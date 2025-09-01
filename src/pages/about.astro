@@ -1,0 +1,84 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import TeamMemberCard from '@/components/TeamMemberCard.astro';
+---
+
+<Layout title="About Us | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">About Us</p>
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          More Than a Gym, We're a Movement
+        </h1>
+        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
+          Discover the story behind The Latina Sweat Project, our passionate team, and the mission that drives us to empower our community.
+        </p>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Our Story Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Our Story</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            The Latina Sweat Project was born from a desire to create a fitness community that truly understands and celebrates the unique experiences of Latinas and women of color in Chicago.
+          </p>
+          <p class="mt-4 font-body text-lg text-medium-gray">
+            Our journey began with a simple idea: to provide a safe and welcoming space where women can come together, support each other, and achieve their fitness goals while embracing their cultural heritage. We've grown into a vibrant community of strong, resilient women who inspire and uplift one another every day.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0">
+          <img alt="Group of women exercising together happily" class="rounded-lg shadow-xl" src="https://images.pexels.com/photos/4761787/pexels-photo-4761787.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" />
+        </div>
+      </div>
+    </section>
+    {/* END: Our Story Section */}
+
+    {/* START: Meet Our Team Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Meet Our Team</h2>
+          <p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
+            The heart and soul of our project. Get to know the passionate individuals dedicated to your fitness journey.
+          </p>
+        </div>
+        <div class="mt-16 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          <TeamMemberCard
+            imageSrc="https://images.pexels.com/photos/4269493/pexels-photo-4269493.jpeg?auto=compress&cs=tinysrgb&w=800"
+            name="Isabella Rodriguez"
+            title="Founder & Lead Instructor"
+          />
+          <TeamMemberCard
+            imageSrc="https://images.pexels.com/photos/5327580/pexels-photo-5327580.jpeg?auto=compress&cs=tinysrgb&w=800"
+            name="Sofia Ramirez"
+            title="Community Manager"
+          />
+          <TeamMemberCard
+            imageSrc="https://images.pexels.com/photos/3807519/pexels-photo-3807519.jpeg?auto=compress&cs=tinysrgb&w=800"
+            name="Camila Lopez"
+            title="Fitness Coach"
+          />
+        </div>
+      </div>
+    </section>
+    {/* END: Meet Our Team Section */}
+
+    {/* START: Mission Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Our Mission & Values</h2>
+        <p class="mx-auto mt-6 font-body text-lg text-medium-gray">
+          Our mission is to empower Latinas and women of color in Chicago to achieve their fitness goals in a supportive and culturally relevant environment. We are committed to fostering a community where every woman feels seen, heard, and valued. Our core values include inclusivity, empowerment, community, and cultural celebration.
+        </p>
+      </div>
+    </section>
+    {/* END: Mission Section */}
+  </main>
+</Layout>

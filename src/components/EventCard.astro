@@ -1,0 +1,22 @@
+---
+interface Props {
+  href: string;
+  imageSrc: string;
+  date: string;
+  title: string;
+  description: string;
+}
+
+const { href, imageSrc, date, title, description } = Astro.props;
+---
+<div class="overflow-hidden rounded-lg bg-white shadow-lg transition-transform hover:scale-105">
+  <img alt={title} class="h-56 w-full object-cover" src={imageSrc} />
+  <div class="p-6">
+    <p class="font-sans text-sm font-medium text-vibrant-pink">{date}</p>
+    <h3 class="mt-2 font-sans text-xl font-bold text-off-black">{title}</h3>
+    <p class="mt-2 font-body text-base text-medium-gray">{description}</p>
+    <a href={href} class="mt-4 inline-block font-sans font-semibold text-vibrant-pink transition hover:text-accent-gold">
+      Learn More →
+    </a>
+  </div>
+</div>

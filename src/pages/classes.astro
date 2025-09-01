@@ -1,0 +1,464 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+---
+
+<Layout title="Classes | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* All HTML content remains the same as before */}
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Our Classes
+        </h1>
+        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
+          Find the perfect class to ignite your fitness journey. Explore our diverse range of classes designed to empower and energize you.
+        </p>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Schedule Section */}
+    <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-24 lg:px-8">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
+        {/* Calendar Column */}
+        <div class="flex flex-col rounded-lg border border-slate-200 p-6">
+          <div class="flex items-center justify-between">
+            <button id="prev-month-btn" class="rounded-full p-2 hover:bg-slate-100" aria-label="Previous month">
+              <svg class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <h3 id="month-year-display" class="font-sans text-lg font-semibold text-off-black"></h3>
+            <button id="next-month-btn" class="rounded-full p-2 hover:bg-slate-100" aria-label="Next month">
+              <svg class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+          <div id="calendar-grid" class="mt-4 grid grid-cols-7 text-center font-sans">
+            <div class="py-2 text-xs font-medium text-medium-gray">S</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">M</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">T</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">W</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">T</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">F</div>
+            <div class="py-2 text-xs font-medium text-medium-gray">S</div>
+          </div>
+        </div>
+
+        {/* Schedule List Column */}
+        <div class="space-y-4">
+          <h3 id="schedule-title" class="font-sans text-lg font-semibold text-off-black"></h3>
+          <div id="schedule-list" class="divide-y divide-slate-200 rounded-lg border border-slate-200">
+            {/* Schedule items will be inserted here */}
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Schedule Section */}
+    
+    {/* Remaining sections are unchanged... */}
+    <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-24 lg:px-8">
+      <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Class Descriptions</h2>
+      <div class="mt-8 space-y-4">
+        <details class="group rounded-lg bg-slate-50 p-4" open>
+            <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+                Yoga Sculpt
+                <div class="transition-transform group-open:rotate-180">
+                    <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+            </summary>
+            <p class="mt-2 font-body text-medium-gray">A dynamic fusion of yoga and strength training. This class often incorporates weights to tone and sculpt the body while flowing through yoga poses, boosting metabolism and building lean muscle.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Yoga Flow
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A smooth, continuous sequence of yoga postures synchronized with breath. This class is designed to build heat, flexibility, and strength, leaving you feeling centered and energized.</p>
+        </details>
+         <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Restorative Yoga
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A gentle and relaxing practice that uses props like bolsters and blankets to support the body in comfortable poses. This class is designed to reduce stress, calm the nervous system, and promote deep relaxation.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Mat Pilates
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A core-focused workout based on the principles of Joseph Pilates. This class strengthens the abdominal muscles, improves posture, and increases overall body awareness and stability, all performed on a mat.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Strength Train
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A high-intensity workout focused on building muscular strength and endurance. This class utilizes various equipment and bodyweight exercises to challenge your limits and boost your power.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Yoga Flow in Spanish
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A Yoga Flow class conducted entirely in Spanish. Experience the same fluid movements and breath synchronization in a fully immersive Spanish-language environment.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Dance Fitness
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A fun, high-energy class that combines various dance styles with a great cardio workout. Get ready to groove to upbeat music and burn calories while having a blast.</p>
+        </details>
+        <details class="group rounded-lg bg-slate-50 p-4">
+          <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
+            Trauma Sensitive Yoga Bilingual
+            <div class="transition-transform group-open:rotate-180">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </summary>
+          <p class="mt-2 font-body text-medium-gray">A gentle, bilingual (Spanish/English) yoga practice designed to be a safe and supportive space. This class focuses on mindful movement and breath to help empower individuals and reconnect the mind and body.</p>
+        </details>
+      </div>
+    </section>
+    {/* START: Pricing Section */}
+    <section class="bg-light-gray py-12 sm:py-24">
+        <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black">Pricing & Donations</h2>
+            <p class="mx-auto mt-4 max-w-3xl text-center font-body text-medium-gray">To make our classes accessible, we operate on a donation-based model. Free seats are available on a first-come, first-serve basis.</p>
+            <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+                
+                {/* Minimum Donation Card */}
+                <div class="flex flex-col rounded-lg border border-slate-200 bg-white p-6 text-center">
+                    <h3 class="font-sans text-lg font-semibold text-off-black">Minimum Donation</h3>
+                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">$5</p>
+                    <p class="mt-1 font-body text-sm text-medium-gray">to reserve a spot</p>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
+                </div>
+
+                {/* Recommended Donation Card */}
+                <div class="relative flex flex-col rounded-lg border-2 border-vibrant-pink bg-white p-6 text-center">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-vibrant-pink px-3 py-1 font-sans text-xs font-semibold uppercase tracking-wider text-white">Recommended Donation</div>
+                    <h3 class="font-sans text-lg font-semibold text-off-black">Community Support</h3>
+                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">$15</p>
+                    <p class="mt-1 font-body text-sm text-medium-gray">helps us grow</p>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md bg-vibrant-pink px-4 py-2 font-sans text-sm font-semibold text-white transition hover:bg-accent-gold">Donate</a>
+                </div>
+
+                {/* Custom Donation Card */}
+                <div class="flex flex-col rounded-lg border border-slate-200 bg-white p-6 text-center">
+                    <h3 class="font-sans text-lg font-semibold text-off-black">Pay What You Can</h3>
+                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">Your Price</p>
+                    <p class="mt-1 font-body text-sm text-medium-gray">any amount is valued</p>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    {/* END: Pricing Section */}
+  </main>
+</Layout>
+
+<script>
+  // STEP 1: Add a "bookLink" property to each class object.
+  const classSchedule = [
+     // Monday, August 18, 2025
+  { date: '2025-8-18', time: '6:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-18', time: '7:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-18', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-18', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Juanita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-18', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Vero', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-18', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Liz', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Tuesday, August 19, 2025
+  { date: '2025-8-19', time: '6:15 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-19', time: '7:15 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-19', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Lizzel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-19', time: '12:00 PM', name: 'Mat Pilates', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Wednesday, August 20, 2025
+  { date: '2025-8-20', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Yajari', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '7:15 AM', name: 'Yoga Flow in Spanish', instructor: 'Zoraida', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '8:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Gayatri', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-20', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Gaby', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Thursday, August 21, 2025
+  { date: '2025-8-21', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Laura', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-21', time: '7:15 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-21', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Grecia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-21', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Hayley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Friday, August 22, 2025
+  { date: '2025-8-22', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Christian', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-22', time: '7:15 AM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-22', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-22', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Saturday, August 23, 2025
+  { date: '2025-8-23', time: '8:00 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-23', time: '9:00 AM', name: 'Yoga Sculpt', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-23', time: '10:00 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-23', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Kayla', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Sunday, August 24, 2025
+  { date: '2025-8-24', time: '8:00 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-24', time: '9:00 AM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-24', time: '10:00 AM', name: 'Yoga Flow', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-24', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Rut', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-24', time: '5:00 PM', name: 'Yoga Flow in Spanish', instructor: 'Montserrat', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-24', time: '6:15 PM', name: 'Trauma Sensitive Yoga Bilingual', instructor: 'Lucia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Monday, August 25, 2025
+  { date: '2025-8-25', time: '6:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-25', time: '7:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-25', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-25', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Juanita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-25', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Vero', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-25', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Liz', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Tuesday, August 26, 2025
+  { date: '2025-8-26', time: '6:15 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-26', time: '7:15 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-26', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Lizzel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-26', time: '12:00 PM', name: 'Mat Pilates', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Wednesday, August 27, 2025
+  { date: '2025-8-27', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Yajari', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '7:15 AM', name: 'Yoga Flow in Spanish', instructor: 'Zoraida', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '8:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Gayatri', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-27', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Gaby', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Thursday, August 28, 2025
+  { date: '2025-8-28', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Laura', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-28', time: '7:15 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-28', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Grecia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-28', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Hayley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Friday, August 29, 2025
+  { date: '2025-8-29', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Christian', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-29', time: '7:15 AM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-29', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-29', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Saturday, August 30, 2025
+  { date: '2025-8-30', time: '8:00 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-30', time: '9:00 AM', name: 'Yoga Sculpt', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-30', time: '10:00 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-30', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Kayla', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Sunday, August 31, 2025
+  { date: '2025-8-31', time: '8:00 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-31', time: '9:00 AM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-31', time: '10:00 AM', name: 'Yoga Flow', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-31', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Rut', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-31', time: '5:00 PM', name: 'Yoga Flow in Spanish', instructor: 'Montserrat', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-8-31', time: '6:15 PM', name: 'Trauma Sensitive Yoga Bilingual', instructor: 'Lucia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Monday, September 1, 2025
+  { date: '2025-9-1', time: '6:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-1', time: '7:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-1', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-1', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Juanita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-1', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Vero', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-1', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Liz', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Tuesday, September 2, 2025
+  { date: '2025-9-2', time: '6:15 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-2', time: '7:15 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-2', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Lizzel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-2', time: '12:00 PM', name: 'Mat Pilates', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Wednesday, September 3, 2025
+  { date: '2025-9-3', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Yajari', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '7:15 AM', name: 'Yoga Flow in Spanish', instructor: 'Zoraida', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '8:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Gayatri', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-3', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Gaby', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Thursday, September 4, 2025
+  { date: '2025-9-4', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Laura', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-4', time: '7:15 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-4', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Grecia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-4', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Hayley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Friday, September 5, 2025
+  { date: '2025-9-5', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Christian', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-5', time: '7:15 AM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-5', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-5', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Saturday, September 6, 2025
+  { date: '2025-9-6', time: '8:00 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-6', time: '9:00 AM', name: 'Yoga Sculpt', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-6', time: '10:00 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-6', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Kayla', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Sunday, September 7, 2025
+  { date: '2025-9-7', time: '8:00 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-7', time: '9:00 AM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-7', time: '10:00 AM', name: 'Yoga Flow', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-7', time: '11:00 AM', name: 'Dance Fitness', instructor: 'Rut', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-7', time: '5:00 PM', name: 'Yoga Flow in Spanish', instructor: 'Montserrat', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-7', time: '6:15 PM', name: 'Trauma Sensitive Yoga Bilingual', instructor: 'Lucia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Monday, September 8, 2025
+  { date: '2025-9-8', time: '6:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-8', time: '7:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-8', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Brenda', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-8', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Juanita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-8', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Vero', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-8', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Liz', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Tuesday, September 9, 2025
+  { date: '2025-9-9', time: '6:15 AM', name: 'Mat Pilates', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-9', time: '7:15 AM', name: 'Strength Train', instructor: 'Eli', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-9', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Lizzel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-9', time: '12:00 PM', name: 'Mat Pilates', instructor: 'Ashley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Wednesday, September 10, 2025
+  { date: '2025-9-10', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Yajari', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '7:15 AM', name: 'Yoga Flow in Spanish', instructor: 'Zoraida', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '8:15 AM', name: 'Yoga Sculpt', instructor: 'Rachel', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Alyx', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '5:30 PM', name: 'Yoga Flow', instructor: 'Gayatri', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '6:30 PM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-10', time: '7:30 PM', name: 'Restorative Yoga', instructor: 'Gaby', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Thursday, September 11, 2025
+  { date: '2025-9-11', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Laura', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-11', time: '7:15 AM', name: 'Strength Train', instructor: 'Jay', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-11', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Grecia', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-11', time: '12:00 PM', name: 'Yoga Flow', instructor: 'Hayley', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+
+  // Friday, September 12, 2025
+  { date: '2025-9-12', time: '6:15 AM', name: 'Yoga Flow', instructor: 'Christian', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-12', time: '7:15 AM', name: 'Yoga Sculpt', instructor: 'Amayrani', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-12', time: '8:15 AM', name: 'Yoga Flow', instructor: 'Gerrald', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  { date: '2025-9-12', time: '12:00 PM', name: 'Yoga Sculpt', instructor: 'Margarita', studio: '949 W 16th Street', bookLink: 'https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes' },
+  ];
+
+  // The rest of the script is largely the same...
+  const processedSchedule = classSchedule.map(item => {
+    const [year, month, day] = item.date.split('-').map(Number);
+    return {
+      ...item,
+      dateObj: new Date(year, month - 1, day, 0, 0, 0, 0)
+    };
+  });
+
+  let currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0); 
+  let selectedDate = new Date(currentDate);
+
+  const monthYearDisplay = document.getElementById('month-year-display');
+  const calendarGrid = document.getElementById('calendar-grid');
+  const scheduleTitle = document.getElementById('schedule-title');
+  const scheduleList = document.getElementById('schedule-list');
+  const prevMonthBtn = document.getElementById('prev-month-btn');
+  const nextMonthBtn = document.getElementById('next-month-btn');
+
+  function renderCalendar() {
+    calendarGrid.querySelectorAll('.day').forEach(el => el.remove());
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    monthYearDisplay.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate);
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dayElement = document.createElement('div');
+      dayElement.className = 'py-2 day';
+      if (i === 1) { dayElement.style.gridColumnStart = firstDayOfMonth + 1; }
+      
+      const button = document.createElement('button');
+      button.className = 'flex h-8 w-8 items-center justify-center rounded-full text-sm hover:bg-slate-100';
+      button.textContent = i.toString();
+      
+      const dayDate = new Date(year, month, i, 0, 0, 0, 0);
+      button.dataset.date = dayDate.toISOString();
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (dayDate.getTime() === today.getTime()) {
+        button.classList.add('border', 'border-vibrant-pink');
+      }
+      if (dayDate.getTime() === selectedDate.getTime()) {
+        button.classList.add('bg-vibrant-pink', 'text-white', 'font-semibold');
+      }
+      dayElement.appendChild(button);
+      calendarGrid.appendChild(dayElement);
+    }
+  }
+
+  function renderSchedule(date) {
+    if (!date) return;
+    selectedDate = date;
+    scheduleTitle.textContent = `Schedule for ${new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date)}`;
+    
+    const classesForDay = processedSchedule.filter(c => c.dateObj.getTime() === selectedDate.getTime());
+    
+    scheduleList.innerHTML = '';
+    if (classesForDay.length === 0) {
+      scheduleList.innerHTML = '<div class="p-4 font-body text-medium-gray">No classes scheduled for this day.</div>';
+    } else {
+      classesForDay.forEach(cls => {
+        const classElement = document.createElement('div');
+        classElement.className = 'grid grid-cols-4 items-center gap-4 p-4';
+        
+        // STEP 2: Change the button to an <a> tag and use the "cls.bookLink"
+        classElement.innerHTML = `
+          <div class="font-body"><p class="font-medium text-off-black">${cls.time}</p><p class="text-sm text-medium-gray">${cls.name}</p></div>
+          <div class="text-sm text-medium-gray font-body">${cls.instructor}</div>
+          <div class="text-sm text-medium-gray font-body">${cls.studio}</div>
+          <a href="${cls.bookLink}" class="rounded-md bg-vibrant-pink px-3 py-1.5 text-center text-sm font-semibold text-white transition hover:bg-accent-gold">Book</a>
+        `;
+        scheduleList.appendChild(classElement);
+      });
+    }
+    renderCalendar();
+  }
+
+  // EVENT LISTENERS
+  prevMonthBtn.addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  nextMonthBtn.addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  calendarGrid.addEventListener('click', (e) => {
+    const target = e.target.closest('button');
+    if (target && target.dataset.date) {
+      renderSchedule(new Date(target.dataset.date));
+    }
+  });
+
+  // INITIALIZATION
+  renderSchedule(selectedDate);
+</script>

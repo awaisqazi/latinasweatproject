@@ -1,0 +1,87 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import EventCard from '@/components/EventCard.astro'; // We can reuse the EventCard from the homepage!
+---
+
+<Layout title="Events | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 md:py-24">
+      <div class="mx-auto max-w-7xl px-4 text-center">
+        <h1 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl md:text-6xl">
+          Our Events
+        </h1>
+        <p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
+          Join our vibrant community. Sweat, dance, and connect at our upcoming events.
+        </p>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Upcoming Events Section */}
+    <section class="py-16 md:py-24">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="mb-12 text-center font-sans text-3xl font-bold text-off-black sm:text-4xl">
+          Upcoming Events
+        </h2>
+        {/* We are reusing the EventCard component we already built for the homepage */}
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <EventCard
+            href="/events/zumba-fiesta"
+            imageSrc="https://images.pexels.com/photos/3775540/pexels-photo-3775540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="SEPTEMBER 20, 2025"
+            title="Zumba Fiesta"
+            description="Join us for a high-energy Zumba class with a live DJ."
+          />
+          <EventCard
+            href="/events/salsa-sweat"
+            imageSrc="https://images.pexels.com/photos/2775273/pexels-photo-2775273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="OCTOBER 5, 2025"
+            title="Salsa & Sweat"
+            description="Combine the rhythm of salsa with a challenging workout."
+          />
+          <EventCard
+            href="/events/barre-bootcamp"
+            imageSrc="https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="OCTOBER 21, 2025"
+            title="Barre Bootcamp"
+            description="Sculpt and tone your body with our signature barre class."
+          />
+        </div>
+      </div>
+    </section>
+    {/* END: Upcoming Events Section */}
+
+    {/* START: Past Events Gallery */}
+    <section class="bg-light-gray py-16 md:py-24">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="mb-12 text-center font-sans text-3xl font-bold text-off-black sm:text-4xl">
+          Past Events Gallery
+        </h2>
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div class="group relative overflow-hidden rounded-lg">
+            <img alt="Past event photo of people smiling" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/4761783/pexels-photo-4761783.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+          <div class="group relative overflow-hidden rounded-lg">
+            <img alt="Past event photo of a fitness class" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/416809/pexels-photo-416809.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+          <div class="group relative col-span-2 row-span-2 overflow-hidden rounded-lg md:col-span-1">
+            <img alt="Past event photo of a dance class" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/2203683/pexels-photo-2203683.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+          <div class="group relative overflow-hidden rounded-lg">
+            <img alt="Past event photo of people working out together" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/8639891/pexels-photo-8639891.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+          <div class="group relative overflow-hidden rounded-lg">
+            <img alt="Past event photo of a yoga class" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+           <div class="group relative overflow-hidden rounded-lg">
+            <img alt="Past event photo of a community gathering" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://images.pexels.com/photos/7031407/pexels-photo-7031407.jpeg?auto=compress&cs=tinysrgb&w=800" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Past Events Gallery */}
+  </main>
+</Layout>

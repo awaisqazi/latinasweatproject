@@ -1,0 +1,133 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+
+// 1. DEFINE YOUR DATA FIRST
+const allEvents = [
+  {
+    slug: "zumba-fiesta",
+    title: "Zumba Fiesta",
+    imageSrc: "https://images.pexels.com/photos/3775540/pexels-photo-3775540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    date: "Saturday, September 20, 2025",
+    time: "10:00 AM - 11:00 AM",
+    location: "Community Center",
+    address: "123 Main Street, Chicago, IL",
+    description: "Get ready to move and groove at our Zumba Fiesta! This class is designed for all fitness levels and will have you sweating and smiling. Experience the joy of Zumba with a Latin twist, led by our certified instructors. Don't miss out on this fun-filled workout!",
+    registrationLink: "#"
+  },
+  {
+    slug: "salsa-sweat",
+    title: "Salsa & Sweat",
+    imageSrc: "https://images.pexels.com/photos/2775273/pexels-photo-2775273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    date: "Sunday, October 5, 2025",
+    time: "11:00 AM - 12:00 PM",
+    location: "Dance Hall",
+    address: "456 Rhythm Ave, Chicago, IL",
+    description: "Combine the rhythm of salsa with a challenging, full-body workout. No partner or dance experience required. Just bring your energy and get ready to sweat!",
+    registrationLink: "#"
+  },
+  {
+    slug: "barre-bootcamp",
+    title: "Barre Bootcamp",
+    imageSrc: "https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    date: "Tuesday, October 21, 2025",
+    time: "6:00 PM - 7:00 PM",
+    location: "The Studio",
+    address: "789 Balance Blvd, Chicago, IL",
+    description: "Sculpt and tone your body with our signature barre class. This high-intensity, low-impact workout will challenge you and leave you feeling strong and graceful.",
+    registrationLink: "#"
+  }
+];
+
+// 2. CREATE THE GETSTATICPATHS FUNCTION
+// This function tells Astro to create a page for each event in our list.
+export function getStaticPaths() {
+  return allEvents.map(event => ({
+    params: { slug: event.slug },
+    props: event,
+  }));
+}
+
+// 3. GET THE PROPS FOR THIS SPECIFIC PAGE
+// Astro passes the props from getStaticPaths to the component.
+const event = Astro.props;
+---
+
+<Layout title={`${event.title} | The Latina Sweat Project`}>
+  <Header />
+  <main>
+    <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-5">
+        
+        {/* Left Column: Image */}
+        <div class="lg:col-span-3">
+          <div class="aspect-video overflow-hidden rounded-2xl shadow-lg">
+            <img alt={event.title} class="h-full w-full object-cover" src={event.imageSrc} />
+          </div>
+        </div>
+
+        {/* Right Column: Details */}
+        <div class="lg:col-span-2">
+          <div class="flex flex-col gap-4">
+            <h1 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+              {event.title}
+            </h1>
+            <p class="font-body text-lg text-medium-gray">
+              Join us for a high-energy event filled with Latin rhythms and fun.
+            </p>
+            <div class="mt-4 flex flex-col gap-4 border-t border-slate-200 pt-6">
+              <div class="flex items-start gap-4">
+                <svg class="mt-1 h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 12.75h.008v.008H12v-.008z" /></svg>
+                <div>
+                  <p class="font-sans font-semibold text-off-black">{event.date}</p>
+                  <p class="font-body text-sm text-medium-gray">{event.time}</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <svg class="mt-1 h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                <div>
+                  <p class="font-sans font-semibold text-off-black">{event.location}</p>
+                  <p class="font-body text-sm text-medium-gray">{event.address}</p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <a href={event.registrationLink} class="flex w-full items-center justify-center rounded-full h-12 px-6 bg-vibrant-pink font-sans text-lg font-bold text-white shadow-md transition hover:scale-105 hover:bg-accent-gold">
+                Register Now
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* About this Event Section */}
+      <div class="mt-16 border-t border-slate-200 pt-12">
+        <h2 class="font-sans text-2xl font-bold text-off-black">About this Event</h2>
+        <p class="mt-4 font-body text-base leading-7 text-medium-gray">
+          {event.description}
+        </p>
+      </div>
+
+      {/* FAQ Section */}
+      <div class="mt-16 border-t border-slate-200 pt-12">
+        <h2 class="text-center font-sans text-3xl font-bold text-off-black">Frequently Asked Questions</h2>
+        <div class="mx-auto mt-8 max-w-3xl space-y-4">
+          <details class="group rounded-lg bg-slate-50 p-6" open>
+            <summary class="flex cursor-pointer list-none items-center justify-between font-sans font-semibold text-off-black">
+              What should I bring?
+              <svg class="h-6 w-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </summary>
+            <p class="mt-4 font-body text-medium-gray">Please bring a water bottle, a towel, and comfortable workout attire. We recommend wearing supportive athletic shoes.</p>
+          </details>
+          <details class="group rounded-lg bg-slate-50 p-6">
+            <summary class="flex cursor-pointer list-none items-center justify-between font-sans font-semibold text-off-black">
+              Is this class suitable for beginners?
+               <svg class="h-6 w-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </summary>
+            <p class="mt-4 font-body text-medium-gray">Absolutely! This event is designed for all fitness levels. Our instructors will provide modifications to ensure everyone can participate and have a great time.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

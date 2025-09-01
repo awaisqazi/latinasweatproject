@@ -1,16 +1,129 @@
 ---
-
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import TestimonialCard from '@/components/TestimonialCard.astro';
+import EventCard from '@/components/EventCard.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="The Latina Sweat Project | Home">
+  <Header />
+  <main>
+    {/* START: Hero Section */}
+    <section class="relative h-[60vh] min-h-[480px] w-full sm:h-screen">
+      <div class="absolute inset-0 bg-black/50"></div>
+      
+      <video autoplay loop muted playsinline class="hidden h-full w-full object-cover sm:block">
+        <source src="https://videos.pexels.com/video-files/8040224/8040224-hd_1920_1080_25fps.mp4" type="video/mp4"/>
+      </video>
+      
+      <div class="sm:hidden h-full w-full bg-cover bg-center" style='background-image: url("https://images.pexels.com/photos/4753997/pexels-photo-4753997.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");'></div>
+      
+      <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
+        <h1 class="font-sans text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+          Empowering Through Movement
+        </h1>
+        <p class="mt-4 max-w-2xl font-body text-lg sm:text-xl">
+          Join our vibrant community in Chicago and experience fitness that celebrates our culture.
+        </p>
+        <a href="/classes" class="mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+          Join a Class
+        </a>
+      </div>
+    </section>
+    {/* END: Hero Section */}
+
+    {/* START: Testimonials Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">
+          What Our Community Says
+        </h2>
+        <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+          <TestimonialCard
+            imageSrc="https://images.pexels.com/photos/3775131/pexels-photo-3775131.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            quote="This community has transformed my fitness journey. I feel stronger and more connected than ever."
+            author="Ana S."
+          />
+          <TestimonialCard
+            imageSrc="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            quote="The classes are challenging yet fun, and the instructors are incredibly supportive."
+            author="Maria G."
+          />
+          <TestimonialCard
+            imageSrc="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            quote="I love the energy and the sense of belonging. It's more than just a workout; it's a family."
+            author="Sofia R."
+          />
+        </div>
+      </div>
+    </section>
+    {/* END: Testimonials Section */}
+
+    {/* START: Upcoming Events Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">
+          Upcoming Events
+        </h2>
+        <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <EventCard
+            href="/events/zumba-fiesta"
+            imageSrc="https://images.pexels.com/photos/3775540/pexels-photo-3775540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="SEPTEMBER 20, 2025"
+            title="Zumba Fiesta"
+            description="Join us for a high-energy Zumba class with a live DJ."
+          />
+          <EventCard
+            href="/events/salsa-sweat"
+            imageSrc="https://images.pexels.com/photos/2775273/pexels-photo-2775273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="OCTOBER 5, 2025"
+            title="Salsa & Sweat"
+            description="Combine the rhythm of salsa with a challenging workout."
+          />
+          <EventCard
+            href="/events/barre-bootcamp"
+            imageSrc="https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            date="OCTOBER 21, 2025"
+            title="Barre Bootcamp"
+            description="Sculpt and tone your body with our signature barre class."
+          />
+        </div>
+      </div>
+    </section>
+    {/* END: Upcoming Events Section */}
+
+    {/* START: Instagram Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">Follow Us on Instagram</h2>
+            <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4753928/pexels-photo-4753928.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4397835/pexels-photo-4397835.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/7031706/pexels-photo-7031706.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/3757954/pexels-photo-3757954.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+                <div class="aspect-square w-full overflow-hidden rounded-lg">
+                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4761793/pexels-photo-4761793.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+                </div>
+            </div>
+            <div class="mt-10 text-center">
+                <a href="https://www.instagram.com/latinasweatproject/" class="rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                    @LatinaSweatProject
+                </a>
+            </div>
+        </div>
+    </section>
+    {/* END: Instagram Section */}
+
+  </main>
+</Layout>
