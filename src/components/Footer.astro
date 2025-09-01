@@ -1,12 +1,15 @@
 ---
 // src/components/Footer.astro
+import logo from '/logo.svg';
+import { navLinks } from '@/lib/nav.js';
+const base = import.meta.env.BASE_URL;
 ---
 <footer class="bg-off-black text-white">
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
     <div class="xl:grid xl:grid-cols-3 xl:gap-8">
       <div class="space-y-8 xl:col-span-1">
-        <a href="/" class="flex items-center gap-3">
-          <img src="/logo.svg" alt="The Latina Sweat Project Logo" class="h-10 w-10">
+        <a href={base} class="flex items-center gap-3">
+          <img src={logo} alt="The Latina Sweat Project Logo" class="h-10 w-10">
           <span class="font-sans text-xl font-bold text-white">The Latina Sweat Project</span>
         </a>
         <p class="font-body text-base text-slate-400">
@@ -21,10 +24,13 @@
           <div>
             <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300">Navigation</h3>
             <ul class="mt-4 space-y-4 font-body" role="list">
-              <li><a class="text-base text-slate-400 hover:text-vibrant-pink" href="about">About Us</a></li>
-              <li><a class="text-base text-slate-400 hover:text-vibrant-pink" href="classes">Classes</a></li>
-              <li><a class="text-base text-slate-400 hover:text-vibrant-pink" href="events">Events</a></li>
-              <li><a class="text-base text-slate-400 hover:text-vibrant-pink" href="contact">Contact</a></li>
+              {navLinks.filter(link => link.path !== "").map(link => (
+                <li>
+                  <a class="text-base text-slate-400 hover:text-vibrant-pink" href=`${base}${link.path}`>
+                    {link.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div class="mt-12 md:mt-0">
