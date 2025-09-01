@@ -8,4 +8,6 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
   }
+  site: 'https://awaisqazi.github.io',
+  base: '/latinasweatproject/',
 });
