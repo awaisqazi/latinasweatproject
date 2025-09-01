@@ -11,7 +11,7 @@ const base = import.meta.env.BASE_URL;
         </a>
 
         {/* Desktop Navigation */}
-        <nav class="hidden items-center gap-8 lg:flex">
+        <nav id="desktop-menu" class="hidden items-center gap-8 lg:flex">
             <a href={base} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Home</a>
             <a href={`${base}about`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">About Us</a>
             <a href={`${base}classes`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
@@ -24,11 +24,28 @@ const base = import.meta.env.BASE_URL;
             <a href={`${base}classes`} class="hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
                 Book a Class
             </a>
-            <button class="lg:hidden">
+            <button id="mobile-menu-button" class="lg:hidden">
                 <svg class="h-6 w-6 text-off-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                 </svg>
             </button>
         </div>
     </div>
+    {/* Mobile Menu */}
+    <nav id="mobile-menu" class="hidden lg:hidden">
+        <a href={base} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Home</a>
+        <a href={`${base}about`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">About Us</a>
+        <a href={`${base}classes`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
+        <a href={`${base}events`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Events</a>
+        <a href={`${base}contact`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Contact</a>
+    </nav>
 </header>
+
+<script>
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>
