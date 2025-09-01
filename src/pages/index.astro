@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
 import TestimonialCard from '@/components/TestimonialCard.astro';
 import EventCard from '@/components/EventCard.astro';
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -25,7 +26,7 @@ import EventCard from '@/components/EventCard.astro';
         <p class="mt-4 max-w-2xl font-body text-lg sm:text-xl">
           Join our vibrant community in Chicago and experience fitness that celebrates our culture.
         </p>
-        <a href="/classes" class="mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+        <a href={`${base}classes`} class="mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
           Join a Class
         </a>
       </div>

@@ -1,39 +1,27 @@
 ---
 // src/components/Header.astro
-import logo from '/logo.svg';
-import { navLinks } from '@/lib/nav.js';
-
-const pathname = Astro.url.pathname;
 const base = import.meta.env.BASE_URL;
 ---
 <header class="sticky top-0 z-50 bg-white/80 shadow-sm backdrop-blur-md">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo and Site Title */}
         <a href={base} class="flex items-center gap-3">
-            <img src={logo} alt="The Latina Sweat Project Logo" class="h-10 w-10">
+            <img src={`${base}logo.svg`} alt="The Latina Sweat Project Logo" class="h-10 w-10">
             <span class="text-xl font-bold text-off-black">The Latina Sweat Project</span>
         </a>
 
-        {/* Desktop Navigation - Now built dynamically */}
+        {/* Desktop Navigation */}
         <nav class="hidden items-center gap-8 lg:flex">
-            {navLinks.map(link => {
-                const href = `${base}${link.path}`;
-                // Check if the current page path matches the link's path
-                const isActive = href === pathname || (href !== base && pathname.startsWith(href));
-                return (
-                    <a href={href} class:list={[
-                        "text-base font-medium transition",
-                        isActive ? "text-vibrant-pink" : "text-medium-gray hover:text-vibrant-pink"
-                    ]}>
-                        {link.name}
-                    </a>
-                )
-            })}
+            <a href={base} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Home</a>
+            <a href={`${base}about`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">About Us</a>
+            <a href={`${base}classes`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
+            <a href={`${base}events`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Events</a>
+            <a href={`${base}contact`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Contact</a>
         </nav>
 
         {/* CTA Button and Mobile Menu Icon */}
         <div class="flex items-center gap-4">
-            <a href=`${base}classes` class="hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
+            <a href={`${base}classes`} class="hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
                 Book a Class
             </a>
             <button class="lg:hidden">
