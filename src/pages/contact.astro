@@ -29,24 +29,43 @@ import Header from '@/components/Header.astro';
             <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">
               Contact Us
             </h2>
-            <p class="mt-4 font-body text-lg text-medium-gray">
-              Have questions about our classes, events, or community? Fill out the form, and we'll get back to you as soon as possible.
-            </p>
-            <form class="mt-8 space-y-6">
-              <div>
-                <label for="name" class="sr-only">Name</label>
-                <input type="text" name="name" id="name" required placeholder="Your Name" class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink" />
+            
+            <form method="post" action="https://api.prd.xplorcs.com/forms-v2/forms/answers" onsubmit="onXplFormSubmit(event)" name="8189caeb-de28-43fc-8cf7-858529bcf767" id="bb_form" class="mt-8 space-y-6">
+              <div id="alert"></div>
+              <input type="hidden" name="uuid" id="bb_uuid" value="8189caeb-de28-43fc-8cf7-858529bcf767">
+              
+              <div class="flex flex-col gap-6 sm:flex-row">
+                <div class="w-full">
+                  <label for="bb_first_name" class="sr-only">First Name</label>
+                  <input type="text" name="first_name" id="bb_first_name" placeholder="First Name" required class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink">
+                </div>
+                <div class="w-full">
+                  <label for="bb_last_name" class="sr-only">Last Name</label>
+                  <input type="text" name="last_name" id="bb_last_name" placeholder="Last Name" required class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink">
+                </div>
               </div>
+
               <div>
-                <label for="email" class="sr-only">Email</label>
-                <input type="email" name="email" id="email" autocomplete="email" required placeholder="Your Email" class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink" />
+                <label for="bb_email" class="sr-only">Email Address</label>
+                <input type="email" name="email" id="bb_email" placeholder="Email Address" required class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink">
               </div>
+
               <div>
-                <label for="message" class="sr-only">Message</label>
-                <textarea name="message" id="message" required rows="5" placeholder="Your Message" class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink"></textarea>
+                <label for="bb_custom_685699" class="sr-only">Please share any questions you have about our classes, events, or community</label>
+                <textarea name="custom_685699" id="bb_custom_685699" required rows="5" placeholder="Please share any questions you have about our classes, events, or community" class="w-full rounded-md border-slate-300 px-4 py-3 font-body text-base text-off-black placeholder-slate-400 focus:border-vibrant-pink focus:ring-vibrant-pink"></textarea>
               </div>
+
+              <div class="flex items-start">
+                <div class="flex h-5 items-center">
+                  <input id="bb_opt_in_email" name="opt_in_email" type="checkbox" value="By selecting this option, you agree to receive marketing communications via email" class="h-4 w-4 rounded border-slate-300 text-vibrant-pink focus:ring-vibrant-pink">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="bb_opt_in_email" class="font-body text-medium-gray">By selecting this option, you agree to receive marketing communications via email</label>
+                </div>
+              </div>
+
               <div>
-                <button type="submit" class="w-full rounded-full bg-vibrant-pink px-6 py-3 font-sans text-base font-semibold text-white shadow-md transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2">
+                <button type="submit" id="bb_submit" class="w-full rounded-full bg-vibrant-pink px-6 py-3 font-sans text-base font-semibold text-white shadow-md transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2">
                   Send Message
                 </button>
               </div>
@@ -79,12 +98,8 @@ import Header from '@/components/Header.astro';
                     <span>949 W 16th St, Chicago, IL 60607</span>
                   </p>
                   <p class="flex items-center gap-3">
-                    <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 6.75z" /></svg>
-                    <span>(312) 555-1234</span>
-                  </p>
-                  <p class="flex items-center gap-3">
                     <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
-                    <span>hola@latinasweatproject.com</span>
+                    <span>collab@latinasweatproject.com</span>
                   </p>
                 </div>
               </div>
@@ -97,3 +112,30 @@ import Header from '@/components/Header.astro';
     {/* END: Contact Form & Details Section */}
   </main>
 </Layout>
+
+<script>
+  // Handles the XplorGrowth contact form submission.
+  if (document.forms['8189caeb-de28-43fc-8cf7-858529bcf767']) {
+      const FormServiceURL = 'https://api.prd.xplorcs.com/forms-v2/forms';
+      const formUuid = '8189caeb-de28-43fc-8cf7-858529bcf767';
+      const formContainer = new XplFormContainer(FormServiceURL);
+      const loadRecaptcha = (formConfig) => {
+          const { template } = formConfig;
+          const key = template.use_recaptcha ? template.recaptcha_key : null;
+          if (key) XplFormAPI.loadRecaptchaScript(key);
+      };
+      formContainer.load(formUuid).then(loadRecaptcha);
+      window.onXplFormLocationChange = (selectElement) => formContainer.load(selectElement.value);
+      window.onXplFormSubmit = async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const form = new XplFormAPI(FormServiceURL, event.target, formContainer);
+          const recaptchaKey = form.getRecaptchaKey();
+          if (recaptchaKey) {
+              window.grecaptcha.ready(() => window.grecaptcha.execute(recaptchaKey, { action: 'submit' }).then((recaptchaResponse) => form.submit(recaptchaResponse)));
+          } else {
+              form.submit();
+          }
+      };
+  }
+</script>
