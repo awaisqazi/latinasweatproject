@@ -57,10 +57,43 @@ const base = import.meta.env.BASE_URL;
           <div class="order-last lg:order-first">
             <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Big News!</p>
             <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Grand Opening Celebration</h2>
-            <p class="mt-6 font-body text-lg text-medium-gray">Get ready to celebrate with us! We're thrilled to announce the official Grand Opening of our new studio space. Join us for a day of classes, music, and community fun.</p>
-            <div class="mt-8 rounded-lg border-2 border-dashed border-accent-gold bg-light-gray p-6 text-center">
-              <p class="font-sans text-2xl font-bold text-off-black">Save the Date: September 20th</p>
-              <p class="mt-2 font-body text-medium-gray">More details and a full schedule of events will be announced soon. Keep an eye on our site and social media!</p>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Get ready to be part of something extraordinary at Latina Sweat Project!</p>
+              <p>We’re counting down to the grand opening of our new studio and we want you to be part of the journey from the very beginning! Experience the energy, meet our growing teaching team, and see firsthand what makes LSP more than just a place to move. We are a community, a safe space, and a celebration of wellness in our neighborhoods.</p>
+              <p>Join us, bring a friend, and let’s make our first memories in this space together before we officially open our doors!</p>
+            </div>
+            <div class="mt-8 text-center">
+              <p class="font-sans text-2xl font-bold tracking-tight text-off-black">Join Us on September 20th</p>
+              <div id="countdown-container" class="mt-4 flex items-start justify-center gap-3 sm:gap-4">
+                <div class="countdown-unit">
+                  <div class="flipper" data-unit="days">
+                    <div class="number top">00</div>
+                    <div class="number bottom">00</div>
+                  </div>
+                  <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Days</p>
+                </div>
+                <div class="countdown-unit">
+                  <div class="flipper" data-unit="hours">
+                    <div class="number top">00</div>
+                    <div class="number bottom">00</div>
+                  </div>
+                  <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Hours</p>
+                </div>
+                <div class="countdown-unit">
+                  <div class="flipper" data-unit="minutes">
+                    <div class="number top">00</div>
+                    <div class="number bottom">00</div>
+                  </div>
+                  <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Minutes</p>
+                </div>
+                <div class="countdown-unit">
+                  <div class="flipper" data-unit="seconds">
+                    <div class="number top">00</div>
+                    <div class="number bottom">00</div>
+                  </div>
+                  <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Seconds</p>
+                </div>
+              </div>
             </div>
           </div>
           <div class="w-full overflow-hidden rounded-lg shadow-xl">
@@ -139,3 +172,138 @@ const base = import.meta.env.BASE_URL;
 
   </main>
 </Layout>
+
+<style is:global>
+  .flipper {
+    position: relative;
+    width: 60px;
+    height: 72px;
+    font-size: 2.5rem;
+    line-height: 72px;
+    font-weight: 700;
+    font-family: 'Rubik', sans-serif;
+    text-align: center;
+  }
+
+  @media (min-width: 640px) {
+    .flipper {
+      width: 72px;
+      height: 90px;
+      font-size: 3rem;
+      line-height: 90px;
+    }
+  }
+
+  .number {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: #febd59; /* accent-gold */
+    color: #2a2a2a; /* off-black for contrast */
+    overflow: hidden;
+    perspective: 400px;
+  }
+
+  .top {
+    top: 0;
+    height: 50%;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .bottom {
+    bottom: 0;
+    height: 50%;
+    border-radius: 0 0 8px 8px;
+    line-height: 0;
+  }
+
+  .flipper .flip-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background-color: #febd59; /* accent-gold */
+    color: #2a2a2a; /* off-black for contrast */
+    border-radius: 8px 8px 0 0;
+    transform-origin: bottom;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    overflow: hidden;
+  }
+
+  .flipper .flip-card.flipping {
+    animation: flip-down 0.5s ease-in-out;
+  }
+
+  .flipper .flip-card .next-number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    line-height: 0;
+    background-color: #febd59; /* accent-gold */
+    color: #2a2a2a; /* off-black for contrast */
+    border-radius: 8px 8px 0 0;
+    transform: rotateX(180deg);
+    backface-visibility: hidden;
+  }
+
+  @keyframes flip-down {
+    from {
+      transform: rotateX(0deg);
+    }
+    to {
+      transform: rotateX(-180deg);
+    }
+  }
+</style>
+
+<script>
+  const targetDate = new Date('2025-09-20T10:00:00-05:00').getTime();
+
+  const flip = (flipper, newNumber) => {
+    const top = flipper.querySelector('.top');
+    const bottom = flipper.querySelector('.bottom');
+    const currentNumber = parseInt(top.textContent, 10);
+
+    if (newNumber === currentNumber) return;
+
+    const flipCard = document.createElement('div');
+    flipCard.className = 'flip-card';
+    flipCard.innerHTML = `<div class="next-number">${String(newNumber).padStart(2, '0')}</div>${String(currentNumber).padStart(2, '0')}`;
+    
+    flipper.appendChild(flipCard);
+    top.textContent = String(newNumber).padStart(2, '0');
+
+    flipCard.classList.add('flipping');
+
+    flipCard.addEventListener('animationend', () => {
+      bottom.textContent = String(newNumber).padStart(2, '0');
+      flipCard.remove();
+    }, { once: true });
+  };
+
+  const countdownInterval = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('countdown-container').innerHTML = '<p class="font-sans text-2xl font-bold text-vibrant-pink text-center w-full">The celebration has begun!</p>';
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    flip(document.querySelector('[data-unit="days"]'), days);
+    flip(document.querySelector('[data-unit="hours"]'), hours);
+    flip(document.querySelector('[data-unit="minutes"]'), minutes);
+    flip(document.querySelector('[data-unit="seconds"]'), seconds);
+  }, 1000);
+</script>
