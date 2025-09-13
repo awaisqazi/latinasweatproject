@@ -3,15 +3,55 @@ interface Props {
   imageSrc: string;
   name: string;
   title: string;
+  story: string;
 }
-const { imageSrc, name, title } = Astro.props;
+const { imageSrc, name, title, story } = Astro.props;
 ---
-<div class="text-center">
-  <div class="mx-auto h-40 w-40">
-    <img alt={`Photo of ${name}`} class="h-full w-full rounded-full object-cover" src={imageSrc} />
-  </div>
-  <div class="mt-6">
-    <h4 class="font-sans text-xl font-bold text-off-black">{name}</h4>
-    <p class="font-sans text-base font-semibold text-vibrant-pink">{title}</p>
+<div class="team-member-card-container h-80 w-80 cursor-pointer [perspective:1000px]">
+  <div class="card-inner relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d]">
+    <!-- Front of card -->
+    <div class="absolute inset-0">
+      <img class="h-full w-full rounded-xl object-cover shadow-xl shadow-black/40" src={imageSrc} alt={`Photo of ${name}`} />
+      <div class="absolute bottom-0 w-full rounded-b-xl bg-black/60 p-6 text-center">
+        <h4 class="font-sans text-xl font-bold text-white">{name}</h4>
+        <p class="font-sans text-base font-semibold text-vibrant-pink">{title}</p>
+      </div>
+      <div class="absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm" title="Tap to read bio">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    </div>
+    <!-- Back of card -->
+    <div class="absolute inset-0 h-full w-full rounded-xl bg-slate-50 p-6 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+        <div class="flex h-full flex-col">
+            <div class="flex-shrink-0 text-center">
+                <h4 class="font-sans text-xl font-bold text-off-black">{name}</h4>
+                <p class="font-sans text-base font-semibold text-vibrant-pink">{title}</p>
+            </div>
+            <div class="mt-4 flex-1 space-y-2 overflow-y-auto pr-2 text-left font-body text-sm text-medium-gray" set:html={story} />
+        </div>
+    </div>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll('.team-member-card-container').forEach(card => {
+    card.addEventListener('click', () => {
+      card.querySelector('.card-inner')?.classList.toggle('is-flipped');
+    });
+  });
+</script>
+
+<style is:global>
+  .card-inner.is-flipped {
+    transform: rotateY(180deg);
+  }
+
+  /* Add a hover effect for devices that support it */
+  @media (hover: hover) {
+    .team-member-card-container:hover .card-inner:not(.is-flipped) {
+      transform: rotateY(15deg);
+    }
+  }
+</style>
