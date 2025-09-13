@@ -51,11 +51,37 @@ const base = import.meta.env.BASE_URL;
           <div>
             <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300">Subscribe to our newsletter</h3>
             <p class="mt-4 font-body text-base text-slate-400">The latest news, articles, and resources, sent to your inbox weekly.</p>
-            <form class="mt-4 sm:flex sm:max-w-md">
-              <label for="email-address" class="sr-only">Email address</label>
-              <input type="email" name="email-address" id="email-address" autocomplete="email" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink" placeholder="Enter your email" />
-              <div class="mt-3 rounded-md sm:ml-3 sm:mt-0 sm:flex-shrink-0">
-                <button type="submit" class="flex w-full items-center justify-center rounded-md bg-vibrant-pink px-4 py-2 font-sans text-base font-medium text-white transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+            <form method="post" action="https://api.prd.xplorcs.com/forms-v2/forms/answers" onsubmit="onXplFormSubmit(event)" name="6f1884c5-b7dd-40c6-ad8e-623af0f3a140" id="bb_form" class="mt-4 space-y-4">
+              <div id="alert"></div>
+              <input type="hidden" name="uuid" id="bb_uuid" value="6f1884c5-b7dd-40c6-ad8e-623af0f3a140">
+              
+              <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="w-full">
+                  <label for="bb_first_name" class="sr-only">First Name</label>
+                  <input type="text" name="first_name" id="bb_first_name" placeholder="First Name" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
+                </div>
+                <div class="w-full">
+                  <label for="bb_last_name" class="sr-only">Last Name</label>
+                  <input type="text" name="last_name" id="bb_last_name" placeholder="Last Name" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
+                </div>
+              </div>
+
+              <div>
+                <label for="bb_email" class="sr-only">Email Address</label>
+                <input type="email" name="email" id="bb_email" placeholder="Email Address" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
+              </div>
+
+              <div class="flex items-start">
+                <div class="flex h-5 items-center">
+                  <input id="bb_opt_in_email" name="opt_in_email" type="checkbox" value="By selecting this option, you agree to receive marketing communications via email" class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-vibrant-pink focus:ring-vibrant-pink">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="bb_opt_in_email" class="font-body text-slate-400">By selecting this option, you agree to receive marketing communications via email</label>
+                </div>
+              </div>
+
+              <div>
+                <button type="submit" id="bb_submit" class="flex w-full items-center justify-center rounded-md bg-vibrant-pink px-4 py-2 font-sans text-base font-medium text-white transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
                   Subscribe
                 </button>
               </div>
@@ -69,3 +95,30 @@ const base = import.meta.env.BASE_URL;
     </div>
   </div>
 </footer>
+
+<script>
+    // Handles the XplorGrowth form submission.
+    if (document.forms['6f1884c5-b7dd-40c6-ad8e-623af0f3a140']) {
+        const FormServiceURL = 'https://api.prd.xplorcs.com/forms-v2/forms';
+        const formUuid = '6f1884c5-b7dd-40c6-ad8e-623af0f3a140';
+        const formContainer = new XplFormContainer(FormServiceURL);
+        const loadRecaptcha = (formConfig) => {
+            const { template } = formConfig;
+            const key = template.use_recaptcha ? template.recaptcha_key : null;
+            if (key) XplFormAPI.loadRecaptchaScript(key);
+        };
+        formContainer.load(formUuid).then(loadRecaptcha);
+        window.onXplFormLocationChange = (selectElement) => formContainer.load(selectElement.value);
+        window.onXplFormSubmit = async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const form = new XplFormAPI(FormServiceURL, event.target, formContainer);
+            const recaptchaKey = form.getRecaptchaKey();
+            if (recaptchaKey) {
+                window.grecaptcha.ready(() => window.grecaptcha.execute(recaptchaKey, { action: 'submit' }).then((recaptchaResponse) => form.submit(recaptchaResponse)));
+            } else {
+                form.submit();
+            }
+        };
+    }
+</script>
