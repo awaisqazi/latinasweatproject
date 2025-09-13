@@ -33,32 +33,43 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Testimonials Section */}
+    {/*
+    START: Testimonials Section
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">
           What Our Community Says
         </h2>
         <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
-          <TestimonialCard
-            imageSrc="https://images.pexels.com/photos/3775131/pexels-photo-3775131.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            quote="This community has transformed my fitness journey. I feel stronger and more connected than ever."
-            author="Ana S."
-          />
-          <TestimonialCard
-            imageSrc="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            quote="The classes are challenging yet fun, and the instructors are incredibly supportive."
-            author="Maria G."
-          />
-          <TestimonialCard
-            imageSrc="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            quote="I love the energy and the sense of belonging. It's more than just a workout; it's a family."
-            author="Sofia R."
-          />
+          <TestimonialCard imageSrc="https://images.pexels.com/photos/3775131/pexels-photo-3775131.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" quote="This community has transformed my fitness journey. I feel stronger and more connected than ever." author="Ana S." />
+          <TestimonialCard imageSrc="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" quote="The classes are challenging yet fun, and the instructors are incredibly supportive." author="Maria G." />
+          <TestimonialCard imageSrc="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" quote="I love the energy and the sense of belonging. It's more than just a workout; it's a family." author="Sofia R." />
         </div>
       </div>
     </section>
-    {/* END: Testimonials Section */}
+    END: Testimonials Section
+    */}
+
+    {/* START: Grand Opening Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="order-last lg:order-first">
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Big News!</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Grand Opening Celebration</h2>
+            <p class="mt-6 font-body text-lg text-medium-gray">Get ready to celebrate with us! We're thrilled to announce the official Grand Opening of our new studio space. Join us for a day of classes, music, and community fun.</p>
+            <div class="mt-8 rounded-lg border-2 border-dashed border-accent-gold bg-light-gray p-6 text-center">
+              <p class="font-sans text-2xl font-bold text-off-black">Save the Date: September 20th</p>
+              <p class="mt-2 font-body text-medium-gray">More details and a full schedule of events will be announced soon. Keep an eye on our site and social media!</p>
+            </div>
+          </div>
+          <div class="w-full overflow-hidden rounded-lg shadow-xl">
+            <img src="https://images.pexels.com/photos/866027/pexels-photo-866027.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="A vibrant and welcoming fitness studio space with colorful lights." class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Grand Opening Section */}
 
     {/* START: Upcoming Events Section */}
     <section class="py-12 sm:py-16 lg:py-20">
