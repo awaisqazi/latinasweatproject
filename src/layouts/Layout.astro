@@ -63,7 +63,7 @@ const { title } = Astro.props;
     </noscript>
 
     
-    <!-- Page Password protection script (Before go live remove this script unless you need password on mariana tek pages) -->
+    <!-- Page Password protection script (Before go live remove this script unless you need password on mariana tek pages) 
 
 <script>
   (function () {
@@ -78,14 +78,14 @@ const { title } = Astro.props;
         const userInput = prompt("This page is protected. Please enter the password:");
         if (userInput !== correctPassword) {
           alert("Incorrect password. Redirecting to homepage.");
-          window.location.href = `${currentPath}`;
+          window.location.href = `${base}`;
         } else {
           sessionStorage.setItem("pageAccess", correctPassword);
         }
       } 
     }
   })();
-</script>
+</script> -->
 
 
     

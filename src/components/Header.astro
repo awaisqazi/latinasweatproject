@@ -14,14 +14,19 @@ const base = import.meta.env.BASE_URL;
         <nav id="desktop-menu" class="hidden items-center gap-8 lg:flex">
             <a href={base} class="link-underline text-base font-medium text-medium-gray">Home</a>
             <a href={`${base}about`} class="link-underline text-base font-medium text-medium-gray">About Us</a>
-            <a href={`${base}classes`} class="link-underline text-base font-medium text-medium-gray">Classes</a>
+            <a href={`${base}schedule`} class="link-underline text-base font-medium text-medium-gray">Classes</a>
+            <a href={`${base}pricing`} class="link-underline text-base font-medium text-medium-gray">Pricing</a>
             <!--<a href={`${base}events`} class="link-underline text-base font-medium text-medium-gray">Events</a>-->
             <a href={`${base}contact`} class="link-underline text-base font-medium text-medium-gray">Contact</a>
         </nav>
 
         {/* CTA Button and Mobile Menu Icon */}
         <div class="flex items-center gap-4">
-            <a href={`${base}classes`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
+            <a href={`${base}account`} id="desktop-login-link" class="hidden items-center gap-2 text-sm font-bold text-medium-gray transition hover:text-vibrant-pink sm:flex">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
+                <span>Login</span>
+            </a>
+            <a href={`${base}schedule`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
                 Book a Class
             </a>
             <button id="mobile-menu-button" class="lg:hidden">
@@ -35,9 +40,14 @@ const base = import.meta.env.BASE_URL;
     <nav id="mobile-menu" class="hidden lg:hidden">
         <a href={base} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Home</a>
         <a href={`${base}about`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">About Us</a>
-        <a href={`${base}classes`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
+        <a href={`${base}schedule`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
+        <a href={`${base}pricing`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Pricing</a>
         <!--<a href={`${base}events`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Events</a>-->
         <a href={`${base}contact`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Contact</a>
+        <a href={`${base}account`} id="mobile-login-link" class="flex items-center gap-2 px-4 py-2 text-base font-medium text-medium-gray transition hover:text-vibrant-pink">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
+            <span>Login</span>
+        </a>
     </nav>
 </header>
 
@@ -48,4 +58,30 @@ const base = import.meta.env.BASE_URL;
   mobileMenuButton.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
   });
+
+  // This script dynamically updates the "Login" link text based on the user's login status with MarianaTek.
+  function updateLoginStatus() {
+    const desktopLoginLink = document.getElementById('desktop-login-link');
+    const mobileLoginLink = document.getElementById('mobile-login-link');
+    
+    const desktopLoginText = desktopLoginLink ? desktopLoginLink.querySelector('span') : null;
+    const mobileLoginText = mobileLoginLink ? mobileLoginLink.querySelector('span') : null;
+
+    // MarianaTek integrations often store a JWT in localStorage upon login.
+    const isLoggedIn = localStorage.getItem('mt-user-jwt');
+
+    if (isLoggedIn) {
+      if (desktopLoginText) desktopLoginText.textContent = 'My Account';
+      if (mobileLoginText) mobileLoginText.textContent = 'My Account';
+    } else {
+      if (desktopLoginText) desktopLoginText.textContent = 'Login';
+      if (mobileLoginText) mobileLoginText.textContent = 'Login';
+    }
+  }
+
+  // Check status on initial page load.
+  document.addEventListener('DOMContentLoaded', updateLoginStatus);
+  // MarianaTek dispatches custom events on login/logout, allowing us to update the UI without a page refresh.
+  window.addEventListener('mt-user-login', updateLoginStatus);
+  window.addEventListener('mt-user-logout', updateLoginStatus);
 </script>
