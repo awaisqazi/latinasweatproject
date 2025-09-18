@@ -1,0 +1,149 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Corporate Collaborations | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Corporate Collaborations
+        </h1>
+        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
+          Partner with us to make yoga accessible to all.
+        </p>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Partners Section */}
+    {/* lululemon */}
+    <section class="relative bg-white py-16 sm:py-24">
+      <div class="absolute left-1/2 -top-4 -translate-x-1/2 transform rounded-full bg-vibrant-pink px-4 py-1.5 text-center text-sm font-semibold uppercase tracking-wider text-white shadow-lg">
+        Featured Collaboration
+      </div>
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">lululemon</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            As a proud recipient of the 2025 Community Wellbeing Grant, our partnership with lululemon has enabled us to deepen our impact, expand our free programming, and support the certification of new BIPOC yoga instructors from within our community.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0">
+          <img alt="Latina Sweat Project awarded Lululemon Community Wellbeing Grant" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab2.png`} />
+        </div>
+      </div>
+    </section>
+
+    {/* Chicago Bulls */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Chicago Bulls</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            We were honored to support the Chicago Bulls' Girls' Day of Play '25.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0 lg:order-first">
+          <img alt="Latina Sweat Project attending Chicago Bulls' Girls' Day of Play" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab1.jpg`} />
+        </div>
+      </div>
+    </section>
+
+    {/* Google */}
+    <section class="bg-white py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Google</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            At Google's Chicago HQ, we guided members of their HOLA Business Resource Group through a mindful mid-day reset, providing tools for stress reduction and mental clarity right in the workplace.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0">
+          <img alt="Professionals in an office setting participating in a wellness reset with Google" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab3.jpg`} />
+        </div>
+      </div>
+    </section>
+
+    {/* Edelman */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Edelman</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            We partnered with Edelman to lead their Inclusivo employee group in an invigorating morning yoga class, setting a positive and centered tone for the day ahead and fostering a sense of community.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0 lg:order-first">
+          <img alt="A group doing yoga in a bright, modern office space for an Edelman employee event" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab4.jpg`} />
+        </div>
+      </div>
+    </section>
+
+    {/* Cicero Family Services */}
+    <section class="bg-white py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Cicero Family Services</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            In a special session for Cicero Family Services, we led their dedicated clinical team through a restorative, meditation-focused session designed to provide care for the caregivers and prevent burnout.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0">
+          <img alt="A calm meditation session for the clinical team of Cicero Family Services" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab5.jpg`} />
+        </div>
+      </div>
+    </section>
+
+    {/* HACE */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">HACE</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            The Hispanic Alliance for Career Enhancement (HACE) joined us for a vibrant Health and Wellness event, where we shared accessible movement practices and discussed the importance of holistic well-being for professional growth.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0 lg:order-first">
+          <img alt="Professionals at a health and wellness event with HACE" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab6.jpg`} />
+        </div>
+      </div>
+    </section>
+
+    {/* Mechanics Grove Elementary */}
+    <section class="bg-white py-16 sm:py-24">
+      <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-24 lg:px-8">
+        <div>
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Mechanics Grove Elementary</h2>
+          <p class="mt-6 font-body text-lg text-medium-gray">
+            We had a wonderful time at Mechanics Grove Elementary, where we guided parents and children together through a fun and engaging introduction to yoga, promoting family wellness and connection.
+          </p>
+        </div>
+        <div class="mt-12 lg:mt-0">
+          <img alt="Parents and children doing yoga together at Mechanics Grove Elementary" class="rounded-lg shadow-xl" src={`${base}images/corpcollabs/collab7.jpg`} />
+        </div>
+      </div>
+    </section>
+    {/* END: Partners Section */}
+
+    {/* START: CTA Section */}
+    <section class="bg-vibrant-pink">
+      <div class="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <span class="block">Become a Partner</span>
+        </h2>
+        <p class="mt-4 text-lg leading-6 text-white/90">
+          Ready to bring culturally-relevant wellness to your organization? Let's collaborate to create a unique experience for your team.
+        </p>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfCIhTvo9WHzZLGZJ5OWF5ctyxJYsFfN9renTJqlyYTYkz4Mg/viewform?pli=1" class="btn mt-8 inline-flex w-auto items-center justify-center rounded-full border border-transparent bg-white px-6 py-3 text-base font-bold text-vibrant-pink shadow-md transition hover:bg-light-gray">
+          Collaboration Form
+        </a>
+      </div>
+    </section>
+    {/* END: CTA Section */}
+  </main>
+</Layout>

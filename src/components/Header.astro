@@ -3,33 +3,53 @@
 const base = import.meta.env.BASE_URL;
 ---
 <header class="sticky top-0 z-50 bg-white/80 shadow-sm backdrop-blur-md">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo and Site Title */}
-        <a href={base} class="flex items-center gap-3">
-            <img src={`${base}logo.png`} alt="The Latina Sweat Project Logo" class="h-10 w-10">
-            <span class="text-xl font-bold text-off-black">The Latina Sweat Project</span>
-        </a>
-
-        {/* Desktop Navigation */}
-        <nav id="desktop-menu" class="hidden items-center gap-8 lg:flex">
-            <a href={base} class="link-underline text-base font-medium text-medium-gray">Home</a>
-            <a href={`${base}about`} class="link-underline text-base font-medium text-medium-gray">About Us</a>
-            <a href={`${base}schedule`} class="link-underline text-base font-medium text-medium-gray">Classes</a>
-            <a href={`${base}pricing`} class="link-underline text-base font-medium text-medium-gray">Pricing</a>
-            <!--<a href={`${base}events`} class="link-underline text-base font-medium text-medium-gray">Events</a>-->
-            <a href={`${base}contact`} class="link-underline text-base font-medium text-medium-gray">Contact</a>
-        </nav>
-
-        {/* CTA Button and Mobile Menu Icon */}
-        <div class="flex items-center gap-4">
-            <a href={`${base}account`} class="header-account-link hidden items-center gap-2 text-sm font-bold text-medium-gray sm:flex">
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
-                <span>My Account</span>
+        <div class="flex-shrink-0">
+            <a href={base} class="flex items-center gap-3">
+                <img src={`${base}logo.png`} alt="The Latina Sweat Project Logo" class="h-10 w-10">
+                <span class="text-xl font-bold text-off-black">The Latina Sweat Project</span>
             </a>
-            <a href={`${base}schedule`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
-                Book a Class
-            </a>
-            <button id="mobile-menu-button" class="lg:hidden">
+        </div>
+
+        {/* Desktop Navigation & CTAs */}
+        <div class="hidden flex-1 items-center gap-8 xl:flex">
+            <nav class="flex flex-1 items-center justify-center gap-8">
+                <a href={base} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Home</a>
+                <a href={`${base}about`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">About Us</a>
+                <a href={`${base}schedule`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Classes</a>
+                <a href={`${base}pricing`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Pricing</a>
+                <a href={`${base}corporate-collaborations`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Corporate Collabs</a>
+                
+                {/* "More" Dropdown */}
+                <div id="more-dropdown" class="relative">
+                    <button id="more-button" class="link-underline flex items-center gap-1 text-base font-medium text-medium-gray">
+                        <span>More</span>
+                        <svg class="h-5 w-5 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                    <div id="more-panel" class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden">
+                        <div role="menu" aria-orientation="vertical" aria-labelledby="more-button">
+                            <a href={`${base}contact`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Contact</span></a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* CTA Buttons - also told not to shrink */}
+            <div class="flex flex-shrink-0 items-center gap-4">
+                <a href={`${base}account`} class="header-account-link hidden items-center gap-2 text-sm font-bold text-medium-gray sm:flex">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
+                    <span>My Account</span>
+                </a>
+                <a href={`${base}schedule`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
+                    Book a Class
+                </a>
+            </div>
+        </div>
+
+        {/* Mobile Menu Icon */}
+        <div class="flex items-center xl:hidden">
+            <button id="mobile-menu-button" class="xl:hidden">
                 <svg class="h-6 w-6 text-off-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                 </svg>
@@ -37,9 +57,10 @@ const base = import.meta.env.BASE_URL;
         </div>
     </div>
     {/* Mobile Menu */}
-    <nav id="mobile-menu" class="hidden lg:hidden">
+    <nav id="mobile-menu" class="hidden xl:hidden">
         <a href={base} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Home</a>
         <a href={`${base}about`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">About Us</a>
+        <a href={`${base}corporate-collaborations`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Corporate Collabs</a>
         <a href={`${base}schedule`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Classes</a>
         <a href={`${base}pricing`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Pricing</a>
         <!--<a href={`${base}events`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Events</a>-->
@@ -55,7 +76,32 @@ const base = import.meta.env.BASE_URL;
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
 
-  mobileMenuButton.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-  });
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // --- Simple Dropdown Toggle Logic ---
+  const moreDropdown = document.getElementById('more-dropdown');
+  const moreButton = document.getElementById('more-button');
+  const morePanel = document.getElementById('more-panel');
+
+  if (moreButton && morePanel && moreDropdown) {
+    moreButton.addEventListener('click', function (e) {
+      e.stopPropagation();
+      morePanel.classList.toggle('hidden');
+      const svg = moreButton.querySelector('svg');
+      if (svg) svg.classList.toggle('rotate-180');
+    });
+
+    document.addEventListener('click', function (e) {
+      const t = e.target;
+      if (t instanceof Node && !moreDropdown.contains(t)) {
+        morePanel.classList.add('hidden');
+        const svg = moreButton.querySelector('svg');
+        if (svg) svg.classList.remove('rotate-180');
+      }
+    });
+  }
 </script>
