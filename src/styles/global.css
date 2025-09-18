@@ -52,6 +52,19 @@
     transform-origin: bottom left;
   }
 
+  /* Custom class for the header account link to ensure animations work. */
+  .header-account-link {
+    transition-property: color, transform;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  .header-account-link:hover {
+    /* The color needs !important to override other styles. */
+    color: var(--color-vibrant-pink) !important;
+    transform: scale(1.05);
+  }
+
   /* Countdown Flipper Styles */
   .flipper {
     position: relative;
