@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
                 <a href={`${base}about`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">About Us</a>
                 <a href={`${base}schedule`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Classes</a>
                 <a href={`${base}pricing`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Pricing</a>
-                <a href={`${base}corporate-collaborations`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Corporate Collabs</a>
+                <a href={`${base}contact`} class="link-underline whitespace-nowrap text-base font-medium text-medium-gray">Contact</a>
                 
                 {/* "More" Dropdown */}
                 <div id="more-dropdown" class="relative">
@@ -29,7 +29,8 @@ const base = import.meta.env.BASE_URL;
                     </button>
                     <div id="more-panel" class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden">
                         <div role="menu" aria-orientation="vertical" aria-labelledby="more-button">
-                            <a href={`${base}contact`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Contact</span></a>
+                            <a href={`${base}corporate-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Corporate Collabs</span></a>
+                            <a href={`${base}community-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Community Collabs</span></a>
                         </div>
                     </div>
                 </div>
