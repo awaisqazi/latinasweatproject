@@ -142,31 +142,17 @@ const base = import.meta.env.BASE_URL;
     {/* START: Instagram Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">Follow Us on Instagram</h2>
-            <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4753928/pexels-photo-4753928.jpeg?auto=compress&cs=tinysrgb&w=800"/>
+            <div class="mx-auto max-w-2xl text-center">
+                <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Join Our Community Online</h2>
+                <p class="mt-4 font-body text-lg text-medium-gray">
+                    See our community in action! Follow us on Instagram for daily inspiration, class updates, and behind-the-scenes moments that celebrate our culture and movement.
+                </p>
+                <div class="mt-8">
+                    <a href="https://www.instagram.com/latinasweatproject/" class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z" clip-rule="evenodd"></path></svg>
+                        Follow @LatinaSweatProject
+                    </a>
                 </div>
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4397835/pexels-photo-4397835.jpeg?auto=compress&cs=tinysrgb&w=800"/>
-                </div>
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/7031706/pexels-photo-7031706.jpeg?auto=compress&cs=tinysrgb&w=800"/>
-                </div>
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/3757954/pexels-photo-3757954.jpeg?auto=compress&cs=tinysrgb&w=800"/>
-                </div>
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg?auto=compress&cs=tinysrgb&w=800"/>
-                </div>
-                <div class="aspect-square w-full overflow-hidden rounded-lg">
-                    <img alt="Instagram post" class="h-full w-full object-cover transition duration-300 hover:scale-110" src="https://images.pexels.com/photos/4761793/pexels-photo-4761793.jpeg?auto=compress&cs=tinysrgb&w=800"/>
-                </div>
-            </div>
-            <div class="mt-10 text-center">
-                <a href="https://www.instagram.com/latinasweatproject/" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                    @LatinaSweatProject
-                </a>
             </div>
         </div>
     </section>
@@ -174,94 +160,6 @@ const base = import.meta.env.BASE_URL;
 
   </main>
 </Layout>
-
-<style is:global>
-  .flipper {
-    position: relative;
-    width: 60px;
-    height: 72px;
-    font-size: 2.5rem;
-    line-height: 72px;
-    font-weight: 700;
-    font-family: 'Rubik', sans-serif;
-    text-align: center;
-  }
-
-  @media (min-width: 640px) {
-    .flipper {
-      width: 72px;
-      height: 90px;
-      font-size: 3rem;
-      line-height: 90px;
-    }
-  }
-
-  .number {
-    position: absolute;
-    left: 0;
-    right: 0;
-    background-color: #febd59; /* accent-gold */
-    color: #2a2a2a; /* off-black for contrast */
-    overflow: hidden;
-    perspective: 400px;
-  }
-
-  .top {
-    top: 0;
-    height: 50%;
-    border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-  }
-
-  .bottom {
-    bottom: 0;
-    height: 50%;
-    border-radius: 0 0 8px 8px;
-    line-height: 0;
-  }
-
-  .flipper .flip-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background-color: #febd59; /* accent-gold */
-    color: #2a2a2a; /* off-black for contrast */
-    border-radius: 8px 8px 0 0;
-    transform-origin: bottom;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    overflow: hidden;
-  }
-
-  .flipper .flip-card.flipping {
-    animation: flip-down 0.5s ease-in-out;
-  }
-
-  .flipper .flip-card .next-number {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    line-height: 0;
-    background-color: #febd59; /* accent-gold */
-    color: #2a2a2a; /* off-black for contrast */
-    border-radius: 8px 8px 0 0;
-    transform: rotateX(180deg);
-    backface-visibility: hidden;
-  }
-
-  @keyframes flip-down {
-    from {
-      transform: rotateX(0deg);
-    }
-    to {
-      transform: rotateX(-180deg);
-    }
-  }
-</style>
 
 <script>
   const targetDate = new Date('2025-09-20T10:00:00-05:00').getTime();
