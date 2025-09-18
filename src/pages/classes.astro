@@ -90,7 +90,7 @@ import { classDescriptions } from '@/data/class-descriptions.js';
                     <h3 class="font-sans text-lg font-semibold text-off-black">Minimum Donation</h3>
                     <p class="mt-2 font-sans text-4xl font-bold text-off-black">$5</p>
                     <p class="mt-1 font-body text-sm text-medium-gray">to reserve a spot</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
                 </div>
 
                 {/* Recommended Donation Card */}
@@ -99,7 +99,7 @@ import { classDescriptions } from '@/data/class-descriptions.js';
                     <h3 class="font-sans text-lg font-semibold text-off-black">Community Support</h3>
                     <p class="mt-2 font-sans text-4xl font-bold text-off-black">$15</p>
                     <p class="mt-1 font-body text-sm text-medium-gray">helps us grow</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md bg-vibrant-pink px-4 py-2 font-sans text-sm font-semibold text-white transition hover:bg-accent-gold">Donate</a>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md bg-vibrant-pink px-4 py-2 font-sans text-sm font-semibold text-white transition hover:bg-accent-gold">Donate</a>
                 </div>
 
                 {/* Custom Donation Card */}
@@ -107,7 +107,7 @@ import { classDescriptions } from '@/data/class-descriptions.js';
                     <h3 class="font-sans text-lg font-semibold text-off-black">Pay What You Can</h3>
                     <p class="mt-2 font-sans text-4xl font-bold text-off-black">Your Price</p>
                     <p class="mt-1 font-body text-sm text-medium-gray">any amount is valued</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
+                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
                 </div>
             </div>
         </div>
@@ -186,7 +186,7 @@ import { classDescriptions } from '@/data/class-descriptions.js';
           <div class="font-body"><p class="font-medium text-off-black">${cls.time}</p><p class="text-sm text-medium-gray">${cls.name}</p></div>
           <div class="text-sm text-medium-gray font-body">${cls.instructor}</div>
           <div class="text-sm text-medium-gray font-body">${cls.studio}</div>
-          <a href="${cls.bookLink}" class="rounded-md bg-vibrant-pink px-3 py-1.5 text-center text-sm font-semibold text-white transition hover:bg-accent-gold">Book</a>
+          <a href="${cls.bookLink}" class="btn rounded-md bg-vibrant-pink px-3 py-1.5 text-center text-sm font-semibold text-white transition hover:bg-accent-gold">Book</a>
         `;
         scheduleList.appendChild(classElement);
       });

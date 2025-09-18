@@ -12,16 +12,16 @@ const base = import.meta.env.BASE_URL;
 
         {/* Desktop Navigation */}
         <nav id="desktop-menu" class="hidden items-center gap-8 lg:flex">
-            <a href={base} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Home</a>
-            <a href={`${base}about`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">About Us</a>
-            <a href={`${base}classes`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Classes</a>
-            <!--<a href={`${base}events`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Events</a>-->
-            <a href={`${base}contact`} class="text-base font-medium text-medium-gray transition hover:text-vibrant-pink">Contact</a>
+            <a href={base} class="link-underline text-base font-medium text-medium-gray">Home</a>
+            <a href={`${base}about`} class="link-underline text-base font-medium text-medium-gray">About Us</a>
+            <a href={`${base}classes`} class="link-underline text-base font-medium text-medium-gray">Classes</a>
+            <!--<a href={`${base}events`} class="link-underline text-base font-medium text-medium-gray">Events</a>-->
+            <a href={`${base}contact`} class="link-underline text-base font-medium text-medium-gray">Contact</a>
         </nav>
 
         {/* CTA Button and Mobile Menu Icon */}
         <div class="flex items-center gap-4">
-            <a href={`${base}classes`} class="hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
+            <a href={`${base}classes`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
                 Book a Class
             </a>
             <button id="mobile-menu-button" class="lg:hidden">

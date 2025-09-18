@@ -1,12 +1,54 @@
 @import "tailwindcss";
 
 @theme {
-  --color-vibrant-pink: #febd59;
-  --color-accent-gold: #ec1380;
+  --color-vibrant-pink: #b5a18d;
+  --color-accent-gold: #ffbd59;
   --color-off-black: #1E1E1E;
   --color-medium-gray: #555555;
   --color-light-gray: #FDF2F2;
 
   --font-sans: "Rubik", sans-serif;
   --font-body: "Rubik", sans-serif;
+}
+
+@layer components {
+  /* This rule applies the accent gold color on hover to elements with the .btn class. */
+  /* By adding !important, we ensure this style isn't overridden by MarianaTek's CSS. */
+  .btn:hover {
+    background-color: var(--color-accent-gold) !important;
+  }
+
+  /* 
+    A reusable class for an animated underline effect on links.
+    It uses `currentColor` for the underline, so it automatically
+    matches the link's text color, which can be set via Tailwind utilities.
+  */
+  .link-underline {
+    position: relative;
+    padding-bottom: 4px; /* Space for the underline */
+    transition: color 0.3s ease-in-out;
+  }
+
+  .link-underline:hover {
+    /* Use !important to ensure this hover color overrides base color utilities. */
+    color: var(--color-vibrant-pink) !important;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor; /* The underline will match the text color */
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
 }
