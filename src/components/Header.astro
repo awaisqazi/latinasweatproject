@@ -38,9 +38,8 @@ const base = import.meta.env.BASE_URL;
 
             {/* CTA Buttons - also told not to shrink */}
             <div class="flex flex-shrink-0 items-center gap-4">
-                <a href={`${base}account`} class="header-account-link hidden items-center gap-2 text-sm font-bold text-medium-gray sm:flex">
-                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
-                    <span>My Account</span>
+                <a href={`${base}account`} class="header-account-link hidden text-sm font-bold text-medium-gray sm:inline-block">
+                    My Account
                 </a>
                 <a href={`${base}schedule`} class="btn hidden rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:block">
                     Book a Class
@@ -67,9 +66,8 @@ const base = import.meta.env.BASE_URL;
         <a href={`${base}pricing`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Pricing</a>
         <!--<a href={`${base}events`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Events</a>-->
         <a href={`${base}contact`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Contact</a>
-        <a href={`${base}account`} class="flex items-center gap-2 px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd"></path></svg>
-            <span>My Account</span>
+        <a href={`${base}account`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">
+            My Account
         </a>
     </nav>
 </header>
