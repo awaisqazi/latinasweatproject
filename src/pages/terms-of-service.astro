@@ -1,0 +1,63 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Terms of Service | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Terms of Service
+        </h1>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Content Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="space-y-6 font-body text-lg text-medium-gray">
+          <p>Welcome to Latina Sweat Project!</p>
+          <p>By accessing or using our website (latinasweatproject.com), mobile app, classes, and related services (the “Services”), you agree to the following Terms of Service. Please read them carefully.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Eligibility</h2>
+          <p>You must be at least 16 years old to use our Services. If under 18, you may only participate with parent or guardian consent.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Use of Services</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>Our classes, events, and app are intended for personal, non-commercial use.</li>
+            <li>You agree not to misuse the Services, including sharing false information, disrupting events, or attempting to gain unauthorized access.</li>
+          </ul>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Health & Wellness Disclaimer</h2>
+          <p>Latina Sweat Project provides fitness, yoga, and wellness programming. Participation is voluntary and at your own risk. Always consult a physician before beginning any new exercise program. Latina Sweat Project is not responsible for injuries or health issues that may occur.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Payments & Donations</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>Donations, memberships, or paid classes are non-refundable unless otherwise stated.</li>
+            <li>All payments are securely processed through our third-party providers.</li>
+          </ul>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Intellectual Property</h2>
+          <p>All logos, designs, images, and content are property of Latina Sweat Project and may not be copied or used without permission.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Termination</h2>
+          <p>We reserve the right to suspend or terminate accounts if these Terms are violated.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Changes to Terms</h2>
+          <p>We may update these Terms from time to time. Continued use of our Services after updates means you accept the changes.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Contact Us</h2>
+          <p>For questions about these Terms, contact us at: <a href="mailto:collab@latinasweatproject.com" class="link-underline text-vibrant-pink">collab@latinasweatproject.com</a></p>
+          
+          <p class="!mt-12 text-center text-base text-slate-500">© 2025 Latina Sweat Project. All rights reserved.</p>
+        </div>
+      </div>
+    </section>
+    {/* END: Content Section */}
+  </main>
+</Layout>

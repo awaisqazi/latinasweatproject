@@ -1,0 +1,72 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Privacy Policy | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Privacy Policy
+        </h1>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Content Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="space-y-6 font-body text-lg text-medium-gray">
+          <p>Latina Sweat Project values your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our website, mobile app, classes, and events.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Information We Collect</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>Personal Information: Name, email, phone number, billing details (when you register or donate).</li>
+            <li>Wellness Preferences: Information you choose to share about fitness or yoga participation.</li>
+            <li>Usage Data: How you interact with our site/app, device information, and IP address.</li>
+          </ul>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">How We Use Information</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>To register you for classes, trainings, or events.</li>
+            <li>To process donations or payments.</li>
+            <li>To send important updates, newsletters, and community opportunities.</li>
+            <li>To improve our Services and ensure safety during participation.</li>
+          </ul>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Sharing of Information</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>We do not sell or rent your personal data.</li>
+            <li>We may share information with trusted third-party vendors (e.g., payment processors, event platforms) strictly to provide Services.</li>
+            <li>We may disclose information if required by law.</li>
+          </ul>
+
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Data Security</h2>
+          <p>We use reasonable measures (encryption, secure servers) to protect your personal information, but cannot guarantee 100% security.</p>
+
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Your Rights</h2>
+          <ul class="list-disc space-y-2 pl-6">
+            <li>You may request access, updates, or deletion of your data by contacting us.</li>
+            <li>You may opt out of promotional emails at any time.</li>
+          </ul>
+
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Children’s Privacy</h2>
+          <p>We do not knowingly collect personal information from children under 13.</p>
+
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Changes to Policy</h2>
+          <p>We may update this Privacy Policy periodically. Updates will be posted on our website/app.</p>
+          
+          <h2 class="!mt-10 font-sans text-2xl font-bold text-off-black">Contact Us</h2>
+          <p>For privacy questions or requests, contact us at: <a href="mailto:collab@latinasweatproject.com" class="link-underline text-vibrant-pink">collab@latinasweatproject.com</a></p>
+          
+          <p class="!mt-12 text-center text-base text-slate-500">© 2025 Latina Sweat Project. All rights reserved.</p>
+        </div>
+      </div>
+    </section>
+    {/* END: Content Section */}
+  </main>
+</Layout>
