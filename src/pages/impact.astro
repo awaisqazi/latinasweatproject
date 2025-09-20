@@ -1,0 +1,185 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+
+const mutualAidImages = [
+  { src: 'mutual-aid-1.jpg', alt: 'Donation drive with clothing and supplies' },
+  { src: 'mutual-aid-2.jpg', alt: 'Volunteers organizing food donations' },
+  { src: 'mutual-aid-3.jpg', alt: 'Community members receiving aid' },
+  { src: 'mutual-aid-4.jpg', alt: 'A community member receiving a bag of groceries' },
+  { src: 'mutual-aid-5.jpg', alt: 'A table full of donated clothing items' },
+  { src: 'mutual-aid-6.jpg', alt: 'Volunteers smiling together during a donation drive' },
+  { src: 'mutual-aid-7.jpg', alt: 'Boxes of food and supplies ready for distribution' },
+];
+---
+
+<Layout title="Community Impact | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Community Impact
+        </h1>
+        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
+          See how we're making a difference, together.
+        </p>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: 200Hr Yoga Teacher Training Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="w-full overflow-hidden rounded-lg shadow-xl">
+            <img src={`${base}images/impact/ytt.jpg`} alt="Diverse group of people in a yoga teacher training session" class="h-full w-full object-cover" />
+          </div>
+          <div class="lg:order-first">
+            <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">200Hr Yoga Teacher Training</h2>
+            <p class="mt-4 font-sans text-lg font-semibold text-vibrant-pink">August 4 - December 15</p>
+            <p class="mt-4 font-body text-lg text-medium-gray">Our vision is to create community-led, accessible, health and wellness resources by empowering the next generation of instructors from within our community.</p>
+            
+            <div class="mt-8 space-y-6 border-t border-slate-200 pt-6">
+              <h3 class="font-sans text-xl font-bold text-off-black">Application FAQ</h3>
+              <div class="space-y-4">
+                <div>
+                  <h4 class="font-sans font-semibold text-medium-gray">Who can apply?</h4>
+                  <p class="font-body text-medium-gray">This program is open to all dedicated members of our community who are passionate about wellness and leadership.</p>
+                </div>
+                <div>
+                  <h4 class="font-sans font-semibold text-medium-gray">Where can I apply?</h4>
+                  <p class="font-body text-medium-gray">Applications will be available through a link on our website and social media channels.</p>
+                </div>
+                <div>
+                  <h4 class="font-sans font-semibold text-medium-gray">What is the deadline?</h4>
+                  <p class="font-body text-medium-gray">All applications must be submitted by July 15th, 2025.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: 200Hr Yoga Teacher Training Section */}
+
+    {/* START: Monthly Impact Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Monthly Vibe Check: Free Community Classes</h2>
+        </div>
+        <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- January Card -->
+          <div class="overflow-hidden rounded-lg bg-white shadow-md">
+            <img src={`${base}images/impact/monthly-jan.jpg`} alt="Community class in January" class="h-48 w-full object-cover">
+            <div class="p-6 text-center">
+              <h3 class="font-sans text-xl font-bold text-off-black">January 2025</h3>
+              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
+                <li><span class="font-semibold">2,940</span> Students Served</li>
+                <li><span class="font-semibold">7</span> Instructors</li>
+                <li><span class="font-semibold">80</span> Classes Led</li>
+              </ul>
+            </div>
+          </div>
+          <!-- February Card -->
+          <div class="overflow-hidden rounded-lg bg-white shadow-md">
+            <img src={`${base}images/impact/monthly-feb.jpg`} alt="Community class in February" class="h-48 w-full object-cover">
+            <div class="p-6 text-center">
+              <h3 class="font-sans text-xl font-bold text-off-black">February 2025</h3>
+              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
+                <li><span class="font-semibold">4,718</span> Students Served</li>
+                <li><span class="font-semibold">11</span> Instructors</li>
+                <li><span class="font-semibold">92</span> Classes Led</li>
+              </ul>
+            </div>
+          </div>
+          <!-- March Card -->
+          <div class="overflow-hidden rounded-lg bg-white shadow-md">
+            <img src={`${base}images/impact/monthly-mar.jpg`} alt="Community class in March" class="h-48 w-full object-cover">
+            <div class="p-6 text-center">
+              <h3 class="font-sans text-xl font-bold text-off-black">March 2025</h3>
+              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
+                <li><span class="font-semibold">6,134</span> Students Served</li>
+                <li><span class="font-semibold">15</span> Instructors</li>
+                <li><span class="font-semibold">105</span> Classes Led</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Monthly Impact Section */}
+
+    {/* START: Yearly Vibe Check Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Yearly Vibe Check</h2>
+        </div>
+        <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+            <h3 class="font-sans text-2xl font-bold text-off-black">2024 Impact</h3>
+            <ul class="mt-4 space-y-3 font-body text-medium-gray">
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">2,000+</span> Attendees</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">50</span> Free Community Events</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">$27,000</span> Donated to Non-Profits</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">200</span> Yoga Mats Donated</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">100</span> Emergency Packs</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">35</span> Bags of Clothing Donated</li>
+            </ul>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+            <h3 class="font-sans text-2xl font-bold text-off-black">2023 Impact</h3>
+            <ul class="mt-4 space-y-3 font-body text-medium-gray">
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">1,000+</span> Attendees</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">25</span> Free Community Events</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">750</span> Yoga Mats Donated</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">500</span> Emergency Packs</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">100</span> Children's Snack Packs</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">75</span> Gallons of Soap</li>
+              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">50</span> Bags of Clothing Donated</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Yearly Vibe Check Section */}
+
+    {/* START: Yoga for Wishes Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
+            <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Yoga for Wishes</h2>
+            <p class="mt-4 font-body text-lg text-medium-gray">We were honored to host "Yoga for Wishes," a special charity event that brought our community together to support the incredible work of the <span class="font-semibold text-vibrant-pink">Make A Wish Illinois</span> foundation. Together, we flowed with purpose and raised funds to help grant life-changing wishes.</p>
+          </div>
+          <div class="w-full overflow-hidden rounded-lg shadow-xl">
+            <img src={`${base}images/impact/yoga-for-wishes.jpg`} alt="Group of people at the Yoga for Wishes charity event" class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Yoga for Wishes Section */}
+
+    {/* START: Community Mutual Aid Section */}
+    <section class="py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Community Mutual Aid</h2>
+          <p class="mt-4 font-body text-lg text-medium-gray">Our strength is in our solidarity. Through clothing drives, food donations, and resource sharing, we actively support one another, ensuring our community thrives both inside and outside the studio.</p>
+        </div>
+        <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {mutualAidImages.map(image => (
+            <div class="overflow-hidden rounded-lg shadow-md">
+              <img src={`${base}images/impact/${image.src}`} alt={image.alt} class="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+    {/* END: Community Mutual Aid Section */}
+  </main>
+</Layout>
