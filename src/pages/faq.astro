@@ -1,0 +1,118 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+
+const faqs = [
+  {
+    english: {
+      title: "Are your classes really FREE?",
+      answer: "Our mission is to make Yoga accessible to ALL, beginning with the financial barriers that prevent so many from accessing a safe space to practice. To live in our mission every day, every class we offer is free to attend with no obligation to donate. However, we do need funds to cover our expenses each month (rent, utilities, supplies, etc.) so that we can continue to serve our community. If you are able to donate, it is needed and deeply appreciated! The minimum donation amount to reserve your space is $5- this can help support others in our community have access to the practice. If you are unable to donate, please arrive 10-15 minutes before start time as you will be accommodated on a first come first serve basis. Walk in's are welcome on a first come, first served basis and are not guaranteed."
+    },
+    spanish: {
+      title: "¿Las clases realmente son GRATIS?",
+      answer: "Nuestra misión es que Yoga sea accesible para TODOS, empezando por quitar las barreras económicas que hacen dificil para muchos encontrar un lugar seguro para practicar. Para cumplir con nuestra misión todos los días, todas nuestras clases son gratis y no tienes que donar si no puedes. Aun asi, necesitamos fondos para cubrir nuestros gastos cada mes (renta, luz, agua, materiales, etc.) para poder seguir sirviendo a nuestra comunidad. ¡Si puedes donar, cualquier ayuda se aprecia muchísimo! El mínimo para reservar tu espacio es $5, ya que eso ayuda a que otros en la comunidad también tengan acceso a la práctica. Si no puedes donar, llega entre 10 a 15 minutos antes de que empiece la clase porque se dará el espacio según quien llegue primero. Las personas que lleguen sin reservación serán acomodadas si hay espacio disponible, pero no siempre se garantiza."
+    }
+  },
+  {
+    english: {
+      title: "Are my donations tax-deductible?",
+      answer: "YES! Because we are a 501 (c)(3) organization with a mission to make Yoga accessible to ALL, everything you donate to LSP supports our cause and is tax-deductible."
+    },
+    spanish: {
+      title: "¿Mis donaciones son deducibles de impuestos?",
+      answer: "¡SÍ! Porque somos una organización 501(c)(3) con la misión de hacer que el Yoga sea accesible para TODOS, todo lo que dones a LSP apoya nuestra causa y es deducible de impuestos."
+    }
+  },
+  {
+    english: {
+      title: "Where can I sign up for class?",
+      answer: "When we have a live series, it can be found directly on our website's Home page. Although we do take time off in between series, we strive to maintain a consistent schedule as often as possible and post our classes as soon as venue and funding is confirmed. Follow us on Instagram and Eventbrite @latinasweatproject to receive registration reminders and the latest info!"
+    },
+    spanish: {
+      title: "¿Dónde puedo inscribirme para la clase?",
+      answer: "Cuando tenemos una serie en vivo, la puedes encontrar directamente en la página de inicio de nuestro sitio web. Aunque tomamos descansos entre series, nos esforzamos por mantener un horario constante lo más seguido posible y publicamos nuestras clases tan pronto como se confirma el lugar y el financiamiento. ¡Síguenos en Instagram y Eventbrite @latinasweatproject para recibir recordatorios de inscripción y la información más reciente!"
+    }
+  },
+  {
+    english: {
+      title: "What do I bring?",
+      answer: "Please bring a water and a sweat towel. Both are available for those unable to bring. Community mats are available in the studio space (thanks lululemon), you are welcome to bring your own."
+    },
+    spanish: {
+      title: "¿Qué debo llevar?",
+      answer: "Por favor, lleva agua y una toalla para el sudor. Ambos están disponibles para quienes no puedan traerlos. También tenemos tapetes comunitarios en el espacio del estudio (gracias lululemon), pero si prefieres, puedes traer el tuyo."
+    }
+  }
+];
+---
+
+<Layout title="FAQ | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Page Header Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
+          Frequently Asked Questions
+        </h1>
+      </div>
+    </section>
+    {/* END: Page Header Section */}
+
+    {/* START: Introduction Section */}
+    <section class="bg-off-black py-16 sm:py-24 text-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight sm:text-4xl">Our Mission, Our Words</h2>
+        </div>
+        <div class="mt-16 grid grid-cols-1 gap-y-12 gap-x-16 md:grid-cols-2 font-body text-lg text-slate-300">
+          <div class="border-t-2 border-vibrant-pink pt-8 space-y-6">
+            <h3 class="font-sans text-2xl font-bold text-white">Hecha por Latinas.</h3>
+            <p class="font-sans text-xl font-bold text-slate-200">This is what the first Latina Yoga non-profit looks like.</p>
+            <p>Creating long term, systemic change in the wellness industry, ensuring that Yoga and mental health resources are led by us.</p>
+            <p class="italic">How do we do it?</p>
+            <ul class="list-disc list-inside space-y-2">
+              <li>Community led donation based Yoga programming. Every day.</li>
+              <li>First ever cost free 200hr Yoga teacher training. Led by us.</li>
+            </ul>
+          </div>
+          <div class="border-t-2 border-vibrant-pink pt-8 space-y-6">
+            <h3 class="font-sans text-2xl font-bold text-white">Para Nuestra Comunidad.</h3>
+            <p class="font-sans text-xl font-bold text-slate-200">Así es como se ve la primera organización de Yoga sin fines de lucro creada por Latinas.</p>
+            <p>Creando un cambio sistémico a largo plazo en la industria de Yoga, y asegurando que los recursos de salud mental sean dirigidos por nuestras comunidades.</p>
+            <p class="italic">¿Cómo lo hacemos?</p>
+            <ul class="list-disc list-inside space-y-2">
+              <li>Programación gratuita. Todos los días.</li>
+              <li>Entrenamiento de certificación de Yoga, invierno 2025.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Introduction Section */}
+
+    {/* START: Main FAQ Section */}
+    <section class="bg-light-gray py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="space-y-12">
+          {faqs.map((faq) => (
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16">
+              {/* English Side */}
+              <div>
+                <h3 class="font-sans text-xl font-bold text-off-black">{faq.english.title}</h3>
+                <p class="mt-4 font-body text-lg text-medium-gray">{faq.english.answer}</p>
+              </div>
+              {/* Spanish Side */}
+              <div>
+                <h3 class="font-sans text-xl font-bold text-off-black">{faq.spanish.title}</h3>
+                <p class="mt-4 font-body text-lg text-medium-gray">{faq.spanish.answer}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+    {/* END: Main FAQ Section */}
+  </main>
+</Layout>

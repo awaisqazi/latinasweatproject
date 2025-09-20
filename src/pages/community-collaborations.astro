@@ -2,6 +2,34 @@
 import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
 const base = import.meta.env.BASE_URL;
+
+const collaborations = [
+  {
+    name: 'LSP X Venados Running Club',
+    image: 'venados.jpg',
+    alt: 'A group of runners stretching, representing the Venados Running Club collaboration'
+  },
+  {
+    name: 'LSP X Latinas Run Club',
+    image: 'lrc.jpg',
+    alt: 'A diverse group of women running together, representing the Latinas Run Club collaboration'
+  },
+  {
+    name: 'LSP X The Mural Movement',
+    image: 'muralmovement.jpg',
+    alt: 'A vibrant community mural, representing The Mural Movement collaboration'
+  },
+  {
+    name: 'Crisis Management',
+    image: 'crisismanagement.jpg',
+    alt: 'People in a supportive group session, representing the Crisis Management collaboration'
+  },
+  {
+    name: 'LSP X Vault Gallerie',
+    image: 'vaultgallarie.jpg',
+    alt: 'Art pieces displayed in a gallery setting, representing the Vault Gallerie collaboration'
+  }
+];
 ---
 
 <Layout title="Community Collaborations | The Latina Sweat Project">
@@ -23,48 +51,15 @@ const base = import.meta.env.BASE_URL;
     {/* START: Collaborations Gallery Section */}
     <section class="py-16 sm:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          
-          {/* LSP X Venados Running Club */}
-          <div class="group overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-xl">
-            <div class="aspect-h-1 aspect-w-1 w-full bg-slate-200">
-              <img src="https://images.pexels.com/photos/1571939/pexels-photo-1571939.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="A group of runners stretching, representing the Venados Running Club collaboration" class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
+        <div class="columns-1 gap-8 sm:columns-2 lg:columns-3">
+          {collaborations.map(collab => (
+            <div class="group mb-8 inline-block w-full break-inside-avoid overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-xl">
+              <img src={`${base}images/commcollabs/${collab.image}`} alt={collab.alt} class="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <div class="p-4 bg-white">
+                <h3 class="font-sans text-lg font-semibold text-off-black">{collab.name}</h3>
+              </div>
             </div>
-            <div class="p-4 bg-white">
-              <h3 class="font-sans text-lg font-semibold text-off-black">LSP X Venados Running Club</h3>
-            </div>
-          </div>
-
-          {/* LSP X Latinas Run Club */}
-          <div class="group overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-xl">
-            <div class="aspect-h-1 aspect-w-1 w-full bg-slate-200">
-              <img src="https://images.pexels.com/photos/280453/pexels-photo-280453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="A diverse group of women running together, representing the Latinas Run Club collaboration" class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div class="p-4 bg-white">
-              <h3 class="font-sans text-lg font-semibold text-off-black">LSP X Latinas Run Club</h3>
-            </div>
-          </div>
-
-          {/* LSP X The Mural Movement */}
-          <div class="group overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-xl">
-            <div class="aspect-h-1 aspect-w-1 w-full bg-slate-200">
-              <img src="https://images.pexels.com/photos/1624600/pexels-photo-1624600.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="A vibrant community mural, representing The Mural Movement collaboration" class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div class="p-4 bg-white">
-              <h3 class="font-sans text-lg font-semibold text-off-black">LSP X The Mural Movement</h3>
-            </div>
-          </div>
-
-          {/* Crisis Management */}
-          <div class="group overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-xl">
-            <div class="aspect-h-1 aspect-w-1 w-full bg-slate-200">
-              <img src="https://images.pexels.com/photos/7648434/pexels-photo-7648434.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="People in a supportive group session, representing the Crisis Management collaboration" class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div class="p-4 bg-white">
-              <h3 class="font-sans text-lg font-semibold text-off-black">Crisis Management</h3>
-            </div>
-          </div>
-
+          ))}
         </div>
       </div>
     </section>
