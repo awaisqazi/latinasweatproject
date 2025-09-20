@@ -10,6 +10,6 @@ export default defineConfig({
   },
   
   // Add these lines for GitHub Pages deployment
-  site: 'https://awaisqazi.github.io',
-  base: '/latinasweatproject/',
+  site: 'https://thelatinasweatproject.com',
+  base: '/',
 });
