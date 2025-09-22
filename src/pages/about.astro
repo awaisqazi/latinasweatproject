@@ -22,53 +22,22 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Page Header Section */}
 
-    {/* START: Grand Opening Announcement Section */}
+    {/* START: Our Studio Is Open Section */}
     <section class="py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Join Our Celebration</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Grand Opening: September 20th</h2>
+        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">We're Open!</p>
+        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Our New Studio Is Now Open</h2>
         <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray">
-          We're proud to announce the grand opening of our first dedicated studio! This milestone follows a year of rapid growth and community demand, with over <strong>250,000 registrations</strong> for our free wellness programming since launch. The September 20th grand opening will feature free community classes, music, refreshments, and an open house to welcome neighbors and longtime supporters.
+          We're thrilled to announce our new dedicated studio is now open! This milestone follows a year of rapid growth and community demand, with over <strong>250,000 registrations</strong> for our free wellness programming. Come experience our new home, built to welcome neighbors and longtime supporters.
         </p>
         <div class="mt-12">
-          <p class="font-sans text-2xl font-bold tracking-tight text-off-black">Countdown to Opening</p>
-          <div id="countdown-container" class="mt-4 flex items-start justify-center gap-3 sm:gap-4">
-            <div class="countdown-unit">
-              <div class="flipper" data-unit="days">
-                <div class="number top">00</div>
-                <div class="number bottom">00</div>
-              </div>
-              <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Days</p>
-            </div>
-            <div class="countdown-unit">
-              <div class="flipper" data-unit="hours">
-                <div class="number top">00</div>
-                <div class="number bottom">00</div>
-              </div>
-              <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Hours</p>
-            </div>
-            <div class="countdown-unit">
-              <div class="flipper" data-unit="minutes">
-                <div class="number top">00</div>
-                <div class="number bottom">00</div>
-              </div>
-              <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Minutes</p>
-            </div>
-            <div class="countdown-unit">
-              <div class="flipper" data-unit="seconds">
-                <div class="number top">00</div>
-                <div class="number bottom">00</div>
-              </div>
-              <p class="mt-2 text-center font-sans text-xs font-semibold uppercase tracking-wider text-medium-gray">Seconds</p>
-            </div>
-          </div>
-          <a href={`${base}schedule`} class="btn mt-8 inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-            See Grand Opening Classes
+          <a href={`${base}schedule`} class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+            View Class Schedule
           </a>
         </div>
       </div>
     </section>
-    {/* END: Grand Opening Announcement Section */}
+    {/* END: Our Studio Is Open Section */}
 
     {/* START: Our Story Section */}
     <section class="bg-light-gray py-16 sm:py-24">
@@ -176,53 +145,3 @@ const base = import.meta.env.BASE_URL;
     {/* END: About Section */}
   </main>
 </Layout>
-
-<script>
-  const targetDate = new Date('2025-09-20T15:00:00-05:00').getTime();
-
-  const flip = (flipper, newNumber) => {
-    const top = flipper.querySelector('.top');
-    const bottom = flipper.querySelector('.bottom');
-    const currentNumber = parseInt(top.textContent, 10);
-
-    if (newNumber === currentNumber) return;
-
-    const flipCard = document.createElement('div');
-    flipCard.className = 'flip-card';
-    flipCard.innerHTML = `<div class="next-number">${String(newNumber).padStart(2, '0')}</div>${String(currentNumber).padStart(2, '0')}`;
-    
-    flipper.appendChild(flipCard);
-    top.textContent = String(newNumber).padStart(2, '0');
-
-    flipCard.classList.add('flipping');
-
-    flipCard.addEventListener('animationend', () => {
-      bottom.textContent = String(newNumber).padStart(2, '0');
-      flipCard.remove();
-    }, { once: true });
-  };
-
-  const countdownInterval = setInterval(() => {
-    const now = new Date().getTime();
-    const distance = targetDate - now;
-
-    if (distance < 0) {
-      clearInterval(countdownInterval);
-      const countdownContainer = document.getElementById('countdown-container');
-      countdownContainer.innerHTML = '<div class="inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg">Now Open!</div>';
-      countdownContainer.classList.remove('items-start');
-      countdownContainer.classList.add('items-center');
-      return;
-    }
-
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    flip(document.querySelector('[data-unit="days"]'), days);
-    flip(document.querySelector('[data-unit="hours"]'), hours);
-    flip(document.querySelector('[data-unit="minutes"]'), minutes);
-    flip(document.querySelector('[data-unit="seconds"]'), seconds);
-  }, 1000);
-</script>
