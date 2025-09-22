@@ -10,6 +10,6 @@ export default defineConfig({
   },
   
   // Add these lines for GitHub Pages deployment
-  site: 'https://thelatinasweatproject.com',
+  site: 'https://latinasweatproject.com',
   base: '/',
 });
