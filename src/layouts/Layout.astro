@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const siteName = "The Latina Sweat Project";
 const description = "Empowering through movement, community, and culture. Join our vibrant community in Chicago and experience fitness that celebrates our culture.";
 const socialImage = "logo.png";
 const socialImageUrl = new URL(base + socialImage, Astro.url);
@@ -24,17 +25,20 @@ const socialImageUrl = new URL(base + socialImage, Astro.url);
     <title>{title}</title>
 
     <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content={siteName} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImageUrl.href} />
+    <meta property="og:image:alt" content="The Latina Sweat Project Logo" />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageUrl.href} />
+    <meta name="twitter:image:alt" content="The Latina Sweat Project Logo" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
