@@ -11,6 +11,7 @@ const { title } = Astro.props;
 const siteName = "The Latina Sweat Project";
 const description = "Empowering through movement, community, and culture. Join our vibrant community in Chicago and experience fitness that celebrates our culture.";
 const socialImage = "logo.png";
+const socialImageAlt = "The Latina Sweat Project Logo";
 const socialImageUrl = new URL(base + socialImage, Astro.url);
 ---
 
@@ -30,15 +31,19 @@ const socialImageUrl = new URL(base + socialImage, Astro.url);
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image:secure_url" content={socialImageUrl.href} />
     <meta property="og:image" content={socialImageUrl.href} />
-    <meta property="og:image:alt" content="The Latina Sweat Project Logo" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" /> {/* Note: Update with actual width of logo.png */}
+    <meta property="og:image:height" content="512" /> {/* Note: Update with actual height of logo.png */}
+    <meta property="og:image:alt" content={socialImageAlt} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageUrl.href} />
-    <meta name="twitter:image:alt" content="The Latina Sweat Project Logo" />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
