@@ -6,6 +6,17 @@ import Header from '@/components/Header.astro';
 <Layout title="Account | The Latina Sweat Project">
   <Header />
   <main>
-     <div data-mariana-integrations="/account"></div>
+    <div class="my-8 px-4 text-center">
+      <p class="text-vibrant-pink">
+        Trouble viewing your account or logging in below?
+        <a
+          href="https://latinasweatproject.marianatools.com/?_mt=/account"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold underline transition hover:text-accent-gold">Open in a new window.</a
+        >
+      </p>
+    </div>
+    <div data-mariana-integrations="/account"></div>
   </main>
 </Layout>
