@@ -15,7 +15,7 @@ const base = import.meta.env.BASE_URL;
             Underrepresented Community + Hardship Membership Options
           </h1>
           <p class="mt-6 max-w-3xl mx-auto font-body text-lg text-medium-gray">
-            To keep Latina Sweat thriving, all teacher training (TT) students may select one of two options to access unlimited classes.
+            To keep Latina Sweat thriving, all teacher training students may select one of two options to access unlimited classes.
           </p>
         </div>
 
@@ -56,28 +56,18 @@ const base = import.meta.env.BASE_URL;
 
         {/* How to Sign Up */}
         <div class="mt-16">
-          <h2 class="text-center font-sans text-3xl font-bold tracking-tight text-off-black">How to Sign Up</h2>
-          <div class="mt-8 space-y-8 font-body text-lg text-medium-gray">
-            <div class="flex items-start">
-              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">1</div>
-              <div class="ml-4">
-                <h3 class="font-bold text-off-black">Create Account</h3>
-                <p>Register on our scheduling platform at <a href={`${base}`} class="text-vibrant-pink underline hover:text-accent-gold">latinasweatproject.com</a>.</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">2</div>
-              <div class="ml-4">
-                <h3 class="font-bold text-off-black">Email Us</h3>
-                <p>Send your name (as it appears on the platform) and your chosen option to <a href="mailto:membership@latinasweatproject.com" class="text-vibrant-pink underline hover:text-accent-gold">membership@latinasweatproject.com</a>.</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">3</div>
-              <div class="ml-4">
-                <h3 class="font-bold text-off-black">Sign Up for Shifts (Option 1)</h3>
-                <p>If you chose Option 1, you’ll receive a link to our Volunteer Sign-Up Doc. Pick an open time slot (no overlaps). This doc is connected to our membership system.</p>
-              </div>
+          <h2 class="text-center font-sans text-3xl font-bold tracking-tight text-off-black">How It Works</h2>
+          <div class="mt-8 text-center font-body text-lg text-medium-gray">
+            <p class="max-w-2xl mx-auto">
+              To receive the <span class="font-bold text-off-black">Community Support Exchange</span> (unlimited free classes), simply sign up for two hours of volunteer shifts per month using our sign-up sheet. We'll track your hours and apply the discount automatically. If you don't sign up for shifts, you will automatically receive the <span class="font-bold text-off-black">50% Community Discount</span>.
+            </p>
+            <div class="mt-8">
+              <a 
+                href="https://docs.google.com/spreadsheets/d/14vEkdtHSwNdYvmB3cuyaYyM_J8k8Em4WvIfEnZRNQj4/edit?usp=sharing" 
+                target="_blank" rel="noopener noreferrer" 
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Sign Up for Volunteer Shifts
+              </a>
             </div>
           </div>
         </div>
@@ -102,12 +92,10 @@ const base = import.meta.env.BASE_URL;
             </div>
         </div>
 
-        {/* Reminder */}
-        <div class="mt-16 rounded-lg border-l-4 border-accent-gold bg-yellow-50 p-6">
-          <h3 class="font-sans text-xl font-bold text-off-black">Important Reminder</h3>
-          <p class="mt-2 font-body text-medium-gray">All selections and scheduling must go through the official channels: <a href={`${base}`} class="text-vibrant-pink underline hover:text-accent-gold">latinasweatproject.com</a>, the shared volunteer doc, and <a href="mailto:membership@latinasweatproject.com" class="text-vibrant-pink underline hover:text-accent-gold">membership@latinasweatproject.com</a>. The front desk cannot manage sign-ups or scheduling.
-          </p>
-          <p class="mt-4 font-body font-bold text-off-black">With love, <br/>The Latina Sweat Project</p>
+        {/* Sign Off */}
+        <div class="mt-16 text-center">
+          <p class="font-body text-xl italic text-medium-gray">With love,</p>
+          <p class="mt-1 font-sans text-2xl font-bold text-vibrant-pink">The Latina Sweat Project</p>
         </div>
       </div>
     </section>
