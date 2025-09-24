@@ -1,0 +1,115 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Teacher Training Membership | The Latina Sweat Project">
+  <Header />
+  <main>
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">For Teacher Training Students</p>
+          <h1 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">
+            Underrepresented Community + Hardship Membership Options
+          </h1>
+          <p class="mt-6 max-w-3xl mx-auto font-body text-lg text-medium-gray">
+            To keep Latina Sweat thriving, all teacher training (TT) students may select one of two options to access unlimited classes.
+          </p>
+        </div>
+
+        {/* Membership Options */}
+        <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <!-- Option 1: Community Support Exchange -->
+          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-lg">
+            <h2 class="font-sans text-2xl font-bold text-off-black">Option 1: Community Support Exchange</h2>
+            <p class="mt-4 font-body text-lg text-medium-gray">Contribute your time to support our community and enjoy free classes.</p>
+            <ul class="mt-6 space-y-3 font-body text-medium-gray">
+              <li class="flex items-start">
+                <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="ml-3"><span class="font-bold text-off-black">2 hours</span> of volunteer support per month</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="ml-3"><span class="font-bold text-off-black">Unlimited free classes</span></span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Option 2: Community Discount -->
+          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-lg">
+            <h2 class="font-sans text-2xl font-bold text-off-black">Option 2: Community Discount</h2>
+            <p class="mt-4 font-body text-lg text-medium-gray">Receive a significant discount on your membership with no time commitment.</p>
+            <ul class="mt-6 space-y-3 font-body text-medium-gray">
+              <li class="flex items-start">
+                <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="ml-3"><span class="font-bold text-off-black">50% off</span> membership</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="h-6 w-6 flex-shrink-0 text-vibrant-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="ml-3"><span class="font-bold text-off-black">No time contribution</span> required</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* How to Sign Up */}
+        <div class="mt-16">
+          <h2 class="text-center font-sans text-3xl font-bold tracking-tight text-off-black">How to Sign Up</h2>
+          <div class="mt-8 space-y-8 font-body text-lg text-medium-gray">
+            <div class="flex items-start">
+              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">1</div>
+              <div class="ml-4">
+                <h3 class="font-bold text-off-black">Create Account</h3>
+                <p>Register on our scheduling platform at <a href={`${base}`} class="text-vibrant-pink underline hover:text-accent-gold">latinasweatproject.com</a>.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">2</div>
+              <div class="ml-4">
+                <h3 class="font-bold text-off-black">Email Us</h3>
+                <p>Send your name (as it appears on the platform) and your chosen option to <a href="mailto:membership@latinasweatproject.com" class="text-vibrant-pink underline hover:text-accent-gold">membership@latinasweatproject.com</a>.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-vibrant-pink font-bold text-white">3</div>
+              <div class="ml-4">
+                <h3 class="font-bold text-off-black">Sign Up for Shifts (Option 1)</h3>
+                <p>If you chose Option 1, you’ll receive a link to our Volunteer Sign-Up Doc. Pick an open time slot (no overlaps). This doc is connected to our membership system.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Membership Rules & Hour Tracking */}
+        <div class="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div class="rounded-lg bg-white p-6 shadow">
+                <h3 class="font-sans text-xl font-bold text-off-black">Membership Rules</h3>
+                <ul class="mt-4 list-disc list-inside space-y-2 font-body text-medium-gray">
+                    <li>Complete 2 full hours each month to keep your membership at $0.00.</li>
+                    <li>No-shows or incomplete hours will result in your membership automatically switching to the 50% discount rate.</li>
+                </ul>
+            </div>
+            <div class="rounded-lg bg-white p-6 shadow">
+                <h3 class="font-sans text-xl font-bold text-off-black">Tracking Your Hours (Option 1)</h3>
+                <ul class="mt-4 list-disc list-inside space-y-2 font-body text-medium-gray">
+                    <li>Shifts must be 30–60 minutes each.</li>
+                    <li>Maximum of 1 hour per day.</li>
+                    <li>Shifts must be completed consecutively before or after class, not split.</li>
+                    <li>Remember to check in when you arrive for your shift.</li>
+                </ul>
+            </div>
+        </div>
+
+        {/* Reminder */}
+        <div class="mt-16 rounded-lg border-l-4 border-accent-gold bg-yellow-50 p-6">
+          <h3 class="font-sans text-xl font-bold text-off-black">Important Reminder</h3>
+          <p class="mt-2 font-body text-medium-gray">All selections and scheduling must go through the official channels: <a href={`${base}`} class="text-vibrant-pink underline hover:text-accent-gold">latinasweatproject.com</a>, the shared volunteer doc, and <a href="mailto:membership@latinasweatproject.com" class="text-vibrant-pink underline hover:text-accent-gold">membership@latinasweatproject.com</a>. The front desk cannot manage sign-ups or scheduling.
+          </p>
+          <p class="mt-4 font-body font-bold text-off-black">With love, <br/>The Latina Sweat Project</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
