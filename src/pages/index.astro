@@ -33,6 +33,28 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Gala Save the Date Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">First Annual LSP Gala</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Get ready for a night of celebration and community at the first-ever Latina Sweat Project Gala!</p>
+              <p class="font-bold text-off-black">When: <span class="text-accent-gold">December 11th, 2025</span></p>
+              <p>More details are coming soon. Follow us on Instagram to stay up-to-date as we reveal more about this unforgettable evening!</p>
+            </div>
+          </div>
+          <div class="w-full" set:html={`
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DO9u-5giUGT/?utm_source=ig_embed&utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px auto; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <script async src="//www.instagram.com/embed.js"></script>
+          `} />
+        </div>
+      </div>
+    </section>
+    {/* END: Gala Save the Date Section */}
+
     {/* START: LSP x One Night Only Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -42,7 +64,7 @@ const base = import.meta.env.BASE_URL;
             <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
               <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque, drag, and circus artists.</p>
-              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, September 26th at 8 pm CT</span></p>
+              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, October 24th at 8 pm CT</span></p>
               <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
               <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
               <div class="mt-8" set:html={`
@@ -66,29 +88,6 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: LSP x One Night Only Section */}
-
-    {/* START: Más Flow 5K Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="lg:order-last">
-            <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">MAS FLOW 5K BIB</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Más Flow 5K is bringing el perreo to the pavement. Khé? El pari se vuelve movimiento. And once you hit that finish line, the party keeps going with DJs and artists you love. Va a ser un día INOLVIDABLE.</p>
-            </div>
-            <div class="mt-8">
-              <a href="https://www.zeffy.com/en-US/ticketing/mas-flow-5k-bib" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                BUY BIB - $50
-              </a>
-            </div>
-          </div>
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/eventbib.jpg`} alt="Infographic for Mas Flow 5K Bib detailing what is included with the purchase" class="h-full w-full object-cover" />
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Más Flow 5K Section */}
 
 
     {/* START: Merch Section */}
