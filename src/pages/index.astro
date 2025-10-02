@@ -39,20 +39,24 @@ const base = import.meta.env.BASE_URL;
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
             <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">First Annual LSP Gala</h2>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Get ready for a night of celebration and community at the first-ever Latina Sweat Project Gala!</p>
-              <p class="font-bold text-off-black">When: <span class="text-accent-gold">December 11th, 2025</span></p>
-              <p>More details are coming soon. Follow us on Instagram to stay up-to-date as we reveal more about this unforgettable evening!</p>
+              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
+              <ul class="list-none space-y-2 pt-2">
+                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
+                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery</li>
+                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
+              </ul>
+              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
             </div>
             <div class="mt-8">
               <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Learn More About the Gala
+                Get Tickets & Details
               </a>
             </div>
           </div>
           <div class="w-full" set:html={`
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DO9u-5giUGT/?utm_source=ig_embed&utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px auto; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
             <script async src="//www.instagram.com/embed.js"></script>
           `} />
         </div>
