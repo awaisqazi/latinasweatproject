@@ -1,0 +1,214 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const base = import.meta.env.BASE_URL;
+
+const sponsors = [
+  // Example Sponsors - replace with real ones as they are confirmed
+  // { name: 'Sol Sponsor Example', logo: `${base}images/sponsors/sol-sponsor.png`, url: '#', tier: 'sol' },
+  // { name: 'Luna Sponsor Example 1', logo: `${base}images/sponsors/luna-sponsor-1.png`, url: '#', tier: 'luna' },
+  // { name: 'Luna Sponsor Example 2', logo: `${base}images/sponsors/luna-sponsor-2.png`, url: '#', tier: 'luna' },
+  // { name: 'Estrella Sponsor Example', logo: `${base}images/sponsors/estrella-sponsor.png`, url: '#', tier: 'estrella' },
+  // { name: 'Raiz Sponsor Example', logo: `${base}images/sponsors/raiz-sponsor.png`, url: '#', tier: 'raiz' },
+];
+
+const solSponsors = sponsors.filter(s => s.tier === 'sol');
+const lunaSponsors = sponsors.filter(s => s.tier === 'luna');
+const estrellaSponsors = sponsors.filter(s => s.tier === 'estrella');
+const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
+---
+
+<Layout title="Noche Inolvidable Gala | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* START: Hero Section */}
+    <section class="relative bg-off-black py-20 text-white sm:py-24 lg:py-32">
+      <div class="absolute inset-0">
+        <img src={`${base}images/gala.png`} alt="Noche Inolvidable Gala Invitation" class="h-full w-full object-cover object-center opacity-30" />
+        <div class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/80 to-transparent"></div>
+      </div>
+      <div class="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">First Annual Latina Sweat Project Gala</p>
+        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+          Noche Inolvidable
+        </h1>
+        <p class="mt-4 font-body text-lg text-light-gray sm:text-xl">
+          A night of impact, connection, music, and purpose.
+        </p>
+        <div class="mt-8 space-y-2 font-body text-lg sm:text-xl">
+          <p><span class="font-bold text-accent-gold">Date:</span> December 11, 2025</p>
+          <p><span class="font-bold text-accent-gold">Time:</span> 6:00 PM - 11:00 PM</p>
+          <p><span class="font-bold text-accent-gold">Dress Theme:</span> Dress to impress in 1920s Latin American evening gowns style.</p>
+        </div>
+      </div>
+    </section>
+    {/* END: Hero Section */}
+
+    {/* START: About the Gala Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">An Unforgettable Evening</h2>
+        <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+          <p>Join us for an unforgettable evening of community, celebration, and impact. Enjoy dinner, drinks, live entertainment, a silent auction, inspiring guest speakers, and more.</p>
+          <p>Every sponsorship is a direct donation to the Latina Sweat Project, helping us expand free yoga and wellness programs across underrepresented communities in Chicago. Your support also fuels our mission to train and empower the next generation of yoga instructors, building inclusive and accessible spaces for all.</p>
+          <p>On this day, we welcome you to celebrate and honor our first graduating class of LSP’s Yoga Teacher Training Program - a milestone we’re thrilled to share with you. 💃</p>
+        </div>
+      </div>
+    </section>
+    {/* END: About the Gala Section */}
+
+    {/* START: Sponsorship Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Become a Sponsor</h2>
+          <p class="mt-4 font-body text-lg text-medium-gray">Your support is crucial to our success. By sponsoring the gala, you align your brand with a powerful mission and gain visibility among a passionate and engaged community.</p>
+        </div>
+
+        <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:items-start">
+          <!-- Sponsorship Tiers -->
+          <div class="space-y-8">
+            <!-- Sol Sponsor -->
+            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 class="font-sans text-2xl font-bold text-off-black">Sol Sponsor - $25,000</h3>
+              <p class="mt-2 font-body text-medium-gray"><span class="font-semibold text-vibrant-pink">Impact:</span> Certifies ~6 yoga teachers.</p>
+              <ul class="mt-4 list-disc space-y-2 pl-5 font-body text-medium-gray">
+                <li>Premium logo placement (social, website, print)</li>
+                <li>Homepage recognition on gala website</li>
+                <li>Exclusive stage call-out + rep spotlight</li>
+                <li>1-month membership for 2 employees</li>
+                <li>1 Gala Table (10 guests, premium seating)</li>
+                <li>Recognition in social media + 1 dedicated email</li>
+                <li>Mention in press release & logo on sponsor backdrop & gala recap</li>
+              </ul>
+            </div>
+            <!-- Luna Sponsor -->
+            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 class="font-sans text-2xl font-bold text-off-black">Luna Sponsor - $15,000</h3>
+              <p class="mt-2 font-body text-medium-gray"><span class="font-semibold text-vibrant-pink">Impact:</span> Certifies ~4 yoga teachers.</p>
+              <ul class="mt-4 list-disc space-y-2 pl-5 font-body text-medium-gray">
+                <li>Logo placement (website, signage, program)</li>
+                <li>Recognition on gala website & social media</li>
+                <li>Table for 6 guests</li>
+                <li>5-Class Pack for 3 employees</li>
+                <li>Mention in press release & logo in gala recap video</li>
+              </ul>
+            </div>
+            <!-- Estrella Sponsor -->
+            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 class="font-sans text-2xl font-bold text-off-black">Estrella Sponsor - $8,500</h3>
+              <p class="mt-2 font-body text-medium-gray"><span class="font-semibold text-vibrant-pink">Impact:</span> Certifies ~2 yoga teachers.</p>
+              <ul class="mt-4 list-disc space-y-2 pl-5 font-body text-medium-gray">
+                <li>Logo on signage, printed program & sponsor backdrop</li>
+                <li>4 gala tickets</li>
+                <li>Complimentary class pass for 6 employees</li>
+                <li>1 social media recognition & inclusion in post-event thank-you email</li>
+              </ul>
+            </div>
+            <!-- Raiz Sponsor -->
+            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 class="font-sans text-2xl font-bold text-off-black">Raiz Sponsor - $5,000</h3>
+              <p class="mt-2 font-body text-medium-gray"><span class="font-semibold text-vibrant-pink">Impact:</span> Certifies ~1 yoga teacher.</p>
+              <ul class="mt-4 list-disc space-y-2 pl-5 font-body text-medium-gray">
+                <li>Name/logo in event program & on sponsor backdrop</li>
+                <li>2 gala tickets</li>
+                <li>Recognition in group thank-you social post</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Zeffy Form & Alt Payments -->
+          <div class="lg:sticky lg:top-24">
+            <div class="w-full overflow-hidden rounded-lg shadow-xl">
+              <div style="position:relative;overflow:hidden;height:450px;width:100%;padding-top:450px;">
+                <iframe title='Donation form powered by Zeffy' style='position: absolute; border: 0; top:0;left:0;bottom:0;right:0;width:100%;height:100%' src='https://www.zeffy.com/embed/ticketing/noche-inolvidable-latina-sweat-projects-2025-gala-sponsorship-packages' allowpaymentrequest allowTransparency="true"></iframe>
+              </div>
+            </div>
+            <div class="mt-6 rounded-lg bg-white p-6 text-center font-body text-medium-gray shadow-sm">
+              <p>Payments can also be made via Zelle or check. For in-kind sponsorships, payment plans, or other arrangements, please contact <a href="mailto:amayrani@latinasweatproject.com" class="font-semibold text-vibrant-pink underline">amayrani@latinasweatproject.com</a>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Sponsorship Section */}
+
+    {/* START: Individual Tickets Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Get Your Tickets</h2>
+                <p class="mt-4 font-body text-lg text-medium-gray">
+                    Be part of this incredible night and support a great cause. Purchase your individual tickets below.
+                </p>
+            </div>
+            <div class="mt-10 overflow-hidden rounded-lg shadow-xl">
+                <div style="position:relative;overflow:hidden;height:450px;width:100%;padding-top:450px;"><iframe title='Donation form powered by Zeffy' style='position: absolute; border: 0; top:0;left:0;bottom:0;right:0;width:100%;height:100%' src='https://www.zeffy.com/embed/ticketing/noche-inolvidable-a-latina-sweat-project-benefit' allowpaymentrequest allowTransparency="true"></iframe></div>
+            </div>    
+        </div>
+    </section>
+    {/* END: Individual Tickets Section */}
+
+    {/* START: Our Sponsors Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Our Generous Sponsors</h2>
+          <p class="mt-4 font-body text-lg text-medium-gray">
+            We are deeply grateful for the support of our sponsors who make our work possible.
+          </p>
+        </div>
+        
+        {sponsors.length > 0 ? (
+          <div class="mt-12 space-y-12">
+            <!-- Sol Sponsors -->
+            {solSponsors.length > 0 && (
+              <div class="text-center">
+                <h3 class="font-sans text-2xl font-bold text-accent-gold">Sol Sponsors</h3>
+                <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {solSponsors.map(sponsor => (
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="col-span-1 flex items-center justify-center rounded-lg bg-white p-8 shadow-lg transition hover:shadow-xl">
+                      <img class="max-h-32 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            <!-- Luna Sponsors -->
+            {lunaSponsors.length > 0 && (
+              <div class="text-center">
+                <h3 class="font-sans text-2xl font-bold text-accent-gold">Luna Sponsors</h3>
+                <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                  {lunaSponsors.map(sponsor => (
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center rounded-lg bg-white p-6 shadow transition hover:shadow-lg">
+                      <img class="max-h-24 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            <!-- Estrella & Raiz Sponsors -->
+            {(estrellaSponsors.length > 0 || raizSponsors.length > 0) && (
+              <div class="text-center">
+                <h3 class="font-sans text-2xl font-bold text-accent-gold">Estrella & Raiz Sponsors</h3>
+                <div class="mt-8 grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {[...estrellaSponsors, ...raizSponsors].map(sponsor => (
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md">
+                      <img class="max-h-20 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div class="mt-10 rounded-lg border-2 border-dashed border-medium-gray bg-white p-12 text-center">
+            <p class="font-body text-lg text-medium-gray">Sponsor logos will be displayed here as they are confirmed. Become our first sponsor!</p>
+          </div>
+        )}
+      </div>
+    </section>
+    {/* END: Our Sponsors Section */}
+
+  </main>
+</Layout>
