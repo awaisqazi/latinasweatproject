@@ -3,17 +3,29 @@ import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
 ---
 
-<Layout title="Check-in | The Latina Sweat Project">
+<Layout title="Volunteer Check-in | The Latina Sweat Project">
 	<Header />
 	<main>
 		<section class="py-16 sm:py-24">
 			<div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
 				<h1 class="font-sans text-4xl font-extrabold tracking-tighter text-off-black sm:text-5xl">
-					Class Check-in
+					Volunteer Check-in
 				</h1>
 				<p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
-					Please fill out the form below to check in for your class. We're excited to have you!
+					Please fill out the form below to check in for your volunteer shift. We're excited to have you!
 				</p>
+			</div>
+
+			<div class="mx-auto mt-8 max-w-3xl px-4 sm:px-6 lg:px-8">
+				<div class="rounded-md bg-red-50 p-4">
+					<div class="flex">
+						<div class="ml-3">
+							<p class="text-sm font-medium text-red-800">
+								<strong class="font-bold">A quick reminder:</strong> By checking in, you are committing to support the Latina Sweat Project for your entire shift. To ensure a safe and focused environment, we kindly request that volunteers do not bring children with them. Your full attention is crucial for our mission, and we deeply appreciate your dedication and understanding!
+							</p>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="mx-auto mt-12 max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -25,6 +37,15 @@ import Header from '@/components/Header.astro';
 						marginheight="0"
 						marginwidth="0">Loading…</iframe
 					>
+				</div>
+
+				<div class="mt-6 text-center">
+					<p class="mb-4 font-body text-medium-gray">
+						Having trouble with the form?
+					</p>
+					<a href="https://forms.gle/ig91np7o7rBwY6ko9" target="_blank" rel="noopener noreferrer" class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-sm font-bold text-white shadow-md transition-transform hover:scale-105">
+						Open in New Tab
+					</a>
 				</div>
 			</div>
 		</section>
