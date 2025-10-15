@@ -1,0 +1,139 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+const flickrEmbed = '<a data-flickr-embed="true" href="https://www.flickr.com/photos/88623248@N07/albums/72177720329189239" title="LSP - Grand Opening"><img src="https://live.staticflickr.com/65535/54802479530_b513abe167_c.jpg" alt="LSP - Grand Opening"/></a>';
+---
+
+<Layout title="Gallery | The Latina Sweat Project">
+  <Header />
+  <main>
+    <div class="my-8 px-4 text-center">
+      <h1 class="text-4xl font-bold text-off-black sm:text-5xl">Our Gallery</h1>
+      <p class="mt-4 text-lg text-medium-gray">A glimpse into our vibrant community and events.</p>
+    </div>
+    <!-- Responsive wrapper for the Flickr embed: scales the iframe to the viewport so controls remain visible -->
+    <div class="my-8">
+      <div class="mx-auto max-w-7xl">
+        <div class="px-4 sm:px-0">
+          <!-- The embed script will inject an iframe; we use this container to control sizing -->
+          <div class="flickr-embed-container" set:html={flickrEmbed}></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+</Layout>
+
+<style>
+  /* Ensure the Flickr iframe is responsive and has no border */
+  /* Make the injected Flickr iframe scale to container width and keep its controls visible. */
+  .flickr-embed-container {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible; /* allow controls to overflow if needed */
+  }
+
+  /* Target the iframe that Flickr adds. Ensure it fills the container and keeps aspect ratio. */
+  iframe.flickr-embed-frame {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    border: none !important;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Some Flickr embeds wrap the iframe inside .flickr-embed; cover that case too. */
+  .flickr-embed-container .flickr-embed,
+  .flickr-embed-container .flickr-embed iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* On small screens prefer the embed to shrink so all controls (arrows) remain visible */
+  @media (max-width: 640px) {
+    .flickr-embed-container iframe.flickr-embed-frame {
+      /* If the embed still reports a large fixed height, allow the iframe to fit the width and show full content */
+      height: auto !important;
+    }
+  }
+
+  /* Make the container center its child and allow visible overflow so arrows/controls are accessible */
+  .flickr-embed-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible !important;
+    position: relative;
+  }
+</style>
+
+<script>
+  // Wait for the Flickr embed script to inject its elements, then adjust scaling so the full embed (including side controls)
+  // is visible on smaller screens while centering and maximizing on larger screens.
+  (function () {
+    const containerEl = document.querySelector('.flickr-embed-container');
+    if (!containerEl) return;
+    const container = containerEl as HTMLElement;
+
+    function adjustEmbed() {
+      const embedNode = container.querySelector('.flickr-embed') || container.querySelector('iframe') || container.firstElementChild;
+      if (!embedNode) return;
+      const embed = embedNode as HTMLElement;
+
+      // Get natural sizes as reported in layout
+      const containerW = container.clientWidth;
+      const embedRect = embed.getBoundingClientRect();
+      const embedW = embedRect.width;
+      const embedH = embedRect.height;
+
+      // If embed width is 0 (not yet laid out), skip
+      if (!embedW) return;
+
+      // Compute scale to fit the width without exceeding 1
+      const scale = Math.min(1, containerW / embedW);
+
+      // Apply transform when necessary and reserve container height to avoid clipping
+      if (scale < 1) {
+        (embed.style as CSSStyleDeclaration).transform = 'scale(' + scale + ')';
+        (embed.style as CSSStyleDeclaration).transformOrigin = 'center top';
+        (embed.style as CSSStyleDeclaration).display = 'block';
+        (embed.style as CSSStyleDeclaration).margin = '0 auto';
+        (container.style as CSSStyleDeclaration).height = (embedH * scale) + 'px';
+      } else {
+        // Reset any previous transforms
+        (embed.style as CSSStyleDeclaration).transform = '';
+        (embed.style as CSSStyleDeclaration).transformOrigin = '';
+        (container.style as CSSStyleDeclaration).height = '';
+      }
+
+      // Ensure overflow is visible so side-controls (arrows) are not clipped
+      (container.style as CSSStyleDeclaration).overflow = 'visible';
+      // Also allow parent wrappers to show overflow if Flickr positioned controls outside iframe
+      let p: HTMLElement | null = container.parentElement as HTMLElement | null;
+      for (let i = 0; i < 3 && p; i++, p = p.parentElement as HTMLElement | null) {
+        (p.style as CSSStyleDeclaration).overflow = 'visible';
+      }
+    }
+
+    // Observe mutations (the embed script injects nodes asynchronously)
+    const mo = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.addedNodes && m.addedNodes.length) {
+          // Try adjusting after a short delay to let layout settle
+          requestAnimationFrame(() => adjustEmbed());
+          return;
+        }
+      }
+    });
+
+    mo.observe(container, { childList: true, subtree: true });
+
+    // Run initially (in case embed already present) and on resize
+    window.addEventListener('resize', () => requestAnimationFrame(adjustEmbed));
+    // Also try once after load
+    window.addEventListener('load', () => setTimeout(adjustEmbed, 50));
+    // Try an initial adjust attempt
+    setTimeout(adjustEmbed, 100);
+  })();
+</script>
