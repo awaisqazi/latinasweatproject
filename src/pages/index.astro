@@ -33,8 +33,55 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Gala Save the Date Section */}
+    {/* START: LSP x One Night Only Section */}
     <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="lg:order-first">
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque, drag, and circus artists.</p>
+              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, October 24th at 8 pm CT</span></p>
+              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
+              <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
+              <div class="mt-8" set:html={`
+                <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DO64sSaAZup/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px auto; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+                <script async src="//www.instagram.com/embed.js"></script>
+              `} />
+            </div>
+          </div>
+          <div class="flex flex-col gap-8">
+            <!-- START: Countdown Timer -->
+            <div id="countdown-container" class="rounded-lg bg-vibrant-pink p-6 text-center shadow-xl">
+              <h3 class="font-sans text-2xl font-bold tracking-tight text-off-black">The Show Starts In...</h3>
+              <div id="countdown-timer" class="mt-4 flex justify-center gap-4">
+                <!-- Timer will be injected here by the script -->
+              </div>
+            </div>
+            <!-- END: Countdown Timer -->
+
+            <!-- START: Ticketing Iframe -->
+            <div class="w-full overflow-hidden rounded-lg shadow-xl">
+              <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
+                  <iframe 
+                      title="LSP x One Night Only Ticketing" 
+                      style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;" 
+                      src="https://www.zeffy.com/embed/ticketing/lsp-x-one-night-only" 
+                      allowpaymentrequest 
+                      allowTransparency="true">
+                  </iframe>
+              </div>
+            </div>
+            <!-- END: Ticketing Iframe -->
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: LSP x One Night Only Section */}
+
+    {/* START: Gala Save the Date Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
@@ -65,7 +112,7 @@ const base = import.meta.env.BASE_URL;
     {/* END: Gala Save the Date Section */}
 
     {/* START: Donation Drive Section */}
-    <section class="relative overflow-hidden bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section class="relative overflow-hidden py-12 sm:py-16 lg:py-20">
       {/* Background Icons */}
       <div class="absolute inset-0 z-0">
         <!-- Sweater Icon -->
@@ -124,7 +171,7 @@ const base = import.meta.env.BASE_URL;
 
 
     {/* START: Merch Section */}
-    <section class="py-12 sm:py-16 lg:py-20"> {/* This section now has a white background, maintaining the alternating pattern */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20"> {/* This section now has a white background, maintaining the alternating pattern */}
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Shop Our 'Immigrant Made' Merch Drop</h2>
@@ -154,43 +201,6 @@ const base = import.meta.env.BASE_URL;
         </div>
     </section>
     {/* END: Merch Section */}
-
-    {/* START: LSP x One Night Only Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="lg:order-first">
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque, drag, and circus artists.</p>
-              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, October 24th at 8 pm CT</span></p>
-              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
-              <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
-              <div class="mt-8" set:html={`
-                <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DO64sSaAZup/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px auto; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-                <script async src="//www.instagram.com/embed.js"></script>
-              `} />
-            </div>
-          </div>
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
-                <iframe 
-                    title="LSP x One Night Only Ticketing" 
-                    style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;" 
-                    src="https://www.zeffy.com/embed/ticketing/lsp-x-one-night-only" 
-                    allowpaymentrequest 
-                    allowTransparency="true">
-                </iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: LSP x One Night Only Section */}
-
-
-    
 
     {/*
     START: Testimonials Section
@@ -293,3 +303,64 @@ const base = import.meta.env.BASE_URL;
 
   </main>
 </Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuration ---
+    // NOTE: Months are 0-indexed in JavaScript (0=Jan, 9=Oct)
+    const eventYear = new Date().getFullYear(); // Assumes current year
+    const eventDate = new Date(Date.UTC(eventYear, 9, 24, 20, 0, 0)); // October 24th, 8:00 PM
+    const eventEnd = new Date(Date.UTC(eventYear, 9, 24, 22, 0, 0)); // October 24th, 10:00 PM
+    const timeZone = 'America/Chicago'; // IANA time zone for Central Time
+
+    // Convert UTC dates to the target time zone for accurate comparison
+    const eventStartInCT = new Date(eventDate.toLocaleString('en-US', { timeZone }));
+    const eventEndInCT = new Date(eventEnd.toLocaleString('en-US', { timeZone }));
+
+    const countdownContainer = document.getElementById('countdown-container');
+    const countdownTimerEl = document.getElementById('countdown-timer');
+
+    if (!countdownContainer || !countdownTimerEl) return;
+
+    const createTimeBlock = (value, label) => `
+      <div class="flex flex-col items-center">
+        <span class="font-sans text-4xl font-bold tracking-tighter text-accent-gold">${value}</span>
+        <span class="mt-1 font-body text-xs uppercase tracking-wider text-off-black/70">${label}</span>
+      </div>
+    `;
+
+    const updateCountdown = () => {
+      const nowInCT = new Date(new Date().toLocaleString('en-US', { timeZone }));
+      const totalSeconds = (eventStartInCT.getTime() - nowInCT.getTime()) / 1000;
+
+      if (totalSeconds > 0) {
+        // --- Before the event ---
+        const days = Math.floor(totalSeconds / 3600 / 24);
+        const hours = Math.floor(totalSeconds / 3600) % 24;
+        const minutes = Math.floor(totalSeconds / 60) % 60;
+        const seconds = Math.floor(totalSeconds) % 60;
+
+        countdownTimerEl.innerHTML = `
+          ${createTimeBlock(String(days).padStart(2, '0'), 'Days')}
+          ${createTimeBlock(String(hours).padStart(2, '0'), 'Hours')}
+          ${createTimeBlock(String(minutes).padStart(2, '0'), 'Mins')}
+          ${createTimeBlock(String(seconds).padStart(2, '0'), 'Secs')}
+        `;
+      } else if (nowInCT >= eventStartInCT && nowInCT < eventEndInCT) {
+        // --- During the event ---
+        countdownContainer.innerHTML = `
+          <div class="animate-pulse font-sans text-2xl font-bold tracking-tight text-accent-gold">The event is live!</div>
+          <p class="mt-2 font-body text-lg text-off-black">Join us now!</p>
+        `;
+        clearInterval(countdownInterval);
+      } else {
+        // --- After the event ---
+        countdownContainer.innerHTML = `<div class="font-sans text-xl font-bold text-off-black">See you next month!</div>`;
+        clearInterval(countdownInterval);
+      }
+    };
+
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+  });
+</script>
