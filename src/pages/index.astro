@@ -307,16 +307,17 @@ const base = import.meta.env.BASE_URL;
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // --- Configuration ---
-    // NOTE: Months are 0-indexed in JavaScript (0=Jan, 9=Oct)
-    const eventYear = new Date().getFullYear(); // Assumes current year
-    const eventDate = new Date(Date.UTC(eventYear, 9, 24, 20, 0, 0)); // October 24th, 8:00 PM
-    const eventEnd = new Date(Date.UTC(eventYear, 9, 24, 22, 0, 0)); // October 24th, 10:00 PM
     const timeZone = 'America/Chicago'; // IANA time zone for Central Time
 
-    // Convert UTC dates to the target time zone for accurate comparison
-    const eventStartInCT = new Date(eventDate.toLocaleString('en-US', { timeZone }));
-    const eventEndInCT = new Date(eventEnd.toLocaleString('en-US', { timeZone }));
+    // Directly create the event date in the target time zone.
+    // new Date() will be in the user's local time, but toLocaleString with a timeZone
+    // gives us a string representation of the current time in Chicago.
+    const nowInCT = new Date(new Date().toLocaleString('en-US', { timeZone }));
+    const eventYear = nowInCT.getFullYear(); // Use the year from the target timezone
 
+    // Set the target date and time directly.
+    const eventStartInCT = new Date(`${eventYear}-10-24T20:00:00`); // October 24th, 8:00 PM CT
+    const eventEndInCT = new Date(`${eventYear}-10-24T22:00:00`);   // October 24th, 10:00 PM CT
     const countdownContainer = document.getElementById('countdown-container');
     const countdownTimerEl = document.getElementById('countdown-timer');
 
