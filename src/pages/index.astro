@@ -33,20 +33,88 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: LSP x One Night Only Section */}
+    {/* START: Recuérdame Event Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="flex flex-col gap-8">
+          <div class="lg:order-last">
             {/* START: Countdown Timer */}
-            <div id="countdown-container" class="rounded-lg bg-vibrant-pink p-6 text-center shadow-xl">
-              <h3 class="font-sans text-2xl font-bold tracking-tight text-off-black">The Show Starts In...</h3>
+            <div id="countdown-container" class="mb-6 rounded-lg bg-vibrant-pink p-6 text-center shadow-xl">
+              <h3 class="font-sans text-2xl font-bold tracking-tight text-off-black">Event Starts In...</h3>
               <div id="countdown-timer" class="mt-4 flex justify-center gap-4">
                 {/* Timer will be injected here by the script */}
               </div>
             </div>
             {/* END: Countdown Timer */}
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Special Event</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Recuérdame: A Día de los Muertos Meditation</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Join us for Recuérdame, our signature Día de los Muertos meditation — an evening that honors memory, celebrates life, and connects us through collective healing. Together, we’ll reflect on the beauty of remembrance and the power of community as we learn from our new partners at Salud Chicago and are guided through the five stages of grief by LSP.</p>
+              <p>Stay after for live music provided by Codigo Verde and ofrendas mingle — a heartfelt space to celebrate loved ones who continue to live within us.</p>
+              <p class="font-bold text-off-black">When: <span class="text-accent-gold">Saturday, November 1st, 6:00 PM - 8:45 PM</span></p>
+              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a></p>
 
+              <div class="rounded-md border border-medium-gray/20 bg-white/50 p-4">
+                <h4 class="font-bold text-off-black">Agenda:</h4>
+                <ul class="mt-2 list-none space-y-1 text-base">
+                  <li><span class="font-semibold">🕕 6:00–6:30 PM:</span> Welcome + Intro Gentle Flow</li>
+                  <li><span class="font-semibold">💬 6:30–7:15 PM:</span> Grief Therapy with Salud Chicago</li>
+                  <li><span class="font-semibold">🕯️ 7:15–7:45 PM:</span> Stages of Grief Meditation</li>
+                  <li><span class="font-semibold">🎶 7:45–8:45 PM:</span> Live Performance by Codigo Verde + Ofrendas Mingle</li>
+                </ul>
+              </div>
+              <p class="font-bold text-vibrant-pink">**Registration required for non-members**</p>
+            </div>
+            <div class="mt-8">
+              <a href="https://www.zeffy.com/en-US/ticketing/recuerdame-dia-de-los-muertos-x-lsp" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Reserve Your Spot ($20)
+              </a>
+            </div>
+          </div>
+          <div class="w-full overflow-hidden rounded-lg shadow-xl">
+            <img src={`${base}images/Recuerdame.png`} alt="Recuerdame: A Dia de los Muertos Meditation event flyer" class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Recuérdame Event Section */}
+
+    {/* START: Gala Save the Date Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
+              <ul class="list-none space-y-2 pt-2">
+                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
+                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery</li>
+                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
+              </ul>
+              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
+            </div>
+            <div class="mt-8">
+              <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Get Tickets & Details
+              </a>
+            </div>
+          </div>
+          <div class="w-full" set:html={`
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <script async src="//www.instagram.com/embed.js"></script>
+          `} />
+        </div>
+      </div>
+    </section>
+    {/* END: Gala Save the Date Section */}
+
+    {/* START: LSP x One Night Only Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="flex flex-col gap-8 lg:order-last">
             {/* START: Ticketing Iframe */}
             <div class="w-full overflow-hidden rounded-lg shadow-xl">
               <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
@@ -79,74 +147,6 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: LSP x One Night Only Section */}
-
-    {/* START: Recuérdame Event Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="lg:order-last">
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Special Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Recuérdame: A Día de los Muertos Meditation</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for Recuérdame, our signature Día de los Muertos meditation — an evening that honors memory, celebrates life, and connects us through collective healing. Together, we’ll reflect on the beauty of remembrance and the power of community as we learn from our new partners at Salud Chicago and are guided through the five stages of grief by LSP.</p>
-              <p>Stay after for live music provided by Codigo Verde and ofrendas mingle — a heartfelt space to celebrate loved ones who continue to live within us.</p>
-              <p class="font-bold text-off-black">When: <span class="text-accent-gold">Saturday, November 1st, 6:00 PM - 8:45 PM</span></p>
-              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a></p>
-              <div class="rounded-md border border-medium-gray/20 bg-white/50 p-4">
-                <h4 class="font-bold text-off-black">Agenda:</h4>
-                <ul class="mt-2 list-none space-y-1 text-base">
-                  <li><span class="font-semibold">🕕 6:00–6:30 PM:</span> Welcome + Intro Gentle Flow</li>
-                  <li><span class="font-semibold">💬 6:30–7:15 PM:</span> Grief Therapy with Salud Chicago</li>
-                  <li><span class="font-semibold">🕯️ 7:15–7:45 PM:</span> Stages of Grief Meditation</li>
-                  <li><span class="font-semibold">🎶 7:45–8:45 PM:</span> Live Performance by Codigo Verde + Ofrendas Mingle</li>
-                </ul>
-              </div>
-              <p class="font-bold text-vibrant-pink">**Registration required for non-members**</p>
-            </div>
-            <div class="mt-8">
-              <a href="https://www.zeffy.com/en-US/ticketing/recuerdame-dia-de-los-muertos-x-lsp" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Reserve Your Spot ($20)
-              </a>
-            </div>
-          </div>
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/Recuerdame.png`} alt="Recuerdame: A Dia de los Muertos Meditation event flyer" class="h-full w-full object-cover" />
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Recuérdame Event Section */}
-
-    {/* START: Gala Save the Date Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
-              <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
-                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery</li>
-                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
-              </ul>
-              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
-            </div>
-            <div class="mt-8">
-              <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Get Tickets & Details
-              </a>
-            </div>
-          </div>
-          <div class="w-full" set:html={`
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-            <script async src="//www.instagram.com/embed.js"></script>
-          `} />
-        </div>
-      </div>
-    </section>
-    {/* END: Gala Save the Date Section */}
 
     {/* START: Donation Drive Section */}
     <section class="bg-light-gray relative overflow-hidden py-12 sm:py-16 lg:py-20">
@@ -353,8 +353,8 @@ const base = import.meta.env.BASE_URL;
     const eventYear = nowInCT.getFullYear(); // Use the year from the target timezone
 
     // Set the target date and time directly.
-    const eventStartInCT = new Date(`${eventYear}-10-24T20:00:00`); // October 24th, 8:00 PM CT
-    const eventEndInCT = new Date(`${eventYear}-10-24T22:00:00`);   // October 24th, 10:00 PM CT
+    const eventStartInCT = new Date(`${eventYear}-11-01T18:00:00`); // November 1st, 6:00 PM CT
+    const eventEndInCT = new Date(`${eventYear}-11-01T20:45:00`);   // November 1st, 8:45 PM CT
     const countdownContainer = document.getElementById('countdown-container');
     const countdownTimerEl = document.getElementById('countdown-timer');
 
@@ -387,13 +387,13 @@ const base = import.meta.env.BASE_URL;
       } else if (nowInCT >= eventStartInCT && nowInCT < eventEndInCT) {
         // --- During the event ---
         countdownContainer.innerHTML = `
-          <div class="animate-pulse font-sans text-2xl font-bold tracking-tight text-accent-gold">The event is live!</div>
+          <div class="animate-pulse font-sans text-2xl font-bold tracking-tight text-accent-gold">This event is live!</div>
           <p class="mt-2 font-body text-lg text-off-black">Join us now!</p>
         `;
         clearInterval(countdownInterval);
       } else {
         // --- After the event ---
-        countdownContainer.innerHTML = `<div class="font-sans text-xl font-bold text-off-black">See you next month!</div>`;
+        countdownContainer.innerHTML = `<div class="font-sans text-xl font-bold text-off-black">Thank you for joining us!</div>`;
         clearInterval(countdownInterval);
       }
     };
