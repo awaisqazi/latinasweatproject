@@ -1,0 +1,26 @@
+---
+const target = 'https://www.zeffy.com/en-US/ticketing/lsp-teacher-training-classes';
+export const prerender = true;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <title>Redirecting…</title>
+  </head>
+  <body>
+    <main style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 3rem; text-align: center;">
+      <h1>Redirecting to teacher training classes page…</h1>
+      <p>If you are not redirected automatically, <a href={target}>click here to see the classes</a>.</p>
+    </main>
+    <script define:vars={{ target }}>
+      // JS fallback for environments that don't respect meta refresh
+      try {
+        window.location.replace(target);
+      } catch (e) { /* ignore */ }
+    </script>
+  </body>
+</html>
