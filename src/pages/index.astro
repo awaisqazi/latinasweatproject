@@ -33,6 +33,37 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Carrera de los Muertos Event Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Collaboration</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x Carrera de los Muertos 5K</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>We're teaming up with Carrera de los Muertos for their annual 5K race! Join the LSP team for an energizing run, then unwind with us for a special post-run yoga session to cool down and celebrate.</p>
+              <ul class="list-none space-y-2 pt-2">
+                <li><span class="font-bold text-off-black">What:</span> Post-Run Yoga Session</li>
+                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">Saturday, November 1st at 9:00 AM</span></li>
+                <li><span class="font-bold text-off-black">Where:</span> Benito Juarez HS Field</li>
+              </ul>
+              <p>Don't miss this incredible community event. Sign up for the race and get ready to move with us!</p>
+            </div>
+            <div class="mt-8">
+              <a href="https://www.unochicago.org/la-carrera" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Learn More about the Event
+              </a>
+            </div>
+          </div>
+          <div class="w-full" set:html={`
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQcuzHoEZi7/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <script async src="//www.instagram.com/embed.js"></script>
+          `} />
+        </div>
+      </div>
+    </section>
+    {/* END: Carrera de los Muertos Event Section */}
+
     {/* START: Recuérdame Event Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
