@@ -33,85 +33,53 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Carrera de los Muertos Event Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Collaboration</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x Carrera de los Muertos 5K</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>We're teaming up with Carrera de los Muertos for their annual 5K race! Join the LSP team for an energizing run, then unwind with us for a special post-run yoga session to cool down and celebrate.</p>
-              <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">What:</span> Post-Run Yoga Session</li>
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">Saturday, November 1st at 9:00 AM</span></li>
-                <li><span class="font-bold text-off-black">Where:</span> <a href="https://www.google.com/maps/search/?api=1&query=1450-1510+W+Cermak+Rd,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">Benito Juarez HS Field (1450-1510 W Cermak Rd)</a></li>
-              </ul>
-              <p>Don't miss this incredible community event. Get ready to move with us!</p>
-            </div>
-            <div class="mt-8 flex flex-wrap gap-4">
-              <a href="https://www.zeffy.com/en-US/ticketing/lsp-x-carrera-de-los-muertos" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Register for Yoga
-              </a>
-              <a href="https://www.unochicago.org/la-carrera" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Learn More about the Event
-              </a>
-            </div>
-          </div>
-          <div class="w-full" set:html={`
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQcuzHoEZi7/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-            <script async src="//www.instagram.com/embed.js"></script>
-          `} />
-        </div>
-      </div>
-    </section>
-    {/* END: Carrera de los Muertos Event Section */}
-
-    {/* START: Recuérdame Event Section */}
+    {/* START: Salud Chicago Partnership Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="w-full">
+            <div class="mx-auto max-w-[540px] rounded-lg shadow-xl overflow-hidden" set:html={`
+              <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQT7ZSxEQbN/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
+              <script async src="//www.instagram.com/embed.js"></script>
+            `} />
+          </div>
           <div class="lg:order-last">
-            {/* START: Countdown Timer */}
-            <div id="countdown-container" class="mb-6 rounded-lg bg-vibrant-pink p-6 text-center shadow-xl">
-              <h3 class="font-sans text-2xl font-bold tracking-tight text-off-black">Event Starts In...</h3>
-              <div id="countdown-timer" class="mt-4 flex justify-center gap-4">
-                {/* Timer will be injected here by the script */}
-              </div>
-            </div>
-            {/* END: Countdown Timer */}
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Special Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Recuérdame: A Día de los Muertos Meditation</h2>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Wellness Partnership</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x Salud Chicago: Mental Health for La Cultura</h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for Recuérdame, our signature Día de los Muertos meditation — an evening that honors memory, celebrates life, and connects us through collective healing. Together, we’ll reflect on the beauty of remembrance and the power of community as we learn from our new partners at Salud Chicago and are guided through the five stages of grief by LSP.</p>
-              <p>Stay after for live music provided by Codigo Verde and ofrendas mingle — a heartfelt space to celebrate loved ones who continue to live within us.</p>
-              <p class="font-bold text-off-black">When: <span class="text-accent-gold">Saturday, November 1st, 6:00 PM - 8:45 PM</span></p>
-              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a></p>
-
+              <p>We are proud to partner with <a href="http://saludchicago.com/" target="_blank" rel="noopener noreferrer" class="font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">Salud Chicago</a>, a Latine family-founded mental health nonprofit, to offer professionally-led, bilingual healing sessions right here in our Pilsen home.</p>
+              <p>Culture and community shouldn't be a side note in therapy. Together, we're creating a safe space to break stigmas and prioritize our collective wellness. Join us for these essential conversations.</p>
+              
               <div class="rounded-md border border-medium-gray/20 bg-white/50 p-4">
-                <h4 class="font-bold text-off-black">Agenda:</h4>
-                <ul class="mt-2 list-none space-y-1 text-base">
-                  <li><span class="font-semibold">🕕 6:00–6:30 PM:</span> Welcome + Intro Gentle Flow</li>
-                  <li><span class="font-semibold">💬 6:30–7:15 PM:</span> Grief Therapy with Salud Chicago</li>
-                  <li><span class="font-semibold">🕯️ 7:15–7:45 PM:</span> Stages of Grief Meditation</li>
-                  <li><span class="font-semibold">🎶 7:45–8:45 PM:</span> Live Performance by Codigo Verde + Ofrendas Mingle</li>
+                <h4 class="font-bold text-off-black">Upcoming Healing Sessions:</h4>
+                <ul class="mt-2 list-none space-y-3 text-base">
+                  <li>
+                    <span class="font-semibold text-accent-gold">Men's Therapy:</span> Friday, Nov 7th @ 6:00 PM
+                    <a href="https://www.eventbrite.com/e/1894607986489?aff=oddtdtcreator" target="_blank" rel="noopener noreferrer" class="ml-2 text-sm font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">[RSVP Required]</a>
+                  </li>
+                  <li>
+                    <span class="font-semibold text-accent-gold">Comunidad Therapy:</span> Sunday, Nov 9th @ 2:00 PM
+                    <a href="https://www.eventbrite.com/e/1894434286949?aff=oddtdtcreator" target="_blank" rel="noopener noreferrer" class="ml-2 text-sm font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">[RSVP Required]</a>
+                  </li>
                 </ul>
+                <p class="mt-4 font-bold text-lg text-off-black">
+                  Location: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a>
+                </p>
+                <p class="mt-2 text-xs">Please RSVP at <a href="http://saludchicago.com/" target="_blank" rel="noopener noreferrer" class="font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">saludchicago.com</a>. Donations are kindly requested to keep this work sustainable.</p>
               </div>
-              <p class="font-bold text-vibrant-pink">**Registration required for non-members**</p>
+
+              <p class="pt-2 font-bold text-accent-gold">Support Latine mental health. Donate. Show up. Normalize.</p>
             </div>
             <div class="mt-8">
-              <a href="https://www.zeffy.com/en-US/ticketing/recuerdame-dia-de-los-muertos-x-lsp" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Reserve Your Spot ($20)
+              <a href="http://saludchicago.com/" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Learn More & Register
               </a>
             </div>
-          </div>
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/Recuerdame.png`} alt="Recuerdame: A Dia de los Muertos Meditation event flyer" class="h-full w-full object-cover" />
           </div>
         </div>
       </div>
     </section>
-    {/* END: Recuérdame Event Section */}
+    {/* END: Salud Chicago Partnership Section */}
 
     {/* START: Gala Save the Date Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
@@ -182,67 +150,9 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: LSP x One Night Only Section */}
 
-    {/* START: Donation Drive Section */}
-    <section class="bg-light-gray relative overflow-hidden py-12 sm:py-16 lg:py-20">
-      {/* Background Icons */}
-      <div class="absolute inset-0 z-0">
-        <!-- Sweater Icon -->
-        <svg class="absolute -left-8 top-8 h-28 w-28 -rotate-[30deg] text-medium-gray/10 sm:h-32 sm:w-32" fill="currentColor" viewBox="0 0 481.759 481.759"><g><g><path d="M358.597,481.759H121.831c-3.313,0-6-2.686-6-6v-56.178c0-8.694,1.735-17.063,5.162-24.92 c-3.239-7.426-4.966-15.309-5.146-23.496c0-0.004,0-0.009,0-0.013c0-0.017-0.001-0.034-0.001-0.051c0-0.002,0-0.004,0-0.006 c0-0.011-0.001-0.021-0.001-0.031c0-0.008,0-0.017,0-0.025c-0.001-0.05-0.002-0.1-0.003-0.15c0-0.006-0.001-0.013-0.001-0.02 c-0.001-0.037-0.001-0.075-0.002-0.112c0,0,0,0,0-0.001c0-0.013-0.001-0.026-0.001-0.04c0-0.006,0-0.011,0-0.017 c-0.001-0.068-0.002-0.136-0.003-0.204c0-0.007,0-0.015,0-0.022c0-0.029-0.001-0.058-0.001-0.087c0-0.028,0-0.055-0.001-0.083 c0-0.012,0-0.025,0-0.038c0-0.006,0-0.012,0-0.018c0-0.031-0.001-0.063-0.001-0.094c0-0.02,0-0.039,0-0.06 c0-0.119-0.001-0.238-0.001-0.357c0-0.05,0-0.1,0.002-0.149l1.999-163.974c0.04-3.288,2.719-5.927,5.998-5.927 c0.025,0,0.049,0,0.075,0c3.313,0.041,5.967,2.759,5.926,6.073l-1.999,164.011c0,0.078,0,0.156,0,0.234c0,0.002,0,0.003,0,0.005 c0,0.001,0,0.003,0,0.003c0,0.137,0.002,0.273,0.003,0.409c0,0.003,0,0.005,0,0.008c0.1,7.578,1.833,14.833,5.153,21.576 c0.823,1.671,0.823,3.629,0.001,5.301c-3.423,6.953-5.159,14.446-5.159,22.272v50.178h224.767l-0.002-50.178 c0-7.805-1.726-15.28-5.131-22.22c-0.082-0.163-0.156-0.329-0.223-0.498c-0.083-0.211-0.154-0.424-0.212-0.64 c-0.001-0.003-0.001-0.004-0.002-0.006c-0.136-0.505-0.207-1.029-0.207-1.558c0-0.881,0.194-1.775,0.604-2.62v-0.001 c0.001-0.003,0.003-0.006,0.004-0.009l0-0.001c0.001-0.002,0.002-0.005,0.004-0.007c0-0.001,0-0.001,0.001-0.002 c0.001-0.003,0.003-0.006,0.004-0.009c3.423-6.954,5.159-14.447,5.159-22.272l-2-163.976c-0.041-3.313,2.613-6.032,5.926-6.073 c3.304-0.045,6.032,2.613,6.073,5.926l2,164.035c0.001,0.029,0.001,0.058,0.001,0.087c0,8.695-1.735,17.064-5.163,24.922 c3.427,7.859,5.161,16.228,5.161,24.921l0.002,56.178c0,1.591-0.632,3.117-1.757,4.243 C361.715,481.126,360.189,481.759,358.597,481.759z"/></g><g><g><g><g><path d="M119.396,449.166H64.243c-1.591,0-3.117-0.632-4.243-1.757 c-1.125-1.126-1.757-2.651-1.757-4.243c0-8.694,1.735-17.064,5.162-24.921c-3.281-7.522-5.011-15.514-5.153-23.812 c0-0.031-0.001-0.06-0.002-0.091c-0.001-0.071-0.002-0.142-0.003-0.213c0-0.042-0.001-0.084-0.001-0.126 c0-0.024,0-0.048,0-0.072c-0.001-0.07-0.001-0.141-0.002-0.211c0-0.048,0-0.097,0-0.145c0-0.083,0-0.167,0-0.251V170.75 c0-30.487,24.713-55.312,55.158-55.497l81.958-9.054c3.298-0.36,6.259,2.012,6.623,5.305c0.364,3.294-2.011,6.259-5.305,6.623 l-82.276,9.089c-0.219,0.024-0.438,0.036-0.659,0.036c-23.985,0-43.498,19.513-43.498,43.498v222.572 c0,0.219,0.001,0.438,0.004,0.656c0,0.03,0.001,0.059,0.001,0.089c0,0.017,0,0.034,0,0.051 c0.001,0.056,0.002,0.112,0.003,0.168c0,0.018,0,0.036,0.001,0.054c0.002,0.103,0.004,0.206,0.007,0.308 c0,0.002,0,0.004,0,0.006c0.187,7.345,1.914,14.383,5.142,20.939c0.153,0.311,0.277,0.631,0.373,0.958 c0.165,0.559,0.245,1.128,0.244,1.692c0,0.145-0.005,0.29-0.016,0.434c-0.055,0.761-0.255,1.514-0.602,2.216 c-2.538,5.155-4.148,10.608-4.811,16.272h48.806c3.313,0,6,2.686,6,6S122.709,449.166,119.396,449.166z"/></g></g><g><path d="M121.831,423.831h-49.51c-3.313,0-6-2.687-6-6c0-3.314,2.687-6,6-6h49.51c3.313,0,6,2.686,6,6 C127.831,421.144,125.144,423.831,121.831,423.831z"/></g></g><g><g><g><path d="M417.516,449.166h-55.153c-3.314,0-6-2.686-6-6s2.686-6,6-6h48.806 c-0.663-5.664-2.273-11.117-4.811-16.272c-0.346-0.702-0.546-1.456-0.601-2.216c-0.011-0.144-0.016-0.289-0.016-0.434 c0-0.564,0.079-1.134,0.244-1.692c0.096-0.327,0.221-0.647,0.373-0.958c3.228-6.556,4.955-13.594,5.142-20.939 c0-0.002,0-0.004,0-0.006c0.003-0.103,0.005-0.206,0.007-0.308c0-0.018,0-0.036,0.001-0.054 c0.001-0.056,0.002-0.112,0.003-0.168c0-0.017,0-0.034,0-0.051c0.001-0.03,0.001-0.059,0.002-0.089 c0.002-0.219,0.004-0.437,0.004-0.656V170.75c0-23.984-19.513-43.498-43.498-43.498c-0.22,0-0.44-0.012-0.659-0.036 l-82.276-9.089c-3.294-0.364-5.669-3.329-5.305-6.623c0.364-3.294,3.33-5.665,6.623-5.305l81.957,9.054 c30.445,0.185,55.158,25.009,55.158,55.497v222.572c0,0.084,0,0.168,0,0.251c0,0.049,0,0.097,0,0.145 c0,0.07-0.001,0.141-0.002,0.211c0,0.024,0,0.048,0,0.072c0,0.042-0.001,0.084-0.001,0.126 c-0.001,0.071-0.002,0.142-0.003,0.213c-0.001,0.031-0.001,0.06-0.001,0.091c-0.142,8.298-1.872,16.29-5.153,23.812 c3.427,7.857,5.162,16.227,5.162,24.921c0,1.591-0.632,3.117-1.757,4.243C420.633,448.534,419.107,449.166,417.516,449.166z"/></g></g><g><path d="M409.438,423.831h-50.843c-3.313,0-6-2.687-6-6c0-3.314,2.686-6,6-6h50.843c3.314,0,6,2.686,6,6 C415.438,421.144,412.751,423.831,409.438,423.831z"/></g></g></g><g><path d="M240.88,137.165c-17.653,0-35.305-6.719-48.744-20.157c-2.343-2.343-2.343-6.142,0-8.485 c2.343-2.343,6.142-2.343,8.485,0c22.199,22.197,58.319,22.196,80.518-0.001c2.344-2.343,6.143-2.342,8.485,0 c2.343,2.343,2.343,6.143,0,8.485C276.187,130.446,258.533,137.165,240.88,137.165z"/></g><g><path d="M321.612,120.915c-1.064,0-2.141-0.283-3.116-0.877c-2.83-1.724-3.727-5.416-2.002-8.246 l5.204-8.542H159.963l2.715,4.535c1.702,2.843,0.776,6.528-2.067,8.23c-2.843,1.701-6.527,0.776-8.23-2.067l-8.15-13.617 c-1.109-1.854-1.137-4.161-0.071-6.04c1.065-1.879,3.059-3.041,5.22-3.041h183c2.169,0,4.169,1.17,5.231,3.062 c1.063,1.891,1.021,4.208-0.107,6.06l-10.762,17.664C325.611,119.89,323.636,120.915,321.612,120.915z"/></g><g><path d="M332.379,103.25c-3.314,0-6-2.687-6-6c0-47.007-38.243-85.25-85.25-85.25h-0.5 c-47.007,0-85.25,38.243-85.25,85.25c0,3.313-2.687,6-6,6c-3.314,0-6-2.687-6-6c0-53.624,43.626-97.25,97.25-97.25h0.5 c53.624,0,97.25,43.626,97.25,97.25C338.379,100.563,335.693,103.25,332.379,103.25z"/></g><g><g><path d="M334.379,419.545c-3.314,0-6-2.686-6-6v-12.828c-26.499-9.076-45.21-33.141-47.579-61.006h-79.843 c-2.368,27.866-21.08,51.931-47.579,61.006v12.828c0,3.314-2.687,6-6,6c-3.314,0-6-2.686-6-6v-17.263 c0-2.71,1.817-5.083,4.433-5.792c25.554-6.915,43.4-30.265,43.4-56.78c0-3.313,2.687-6,6-6h91.334c3.314,0,6,2.687,6,6 c0,26.516,17.847,49.865,43.4,56.78c2.616,0.708,4.433,3.082,4.433,5.792v17.263 C340.379,416.859,337.693,419.545,334.379,419.545z"/></g><g><path d="M151.711,99.406l180.668-2.156l-9.133,17.664l-32.055-2.148c0,0-33.532,18.238-49.086,17.839 c-15.554-0.398-46.262-21.136-46.262-21.136l-38.481,6.965L151.711,99.406z"/></g><g><path d="M240.879,159.383c-3.314,0-6-2.687-6-6v-18.999c0-3.313,2.686-6,6-6c3.313,0,6,2.687,6,6v18.999 C246.879,156.696,244.193,159.383,240.879,159.383z"/></g></g><g><g><polygon points="371.985,421.167 385.757,440.448 362.165,440.448 357.665,422.935 			"/></g><g><polygon points="109.774,421.167 96.001,440.448 119.594,440.448 124.093,422.935 			"/></g></g></g></svg>
-        <!-- Mitten Icon -->
-        <svg class="absolute -right-4 top-16 h-24 w-24 rotate-[25deg] text-medium-gray/10 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 512 512"><path d="M392.505,185.316c-12.365,0-23.989,4.816-32.731,13.56l-12.284,12.284v-86.178 C347.489,56.066,291.424,0,222.509,0C153.591,0,97.522,56.066,97.522,124.982v273.93c-15.079,4.855-24.315,19.721-24.315,40.58 v66.859c0,3.12,2.53,5.649,5.649,5.649h287.3c3.12,0,5.649-2.53,5.649-5.649v-66.859c0-21.841-10.129-37.104-26.484-41.193v-54.05 l79.915-79.911c8.743-8.741,13.559-20.367,13.557-32.731c-0.001-12.366-4.816-23.989-13.557-32.731 C416.495,190.132,404.869,185.316,392.505,185.316z M222.509,11.299c57.842,0,105.731,43.424,112.784,99.383 c-8.282,1.598-13.317,6.265-17.507,10.165c-4.631,4.312-8.291,7.718-15.984,7.718c-7.691,0-11.349-3.406-15.979-7.718 c-5.143-4.788-11.542-10.748-23.683-10.748c-12.137,0-18.536,5.959-23.677,10.748c-4.63,4.312-8.288,7.718-15.98,7.718 c-7.692,0-11.35-3.406-15.981-7.718c-5.142-4.788-11.541-10.748-23.678-10.748c-12.139,0-18.538,5.959-23.68,10.748 c-4.63,4.312-8.288,7.718-15.979,7.718c-7.691,0-11.349-3.406-15.979-7.718c-4.183-3.894-9.203-8.561-17.465-10.168 C116.772,54.721,164.664,11.299,222.509,11.299z M122.921,500.701H84.505v-61.209c0-7.271,1.759-30.996,24.397-30.996h14.018 v92.206H122.921z M185.545,500.701H134.22v-92.204h51.325V500.701z M248.169,500.701h-51.325v-92.204h51.325V500.701z M310.795,500.701h-51.328v-92.204h51.328V500.701z M360.507,439.492v61.209h-38.413v-92.204h14.016 C358.748,408.497,360.507,432.221,360.507,439.492z M335.678,337.917c-1.104,1.102-1.655,2.548-1.655,3.995v55.286h-225.12 c-0.028,0-0.055,0.003-0.083,0.003V124.982c0-0.965,0.013-1.928,0.036-2.887c4.332,1.198,7.226,3.857,10.625,7.022 c5.142,4.788,11.541,10.749,23.678,10.749s18.538-5.959,23.68-10.749c4.63-4.312,8.288-7.717,15.979-7.717 c7.691,0,11.349,3.406,15.979,7.717c5.142,4.788,11.542,10.749,23.681,10.749c12.139,0,18.539-5.959,23.681-10.749 c4.63-4.312,8.287-7.717,15.978-7.717c7.694,0,11.353,3.406,15.984,7.718c5.142,4.788,11.541,10.748,23.678,10.748 c12.14,0,18.541-5.959,23.683-10.749c3.413-3.176,6.306-5.854,10.669-7.045c0.025,0.968,0.036,1.938,0.036,2.911v97.478 l-3.933,3.933c-2.207,2.206-2.207,5.784,0,7.988c2.205,2.207,5.784,2.207,7.988,0l18.648-18.648 c-0.001,0.216-0.131,10.389,5.195,15.646c5.323,5.255,10.944,5.107,15.045,5.01c3.501-0.095,4.993-0.051,6.822,1.754 c1.833,1.809,1.889,3.303,1.845,6.804c-0.05,4.105-0.121,9.726,5.205,14.985c5.325,5.259,15.454,5.004,15.659,5L335.678,337.917z M418.192,255.357c-3.806-1.856-7.501-1.776-10.421-1.706c-3.503,0.083-4.994,0.053-6.827-1.758 c-1.833-1.81-1.889-3.304-1.845-6.806c0.05-4.105,0.121,9.726-5.205-14.985c-5.323-5.256-10.945-5.117-15.045-5.01 c-3.504,0.094-4.994,0.051-6.822-1.755c-1.832-1.808-1.887-3.3-1.842-6.799c0.036-2.896,0.069-6.546-1.778-10.289 c13.688-13.012,35.407-12.817,48.837,0.615c6.609,6.61,10.248,15.396,10.248,24.743 C427.495,240.498,424.198,248.874,418.192,255.357z"/></svg>
-        <!-- Simplified Scarf Icon -->
-        <svg class="absolute bottom-8 left-1/4 h-24 w-24 rotate-[15deg] text-medium-gray/10 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 1000 1000"><g transform="translate(0.000000,511.000000) scale(0.100000,-0.100000)"><path d="M4299.4,4985.2c-1187-164.6-2141.7-902.4-2747.8-2130.1C653.1,1040.7,475-1523.1,1075.3-3918.5c91-360.2,106.5-395,187.8-410.5c79.4-15.5,141.4,7.7,255.6,94.9c122,92.9,278.8,147.2,426,147.2c218.8,0,356.3-63.9,670-309.8c158.8-123.9,433.8-259.5,610-302.1c100.7-23.2,195.6-29,367.9-21.3c201.4,5.8,255.6,15.5,398.9,69.7c201.4,73.6,458.9,238.2,472.5,298.2c23.2,112.3,87.1,569.3,106.5,763c25.2,275,25.2,1020.5,0,1283.8c-50.3,493.8-178.2,1098-300.1,1413.6c-34.8,91-102.6,245.9-153,346.6c-50.4,98.8-87.1,184-83.3,187.8c3.9,3.9,60-13.6,125.9-40.7c447.3-182,1028.3-255.6,1481.4-185.9c93,13.5,174.3,21.3,180.1,17.4c3.9-5.8-31-91-77.5-191.7c-247.9-532.5-348.6-1084.4-373.8-2031.3c-17.4-726.2,50.4-1477.5,149.1-1636.3c139.4-224.6,445.4-360.2,823-364c331.1-3.9,577.1,87.1,883,331.1c89.1,69.7,211.1,156.9,269.2,191.7c123.9,75.5,348.6,151,505.4,170.4c176.2,21.3,398.9-38.7,538.3-147.2c118.1-93,267.2-2,352.4,214.9c91,240.1,211.1,772.6,276.9,1249c127.8,894.6,143.3,2157.2,38.7,3069.2c-102.6,898.5-302.1,1622.7-631.3,2286.9c-271.1,548-565.4,937.2-1111.5,1469.8c-600.3,584.8-1156.1,842.3-1973.3,910.1c-137.5,11.6-304,29-367.9,38.7C4952,5018.1,4510.5,5014.3,4299.4,4985.2z M5887.3,4597.9c586.7-129.8,1101.8-435.7,1467.8-873.3c261.4-311.8,416.3-610,520.9-1014.7c65.8-251.7,83.3-685.5,36.8-956.6c-91-536.4-309.8-950.8-706.8-1347.7c-397-395-793.9-608-1357.4-730c-226.6-48.4-770.7-48.4-1010.8,0c-528.6,106.5-997.3,356.3-1371,730c-629.3,629.3-869.5,1500.7-648.7,2354.7c180.1,689.4,706.8,1316.8,1371,1632.4c197.5,93,480.3,184,671.9,215c79.4,11.6,158.8,25.2,174.3,29C5118.5,4656,5755.6,4627,5887.3,4597.9z M3832.8,4561.2c-3.9-3.9-73.6-52.3-153-104.6c-602.2-406.7-1032.1-1036-1190.9-1752.5c-50.3-220.8-60-759.1-19.4-1005c98.8-590.6,352.4-1082.5,811.4-1558.8c451.2-470.5,797.8-1198.7,931.4-1951.9c112.3-633.2,118.1-1392.3,17.4-2161.1l-31-244l-104.6-62c-162.7-100.7-319.5-143.3-530.6-145.2c-315.6-1.9-540.3,91-898.5,373.8c-300.2,234.3-491.9,304-807.5,288.5c-141.4-5.8-209.1-19.4-307.9-62c-166.5-69.7-178.2-69.7-195.6-1.9c-87.1,311.8-218.8,1094.1-282.7,1675c-48.4,453.1-48.4,1682.8,0,2101c112.3,939.2,275,1599.5,586.8,2372.1c395,976,1007,1702.1,1740.8,2072C3608.1,4499.2,3875.4,4601.8,3832.8,4561.2z M8350.5,2216.1c222.7-507.3,402.8-1212.2,478.3-1868.7C9016.6-1263.6,8972-2592,8693.2-3707.4c-31-127.8-60-236.2-65.8-240.1c-3.9-3.9-56.2,9.7-116.2,32.9c-160.7,60-340.8,71.6-534.5,32.9c-391.2-79.4-611.9-189.8-883-441.5c-236.3-218.8-317.6-253.7-619.7-263.3c-282.7-9.7-455.1,31-573.2,135.5c-67.8,60-73.6,75.5-100.7,247.9c-48.4,325.3-67.8,619.7-67.8,1074.7c0,1196.7,170.4,1990.7,536.4,2494.1c58.1,79.4,96.8,106.5,292.4,197.5c821.1,391.2,1372.9,1057.3,1584,1917.1c46.5,187.8,54.2,251.7,54.2,542.2c1.9,182-3.9,381.5-13.6,445.4l-13.6,116.2l52.3-96.8C8251.7,2434.9,8309.8,2312.9,8350.5,2216.1z"/></g></svg>
-        <!-- Jacket Icon -->
-        <svg class="absolute right-8 top-1/3 h-28 w-28 -rotate-12 text-medium-gray/10 sm:h-32 sm:w-32" fill="currentColor" viewBox="0 0 1000 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"><path d="M4659.2,4948.5c-690.8-88.8-1225.4-478.6-1555.3-1134.7c-166-330-260.5-735.2-233.5-1007.3c13.5-150.5,57.9-314.5,102.3-382.1c38.6-57.9,77.2-25.1-416.8-343.5c-420.7-268.2-536.5-360.8-714-567.3c-320.3-372.4-492.1-710.1-742.9-1456.9C998.5-240.5,880.8-570.5,838.4-676.6c-94.6-237.3-351.2-1015-416.8-1263.9C294.2-2419.1,247.9-2859.1,276.8-3274c13.5-198.8,25.1-264.4,52.1-293.3c86.8-98.5,941.7-476.7,1074.8-476.7c247,0,721.7,467,922.4,908.9l65.6,142.8l25.1-77.2c65.6-204.5,227.7-476.6,403.3-681.2c63.7-75.3,117.7-154.4,117.7-175.6c0-25.1,15.4-44.4,44.4-50.2c23.2-5.8,947.5-7.7,2053.2-5.8l2010.8,5.8l88.8,86.8c169.8,164,349.3,465.1,490.2,820.1c11.6,30.9,32.8,3.9,108.1-142.8c171.7-331.9,440-640.6,710.1-814.3c177.5-115.8,245.1-106.1,708.2,98.4c100.4,44.4,252.8,119.7,339.6,167.9c169.8,94.5,198.8,131.2,239.3,314.5c28.9,131.2,23.2,540.3-11.6,770c-83,575.1-343.5,1455-741,2520.2c-312.6,835.6-530.7,1240.8-893.4,1663.4c-179.5,210.3-285.6,297.2-631,517.2c-164,104.2-345.4,220-399.5,254.7l-102.3,65.6l50.2,73.3c135.1,206.5,175.6,505.6,113.9,872.2c-152.5,914.7-706.3,1474.3-1611.3,1626.7C5278.6,4956.2,4848.3,4971.6,4659.2,4948.5z M5352,4628.1c387.9-67.5,700.5-227.7,982.2-507.5c148.6-148.6,378.2-440,358.9-459.3c-3.8-3.9-77.2,36.7-164,88.8c-274,166-563.5,266.3-986.1,341.6c-229.6,42.5-812.4,48.2-1022.7,11.6c-341.6-61.8-708.2-185.3-982.2-333.8c-57.9-30.9-110-52.1-113.9-46.3c-17.4,17.4,123.5,227.7,241.2,357c256.7,279.8,602.1,474.7,970.6,550C4811.6,4664.8,5135.8,4664.8,5352,4628.1z M5407.9,3800.3c266.3-38.6,526.8-102.3,723.6-183.3c277.9-110,565.4-306.8,669.6-459.3c57.9-81,63.7-104.2,63.7-225.8c0-113.9-9.6-156.3-61.8-260.5c-113.8-233.5-351.2-443.8-648.4-578.9c-202.6-90.7-347.3-119.6-563.5-111.9c-173.7,5.8-206.5,13.5-337.7,75.3c-79.1,38.6-185.2,106.1-235.4,150.5c-48.2,42.5-98.4,79.1-110,79.1c-11.6,0-21.2,9.6-21.2,19.3c0,38.6-108.1,17.4-177.5-34.7c-38.6-28.9-110-79.1-156.3-113.9c-349.3-252.8-760.3-179.5-1152,206.5c-177.5,173.7-250.9,308.8-264.4,486.3c-23.1,285.6,125.4,465,555.8,677.3c339.6,166,632.9,254.7,962.9,289.5C4830.9,3835,5214.9,3825.4,5407.9,3800.3z M7034.6,1963.2c150.5-102.3,279.8-191,287.5-196.8c23.2-19.3-140.9-546.1-185.3-594.4c-11.6-13.5-497.9-310.7-1082.6-660L4993-126.7l-5.8,997.7c-1.9,548-1.9,999.6,1.9,1001.5c3.9,3.9,96.5-28.9,208.4-73.3c177.5-71.4,221.9-81,395.6-88.8c154.4-5.8,229.6,0,357,32.8c192.9,48.2,457.3,175.6,644.5,308.8c75.3,52.1,142.8,96.5,150.5,96.5C6754.8,2150.4,6884.1,2067.4,7034.6,1963.2z M3391.4,1992.2c187.2-142.8,538.4-266.3,758.4-266.3c40.5,0,169.8,34.7,291.4,77.2c121.6,42.5,223.8,73.3,227.7,71.4c3.9-3.9,3.9-434.2,1.9-957.1L4665-32.1l-934,598.2l-935.9,596.3l-69.5,210.3c-38.6,113.8-84.9,235.4-100.3,266.3c-61.7,117.7-65.6,113.9,274,306.8l318.4,181.4l48.2-36.7C3292.9,2069.3,3348.9,2025,3391.4,1992.2z M2376.3,1519.4c106.1-210.3,216.1-719.8,250.9-1161.7c42.5-536.5-59.8-1113.4-285.6-1593.9c-83-177.5-102.3-316.5-129.3-887.7c-5.8-148.6-23.1-330-38.6-401.4c-110-536.5-420.7-1018.9-764.2-1181l-69.5-34.7l-239.3,102.2c-131.2,56-312.6,139-405.2,185.3l-169.8,84.9v260.5c0,600.2,117.7,1142.4,445.8,2045.5c65.6,181.4,216.1,605.9,333.8,945.5c225.8,644.5,343.5,907,528.7,1186.8c111.9,167.9,438,521,480.5,521C2328.1,1590.8,2355.1,1558,2376.3,1519.4z M7746.7,1413.2c322.3-333.8,538.4-696.6,808.5-1356.6c596.3-1456.9,910.8-2572.3,903.1-3184c-3.9-248.9-9.6-260.5-152.5-337.7c-212.3-111.9-679.3-308.8-702.4-295.2c-11.6,5.8-77.2,55.9-144.7,110c-304.9,243.1-586.6,731.3-675.4,1169.4c-11.6,57.9-28.9,237.4-40.5,397.5c-28.9,411-67.5,644.5-125.4,758.4C7434.1-960.3,7299-352.4,7299,110.7c0,220,38.6,513.3,96.5,764.2c54,223.8,196.8,658,218.1,658C7623.2,1532.9,7683,1478.9,7746.7,1413.2z M3821.7,145.4l852.9-546.1v-497.9v-497.8l-874.2,521l-876.1,522.9L2934-61c7.7,264.4-11.6,565.4-46.3,744.9l-13.5,67.5l46.3-30.9C2945.6,703.1,3350.8,444.5,3821.7,145.4z M7026.9,535.2c-23.2-162.1-28.9-582.8-11.6-814.3c3.9-61.8-3.9-71.4-102.3-127.4c-285.6-165.9-1908.5-1071-1920.1-1071c-5.8,0-7.7,221.9-5.8,494l5.8,495.9l1022.7,611.7C6579.2,460,7042.4,734,7046.2,730.1C7050.1,726.3,7042.4,639.4,7026.9,535.2z M7067.5-722.9c0-71.4,117.7-428.4,212.3-646.5c156.3-358.9,189.1-297.2-306.8-559.6c-233.5-125.4-430.3-225.8-438-225.8c-7.7,0-65.6,137-127.4,304.9c-113.8,310.7-152.4,372.4-237.4,372.4c-42.5,0-144.7-96.5-144.7-137c0-11.6,44.4-171.7,98.4-358.9c52.1-187.2,90.7-345.4,81.1-353.2c-27-23.1-1219.6-598.2-1240.8-598.2c-13.5,0-17.4,187.2-15.4,551.9l5.8,553.8l1032.4,563.5c567.3,310.7,1044,565.4,1057.5,567.3C7055.9-686.3,7067.5-701.7,7067.5-722.9z M4670.8-2324.6c1.9-299.1-1.9-542.3-7.7-542.3c-11.6,0-822.1,440-908.9,494l-42.4,27l115.8,341.6c61.7,189.1,113.9,366.7,113.9,395.6c0,102.3-119.6,165.9-198.8,108.1c-17.4-13.5-84.9-171.8-146.7-351.2c-63.7-177.5-119.6-328-125.4-333.8c-3.9-3.9-208.4,94.6-453.5,220L2569.3-1738l13.5,67.5c5.8,36.7,27,96.5,46.3,135.1c56,110,144.7,380.2,202.6,611.7l52.1,214.2l891.5-536.5l889.6-538.4L4670.8-2324.6z M3331.5-2463.5c9.6-7.7-40.5-194.9-111.9-416.8c-69.5-220-127.4-416.8-127.4-436.1c0-88.8,131.2-137,239.3-88.8c56,27,73.3,63.7,194.9,467c52.1,166,98.4,302.9,106.1,302.9c7.7,0,243.1-121.5,523-270.2l509.4-268.2l5.8-252.8l5.8-250.9l-814.3,3.9l-814.3,5.8l-104.2,135.1c-127.4,164-279.8,470.9-331.9,665.7c-56,200.7-98.4,501.7-98.4,681.2v148.6l401.4-204.6C3134.7-2355.5,3321.9-2453.9,3331.5-2463.5z M7474.6-2320.7c-27-268.2-83-515.3-173.7-752.6c-63.7-162.1-237.4-459.3-326.1-550l-50.2-54H5954h-970.6v202.6v202.6l677.3,339.6c372.4,185.3,679.2,335.8,683.1,331.9c1.9-3.9,57.9-169.8,125.4-372.5c133.2-407.1,162.1-453.5,287.5-453.5c73.3,0,117.7,32.8,142.8,100.4c5.8,17.3-48.2,216.1-121.6,441.9c-73.3,225.8-131.2,412.9-129.3,414.9c54,42.5,835.6,424.5,841.4,411C7493.9-2069.9,7486.2-2187.6,7474.6-2320.7z"/><path d="M149.5-4053.6c-67.5-65.6-65.6-160.1,3.9-225.8c75.3-69.5,916.6-440,999.6-440c34.7,0,79.1,13.5,94.6,30.9c42.5,42.5,40.5,185.3-3.9,225.8c-40.5,36.7-978.4,457.3-1018.9,457.3C209.3-4005.4,174.6-4026.6,149.5-4053.6z"/><path d="M9296.3-4204.1c-551.9-248.9-528.8-235.4-561.5-312.6c-44.4-110,15.4-202.6,133.1-202.6c25.1,0,252.8,92.6,505.6,206.5c519.1,235.4,553.8,260.5,515.2,387.9c-19.3,65.6-81.1,119.6-135.1,119.6C9745.9-4005.4,9541.3-4096,9296.3-4204.1z"/><path d="M2812.5-4341.1c-63.7-63.7-63.7-152.4,0-216.1l46.3-46.3l2180.6,3.9c2398.6,5.8,2226.9-3.9,2252,123.5c7.7,46.3,0,71.4-36.7,115.8l-48.2,56l-2172.9,5.8l-2174.8,3.8L2812.5-4341.1z"/></g></g></svg>
-        <!-- Sleeping Bag Icon -->
-        <svg class="absolute bottom-8 -right-4 h-28 w-28 -rotate-[25deg] text-medium-gray/10 sm:h-32 sm:w-32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.91" stroke-miterlimit="10" xmlns="http://www.w3.org/2000/svg">
-          <rect x="6.27" y="1.5" width="11.45" height="21" rx="2.86"/>
-          <polyline points="17.73 8.18 12.96 12.96 6.27 8.18"/>
-          <line x1="6.27" y1="8.18" x2="17.73" y2="8.18"/>
-          <rect x="9.14" y="4.36" width="5.73" height="3.82" rx="1.91"/>
-        </svg>
-        <!-- Tent Icon -->
-        <svg class="absolute left-1/4 top-4 h-28 w-28 rotate-12 text-medium-gray/10 sm:h-32 sm:w-32" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-          <g>
-            <path d="M474.329,428.213L272.498,111.482l24.673-38.715l-23.466-14.953L256,85.595l-17.705-27.782l-23.47,14.953 l24.673,38.715L37.671,428.213H0v25.974h512v-25.974H474.329z M392.923,425.425C322.368,405.279,263.091,300.442,256,239.001 c-7.095,61.44-66.37,166.277-136.923,186.424H72.439L256,137.377l183.554,288.049H392.923z"/>
-          </g>
-        </svg>
-        <!-- Shoe Icon -->
-        <svg class="absolute bottom-1/4 -left-4 h-28 w-28 rotate-[15deg] text-medium-gray/10 sm:h-32 sm:w-32" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-          <g>
-            <path d="M428.588,239.276c-46.594-11.245-119.026-57.862-163.522-96.005c-6.122-5.255-11.044-10.412-15.804-15.402 c-9.026-9.466-17.556-18.409-30.294-23.187c-5.252-1.969-10.799-2.969-16.482-2.969h-0.004c-18.901,0-33.706,11.086-40.82,16.418 c-18.92,14.161-24.641,29.7-25.751,41.422c-1.81,0.144-3.65,0.227-5.501,0.227c-18.636,0-25.436-7.724-29.631-15.274 c-10.954-19.719-30.359-31.971-50.646-31.971C25.22,112.535,0,131.799,0,168.625V379.27v31.017h31.017h448.458h31.017V379.27 c0-1.416,0.265-4.764,0.499-7.716C513.15,344.277,519.715,261.267,428.588,239.276z M385.446,275.321 c5.422-4.195,12.162-7.777,20.423-10.473c5.293,1.78,10.481,3.386,15.44,4.582c44.11,10.647,56.438,39.627,59.119,65.896h-132.61 l9.397-0.447l2.06-0.076v-0.022l-0.015-1.038c-0.038-4.339,0.734-21.021,8.602-36.674 C371.786,289.217,377.352,281.607,385.446,275.321z M180.231,142.976c5.191-3.884,13.664-10.246,22.256-10.246 c1.87,0,3.74,0.303,5.588,0.992c10.336,3.877,19.03,17.848,36.803,33.092c34.394,29.487,85.638,64.858,131.914,86.334 c-1.901,1.242-3.877,2.446-5.611,3.794c-8.61,6.687-15.092,14.433-19.999,22.354c-62.455-30.221-109.886-58.574-142.209-79.928 c-17.814-11.768-31.093-21.415-39.873-28.079c-0.504-0.378-0.845-0.651-1.318-1.015 C165.324,163.187,166.259,153.434,180.231,142.976z M31.017,168.625c0-16.994,8.924-25.073,19.117-25.073 c8.413,0,17.69,5.497,23.532,16.016c13.65,24.572,36.266,31.229,56.745,31.229c8.148,0,15.933-1.06,22.706-2.453 c24.49,18.78,86.922,63.049,188.363,112.097c-0.159,0.492-0.356,1.007-0.507,1.492c-4.521,14.668-4.96,26.988-4.975,31.812 c0,0.72,0.015,1.211,0.023,1.583h-183.32c-4.222-16.758-14.036-33.334-28.871-47.079c-20.203-18.682-49.998-31.827-87.33-31.789 c-1.798,0-3.65,0.09-5.482,0.151C31.017,214.635,31.017,176.227,31.017,168.625z M31.017,279.872 c1.844-0.068,3.692-0.151,5.482-0.151c31.915,0.038,55.597,10.95,71.557,25.626c9.893,9.08,16.659,19.711,20.374,29.98H31.017 C31.017,318.97,31.017,299.584,31.017,279.872z M479.475,379.27H31.017c0,0,0-7.959,0-20.681H480.8 C480.338,367.267,479.475,374.575,479.475,379.27z"/>
-          </g>
-        </svg>
-      </div>
-
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="relative z-10 mx-auto max-w-3xl text-center">
-          <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Initiative</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Fall Donation Drive</h2>
-            <div class="mt-6 space-y-4 text-left font-body text-lg text-medium-gray sm:text-center">
-              <p>As the weather changes, our Community Impact Board is collecting donations to distribute to our neighbors in need. Your contribution can make a real difference.</p>
-              <div class="mx-auto inline-block rounded-lg bg-white/50 p-6 text-left shadow-inner">
-                <p class="font-bold text-off-black">We are collecting new or gently used:</p>
-                <ul class="mt-2 list-disc list-inside space-y-1">
-                  <li>Fall/winter clothes, jackets & coats</li>
-                  <li>Gloves, hats, scarves, and socks</li>
-                  <li>Fall/winter shoes & activewear</li>
-                  <li>Blankets, tents, & sleeping bags</li>
-                  <li>Hand warmers</li>
-                </ul>
-              </div>
-              <p class="pt-2 font-bold text-accent-gold">Please drop off donations during classes until the end of October!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Donation Drive Section */}
-
 
     {/* START: Merch Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Shop Our 'Immigrant Made' Merch Drop</h2>
@@ -291,7 +201,7 @@ const base = import.meta.env.BASE_URL;
     */}
 
     {/* START: Grand Opening Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
           <div class="order-last lg:order-first">
@@ -354,7 +264,7 @@ const base = import.meta.env.BASE_URL;
     */}
 
     {/* START: Instagram Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Join Our Community Online</h2>
@@ -376,63 +286,5 @@ const base = import.meta.env.BASE_URL;
 </Layout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // --- Configuration ---
-    const timeZone = 'America/Chicago'; // IANA time zone for Central Time
-
-    // Directly create the event date in the target time zone.
-    // new Date() will be in the user's local time, but toLocaleString with a timeZone
-    // gives us a string representation of the current time in Chicago.
-    const nowInCT = new Date(new Date().toLocaleString('en-US', { timeZone }));
-    const eventYear = nowInCT.getFullYear(); // Use the year from the target timezone
-
-    // Set the target date and time directly.
-    const eventStartInCT = new Date(`${eventYear}-11-01T18:00:00`); // November 1st, 6:00 PM CT
-    const eventEndInCT = new Date(`${eventYear}-11-01T20:45:00`);   // November 1st, 8:45 PM CT
-    const countdownContainer = document.getElementById('countdown-container');
-    const countdownTimerEl = document.getElementById('countdown-timer');
-
-    if (!countdownContainer || !countdownTimerEl) return;
-
-    const createTimeBlock = (value, label) => `
-      <div class="flex flex-col items-center">
-        <span class="font-sans text-4xl font-bold tracking-tighter text-accent-gold">${value}</span>
-        <span class="mt-1 font-body text-xs uppercase tracking-wider text-off-black/70">${label}</span>
-      </div>
-    `;
-
-    const updateCountdown = () => {
-      const nowInCT = new Date(new Date().toLocaleString('en-US', { timeZone }));
-      const totalSeconds = (eventStartInCT.getTime() - nowInCT.getTime()) / 1000;
-
-      if (totalSeconds > 0) {
-        // --- Before the event ---
-        const days = Math.floor(totalSeconds / 3600 / 24);
-        const hours = Math.floor(totalSeconds / 3600) % 24;
-        const minutes = Math.floor(totalSeconds / 60) % 60;
-        const seconds = Math.floor(totalSeconds) % 60;
-
-        countdownTimerEl.innerHTML = `
-          ${createTimeBlock(String(days).padStart(2, '0'), 'Days')}
-          ${createTimeBlock(String(hours).padStart(2, '0'), 'Hours')}
-          ${createTimeBlock(String(minutes).padStart(2, '0'), 'Mins')}
-          ${createTimeBlock(String(seconds).padStart(2, '0'), 'Secs')}
-        `;
-      } else if (nowInCT >= eventStartInCT && nowInCT < eventEndInCT) {
-        // --- During the event ---
-        countdownContainer.innerHTML = `
-          <div class="animate-pulse font-sans text-2xl font-bold tracking-tight text-accent-gold">This event is live!</div>
-          <p class="mt-2 font-body text-lg text-off-black">Join us now!</p>
-        `;
-        clearInterval(countdownInterval);
-      } else {
-        // --- After the event ---
-        countdownContainer.innerHTML = `<div class="font-sans text-xl font-bold text-off-black">Thank you for joining us!</div>`;
-        clearInterval(countdownInterval);
-      }
-    };
-
-    updateCountdown();
-    const countdownInterval = setInterval(updateCountdown, 1000);
-  });
+  // The countdown timer script was removed as it was only used by the "Recuérdame" event.
 </script>
