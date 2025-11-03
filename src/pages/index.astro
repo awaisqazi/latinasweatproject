@@ -33,8 +33,39 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Salud Chicago Partnership Section */}
+    {/* START: Gala Save the Date Section */}
     <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
+              <ul class="list-none space-y-2 pt-2">
+                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
+                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery</li>
+                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
+              </ul>
+              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
+            </div>
+            <div class="mt-8">
+              <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Get Tickets & Details
+              </a>
+            </div>
+          </div>
+          <div class="w-full" set:html={`
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <script async src="//www.instagram.com/embed.js"></script>
+          `} />
+        </div>
+      </div>
+    </section>
+    {/* END: Gala Save the Date Section */}
+
+    {/* START: Salud Chicago Partnership Section */}
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div class="w-full">
@@ -72,7 +103,7 @@ const base = import.meta.env.BASE_URL;
             </div>
             <div class="mt-8">
               <a href="http://saludchicago.com/" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Learn More & Register
+                Learn More About Salud
               </a>
             </div>
           </div>
@@ -81,44 +112,21 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Salud Chicago Partnership Section */}
 
-    {/* START: Gala Save the Date Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
-              <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
-                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery</li>
-                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
-              </ul>
-              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
-            </div>
-            <div class="mt-8">
-              <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                Get Tickets & Details
-              </a>
-            </div>
-          </div>
-          <div class="w-full" set:html={`
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-            <script async src="//www.instagram.com/embed.js"></script>
-          `} />
-        </div>
-      </div>
-    </section>
-    {/* END: Gala Save the Date Section */}
-
     {/* START: LSP x One Night Only Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="flex flex-col gap-8 lg:order-last">
+          <div>
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque and drag artists.</p>
+              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, October 24th at 8 pm CT</span></p>
+              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
+              <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
+            </div>
             {/* START: Ticketing Iframe */}
-            <div class="w-full overflow-hidden rounded-lg shadow-xl">
+            <div class="mt-8 w-full overflow-hidden rounded-lg shadow-xl">
               <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
                   <iframe 
                       title="LSP x One Night Only Ticketing" 
@@ -131,19 +139,11 @@ const base = import.meta.env.BASE_URL;
             </div>
             {/* END: Ticketing Iframe */}
           </div>
-          <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque and drag artists.</p>
-              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, October 24th at 8 pm CT</span></p>
-              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
-              <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
-              <div class="mt-8 mx-auto max-w-[540px] rounded-lg shadow-lg overflow-hidden" set:html={`
+          <div class="w-full">
+            <div class="mx-auto max-w-[540px] rounded-lg shadow-lg overflow-hidden" set:html={`
                 <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQCsBRcAMfC/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
                 <script async src="//www.instagram.com/embed.js"></script>
               `} />
-            </div>
           </div>
         </div>
       </div>
