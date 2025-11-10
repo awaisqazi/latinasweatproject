@@ -34,7 +34,7 @@ const base = import.meta.env.BASE_URL;
     {/* END: Hero Section */}
 
     {/* START: Gala Save the Date Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section id="gala" class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
@@ -69,7 +69,7 @@ const base = import.meta.env.BASE_URL;
     {/* END: Gala Save the Date Section */}
 
     {/* START: HAUS of LSP Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section id="haus-of-lsp" class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div class="w-full" set:html={`
@@ -103,7 +103,7 @@ const base = import.meta.env.BASE_URL;
     {/* END: HAUS of LSP Section */}
 
     {/* START: Salud Chicago Partnership Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section id="salud-chicago" class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
@@ -121,8 +121,9 @@ const base = import.meta.env.BASE_URL;
                     <span class="ml-2 text-sm font-bold text-medium-gray/80">[Session Ended]</span>
                   </li>
                   <li>
-                    <span class="font-semibold text-accent-gold">Comunidad Therapy:</span> Sunday, Nov 9th @ 2:00 PM
-                    <a href="https://www.eventbrite.com/e/1894434286949?aff=oddtdtcreator" target="_blank" rel="noopener noreferrer" class="ml-2 text-sm font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">[RSVP Required]</a>
+                    <span class="font-semibold text-accent-gold text-medium-gray/70 line-through">Comunidad Therapy:</span>
+                    <span class="text-medium-gray/70 line-through">Sunday, Nov 9th @ 2:00 PM</span>
+                    <span class="ml-2 text-sm font-bold text-medium-gray/80">[Session Ended]</span>
                   </li>
                 </ul>
                 <p class="mt-4 font-bold text-lg text-off-black">
@@ -151,7 +152,7 @@ const base = import.meta.env.BASE_URL;
     {/* END: Salud Chicago Partnership Section */}
 
     {/* START: LSP x One Night Only Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section id="one-night-only" class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div class="w-full">
@@ -264,10 +265,7 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Grand Opening Section */}
 
-    
-
-    {/* 
-    START: Upcoming Events Section
+    {/* START: Upcoming Events Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">
@@ -275,34 +273,35 @@ const base = import.meta.env.BASE_URL;
         </h2>
         <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <EventCard
-            href="/events/zumba-fiesta"
-            imageSrc="https://images.pexels.com/photos/3775540/pexels-photo-3775540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            date="SEPTEMBER 20, 2025"
-            title="Zumba Fiesta"
-            description="Join us for a high-energy Zumba class with a live DJ."
+            href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp"
+            target="_blank"
+            imageSrc={`${base}images/hausparty.png`}
+            date="NOV 22, 2025"
+            title="HAUS of LSP"
+            description="A new event made by and for the LGBTQI+ communities on Chicago's Southwest Side."
           />
           <EventCard
-            href="/events/salsa-sweat"
-            imageSrc="https://images.pexels.com/photos/2775273/pexels-photo-2775273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            date="OCTOBER 5, 2025"
-            title="Salsa & Sweat"
-            description="Combine the rhythm of salsa with a challenging workout."
+            href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
+            target="_blank"
+            imageSrc={`${base}images/onenightonly.png`}
+            date="NOV 28, 2025"
+            title="LSP x One Night Only"
+            description="A variety show featuring an eclectic selection of Chicago's burlesque and drag artists."
           />
           <EventCard
-            href="/events/barre-bootcamp"
-            imageSrc="https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            date="OCTOBER 21, 2025"
-            title="Barre Bootcamp"
-            description="Sculpt and tone your body with our signature barre class."
+            href={`${base}gala`}
+            imageSrc={`${base}images/gala.png`}
+            date="DECEMBER 11, 2025"
+            title="Noche Inolvidable Gala"
+            description="Our first annual gala celebrating community and our teacher training graduates."
           />
         </div>
       </div>
     </section>
-    END: Upcoming Events Section
-    */}
+    {/* END: Upcoming Events Section */}
 
     {/* START: Instagram Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Join Our Community Online</h2>

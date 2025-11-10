@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL;
                 <a href={base} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Home</a>
                 <a href={`${base}about`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">About Us</a>
                 <a href={`${base}schedule`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Classes</a>
-                <a href={`${base}pricing`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Pricing</a>
+                <a href={`${base}events`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Events</a>
                 <a href={`${base}impact`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Impact</a>
                 <a href={`${base}gala`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Gala</a>                
                 
@@ -28,8 +28,9 @@ const base = import.meta.env.BASE_URL;
                         <span>More</span>
                         <svg class="h-5 w-5 transition-transform group-hover:rotate-180 group-focus-within:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                     </button>
-                    <div id="more-panel" class="absolute right-0 w-48 origin-top-right rounded-md bg-white pt-3 pb-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block group-focus-within:block">
+                    <div id="more-panel" class="absolute right-0 w-56 origin-top-right rounded-md bg-white pt-3 pb-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block group-focus-within:block">
                         <div role="menu" aria-orientation="vertical" aria-labelledby="more-button">
+                            <a href={`${base}pricing`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Pricing</span></a>
                             <a href={`${base}gallery`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Gallery</span></a>
                             <a href={`${base}corporate-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Corporate Collabs</span></a>
                             <a href={`${base}community-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Community Collabs</span></a>
@@ -69,6 +70,7 @@ const base = import.meta.env.BASE_URL;
         <a href={base} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Home</a>
         <a href={`${base}about`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">About Us</a>
         <a href={`${base}schedule`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Classes</a>
+        <a href={`${base}events`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Events</a>
         <a href={`${base}pricing`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Pricing</a>
         <a href={`${base}impact`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Impact</a>
         <a href={`${base}gallery`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Gallery</a>
@@ -77,7 +79,6 @@ const base = import.meta.env.BASE_URL;
         <a href={`${base}community-collaborations`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Community Collabs</a>
         <a href={`${base}faq`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">FAQ</a>
         <a href={`${base}contact`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Contact</a>
-        <!--<a href={`${base}events`} class="block px-4 py-2 text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Events</a>-->
     <a href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project" target="_blank" rel="noopener noreferrer" class="block mx-4 my-2 rounded-full bg-[#b5a18d] px-4 py-2 text-center text-base font-bold text-white shadow-sm transition transform hover:bg-[#ffbd59] hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ffbd59]">Donate</a>
 
     <a href={`${base}schedule`} class="block mx-4 my-2 rounded-full bg-vibrant-pink px-4 py-2 text-center text-base font-bold text-white shadow-sm transition transform hover:bg-[#ffbd59] hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ffbd59]">Book a Class</a>
