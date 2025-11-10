@@ -68,17 +68,45 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Gala Save the Date Section */}
 
-    {/* START: Salud Chicago Partnership Section */}
+    {/* START: HAUS of LSP Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="w-full">
-            <div class="mx-auto max-w-[540px] rounded-lg shadow-xl overflow-hidden" set:html={`
-              <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQT7ZSxEQbN/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
-              <script async src="//www.instagram.com/embed.js"></script>
-            `} />
-          </div>
+          <div class="w-full" set:html={`
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQ4Yfnykc_e/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
+            <script async src="//www.instagram.com/embed.js"></script>
+          `} />
           <div class="lg:order-last">
+            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">New Community Event</p>
+            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">HAUS of LSP: Una Casa para Todos</h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
+              <p>Get ready to dance! We're thrilled to announce HAUS of LSP, a brand new event celebrating and cultivating queer community in Pilsen, Little Village, and across Chicago’s Southwest Side.</p>
+              <ul class="list-none space-y-2 pt-2">
+                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">Saturday, November 22, 2025 @ 7:30 PM</span></li>
+                <li><span class="font-bold text-off-black">Where:</span> <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a></li>
+              </ul>
+              <p>Join us for a night of connection and celebration, made by and for our LGBTQI+ communities.</p>
+              <div class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4">
+                <h4 class="font-bold text-off-black">Entry Details</h4>
+                <p class="text-base">Entry is available with a $5 donation to LSP or by bringing a food item for the Pilsen Food Pantry.</p>
+              </div>
+            </div>
+            <div class="mt-8">
+              <a href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+                Get Tickets
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: HAUS of LSP Section */}
+
+    {/* START: Salud Chicago Partnership Section */}
+    <section class="py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div>
             <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Wellness Partnership</p>
             <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x Salud Chicago: Mental Health for La Cultura</h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
@@ -89,8 +117,8 @@ const base = import.meta.env.BASE_URL;
                 <h4 class="font-bold text-off-black">Upcoming Healing Sessions:</h4>
                 <ul class="mt-2 list-none space-y-3 text-base">
                   <li>
-                    <span class="font-semibold text-accent-gold">Men's Therapy:</span> Friday, Nov 7th @ 6:00 PM
-                    <a href="https://www.eventbrite.com/e/1894607986489?aff=oddtdtcreator" target="_blank" rel="noopener noreferrer" class="ml-2 text-sm font-bold text-vibrant-pink underline transition-colors hover:text-accent-gold">[RSVP Required]</a>
+                    <span class="font-semibold text-accent-gold text-medium-gray/70 line-through">Men's Therapy:</span> <span class="text-medium-gray/70 line-through">Friday, Nov 7th @ 6:00 PM</span>
+                    <span class="ml-2 text-sm font-bold text-medium-gray/80">[Session Ended]</span>
                   </li>
                   <li>
                     <span class="font-semibold text-accent-gold">Comunidad Therapy:</span> Sunday, Nov 9th @ 2:00 PM
@@ -111,15 +139,27 @@ const base = import.meta.env.BASE_URL;
               </a>
             </div>
           </div>
+          <div class="w-full">
+            <div class="mx-auto max-w-[540px] rounded-lg shadow-xl overflow-hidden" set:html={`
+              <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQT7ZSxEQbN/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
+              <script async src="//www.instagram.com/embed.js"></script>
+            `} />
+          </div>
         </div>
       </div>
     </section>
     {/* END: Salud Chicago Partnership Section */}
 
     {/* START: LSP x One Night Only Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          <div class="w-full">
+            <div class="mx-auto max-w-[540px] rounded-lg shadow-lg overflow-hidden" set:html={`
+                <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQCsBRcAMfC/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
+                <script async src="//www.instagram.com/embed.js"></script>
+              `} />
+          </div>
           <div>
             <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
             <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
@@ -143,12 +183,6 @@ const base = import.meta.env.BASE_URL;
             </div>
             {/* END: Ticketing Iframe */}
           </div>
-          <div class="w-full">
-            <div class="mx-auto max-w-[540px] rounded-lg shadow-lg overflow-hidden" set:html={`
-                <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQCsBRcAMfC/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
-                <script async src="//www.instagram.com/embed.js"></script>
-              `} />
-          </div>
         </div>
       </div>
     </section>
@@ -156,7 +190,7 @@ const base = import.meta.env.BASE_URL;
 
 
     {/* START: Merch Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section class="py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Shop Our 'Immigrant Made' Merch Drop</h2>
@@ -205,7 +239,7 @@ const base = import.meta.env.BASE_URL;
     */}
 
     {/* START: Grand Opening Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
+    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
           <div class="order-last lg:order-first">
@@ -268,7 +302,7 @@ const base = import.meta.env.BASE_URL;
     */}
 
     {/* START: Instagram Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section class="py-12 sm:py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Join Our Community Online</h2>
