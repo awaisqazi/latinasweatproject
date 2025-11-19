@@ -12,21 +12,73 @@ interface Props {
 
 const { href, imageSrc, date, title, description, target } = Astro.props;
 
-const isExternal = href.startsWith('http');
-const finalHref = isExternal ? href : `${base}${href.startsWith('/') ? href.substring(1) : href}`;
-const finalTarget = isExternal || target === '_blank' ? '_blank' : undefined;
-const finalRel = finalTarget === '_blank' ? 'noopener noreferrer' : undefined;
+const isExternal = href.startsWith("http");
+const finalHref = isExternal
+  ? href
+  : `${base}${href.startsWith("/") ? href.substring(1) : href}`;
+const finalTarget = isExternal || target === "_blank" ? "_blank" : undefined;
+const finalRel = finalTarget === "_blank" ? "noopener noreferrer" : undefined;
 ---
-<div class="group flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
-  <a href={finalHref} target={finalTarget} rel={finalRel} class="block overflow-hidden">
-    <img alt={title} class="h-56 w-full object-cover transition-transform duration-300 group-hover:scale-105" src={imageSrc} />
+
+<div
+  class="group relative flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-vibrant-pink/20"
+>
+  <a
+    href={finalHref}
+    target={finalTarget}
+    rel={finalRel}
+    class="relative block overflow-hidden"
+  >
+    <img
+      alt={title}
+      class="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110"
+      src={imageSrc}
+    />
+    <div
+      class="absolute left-4 top-4 rounded-lg bg-white/90 px-3 py-1 text-center shadow-sm backdrop-blur-sm"
+    >
+      <p
+        class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+      >
+        {date}
+      </p>
+    </div>
   </a>
   <div class="flex flex-1 flex-col p-6">
-    <div>
-      <p class="font-sans text-sm font-medium text-vibrant-pink">{date}</p>
-      <h3 class="mt-2 font-sans text-xl font-bold text-off-black">{title}</h3>
-      <p class="mt-2 font-body text-base text-medium-gray">{description}</p>
+    <div class="flex-1">
+      <h3
+        class="font-sans text-xl font-bold leading-tight text-off-black transition-colors group-hover:text-vibrant-pink"
+      >
+        <a href={finalHref} target={finalTarget} rel={finalRel}>
+          {title}
+        </a>
+      </h3>
+      <p class="mt-3 font-body text-base leading-relaxed text-medium-gray">
+        {description}
+      </p>
     </div>
-    <a href={finalHref} target={finalTarget} rel={finalRel} class="mt-4 inline-block self-start font-sans font-semibold text-vibrant-pink transition hover:text-accent-gold">Learn More →</a>
+    <div class="mt-6">
+      <a
+        href={finalHref}
+        target={finalTarget}
+        rel={finalRel}
+        class="group/link inline-flex items-center font-sans font-bold text-vibrant-pink transition-colors hover:text-accent-gold"
+      >
+        Learn More
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="ml-2 h-4 w-4 transition-transform duration-300 group-hover/link:translate-x-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
   </div>
 </div>

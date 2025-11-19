@@ -1,8 +1,8 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import TestimonialCard from '@/components/TestimonialCard.astro';
-import EventCard from '@/components/EventCard.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import TestimonialCard from "@/components/TestimonialCard.astro";
+import EventCard from "@/components/EventCard.astro";
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -12,21 +12,39 @@ const base = import.meta.env.BASE_URL;
     {/* START: Hero Section */}
     <section class="relative h-[60vh] min-h-[480px] w-full sm:h-screen">
       <div class="absolute inset-0 bg-black/50"></div>
-      
-      <video autoplay loop muted playsinline class="hidden h-full w-full object-cover sm:block">
-        <source src={`${base}videos/heroclip.mp4`} type="video/mp4"/>
+
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="hidden h-full w-full object-cover sm:block"
+      >
+        <source src={`${base}videos/heroclip.mp4`} type="video/mp4" />
       </video>
-      
-      <div class="sm:hidden h-full w-full bg-cover bg-center" style='background-image: url("https://images.pexels.com/photos/4753997/pexels-photo-4753997.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");'></div>
-      
-      <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
-        <h1 class="font-sans text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+
+      <div
+        class="sm:hidden h-full w-full bg-cover bg-center"
+        style='background-image: url("https://images.pexels.com/photos/4753997/pexels-photo-4753997.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");'
+      >
+      </div>
+
+      <div
+        class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
+      >
+        <h1
+          class="font-sans text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
+        >
           Empowering Through Movement
         </h1>
         <p class="mt-4 max-w-2xl font-body text-lg sm:text-xl">
-          Join our vibrant community in Chicago and experience fitness that celebrates our culture.
+          Join our vibrant community in Chicago and experience fitness that
+          celebrates our culture.
         </p>
-        <a href={`${base}schedule`} class="btn mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+        <a
+          href={`${base}schedule`}
+          class="btn mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+        >
           Join a Class
         </a>
       </div>
@@ -36,33 +54,81 @@ const base = import.meta.env.BASE_URL;
     {/* START: Gala Save the Date Section */}
     <section id="gala" class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+        <div
+          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
+        >
           <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Save the Date!</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable: Our First Annual Gala</h2>
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+            >
+              Save the Date!
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              Noche Inolvidable: Our First Annual Gala
+            </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for a 1920s-inspired evening of glamour and elegance as we celebrate our community and the first graduating class of the LSP Teacher Training Program!</p>
+              <p>
+                Join us for a 1920s-inspired evening of glamour and elegance as
+                we celebrate our community and the first graduating class of the
+                LSP Teacher Training Program!
+              </p>
               <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">December 11, 2025</span></li>
-                <li><span class="font-bold text-off-black">Where:</span> Xoco House Gallery (<a href="https://www.google.com/maps/search/?api=1&query=2317+W+18th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">2317 W 18th St, Chicago, IL 60608</a>)</li>
-                <li><span class="font-bold text-off-black">Theme:</span> 1920s Evening Gowns in Latin America</li>
+                <li>
+                  <span class="font-bold text-off-black">When:</span>
+                  <span class="text-accent-gold">December 11, 2025</span>
+                </li>
+                <li>
+                  <span class="font-bold text-off-black">Where:</span> Xoco House
+                  Gallery (<a
+                    href="https://www.google.com/maps/search/?api=1&query=2317+W+18th+St,+Chicago,+IL+60608"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold"
+                    >2317 W 18th St, Chicago, IL 60608</a
+                  >)
+                </li>
+                <li>
+                  <span class="font-bold text-off-black">Theme:</span> 1920s Evening
+                  Gowns in Latin America
+                </li>
               </ul>
-              <p>Early bird tickets are available until October 15th. All proceeds support our mission to create accessible wellness spaces.</p>
-              <div class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4">
+              <p>
+                Early bird tickets are available until October 15th. All
+                proceeds support our mission to create accessible wellness
+                spaces.
+              </p>
+              <div
+                class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4"
+              >
                 <h4 class="font-bold text-off-black">Nominations Now Open!</h4>
-                <p class="text-base">Honor a community hero by nominating them for our Changemaker or Community Icon Award. <a href={`${base}gala`} class="font-bold text-vibrant-pink underline">Learn more and submit your nomination!</a></p>
+                <p class="text-base">
+                  Honor a community hero by nominating them for our Changemaker
+                  or Community Icon Award. <a
+                    href={`${base}gala`}
+                    class="font-bold text-vibrant-pink underline"
+                    >Learn more and submit your nomination!</a
+                  >
+                </p>
               </div>
             </div>
             <div class="mt-8">
-              <a href={`${base}gala`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+              <a
+                href={`${base}gala`}
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
                 Get Tickets & Details
               </a>
             </div>
           </div>
-          <div class="w-full" set:html={`
+          <div
+            class="w-full"
+            set:html={`
             <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
             <script async src="//www.instagram.com/embed.js"></script>
-          `} />
+          `}
+          />
         </div>
       </div>
     </section>
@@ -71,28 +137,72 @@ const base = import.meta.env.BASE_URL;
     {/* START: HAUS of LSP Section */}
     <section id="haus-of-lsp" class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="w-full" set:html={`
+        <div
+          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
+        >
+          <div
+            class="w-full"
+            set:html={`
             <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQ4Yfnykc_e/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
             <script async src="//www.instagram.com/embed.js"></script>
-          `} />
+          `}
+          />
           <div class="lg:order-last">
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">New Community Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">HAUS of LSP: Una Casa para Todos</h2>
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+            >
+              New Community Event
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              HAUS of LSP: Una Casa para Todos
+            </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Get ready to dance! We're thrilled to announce HAUS of LSP, a brand new event celebrating and cultivating queer community in Pilsen, Little Village, and across Chicago’s Southwest Side.</p>
+              <p>
+                Get ready to dance! We're thrilled to announce HAUS of LSP, a
+                brand new event celebrating and cultivating queer community in
+                Pilsen, Little Village, and across Chicago’s Southwest Side.
+              </p>
               <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">Saturday, November 22, 2025 @ 7:30 PM</span></li>
-                <li><span class="font-bold text-off-black">Where:</span> <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60608</a></li>
+                <li>
+                  <span class="font-bold text-off-black">When:</span>
+                  <span class="text-accent-gold"
+                    >Saturday, November 22, 2025 @ 7:30 PM</span
+                  >
+                </li>
+                <li>
+                  <span class="font-bold text-off-black">Where:</span>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold"
+                    >949 W 16th St, Chicago, IL 60608</a
+                  >
+                </li>
               </ul>
-              <p>Join us for a night of connection and celebration, made by and for our LGBTQI+ communities.</p>
-              <div class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4">
+              <p>
+                Join us for a night of connection and celebration, made by and
+                for our LGBTQI+ communities.
+              </p>
+              <div
+                class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4"
+              >
                 <h4 class="font-bold text-off-black">Entry Details</h4>
-                <p class="text-base">Entry is available with a $5 donation to LSP or by bringing a food item for the Pilsen Food Pantry.</p>
+                <p class="text-base">
+                  Entry is available with a $5 donation to LSP or by bringing a
+                  food item for the Pilsen Food Pantry.
+                </p>
               </div>
             </div>
             <div class="mt-8">
-              <a href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
                 Get Tickets
               </a>
             </div>
@@ -105,28 +215,62 @@ const base = import.meta.env.BASE_URL;
     <!-- START: Yoga & Cafecito Section -->
     <section id="yoga-cafecito" class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+        <div
+          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
+        >
           <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Community Collaboration</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Yoga & Cafecito with ALPFA Chicago</h2>
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+            >
+              Community Collaboration
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              Yoga & Cafecito with ALPFA Chicago
+            </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join us for our first-ever Yoga & Cafecito Community Event in collaboration with ALPFA Chicago! Network, support small businesses, and enjoy a restorative yoga session.</p>
+              <p>
+                Join us for our first-ever Yoga & Cafecito Community Event in
+                collaboration with ALPFA Chicago! Network, support small
+                businesses, and enjoy a restorative yoga session.
+              </p>
               <ul class="list-none space-y-2 pt-2">
-                <li><span class="font-bold text-off-black">When:</span> <span class="text-accent-gold">Sunday, November 23, 2025 @ 1:30 PM</span></li>
-                <li><span class="font-bold text-off-black">Featuring:</span> Cafecito by Stockyards Coffee, a restorative yoga session, and a mercadito with local vendors.</li>
+                <li>
+                  <span class="font-bold text-off-black">When:</span>
+                  <span class="text-accent-gold"
+                    >Sunday, November 23, 2025 @ 1:30 PM</span
+                  >
+                </li>
+                <li>
+                  <span class="font-bold text-off-black">Featuring:</span> Cafecito
+                  by Stockyards Coffee, a restorative yoga session, and a mercadito
+                  with local vendors.
+                </li>
               </ul>
-              <p>This event is a perfect opportunity to connect with community partners and support local entrepreneurs this holiday season.</p>
+              <p>
+                This event is a perfect opportunity to connect with community
+                partners and support local entrepreneurs this holiday season.
+              </p>
             </div>
             <div class="mt-8">
-              <a href="https://www.eventbrite.com/e/alpfa-x-lsp-yoga-cafecito-community-event-in-pilsen-tickets-1964575597497?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+              <a
+                href="https://www.eventbrite.com/e/alpfa-x-lsp-yoga-cafecito-community-event-in-pilsen-tickets-1964575597497?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
                 Register Now
               </a>
             </div>
           </div>
-          <div class="w-full" set:html={`
+          <div
+            class="w-full"
+            set:html={`
             <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQ7GLHDDmKd/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
             <script async src="//www.instagram.com/embed.js"></script>
-          `} />
+          `}
+          />
         </div>
       </div>
     </section>
@@ -135,32 +279,66 @@ const base = import.meta.env.BASE_URL;
     {/* START: LSP x One Night Only Section */}
     <section id="one-night-only" class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+        <div
+          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
+        >
           <div class="w-full">
-            <div class="mx-auto max-w-[540px] overflow-hidden rounded-lg shadow-lg" set:html={`
+            <div
+              class="mx-auto max-w-[540px] overflow-hidden rounded-lg shadow-lg"
+              set:html={`
                 <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DQCsBRcAMfC/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="margin: 0 !important; padding: 0 !important; width: 100% !important;"></blockquote>
                 <script async src="//www.instagram.com/embed.js"></script>
-              `} />
+              `}
+            />
           </div>
           <div class="lg:order-last">
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">Monthly Event</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">LSP x One Night Only</h2>
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+            >
+              Monthly Event
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              LSP x One Night Only
+            </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>Join Latina Sweat the last Friday of the month, every month, for our collaboration with One Night Only, a variety show featuring an eclectic selection of Chicago's burlesque and drag artists.</p>
-              <p class="font-bold text-off-black">Next Show: <span class="text-accent-gold">Friday, November 28th at 8 pm CT</span></p>
-              <p class="font-bold text-off-black">Where: <a href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">949 W 16th St, Chicago, IL 60607</a></p>
-              <p class="font-bold text-vibrant-pink">PLEASE BRING CASH TIPS FOR THE PERFORMERS.</p>
+              <p>
+                Join Latina Sweat the last Friday of the month, every month, for
+                our collaboration with One Night Only, a variety show featuring
+                an eclectic selection of Chicago's burlesque and drag artists.
+              </p>
+              <p class="font-bold text-off-black">
+                Next Show: <span class="text-accent-gold"
+                  >Friday, November 28th at 8 pm CT</span
+                >
+              </p>
+              <p class="font-bold text-off-black">
+                Where: <a
+                  href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60607"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold"
+                  >949 W 16th St, Chicago, IL 60607</a
+                >
+              </p>
+              <p class="font-bold text-vibrant-pink">
+                PLEASE BRING CASH TIPS FOR THE PERFORMERS.
+              </p>
             </div>
             {/* START: Ticketing Iframe */}
             <div class="mt-8 w-full overflow-hidden rounded-lg shadow-xl">
-              <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
-                  <iframe 
-                      title="LSP x One Night Only Ticketing" 
-                      style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;" 
-                      src="https://www.zeffy.com/embed/ticketing/lsp-x-one-night-only" 
-                      allowpaymentrequest 
-                      allowTransparency="true">
-                  </iframe>
+              <div
+                style="position: relative; overflow: hidden; width: 100%; height: 700px;"
+              >
+                <iframe
+                  title="LSP x One Night Only Ticketing"
+                  style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;"
+                  src="https://www.zeffy.com/embed/ticketing/lsp-x-one-night-only"
+                  allowpaymentrequest
+                  allowTransparency="true"
+                >
+                </iframe>
               </div>
             </div>
             {/* END: Ticketing Iframe */}
@@ -170,40 +348,60 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: LSP x One Night Only Section */}
 
-
     {/* START: Merch Section */}
     <section class="py-12 sm:py-16 lg:py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-3xl text-center">
-                <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Shop Our 'Immigrant Made' Merch Drop</h2>
-                <p class="mt-4 font-body text-lg text-medium-gray">
-                    Support our mission and wear your pride! Our exclusive 'Immigrant Made' collection is now available. Every purchase helps us continue to empower our community through movement.
-                </p>
-                <div class="mt-8">
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-immigrant-made-merch-drop" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                        Open Shop in New Window
-                    </a>
-                </div>
-            </div>
-            <div class="mt-10 mx-auto max-w-4xl w-full">
-              <img src={`${base}merch.PNG`} alt="Latina Sweat Project 'Immigrant Made' merchandise" class="h-full w-full object-cover" />
-            </div>
-            <div class="mt-10 mx-auto max-w-4xl rounded-lg shadow-xl overflow-hidden">
-                <div style="position: relative; overflow: hidden; width: 100%; height: 700px;">
-                    <iframe 
-                        title="LSP Immigrant Made Merch Drop" 
-                        style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;" 
-                        src="https://www.zeffy.com/embed/ticketing/lsp-immigrant-made-merch-drop" 
-                        allowpaymentrequest 
-                        allowTransparency="true">
-                    </iframe>
-                </div>
-            </div>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+          >
+            Shop Our 'Immigrant Made' Merch Drop
+          </h2>
+          <p class="mt-4 font-body text-lg text-medium-gray">
+            Support our mission and wear your pride! Our exclusive 'Immigrant
+            Made' collection is now available. Every purchase helps us continue
+            to empower our community through movement.
+          </p>
+          <div class="mt-8">
+            <a
+              href="https://www.zeffy.com/en-US/ticketing/lsp-immigrant-made-merch-drop"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              Open Shop in New Window
+            </a>
+          </div>
         </div>
+        <div class="mt-10 mx-auto max-w-4xl w-full">
+          <img
+            src={`${base}merch.PNG`}
+            alt="Latina Sweat Project 'Immigrant Made' merchandise"
+            class="h-full w-full object-cover"
+          />
+        </div>
+        <div
+          class="mt-10 mx-auto max-w-4xl rounded-lg shadow-xl overflow-hidden"
+        >
+          <div
+            style="position: relative; overflow: hidden; width: 100%; height: 700px;"
+          >
+            <iframe
+              title="LSP Immigrant Made Merch Drop"
+              style="position: absolute; border: 0; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;"
+              src="https://www.zeffy.com/embed/ticketing/lsp-immigrant-made-merch-drop"
+              allowpaymentrequest
+              allowTransparency="true"
+            >
+            </iframe>
+          </div>
+        </div>
+      </div>
     </section>
     {/* END: Merch Section */}
 
-    {/*
+    {
+      /*
     START: Testimonials Section
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -218,28 +416,54 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     END: Testimonials Section
-    */}
+    */
+    }
 
     {/* START: Grand Opening Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
+        <div
+          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
+        >
           <div>
-            <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">We&apos;re Open!</p>
-            <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Our New Studio Is Here</h2>
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+            >
+              We&apos;re Open!
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              Our New Studio Is Here
+            </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
               <p>The wait is over! Our brand new studio is officially open.</p>
-              <p>Experience the energy, meet our incredible teaching team, and see firsthand what makes LSP more than just a place to move. We are a community, a safe space, and a celebration of wellness in our neighborhoods.</p>
-              <p>Come join a class and be part of our vibrant community. We can't wait to welcome you!</p>
+              <p>
+                Experience the energy, meet our incredible teaching team, and
+                see firsthand what makes LSP more than just a place to move. We
+                are a community, a safe space, and a celebration of wellness in
+                our neighborhoods.
+              </p>
+              <p>
+                Come join a class and be part of our vibrant community. We can't
+                wait to welcome you!
+              </p>
             </div>
             <div class="mt-8 text-center">
-              <a href={`${base}schedule`} class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+              <a
+                href={`${base}schedule`}
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
                 View Class Schedule
               </a>
             </div>
           </div>
           <div class="order-last w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/studio.png`} alt="The brand new Latina Sweat Project yoga studio" class="h-full w-full object-cover" />
+            <img
+              src={`${base}images/studio.png`}
+              alt="The brand new Latina Sweat Project yoga studio"
+              class="h-full w-full object-cover"
+            />
           </div>
         </div>
       </div>
@@ -249,41 +473,127 @@ const base = import.meta.env.BASE_URL;
     {/* START: Upcoming Events Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl">
+        <h2
+          class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl"
+        >
           Upcoming Events
         </h2>
-        <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          <EventCard
-            href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp"
-            target="_blank"
-            imageSrc={`${base}images/hausparty.png`}
-            date="NOV 22, 2025"
-            title="HAUS of LSP"
-            description="A new event made by and for the LGBTQI+ communities on Chicago's Southwest Side."
-          />
-          <EventCard
-            href="https://www.eventbrite.com/e/alpfa-x-lsp-yoga-cafecito-community-event-in-pilsen-tickets-1964575597497?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl"
-            target="_blank"
-            imageSrc={`${base}images/cafecito.png`}
-            date="NOV 23, 2025"
-            title="Yoga & Cafecito with ALPFA"
-            description="A special community event with yoga, cafecito, and a mercadito to support local vendors."
-          />
-          <EventCard
-            href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
-            target="_blank"
-            imageSrc={`${base}images/onenightonly.png`}
-            date="NOV 28, 2025"
-            title="LSP x One Night Only"
-            description="A variety show featuring an eclectic selection of Chicago's burlesque and drag artists."
-          />
-          <EventCard
-            href={`${base}gala`}
-            imageSrc={`${base}images/gala.png`}
-            date="DECEMBER 11, 2025"
-            title="Noche Inolvidable Gala"
-            description="Our first annual gala celebrating community and our teacher training graduates."
-          />
+        <div class="relative group">
+          {/* Navigation Buttons (Desktop) */}
+          <button
+            id="scroll-left"
+            class="absolute left-0 top-1/2 z-10 -ml-4 hidden -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-gray-50 hover:text-vibrant-pink focus:outline-none focus:ring-2 focus:ring-vibrant-pink lg:block opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            aria-label="Scroll left"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+
+          <button
+            id="scroll-right"
+            class="absolute right-0 top-1/2 z-10 -mr-4 hidden -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-gray-50 hover:text-vibrant-pink focus:outline-none focus:ring-2 focus:ring-vibrant-pink lg:block opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            aria-label="Scroll right"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          {/* Carousel Container */}
+          <div
+            id="swipe-hint"
+            class="absolute inset-y-0 right-0 z-20 flex w-16 items-center justify-end bg-gradient-to-l from-white/80 to-transparent pr-2 transition-opacity duration-500 lg:hidden pointer-events-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8 animate-pulse text-vibrant-pink"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+            </svg>
+          </div>
+
+          {/* Carousel Container */}
+          <div
+            id="events-carousel"
+            class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 pt-2 hide-scrollbar"
+            style="scrollbar-width: none; -ms-overflow-style: none;"
+          >
+            <div
+              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
+            >
+              <EventCard
+                href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp"
+                target="_blank"
+                imageSrc={`${base}images/hausparty.png`}
+                date="NOV 22, 2025"
+                title="HAUS of LSP"
+                description="A new event made by and for the LGBTQI+ communities on Chicago's Southwest Side."
+              />
+            </div>
+            <div
+              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
+            >
+              <EventCard
+                href="https://www.eventbrite.com/e/alpfa-x-lsp-yoga-cafecito-community-event-in-pilsen-tickets-1964575597497?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl"
+                target="_blank"
+                imageSrc={`${base}images/cafecito.png`}
+                date="NOV 23, 2025"
+                title="Yoga & Cafecito with ALPFA"
+                description="A special community event with yoga, cafecito, and a mercadito to support local vendors."
+              />
+            </div>
+            <div
+              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
+            >
+              <EventCard
+                href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
+                target="_blank"
+                imageSrc={`${base}images/onenightonly.png`}
+                date="NOV 28, 2025"
+                title="LSP x One Night Only"
+                description="A variety show featuring an eclectic selection of Chicago's burlesque and drag artists."
+              />
+            </div>
+            <div
+              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
+            >
+              <EventCard
+                href={`${base}gala`}
+                imageSrc={`${base}images/gala.png`}
+                date="DECEMBER 11, 2025"
+                title="Noche Inolvidable Gala"
+                description="Our first annual gala celebrating community and our teacher training graduates."
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -291,26 +601,114 @@ const base = import.meta.env.BASE_URL;
 
     {/* START: Instagram Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Join Our Community Online</h2>
-                <p class="mt-4 font-body text-lg text-medium-gray">
-                    See our community in action! Follow us on Instagram for daily inspiration, class updates, and behind-the-scenes moments that celebrate our culture and movement.
-                </p>
-                <div class="mt-8">
-                    <a href="https://www.instagram.com/latinasweatproject/" class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z" clip-rule="evenodd"></path></svg>
-                        Follow @LatinaSweatProject
-                    </a>
-                </div>
-            </div>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+          >
+            Join Our Community Online
+          </h2>
+          <p class="mt-4 font-body text-lg text-medium-gray">
+            See our community in action! Follow us on Instagram for daily
+            inspiration, class updates, and behind-the-scenes moments that
+            celebrate our culture and movement.
+          </p>
+          <div class="mt-8">
+            <a
+              href="https://www.instagram.com/latinasweatproject/"
+              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                ><path
+                  fill-rule="evenodd"
+                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+                  clip-rule="evenodd"></path></svg
+              >
+              Follow @LatinaSweatProject
+            </a>
+          </div>
         </div>
+      </div>
     </section>
     {/* END: Instagram Section */}
-
   </main>
 </Layout>
 
 <script>
-  // The countdown timer script was removed as it was only used by the "Recuérdame" event.
+  const carousel = document.getElementById("events-carousel");
+  const leftBtn = document.getElementById("scroll-left");
+  const rightBtn = document.getElementById("scroll-right");
+  const swipeHint = document.getElementById("swipe-hint");
+
+  if (carousel) {
+    // Mobile Swipe Hint Logic
+    if (swipeHint) {
+      const hideHint = () => {
+        swipeHint.style.opacity = "0";
+        // Remove listener after hiding to avoid unnecessary calls
+        carousel.removeEventListener("scroll", hideHint);
+      };
+      carousel.addEventListener("scroll", hideHint, { passive: true });
+
+      // Also hide if user clicks/touches
+      carousel.addEventListener("touchstart", hideHint, { passive: true });
+    }
+
+    // Desktop Button Logic
+    if (leftBtn && rightBtn) {
+      leftBtn.addEventListener("click", () => {
+        carousel.scrollBy({ left: -carousel.offsetWidth, behavior: "smooth" });
+      });
+
+      rightBtn.addEventListener("click", () => {
+        carousel.scrollBy({ left: carousel.offsetWidth, behavior: "smooth" });
+      });
+    }
+
+    // Desktop Edge Scrolling Logic
+    let scrollInterval: number | null = null;
+    const scrollSpeed = 5; // Pixels per frame
+    const edgeThreshold = 100; // Distance from edge to trigger scroll
+
+    const startScrolling = (direction: "left" | "right") => {
+      if (scrollInterval) return;
+
+      scrollInterval = window.setInterval(() => {
+        if (direction === "left") {
+          carousel.scrollLeft -= scrollSpeed;
+        } else {
+          carousel.scrollLeft += scrollSpeed;
+        }
+      }, 16); // ~60fps
+    };
+
+    const stopScrolling = () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+      }
+    };
+
+    carousel.addEventListener("mousemove", (e) => {
+      // Only enable on desktop (check if hover is supported roughly)
+      if (window.matchMedia("(hover: hover)").matches) {
+        const rect = carousel.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+
+        if (x < edgeThreshold) {
+          startScrolling("left");
+        } else if (x > rect.width - edgeThreshold) {
+          startScrolling("right");
+        } else {
+          stopScrolling();
+        }
+      }
+    });
+
+    carousel.addEventListener("mouseleave", stopScrolling);
+  }
 </script>
