@@ -142,13 +142,13 @@ const base = import.meta.env.BASE_URL;
             >
                 <div class="w-6 h-5 flex flex-col justify-between relative">
                     <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 origin-left transform group-aria-expanded:rotate-45 group-aria-expanded:translate-x-1"
+                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
                         id="hamburger-top"></span>
                     <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 transform group-aria-expanded:translate-x-full group-aria-expanded:opacity-0"
+                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
                         id="hamburger-middle"></span>
                     <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 origin-left transform group-aria-expanded:-rotate-45 group-aria-expanded:translate-x-1"
+                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
                         id="hamburger-bottom"></span>
                 </div>
             </button>
@@ -279,33 +279,17 @@ const base = import.meta.env.BASE_URL;
             document.body.style.overflow = "hidden";
 
             // Animate Hamburger to X
-            topBar?.classList.add(
-                "rotate-45",
-                "translate-x-[2px]",
-                "-translate-y-[2px]",
-            );
-            middleBar?.classList.add("opacity-0", "translate-x-full");
-            bottomBar?.classList.add(
-                "-rotate-45",
-                "translate-x-[2px]",
-                "translate-y-[2px]",
-            );
+            topBar?.classList.add("rotate-45", "translate-y-[9px]");
+            middleBar?.classList.add("opacity-0");
+            bottomBar?.classList.add("-rotate-45", "-translate-y-[9px]");
         } else {
             overlay?.classList.add("translate-x-full");
             document.body.style.overflow = "";
 
             // Reset Hamburger
-            topBar?.classList.remove(
-                "rotate-45",
-                "translate-x-[2px]",
-                "-translate-y-[2px]",
-            );
-            middleBar?.classList.remove("opacity-0", "translate-x-full");
-            bottomBar?.classList.remove(
-                "-rotate-45",
-                "translate-x-[2px]",
-                "translate-y-[2px]",
-            );
+            topBar?.classList.remove("rotate-45", "translate-y-[9px]");
+            middleBar?.classList.remove("opacity-0");
+            bottomBar?.classList.remove("-rotate-45", "-translate-y-[9px]");
         }
         updateHeader(); // Update header style based on new menu state
     });
