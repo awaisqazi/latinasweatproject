@@ -2,103 +2,321 @@
 // src/components/Header.astro
 const base = import.meta.env.BASE_URL;
 ---
-<header class="sticky top-0 z-50 bg-white/80 shadow-sm backdrop-blur-md">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        {/* Logo and Site Title */}
-        <div class="flex-shrink-0">
-            <a href={base} class="flex items-center gap-3">
-                <img src={`${base}logo.png`} alt="The Latina Sweat Project Logo" class="h-10 w-10">
-                <span class="text-xl font-bold text-off-black">The Latina Sweat Project</span>
+
+<header
+    id="main-header"
+    class="sticky top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-transparent"
+>
+    <div
+        class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+    >
+        {/* Logo */}
+        <div class="flex-shrink-0 relative z-50">
+            <a href={base} class="flex items-center gap-3 group">
+                <img
+                    src={`${base}logo.png`}
+                    alt="The Latina Sweat Project Logo"
+                    class="h-10 w-10 transition-transform duration-300 group-hover:scale-110"
+                />
+                <span
+                    class="text-xl font-bold text-off-black tracking-tight group-hover:text-vibrant-pink transition-colors duration-300"
+                    >The Latina Sweat Project</span
+                >
             </a>
         </div>
 
-        {/* Desktop Navigation & CTAs */}
-        <div class="hidden flex-1 items-center gap-4 xl:flex">
-            <nav class="flex flex-1 items-center justify-center gap-[18px]">
-                <a href={base} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Home</a>
-                <a href={`${base}about`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">About Us</a>
-                <a href={`${base}schedule`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Classes</a>
-                <a href={`${base}events`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Events</a>
-                <a href={`${base}impact`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Impact</a>
-                <a href={`${base}gala`} class="link-underline inline-flex items-center h-10 whitespace-nowrap text-base font-medium text-medium-gray">Gala</a>                
-                
-                {/* "More" Dropdown */}
-                <div id="more-dropdown" class="relative group">
-                    <button id="more-button" class="link-underline inline-flex items-center h-10 gap-1 text-base font-medium text-medium-gray">
-                        <span>More</span>
-                        <svg class="h-5 w-5 transition-transform group-hover:rotate-180 group-focus-within:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        {/* Desktop Navigation */}
+        <div class="hidden xl:flex items-center gap-8">
+            <nav class="flex items-center gap-6">
+                {
+                    [
+                        "Home",
+                        "About",
+                        "Classes",
+                        "Events",
+                        "Impact",
+                        "Gala",
+                    ].map((item) => {
+                        const href =
+                            item === "Home"
+                                ? base
+                                : `${base}${item.toLowerCase().replace(" ", "-")}`;
+                        const label = item === "About" ? "About Us" : item;
+                        return (
+                            <a
+                                href={href}
+                                class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                            >
+                                {label}
+                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
+                            </a>
+                        );
+                    })
+                }
+
+                {/* More Dropdown */}
+                <div class="relative group">
+                    <button
+                        class="flex items-center gap-1 py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors focus:outline-none"
+                    >
+                        More
+                        <svg
+                            class="h-4 w-4 transition-transform duration-200 group-hover:rotate-180"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </button>
-                    <div id="more-panel" class="absolute right-0 w-56 origin-top-right rounded-md bg-white pt-3 pb-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block group-focus-within:block">
-                        <div role="menu" aria-orientation="vertical" aria-labelledby="more-button">
-                            <a href={`${base}pricing`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Pricing</span></a>
-                            <a href={`${base}gallery`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Gallery</span></a>
-                            <a href={`${base}corporate-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Corporate Collabs</span></a>
-                            <a href={`${base}community-collaborations`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Community Collabs</span></a>
-                            <a href={`${base}faq`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">FAQ</span></a>
-                            <a href={`${base}contact`} class="dropdown-link block px-4 py-2 text-base text-medium-gray"><span class="dropdown-link-text">Contact</span></a>
+
+                    <div
+                        class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right"
+                    >
+                        <div
+                            class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
+                        >
+                            {
+                                [
+                                    "Pricing",
+                                    "Gallery",
+                                    "Corporate Collabs",
+                                    "Community Collabs",
+                                    "FAQ",
+                                    "Contact",
+                                ].map((item) => (
+                                    <a
+                                        href={`${base}${item.toLowerCase().replace(/ /g, "-")}`}
+                                        class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    >
+                                        {item}
+                                    </a>
+                                ))
+                            }
                         </div>
                     </div>
                 </div>
             </nav>
 
-            {/* CTA Buttons - also told not to shrink */}
-            <div class="flex flex-shrink-0 items-center gap-4">
-                <a href={`${base}account`} class="header-account-link hidden text-sm font-bold text-medium-gray sm:inline-flex items-center h-10">
+            {/* CTAs */}
+            <div class="flex items-center gap-4 pl-4 border-l border-gray-200">
+                <a
+                    href={`${base}account`}
+                    class="text-sm font-bold text-medium-gray hover:text-vibrant-pink transition-colors"
+                >
                     My Account
                 </a>
-                <a href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project" target="_blank" rel="noopener noreferrer" aria-label="Donate to The Latina Sweat Project" class="btn hidden inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:inline-flex">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.93-10-8.03C-1.33 7.9 4 3 7.5 5.5 9.24 6.79 12 9 12 9s2.76-2.21 4.5-3.5C20 3 25.33 7.9 22 12.97 19.5 16.07 12 21 12 21z"></path></svg>
+                <a
+                    href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+                >
                     Donate
                 </a>
-                <a href={`${base}schedule`} class="btn hidden inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-105 sm:inline-flex">
-                    Book a Class
+                <a
+                    href={`${base}schedule`}
+                    class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-off-black px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-vibrant-pink"
+                >
+                    Book Class
                 </a>
             </div>
         </div>
 
-        {/* Mobile Menu Icon */}
-        <div class="flex items-center xl:hidden">
-            <button id="mobile-menu-button" class="xl:hidden">
-                <svg class="h-6 w-6 text-off-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
+        {/* Mobile Menu Button */}
+        <div class="xl:hidden flex items-center gap-4">
+            <a
+                href={`${base}schedule`}
+                class="btn inline-flex items-center h-9 rounded-full bg-vibrant-pink px-4 text-xs font-bold text-white shadow-sm sm:hidden"
+            >
+                Book
+            </a>
+            <button
+                id="mobile-menu-toggle"
+                class="relative z-50 p-2 text-off-black focus:outline-none group"
+                aria-label="Toggle Menu"
+            >
+                <div
+                    class="w-6 h-5 flex flex-col justify-between relative overflow-hidden"
+                >
+                    <span
+                        class="w-full h-0.5 bg-current transition-all duration-300 origin-left transform group-aria-expanded:rotate-45 group-aria-expanded:translate-x-1"
+                        id="hamburger-top"></span>
+                    <span
+                        class="w-full h-0.5 bg-current transition-all duration-300 transform group-aria-expanded:translate-x-full group-aria-expanded:opacity-0"
+                        id="hamburger-middle"></span>
+                    <span
+                        class="w-full h-0.5 bg-current transition-all duration-300 origin-left transform group-aria-expanded:-rotate-45 group-aria-expanded:translate-x-1"
+                        id="hamburger-bottom"></span>
+                </div>
             </button>
         </div>
     </div>
-    {/* Mobile Menu */}
-    <nav id="mobile-menu" class="hidden xl:hidden">
-        <a href={base} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Home</a>
-        <a href={`${base}about`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">About Us</a>
-        <a href={`${base}schedule`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Classes</a>
-        <a href={`${base}events`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Events</a>
-        <a href={`${base}pricing`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Pricing</a>
-        <a href={`${base}impact`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Impact</a>
-        <a href={`${base}gallery`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Gallery</a>
-        <a href={`${base}gala`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Gala</a>
-        <a href={`${base}corporate-collaborations`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Corporate Collabs</a>
-        <a href={`${base}community-collaborations`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Community Collabs</a>
-        <a href={`${base}faq`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">FAQ</a>
-        <a href={`${base}contact`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">Contact</a>
-    <a href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project" target="_blank" rel="noopener noreferrer" class="block mx-4 my-2 rounded-full bg-[#b5a18d] px-4 py-2 text-center text-base font-bold text-white shadow-sm transition transform hover:bg-[#ffbd59] hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ffbd59]">Donate</a>
-
-    <a href={`${base}schedule`} class="block mx-4 my-2 rounded-full bg-vibrant-pink px-4 py-2 text-center text-base font-bold text-white shadow-sm transition transform hover:bg-[#ffbd59] hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ffbd59]">Book a Class</a>
-
-        <a href={`${base}account`} class="block px-4 py-2 text-center text-base font-medium text-medium-gray transition hover:!text-vibrant-pink">
-            My Account
-        </a>
-    </nav>
 </header>
 
+{/* Mobile Menu Overlay */}
+<div
+    id="mobile-menu-overlay"
+    class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col pt-24 px-6 pb-8 overflow-y-auto h-screen"
+>
+    <nav class="flex flex-col gap-4 text-center">
+        {
+            [
+                "Home",
+                "About Us",
+                "Classes",
+                "Events",
+                "Pricing",
+                "Impact",
+                "Gallery",
+                "Gala",
+                "Corporate Collabs",
+                "Community Collabs",
+                "FAQ",
+                "Contact",
+            ].map((item) => {
+                const href =
+                    item === "Home"
+                        ? base
+                        : `${base}${item.toLowerCase().replace(/ /g, "-")}`;
+                return (
+                    <a
+                        href={href}
+                        class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+                    >
+                        {item}
+                    </a>
+                );
+            })
+        }
+        <hr class="border-gray-200 my-2" />
+        <a
+            href={`${base}account`}
+            class="text-lg font-medium text-medium-gray hover:text-vibrant-pink mobile-link py-1"
+            >My Account</a
+        >
+        <div class="flex flex-col gap-3 mt-4 pb-8">
+            <a
+                href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn w-full py-3 rounded-full bg-vibrant-pink text-white font-bold shadow-lg text-lg"
+            >
+                Donate
+            </a>
+            <a
+                href={`${base}schedule`}
+                class="btn w-full py-3 rounded-full bg-off-black text-white font-bold shadow-lg text-lg"
+            >
+                Book a Class
+            </a>
+        </div>
+    </nav>
+</div>
+
 <script>
-  const mobileMenuButton = document.getElementById('mobile-menu-button');
-  const mobileMenu = document.getElementById('mobile-menu');
+    const header = document.getElementById("main-header");
+    const toggleBtn = document.getElementById("mobile-menu-toggle");
+    const overlay = document.getElementById("mobile-menu-overlay");
+    const topBar = document.getElementById("hamburger-top");
+    const middleBar = document.getElementById("hamburger-middle");
+    const bottomBar = document.getElementById("hamburger-bottom");
+    let isMenuOpen = false;
 
-  if (mobileMenuButton && mobileMenu) {
-    mobileMenuButton.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+    // Scroll Effect
+    const updateHeader = () => {
+        // If menu is open, force solid white background
+        if (isMenuOpen) {
+            header?.classList.add("bg-white");
+            header?.classList.remove(
+                "bg-white/80",
+                "bg-white/95",
+                "backdrop-blur-md",
+                "border-transparent",
+            );
+            header?.classList.add("border-gray-100"); // Optional: keep border
+            return;
+        }
+
+        if (window.scrollY > 10) {
+            header?.classList.add(
+                "shadow-sm",
+                "bg-white/95",
+                "backdrop-blur-md",
+            );
+            header?.classList.remove(
+                "bg-white",
+                "bg-white/80",
+                "border-transparent",
+            );
+            header?.classList.add("border-gray-100");
+        } else {
+            header?.classList.remove(
+                "shadow-sm",
+                "bg-white",
+                "bg-white/95",
+                "border-gray-100",
+            );
+            header?.classList.add(
+                "bg-white/80",
+                "backdrop-blur-md",
+                "border-transparent",
+            );
+        }
+    };
+    window.addEventListener("scroll", updateHeader);
+    updateHeader(); // Init
+
+    // Mobile Menu Toggle
+    toggleBtn?.addEventListener("click", () => {
+        isMenuOpen = !isMenuOpen;
+        toggleBtn.setAttribute("aria-expanded", isMenuOpen.toString());
+
+        if (isMenuOpen) {
+            overlay?.classList.remove("translate-x-full");
+            document.body.style.overflow = "hidden";
+
+            // Animate Hamburger to X
+            topBar?.classList.add(
+                "rotate-45",
+                "translate-x-[2px]",
+                "-translate-y-[2px]",
+            );
+            middleBar?.classList.add("opacity-0", "translate-x-full");
+            bottomBar?.classList.add(
+                "-rotate-45",
+                "translate-x-[2px]",
+                "translate-y-[2px]",
+            );
+        } else {
+            overlay?.classList.add("translate-x-full");
+            document.body.style.overflow = "";
+
+            // Reset Hamburger
+            topBar?.classList.remove(
+                "rotate-45",
+                "translate-x-[2px]",
+                "-translate-y-[2px]",
+            );
+            middleBar?.classList.remove("opacity-0", "translate-x-full");
+            bottomBar?.classList.remove(
+                "-rotate-45",
+                "translate-x-[2px]",
+                "translate-y-[2px]",
+            );
+        }
+        updateHeader(); // Update header style based on new menu state
     });
-  }
 
-  // The "More" dropdown is now handled by Tailwind CSS utility classes (group-hover and group-focus-within)
-  // for a CSS-only solution that supports mouse, keyboard, and touch.
+    // Close menu when clicking a link
+    const mobileLinks = document.querySelectorAll(".mobile-link");
+    mobileLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+            if (isMenuOpen) toggleBtn?.click();
+        });
+    });
 </script>
