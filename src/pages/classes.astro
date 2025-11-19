@@ -1,223 +1,34 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import { classSchedule } from '@/data/schedule.js';
-import { classDescriptions } from '@/data/class-descriptions.js';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
 ---
 
-<Layout title="Classes | The Latina Sweat Project">
+<Layout title="Schedule | The Latina Sweat Project">
   <Header />
   <main>
-    {/* START: Page Header Section */}
-    <section class="bg-light-gray py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <h1 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
-          Our Classes
-        </h1>
-        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
-          Find the perfect class to ignite your fitness journey. Explore our diverse range of classes designed to empower and energize you.
+    <div class="my-8 px-4">
+      <div
+        class="mx-auto max-w-4xl rounded-lg border border-red-300 bg-red-50 p-4 text-center"
+      >
+        <p class="font-semibold text-red-800">
+          Please note: Participants must be 12 years of age or older to register
+          for and attend classes.
         </p>
       </div>
-    </section>
-    {/* END: Page Header Section */}
-
-    {/* START: Schedule Section */}
-    <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-24 lg:px-8">
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12 items-start">
-        {/* Calendar Column */}
-        <div class="flex flex-col rounded-lg border border-slate-200 p-6">
-          <div class="flex items-center justify-between">
-            <button id="prev-month-btn" class="rounded-full p-2 hover:bg-slate-100" aria-label="Previous month">
-              <svg class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <h3 id="month-year-display" class="font-sans text-lg font-semibold text-off-black"></h3>
-            <button id="next-month-btn" class="rounded-full p-2 hover:bg-slate-100" aria-label="Next month">
-              <svg class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-            </button>
-          </div>
-          <div id="calendar-grid" class="mt-4 grid grid-cols-7 text-center font-sans">
-            <div class="py-2 text-xs font-medium text-medium-gray">S</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">M</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">T</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">W</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">T</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">F</div>
-            <div class="py-2 text-xs font-medium text-medium-gray">S</div>
-          </div>
-        </div>
-
-        {/* Schedule List Column */}
-        <div class="space-y-4">
-          <h3 id="schedule-title" class="font-sans text-lg font-semibold text-off-black"></h3>
-          <div id="schedule-list" class="divide-y divide-slate-200 rounded-lg border border-slate-200">
-            {/* Schedule items will be inserted here */}
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Schedule Section */}
-    
-    {/* START: Class Descriptions Section */}
-    <section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-24 lg:px-8">
-      <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Class Descriptions</h2>
-      <div class="mt-8 space-y-4">
-        {classDescriptions.map((classInfo, index) => (
-          <details class="group rounded-lg bg-slate-50 p-4 transition-transform duration-200" open={index === 0}>
-              <summary class="flex cursor-pointer list-none items-center justify-between font-sans text-lg font-medium text-off-black">
-                  {classInfo.name}
-                  <div class="transition-transform group-open:rotate-180">
-                      <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-              </summary>
-              <div class="overflow-hidden transition-all duration-500 ease-in-out max-h-0 group-open:max-h-96">
-                <p class="mt-2 font-body text-medium-gray">{classInfo.description}</p>
-              </div>
-          </details>
-        ))}
-      </div>
-    </section>
-    {/* END: Class Descriptions Section */}
-
-    {/* START: Pricing Section */}
-    <section class="bg-light-gray py-12 sm:py-24">
-        <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 class="font-sans text-3xl font-bold tracking-tight text-center text-off-black">Pricing & Donations</h2>
-            <p class="mx-auto mt-4 max-w-3xl text-center font-body text-medium-gray">To make our classes accessible, we operate on a donation-based model. Free seats are available on a first-come, first-serve basis.</p>
-            <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
-                
-                {/* Minimum Donation Card */}
-                <div class="flex flex-col rounded-lg border border-slate-200 bg-white p-6 text-center">
-                    <h3 class="font-sans text-lg font-semibold text-off-black">Minimum Donation</h3>
-                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">$5</p>
-                    <p class="mt-1 font-body text-sm text-medium-gray">to reserve a spot</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
-                </div>
-
-                {/* Recommended Donation Card */}
-                <div class="relative flex flex-col rounded-lg border-2 border-vibrant-pink bg-white p-6 text-center">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-vibrant-pink px-3 py-1 font-sans text-xs font-semibold uppercase tracking-wider text-white">Recommended Donation</div>
-                    <h3 class="font-sans text-lg font-semibold text-off-black">Community Support</h3>
-                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">$15</p>
-                    <p class="mt-1 font-body text-sm text-medium-gray">helps us grow</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md bg-vibrant-pink px-4 py-2 font-sans text-sm font-semibold text-white transition hover:bg-accent-gold">Donate</a>
-                </div>
-
-                {/* Custom Donation Card */}
-                <div class="flex flex-col rounded-lg border border-slate-200 bg-white p-6 text-center">
-                    <h3 class="font-sans text-lg font-semibold text-off-black">Pay What You Can</h3>
-                    <p class="mt-2 font-sans text-4xl font-bold text-off-black">Your Price</p>
-                    <p class="mt-1 font-body text-sm text-medium-gray">any amount is valued</p>
-                    <a href="https://www.zeffy.com/en-US/ticketing/lsp-soft-launch-classes" class="btn mt-6 rounded-md border border-slate-300 bg-white px-4 py-2 font-sans text-sm font-semibold text-off-black transition hover:bg-slate-50">Donate</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    {/* END: Pricing Section */}
+    </div>
+    <div class="my-8 px-4 text-center">
+      <p class="text-vibrant-pink">
+        Trouble viewing the schedule or registering below?
+        <a
+          href="https://latinasweatproject.marianatools.com/?_mt=/schedule/daily/48541?locations=48717"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold underline transition hover:text-accent-gold"
+          >Open in a new window.</a
+        >
+      </p>
+    </div>
+    <div data-mariana-integrations="/schedule/daily/48541?locations=48717">
+    </div>
   </main>
 </Layout>
-
-<script define:vars={{ classSchedule }}>
-  const processedSchedule = classSchedule.map(item => {
-    const [year, month, day] = item.date.split('-').map(Number);
-    return {
-      ...item,
-      dateObj: new Date(year, month - 1, day, 0, 0, 0, 0)
-    };
-  });
-  let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); 
-  let selectedDate = new Date(currentDate);
-
-  const monthYearDisplay = document.getElementById('month-year-display');
-  const calendarGrid = document.getElementById('calendar-grid');
-  const scheduleTitle = document.getElementById('schedule-title');
-  const scheduleList = document.getElementById('schedule-list');
-  const prevMonthBtn = document.getElementById('prev-month-btn');
-  const nextMonthBtn = document.getElementById('next-month-btn');
-  
-  function renderCalendar() {
-    calendarGrid.querySelectorAll('.day').forEach(el => el.remove());
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    monthYearDisplay.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate);
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dayElement = document.createElement('div');
-      dayElement.className = 'py-2 day flex justify-center';
-      if (i === 1) { dayElement.style.gridColumnStart = firstDayOfMonth + 1; }
-      
-      const button = document.createElement('button');
-      button.className = 'flex h-8 w-8 items-center justify-center rounded-full text-sm hover:bg-slate-100';
-      button.textContent = i.toString();
-      const dayDate = new Date(year, month, i, 0, 0, 0, 0);
-      button.dataset.date = dayDate.toISOString();
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (dayDate.getTime() === today.getTime()) {
-        button.classList.add('border', 'border-vibrant-pink');
-      }
-      if (dayDate.getTime() === selectedDate.getTime()) {
-        button.classList.add('bg-vibrant-pink', 'text-white', 'font-semibold');
-      }
-      dayElement.appendChild(button);
-      calendarGrid.appendChild(dayElement);
-    }
-  }
-
-  function renderSchedule(date) {
-    if (!date) return;
-    selectedDate = date;
-    scheduleTitle.textContent = `Schedule for ${new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date)}`;
-    const classesForDay = processedSchedule.filter(c => c.dateObj.getTime() === selectedDate.getTime());
-    
-    scheduleList.innerHTML = '';
-    if (classesForDay.length === 0) {
-      scheduleList.innerHTML = '<div class="p-4 font-body text-medium-gray">No classes scheduled for this day.</div>';
-    } else {
-      classesForDay.forEach(cls => {
-        const classElement = document.createElement('div');
-        classElement.className = 'grid grid-cols-4 items-center gap-4 p-4';
-        
-        classElement.innerHTML = `
-          <div class="font-body"><p class="font-medium text-off-black">${cls.time}</p><p class="text-sm text-medium-gray">${cls.name}</p></div>
-          <div class="text-sm text-medium-gray font-body">${cls.instructor}</div>
-          <div class="text-sm text-medium-gray font-body">${cls.studio}</div>
-          <a href="${cls.bookLink}" class="btn rounded-md bg-vibrant-pink px-3 py-1.5 text-center text-sm font-semibold text-white transition hover:bg-accent-gold">Book</a>
-        `;
-        scheduleList.appendChild(classElement);
-      });
-    }
-    renderCalendar();
-  }
-
-  // EVENT LISTENERS
-  prevMonthBtn.addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-  });
-  nextMonthBtn.addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-  });
-  calendarGrid.addEventListener('click', (e) => {
-    const target = e.target.closest('button');
-    if (target && target.dataset.date) {
-      renderSchedule(new Date(target.dataset.date));
-    }
-  });
-  
-  // INITIALIZATION
-  renderSchedule(selectedDate);
-</script>
-
-<style>
-  @media (hover: hover) {
-    details.group:not([open]):hover {
-      transform: scale(1.01);
-    }
-  }
-</style>
