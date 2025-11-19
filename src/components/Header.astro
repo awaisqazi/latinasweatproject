@@ -28,31 +28,60 @@ const base = import.meta.env.BASE_URL;
         {/* Desktop Navigation */}
         <div class="hidden xl:flex items-center gap-8">
             <nav class="flex items-center gap-6">
-                {
-                    [
-                        "Home",
-                        "About",
-                        "Classes",
-                        "Events",
-                        "Impact",
-                        "Gala",
-                    ].map((item) => {
-                        const href =
-                            item === "Home"
-                                ? base
-                                : `${base}${item.toLowerCase().replace(" ", "-")}`;
-                        const label = item === "About" ? "About Us" : item;
-                        return (
-                            <a
-                                href={href}
-                                class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                            >
-                                {label}
-                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
-                            </a>
-                        );
-                    })
-                }
+                <a
+                    href={base}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    Home
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
+                <a
+                    href={`${base}about`}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    About Us
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
+                <a
+                    href={`${base}schedule`}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    Classes
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
+                <a
+                    href={`${base}events`}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    Events
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
+                <a
+                    href={`${base}impact`}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    Impact
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
+                <a
+                    href={`${base}gala`}
+                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                >
+                    Gala
+                    <span
+                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                    ></span>
+                </a>
 
                 {/* More Dropdown */}
                 <div class="relative group">
@@ -80,23 +109,42 @@ const base = import.meta.env.BASE_URL;
                         <div
                             class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                         >
-                            {
-                                [
-                                    "Pricing",
-                                    "Gallery",
-                                    "Corporate Collabs",
-                                    "Community Collabs",
-                                    "FAQ",
-                                    "Contact",
-                                ].map((item) => (
-                                    <a
-                                        href={`${base}${item.toLowerCase().replace(/ /g, "-")}`}
-                                        class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                                    >
-                                        {item}
-                                    </a>
-                                ))
-                            }
+                            <a
+                                href={`${base}pricing`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Pricing
+                            </a>
+                            <a
+                                href={`${base}gallery`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Gallery
+                            </a>
+                            <a
+                                href={`${base}corporate-collaborations`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Corporate Collabs
+                            </a>
+                            <a
+                                href={`${base}community-collaborations`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Community Collabs
+                            </a>
+                            <a
+                                href={`${base}faq`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                FAQ
+                            </a>
+                            <a
+                                href={`${base}contact`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Contact
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -162,35 +210,78 @@ const base = import.meta.env.BASE_URL;
     class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col pt-24 px-6 pb-8 overflow-y-auto h-screen"
 >
     <nav class="flex flex-col gap-4 text-center">
-        {
-            [
-                "Home",
-                "About Us",
-                "Classes",
-                "Events",
-                "Pricing",
-                "Impact",
-                "Gallery",
-                "Gala",
-                "Corporate Collabs",
-                "Community Collabs",
-                "FAQ",
-                "Contact",
-            ].map((item) => {
-                const href =
-                    item === "Home"
-                        ? base
-                        : `${base}${item.toLowerCase().replace(/ /g, "-")}`;
-                return (
-                    <a
-                        href={href}
-                        class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
-                    >
-                        {item}
-                    </a>
-                );
-            })
-        }
+        <a
+            href={base}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Home
+        </a>
+        <a
+            href={`${base}about`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            About Us
+        </a>
+        <a
+            href={`${base}schedule`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Classes
+        </a>
+        <a
+            href={`${base}events`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Events
+        </a>
+        <a
+            href={`${base}pricing`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Pricing
+        </a>
+        <a
+            href={`${base}impact`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Impact
+        </a>
+        <a
+            href={`${base}gallery`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Gallery
+        </a>
+        <a
+            href={`${base}gala`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Gala
+        </a>
+        <a
+            href={`${base}corporate-collaborations`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Corporate Collabs
+        </a>
+        <a
+            href={`${base}community-collaborations`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Community Collabs
+        </a>
+        <a
+            href={`${base}faq`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            FAQ
+        </a>
+        <a
+            href={`${base}contact`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Contact
+        </a>
         <hr class="border-gray-200 my-2" />
         <a
             href={`${base}account`}
