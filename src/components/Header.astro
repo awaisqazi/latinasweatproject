@@ -161,7 +161,7 @@ const base = import.meta.env.BASE_URL;
 {/* Mobile Menu Overlay */}
 <div
     id="mobile-menu-overlay"
-    class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col pt-24 px-6 pb-8 overflow-y-auto h-screen"
+    class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl flex flex-col pt-24 px-6 pb-8 overflow-y-auto h-screen hidden"
 >
     <nav class="flex flex-col gap-4 text-center">
         {
@@ -277,7 +277,7 @@ const base = import.meta.env.BASE_URL;
         toggleBtn.setAttribute("aria-expanded", isMenuOpen.toString());
 
         if (isMenuOpen) {
-            overlay?.classList.remove("translate-x-full");
+            overlay?.classList.remove("hidden");
             document.body.style.overflow = "hidden";
 
             // Animate Hamburger to X
@@ -293,7 +293,7 @@ const base = import.meta.env.BASE_URL;
                 "translate-y-[2px]",
             );
         } else {
-            overlay?.classList.add("translate-x-full");
+            overlay?.classList.add("hidden");
             document.body.style.overflow = "";
 
             // Reset Hamburger
