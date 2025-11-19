@@ -263,15 +263,104 @@ const base = import.meta.env.BASE_URL;
 </header>
 
 <script>
-    const mobileMenuButton = document.getElementById("mobile-menu-button");
-    const mobileMenu = document.getElementById("mobile-menu");
+    const header = document.getElementById("main-header");
+    const toggleBtn = document.getElementById("mobile-menu-toggle");
+    const overlay = document.getElementById("mobile-menu-overlay");
+    const topBar = document.getElementById("hamburger-top");
+    const middleBar = document.getElementById("hamburger-middle");
+    const bottomBar = document.getElementById("hamburger-bottom");
+    let isMenuOpen = false;
 
-    if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
+    // Scroll Effect
+    const updateHeader = () => {
+        // If menu is open, force solid white background
+        if (isMenuOpen) {
+            header?.classList.add("bg-white");
+            header?.classList.remove(
+                "bg-white/80",
+                "bg-white/95",
+                "backdrop-blur-md",
+                "border-transparent",
+            );
+            header?.classList.add("border-gray-100"); // Optional: keep border
+            return;
+        }
+
+        if (window.scrollY > 10) {
+            header?.classList.add(
+                "shadow-sm",
+                "bg-white/95",
+                "backdrop-blur-md",
+            );
+            header?.classList.remove(
+                "bg-white",
+                "bg-white/80",
+                "border-transparent",
+            );
+            header?.classList.add("border-gray-100");
+        } else {
+            header?.classList.remove(
+                "shadow-sm",
+                "bg-white",
+                "bg-white/95",
+                "border-gray-100",
+            );
+            header?.classList.add(
+                "bg-white/80",
+                "backdrop-blur-md",
+                "border-transparent",
+            );
+        }
+    };
+    window.addEventListener("scroll", updateHeader);
+    updateHeader(); // Init
+
+    // Mobile Menu Toggle
+    toggleBtn?.addEventListener("click", () => {
+        isMenuOpen = !isMenuOpen;
+        toggleBtn.setAttribute("aria-expanded", isMenuOpen.toString());
+
+        if (isMenuOpen) {
+            overlay?.classList.remove("translate-x-full");
+            document.body.style.overflow = "hidden";
+
+            // Animate Hamburger to X
+            topBar?.classList.add(
+                "rotate-45",
+                "translate-x-[2px]",
+                "-translate-y-[2px]",
+            );
+            middleBar?.classList.add("opacity-0", "translate-x-full");
+            bottomBar?.classList.add(
+                "-rotate-45",
+                "translate-x-[2px]",
+                "translate-y-[2px]",
+            );
+        } else {
+            overlay?.classList.add("translate-x-full");
+            document.body.style.overflow = "";
+
+            // Reset Hamburger
+            topBar?.classList.remove(
+                "rotate-45",
+                "translate-x-[2px]",
+                "-translate-y-[2px]",
+            );
+            middleBar?.classList.remove("opacity-0", "translate-x-full");
+            bottomBar?.classList.remove(
+                "-rotate-45",
+                "translate-x-[2px]",
+                "translate-y-[2px]",
+            );
+        }
+        updateHeader(); // Update header style based on new menu state
+    });
+
+    // Close menu when clicking a link
+    const mobileLinks = document.querySelectorAll(".mobile-link");
+    mobileLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+            if (isMenuOpen) toggleBtn?.click();
         });
-    }
-
-    // The "More" dropdown is now handled by Tailwind CSS utility classes (group-hover and group-focus-within)
-    // for a CSS-only solution that supports mouse, keyboard, and touch.
+    });
 </script>
