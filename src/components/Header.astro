@@ -1,11 +1,20 @@
 ---
 // src/components/Header.astro
 const base = import.meta.env.BASE_URL;
+
+const pathname = Astro.url.pathname;
+const isHome = pathname === base || pathname === `${base}/`;
 ---
+
+{/* Spacer for fixed header on non-home pages to prevent overlap */}
+{!isHome && <div class="h-20" />}
 
 <header
     id="main-header"
-    class="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-transparent"
+    class:list={[
+        "top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-transparent",
+        "fixed",
+    ]}
 >
     <div
         class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"

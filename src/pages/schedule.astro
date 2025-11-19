@@ -1,15 +1,18 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
   <Header />
   <main>
     <div class="my-8 px-4">
-      <div class="mx-auto max-w-4xl rounded-lg border border-red-300 bg-red-50 p-4 text-center">
+      <div
+        class="mx-auto max-w-4xl rounded-lg border border-red-300 bg-red-50 p-4 text-center"
+      >
         <p class="font-semibold text-red-800">
-          Please note: Participants must be 12 years of age or older to register for and attend classes.
+          Please note: Participants must be 12 years of age or older to register
+          for and attend classes.
         </p>
       </div>
     </div>
@@ -20,10 +23,12 @@ import Header from '@/components/Header.astro';
           href="https://latinasweatproject.marianatools.com/?_mt=/schedule/daily/48541?locations=48717"
           target="_blank"
           rel="noopener noreferrer"
-          class="font-semibold underline transition hover:text-accent-gold">Open in a new window.</a
+          class="font-semibold underline transition hover:text-accent-gold"
+          >Open in a new window.</a
         >
       </p>
     </div>
-    <div data-mariana-integrations="/schedule/daily/48541?locations=48717"></div>
+    <div data-mariana-integrations="/schedule/daily/48541?locations=48717">
+    </div>
   </main>
 </Layout>
