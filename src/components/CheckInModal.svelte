@@ -28,7 +28,12 @@
         <div
             class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
             transition:fade={{ duration: 200 }}
+            role="button"
+            tabindex="0"
             on:click={close}
+            on:keydown={(e) => {
+                if (e.key === "Escape" || e.key === "Enter") close();
+            }}
         ></div>
 
         <!-- Modal Panel -->

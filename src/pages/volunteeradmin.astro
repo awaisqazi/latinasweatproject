@@ -1,0 +1,10 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VolunteerAdminApp from "../components/VolunteerAdminApp.svelte";
+---
+
+<Layout title="Volunteer Admin | The Latina Sweat Project">
+    <main class="min-h-screen bg-gray-50">
+        <VolunteerAdminApp client:only="svelte" />
+    </main>
+</Layout>
