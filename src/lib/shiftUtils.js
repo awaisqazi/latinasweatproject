@@ -37,16 +37,19 @@ export const generateShifts = (startDate = new Date()) => {
         const date = current.getDate();
 
         const addShift = (startHour, startMinute, endHour, endMinute) => {
+            // SAFE FOR SAFARI: Use integer constructor
             const start = new Date(year, month, date, startHour, startMinute);
             const end = new Date(year, month, date, endHour, endMinute);
+
+            // Re-create the date object for the shift property to ensure it's a valid object
+            const shiftDate = new Date(year, month, date);
 
             shifts.push({
                 id: getShiftId({ start, end }),
                 start,
                 end,
-                date: new Date(year, month, date),
-                // CRITICAL FIX: Add a pre-calculated string for safe matching
-                dateStr: toLocalISOString(new Date(year, month, date))
+                date: shiftDate,
+                dateStr: toLocalISOString(shiftDate)
             });
         };
 
@@ -55,40 +58,34 @@ export const generateShifts = (startDate = new Date()) => {
             for (let h = 7; h < 12; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Monday: 5:30am-6am, 6am-9am (Hourly), 5pm-9pm (Hourly)
         if (dayOfWeek === 1) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Tuesday: 5:30am-6am, 6am-8am (Hourly)
         if (dayOfWeek === 2) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 8; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Wednesday: 5:30am-6am, 6am-9am (Hourly), 5pm-9pm (Hourly)
         if (dayOfWeek === 3) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Thursday: 5:30am-6am, 6am-9am (Hourly)
         if (dayOfWeek === 4) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Friday: 5:30am-6am, 6am-9am (Hourly), 5pm-8pm (Hourly)
         if (dayOfWeek === 5) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 20; h++) addShift(h, 0, h + 1, 0);
         }
-
         // Saturday: 7am-12pm (Hourly)
         if (dayOfWeek === 6) {
             for (let h = 7; h < 12; h++) addShift(h, 0, h + 1, 0);

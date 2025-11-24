@@ -10,34 +10,57 @@
     import { generateShifts } from "../lib/shiftUtils";
 
     let shifts = [];
-    let shiftData = {}; // Map of shiftId -> { lead: count, volunteer: count, registrations: [] }
+    let shiftData = {};
     let loading = true;
+    let error = null;
 
     onMount(() => {
-        // 1. Generate Shifts
-        shifts = generateShifts();
+        try {
+            // 1. Generate Shifts (Wrap in try-catch in case Safari hates the date math)
+            shifts = generateShifts();
 
-        // 2. Subscribe to Firestore
-        const unsubscribe = onSnapshot(collection(db, "shifts"), (snapshot) => {
-            const data = {};
-            snapshot.forEach((doc) => {
-                data[doc.id] = doc.data();
-            });
-            shiftData = data;
+            // 2. Subscribe to Firestore
+            const unsubscribe = onSnapshot(
+                collection(db, "shifts"),
+                (snapshot) => {
+                    const data = {};
+                    snapshot.forEach((doc) => {
+                        data[doc.id] = doc.data();
+                    });
+                    shiftData = data;
+                    loading = false;
+                },
+                (err) => {
+                    console.error("Firestore Error:", err);
+                    error = "Database connection failed: " + err.message;
+                    loading = false;
+                },
+            );
+
+            return () => unsubscribe();
+        } catch (e) {
+            console.error("Critical App Error:", e);
+            error = "App failed to load: " + e.message;
             loading = false;
-        });
-
-        return () => unsubscribe();
+        }
     });
 
-    // Filter for upcoming shifts (including today)
-    $: upcomingShifts = shifts
-        .filter((shift) => {
-            const shiftDate = new Date(shift.date);
+    // Helper to safely check if a shift is today or future
+    const isUpcoming = (shift) => {
+        if (!shift || !shift.date) return false;
+        try {
+            // Compare timestamps to avoid Timezone/Date parsing issues
+            const shiftTime = shift.date.getTime();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            return shiftDate >= today;
-        })
+            return shiftTime >= today.getTime();
+        } catch (e) {
+            return false;
+        }
+    };
+
+    $: upcomingShifts = shifts
+        .filter(isUpcoming)
         .map((shift) => {
             const data = shiftData[shift.id] || { registrations: [] };
             return {
@@ -45,13 +68,11 @@
                 registrations: data.registrations || [],
             };
         })
-        // Only show shifts that actually have registrations
         .filter((shift) => shift.registrations.length > 0)
         .sort((a, b) => a.start - b.start);
 
     async function handleCheckIn(shiftId, registrationIndex) {
-        // if (!confirm("Confirm check-in for this volunteer?")) return;
-
+        if (!confirm("Confirm check-in for this volunteer?")) return;
         const shiftRef = doc(db, "shifts", shiftId);
 
         try {
@@ -65,14 +86,13 @@
                 if (!registrations[registrationIndex])
                     throw "Registration not found!";
 
-                // Update the specific registration
                 registrations[registrationIndex].checkedIn = true;
                 registrations[registrationIndex].checkInTime =
                     new Date().toISOString();
 
                 transaction.update(shiftRef, { registrations });
             });
-            alert("Check-in successful!");
+            // Optional: Show toast instead of alert for better UX
         } catch (e) {
             console.error("Check-in failed: ", e);
             alert("Check-in failed: " + e);
@@ -88,7 +108,14 @@
         <p class="text-gray-600">Manage check-ins for upcoming shifts.</p>
     </div>
 
-    {#if loading}
+    {#if error}
+        <div
+            class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 text-center"
+        >
+            <p class="font-bold">Something went wrong</p>
+            <p class="text-sm">{error}</p>
+        </div>
+    {:else if loading}
         <div class="text-center py-12">
             <div
                 class="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-pink mx-auto"
@@ -109,7 +136,6 @@
                 <div
                     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
                 >
-                    <!-- Shift Header -->
                     <div
                         class="bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center flex-wrap gap-4"
                     >
@@ -142,7 +168,6 @@
                         </div>
                     </div>
 
-                    <!-- Registrations List -->
                     <div class="divide-y divide-gray-100">
                         {#each shift.registrations as reg, i}
                             <div
@@ -154,8 +179,8 @@
                                             {reg.name}
                                         </h4>
                                         <span
-                                            class="text-xs px-2 py-0.5 rounded-full font-medium
-                                            {reg.role === 'lead'
+                                            class="text-xs px-2 py-0.5 rounded-full font-medium {reg.role ===
+                                            'lead'
                                                 ? 'bg-purple-100 text-purple-700'
                                                 : 'bg-pink-100 text-pink-700'}"
                                         >
@@ -195,12 +220,23 @@
                                             <span
                                                 class="text-xs text-gray-400 mt-1"
                                             >
-                                                {new Date(
-                                                    reg.checkInTime,
-                                                ).toLocaleTimeString([], {
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
+                                                {#if reg.checkInTime}
+                                                    {(() => {
+                                                        try {
+                                                            return new Date(
+                                                                reg.checkInTime,
+                                                            ).toLocaleTimeString(
+                                                                [],
+                                                                {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                },
+                                                            );
+                                                        } catch (e) {
+                                                            return "";
+                                                        }
+                                                    })()}
+                                                {/if}
                                             </span>
                                         </div>
                                     {:else}
