@@ -46,23 +46,29 @@
     $: daysInMonth = new Date(year, month + 1, 0).getDate();
     $: firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 = Sun
 
+    // SAFARI FIX: Helper for consistent string comparison
+    const getSafeDateKey = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}/${m}/${d}`;
+    };
+
     $: calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
         const date = new Date(year, month, i + 1);
-        const dateString = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+        // 1. Use safe key for matching
+        const dateString = getSafeDateKey(date);
 
         // Find shifts for this day
         const dayShifts = shifts.filter(
-            (s) =>
-                `${s.date.getFullYear()}/${s.date.getMonth() + 1}/${s.date.getDate()}` ===
-                dateString,
+            (s) => getSafeDateKey(s.date) === dateString,
         );
 
         // Check if ANY shift is available
         const hasAvailableShifts = dayShifts.some((s) => isShiftAvailable(s));
 
-        const isSelected =
-            `${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${selectedDate.getDate()}` ===
-            dateString;
+        // 2. Compare using safe keys
+        const isSelected = getSafeDateKey(selectedDate) === dateString;
         const isPast = date < new Date().setHours(0, 0, 0, 0);
 
         // Only show "hasShifts" if there are actually available shifts

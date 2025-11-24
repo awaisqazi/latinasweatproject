@@ -16,6 +16,15 @@
     let shiftData = {}; // Map of shiftId -> { lead: count, volunteer: count }
     let selectedDate = new Date();
 
+    // 1. SAFARI FIX: Helper for stable date keys (YYYY/MM/DD)
+    // Safari parses "2025/08/18" correctly as local time.
+    const getSafeDateKey = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}/${m}/${d}`;
+    };
+
     // Week View State
     let currentWeekStart = new Date();
     // Initialize to Sunday of current week
@@ -71,7 +80,7 @@
     $: shiftsByDate = shifts.reduce((acc, shift) => {
         if (hideUnavailable && isShiftUnavailable(shift)) return acc;
 
-        const dateKey = `${shift.date.getFullYear()}/${shift.date.getMonth() + 1}/${shift.date.getDate()}`;
+        const dateKey = getSafeDateKey(shift.date);
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(shift);
         return acc;
@@ -113,7 +122,8 @@
         // Wait for DOM to update
         await tick();
 
-        const dateKey = `${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${selectedDate.getDate()}`;
+        // 3. SAFARI FIX: Use the safe key for ID lookup
+        const dateKey = getSafeDateKey(selectedDate);
         const element = document.getElementById(`date-${dateKey}`);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });
