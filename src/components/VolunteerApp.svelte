@@ -71,7 +71,7 @@
     $: shiftsByDate = shifts.reduce((acc, shift) => {
         if (hideUnavailable && isShiftUnavailable(shift)) return acc;
 
-        const dateKey = shift.date.toDateString();
+        const dateKey = `${shift.date.getFullYear()}/${shift.date.getMonth() + 1}/${shift.date.getDate()}`;
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(shift);
         return acc;
@@ -113,7 +113,7 @@
         // Wait for DOM to update
         await tick();
 
-        const dateKey = selectedDate.toDateString();
+        const dateKey = `${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${selectedDate.getDate()}`;
         const element = document.getElementById(`date-${dateKey}`);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -260,8 +260,9 @@
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
             <button
+                type="button"
                 on:click={prevWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
             >
                 &larr; Previous Week
             </button>
@@ -269,8 +270,9 @@
                 Week of {currentWeekStart.toLocaleDateString()}
             </span>
             <button
+                type="button"
                 on:click={nextWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
             >
                 Next Week &rarr;
             </button>

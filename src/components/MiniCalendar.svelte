@@ -48,17 +48,21 @@
 
     $: calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
         const date = new Date(year, month, i + 1);
-        const dateString = date.toDateString();
+        const dateString = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 
         // Find shifts for this day
         const dayShifts = shifts.filter(
-            (s) => s.date.toDateString() === dateString,
+            (s) =>
+                `${s.date.getFullYear()}/${s.date.getMonth() + 1}/${s.date.getDate()}` ===
+                dateString,
         );
 
         // Check if ANY shift is available
         const hasAvailableShifts = dayShifts.some((s) => isShiftAvailable(s));
 
-        const isSelected = selectedDate.toDateString() === dateString;
+        const isSelected =
+            `${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${selectedDate.getDate()}` ===
+            dateString;
         const isPast = date < new Date().setHours(0, 0, 0, 0);
 
         // Only show "hasShifts" if there are actually available shifts
@@ -79,6 +83,7 @@
 <div class="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
     <div class="flex justify-between items-center mb-4">
         <button
+            type="button"
             on:click={prevMonth}
             class="p-1 hover:bg-gray-100 rounded-full text-gray-600"
         >
@@ -88,6 +93,7 @@
             >{monthName} {year}</span
         >
         <button
+            type="button"
             on:click={nextMonth}
             class="p-1 hover:bg-gray-100 rounded-full text-gray-600"
         >
@@ -107,6 +113,7 @@
         {/each}
         {#each calendarDays as day}
             <button
+                type="button"
                 class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all duration-200 relative
         {day.isSelected ? 'bg-vibrant-pink text-white shadow-md scale-110' : ''}
         {!day.isSelected && day.hasShifts && !day.isPast
