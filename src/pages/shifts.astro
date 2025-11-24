@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import VolunteerApp from "../components/VolunteerApp.svelte";
+---
+
+<Layout title="Volunteer Shifts | The Latina Sweat Project">
+    <Header />
+    <main class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <div class="bg-off-black text-white py-16 px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold font-rubik mb-4">
+                    Volunteer Shifts
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Join our community and help us empower through movement.
+                    Sign up for shifts below.
+                </p>
+            </div>
+        </div>
+
+        <!-- App Container -->
+        <div class="py-8">
+            <VolunteerApp client:load />
+        </div>
+    </main>
+</Layout>
