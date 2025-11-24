@@ -1,69 +1,95 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import CheckInApp from "../components/CheckInApp.svelte";
 ---
 
 <Layout title="Volunteer Check-in | The Latina Sweat Project">
 	<Header />
-	<main>
-		<section class="py-16 sm:py-24">
-			<div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-				<h1 class="font-sans text-4xl font-extrabold tracking-tighter text-off-black sm:text-5xl">
-					Volunteer Check-in
-				</h1>
-				<p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
-					Please fill out the form below to check in for your volunteer shift. We're excited to have you!
-				</p>
-			</div>
-
-			<div class="mx-auto mt-8 max-w-3xl px-4 sm:px-6 lg:px-8">
-				<div class="rounded-md bg-red-50 p-4">
-					<div class="flex">
-						<div class="ml-3">
-							<p class="text-sm font-medium text-red-800">
-								<strong class="font-bold">A quick reminder:</strong> By checking in, you are committing to support the Latina Sweat Project for your entire shift. To ensure a safe and focused environment, we kindly request that volunteers do not bring children with them. Your full attention is crucial for our mission, and we deeply appreciate your dedication and understanding!
-							</p>
+	<main class="min-h-screen bg-gray-50">
+		<div class="py-12">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-8">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div
+						class="rounded-md bg-yellow-50 p-4 border border-yellow-200"
+					>
+						<div class="flex">
+							<div class="flex-shrink-0">
+								<svg
+									class="h-5 w-5 text-yellow-400"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+										clip-rule="evenodd"></path>
+								</svg>
+							</div>
+							<div class="ml-3">
+								<h3 class="text-sm font-medium text-yellow-800">
+									Important: New Volunteer Process
+								</h3>
+								<div class="mt-2 text-sm text-yellow-700">
+									<p>
+										We are moving to a new volunteer sign up
+										and check in process.
+									</p>
+									<p class="mt-2">
+										If you have not signed up for a shift
+										yet, please <a
+											href="/shifts"
+											class="font-medium underline text-yellow-800 hover:text-yellow-600"
+											>sign up here</a
+										>.
+									</p>
+									<p class="mt-2">
+										Once you have signed up, you will be
+										able to check in to your shift on this
+										page.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="rounded-md bg-red-50 p-4 border border-red-200">
+						<div class="flex">
+							<div class="flex-shrink-0">
+								<svg
+									class="h-5 w-5 text-red-400"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+										clip-rule="evenodd"></path>
+								</svg>
+							</div>
+							<div class="ml-3">
+								<h3 class="text-sm font-medium text-red-800">
+									Known Issue on iOS/iPhone
+								</h3>
+								<div class="mt-2 text-sm text-red-700">
+									<p>
+										We are experiencing interface issues on
+										iPhone and iOS Safari browsers. Please
+										try <strong
+											>"Request Desktop Website"</strong
+										> in your browser menu or switch to a desktop
+										computer.
+									</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<div class="mx-auto mt-12 max-w-4xl px-4 sm:px-6 lg:px-8">
-				<div class="form-container">
-					<iframe
-						src="https://docs.google.com/forms/d/e/1FAIpQLSfAvBqmLp75YCip1FByeleMtgUbiMY_ngjcqZuOp1s6pBtP4Q/viewform?embedded=true"
-						class="responsive-iframe"
-						frameborder="0"
-						marginheight="0"
-						marginwidth="0">Loading…</iframe
-					>
-				</div>
-
-				<div class="mt-6 text-center">
-					<p class="mb-4 font-body text-medium-gray">
-						Having trouble with the form?
-					</p>
-					<a href="https://forms.gle/ig91np7o7rBwY6ko9" target="_blank" rel="noopener noreferrer" class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-sm font-bold text-white shadow-md transition-transform hover:scale-105">
-						Open in New Tab
-					</a>
-				</div>
-			</div>
-		</section>
+			<CheckInApp client:load />
+		</div>
 	</main>
 </Layout>
-
-<style>
-	.form-container {
-		position: relative;
-		overflow: hidden;
-		padding-top: 128.6%; /* Aspect ratio of the form (823 / 640) */
-	}
-	.responsive-iframe {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		border: 0;
-	}
-</style>

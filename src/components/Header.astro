@@ -119,6 +119,12 @@ const isHome = pathname === base || pathname === `${base}/`;
                             class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                         >
                             <a
+                                href={`${base}shifts`}
+                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                            >
+                                Volunteer
+                            </a>
+                            <a
                                 href={`${base}pricing`}
                                 class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
                             >
@@ -142,6 +148,7 @@ const isHome = pathname === base || pathname === `${base}/`;
                             >
                                 Community Collabs
                             </a>
+
                             <a
                                 href={`${base}faq`}
                                 class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
@@ -256,6 +263,12 @@ const isHome = pathname === base || pathname === `${base}/`;
             Impact
         </a>
         <a
+            href={`${base}shifts`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Volunteer
+        </a>
+        <a
             href={`${base}gallery`}
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
@@ -279,6 +292,7 @@ const isHome = pathname === base || pathname === `${base}/`;
         >
             Community Collabs
         </a>
+
         <a
             href={`${base}faq`}
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"

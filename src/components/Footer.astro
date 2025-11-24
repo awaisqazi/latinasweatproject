@@ -2,138 +2,282 @@
 // src/components/Footer.astro
 const base = import.meta.env.BASE_URL;
 ---
+
 <footer class="bg-off-black text-white">
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
     <div class="xl:grid xl:grid-cols-3 xl:gap-8">
       <div class="space-y-8 xl:col-span-1">
         <a href={base} class="flex items-center gap-3">
-          <img src={`${base}logo.svg`} alt="The Latina Sweat Project Logo" class="h-10 w-10">
-          <span class="font-sans text-xl font-bold text-white">The Latina Sweat Project</span>
+          <img
+            src={`${base}logo.svg`}
+            alt="The Latina Sweat Project Logo"
+            class="h-10 w-10"
+          />
+          <span class="font-sans text-xl font-bold text-white"
+            >The Latina Sweat Project</span
+          >
         </a>
         <p class="font-body text-base text-slate-400">
           Empowering through movement, community, and culture.
         </p>
         <div class="flex space-x-6">
-          <a href="https://www.instagram.com/latinasweatproject/" class="link-underline text-slate-400">
+          <a
+            href="https://www.instagram.com/latinasweatproject/"
+            class="link-underline text-slate-400"
+          >
             <span class="sr-only">Instagram</span>
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z" clip-rule="evenodd" />
+            <svg
+              class="h-6 w-6"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+                clip-rule="evenodd"></path>
             </svg>
           </a>
-          <a href="https://www.tiktok.com/@latinasweatproject" class="link-underline text-slate-400">
+          <a
+            href="https://www.tiktok.com/@latinasweatproject"
+            class="link-underline text-slate-400"
+          >
             <span class="sr-only">TikTok</span>
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.৩৭-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.04-5.36-.01-4.03-.01-8.05.02-12.07z" />
+            <svg
+              class="h-6 w-6"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.৩৭-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.04-5.36-.01-4.03-.01-8.05.02-12.07z"
+              ></path>
             </svg>
           </a>
-          <a href="mailto:collab@latinasweatproject.com" class="link-underline text-slate-400">
+          <a
+            href="mailto:collab@latinasweatproject.com"
+            class="link-underline text-slate-400"
+          >
             <span class="sr-only">Email</span>
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2.992 6.992a2 2 0 011.992-1.992h14.032a2 2 0 011.992 1.992l-9.008 6.004a1 1 0 01-1.008 0L2.992 6.992zM2 8.5v8.5a2 2 0 002 2h14a2 2 0 002-2V8.5l-8.01 5.34a3 3 0 01-2.98 0L2 8.5z" />
+            <svg
+              class="h-6 w-6"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M2.992 6.992a2 2 0 011.992-1.992h14.032a2 2 0 011.992 1.992l-9.008 6.004a1 1 0 01-1.008 0L2.992 6.992zM2 8.5v8.5a2 2 0 002 2h14a2 2 0 002-2V8.5l-8.01 5.34a3 3 0 01-2.98 0L2 8.5z"
+              ></path>
             </svg>
           </a>
         </div>
       </div>
-      <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2 xl:col-span-2 xl:mt-0">
+      <div
+        class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2 xl:col-span-2 xl:mt-0"
+      >
         <div class="md:grid md:grid-cols-2 md:gap-8">
           <div>
-            <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300">Navigation</h3>
+            <h3
+              class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300"
+            >
+              Navigation
+            </h3>
             <ul class="mt-4 space-y-4 font-body" role="list">
-              <li><a class="link-underline text-base text-slate-400" href={`${base}`}>Home</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}about`}>About Us</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}schedule`}>Classes</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}pricing`}>Pricing</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}impact`}>Impact</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}gallery`}>Gallery</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}gala`}>Gala</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}corporate-collaborations`}>Corporate Collabs</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}community-collaborations`}>Community Collabs</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}faq`}>FAQ</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}contact`}>Contact</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}account`}>My Account</a></li>
-              <!--<li><a class="link-underline text-base text-slate-400" href={`${base}events`}>Events</a></li>-->
+              <li>
+                <a
+                  class="link-underline text-base text-slate-400"
+                  href={`${base}`}>Home</a
+                >
+              </li>
+              <li>
+                <a
+                  class="link-underline text-base text-slate-400"
+                  href={`${base}about`}>About Us</a
+                >
+              </li>
+              <li>
+                <a
+                  class="link-underline text-base text-slate-400"
+                  href={`${base}schedule`}>Classes</a
+                >
+              </li>
+              <li>
+                <li>
+                  <a
+                    class="link-underline text-base text-slate-400"
+                    href={`${base}contact`}>Contact</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="link-underline text-base text-slate-400"
+                    href={`${base}account`}>My Account</a
+                  >
+                </li>
+              </li>
             </ul>
+            <div class="mt-12 md:mt-0">
+              <h3
+                class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300"
+              >
+                Legal
+              </h3>
+              <ul class="mt-4 space-y-4 font-body" role="list">
+                <li>
+                  <a
+                    class="link-underline text-base text-slate-400"
+                    href={`${base}privacy-policy`}>Privacy Policy</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="link-underline text-base text-slate-400"
+                    href={`${base}terms-of-service`}>Terms of Service</a
+                  >
+                </li>
+              </ul>
+            </div>
           </div>
-          <div class="mt-12 md:mt-0">
-            <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300">Legal</h3>
-            <ul class="mt-4 space-y-4 font-body" role="list">
-              <li><a class="link-underline text-base text-slate-400" href={`${base}privacy-policy`}>Privacy Policy</a></li>
-              <li><a class="link-underline text-base text-slate-400" href={`${base}terms-of-service`}>Terms of Service</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="md:grid md:grid-cols-1 md:gap-8">
-          <div>
-            <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300">Subscribe to our newsletter</h3>
-            <p class="mt-4 font-body text-base text-slate-400">The latest news, articles, and resources, sent to your inbox weekly.</p>
-            <form method="post" action="https://api.prd.xplorcs.com/forms-v2/forms/answers" onsubmit="onXplFormSubmit(event)" name="6f1884c5-b7dd-40c6-ad8e-623af0f3a140" id="bb_form" class="mt-3 space-y-4">
-              <div id="alert"></div>
-              <input type="hidden" name="uuid" id="bb_uuid" value="6f1884c5-b7dd-40c6-ad8e-623af0f3a140">
-              
-              <div class="flex flex-col gap-4 sm:flex-row">
-                <div class="w-full">
-                  <label for="bb_first_name" class="sr-only">First Name</label>
-                  <input type="text" name="first_name" id="bb_first_name" placeholder="First Name" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
-                </div>
-                <div class="w-full">
-                  <label for="bb_last_name" class="sr-only">Last Name</label>
-                  <input type="text" name="last_name" id="bb_last_name" placeholder="Last Name" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
-                </div>
-              </div>
+          <div class="md:grid md:grid-cols-1 md:gap-8">
+            <div>
+              <h3
+                class="font-sans text-sm font-semibold uppercase tracking-wider text-slate-300"
+              >
+                Subscribe to our newsletter
+              </h3>
+              <p class="mt-4 font-body text-base text-slate-400">
+                The latest news, articles, and resources, sent to your inbox
+                weekly.
+              </p>
+              <form
+                method="post"
+                action="https://api.prd.xplorcs.com/forms-v2/forms/answers"
+                onsubmit="onXplFormSubmit(event)"
+                name="6f1884c5-b7dd-40c6-ad8e-623af0f3a140"
+                id="bb_form"
+                class="mt-3 space-y-4"
+              >
+                <div id="alert"></div>
+                <input
+                  type="hidden"
+                  name="uuid"
+                  id="bb_uuid"
+                  value="6f1884c5-b7dd-40c6-ad8e-623af0f3a140"
+                />
 
-              <div>
-                <label for="bb_email" class="sr-only">Email Address</label>
-                <input type="email" name="email" id="bb_email" placeholder="Email Address" required class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink">
-              </div>
-
-              <div class="flex items-start">
-                <div class="flex h-5 items-center">
-                  <input id="bb_opt_in_email" name="opt_in_email" type="checkbox" value="By selecting this option, you agree to receive marketing communications via email" class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-vibrant-pink focus:ring-vibrant-pink">
+                <div class="flex flex-col gap-4 sm:flex-row">
+                  <div class="w-full">
+                    <label for="bb_first_name" class="sr-only">First Name</label
+                    >
+                    <input
+                      type="text"
+                      name="first_name"
+                      id="bb_first_name"
+                      placeholder="First Name"
+                      required
+                      class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink"
+                    />
+                  </div>
+                  <div class="w-full">
+                    <label for="bb_last_name" class="sr-only">Last Name</label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      id="bb_last_name"
+                      placeholder="Last Name"
+                      required
+                      class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink"
+                    />
+                  </div>
                 </div>
-                <div class="ml-3 text-sm">
-                  <label for="bb_opt_in_email" class="font-body text-slate-400">By selecting this option, you agree to receive marketing communications via email</label>
-                </div>
-              </div>
 
-              <div>
-                <button type="submit" id="bb_submit" class="btn flex w-full items-center justify-center rounded-full bg-vibrant-pink px-4 py-2 font-sans text-base font-semibold text-white shadow-md transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-                  Subscribe
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label for="bb_email" class="sr-only">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="bb_email"
+                    placeholder="Email Address"
+                    required
+                    class="w-full min-w-0 appearance-none rounded-md border border-transparent bg-slate-800 px-4 py-2 font-body text-base text-white placeholder-slate-500 focus:border-vibrant-pink focus:outline-none focus:ring-1 focus:ring-vibrant-pink"
+                  />
+                </div>
+
+                <div class="flex items-start">
+                  <div class="flex h-5 items-center">
+                    <input
+                      id="bb_opt_in_email"
+                      name="opt_in_email"
+                      type="checkbox"
+                      value="By selecting this option, you agree to receive marketing communications via email"
+                      class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-vibrant-pink focus:ring-vibrant-pink"
+                    />
+                  </div>
+                  <div class="ml-3 text-sm">
+                    <label
+                      for="bb_opt_in_email"
+                      class="font-body text-slate-400"
+                      >By selecting this option, you agree to receive marketing
+                      communications via email</label
+                    >
+                  </div>
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    id="bb_submit"
+                    class="btn flex w-full items-center justify-center rounded-full bg-vibrant-pink px-4 py-2 font-sans text-base font-semibold text-white shadow-md transition hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+                  >
+                    Subscribe
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="mt-12 border-t border-slate-700 pt-8">
-      <p class="font-body text-base text-slate-400 xl:text-center">© 2025 The Latina Sweat Project. All rights reserved.</p>
+      <div class="mt-12 border-t border-slate-700 pt-8">
+        <p class="font-body text-base text-slate-400 xl:text-center">
+          © 2025 The Latina Sweat Project. All rights reserved.
+        </p>
+      </div>
     </div>
   </div>
-</footer>
 
-<script>
+  <script>
     // Handles the XplorGrowth form submission.
-    if (document.forms['6f1884c5-b7dd-40c6-ad8e-623af0f3a140']) {
-        const FormServiceURL = 'https://api.prd.xplorcs.com/forms-v2/forms';
-        const formUuid = '6f1884c5-b7dd-40c6-ad8e-623af0f3a140';
-        const formContainer = new XplFormContainer(FormServiceURL);
-        const loadRecaptcha = (formConfig) => {
-            const { template } = formConfig;
-            const key = template.use_recaptcha ? template.recaptcha_key : null;
-            if (key) XplFormAPI.loadRecaptchaScript(key);
-        };
-        formContainer.load(formUuid).then(loadRecaptcha);
-        window.onXplFormLocationChange = (selectElement) => formContainer.load(selectElement.value);
-        window.onXplFormSubmit = async (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            const form = new XplFormAPI(FormServiceURL, event.target, formContainer);
-            const recaptchaKey = form.getRecaptchaKey();
-            if (recaptchaKey) {
-                window.grecaptcha.ready(() => window.grecaptcha.execute(recaptchaKey, { action: 'submit' }).then((recaptchaResponse) => form.submit(recaptchaResponse)));
-            } else {
-                form.submit();
-            }
-        };
+    if (document.forms["6f1884c5-b7dd-40c6-ad8e-623af0f3a140"]) {
+      const FormServiceURL = "https://api.prd.xplorcs.com/forms-v2/forms";
+      const formUuid = "6f1884c5-b7dd-40c6-ad8e-623af0f3a140";
+      const formContainer = new XplFormContainer(FormServiceURL);
+      const loadRecaptcha = (formConfig) => {
+        const { template } = formConfig;
+        const key = template.use_recaptcha ? template.recaptcha_key : null;
+        if (key) XplFormAPI.loadRecaptchaScript(key);
+      };
+      formContainer.load(formUuid).then(loadRecaptcha);
+      window.onXplFormLocationChange = (selectElement) =>
+        formContainer.load(selectElement.value);
+      window.onXplFormSubmit = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const form = new XplFormAPI(
+          FormServiceURL,
+          event.target,
+          formContainer,
+        );
+        const recaptchaKey = form.getRecaptchaKey();
+        if (recaptchaKey) {
+          window.grecaptcha.ready(() =>
+            window.grecaptcha
+              .execute(recaptchaKey, { action: "submit" })
+              .then((recaptchaResponse) => form.submit(recaptchaResponse)),
+          );
+        } else {
+          form.submit();
+        }
+      };
     }
-</script>
+  </script>
+</footer>
