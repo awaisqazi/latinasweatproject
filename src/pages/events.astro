@@ -1,7 +1,7 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import EventCard from '@/components/EventCard.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import EventCard from "@/components/EventCard.astro";
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -11,11 +11,14 @@ const base = import.meta.env.BASE_URL;
     {/* START: Page Header Section */}
     <section class="bg-light-gray py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-4 text-center">
-        <h1 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl md:text-6xl">
+        <h1
+          class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl md:text-6xl"
+        >
           Our Events
         </h1>
         <p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
-          Join our vibrant community. Sweat, dance, and connect at our upcoming events.
+          Join our vibrant community. Sweat, dance, and connect at our upcoming
+          events.
         </p>
       </div>
     </section>
@@ -24,47 +27,41 @@ const base = import.meta.env.BASE_URL;
     {/* START: Upcoming Events Section */}
     <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-4">
-        <h2 class="mb-12 text-center font-sans text-3xl font-bold text-off-black sm:text-4xl">
+        <h2
+          class="mb-12 text-center font-sans text-3xl font-bold text-off-black sm:text-4xl"
+        >
           Upcoming Events
         </h2>
-        {/* We are reusing the EventCard component we already built for the homepage */}
+        {
+          /* We are reusing the EventCard component we already built for the homepage */
+        }
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <EventCard
-                href="https://www.zeffy.com/en-US/ticketing/haus-of-lsp"
-                target="_blank"
-                imageSrc={`${base}images/hausparty.png`}
-                date="NOVEMBER 22, 2025"
-                title="HAUS of LSP"
-                description="A new event made by and for the LGBTQI+ communities on Chicago's Southwest Side."
-            />
-            <EventCard
-                href="https://www.eventbrite.com/e/alpfa-x-lsp-yoga-cafecito-community-event-in-pilsen-tickets-1964575597497?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl"
-                target="_blank"
-                imageSrc={`${base}images/cafecito.png`}
-                date="NOVEMBER 23, 2025"
-                title="Yoga & Cafecito with ALPFA"
-                description="A special community event with yoga, cafecito, and a mercadito to support local vendors."
-            />
-            <EventCard
-                href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
-                target="_blank"
-                imageSrc={`${base}images/onenightonly.png`}
-                date="NOVEMBER 28, 2025"
-                title="LSP x One Night Only"
-                description="A variety show featuring Chicago's best burlesque and drag artists."
-            />
-            <EventCard
-                href={`${base}gala`}
-                imageSrc={`${base}images/gala.png`}
-                date="DECEMBER 11, 2025"
-                title="Noche Inolvidable Gala"
-                description="Our first annual gala celebrating community and our teacher training graduates."
-            />
+          <EventCard
+            href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
+            target="_blank"
+            imageSrc={`${base}images/onenightonly.png`}
+            date="NOVEMBER 28, 2025"
+            title="LSP x One Night Only"
+            description="A variety show featuring Chicago's best burlesque and drag artists."
+          />
+          <EventCard
+            href="https://www.zeffy.com/en-US/ticketing/embodied-resistance-session"
+            target="_blank"
+            imageSrc={`${base}images/embodied.png`}
+            date="NOVEMBER 30, 2025"
+            title="Embodied Resistance Session"
+            description="A night of trauma sensitive yoga, meditation, and dance-movement therapy."
+          />
+          <EventCard
+            href={`${base}gala`}
+            imageSrc={`${base}images/gala.png`}
+            date="DECEMBER 11, 2025"
+            title="Noche Inolvidable Gala"
+            description="Our first annual gala celebrating community and our teacher training graduates."
+          />
         </div>
       </div>
     </section>
-    {/* END: Upcoming Events Section */}
-
-    
   </main>
 </Layout>
+{/* END: Upcoming Events Section */}
