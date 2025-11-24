@@ -76,19 +76,17 @@
                 </div>
             </div>
 
-            <div
-                class="mt-6 flex gap-3 sm:grid sm:grid-flow-row-dense sm:grid-cols-2"
-            >
+            <div class="mt-6 flex flex-col sm:flex-row-reverse gap-3">
                 <button
                     type="button"
-                    class="inline-flex w-full justify-center rounded-lg bg-vibrant-pink px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-pink-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:col-start-2"
+                    class="inline-flex w-full justify-center rounded-lg bg-vibrant-pink px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-pink-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:w-auto"
                     on:click={confirm}
                 >
                     Confirm Check-in
                 </button>
                 <button
                     type="button"
-                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                    class="inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:w-auto"
                     on:click={close}
                 >
                     Cancel
