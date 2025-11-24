@@ -1,33 +1,26 @@
 <script>
     import { createEventDispatcher } from "svelte";
 
-    export let shiftData = {}; // Map of shiftId -> { lead: count, volunteer: count }
-    export let shifts = []; // All generated shifts
+    export let shiftData = {};
+    export let shifts = [];
     export let selectedDate = new Date();
 
     const dispatch = createEventDispatcher();
 
-    // Helper to check if a shift is available
     function isShiftAvailable(shift) {
         const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
-
-        // Check lock
         const now = new Date();
         const lockTime = new Date(shift.start.getTime() - 24 * 60 * 60 * 1000);
         const isLocked = now >= lockTime || now >= shift.start;
 
         if (isLocked) return false;
-
-        // Check capacity
         const isLeadFull = (data.lead || 0) >= 1;
         const isVolunteerFull = (data.volunteer || 0) >= 2;
-
         return !isLeadFull || !isVolunteerFull;
     }
 
-    // Calendar logic
     let currentMonth = new Date(selectedDate);
-    currentMonth.setDate(1); // Start of month
+    currentMonth.setDate(1);
 
     function nextMonth() {
         currentMonth.setMonth(currentMonth.getMonth() + 1);
@@ -42,36 +35,30 @@
     $: year = currentMonth.getFullYear();
     $: month = currentMonth.getMonth();
     $: monthName = currentMonth.toLocaleString("default", { month: "long" });
-
     $: daysInMonth = new Date(year, month + 1, 0).getDate();
-    $: firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 = Sun
+    $: firstDayOfWeek = new Date(year, month, 1).getDay();
 
-    // SAFARI FIX: Helper for consistent string comparison
+    // --- FIX START ---
     const getSafeDateKey = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
         const d = String(date.getDate()).padStart(2, "0");
-        return `${y}/${m}/${d}`;
+        return `${y}-${m}-${d}`; // Matches VolunteerApp format
     };
+    // --- FIX END ---
 
     $: calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
         const date = new Date(year, month, i + 1);
-        // 1. Use safe key for matching
         const dateString = getSafeDateKey(date);
 
-        // Find shifts for this day
         const dayShifts = shifts.filter(
             (s) => getSafeDateKey(s.date) === dateString,
         );
 
-        // Check if ANY shift is available
         const hasAvailableShifts = dayShifts.some((s) => isShiftAvailable(s));
-
-        // 2. Compare using safe keys
         const isSelected = getSafeDateKey(selectedDate) === dateString;
         const isPast = date < new Date().setHours(0, 0, 0, 0);
 
-        // Only show "hasShifts" if there are actually available shifts
         return {
             date,
             day: i + 1,

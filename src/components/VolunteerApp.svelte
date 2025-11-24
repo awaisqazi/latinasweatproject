@@ -13,21 +13,32 @@
     import RegisterModal from "./RegisterModal.svelte";
 
     let shifts = [];
-    let shiftData = {}; // Map of shiftId -> { lead: count, volunteer: count }
+    let shiftData = {};
     let selectedDate = new Date();
 
-    // 1. SAFARI FIX: Helper for stable date keys (YYYY/MM/DD)
-    // Safari parses "2025/08/18" correctly as local time.
+    // --- FIX START ---
+
+    // 1. Generate a standard key (YYYY-MM-DD)
+    // We use hyphens because they are standard for IDs, but we won't use the browser to parse them back.
     const getSafeDateKey = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
         const d = String(date.getDate()).padStart(2, "0");
-        return `${y}/${m}/${d}`;
+        return `${y}-${m}-${d}`;
     };
+
+    // 2. PARSER: Manually reconstruct the Local Date from the key
+    // This bypasses browser inconsistencies (iPhone vs Android) entirely.
+    const parseDateKey = (key) => {
+        if (!key) return new Date();
+        const [y, m, d] = key.split("-").map(Number);
+        return new Date(y, m - 1, d); // Month is 0-indexed in JS constructor
+    };
+
+    // --- FIX END ---
 
     // Week View State
     let currentWeekStart = new Date();
-    // Initialize to Sunday of current week
     currentWeekStart.setDate(
         currentWeekStart.getDate() - currentWeekStart.getDay(),
     );
@@ -40,10 +51,7 @@
     let isSubmitting = false;
 
     onMount(() => {
-        // 1. Generate Shifts
         shifts = generateShifts();
-
-        // 2. Subscribe to Firestore
         const unsubscribe = onSnapshot(collection(db, "shifts"), (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
@@ -51,48 +59,39 @@
             });
             shiftData = data;
         });
-
         return () => unsubscribe();
     });
 
-    // Filter State
     let hideUnavailable = true;
 
-    // Helper to check if a shift is unavailable
     function isShiftUnavailable(shift) {
         const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
-
-        // Check lock
         const now = new Date();
         const lockTime = new Date(shift.start.getTime() - 24 * 60 * 60 * 1000);
         const isLocked = now >= lockTime || now >= shift.start;
 
         if (isLocked) return true;
-
-        // Check capacity
         const isLeadFull = (data.lead || 0) >= 1;
         const isVolunteerFull = (data.volunteer || 0) >= 2;
-
         return isLeadFull && isVolunteerFull;
     }
 
-    // Group shifts by date (filtered)
     $: shiftsByDate = shifts.reduce((acc, shift) => {
         if (hideUnavailable && isShiftUnavailable(shift)) return acc;
-
         const dateKey = getSafeDateKey(shift.date);
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(shift);
         return acc;
     }, {});
 
+    // FIX: Use parseDateKey for sorting
     $: sortedDates = Object.keys(shiftsByDate).sort(
-        (a, b) => new Date(a) - new Date(b),
+        (a, b) => parseDateKey(a) - parseDateKey(b),
     );
 
-    // Week View Logic
+    // FIX: Use parseDateKey for filtering
     $: visibleDates = sortedDates.filter((dateKey) => {
-        const date = new Date(dateKey);
+        const date = parseDateKey(dateKey);
         const endOfWeek = new Date(currentWeekStart);
         endOfWeek.setDate(endOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
@@ -113,16 +112,12 @@
 
     async function handleDateSelect(event) {
         selectedDate = event.detail;
-        // Update current week to match selected date
         const newWeekStart = new Date(selectedDate);
         newWeekStart.setDate(newWeekStart.getDate() - newWeekStart.getDay());
         newWeekStart.setHours(0, 0, 0, 0);
         currentWeekStart = newWeekStart;
-
-        // Wait for DOM to update
         await tick();
 
-        // 3. SAFARI FIX: Use the safe key for ID lookup
         const dateKey = getSafeDateKey(selectedDate);
         const element = document.getElementById(`date-${dateKey}`);
         if (element) {
@@ -130,7 +125,6 @@
         }
     }
 
-    // Swipe Logic
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -159,25 +153,18 @@
         const { name, email, phone, shift, role } = event.detail;
         const shiftId = shift.id;
         const shiftRef = doc(db, "shifts", shiftId);
-
         try {
             await runTransaction(db, async (transaction) => {
                 const sfDoc = await transaction.get(shiftRef);
-
                 let currentData = { lead: 0, volunteer: 0, registrations: [] };
                 if (sfDoc.exists()) {
                     currentData = sfDoc.data();
                 }
-
-                // Check capacity again inside transaction
                 const capacity = role === "lead" ? 1 : 2;
                 const currentCount = currentData[role] || 0;
-
                 if (currentCount >= capacity) {
                     throw "Sorry, this spot was just taken!";
                 }
-
-                // Update count and add registration
                 const newCount = currentCount + 1;
                 const newRegistration = {
                     name,
@@ -186,7 +173,6 @@
                     role,
                     timestamp: new Date().toISOString(),
                 };
-
                 transaction.set(shiftRef, {
                     ...currentData,
                     [role]: newCount,
@@ -196,7 +182,6 @@
                     ],
                 });
             });
-
             alert("Successfully registered!");
             isModalOpen = false;
         } catch (e) {
@@ -209,7 +194,6 @@
 </script>
 
 <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
-    <!-- Sidebar (Calendar) -->
     <div class="lg:w-1/3 xl:w-1/4">
         <div class="sticky top-24 space-y-6">
             <div class="bg-vibrant-pink rounded-2xl p-6 text-white shadow-xl">
@@ -249,7 +233,6 @@
                 </label>
             </div>
 
-            <!-- Note Section (Cleaned up) -->
             <div
                 class="bg-blue-50 rounded-xl p-4 text-sm text-blue-800 shadow-sm"
             >
@@ -259,13 +242,11 @@
         </div>
     </div>
 
-    <!-- Main Content (Shifts List) -->
     <div
         class="flex-1 space-y-6"
         on:touchstart={handleTouchStart}
         on:touchend={handleTouchEnd}
     >
-        <!-- Week Navigation -->
         <div
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
@@ -301,7 +282,7 @@
                     <h3
                         class="text-xl font-bold text-gray-800 mb-4 py-2 border-b border-gray-100"
                     >
-                        {new Date(dateKey).toLocaleDateString("en-US", {
+                        {parseDateKey(dateKey).toLocaleDateString("en-US", {
                             weekday: "long",
                             month: "long",
                             day: "numeric",
