@@ -1,12 +1,22 @@
 import { Timestamp } from "firebase/firestore";
 
+// Helper: Get "YYYY-MM-DD" string in LOCAL time (not UTC)
+const toLocalISOString = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 export const getShiftId = (shift) => {
-    // Create a unique ID based on start time and end time
-    // Format: YYYY-MM-DD_HHmm-HHmm
-    const dateStr = shift.start.toISOString().split('T')[0];
-    const startStr = shift.start.getHours().toString().padStart(2, '0') + shift.start.getMinutes().toString().padStart(2, '0');
-    const endStr = shift.end.getHours().toString().padStart(2, '0') + shift.end.getMinutes().toString().padStart(2, '0');
-    return `${dateStr}_${startStr}-${endStr}`;
+    // Generate ID using local time numbers to avoid timezone shifts
+    const dateStr = toLocalISOString(shift.start);
+    const startH = shift.start.getHours().toString().padStart(2, '0');
+    const startM = shift.start.getMinutes().toString().padStart(2, '0');
+    const endH = shift.end.getHours().toString().padStart(2, '0');
+    const endM = shift.end.getMinutes().toString().padStart(2, '0');
+
+    return `${dateStr}_${startH}${startM}-${endH}${endM}`;
 };
 
 export const generateShifts = (startDate = new Date()) => {
@@ -14,18 +24,14 @@ export const generateShifts = (startDate = new Date()) => {
     const current = new Date(startDate);
     current.setHours(0, 0, 0, 0);
 
-    // Calculate end date: End of the NEXT month
+    // Calculate end date (end of next month)
     const nextMonth = new Date(current);
-    nextMonth.setMonth(nextMonth.getMonth() + 2); // Jump 2 months ahead
-    nextMonth.setDate(0); // Go back to last day of previous month (which is end of next month relative to start)
-    // Actually, let's be more precise.
-    // If today is Nov 23, next month is Dec. End of next month is Dec 31.
-    // current.getMonth() + 2 sets it to Jan. setDate(0) sets it to Dec 31. Correct.
-
+    nextMonth.setMonth(nextMonth.getMonth() + 2);
+    nextMonth.setDate(0);
     const endDate = nextMonth;
 
     while (current <= endDate) {
-        const dayOfWeek = current.getDay(); // 0 = Sun, 1 = Mon, ...
+        const dayOfWeek = current.getDay();
         const year = current.getFullYear();
         const month = current.getMonth();
         const date = current.getDate();
@@ -34,14 +40,13 @@ export const generateShifts = (startDate = new Date()) => {
             const start = new Date(year, month, date, startHour, startMinute);
             const end = new Date(year, month, date, endHour, endMinute);
 
-            // Skip if shift is in the past (optional, but good for UI)
-            // Keeping all generated shifts for now, filtering can happen in UI
-
             shifts.push({
                 id: getShiftId({ start, end }),
                 start,
                 end,
-                date: new Date(year, month, date), // For grouping
+                date: new Date(year, month, date),
+                // CRITICAL FIX: Add a pre-calculated string for safe matching
+                dateStr: toLocalISOString(new Date(year, month, date))
             });
         };
 
@@ -89,7 +94,6 @@ export const generateShifts = (startDate = new Date()) => {
             for (let h = 7; h < 12; h++) addShift(h, 0, h + 1, 0);
         }
 
-        // Next day
         current.setDate(current.getDate() + 1);
     }
 

@@ -7,6 +7,14 @@
 
     const dispatch = createEventDispatcher();
 
+    // Helper: Consistent String comparison
+    const toDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    };
+
     function isShiftAvailable(shift) {
         const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
         const now = new Date();
@@ -14,9 +22,7 @@
         const isLocked = now >= lockTime || now >= shift.start;
 
         if (isLocked) return false;
-        const isLeadFull = (data.lead || 0) >= 1;
-        const isVolunteerFull = (data.volunteer || 0) >= 2;
-        return !isLeadFull || !isVolunteerFull;
+        return !((data.lead || 0) >= 1 && (data.volunteer || 0) >= 2);
     }
 
     let currentMonth = new Date(selectedDate);
@@ -38,25 +44,17 @@
     $: daysInMonth = new Date(year, month + 1, 0).getDate();
     $: firstDayOfWeek = new Date(year, month, 1).getDay();
 
-    // --- FIX START ---
-    const getSafeDateKey = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`; // Matches VolunteerApp format
-    };
-    // --- FIX END ---
-
     $: calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
         const date = new Date(year, month, i + 1);
-        const dateString = getSafeDateKey(date);
+        const dateString = toDateStr(date);
 
+        // Filter using the safe string key
         const dayShifts = shifts.filter(
-            (s) => getSafeDateKey(s.date) === dateString,
+            (s) => (s.dateStr || toDateStr(s.date)) === dateString,
         );
 
         const hasAvailableShifts = dayShifts.some((s) => isShiftAvailable(s));
-        const isSelected = getSafeDateKey(selectedDate) === dateString;
+        const isSelected = toDateStr(selectedDate) === dateString;
         const isPast = date < new Date().setHours(0, 0, 0, 0);
 
         return {

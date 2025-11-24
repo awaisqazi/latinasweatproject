@@ -16,39 +16,39 @@
     let shiftData = {};
     let selectedDate = new Date();
 
-    // --- FIX START ---
-
-    // 1. Generate a standard key (YYYY-MM-DD)
-    // We use hyphens because they are standard for IDs, but we won't use the browser to parse them back.
-    const getSafeDateKey = (date) => {
+    // Helper: Convert Date -> "YYYY-MM-DD"
+    const toDateStr = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
         const d = String(date.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
     };
 
-    // 2. PARSER: Manually reconstruct the Local Date from the key
-    // This bypasses browser inconsistencies (iPhone vs Android) entirely.
-    const parseDateKey = (key) => {
-        if (!key) return new Date();
-        const [y, m, d] = key.split("-").map(Number);
-        return new Date(y, m - 1, d); // Month is 0-indexed in JS constructor
+    // Helper: Get start of week (Sunday)
+    const getStartOfWeek = (date) => {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day;
+        d.setDate(diff);
+        return d;
     };
 
-    // --- FIX END ---
+    // Helper: Add days to a String date
+    const addDays = (dateStr, days) => {
+        const [y, m, d] = dateStr.split("-").map(Number);
+        const date = new Date(y, m - 1, d);
+        date.setDate(date.getDate() + days);
+        return toDateStr(date);
+    };
 
-    // Week View State
-    let currentWeekStart = new Date();
-    currentWeekStart.setDate(
-        currentWeekStart.getDate() - currentWeekStart.getDay(),
-    );
-    currentWeekStart.setHours(0, 0, 0, 0);
+    // State is tracked by STRINGs to be browser-safe
+    let currentWeekStartStr = toDateStr(getStartOfWeek(new Date()));
 
-    // Modal State
     let isModalOpen = false;
     let selectedShift = null;
     let selectedRole = "";
     let isSubmitting = false;
+    let hideUnavailable = true;
 
     onMount(() => {
         shifts = generateShifts();
@@ -62,13 +62,13 @@
         return () => unsubscribe();
     });
 
-    let hideUnavailable = true;
-
     function isShiftUnavailable(shift) {
         const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
         const now = new Date();
         const lockTime = new Date(shift.start.getTime() - 24 * 60 * 60 * 1000);
-        const isLocked = now >= lockTime || now >= shift.start;
+        const isLocked =
+            now.getTime() >= lockTime.getTime() ||
+            now.getTime() >= shift.start.getTime();
 
         if (isLocked) return true;
         const isLeadFull = (data.lead || 0) >= 1;
@@ -76,71 +76,53 @@
         return isLeadFull && isVolunteerFull;
     }
 
+    // Grouping by Safe String Keys
     $: shiftsByDate = shifts.reduce((acc, shift) => {
         if (hideUnavailable && isShiftUnavailable(shift)) return acc;
-        const dateKey = getSafeDateKey(shift.date);
+        // Use the pre-calculated string from generateShifts
+        const dateKey = shift.dateStr || toDateStr(shift.date);
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(shift);
         return acc;
     }, {});
 
-    // FIX: Use parseDateKey for sorting
-    $: sortedDates = Object.keys(shiftsByDate).sort(
-        (a, b) => parseDateKey(a) - parseDateKey(b),
-    );
+    $: sortedDates = Object.keys(shiftsByDate).sort();
 
-    // FIX: Use parseDateKey for filtering
+    // Filter by String Comparison
     $: visibleDates = sortedDates.filter((dateKey) => {
-        const date = parseDateKey(dateKey);
-        const endOfWeek = new Date(currentWeekStart);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-        return date >= currentWeekStart && date <= endOfWeek;
+        const endOfWeekStr = addDays(currentWeekStartStr, 6);
+        return dateKey >= currentWeekStartStr && dateKey <= endOfWeekStr;
     });
 
+    // Display Title
+    $: currentWeekDisplay = (() => {
+        const [y, m, d] = currentWeekStartStr.split("-").map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString();
+    })();
+
     function nextWeek() {
-        const next = new Date(currentWeekStart);
-        next.setDate(next.getDate() + 7);
-        currentWeekStart = next;
+        currentWeekStartStr = addDays(currentWeekStartStr, 7);
     }
 
     function prevWeek() {
-        const prev = new Date(currentWeekStart);
-        prev.setDate(prev.getDate() - 7);
-        currentWeekStart = prev;
+        currentWeekStartStr = addDays(currentWeekStartStr, -7);
     }
 
     async function handleDateSelect(event) {
-        selectedDate = event.detail;
-        const newWeekStart = new Date(selectedDate);
-        newWeekStart.setDate(newWeekStart.getDate() - newWeekStart.getDay());
-        newWeekStart.setHours(0, 0, 0, 0);
-        currentWeekStart = newWeekStart;
+        const date = event.detail;
+        const weekStart = getStartOfWeek(date);
+        currentWeekStartStr = toDateStr(weekStart);
+
         await tick();
 
-        const dateKey = getSafeDateKey(selectedDate);
+        const dateKey = toDateStr(date);
         const element = document.getElementById(`date-${dateKey}`);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }
 
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function handleTouchStart(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    }
-
-    function handleTouchEnd(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }
-
-    function handleSwipe() {
-        if (touchEndX < touchStartX - 50) nextWeek();
-        if (touchEndX > touchStartX + 50) prevWeek();
-    }
+    // --- SWIPE LOGIC REMOVED HERE ---
 
     function openModal(event) {
         selectedShift = event.detail.shift;
@@ -156,16 +138,14 @@
         try {
             await runTransaction(db, async (transaction) => {
                 const sfDoc = await transaction.get(shiftRef);
-                let currentData = { lead: 0, volunteer: 0, registrations: [] };
-                if (sfDoc.exists()) {
-                    currentData = sfDoc.data();
-                }
+                let currentData = sfDoc.exists()
+                    ? sfDoc.data()
+                    : { lead: 0, volunteer: 0, registrations: [] };
+
                 const capacity = role === "lead" ? 1 : 2;
-                const currentCount = currentData[role] || 0;
-                if (currentCount >= capacity) {
+                if ((currentData[role] || 0) >= capacity)
                     throw "Sorry, this spot was just taken!";
-                }
-                const newCount = currentCount + 1;
+
                 const newRegistration = {
                     name,
                     email,
@@ -173,9 +153,10 @@
                     role,
                     timestamp: new Date().toISOString(),
                 };
+
                 transaction.set(shiftRef, {
                     ...currentData,
-                    [role]: newCount,
+                    [role]: (currentData[role] || 0) + 1,
                     registrations: [
                         ...(currentData.registrations || []),
                         newRegistration,
@@ -242,28 +223,22 @@
         </div>
     </div>
 
-    <div
-        class="flex-1 space-y-6"
-        on:touchstart={handleTouchStart}
-        on:touchend={handleTouchEnd}
-    >
+    <div class="flex-1 space-y-6">
         <div
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
             <button
-                type="button"
                 on:click={prevWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
             >
                 &larr; Previous Week
             </button>
-            <span class="font-bold text-gray-800 hidden md:block">
-                Week of {currentWeekStart.toLocaleDateString()}
-            </span>
+            <span class="font-bold text-gray-800 hidden md:block"
+                >Week of {currentWeekDisplay}</span
+            >
             <button
-                type="button"
                 on:click={nextWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
             >
                 Next Week &rarr;
             </button>
@@ -282,13 +257,18 @@
                     <h3
                         class="text-xl font-bold text-gray-800 mb-4 py-2 border-b border-gray-100"
                     >
-                        {parseDateKey(dateKey).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "long",
-                            day: "numeric",
-                        })}
+                        {(() => {
+                            const [y, m, d] = dateKey.split("-").map(Number);
+                            return new Date(y, m - 1, d).toLocaleDateString(
+                                "en-US",
+                                {
+                                    weekday: "long",
+                                    month: "long",
+                                    day: "numeric",
+                                },
+                            );
+                        })()}
                     </h3>
-
                     <div class="space-y-3">
                         {#each shiftsByDate[dateKey] as shift (shift.id)}
                             <ShiftCard
