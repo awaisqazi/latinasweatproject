@@ -4,6 +4,8 @@
     export let shiftData = {};
     export let shifts = [];
     export let selectedDate = new Date();
+    export let dotCondition = null;
+    export let clickableCondition = null;
 
     const dispatch = createEventDispatcher();
 
@@ -53,14 +55,24 @@
             (s) => (s.dateStr || toDateStr(s.date)) === dateString,
         );
 
-        const hasAvailableShifts = dayShifts.some((s) => isShiftAvailable(s));
+        const isClickable = dayShifts.some((s) =>
+            clickableCondition
+                ? clickableCondition(s, shiftData)
+                : isShiftAvailable(s),
+        );
+
+        const showDot = dayShifts.some((s) =>
+            dotCondition ? dotCondition(s, shiftData) : isShiftAvailable(s),
+        );
+
         const isSelected = toDateStr(selectedDate) === dateString;
         const isPast = date < new Date().setHours(0, 0, 0, 0);
 
         return {
             date,
             day: i + 1,
-            hasShifts: hasAvailableShifts,
+            isClickable,
+            showDot,
             isSelected,
             isPast,
         };
@@ -107,15 +119,15 @@
                 type="button"
                 class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all duration-200 relative
         {day.isSelected ? 'bg-vibrant-pink text-white shadow-md scale-110' : ''}
-        {!day.isSelected && day.hasShifts && !day.isPast
+        {!day.isSelected && day.isClickable && !day.isPast
                     ? 'hover:bg-vibrant-pink/10 text-gray-700 font-medium'
                     : ''}
-        {!day.hasShifts || day.isPast ? 'text-gray-300 cursor-default' : ''}"
-                disabled={!day.hasShifts || day.isPast}
+        {!day.isClickable || day.isPast ? 'text-gray-300 cursor-default' : ''}"
+                disabled={!day.isClickable || day.isPast}
                 on:click={() => selectDate(day.date)}
             >
                 {day.day}
-                {#if day.hasShifts && !day.isSelected && !day.isPast}
+                {#if day.showDot && !day.isSelected && !day.isPast}
                     <div
                         class="absolute bottom-1 w-1 h-1 bg-vibrant-pink rounded-full"
                     ></div>
