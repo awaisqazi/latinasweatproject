@@ -16,10 +16,10 @@
 
     onMount(() => {
         try {
-            // 1. Generate Shifts (Wrap in try-catch in case Safari hates the date math)
+            // 1. Generate Shifts safely
             shifts = generateShifts();
 
-            // 2. Subscribe to Firestore
+            // 2. Subscribe to Firestore with ERROR HANDLING
             const unsubscribe = onSnapshot(
                 collection(db, "shifts"),
                 (snapshot) => {
@@ -32,7 +32,7 @@
                 },
                 (err) => {
                     console.error("Firestore Error:", err);
-                    error = "Database connection failed: " + err.message;
+                    error = "Could not load data. Please refresh.";
                     loading = false;
                 },
             );
@@ -49,7 +49,6 @@
     const isUpcoming = (shift) => {
         if (!shift || !shift.date) return false;
         try {
-            // Compare timestamps to avoid Timezone/Date parsing issues
             const shiftTime = shift.date.getTime();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -72,7 +71,7 @@
         .sort((a, b) => a.start - b.start);
 
     async function handleCheckIn(shiftId, registrationIndex) {
-        if (!confirm("Confirm check-in for this volunteer?")) return;
+        // if (!confirm("Confirm check-in for this volunteer?")) return;
         const shiftRef = doc(db, "shifts", shiftId);
 
         try {
@@ -92,7 +91,7 @@
 
                 transaction.update(shiftRef, { registrations });
             });
-            // Optional: Show toast instead of alert for better UX
+            alert("Check-in successful!");
         } catch (e) {
             console.error("Check-in failed: ", e);
             alert("Check-in failed: " + e);

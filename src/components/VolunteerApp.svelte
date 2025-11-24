@@ -16,7 +16,7 @@
     let shiftData = {};
     let selectedDate = new Date();
 
-    // Helper: Convert Date -> "YYYY-MM-DD"
+    // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -33,7 +33,7 @@
         return d;
     };
 
-    // Helper: Add days to a String date
+    // Helper: Add days to a Date string
     const addDays = (dateStr, days) => {
         const [y, m, d] = dateStr.split("-").map(Number);
         const date = new Date(y, m - 1, d);
@@ -41,7 +41,7 @@
         return toDateStr(date);
     };
 
-    // State is tracked by STRINGs to be browser-safe
+    // State is tracked by STRINGS to be browser-safe
     let currentWeekStartStr = toDateStr(getStartOfWeek(new Date()));
 
     let isModalOpen = false;
@@ -51,15 +51,22 @@
     let hideUnavailable = true;
 
     onMount(() => {
-        shifts = generateShifts();
-        const unsubscribe = onSnapshot(collection(db, "shifts"), (snapshot) => {
-            const data = {};
-            snapshot.forEach((doc) => {
-                data[doc.id] = doc.data();
-            });
-            shiftData = data;
-        });
-        return () => unsubscribe();
+        try {
+            shifts = generateShifts();
+            const unsubscribe = onSnapshot(
+                collection(db, "shifts"),
+                (snapshot) => {
+                    const data = {};
+                    snapshot.forEach((doc) => {
+                        data[doc.id] = doc.data();
+                    });
+                    shiftData = data;
+                },
+            );
+            return () => unsubscribe();
+        } catch (e) {
+            console.error("Error initializing shifts:", e);
+        }
     });
 
     function isShiftUnavailable(shift) {
@@ -79,7 +86,6 @@
     // Grouping by Safe String Keys
     $: shiftsByDate = shifts.reduce((acc, shift) => {
         if (hideUnavailable && isShiftUnavailable(shift)) return acc;
-        // Use the pre-calculated string from generateShifts
         const dateKey = shift.dateStr || toDateStr(shift.date);
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(shift);
@@ -121,8 +127,6 @@
             element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }
-
-    // --- SWIPE LOGIC REMOVED HERE ---
 
     function openModal(event) {
         selectedShift = event.detail.shift;
@@ -228,8 +232,9 @@
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
             <button
+                type="button"
                 on:click={prevWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
             >
                 &larr; Previous Week
             </button>
@@ -237,8 +242,9 @@
                 >Week of {currentWeekDisplay}</span
             >
             <button
+                type="button"
                 on:click={nextWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
+                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
             >
                 Next Week &rarr;
             </button>

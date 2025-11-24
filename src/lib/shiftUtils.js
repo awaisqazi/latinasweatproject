@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
-// Helper: Get "YYYY-MM-DD" string in LOCAL time (not UTC)
+// SAFARI FIX: Generate Local YYYY-MM-DD string manually
+// toISOString() converts to UTC, which can shift the date by one day.
 const toLocalISOString = (date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -9,7 +10,7 @@ const toLocalISOString = (date) => {
 };
 
 export const getShiftId = (shift) => {
-    // Generate ID using local time numbers to avoid timezone shifts
+    // Create ID based on LOCAL time
     const dateStr = toLocalISOString(shift.start);
     const startH = shift.start.getHours().toString().padStart(2, '0');
     const startM = shift.start.getMinutes().toString().padStart(2, '0');
@@ -24,7 +25,6 @@ export const generateShifts = (startDate = new Date()) => {
     const current = new Date(startDate);
     current.setHours(0, 0, 0, 0);
 
-    // Calculate end date (end of next month)
     const nextMonth = new Date(current);
     nextMonth.setMonth(nextMonth.getMonth() + 2);
     nextMonth.setDate(0);
@@ -37,11 +37,10 @@ export const generateShifts = (startDate = new Date()) => {
         const date = current.getDate();
 
         const addShift = (startHour, startMinute, endHour, endMinute) => {
-            // SAFE FOR SAFARI: Use integer constructor
+            // Use integer constructor for 100% safe Date creation
             const start = new Date(year, month, date, startHour, startMinute);
             const end = new Date(year, month, date, endHour, endMinute);
-
-            // Re-create the date object for the shift property to ensure it's a valid object
+            // Create a clean date object for the shift property
             const shiftDate = new Date(year, month, date);
 
             shifts.push({
@@ -49,44 +48,45 @@ export const generateShifts = (startDate = new Date()) => {
                 start,
                 end,
                 date: shiftDate,
+                // Add string for safe comparison in Svelte
                 dateStr: toLocalISOString(shiftDate)
             });
         };
 
-        // Sunday: 7am-12pm (Hourly), 5pm-9pm (Hourly)
+        // Sunday
         if (dayOfWeek === 0) {
             for (let h = 7; h < 12; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-        // Monday: 5:30am-6am, 6am-9am (Hourly), 5pm-9pm (Hourly)
+        // Monday
         if (dayOfWeek === 1) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-        // Tuesday: 5:30am-6am, 6am-8am (Hourly)
+        // Tuesday
         if (dayOfWeek === 2) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 8; h++) addShift(h, 0, h + 1, 0);
         }
-        // Wednesday: 5:30am-6am, 6am-9am (Hourly), 5pm-9pm (Hourly)
+        // Wednesday
         if (dayOfWeek === 3) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 21; h++) addShift(h, 0, h + 1, 0);
         }
-        // Thursday: 5:30am-6am, 6am-9am (Hourly)
+        // Thursday
         if (dayOfWeek === 4) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
         }
-        // Friday: 5:30am-6am, 6am-9am (Hourly), 5pm-8pm (Hourly)
+        // Friday
         if (dayOfWeek === 5) {
             addShift(5, 30, 6, 0);
             for (let h = 6; h < 9; h++) addShift(h, 0, h + 1, 0);
             for (let h = 17; h < 20; h++) addShift(h, 0, h + 1, 0);
         }
-        // Saturday: 7am-12pm (Hourly)
+        // Saturday
         if (dayOfWeek === 6) {
             for (let h = 7; h < 12; h++) addShift(h, 0, h + 1, 0);
         }
