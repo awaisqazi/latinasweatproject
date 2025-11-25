@@ -32,8 +32,14 @@
     $: isPast = now >= shift.start;
     $: isLocked = now >= lockTime || isPast;
 
-    $: isLeadFull = taken.lead >= LEAD_CAPACITY;
-    $: isVolunteerFull = taken.volunteer >= VOLUNTEER_CAPACITY;
+    $: registrations = taken.registrations || [];
+    $: leadCount = registrations.filter((r) => r.role === "lead").length;
+    $: volunteerCount = registrations.filter(
+        (r) => r.role === "volunteer",
+    ).length;
+
+    $: isLeadFull = leadCount >= LEAD_CAPACITY;
+    $: isVolunteerFull = volunteerCount >= VOLUNTEER_CAPACITY;
 
     function handleSignup(role) {
         if (isLocked) return;
@@ -57,8 +63,10 @@
             >
         {:else}
             <span class="text-xs text-gray-500 mt-1">
-                {LEAD_CAPACITY - taken.lead} Lead left • {VOLUNTEER_CAPACITY -
-                    taken.volunteer} Vol. left
+                {Math.max(0, LEAD_CAPACITY - leadCount)} Lead left • {Math.max(
+                    0,
+                    VOLUNTEER_CAPACITY - volunteerCount,
+                )} Vol. left
             </span>
         {/if}
     </div>

@@ -117,10 +117,23 @@
 
                 if (!registrations[index]) throw "Registration not found!";
 
+                // Get role to update counts
+                const removedRole = registrations[index].role;
+
                 // Remove the volunteer
                 registrations.splice(index, 1);
 
-                transaction.update(shiftRef, { registrations });
+                // Prepare updates
+                const updates = { registrations };
+
+                if (removedRole === "lead") {
+                    updates.lead = Math.max(0, (data.lead || 0) - 1);
+                } else {
+                    // Default to volunteer if role is missing or 'volunteer'
+                    updates.volunteer = Math.max(0, (data.volunteer || 0) - 1);
+                }
+
+                transaction.update(shiftRef, updates);
             });
         } catch (e) {
             console.error("Remove failed:", e);

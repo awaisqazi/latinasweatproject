@@ -78,8 +78,15 @@
             now.getTime() >= shift.start.getTime();
 
         if (isLocked) return true;
-        const isLeadFull = (data.lead || 0) >= 1;
-        const isVolunteerFull = (data.volunteer || 0) >= 2;
+        const registrations = data.registrations || [];
+        const leadCount = registrations.filter((r) => r.role === "lead").length;
+        const volunteerCount = registrations.filter(
+            (r) => r.role === "volunteer",
+        ).length;
+
+        if (isLocked) return true;
+        const isLeadFull = leadCount >= 1;
+        const isVolunteerFull = volunteerCount >= 2;
         return isLeadFull && isVolunteerFull;
     }
 
@@ -146,8 +153,13 @@
                     ? sfDoc.data()
                     : { lead: 0, volunteer: 0, registrations: [] };
 
+                const registrations = currentData.registrations || [];
+                const currentRoleCount = registrations.filter(
+                    (r) => r.role === role,
+                ).length;
+
                 const capacity = role === "lead" ? 1 : 2;
-                if ((currentData[role] || 0) >= capacity)
+                if (currentRoleCount >= capacity)
                     throw "Sorry, this spot was just taken!";
 
                 const newRegistration = {
@@ -158,13 +170,12 @@
                     timestamp: new Date().toISOString(),
                 };
 
+                // We don't need to manually update lead/volunteer counts anymore
+                // as we calculate them dynamically, but we can keep them for legacy support if needed.
+                // For now, let's just update registrations.
                 transaction.set(shiftRef, {
                     ...currentData,
-                    [role]: (currentData[role] || 0) + 1,
-                    registrations: [
-                        ...(currentData.registrations || []),
-                        newRegistration,
-                    ],
+                    registrations: [...registrations, newRegistration],
                 });
             });
             alert("Successfully registered!");
