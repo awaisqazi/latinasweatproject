@@ -13,6 +13,8 @@
     import RegisterModal from "./RegisterModal.svelte";
 
     let shifts = [];
+    let generatedShifts = [];
+    let customShifts = [];
     let shiftData = {};
     let selectedDate = new Date();
 
@@ -52,8 +54,9 @@
 
     onMount(() => {
         try {
-            shifts = generateShifts();
-            const unsubscribe = onSnapshot(
+            generatedShifts = generateShifts();
+
+            const unsubShifts = onSnapshot(
                 collection(db, "shifts"),
                 (snapshot) => {
                     const data = {};
@@ -61,13 +64,56 @@
                         data[doc.id] = doc.data();
                     });
                     shiftData = data;
+                    combineShifts();
                 },
             );
-            return () => unsubscribe();
+
+            const unsubCustom = onSnapshot(
+                collection(db, "custom_shifts"),
+                (snapshot) => {
+                    const custom = [];
+                    snapshot.forEach((doc) => {
+                        const d = doc.data();
+                        const start = d.start.toDate();
+                        const end = d.end.toDate();
+                        const date = new Date(start);
+                        date.setHours(0, 0, 0, 0);
+
+                        custom.push({
+                            id: doc.id,
+                            start,
+                            end,
+                            date,
+                            dateStr: toDateStr(date),
+                            isCustom: true,
+                            leadCapacity: d.leadCapacity,
+                            volunteerCapacity: d.volunteerCapacity,
+                        });
+                    });
+                    customShifts = custom;
+                    combineShifts();
+                },
+            );
+
+            return () => {
+                unsubShifts();
+                unsubCustom();
+            };
         } catch (e) {
             console.error("Error initializing shifts:", e);
         }
     });
+
+    function combineShifts() {
+        const activeGenerated = generatedShifts.filter((s) => {
+            const data = shiftData[s.id];
+            return !data?.cancelled;
+        });
+
+        const combined = [...activeGenerated, ...customShifts];
+        combined.sort((a, b) => a.start - b.start);
+        shifts = combined;
+    }
 
     function isShiftUnavailable(shift) {
         const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
@@ -85,8 +131,14 @@
         ).length;
 
         if (isLocked) return true;
-        const isLeadFull = leadCount >= 1;
-        const isVolunteerFull = volunteerCount >= 2;
+
+        const leadCap =
+            shift.leadCapacity !== undefined ? shift.leadCapacity : 1;
+        const volCap =
+            shift.volunteerCapacity !== undefined ? shift.volunteerCapacity : 2;
+
+        const isLeadFull = leadCount >= leadCap;
+        const isVolunteerFull = volunteerCount >= volCap;
         return isLeadFull && isVolunteerFull;
     }
 
@@ -158,7 +210,14 @@
                     (r) => r.role === role,
                 ).length;
 
-                const capacity = role === "lead" ? 1 : 2;
+                const capacity =
+                    role === "lead"
+                        ? shift.leadCapacity !== undefined
+                            ? shift.leadCapacity
+                            : 1
+                        : shift.volunteerCapacity !== undefined
+                          ? shift.volunteerCapacity
+                          : 2;
                 if (currentRoleCount >= capacity)
                     throw "Sorry, this spot was just taken!";
 

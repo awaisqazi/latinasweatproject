@@ -2,13 +2,14 @@
     import { createEventDispatcher, onDestroy } from "svelte";
 
     export let shift;
-    export let taken = { lead: 0, volunteer: 0 }; // From Firestore
+    export let taken = { lead: 0, volunteer: 0, registrations: [] }; // From Firestore
 
     const dispatch = createEventDispatcher();
 
     // Capacity
-    const LEAD_CAPACITY = 1;
-    const VOLUNTEER_CAPACITY = 2;
+    $: leadCapacity = shift.leadCapacity !== undefined ? shift.leadCapacity : 1;
+    $: volunteerCapacity =
+        shift.volunteerCapacity !== undefined ? shift.volunteerCapacity : 2;
 
     // Time formatting
     const formatTime = (date) => {
@@ -38,8 +39,8 @@
         (r) => r.role === "volunteer",
     ).length;
 
-    $: isLeadFull = leadCount >= LEAD_CAPACITY;
-    $: isVolunteerFull = volunteerCount >= VOLUNTEER_CAPACITY;
+    $: isLeadFull = leadCount >= leadCapacity;
+    $: isVolunteerFull = volunteerCount >= volunteerCapacity;
 
     function handleSignup(role) {
         if (isLocked) return;
@@ -63,9 +64,9 @@
             >
         {:else}
             <span class="text-xs text-gray-500 mt-1">
-                {Math.max(0, LEAD_CAPACITY - leadCount)} Lead left • {Math.max(
+                {Math.max(0, leadCapacity - leadCount)} Lead left • {Math.max(
                     0,
-                    VOLUNTEER_CAPACITY - volunteerCount,
+                    volunteerCapacity - volunteerCount,
                 )} Vol. left
             </span>
         {/if}

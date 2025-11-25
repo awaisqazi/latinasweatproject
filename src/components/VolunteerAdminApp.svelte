@@ -6,8 +6,12 @@
         onSnapshot,
         doc,
         runTransaction,
+        addDoc,
+        deleteDoc,
+        setDoc,
+        Timestamp,
     } from "firebase/firestore";
-    import { generateShifts } from "../lib/shiftUtils";
+    import { generateShifts, getShiftId } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
 
     // --- Authentication ---
@@ -26,11 +30,25 @@
     }
 
     // --- Data & State ---
-    let shifts = [];
-    let shiftData = {};
+    let shifts = []; // Combined shifts
+    let generatedShifts = []; // Base generated shifts
+    let customShifts = []; // Fetched custom shifts
+    let shiftData = {}; // Registration data
     let loading = true;
     let error = null;
     let selectedDate = new Date();
+
+    // Add Shift Form State
+    let addShiftDate = "";
+    let addShiftTime = "18:00";
+    let addShiftDuration = 60; // minutes
+    let addShiftLeadCap = 1;
+    let addShiftVolCap = 2;
+    let isAddingShift = false;
+
+    // Bulk Upload State
+    let csvFile;
+    let isUploading = false;
 
     // Collapsible State
     let expandedShiftIds = new Set();
@@ -72,8 +90,10 @@
 
     onMount(() => {
         try {
-            shifts = generateShifts();
-            const unsubscribe = onSnapshot(
+            generatedShifts = generateShifts();
+
+            // Subscribe to standard shift data (registrations/cancellations)
+            const unsubShifts = onSnapshot(
                 collection(db, "shifts"),
                 (snapshot) => {
                     const data = {};
@@ -81,15 +101,53 @@
                         data[doc.id] = doc.data();
                     });
                     shiftData = data;
+                    combineShifts();
+                },
+                (err) => {
+                    console.error("Firestore Error (Shifts):", err);
+                    error = "Could not load shift data.";
+                },
+            );
+
+            // Subscribe to custom shifts
+            const unsubCustom = onSnapshot(
+                collection(db, "custom_shifts"),
+                (snapshot) => {
+                    const custom = [];
+                    snapshot.forEach((doc) => {
+                        const d = doc.data();
+                        // Convert Timestamp to Date
+                        const start = d.start.toDate();
+                        const end = d.end.toDate();
+                        // Create date object for grouping
+                        const date = new Date(start);
+                        date.setHours(0, 0, 0, 0);
+
+                        custom.push({
+                            id: doc.id,
+                            start,
+                            end,
+                            date,
+                            dateStr: toDateStr(date),
+                            isCustom: true,
+                            leadCapacity: d.leadCapacity,
+                            volunteerCapacity: d.volunteerCapacity,
+                        });
+                    });
+                    customShifts = custom;
+                    combineShifts();
                     loading = false;
                 },
                 (err) => {
-                    console.error("Firestore Error:", err);
-                    error = "Could not load data.";
-                    loading = false;
+                    console.error("Firestore Error (Custom):", err);
+                    error = "Could not load custom shifts.";
                 },
             );
-            return () => unsubscribe();
+
+            return () => {
+                unsubShifts();
+                unsubCustom();
+            };
         } catch (e) {
             console.error("App Error:", e);
             error = e.message;
@@ -97,7 +155,161 @@
         }
     });
 
+    function combineShifts() {
+        // 1. Filter out cancelled standard shifts
+        const activeGenerated = generatedShifts.filter((s) => {
+            const data = shiftData[s.id];
+            return !data?.cancelled;
+        });
+
+        // 2. Combine with custom shifts
+        const combined = [...activeGenerated, ...customShifts];
+
+        // 3. Sort by start time
+        combined.sort((a, b) => a.start - b.start);
+
+        shifts = combined;
+    }
+
     // --- Actions ---
+
+    async function handleAddShift() {
+        if (!addShiftDate || !addShiftTime) {
+            alert("Please select date and time.");
+            return;
+        }
+
+        isAddingShift = true;
+        try {
+            const [y, m, d] = addShiftDate.split("-").map(Number);
+            const [h, min] = addShiftTime.split(":").map(Number);
+
+            const start = new Date(y, m - 1, d, h, min);
+            const end = new Date(start.getTime() + addShiftDuration * 60000);
+
+            await addDoc(collection(db, "custom_shifts"), {
+                start: Timestamp.fromDate(start),
+                end: Timestamp.fromDate(end),
+                leadCapacity: addShiftLeadCap,
+                volunteerCapacity: addShiftVolCap,
+                createdAt: Timestamp.now(),
+            });
+
+            alert("Shift added successfully!");
+            // Reset form
+            addShiftTime = "18:00";
+            addShiftDuration = 60;
+        } catch (e) {
+            console.error("Add shift failed:", e);
+            alert("Failed to add shift: " + e.message);
+        } finally {
+            isAddingShift = false;
+        }
+    }
+
+    async function handleBulkUpload() {
+        if (!csvFile) {
+            alert("Please select a CSV file first.");
+            return;
+        }
+
+        isUploading = true;
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            try {
+                const text = e.target.result;
+                const lines = text.split("\n");
+                let successCount = 0;
+                let failCount = 0;
+
+                // Skip header if present (simple check: if first line contains "Date")
+                const startIdx = lines[0].toLowerCase().includes("date")
+                    ? 1
+                    : 0;
+
+                for (let i = startIdx; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    try {
+                        // Expected: Date, StartTime, Duration, LeadCapacity, VolunteerCapacity
+                        // Example: 2025-11-26, 18:00, 60, 1, 2
+                        const [dateStr, timeStr, durStr, leadStr, volStr] = line
+                            .split(",")
+                            .map((s) => s.trim());
+
+                        if (!dateStr || !timeStr) continue;
+
+                        const [y, m, d] = dateStr.split("-").map(Number);
+                        const [h, min] = timeStr.split(":").map(Number);
+                        const duration = Number(durStr) || 60;
+                        const leadCap = Number(leadStr) || 1;
+                        const volCap = Number(volStr) || 2;
+
+                        const start = new Date(y, m - 1, d, h, min);
+                        const end = new Date(
+                            start.getTime() + duration * 60000,
+                        );
+
+                        await addDoc(collection(db, "custom_shifts"), {
+                            start: Timestamp.fromDate(start),
+                            end: Timestamp.fromDate(end),
+                            leadCapacity: leadCap,
+                            volunteerCapacity: volCap,
+                            createdAt: Timestamp.now(),
+                        });
+                        successCount++;
+                    } catch (err) {
+                        console.error(
+                            `Failed to parse line ${i + 1}:`,
+                            line,
+                            err,
+                        );
+                        failCount++;
+                    }
+                }
+                alert(
+                    `Upload complete. Added: ${successCount}, Failed: ${failCount}`,
+                );
+                csvFile = null; // Reset
+            } catch (err) {
+                alert("Upload failed: " + err.message);
+            } finally {
+                isUploading = false;
+            }
+        };
+
+        reader.readAsText(csvFile);
+    }
+
+    async function handleDeleteShift(shift) {
+        if (
+            !confirm(
+                "Are you sure you want to DELETE this shift? This cannot be undone.",
+            )
+        )
+            return;
+
+        try {
+            if (shift.isCustom) {
+                // Permanently delete custom shift
+                await deleteDoc(doc(db, "custom_shifts", shift.id));
+            } else {
+                // "Cancel" standard shift
+                await setDoc(
+                    doc(db, "shifts", shift.id),
+                    {
+                        cancelled: true,
+                    },
+                    { merge: true },
+                );
+            }
+        } catch (e) {
+            console.error("Delete failed:", e);
+            alert("Failed to delete shift: " + e.message);
+        }
+    }
 
     async function handleRemoveVolunteer(shiftId, index) {
         if (
@@ -434,6 +646,146 @@
                         </button>
                     </div>
                 </div>
+                <!-- Add Shift Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide"
+                    >
+                        Add Single Shift
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label
+                                class="block text-xs font-medium text-gray-500 mb-1"
+                                >Date</label
+                            >
+                            <input
+                                type="date"
+                                bind:value={addShiftDate}
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                            />
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Time</label
+                                >
+                                <input
+                                    type="time"
+                                    bind:value={addShiftTime}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Duration (m)</label
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={addShiftDuration}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Lead Cap</label
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={addShiftLeadCap}
+                                    min="0"
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Vol Cap</label
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={addShiftVolCap}
+                                    min="0"
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            on:click={handleAddShift}
+                            disabled={isAddingShift}
+                            class="w-full bg-vibrant-pink text-white font-medium py-2 px-4 rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                            {isAddingShift ? "Adding..." : "Add Shift"}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Upload Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-4"
+                >
+                    <div class="flex justify-between items-center">
+                        <h3
+                            class="font-bold text-gray-800 text-sm uppercase tracking-wide"
+                        >
+                            Bulk Upload
+                        </h3>
+                        <!-- Help Tooltip -->
+                        <div class="group relative flex justify-center">
+                            <span
+                                class="cursor-help text-gray-400 hover:text-gray-600"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path></svg
+                                >
+                            </span>
+                            <div
+                                class="absolute bottom-full mb-2 hidden w-64 p-2 text-xs text-white bg-gray-800 rounded shadow-lg group-hover:block z-50"
+                            >
+                                <p class="font-bold mb-1">CSV Format:</p>
+                                <p>
+                                    Date (YYYY-MM-DD), StartTime (HH:MM),
+                                    Duration (min), LeadCap, VolCap
+                                </p>
+                                <p class="mt-1 text-gray-300">
+                                    Example: 2025-11-26, 18:00, 60, 1, 2
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <input
+                            type="file"
+                            accept=".csv"
+                            on:change={(e) => (csvFile = e.target.files[0])}
+                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                        />
+                        <button
+                            on:click={handleBulkUpload}
+                            disabled={!csvFile || isUploading}
+                            class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                            {isUploading ? "Uploading..." : "Upload CSV"}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -496,7 +848,6 @@
                         },
                         { volunteers: 0, leads: 0 },
                     )}
-
                     <div
                         id="date-{dateKey}"
                         class="scroll-mt-32 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4"
@@ -607,10 +958,15 @@
                                             : 'hover:border-gray-300'}"
                                     >
                                         <!-- Header / Summary -->
-                                        <button
+                                        <div
+                                            role="button"
+                                            tabindex="0"
                                             on:click={() =>
                                                 toggleShift(shift.id)}
-                                            class="w-full text-left p-4 bg-white flex flex-col gap-2"
+                                            on:keydown={(e) =>
+                                                e.key === "Enter" &&
+                                                toggleShift(shift.id)}
+                                            class="w-full text-left p-4 bg-white flex flex-col gap-2 cursor-pointer"
                                         >
                                             <div
                                                 class="flex justify-between items-center w-full"
@@ -646,22 +1002,47 @@
                                                     </span>
                                                 </div>
                                                 <div
-                                                    class="text-gray-400 transform transition-transform duration-200 {isExpanded
-                                                        ? 'rotate-180'
-                                                        : ''}"
+                                                    class="flex items-center gap-2"
                                                 >
-                                                    <svg
-                                                        class="w-5 h-5"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                        ><path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 9l-7 7-7-7"
-                                                        ></path></svg
+                                                    <button
+                                                        on:click|stopPropagation={() =>
+                                                            handleDeleteShift(
+                                                                shift,
+                                                            )}
+                                                        class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                        title="Delete Shift"
                                                     >
+                                                        <svg
+                                                            class="w-5 h-5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                            ><path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                            ></path></svg
+                                                        >
+                                                    </button>
+                                                    <div
+                                                        class="text-gray-400 transform transition-transform duration-200 {isExpanded
+                                                            ? 'rotate-180'
+                                                            : ''}"
+                                                    >
+                                                        <svg
+                                                            class="w-5 h-5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                            ><path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 9l-7 7-7-7"
+                                                            ></path></svg
+                                                        >
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -691,7 +1072,7 @@
                                                     No volunteers registered.
                                                 </p>
                                             {/if}
-                                        </button>
+                                        </div>
 
                                         <!-- Expanded Details (Actions) -->
                                         {#if isExpanded}

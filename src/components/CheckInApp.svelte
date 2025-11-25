@@ -12,6 +12,8 @@
     import CheckInModal from "./CheckInModal.svelte";
 
     let shifts = [];
+    let generatedShifts = [];
+    let customShifts = [];
     let shiftData = {};
     let loading = true;
     let error = null;
@@ -57,11 +59,9 @@
 
     onMount(() => {
         try {
-            // 1. Generate Shifts safely
-            shifts = generateShifts();
+            generatedShifts = generateShifts();
 
-            // 2. Subscribe to Firestore with ERROR HANDLING
-            const unsubscribe = onSnapshot(
+            const unsubShifts = onSnapshot(
                 collection(db, "shifts"),
                 (snapshot) => {
                     const data = {};
@@ -69,7 +69,7 @@
                         data[doc.id] = doc.data();
                     });
                     shiftData = data;
-                    loading = false;
+                    combineShifts();
                 },
                 (err) => {
                     console.error("Firestore Error:", err);
@@ -78,13 +78,58 @@
                 },
             );
 
-            return () => unsubscribe();
+            const unsubCustom = onSnapshot(
+                collection(db, "custom_shifts"),
+                (snapshot) => {
+                    const custom = [];
+                    snapshot.forEach((doc) => {
+                        const d = doc.data();
+                        const start = d.start.toDate();
+                        const end = d.end.toDate();
+                        const date = new Date(start);
+                        date.setHours(0, 0, 0, 0);
+
+                        custom.push({
+                            id: doc.id,
+                            start,
+                            end,
+                            date,
+                            dateStr: toDateStr(date),
+                            isCustom: true,
+                            leadCapacity: d.leadCapacity,
+                            volunteerCapacity: d.volunteerCapacity,
+                        });
+                    });
+                    customShifts = custom;
+                    combineShifts();
+                },
+                (err) => {
+                    console.error("Firestore Error (Custom):", err);
+                },
+            );
+
+            return () => {
+                unsubShifts();
+                unsubCustom();
+            };
         } catch (e) {
             console.error("Critical App Error:", e);
             error = "App failed to load: " + e.message;
             loading = false;
         }
     });
+
+    function combineShifts() {
+        const activeGenerated = generatedShifts.filter((s) => {
+            const data = shiftData[s.id];
+            return !data?.cancelled;
+        });
+
+        const combined = [...activeGenerated, ...customShifts];
+        combined.sort((a, b) => a.start - b.start);
+        shifts = combined;
+        loading = false;
+    }
 
     // Grouping by Safe String Keys
     $: shiftsByDate = shifts.reduce((acc, shift) => {
