@@ -23,56 +23,57 @@ import "@/styles/global.css";
         />
     </head>
     <body
-        class="bg-off-black text-white font-['Rubik'] min-h-screen flex flex-col overflow-hidden"
+        class="bg-off-black text-white font-['Rubik'] min-h-screen flex flex-col lg:h-screen lg:overflow-hidden"
     >
-        <!-- Header (15%) -->
+        <!-- Header (10% on Desktop) -->
         <header
-            class="h-[15vh] flex items-center justify-between px-8 md:px-16 bg-off-black z-20 relative border-b border-white/10"
+            class="flex-none py-4 px-4 md:px-8 lg:h-[10vh] lg:py-0 flex items-center justify-between bg-off-black z-20 relative border-b border-white/10"
         >
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 md:gap-6">
                 <!-- Use the requested logo asset -->
                 <img
                     src="/logo3.png"
                     alt="Logo"
-                    class="h-16 w-auto object-contain"
+                    class="h-12 md:h-16 w-auto object-contain"
                 />
                 <h1
-                    class="text-3xl md:text-5xl font-bold tracking-wider text-vibrant-pink uppercase drop-shadow-lg"
+                    class="text-2xl md:text-3xl lg:text-5xl font-bold tracking-wider text-vibrant-pink uppercase drop-shadow-lg"
                 >
                     Noche Inolvidable
                 </h1>
             </div>
             <div class="hidden md:block text-right">
                 <p
-                    class="text-lg text-gray-400 uppercase tracking-[0.2em] font-light"
+                    class="text-sm md:text-lg text-gray-400 uppercase tracking-[0.2em] font-light"
                 >
                     Live Fundraising
                 </p>
             </div>
         </header>
 
-        <!-- Main Stage (70% - 20% Thermometer + 50% Content) -->
-        <main class="h-[70vh] flex flex-col px-8 md:px-16 py-6 relative z-10">
-            <!-- Thermometer Section (20% of total height approx, but flex-grow to fill space) -->
+        <!-- Main Stage (80% on Desktop) -->
+        <main
+            class="flex-grow flex flex-col px-4 md:px-8 lg:px-16 py-4 lg:py-2 relative z-10 overflow-y-auto lg:overflow-hidden pb-32 lg:pb-0 lg:h-[80vh]"
+        >
+            <!-- Thermometer Section (20% of Main = 16% Total) -->
             <div
-                class="flex-none h-[25%] flex items-center justify-center w-full mb-8"
+                class="flex-none mb-8 lg:mb-2 lg:h-[20%] flex items-center justify-center w-full"
             >
                 <Thermometer client:only="svelte" />
             </div>
 
-            <!-- Split View (Remaining height) -->
+            <!-- Split View (80% of Main = 64% Total) -->
             <div
-                class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-12 items-start h-full overflow-hidden"
+                class="flex-grow flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:h-full lg:overflow-hidden"
             >
-                <!-- Top Donors (Left) -->
-                <div class="h-full pr-4">
+                <!-- Top Donors (Left on Desktop, Bottom on Mobile) -->
+                <div class="w-full lg:h-full lg:overflow-y-auto pr-0 lg:pr-4">
                     <TopDonors client:only="svelte" />
                 </div>
 
-                <!-- CTA / QR Code (Right) -->
-                <!-- CTA / QR Code (Right) -->
+                <!-- CTA / QR Code (Right on Desktop, Top on Mobile) -->
                 <div
-                    class="h-full flex flex-col items-center justify-center min-h-0 pb-2"
+                    class="w-full flex-shrink-0 flex flex-col items-center justify-center lg:h-full lg:min-h-0 pb-2"
                 >
                     <div class="relative group">
                         <div
@@ -92,7 +93,7 @@ import "@/styles/global.css";
                             </div>
                             <!-- QR Code -->
                             <div
-                                class="w-40 h-40 md:w-56 md:h-56 bg-white flex items-center justify-center overflow-hidden"
+                                class="w-48 h-48 md:w-56 md:h-56 bg-white flex items-center justify-center overflow-hidden"
                             >
                                 <img
                                     src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://latinasweatproject.org/donate"
@@ -109,16 +110,16 @@ import "@/styles/global.css";
                             Donate Now
                         </h3>
                         <p class="text-base md:text-lg text-gray-300">
-                            latinasweatproject.org
+                            latinasweatproject.com
                         </p>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Footer Ticker (15%) -->
+        <!-- Footer Ticker (10% on Desktop) -->
         <footer
-            class="fixed bottom-0 left-0 right-0 h-[15vh] z-30 bg-gray-900/90 border-t border-gray-800 flex items-center"
+            class="fixed bottom-0 left-0 right-0 h-[10vh] z-30 bg-gray-900/90 border-t border-gray-800 flex items-center"
         >
             <DonationTicker client:only="svelte" />
         </footer>

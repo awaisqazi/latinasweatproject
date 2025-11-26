@@ -131,7 +131,7 @@
             class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
         >
             <h2
-                class="text-5xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wider"
+                class="text-3xl md:text-5xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wider"
             >
                 {formatCurrency($totalRaised)}
             </h2>
