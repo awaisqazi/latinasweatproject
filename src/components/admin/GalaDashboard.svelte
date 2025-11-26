@@ -46,12 +46,10 @@
     ];
 </script>
 
-<div
-    class="min-h-[600px] bg-[var(--color-light-gray)] rounded-xl shadow-lg overflow-hidden"
->
+<div class="min-h-screen bg-[var(--color-light-gray)]">
     {#if !isAuthenticated}
         <!-- Login Screen -->
-        <div class="flex flex-col items-center justify-center h-[600px] p-8">
+        <div class="flex flex-col items-center justify-center min-h-screen p-8">
             <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <h2
                     class="text-2xl font-bold text-[var(--color-off-black)] mb-6 text-center"
@@ -91,8 +89,8 @@
         </div>
     {:else}
         <!-- Dashboard Shell -->
-        <div class="flex h-[800px]">
-            <!-- Fixed height for dashboard feel -->
+        <div class="flex min-h-screen">
+            <!-- Full height for dashboard feel -->
             <!-- Sidebar -->
             <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
                 <div class="p-6 border-b border-gray-100">
