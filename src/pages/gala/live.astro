@@ -1,0 +1,140 @@
+---
+import Thermometer from "../../components/gala/Thermometer.svelte";
+import TopDonors from "../../components/gala/TopDonors.svelte";
+import DonationTicker from "../../components/gala/DonationTicker.svelte";
+import { Image } from "astro:assets";
+import "@/styles/global.css";
+// Placeholder for QR Code - using a generated one or a placeholder div for now
+// In a real scenario, we'd import a specific image asset.
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>Noche Inolvidable - Live Fundraising</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body
+        class="bg-off-black text-white font-['Rubik'] min-h-screen flex flex-col overflow-hidden"
+    >
+        <!-- Header (15%) -->
+        <header
+            class="h-[15vh] flex items-center justify-between px-8 md:px-16 bg-off-black z-20 relative border-b border-white/10"
+        >
+            <div class="flex items-center gap-6">
+                <!-- Use the requested logo asset -->
+                <img
+                    src="/logo3.png"
+                    alt="Logo"
+                    class="h-16 w-auto object-contain"
+                />
+                <h1
+                    class="text-3xl md:text-5xl font-bold tracking-wider text-vibrant-pink uppercase drop-shadow-lg"
+                >
+                    Noche Inolvidable
+                </h1>
+            </div>
+            <div class="hidden md:block text-right">
+                <p
+                    class="text-lg text-gray-400 uppercase tracking-[0.2em] font-light"
+                >
+                    Live Fundraising
+                </p>
+            </div>
+        </header>
+
+        <!-- Main Stage (70% - 20% Thermometer + 50% Content) -->
+        <main class="h-[70vh] flex flex-col px-8 md:px-16 py-6 relative z-10">
+            <!-- Thermometer Section (20% of total height approx, but flex-grow to fill space) -->
+            <div
+                class="flex-none h-[25%] flex items-center justify-center w-full mb-8"
+            >
+                <Thermometer client:only="svelte" />
+            </div>
+
+            <!-- Split View (Remaining height) -->
+            <div
+                class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-12 items-start h-full overflow-hidden"
+            >
+                <!-- Top Donors (Left) -->
+                <div class="h-full pr-4">
+                    <TopDonors client:only="svelte" />
+                </div>
+
+                <!-- CTA / QR Code (Right) -->
+                <!-- CTA / QR Code (Right) -->
+                <div
+                    class="h-full flex flex-col items-center justify-center min-h-0 pb-2"
+                >
+                    <div class="relative group">
+                        <div
+                            class="absolute -inset-1 bg-gradient-to-r from-vibrant-pink to-accent-gold rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"
+                        >
+                        </div>
+                        <div
+                            class="relative bg-white p-3 rounded-xl shadow-2xl"
+                        >
+                            <div
+                                class="absolute -top-8 left-0 right-0 text-center"
+                            >
+                                <span
+                                    class="text-vibrant-pink font-bold text-lg animate-pulse uppercase tracking-widest"
+                                    >Scan Me</span
+                                >
+                            </div>
+                            <!-- QR Code -->
+                            <div
+                                class="w-40 h-40 md:w-56 md:h-56 bg-white flex items-center justify-center overflow-hidden"
+                            >
+                                <img
+                                    src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://latinasweatproject.org/donate"
+                                    alt="Donate QR Code"
+                                    class="w-full h-full object-contain"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3
+                            class="text-xl md:text-2xl font-bold text-accent-gold mb-0"
+                        >
+                            Donate Now
+                        </h3>
+                        <p class="text-base md:text-lg text-gray-300">
+                            latinasweatproject.org
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Ticker (15%) -->
+        <footer
+            class="fixed bottom-0 left-0 right-0 h-[15vh] z-30 bg-gray-900/90 border-t border-gray-800 flex items-center"
+        >
+            <DonationTicker client:only="svelte" />
+        </footer>
+
+        <!-- Background Elements -->
+        <div
+            class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden bg-off-black"
+        >
+            <div
+                class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-vibrant-pink/10 rounded-full blur-[150px]"
+            >
+            </div>
+            <div
+                class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent-gold/10 rounded-full blur-[150px]"
+            >
+            </div>
+        </div>
+    </body>
+</html>

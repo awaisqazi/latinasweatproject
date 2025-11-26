@@ -1,0 +1,8 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import MobileCheckIn from "@/components/gala/MobileCheckIn.svelte";
+---
+
+<Layout title="Volunteer Check-In - Gala" hideFooter={true}>
+    <MobileCheckIn client:only="svelte" />
+</Layout>

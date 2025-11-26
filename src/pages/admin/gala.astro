@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GalaDashboard from "../../components/admin/GalaDashboard.svelte";
+---
+
+<Layout title="Gala Admin Dashboard" hideFooter={true}>
+    <main class="w-full min-h-screen bg-gray-50">
+        <GalaDashboard client:only="svelte" />
+    </main>
+</Layout>
