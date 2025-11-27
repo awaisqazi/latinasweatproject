@@ -39,6 +39,8 @@
         (r) => r.role === "volunteer",
     ).length;
 
+    $: leadName = registrations.find((r) => r.role === "lead")?.name;
+
     $: isLeadFull = leadCount >= leadCapacity;
     $: isVolunteerFull = volunteerCount >= volunteerCapacity;
 
@@ -63,12 +65,25 @@
                 >Registration Closed</span
             >
         {:else}
-            <span class="text-xs text-gray-500 mt-1">
-                {Math.max(0, leadCapacity - leadCount)} Lead left • {Math.max(
-                    0,
-                    volunteerCapacity - volunteerCount,
-                )} Vol. left
-            </span>
+            <div
+                class="text-xs mt-1 flex flex-wrap items-center gap-x-2 gap-y-1"
+            >
+                {#if leadName}
+                    <span
+                        class="font-bold text-vibrant-pink flex items-center gap-1"
+                    >
+                        👑 {leadName}
+                    </span>
+                {:else}
+                    <span class="text-gray-500">
+                        {Math.max(0, leadCapacity - leadCount)} Lead left
+                    </span>
+                {/if}
+                <span class="text-gray-300">•</span>
+                <span class="text-gray-500">
+                    {Math.max(0, volunteerCapacity - volunteerCount)} Vol. left
+                </span>
+            </div>
         {/if}
     </div>
 

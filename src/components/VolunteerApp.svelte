@@ -51,6 +51,9 @@
     let selectedRole = "";
     let isSubmitting = false;
     let hideUnavailable = true;
+    let registrationSuccess = false;
+    let successTitle = "";
+    let successMessage = "";
 
     onMount(() => {
         try {
@@ -191,21 +194,35 @@
         selectedShift = event.detail.shift;
         selectedRole = event.detail.role;
         isModalOpen = true;
+        registrationSuccess = false;
     }
 
     async function handleRegistration(event) {
         isSubmitting = true;
+        successTitle = "";
+        successMessage = "";
         const { name, email, phone, shift, role } = event.detail;
         const shiftId = shift.id;
         const shiftRef = doc(db, "shifts", shiftId);
         try {
-            await runTransaction(db, async (transaction) => {
+            const result = await runTransaction(db, async (transaction) => {
                 const sfDoc = await transaction.get(shiftRef);
                 let currentData = sfDoc.exists()
                     ? sfDoc.data()
                     : { lead: 0, volunteer: 0, registrations: [] };
 
                 const registrations = currentData.registrations || [];
+
+                // Duplicate Check
+                const normalizedEmail = email.toLowerCase();
+                const isDuplicate = registrations.some(
+                    (r) => r.email.toLowerCase() === normalizedEmail,
+                );
+
+                if (isDuplicate) {
+                    return { status: "duplicate" };
+                }
+
                 const currentRoleCount = registrations.filter(
                     (r) => r.role === role,
                 ).length;
@@ -229,16 +246,30 @@
                     timestamp: new Date().toISOString(),
                 };
 
-                // We don't need to manually update lead/volunteer counts anymore
-                // as we calculate them dynamically, but we can keep them for legacy support if needed.
-                // For now, let's just update registrations.
                 transaction.set(shiftRef, {
                     ...currentData,
                     registrations: [...registrations, newRegistration],
                 });
+
+                return { status: "success" };
             });
-            alert("Successfully registered!");
-            isModalOpen = false;
+
+            if (result.status === "duplicate") {
+                successTitle = "Already Signed Up!";
+                const dateStr = shift.start.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                });
+                const timeStr = shift.start.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                });
+                successMessage = `It looks like you are already signed up for this shift on ${dateStr} at ${timeStr}! We look forward to seeing you there.`;
+                registrationSuccess = true;
+            } else if (result.status === "success") {
+                registrationSuccess = true;
+            }
         } catch (e) {
             console.error("Transaction failed: ", e);
             alert("Registration failed: " + e);
@@ -368,6 +399,12 @@
     shift={selectedShift}
     role={selectedRole}
     {isSubmitting}
-    on:close={() => (isModalOpen = false)}
+    success={registrationSuccess}
+    {successTitle}
+    {successMessage}
+    on:close={() => {
+        isModalOpen = false;
+        registrationSuccess = false;
+    }}
     on:submit={handleRegistration}
 />
