@@ -132,24 +132,37 @@ const schedule = [
                     class="mt-10 flex flex-col items-center justify-center gap-6"
                 >
                     <a
-                        href="#"
+                        href="https://www.zeffy.com/en-US/ticketing/gala-bootcamp"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         class="rounded-full bg-vibrant-pink px-8 py-4 text-xl font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
                     >
                         $100 to Participate
                     </a>
                     <div
-                        class="max-w-md rounded-xl bg-white/10 p-6 backdrop-blur-sm border border-white/20"
+                        class="max-w-md rounded-xl bg-white/10 p-6 backdrop-blur-sm border border-white/20 text-left"
                     >
-                        <p class="text-lg font-medium text-white">
-                            Already a member?
+                        <p
+                            class="text-lg font-bold text-white uppercase tracking-wide mb-3 text-center"
+                        >
+                            How to Join
                         </p>
-                        <p class="mt-2 text-sm text-gray-300">
-                            You can sign up for classes directly on our <a
-                                href={`${base}schedule`}
-                                class="text-accent-gold underline hover:text-vibrant-pink font-bold"
-                                >Schedule page</a
-                            > using your existing membership!
-                        </p>
+                        <div class="text-sm text-gray-200 space-y-3">
+                            <p>
+                                <span class="font-bold text-accent-gold"
+                                    >Step 1:</span
+                                > Purchase the $100 buy-in above.
+                            </p>
+                            <p>
+                                <span class="font-bold text-accent-gold"
+                                    >Step 2:</span
+                                > Head to the <a
+                                    href={`${base}schedule`}
+                                    class="text-white underline hover:text-vibrant-pink font-bold"
+                                    >Schedule page</a
+                                > and sign up for your bootcamp classes for free!
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,12 +212,9 @@ const schedule = [
                     </div>
                 </div>
                 <p class="mt-12 text-lg text-gray-400">
-                    Bootcamp classes will be open to members and walk-ins as
-                    regularly scheduled programming.
-                    <span class="text-white font-bold"
-                        >You must buy in to the challenge to participate in the
-                        rewards.</span
-                    >
+                    <span class="text-white font-bold">Important:</span> You must
+                    purchase the buy-in to participate in the challenge. Once registered,
+                    head to the schedule to book your bootcamp classes for free!
                 </p>
             </div>
         </section>
