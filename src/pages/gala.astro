@@ -6,12 +6,23 @@ const base = import.meta.env.BASE_URL;
 const sponsors = [
   { name: 'Chicago Community Loan Fund', logo: `${base}images/galalogos/Chicago Community Loan Fund.png`, url: 'https://cclfchicago.org/', tier: 'raiz' },
   { name: 'AON', logo: `${base}images/galalogos/AON Logo.png`, url: 'https://www.aon.com/', tier: 'raiz' },
-  // Example Sponsors - replace with real ones as they are confirmed
-  // { name: 'Sol Sponsor Example', logo: `${base}images/sponsors/sol-sponsor.png`, url: '#', tier: 'sol' },
-  // { name: 'Luna Sponsor Example 1', logo: `${base}images/sponsors/luna-sponsor-1.png`, url: '#', tier: 'luna' },
-  // { name: 'Luna Sponsor Example 2', logo: `${base}images/sponsors/luna-sponsor-2.png`, url: '#', tier: 'luna' },
-  // { name: 'Estrella Sponsor Example', logo: `${base}images/sponsors/estrella-sponsor.png`, url: '#', tier: 'estrella' },
-  // { name: 'Raiz Sponsor Example', logo: `${base}images/sponsors/raiz-sponsor.png`, url: '#', tier: 'raiz' },
+  { name: 'Antique Taco', logo: `${base}images/galalogos/antiquetaco.png`, url: '#', tier: 'raiz' },
+  { name: 'Barbi', logo: `${base}images/galalogos/barbi.png`, url: '#', tier: 'raiz' },
+  { name: 'Cruz de Fuego Mezcal', logo: `${base}images/galalogos/cruzdefuegomexcal.png`, url: '#', tier: 'raiz' },
+  { name: 'DJ Vestus', logo: `${base}images/galalogos/djvestus.png`, url: '#', tier: 'raiz' },
+  { name: 'Don Churro', logo: `${base}images/galalogos/donchurro.png`, url: '#', tier: 'raiz' },
+  { name: 'Fleet Feet', logo: `${base}images/galalogos/fleetfeet.png`, url: '#', tier: 'raiz' },
+  { name: 'Los Valores', logo: `${base}images/galalogos/losvalores.png`, url: '#', tier: 'raiz' },
+  { name: 'Oh Snap', logo: `${base}images/galalogos/ohsnap.png`, url: '#', tier: 'raiz' },
+  { name: 'Omni', logo: `${base}images/galalogos/omni.png`, url: '#', tier: 'raiz' },
+  { name: 'Ponce', logo: `${base}images/galalogos/ponce.png`, url: '#', tier: 'raiz' },
+  { name: 'Sacred Agave', logo: `${base}images/galalogos/sacredagave.png`, url: '#', tier: 'raiz' },
+  { name: 'Sox', logo: `${base}images/galalogos/sox.png`, url: '#', tier: 'raiz' },
+  { name: 'Studio E', logo: `${base}images/galalogos/studioe.png`, url: '#', tier: 'raiz' },
+  { name: 'Vestus', logo: `${base}images/galalogos/vestus.png`, url: '#', tier: 'raiz' },
+  { name: 'Vida Mia', logo: `${base}images/galalogos/vidamia.png`, url: '#', tier: 'raiz' },
+  { name: 'Whisky Prieto', logo: `${base}images/galalogos/whiskyprieto.png`, url: '#', tier: 'raiz' },
+  { name: 'Wintrust', logo: `${base}images/galalogos/wintrust.png`, url: '#', tier: 'raiz' },
 ];
 
 const solSponsors = sponsors.filter(s => s.tier === 'sol');
@@ -198,10 +209,10 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
             {solSponsors.length > 0 && (
               <div class="text-center">
                 <h3 class="font-sans text-2xl font-bold text-accent-gold">Sol Sponsors</h3>
-                <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="mt-8 flex flex-wrap justify-center gap-8">
                   {solSponsors.map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="col-span-1 flex items-center justify-center rounded-lg bg-white p-8 shadow-lg transition hover:shadow-xl">
-                      <img class="max-h-32 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-48 w-full max-w-xs items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
+                      <img class="max-h-32 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
                     </a>
                   ))}
                 </div>
@@ -211,10 +222,10 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
             {lunaSponsors.length > 0 && (
               <div class="text-center">
                 <h3 class="font-sans text-2xl font-bold text-accent-gold">Luna Sponsors</h3>
-                <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="mt-8 flex flex-wrap justify-center gap-8">
                   {lunaSponsors.map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center rounded-lg bg-white p-6 shadow transition hover:shadow-lg">
-                      <img class="max-h-24 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-40 w-full max-w-[250px] items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
+                      <img class="max-h-24 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
                     </a>
                   ))}
                 </div>
@@ -224,10 +235,10 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
             {(estrellaSponsors.length > 0 || raizSponsors.length > 0) && (
               <div class="text-center">
                 <h3 class="font-sans text-2xl font-bold text-accent-gold">Estrella & Raiz Sponsors</h3>
-                <div class="mt-8 grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div class="mt-8 flex flex-wrap justify-center gap-6">
                   {[...estrellaSponsors, ...raizSponsors].map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md">
-                      <img class="max-h-20 w-auto" src={sponsor.logo} alt={sponsor.name} />
+                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-32 w-full max-w-[200px] items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-4 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
+                      <img class="max-h-20 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
                     </a>
                   ))}
                 </div>
