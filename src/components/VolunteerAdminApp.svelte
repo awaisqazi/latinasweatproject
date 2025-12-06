@@ -55,10 +55,25 @@
     let expandedDayKeys = new Set(); // Track expanded days
 
     // Export State
-    let startDate = new Date().toISOString().split("T")[0];
+    let startDate = new Date(new Date().getFullYear(), 0, 1)
+        .toISOString()
+        .split("T")[0]; // Default to Jan 1st
     let endDate = new Date(new Date().setMonth(new Date().getMonth() + 1))
         .toISOString()
         .split("T")[0];
+
+    // --- Manual Check-In State ---
+    let manualShiftDate = "";
+    let manualShiftTime = "18:00";
+    let manualName = "";
+    let manualEmail = "";
+    let manualCheckInDate = "";
+    let manualCheckInTime = "";
+    let isManualCheckingIn = false;
+
+    // --- Edit Check-In State ---
+    let editingCheckInKey = null; // "shiftId-index"
+    let editCheckInValue = ""; // ISO string for input
 
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
@@ -90,7 +105,9 @@
 
     onMount(() => {
         try {
-            generatedShifts = generateShifts();
+            // Generate including past shifts (start of PREVIOUS year for history)
+            const startOfHistory = new Date(new Date().getFullYear() - 1, 0, 1);
+            generatedShifts = generateShifts(startOfHistory, 30); // 30 months (2.5 years)
 
             // Subscribe to standard shift data (registrations/cancellations)
             const unsubShifts = onSnapshot(
@@ -169,6 +186,27 @@
         combined.sort((a, b) => a.start - b.start);
 
         shifts = combined;
+
+        // DEBUG LOGS
+        if (shifts.length > 0) {
+            console.log("Combined Shifts Debug:");
+            console.log("Total Shifts:", shifts.length);
+            console.log("First Shift:", shifts[0].dateStr);
+            console.log("Last Shift:", shifts[shifts.length - 1].dateStr);
+
+            // Check November specifically
+            const novShifts = shifts.filter((s) =>
+                s.dateStr.startsWith("2025-11"),
+            );
+            console.log("November 2025 Shifts Count:", novShifts.length);
+
+            // Check registrations in November
+            const novRegs = novShifts.reduce((count, s) => {
+                const data = shiftData[s.id] || {};
+                return count + (data.registrations?.length || 0);
+            }, 0);
+            console.log("Total Registrations in Nov 2025:", novRegs);
+        }
     }
 
     // --- Actions ---
@@ -384,9 +422,8 @@
     }
 
     function exportCSV() {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
+        // Use string comparison for dates to avoid timezone issues
+        // startDate and endDate are YYYY-MM-DD strings from input
 
         const rows = [
             [
@@ -395,19 +432,28 @@
                 "Phone",
                 "Shift Date",
                 "Shift Time",
+                "Shift Duration (Hours)",
                 "Status",
                 "Check-in Time",
             ],
         ];
 
         shifts.forEach((shift) => {
-            if (shift.start >= start && shift.start <= end) {
+            // Check if shift.dateStr is within range [startDate, endDate] (inclusive)
+            // String comparison works for YYYY-MM-DD
+            if (shift.dateStr >= startDate && shift.dateStr <= endDate) {
                 const data = shiftData[shift.id] || {};
                 const regs = data.registrations || [];
 
                 regs.forEach((reg) => {
                     const shiftDate = shift.start.toLocaleDateString();
                     const shiftTime = `${shift.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${shift.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+
+                    const durationHours = (
+                        (shift.end - shift.start) /
+                        (1000 * 60 * 60)
+                    ).toFixed(2);
+
                     const status = reg.checkedIn ? "Checked In" : "Registered";
                     const checkInTime = reg.checkInTime
                         ? new Date(reg.checkInTime).toLocaleString()
@@ -419,6 +465,7 @@
                         `"${reg.phone || ""}"`,
                         `"${shiftDate}"`,
                         `"${shiftTime}"`,
+                        `"${durationHours}"`,
                         `"${status}"`,
                         `"${checkInTime}"`,
                     ]);
@@ -439,6 +486,170 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // --- Manual Check-In & Edit Logic ---
+
+    async function handleManualEntry() {
+        if (
+            !manualShiftDate ||
+            !manualShiftTime ||
+            !manualName ||
+            !manualEmail ||
+            !manualCheckInDate ||
+            !manualCheckInTime
+        ) {
+            alert(
+                "Please fill in all fields (Shift Date/Time, Name, Email, Check-In Date/Time).",
+            );
+            return;
+        }
+
+        isManualCheckingIn = true;
+        try {
+            // 1. Determine Target Shift Start
+            const [sy, sm, sd] = manualShiftDate.split("-").map(Number);
+            const [sh, smin] = manualShiftTime.split(":").map(Number);
+            const targetShiftStart = new Date(sy, sm - 1, sd, sh, smin);
+
+            // 2. Prepare Check-In Timestamp
+            const [cy, cm, cd] = manualCheckInDate.split("-").map(Number);
+            const [ch, cmin] = manualCheckInTime.split(":").map(Number);
+            const checkInTimestamp = new Date(
+                cy,
+                cm - 1,
+                cd,
+                ch,
+                cmin,
+            ).toISOString();
+
+            // 3. Find if shift exists (Standard or Custom)
+            let targetShiftId = null;
+            let isCustom = false;
+
+            // Check generated shifts (in memory)
+            // We use fuzzy match on start time (exact minute)
+            const existingGenerated = generatedShifts.find(
+                (s) => s.start.getTime() === targetShiftStart.getTime(),
+            );
+
+            if (existingGenerated) {
+                targetShiftId = existingGenerated.id;
+            } else {
+                // Check existing custom shifts
+                const existingCustom = customShifts.find(
+                    (s) => s.start.getTime() === targetShiftStart.getTime(),
+                );
+                if (existingCustom) {
+                    targetShiftId = existingCustom.id;
+                    isCustom = true;
+                }
+            }
+
+            // 4. If NO shift found, create a NEW Custom Shift
+            if (!targetShiftId) {
+                const end = new Date(targetShiftStart.getTime() + 60 * 60000); // Default 1 hr
+                const docRef = await addDoc(collection(db, "custom_shifts"), {
+                    start: Timestamp.fromDate(targetShiftStart),
+                    end: Timestamp.fromDate(end),
+                    leadCapacity: 1, // Defaults
+                    volunteerCapacity: 10,
+                    createdAt: Timestamp.now(),
+                });
+                targetShiftId = docRef.id;
+                isCustom = true;
+            }
+
+            // 5. Add Registration (Bypassing limits)
+            const shiftRef = doc(db, "shifts", targetShiftId);
+
+            await runTransaction(db, async (transaction) => {
+                const sfDoc = await transaction.get(shiftRef);
+                const data = sfDoc.exists() ? sfDoc.data() : {};
+                const registrations = data.registrations || [];
+
+                registrations.push({
+                    name: manualName,
+                    email: manualEmail,
+                    phone: "", // Not provided
+                    role: "volunteer", // Default
+                    checkedIn: true,
+                    checkInTime: checkInTimestamp,
+                });
+
+                // Update counts (optional, but good for consistency)
+                const volCount = (data.volunteer || 0) + 1;
+
+                transaction.set(
+                    shiftRef,
+                    {
+                        registrations,
+                        volunteer: volCount,
+                    },
+                    { merge: true },
+                );
+            });
+
+            alert("Manual check-in added successfully!");
+
+            // Clear Form
+            manualName = "";
+            manualEmail = "";
+            // Keep dates for convenience? Or clear? clear is safer.
+            manualCheckInDate = "";
+            manualCheckInTime = "";
+        } catch (e) {
+            console.error("Manual Entry Failed:", e);
+            alert("Failed to add manual entry: " + e.message);
+        } finally {
+            isManualCheckingIn = false;
+        }
+    }
+
+    function startEditingCheckIn(shiftId, index, currentIsoTime) {
+        editingCheckInKey = `${shiftId}-${index}`;
+        if (currentIsoTime) {
+            // Convert ISO to datetime-local format: YYYY-MM-DDTHH:MM
+            const d = new Date(currentIsoTime);
+            // Accounts for local time zone offset for the input
+            const pad = (num) => String(num).padStart(2, "0");
+            const localIso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            editCheckInValue = localIso;
+        } else {
+            editCheckInValue = "";
+        }
+    }
+
+    function cancelEditingCheckIn() {
+        editingCheckInKey = null;
+        editCheckInValue = "";
+    }
+
+    async function saveCheckInTime(shiftId, index) {
+        if (!editCheckInValue) return;
+
+        const shiftRef = doc(db, "shifts", shiftId);
+        try {
+            const newDate = new Date(editCheckInValue);
+            const newIso = newDate.toISOString();
+
+            await runTransaction(db, async (transaction) => {
+                const sfDoc = await transaction.get(shiftRef);
+                if (!sfDoc.exists()) throw "Shift not found";
+
+                const data = sfDoc.data();
+                const registrations = data.registrations || [];
+                if (!registrations[index]) throw "Registration not found";
+
+                registrations[index].checkInTime = newIso;
+
+                transaction.update(shiftRef, { registrations });
+            });
+
+            editingCheckInKey = null;
+        } catch (e) {
+            alert("Failed to update time: " + e);
+        }
     }
 
     // --- Grouping & Filtering ---
@@ -786,6 +997,101 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Manual Check-In Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide"
+                    >
+                        Manual Check-In
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="text-xs font-medium text-gray-500 mb-1 block"
+                                    >Shift Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={manualShiftDate}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="text-xs font-medium text-gray-500 mb-1 block"
+                                    >Shift Time</span
+                                >
+                                <input
+                                    type="time"
+                                    bind:value={manualShiftTime}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </label>
+                        </div>
+                        <label class="block">
+                            <span
+                                class="text-xs font-medium text-gray-500 mb-1 block"
+                                >Volunteer Name</span
+                            >
+                            <input
+                                type="text"
+                                bind:value={manualName}
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                placeholder="Jane Doe"
+                            />
+                        </label>
+                        <label class="block">
+                            <span
+                                class="text-xs font-medium text-gray-500 mb-1 block"
+                                >Email</span
+                            >
+                            <input
+                                type="email"
+                                bind:value={manualEmail}
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                placeholder="jane@example.com"
+                            />
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="text-xs font-medium text-gray-500 mb-1 block"
+                                    >Check-In Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={manualCheckInDate}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="text-xs font-medium text-gray-500 mb-1 block"
+                                    >Check-In Time</span
+                                >
+                                <input
+                                    type="time"
+                                    bind:value={manualCheckInTime}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                                />
+                            </label>
+                        </div>
+
+                        <button
+                            on:click={handleManualEntry}
+                            disabled={isManualCheckingIn}
+                            class="w-full bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                            {isManualCheckingIn
+                                ? "Processing..."
+                                : "Manually Check In"}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1121,15 +1427,59 @@
                                                                     {reg.email} •
                                                                     {reg.phone}
                                                                 </div>
+
                                                                 {#if reg.checkInTime}
-                                                                    <div
-                                                                        class="text-xs text-gray-400 mt-1"
-                                                                    >
-                                                                        Checked
-                                                                        in: {new Date(
-                                                                            reg.checkInTime,
-                                                                        ).toLocaleString()}
-                                                                    </div>
+                                                                    {#if editingCheckInKey === `${shift.id}-${i}`}
+                                                                        <div
+                                                                            class="mt-2 text-xs flex items-center gap-2"
+                                                                        >
+                                                                            <input
+                                                                                type="datetime-local"
+                                                                                bind:value={
+                                                                                    editCheckInValue
+                                                                                }
+                                                                                class="border rounded px-2 py-1 text-gray-700"
+                                                                            />
+                                                                            <button
+                                                                                on:click={() =>
+                                                                                    saveCheckInTime(
+                                                                                        shift.id,
+                                                                                        i,
+                                                                                    )}
+                                                                                class="text-green-600 font-bold hover:underline"
+                                                                                >Save</button
+                                                                            >
+                                                                            <button
+                                                                                on:click={cancelEditingCheckIn}
+                                                                                class="text-gray-500 hover:underline"
+                                                                                >Cancel</button
+                                                                            >
+                                                                        </div>
+                                                                    {:else}
+                                                                        <div
+                                                                            class="text-xs text-gray-400 mt-1 flex items-center gap-2"
+                                                                        >
+                                                                            <span
+                                                                                >Checked
+                                                                                in:
+                                                                                {new Date(
+                                                                                    reg.checkInTime,
+                                                                                ).toLocaleString()}</span
+                                                                            >
+                                                                            <button
+                                                                                on:click={() =>
+                                                                                    startEditingCheckIn(
+                                                                                        shift.id,
+                                                                                        i,
+                                                                                        reg.checkInTime,
+                                                                                    )}
+                                                                                class="text-blue-500 hover:text-blue-700 underline"
+                                                                            >
+                                                                                Edit
+                                                                                Time
+                                                                            </button>
+                                                                        </div>
+                                                                    {/if}
                                                                 {/if}
                                                             </div>
 

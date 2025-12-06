@@ -20,15 +20,14 @@ export const getShiftId = (shift) => {
     return `${dateStr}_${startH}${startM}-${endH}${endM}`;
 };
 
-export const generateShifts = (startDate = new Date()) => {
+export const generateShifts = (startDate = new Date(), months = 2) => {
     const shifts = [];
     const current = new Date(startDate);
     current.setHours(0, 0, 0, 0);
 
-    const nextMonth = new Date(current);
-    nextMonth.setMonth(nextMonth.getMonth() + 2);
-    nextMonth.setDate(0);
-    const endDate = nextMonth;
+    const endDate = new Date(current);
+    endDate.setMonth(endDate.getMonth() + months);
+    endDate.setDate(0);
 
     while (current <= endDate) {
         const dayOfWeek = current.getDay();
