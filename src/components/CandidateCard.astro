@@ -12,9 +12,9 @@ const { imageSrc, name, title, story } = Astro.props;
         <div
             class="absolute inset-0 flex flex-col overflow-hidden rounded-2xl bg-white"
         >
-            <div class="relative flex-1 overflow-hidden">
+            <div class="relative h-72 flex-shrink-0 overflow-hidden sm:h-80">
                 <img
-                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                     src={imageSrc}
                     alt={`Photo of ${name}`}
                 />
