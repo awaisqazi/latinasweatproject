@@ -1,0 +1,82 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+---
+
+<Layout title="Page Not Found | The Latina Sweat Project">
+    <Header />
+    <main
+        class="min-h-[80vh] bg-white relative flex flex-col items-center justify-center p-6 overflow-hidden"
+    >
+        <!-- Giant Watermark 404 -->
+        <div
+            class="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0"
+        >
+            <span
+                class="text-[30vw] font-bold text-gray-50 opacity-80 font-rubik leading-none"
+            >
+            </span>
+        </div>
+
+        <div class="relative z-10 text-center max-w-3xl mx-auto space-y-8">
+            <!-- Badge -->
+            <div
+                class="inline-block px-4 py-1.5 rounded-full bg-red-50 border border-red-100 mb-4"
+            >
+                <span
+                    class="text-sm font-bold tracking-wide uppercase text-vibrant-pink"
+                    >Error 404</span
+                >
+            </div>
+
+            <!-- Headline -->
+            <h1
+                class="font-rubik text-5xl md:text-7xl font-bold text-off-black leading-tight tracking-tight"
+            >
+                You've drifted <br class="hidden md:block" />
+                <span class="text-vibrant-pink">off your mat.</span>
+            </h1>
+
+            <!-- Description -->
+            <p
+                class="font-body text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
+            >
+                It looks like this page is in deep <em>savasana</em> or doesn't exist
+                anymore. Take a deep breath, recenter, and let's flow back to the
+                homepage.
+            </p>
+
+            <!-- Action Button -->
+            <div class="pt-4">
+                <a
+                    href="/"
+                    class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-300 bg-off-black rounded-full hover:bg-vibrant-pink hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-vibrant-pink"
+                >
+                    <span>Return to Home</span>
+                    <svg
+                        class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    // Case-insensitive redirect for LSPGala
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes("lspgala")) {
+        // Show a brief loading message or spinner if desired, but immediate redirect is usually best
+        window.location.href =
+            "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising";
+    }
+</script>
