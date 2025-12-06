@@ -1,0 +1,122 @@
+---
+const { imageSrc, name, title, story } = Astro.props;
+---
+
+<div
+    class="candidate-card-container group relative h-[500px] w-full max-w-sm cursor-pointer [perspective:1000px]"
+>
+    <div
+        class="card-inner relative h-full w-full rounded-2xl shadow-xl transition-all duration-700 [transform-style:preserve-3d]"
+    >
+        {/* Front of card */}
+        <div
+            class="absolute inset-0 flex flex-col overflow-hidden rounded-2xl bg-white"
+        >
+            <div class="relative flex-1 overflow-hidden">
+                <img
+                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    src={imageSrc}
+                    alt={`Photo of ${name}`}
+                />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"
+                >
+                </div>
+
+                {/* Flip Hint - Big and Clear */}
+                <div
+                    class="absolute top-4 right-4 animate-pulse rounded-full bg-white/20 p-2 text-white backdrop-blur-md transition-colors hover:bg-white/30"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-8 w-8"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 text-center shadow-inner">
+                <h4 class="font-sans text-2xl font-extrabold text-off-black">
+                    {name}
+                </h4>
+                <p
+                    class="mt-1 font-sans text-lg font-bold uppercase tracking-wide text-vibrant-pink"
+                >
+                    {title}
+                </p>
+                <button
+                    class="mt-4 rounded-full border-2 border-off-black px-6 py-2 font-sans text-sm font-bold uppercase tracking-wider text-off-black transition-colors group-hover:bg-off-black group-hover:text-white"
+                >
+                    Read Bio
+                </button>
+            </div>
+        </div>
+
+        {/* Back of card */}
+        <div
+            class="absolute inset-0 h-full w-full overflow-hidden rounded-2xl bg-slate-50 p-8 [transform:rotateY(180deg)] [backface-visibility:hidden]"
+        >
+            <div class="flex h-full flex-col">
+                <div
+                    class="flex-shrink-0 border-b border-slate-200 pb-4 text-center"
+                >
+                    <h4 class="font-sans text-2xl font-bold text-off-black">
+                        {name}
+                    </h4>
+                    <p
+                        class="font-sans text-sm font-semibold uppercase text-vibrant-pink"
+                    >
+                        {title}
+                    </p>
+                </div>
+                <div
+                    class="custom-scrollbar mt-4 flex-1 overflow-y-auto pr-2 font-body text-base leading-relaxed text-slate-700"
+                    set:html={story}
+                />
+                <div class="mt-4 pt-2 text-center">
+                    <span class="text-xs font-bold uppercase text-slate-400"
+                        >Click to flip back</span
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll(".candidate-card-container").forEach((card) => {
+        card.addEventListener("click", () => {
+            card.querySelector(".card-inner")?.classList.toggle("is-flipped");
+        });
+    });
+</script>
+
+<style>
+    .card-inner.is-flipped {
+        transform: rotateY(180deg);
+    }
+
+    /* Custom scrollbar for bio text */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+</style>
