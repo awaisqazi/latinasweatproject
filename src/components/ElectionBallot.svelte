@@ -579,11 +579,24 @@
         border-radius: 0.5rem;
         cursor: pointer;
         transition: all 0.2s;
+        /* iOS touch fixes */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
+        position: relative;
     }
 
     .candidate-option:hover {
         border-color: #b5a18d;
         background: #faf8f6;
+    }
+
+    /* Active state for mobile touch feedback */
+    .candidate-option:active {
+        transform: scale(0.98);
+        background: #f5f0eb;
     }
 
     .candidate-option.selected {
@@ -593,9 +606,37 @@
     }
 
     .candidate-option input[type="radio"] {
-        width: 1.25rem;
-        height: 1.25rem;
-        accent-color: #b5a18d;
+        /* Make radio button visible and tappable on iOS */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 1.5rem;
+        height: 1.5rem;
+        min-width: 1.5rem;
+        border: 2px solid #d1d5db;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        position: relative;
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .candidate-option input[type="radio"]:checked {
+        border-color: #b5a18d;
+        background: #b5a18d;
+    }
+
+    .candidate-option input[type="radio"]:checked::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0.5rem;
+        height: 0.5rem;
+        background: white;
+        border-radius: 50%;
     }
 
     .candidate-name {
