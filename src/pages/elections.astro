@@ -278,6 +278,30 @@ const roles = [
                     </div>
                 </div>
 
+                {/* iPhone Troubleshooting Note - visible before ballot */}
+                <div
+                    class="bg-amber-900/30 border border-amber-600/50 rounded-lg p-4 mb-6 text-sm mt-6"
+                >
+                    <div class="flex items-start gap-3">
+                        <span class="text-xl">📱</span>
+                        <div>
+                            <p class="font-semibold text-amber-200 mb-1">
+                                Having trouble on iPhone?
+                            </p>
+                            <p class="text-amber-100/80">
+                                If the ballot is not loading or responding
+                                properly on your iPhone, please tap the
+                                <strong class="text-white">aA</strong> button in
+                                Safari's address bar and select
+                                <strong class="text-white"
+                                    >"Request Desktop Website"</strong
+                                >. This is a known issue we're working to
+                                resolve.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Ballot Container - hidden initially */}
                 <div id="ballot-container" class="hidden">
                     <ElectionBallot roles={roles} client:load />
@@ -285,44 +309,38 @@ const roles = [
             </div>
         </section>
     </main>
-
-    <script>
-        const checkbox = document.getElementById("attestation-checkbox");
-        const revealBtn = document.getElementById("reveal-ballot-btn");
-        const ballotGate = document.getElementById("ballot-gate");
-        const ballotContainer = document.getElementById("ballot-container");
-
-        checkbox?.addEventListener("change", (e) => {
-            const isChecked = (e.target as HTMLInputElement).checked;
-            if (revealBtn) {
-                revealBtn.disabled = !isChecked;
-                if (isChecked) {
-                    revealBtn.classList.remove(
-                        "opacity-50",
-                        "cursor-not-allowed",
-                    );
-                    revealBtn.classList.add(
-                        "hover:scale-105",
-                        "hover:shadow-lg",
-                    );
-                } else {
-                    revealBtn.classList.add("opacity-50", "cursor-not-allowed");
-                    revealBtn.classList.remove(
-                        "hover:scale-105",
-                        "hover:shadow-lg",
-                    );
-                }
-            }
-        });
-
-        revealBtn?.addEventListener("click", () => {
-            ballotGate?.classList.add("hidden");
-            ballotContainer?.classList.remove("hidden");
-            // Scroll to ballot
-            ballotContainer?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        });
-    </script>
 </Layout>
+
+<script>
+    const checkbox = document.getElementById("attestation-checkbox");
+    const revealBtn = document.getElementById("reveal-ballot-btn");
+    const ballotGate = document.getElementById("ballot-gate");
+    const ballotContainer = document.getElementById("ballot-container");
+
+    checkbox?.addEventListener("change", (e) => {
+        const isChecked = (e.target as HTMLInputElement).checked;
+        if (revealBtn) {
+            revealBtn.disabled = !isChecked;
+            if (isChecked) {
+                revealBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                revealBtn.classList.add("hover:scale-105", "hover:shadow-lg");
+            } else {
+                revealBtn.classList.add("opacity-50", "cursor-not-allowed");
+                revealBtn.classList.remove(
+                    "hover:scale-105",
+                    "hover:shadow-lg",
+                );
+            }
+        }
+    });
+
+    revealBtn?.addEventListener("click", () => {
+        ballotGate?.classList.add("hidden");
+        ballotContainer?.classList.remove("hidden");
+        // Scroll to ballot
+        ballotContainer?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    });
+</script>

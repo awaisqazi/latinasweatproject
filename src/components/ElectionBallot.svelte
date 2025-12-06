@@ -1,16 +1,25 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import {
         submitVote,
         isVotingOpen,
         hasAlreadyVoted,
+        subscribeToVotingPeriod,
+        getScheduledVotingStatus,
     } from "../lib/electionFirebase.js";
 
     // Props - candidate data passed from parent
     export let roles = [];
 
     // Voting period status
-    let votingStatus = { isOpen: false, message: "Checking voting status..." };
+    let votingStatus = {
+        isOpen: false,
+        message: "Loading voting status...",
+        status: "loading",
+    };
+    let votingStatusLoading = true;
+    let votingStatusError = false;
+    let unsubscribeVotingPeriod = null;
 
     // Form state
     let voterName = "";
@@ -38,9 +47,90 @@
         { value: "board-member", label: "Board Member" },
     ];
 
+    // Function to compute effective voting status
+    function computeVotingStatus(override) {
+        const scheduled = getScheduledVotingStatus();
+
+        if (override === "open") {
+            return {
+                isOpen: true,
+                message: `Voting is open (manually enabled by admin).`,
+                status: "manual-open",
+            };
+        }
+
+        if (override === "closed") {
+            return {
+                isOpen: false,
+                message: `Voting is currently closed. Please check back later.`,
+                status: "manual-closed",
+            };
+        }
+
+        // No override, use scheduled status
+        return {
+            isOpen: scheduled.isOpen,
+            message: scheduled.message,
+            status: scheduled.isOpen ? "scheduled" : "before-period",
+        };
+    }
+
     onMount(async () => {
-        votingStatus = await isVotingOpen();
+        // Try to subscribe to real-time voting period updates
+        try {
+            unsubscribeVotingPeriod = subscribeToVotingPeriod((settings) => {
+                votingStatus = computeVotingStatus(settings.override);
+                votingStatusLoading = false;
+                votingStatusError = false;
+            });
+
+            // Also do an initial async check as fallback
+            setTimeout(async () => {
+                if (votingStatusLoading) {
+                    // Subscription hasn't fired yet, try direct fetch
+                    try {
+                        votingStatus = await isVotingOpen();
+                        votingStatusLoading = false;
+                    } catch (e) {
+                        console.error("Error fetching voting status:", e);
+                        // Fall back to scheduled status
+                        votingStatus = computeVotingStatus(null);
+                        votingStatusLoading = false;
+                    }
+                }
+            }, 2000);
+        } catch (error) {
+            console.error(
+                "Error setting up voting period subscription:",
+                error,
+            );
+            // Fall back to scheduled status (client-side only)
+            votingStatus = computeVotingStatus(null);
+            votingStatusLoading = false;
+            votingStatusError = true;
+        }
     });
+
+    onDestroy(() => {
+        if (unsubscribeVotingPeriod) {
+            unsubscribeVotingPeriod();
+        }
+    });
+
+    // Retry function for manual refresh
+    async function retryVotingStatus() {
+        votingStatusLoading = true;
+        votingStatusError = false;
+        try {
+            votingStatus = await isVotingOpen();
+            votingStatusLoading = false;
+        } catch (e) {
+            console.error("Retry failed:", e);
+            votingStatus = computeVotingStatus(null);
+            votingStatusLoading = false;
+            votingStatusError = true;
+        }
+    }
 
     // Check if email has voted when email changes
     async function checkEmail() {
@@ -104,7 +194,13 @@
 </script>
 
 <div class="election-ballot">
-    {#if submitSuccess}
+    {#if votingStatusLoading}
+        <!-- Loading State -->
+        <div class="loading-container">
+            <div class="loading-spinner-large"></div>
+            <p>Checking voting status...</p>
+        </div>
+    {:else if submitSuccess}
         <!-- Success State -->
         <div class="success-container">
             <div class="success-icon">
@@ -365,6 +461,30 @@
     .success-note {
         font-size: 0.875rem;
         color: #059669;
+    }
+
+    /* Loading State */
+    .loading-container {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 1rem;
+        border: 2px solid #d1d5db;
+    }
+
+    .loading-spinner-large {
+        width: 3rem;
+        height: 3rem;
+        border: 4px solid #e5e7eb;
+        border-top-color: #b5a18d;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    .loading-container p {
+        color: #6b7280;
+        font-size: 1rem;
     }
 
     /* Closed State */
