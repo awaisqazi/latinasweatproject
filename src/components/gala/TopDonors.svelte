@@ -1,7 +1,6 @@
 <script>
     import { topDonors } from "../../stores/galaStore";
     import { flip } from "svelte/animate";
-    import { fade, scale } from "svelte/transition";
 
     // Format currency
     const formatCurrency = (value) => {
@@ -55,10 +54,8 @@
         <div class="flex flex-col gap-2 md:gap-2 flex-1 justify-evenly">
             {#each $topDonors.slice(0, 5) as donor, index (donor.paddleNumber || donor.name)}
                 <div
-                    animate:flip={{ duration: 600, easing: "easeInOut" }}
-                    in:scale={{ duration: 400, delay: index * 100 }}
-                    out:fade
-                    class="relative py-2 px-3 md:py-2 md:px-4 rounded-xl border backdrop-blur-md flex items-center justify-between transition-all duration-500 shadow-lg {getRankStyle(
+                    animate:flip={{ duration: 300 }}
+                    class="relative py-2 px-3 md:py-2 md:px-4 rounded-xl border backdrop-blur-md flex items-center justify-between transition-all duration-300 shadow-lg {getRankStyle(
                         index,
                     )}"
                 >
