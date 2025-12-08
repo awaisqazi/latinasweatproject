@@ -75,6 +75,12 @@
     let editingCheckInKey = null; // "shiftId-index"
     let editCheckInValue = ""; // ISO string for input
 
+    // --- Volunteer Search State ---
+    let searchQuery = "";
+    let isSearchActive = false;
+    let searchResults = []; // Array of {shift, registration, registrationIndex}
+    let searchStats = { totalShifts: 0, totalHours: 0, checkedInCount: 0 };
+
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
         const y = date.getFullYear();
@@ -731,6 +737,84 @@
 
     // Custom Clickable Condition: Always clickable
     const adminClickableCondition = (shift, data) => true;
+
+    // --- Volunteer Search Logic ---
+    $: {
+        if (searchQuery.length >= 2) {
+            const query = searchQuery.toLowerCase().trim();
+            const results = [];
+
+            shifts.forEach((shift) => {
+                const data = shiftData[shift.id] || {};
+                const regs = data.registrations || [];
+
+                regs.forEach((reg, index) => {
+                    const nameMatch = reg.name?.toLowerCase().includes(query);
+                    const emailMatch = reg.email?.toLowerCase().includes(query);
+
+                    if (nameMatch || emailMatch) {
+                        results.push({
+                            shift,
+                            registration: reg,
+                            registrationIndex: index,
+                        });
+                    }
+                });
+            });
+
+            // Sort results by shift date (newest first)
+            results.sort((a, b) => b.shift.start - a.shift.start);
+            searchResults = results;
+
+            // Calculate stats
+            const hours = results.reduce((sum, r) => {
+                const duration =
+                    (r.shift.end - r.shift.start) / (1000 * 60 * 60);
+                return sum + duration;
+            }, 0);
+            const checkedIn = results.filter(
+                (r) => r.registration.checkedIn,
+            ).length;
+
+            searchStats = {
+                totalShifts: results.length,
+                totalHours: hours.toFixed(1),
+                checkedInCount: checkedIn,
+            };
+            isSearchActive = true;
+        } else {
+            isSearchActive = false;
+            searchResults = [];
+            searchStats = { totalShifts: 0, totalHours: 0, checkedInCount: 0 };
+        }
+    }
+
+    function clearSearch() {
+        searchQuery = "";
+        isSearchActive = false;
+        searchResults = [];
+    }
+
+    function jumpToShift(shift) {
+        clearSearch();
+        const weekStart = getStartOfWeek(shift.start);
+        currentWeekStartStr = toDateStr(weekStart);
+
+        // Expand the day and shift
+        const dateKey = shift.dateStr || toDateStr(shift.date);
+        expandedDayKeys.add(dateKey);
+        expandedDayKeys = expandedDayKeys;
+        expandedShiftIds.add(shift.id);
+        expandedShiftIds = expandedShiftIds;
+
+        // Scroll to shift after DOM updates
+        tick().then(() => {
+            const element = document.getElementById(`date-${dateKey}`);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        });
+    }
 </script>
 
 {#if !isAuthenticated}
@@ -804,6 +888,145 @@
                     clickableCondition={adminClickableCondition}
                     on:select={handleDateSelect}
                 />
+
+                <!-- Volunteer Search Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            ></path>
+                        </svg>
+                        Volunteer Search
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="relative">
+                            <input
+                                type="text"
+                                bind:value={searchQuery}
+                                placeholder="Search by name or email..."
+                                class="w-full px-3 py-2 pr-8 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
+                            />
+                            {#if searchQuery}
+                                <button
+                                    on:click={clearSearch}
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    title="Clear search"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        ></path>
+                                    </svg>
+                                </button>
+                            {/if}
+                        </div>
+
+                        {#if isSearchActive}
+                            {#if searchResults.length > 0}
+                                <div
+                                    class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg p-3 border border-pink-100"
+                                >
+                                    <p
+                                        class="font-bold text-gray-800 text-sm mb-2"
+                                    >
+                                        📊 {searchResults.length} shift{searchResults.length !==
+                                        1
+                                            ? "s"
+                                            : ""} found
+                                    </p>
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <div
+                                            class="flex items-center gap-1 text-gray-600"
+                                        >
+                                            <svg
+                                                class="w-3 h-3"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                ><path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                ></path></svg
+                                            >
+                                            {searchStats.totalHours} hours
+                                        </div>
+                                        <div
+                                            class="flex items-center gap-1 text-green-600"
+                                        >
+                                            <svg
+                                                class="w-3 h-3"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                ><path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 13l4 4L19 7"
+                                                ></path></svg
+                                            >
+                                            {searchStats.checkedInCount}/{searchStats.totalShifts}
+                                            checked in
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    on:click={clearSearch}
+                                    class="w-full text-sm text-gray-600 hover:text-gray-800 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                        ></path></svg
+                                    >
+                                    Back to Weekly View
+                                </button>
+                            {:else}
+                                <div
+                                    class="text-center py-3 text-sm text-gray-500"
+                                >
+                                    <p>
+                                        No volunteers found matching "{searchQuery}"
+                                    </p>
+                                </div>
+                            {/if}
+                        {:else if searchQuery.length === 1}
+                            <p class="text-xs text-gray-400 text-center">
+                                Type at least 2 characters to search
+                            </p>
+                        {/if}
+                    </div>
+                </div>
 
                 <!-- CSV Export Tool -->
                 <div
@@ -1118,7 +1341,218 @@
                 </button>
             </div>
 
-            {#if loading}
+            <!-- Search Results View -->
+            {#if isSearchActive && searchResults.length > 0}
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                >
+                    <div
+                        class="p-4 bg-gradient-to-r from-pink-50 to-purple-50 border-b border-pink-100"
+                    >
+                        <h2 class="text-lg font-bold text-gray-800">
+                            Search Results for "{searchQuery}"
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Found {searchStats.totalShifts} shift{searchStats.totalShifts !==
+                            1
+                                ? "s"
+                                : ""} ({searchStats.totalHours} total hours, {searchStats.checkedInCount}
+                            checked in)
+                        </p>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        {#each searchResults as result (result.shift.id + "-" + result.registrationIndex)}
+                            {@const shift = result.shift}
+                            {@const reg = result.registration}
+                            {@const isPast = shift.end < new Date()}
+                            {@const isFuture = shift.start > new Date()}
+
+                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                <div
+                                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                                >
+                                    <div class="flex-1">
+                                        <div
+                                            class="flex items-center gap-2 flex-wrap"
+                                        >
+                                            <span
+                                                class="font-bold text-gray-900"
+                                            >
+                                                {shift.start.toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        weekday: "short",
+                                                        month: "short",
+                                                        day: "numeric",
+                                                        year: "numeric",
+                                                    },
+                                                )}
+                                            </span>
+                                            <span class="text-gray-600">
+                                                {shift.start.toLocaleTimeString(
+                                                    "en-US",
+                                                    {
+                                                        hour: "numeric",
+                                                        minute: "2-digit",
+                                                    },
+                                                )} -
+                                                {shift.end.toLocaleTimeString(
+                                                    "en-US",
+                                                    {
+                                                        hour: "numeric",
+                                                        minute: "2-digit",
+                                                    },
+                                                )}
+                                            </span>
+
+                                            <!-- Time status badge -->
+                                            {#if isPast}
+                                                <span
+                                                    class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                                                    >Past</span
+                                                >
+                                            {:else if isFuture}
+                                                <span
+                                                    class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"
+                                                    >Upcoming</span
+                                                >
+                                            {:else}
+                                                <span
+                                                    class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full animate-pulse"
+                                                    >Now</span
+                                                >
+                                            {/if}
+                                        </div>
+
+                                        <div
+                                            class="flex items-center gap-2 mt-2 text-sm"
+                                        >
+                                            <!-- Role badge -->
+                                            {#if reg.role === "lead"}
+                                                <span
+                                                    class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium"
+                                                    >Lead</span
+                                                >
+                                            {:else}
+                                                <span
+                                                    class="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full font-medium"
+                                                    >Volunteer</span
+                                                >
+                                            {/if}
+
+                                            <!-- Check-in status -->
+                                            {#if reg.checkedIn}
+                                                <span
+                                                    class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1"
+                                                >
+                                                    <svg
+                                                        class="w-3 h-3"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        ><path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M5 13l4 4L19 7"
+                                                        ></path></svg
+                                                    >
+                                                    Checked In
+                                                </span>
+                                                {#if reg.checkInTime}
+                                                    <span
+                                                        class="text-xs text-gray-500"
+                                                    >
+                                                        at {new Date(
+                                                            reg.checkInTime,
+                                                        ).toLocaleTimeString(
+                                                            "en-US",
+                                                            {
+                                                                hour: "numeric",
+                                                                minute: "2-digit",
+                                                            },
+                                                        )}
+                                                    </span>
+                                                {/if}
+                                            {:else}
+                                                <span
+                                                    class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full"
+                                                    >Registered</span
+                                                >
+                                            {/if}
+                                        </div>
+
+                                        <!-- Volunteer details -->
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <span class="font-medium"
+                                                >{reg.name}</span
+                                            >
+                                            {#if reg.email}
+                                                <span class="mx-1">•</span>
+                                                <span>{reg.email}</span>
+                                            {/if}
+                                            {#if reg.phone}
+                                                <span class="mx-1">•</span>
+                                                <span>{reg.phone}</span>
+                                            {/if}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            on:click={() => jumpToShift(shift)}
+                                            class="text-xs text-blue-600 hover:text-blue-800 font-medium px-3 py-1.5 rounded border border-blue-200 hover:bg-blue-50 transition-colors bg-white"
+                                        >
+                                            View in Calendar
+                                        </button>
+                                        <button
+                                            on:click={() =>
+                                                handleRemoveVolunteer(
+                                                    shift.id,
+                                                    result.registrationIndex,
+                                                )}
+                                            class="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1.5 rounded border border-red-200 hover:bg-red-50 transition-colors bg-white"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+            {:else if isSearchActive && searchResults.length === 0}
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center"
+                >
+                    <svg
+                        class="w-16 h-16 mx-auto text-gray-300 mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                    </svg>
+                    <h3 class="text-lg font-bold text-gray-700">
+                        No Results Found
+                    </h3>
+                    <p class="text-gray-500 mt-2">
+                        No volunteers found matching "{searchQuery}"
+                    </p>
+                    <button
+                        on:click={clearSearch}
+                        class="mt-4 text-vibrant-pink hover:text-pink-700 font-medium"
+                    >
+                        Clear Search
+                    </button>
+                </div>
+            {:else if loading}
                 <div class="text-center py-12">
                     <div
                         class="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-pink mx-auto"
