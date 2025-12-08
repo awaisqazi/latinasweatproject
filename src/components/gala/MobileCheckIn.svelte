@@ -25,6 +25,7 @@
         paddleNumber: "",
         fullName: "",
         email: "",
+        phone: "",
         guestCount: 1,
     };
     let loading = false;
@@ -63,6 +64,7 @@
                 (g) =>
                     (g.fullName && g.fullName.toLowerCase().includes(lower)) ||
                     (g.email && g.email.toLowerCase().includes(lower)) ||
+                    (g.phone && g.phone.toLowerCase().includes(lower)) ||
                     String(g.paddleNumber).includes(lower),
             );
         }
@@ -111,7 +113,7 @@
     }
 
     async function registerWalkIn() {
-        if (!newGuest.fullName) return;
+        if (!newGuest.fullName || !newGuest.email || !newGuest.phone) return;
 
         loading = true;
         try {
@@ -124,6 +126,7 @@
                 paddleNumber: Number(newGuest.paddleNumber),
                 fullName: newGuest.fullName,
                 email: newGuest.email,
+                phone: newGuest.phone,
                 guestCount: Number(newGuest.guestCount),
                 checkedInCount: Number(newGuest.guestCount), // Auto check-in all
                 checkedIn: true,
@@ -138,6 +141,7 @@
                 paddleNumber: "",
                 fullName: "",
                 email: "",
+                phone: "",
                 guestCount: 1,
             };
             view = "search";
@@ -340,7 +344,7 @@
                             <label
                                 for="email"
                                 class="block text-sm font-bold text-gray-700 mb-2"
-                                >Email (Optional)</label
+                                >Email</label
                             >
                             <input
                                 id="email"
@@ -348,6 +352,23 @@
                                 bind:value={newGuest.email}
                                 class="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[var(--color-vibrant-pink)] focus:ring-0 outline-none"
                                 placeholder="jane@example.com"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="phone"
+                                class="block text-sm font-bold text-gray-700 mb-2"
+                                >Phone</label
+                            >
+                            <input
+                                id="phone"
+                                type="tel"
+                                bind:value={newGuest.phone}
+                                class="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[var(--color-vibrant-pink)] focus:ring-0 outline-none"
+                                placeholder="(555) 123-4567"
+                                required
                             />
                         </div>
 

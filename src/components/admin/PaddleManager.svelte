@@ -23,6 +23,7 @@
         paddleNumber: "",
         fullName: "",
         email: "",
+        phone: "",
         guestCount: 1,
     };
 
@@ -59,6 +60,7 @@
                     "Email",
                     "GuestCount",
                 ];
+                // Phone is optional in CSV
                 const missingHeaders = requiredHeaders.filter(
                     (h) => !headers.includes(h),
                 );
@@ -88,6 +90,7 @@
                         paddleNumber: Number(data.PaddleNumber),
                         fullName: data.FullName,
                         email: data.Email,
+                        phone: data.Phone || "",
                         guestCount: Number(data.GuestCount) || 1,
                         checkedIn: false,
                         checkInTime: null,
@@ -136,6 +139,7 @@
                 paddleNumber: Number(newGuest.paddleNumber),
                 fullName: newGuest.fullName,
                 email: newGuest.email,
+                phone: newGuest.phone,
                 guestCount: Number(newGuest.guestCount),
                 checkedIn: false,
                 checkInTime: null,
@@ -146,6 +150,7 @@
                 paddleNumber: "",
                 fullName: "",
                 email: "",
+                phone: "",
                 guestCount: 1,
             };
         } catch (err) {
@@ -206,7 +211,7 @@
             </h3>
             <p class="text-sm text-gray-500 mb-4">
                 Headers required: <code class="bg-gray-100 px-1"
-                    >PaddleNumber, FullName, Email, GuestCount</code
+                    >PaddleNumber, FullName, Email, Phone, GuestCount</code
                 >
             </p>
             <input
@@ -274,18 +279,32 @@
                     </div>
                     <div>
                         <label
-                            for="guest-count"
+                            for="phone"
                             class="block text-xs font-medium text-gray-500 mb-1"
-                            >Guest Count</label
+                            >Phone</label
                         >
                         <input
-                            id="guest-count"
-                            type="number"
-                            bind:value={newGuest.guestCount}
-                            min="1"
+                            id="phone"
+                            type="tel"
+                            bind:value={newGuest.phone}
                             class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                            placeholder="(555) 123-4567"
                         />
                     </div>
+                </div>
+                <div>
+                    <label
+                        for="guest-count"
+                        class="block text-xs font-medium text-gray-500 mb-1"
+                        >Guest Count</label
+                    >
+                    <input
+                        id="guest-count"
+                        type="number"
+                        bind:value={newGuest.guestCount}
+                        min="1"
+                        class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                    />
                 </div>
                 <button
                     type="submit"
@@ -314,6 +333,7 @@
                         <th class="px-4 py-3 font-medium">Paddle</th>
                         <th class="px-4 py-3 font-medium">Name</th>
                         <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium">Phone</th>
                         <th class="px-4 py-3 font-medium">Guests</th>
                         <th class="px-4 py-3 font-medium text-right">Actions</th
                         >
@@ -334,6 +354,9 @@
                                 >{guest.email || "-"}</td
                             >
                             <td class="px-4 py-3 text-gray-500"
+                                >{guest.phone || "-"}</td
+                            >
+                            <td class="px-4 py-3 text-gray-500"
                                 >{guest.guestCount}</td
                             >
                             <td class="px-4 py-3 text-right">
@@ -350,7 +373,7 @@
                     {#if guests.length === 0}
                         <tr>
                             <td
-                                colspan="6"
+                                colspan="7"
                                 class="px-4 py-8 text-center text-gray-400"
                                 >No guests found. Upload a CSV or add one
                                 manually.</td

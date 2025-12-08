@@ -15,6 +15,10 @@
     let searchTerm = "";
     let filteredDonations = [];
 
+    // Delete confirmation modal state
+    let showDeleteModal = false;
+    let donationToDelete = null;
+
     // Stats
     $: totalTransactions = filteredDonations.length;
     $: totalAmount = filteredDonations.reduce(
@@ -63,18 +67,21 @@
                 // Get resolved name for pledges
                 let name = d.donorName || "";
                 let email = d.donorEmail || "";
+                let phone = "";
 
                 if (d.type === "PLEDGE" && d.paddleNumber) {
                     const guest = guests[String(d.paddleNumber)];
                     if (guest) {
                         name = guest.fullName;
                         email = guest.email;
+                        phone = guest.phone || "";
                     }
                 }
 
                 return (
                     name.toLowerCase().includes(lower) ||
                     email.toLowerCase().includes(lower) ||
+                    phone.toLowerCase().includes(lower) ||
                     String(d.paddleNumber || "").includes(lower) ||
                     String(d.amount).includes(lower)
                 );
@@ -83,19 +90,26 @@
     }
 
     // Actions
-    async function handleDelete(donation) {
-        if (
-            !confirm(
-                `Are you sure you want to delete this donation of $${donation.amount}? This cannot be undone.`,
-            )
-        )
-            return;
+    function openDeleteModal(donation) {
+        donationToDelete = donation;
+        showDeleteModal = true;
+    }
+
+    function closeDeleteModal() {
+        showDeleteModal = false;
+        donationToDelete = null;
+    }
+
+    async function confirmDelete() {
+        if (!donationToDelete) return;
 
         try {
-            await deleteDoc(doc(db, "gala_donations", donation.id));
+            await deleteDoc(doc(db, "gala_donations", donationToDelete.id));
+            closeDeleteModal();
         } catch (err) {
             console.error(err);
             alert("Failed to delete donation: " + err.message);
+            closeDeleteModal();
         }
     }
 
@@ -106,18 +120,21 @@
             "Paddle Number",
             "Donor Name",
             "Email",
+            "Phone",
             "Amount",
             "Note",
         ];
         const rows = filteredDonations.map((d) => {
             let name = d.donorName || "";
             let email = d.donorEmail || "";
+            let phone = "";
 
             if (d.type === "PLEDGE" && d.paddleNumber) {
                 const guest = guests[String(d.paddleNumber)];
                 if (guest) {
                     name = guest.fullName;
                     email = guest.email;
+                    phone = guest.phone || "";
                 }
             }
 
@@ -131,6 +148,7 @@
                 `"${d.paddleNumber || ""}"`,
                 `"${name}"`,
                 `"${email}"`,
+                `"${phone}"`,
                 `"${d.amount}"`,
                 `"${d.message || ""}"`,
             ].join(",");
@@ -158,12 +176,14 @@
             return {
                 name: guest ? guest.fullName : "Unknown Guest",
                 email: guest ? guest.email : "",
+                phone: guest ? guest.phone || "" : "",
                 paddle: donation.paddleNumber,
             };
         }
         return {
             name: donation.donorName,
             email: donation.donorEmail,
+            phone: "",
             paddle: null,
         };
     }
@@ -206,7 +226,7 @@
         <input
             type="text"
             bind:value={searchTerm}
-            placeholder="Search by Donor, Paddle #, or Email..."
+            placeholder="Search by Donor, Paddle #, Email, or Phone..."
             class="w-full p-3 pl-10 border border-gray-200 rounded-lg focus:border-[var(--color-vibrant-pink)] focus:ring-0 outline-none"
         />
         <div
@@ -239,6 +259,7 @@
                         <th class="px-4 py-3 font-medium">Type</th>
                         <th class="px-4 py-3 font-medium">Donor Details</th>
                         <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium">Phone</th>
                         <th class="px-4 py-3 font-medium text-right">Amount</th>
                         <th class="px-4 py-3 font-medium text-center"
                             >Actions</th
@@ -288,6 +309,9 @@
                             <td class="px-4 py-3 text-gray-500"
                                 >{details.email || "-"}</td
                             >
+                            <td class="px-4 py-3 text-gray-500"
+                                >{details.phone || "-"}</td
+                            >
                             <td
                                 class="px-4 py-3 text-right font-bold text-[var(--color-vibrant-pink)] text-lg"
                             >
@@ -295,7 +319,7 @@
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <button
-                                    on:click={() => handleDelete(donation)}
+                                    on:click={() => openDeleteModal(donation)}
                                     class="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition-colors"
                                     title="Delete Donation"
                                 >
@@ -318,7 +342,7 @@
                     {#if filteredDonations.length === 0}
                         <tr>
                             <td
-                                colspan="6"
+                                colspan="7"
                                 class="px-4 py-8 text-center text-gray-400"
                                 >No donations found.</td
                             >
@@ -349,4 +373,39 @@
             </p>
         </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    {#if showDeleteModal && donationToDelete}
+        <div
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md mx-4">
+                <h3
+                    class="text-xl font-bold text-[var(--color-off-black)] mb-4"
+                >
+                    Confirm Deletion
+                </h3>
+                <p class="text-gray-600 mb-6">
+                    Are you sure you want to delete this donation of
+                    <span class="font-bold text-[var(--color-vibrant-pink)]">
+                        ${Number(donationToDelete.amount).toLocaleString()}
+                    </span>? This cannot be undone.
+                </p>
+                <div class="flex gap-3 justify-end">
+                    <button
+                        on:click={closeDeleteModal}
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        on:click={confirmDelete}
+                        class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-bold"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
