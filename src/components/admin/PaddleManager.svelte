@@ -7,6 +7,7 @@
         getDoc,
         setDoc,
         deleteDoc,
+        updateDoc,
         onSnapshot,
         query,
         orderBy,
@@ -17,6 +18,68 @@
     let loading = false;
     let error = "";
     let successMessage = "";
+
+    // Multi-select state
+    let selectedGuests = new Set();
+    let showDeleteModal = false;
+
+    // Edit mode state
+    let editingGuest = null; // The paddle number being edited
+    let editForm = {
+        paddleNumber: "",
+        fullName: "",
+        email: "",
+        phone: "",
+        guestCount: 1,
+    };
+    let editLoading = false;
+
+    // Reactive check for "select all" state
+    $: selectAll = guests.length > 0 && selectedGuests.size === guests.length;
+    $: hasSelection = selectedGuests.size > 0;
+
+    function toggleSelectAll() {
+        if (selectAll) {
+            selectedGuests = new Set();
+        } else {
+            selectedGuests = new Set(guests.map((g) => g.paddleNumber));
+        }
+    }
+
+    function toggleGuestSelection(paddleNumber) {
+        const newSet = new Set(selectedGuests);
+        if (newSet.has(paddleNumber)) {
+            newSet.delete(paddleNumber);
+        } else {
+            newSet.add(paddleNumber);
+        }
+        selectedGuests = newSet;
+    }
+
+    async function deleteSelectedGuests() {
+        if (selectedGuests.size === 0) return;
+
+        loading = true;
+        error = "";
+        successMessage = "";
+        showDeleteModal = false;
+
+        try {
+            const batch = writeBatch(db);
+            selectedGuests.forEach((paddleNumber) => {
+                const docRef = doc(db, "gala_guests", String(paddleNumber));
+                batch.delete(docRef);
+            });
+
+            await batch.commit();
+            successMessage = `Successfully deleted ${selectedGuests.size} guest(s).`;
+            selectedGuests = new Set();
+        } catch (err) {
+            error = "Failed to delete guests: " + err.message;
+        } finally {
+            loading = false;
+        }
+    }
 
     // Manual Add Form Data
     let newGuest = {
@@ -172,6 +235,107 @@
             error = "Failed to delete guest: " + err.message;
         }
     }
+
+    // Edit functions
+    function startEdit(guest) {
+        editingGuest = guest.paddleNumber;
+        editForm = {
+            paddleNumber: guest.paddleNumber,
+            fullName: guest.fullName || "",
+            email: guest.email || "",
+            phone: guest.phone || "",
+            guestCount: guest.guestCount || 1,
+        };
+    }
+
+    function cancelEdit() {
+        editingGuest = null;
+        editForm = {
+            paddleNumber: "",
+            fullName: "",
+            email: "",
+            phone: "",
+            guestCount: 1,
+        };
+    }
+
+    async function saveEdit() {
+        if (!editForm.fullName.trim()) {
+            error = "Name is required.";
+            return;
+        }
+        if (!editForm.paddleNumber) {
+            error = "Paddle number is required.";
+            return;
+        }
+
+        editLoading = true;
+        error = "";
+        successMessage = "";
+
+        try {
+            const oldPaddleNumber = editingGuest;
+            const newPaddleNumber = Number(editForm.paddleNumber);
+
+            // If paddle number changed, we need to create new doc and delete old
+            if (oldPaddleNumber !== newPaddleNumber) {
+                // Check if new paddle number already exists
+                const newDocRef = doc(
+                    db,
+                    "gala_guests",
+                    String(newPaddleNumber),
+                );
+                const newDocSnap = await getDoc(newDocRef);
+
+                if (newDocSnap.exists()) {
+                    throw new Error(
+                        `Paddle #${newPaddleNumber} already exists.`,
+                    );
+                }
+
+                // Get old doc data to preserve other fields
+                const oldDocRef = doc(
+                    db,
+                    "gala_guests",
+                    String(oldPaddleNumber),
+                );
+                const oldDocSnap = await getDoc(oldDocRef);
+                const oldData = oldDocSnap.data();
+
+                // Create new doc with updated data
+                await setDoc(newDocRef, {
+                    ...oldData,
+                    paddleNumber: newPaddleNumber,
+                    fullName: editForm.fullName.trim(),
+                    email: editForm.email.trim(),
+                    phone: editForm.phone.trim(),
+                    guestCount: Number(editForm.guestCount),
+                });
+
+                // Delete old doc
+                await deleteDoc(oldDocRef);
+
+                successMessage = `Updated and moved Paddle #${oldPaddleNumber} → #${newPaddleNumber}`;
+            } else {
+                // Simple update, paddle number unchanged
+                const docRef = doc(db, "gala_guests", String(oldPaddleNumber));
+                await updateDoc(docRef, {
+                    fullName: editForm.fullName.trim(),
+                    email: editForm.email.trim(),
+                    phone: editForm.phone.trim(),
+                    guestCount: Number(editForm.guestCount),
+                });
+
+                successMessage = `Updated Paddle #${oldPaddleNumber}`;
+            }
+
+            cancelEdit();
+        } catch (err) {
+            error = "Failed to save: " + err.message;
+        } finally {
+            editLoading = false;
+        }
+    }
 </script>
 
 <div class="space-y-8">
@@ -321,15 +485,35 @@
     <div
         class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
     >
-        <div class="p-4 border-b border-gray-100 bg-gray-50">
+        <div
+            class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center"
+        >
             <h3 class="font-bold text-[var(--color-off-black)]">
                 Current Guest List ({guests.length})
             </h3>
+            {#if hasSelection}
+                <button
+                    on:click={() => (showDeleteModal = true)}
+                    class="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+                >
+                    <span>🗑️</span>
+                    <span>Delete Selected ({selectedGuests.size})</span>
+                </button>
+            {/if}
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead class="bg-gray-50 text-[var(--color-medium-gray)]">
                     <tr>
+                        <th class="px-4 py-3 font-medium w-12">
+                            <input
+                                type="checkbox"
+                                checked={selectAll}
+                                on:change={toggleSelectAll}
+                                disabled={guests.length === 0}
+                                class="w-4 h-4 rounded border-gray-300 text-[var(--color-vibrant-pink)] focus:ring-[var(--color-vibrant-pink)] cursor-pointer"
+                            />
+                        </th>
                         <th class="px-4 py-3 font-medium">Paddle</th>
                         <th class="px-4 py-3 font-medium">Name</th>
                         <th class="px-4 py-3 font-medium">Email</th>
@@ -341,39 +525,137 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {#each guests as guest}
-                        <tr class="hover:bg-gray-50">
-                            <td
-                                class="px-4 py-3 font-mono font-bold text-[var(--color-vibrant-pink)]"
-                                >{guest.paddleNumber}</td
+                        {#if editingGuest === guest.paddleNumber}
+                            <!-- Edit Mode Row -->
+                            <tr class="bg-yellow-50">
+                                <td class="px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        disabled
+                                        class="w-4 h-4 rounded border-gray-300 opacity-50"
+                                    />
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input
+                                        type="number"
+                                        bind:value={editForm.paddleNumber}
+                                        class="w-20 px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none font-mono"
+                                    />
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input
+                                        type="text"
+                                        bind:value={editForm.fullName}
+                                        class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                                        placeholder="Full Name"
+                                    />
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input
+                                        type="email"
+                                        bind:value={editForm.email}
+                                        class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                                        placeholder="email@example.com"
+                                    />
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input
+                                        type="tel"
+                                        bind:value={editForm.phone}
+                                        class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                                        placeholder="(555) 123-4567"
+                                    />
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input
+                                        type="number"
+                                        bind:value={editForm.guestCount}
+                                        min="1"
+                                        class="w-16 px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none text-center"
+                                    />
+                                </td>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex gap-2 justify-end">
+                                        <button
+                                            on:click={saveEdit}
+                                            disabled={editLoading}
+                                            class="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded hover:bg-green-600 disabled:opacity-50"
+                                        >
+                                            {editLoading ? "..." : "Save"}
+                                        </button>
+                                        <button
+                                            on:click={cancelEdit}
+                                            disabled={editLoading}
+                                            class="px-3 py-1 bg-gray-400 text-white text-xs font-bold rounded hover:bg-gray-500 disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {:else}
+                            <!-- Display Mode Row -->
+                            <tr
+                                class="hover:bg-gray-50 {selectedGuests.has(
+                                    guest.paddleNumber,
+                                )
+                                    ? 'bg-pink-50'
+                                    : ''}"
                             >
-                            <td
-                                class="px-4 py-3 font-medium text-[var(--color-off-black)]"
-                                >{guest.fullName}</td
-                            >
-                            <td class="px-4 py-3 text-gray-500"
-                                >{guest.email || "-"}</td
-                            >
-                            <td class="px-4 py-3 text-gray-500"
-                                >{guest.phone || "-"}</td
-                            >
-                            <td class="px-4 py-3 text-gray-500"
-                                >{guest.guestCount}</td
-                            >
-                            <td class="px-4 py-3 text-right">
-                                <button
-                                    on:click={() =>
-                                        deleteGuest(guest.paddleNumber)}
-                                    class="text-red-500 hover:text-red-700 font-medium text-xs uppercase tracking-wide"
+                                <td class="px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedGuests.has(
+                                            guest.paddleNumber,
+                                        )}
+                                        on:change={() =>
+                                            toggleGuestSelection(
+                                                guest.paddleNumber,
+                                            )}
+                                        class="w-4 h-4 rounded border-gray-300 text-[var(--color-vibrant-pink)] focus:ring-[var(--color-vibrant-pink)] cursor-pointer"
+                                    />
+                                </td>
+                                <td
+                                    class="px-4 py-3 font-mono font-bold text-[var(--color-vibrant-pink)]"
+                                    >{guest.paddleNumber}</td
                                 >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
+                                <td
+                                    class="px-4 py-3 font-medium text-[var(--color-off-black)]"
+                                    >{guest.fullName}</td
+                                >
+                                <td class="px-4 py-3 text-gray-500"
+                                    >{guest.email || "-"}</td
+                                >
+                                <td class="px-4 py-3 text-gray-500"
+                                    >{guest.phone || "-"}</td
+                                >
+                                <td class="px-4 py-3 text-gray-500"
+                                    >{guest.guestCount}</td
+                                >
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex gap-3 justify-end">
+                                        <button
+                                            on:click={() => startEdit(guest)}
+                                            class="text-blue-500 hover:text-blue-700 font-medium text-xs uppercase tracking-wide"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            on:click={() =>
+                                                deleteGuest(guest.paddleNumber)}
+                                            class="text-red-500 hover:text-red-700 font-medium text-xs uppercase tracking-wide"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {/if}
                     {/each}
                     {#if guests.length === 0}
                         <tr>
                             <td
-                                colspan="7"
+                                colspan="8"
                                 class="px-4 py-8 text-center text-gray-400"
                                 >No guests found. Upload a CSV or add one
                                 manually.</td
@@ -385,3 +667,36 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+{#if showDeleteModal}
+    <div
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-bold text-[var(--color-off-black)] mb-4">
+                Confirm Bulk Delete
+            </h3>
+            <p class="text-[var(--color-medium-gray)] mb-6">
+                Are you sure you want to delete <strong class="text-red-500"
+                    >{selectedGuests.size}</strong
+                > guest(s)? This action cannot be undone.
+            </p>
+            <div class="flex gap-3 justify-end">
+                <button
+                    on:click={() => (showDeleteModal = false)}
+                    class="px-4 py-2 border border-gray-300 rounded-md text-[var(--color-medium-gray)] hover:bg-gray-50 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    on:click={deleteSelectedGuests}
+                    disabled={loading}
+                    class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50"
+                >
+                    {loading ? "Deleting..." : "Delete"}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
