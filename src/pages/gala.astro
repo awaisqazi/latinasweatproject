@@ -35,24 +35,78 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
   <Header />
   <main>
     {/* START: Hero Section */}
-    <section class="relative bg-off-black py-20 text-white sm:py-24 lg:py-32">
+    <section class="relative bg-off-black py-20 text-white sm:py-24 lg:py-32 overflow-hidden">
+      {/* Background Image */}
       <div class="absolute inset-0">
         <img src={`${base}images/gala.png`} alt="Noche Inolvidable Gala Invitation" class="h-full w-full object-cover object-center opacity-30" />
         <div class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/80 to-transparent"></div>
       </div>
+      
+      {/* Art Deco Pattern Overlay */}
+      <div class="absolute inset-0 opacity-5 gala-pattern"></div>
+      
+      {/* Decorative Corner Elements */}
+      <div class="absolute top-4 left-4 w-24 h-24 border-l-2 border-t-2 border-accent-gold/40 hidden lg:block"></div>
+      <div class="absolute top-4 right-4 w-24 h-24 border-r-2 border-t-2 border-accent-gold/40 hidden lg:block"></div>
+      <div class="absolute bottom-4 left-4 w-24 h-24 border-l-2 border-b-2 border-accent-gold/40 hidden lg:block"></div>
+      <div class="absolute bottom-4 right-4 w-24 h-24 border-r-2 border-b-2 border-accent-gold/40 hidden lg:block"></div>
+
       <div class="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">First Annual Latina Sweat Project Gala</p>
-        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+        <p class="font-sans text-sm sm:text-base font-semibold uppercase tracking-[0.3em] text-accent-gold animate-pulse">✨ This Thursday ✨</p>
+        <h1 class="mt-4 font-sans text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight" style="font-family: 'Playfair Display', Georgia, serif;">
           Noche Inolvidable
         </h1>
-        <p class="mt-4 font-body text-lg text-light-gray sm:text-xl">
-          A night of impact, connection, music, and purpose.
+        <p class="mt-4 font-body text-xl sm:text-2xl text-accent-gold/90 italic">
+          An Unforgettable Evening of 1920s Latin American Glamour
         </p>
-        <div class="mt-8 space-y-2 font-body text-lg sm:text-xl">
-          <p><span class="font-bold text-accent-gold">Date:</span> December 11, 2025</p>
-          <p><span class="font-bold text-accent-gold">Time:</span> 6:00 PM - 11:00 PM</p>
-          <p><span class="font-bold text-accent-gold">Venue:</span> Xoco House Gallery (<a href="https://www.google.com/maps/search/?api=1&query=2317+W+18th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">2317 W 18th St, Chicago, IL 60608</a>)</p>
-          <p><span class="font-bold text-accent-gold">Dress Theme:</span> Dress to impress in 1920s Latin American evening gowns style.</p>
+        
+        {/* Countdown Timer */}
+        <div class="flex justify-center my-10">
+          <div id="gala-countdown-hero" class="grid grid-cols-4 gap-3 sm:gap-6 text-center">
+            <div class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]">
+              <span id="hero-countdown-days" class="block text-3xl sm:text-5xl font-bold text-white">--</span>
+              <span class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block">Days</span>
+            </div>
+            <div class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]">
+              <span id="hero-countdown-hours" class="block text-3xl sm:text-5xl font-bold text-white">--</span>
+              <span class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block">Hours</span>
+            </div>
+            <div class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]">
+              <span id="hero-countdown-mins" class="block text-3xl sm:text-5xl font-bold text-white">--</span>
+              <span class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block">Mins</span>
+            </div>
+            <div class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]">
+              <span id="hero-countdown-secs" class="block text-3xl sm:text-5xl font-bold text-white">--</span>
+              <span class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block">Secs</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 space-y-3 font-body text-lg sm:text-xl">
+          <p><span class="font-bold text-accent-gold">📅 Date:</span> Thursday, December 11, 2025</p>
+          <p><span class="font-bold text-accent-gold">🕕 Time:</span> 6:00 PM - 11:00 PM CT</p>
+          <p><span class="font-bold text-accent-gold">📍 Venue:</span> Xoco House Gallery (<a href="https://www.google.com/maps/search/?api=1&query=2317+W+18th+St,+Chicago,+IL+60608" target="_blank" rel="noopener noreferrer" class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold">2317 W 18th St, Chicago</a>)</p>
+          <p><span class="font-bold text-accent-gold">👗 Theme:</span> <span class="italic">1920s Evening Gowns in Latin America</span></p>
+        </div>
+        
+        {/* Urgency CTA */}
+        <div class="mt-10">
+          <div class="inline-block bg-vibrant-pink/90 rounded-xl px-6 py-3 mb-6 animate-pulse-slow">
+            <p class="text-white font-bold text-lg sm:text-xl">⚡ Final Days to Purchase – Limited Seats!</p>
+          </div>
+          <div>
+            <a
+              href="https://www.zeffy.com/en-US/ticketing/noche-inolvidable-a-latina-sweat-project-benefit"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-accent-gold to-[#e6c55a] px-10 py-5 text-xl sm:text-2xl font-bold text-off-black shadow-2xl shadow-accent-gold/30 transition-all duration-300 hover:scale-105 hover:shadow-accent-gold/50 focus:outline-none focus:ring-4 focus:ring-accent-gold/50"
+            >
+              <span>🎟️ Get Your Tickets Now</span>
+              <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -71,35 +125,38 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
     </section>
     {/* END: About the Gala Section */}
 
-    {/* START: Nominations Section */}
-    <section class="bg-light-gray/50 py-12 sm:py-16 lg:py-20">
+    {/* START: Awards Section - Nominations Closed */}
+    <section class="bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e] py-12 sm:py-16 lg:py-20 text-white">
       <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">2025 Inaugural Gala Awards</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Honor Our Community Champions</h2>
-        <p class="mt-4 font-body text-lg text-medium-gray">
-          As part of our inaugural gala, we are proud to introduce two special awards to recognize outstanding individuals who embody the spirit of the Latina Sweat Project. Help us celebrate the leaders making a difference in our community.
+        <p class="font-sans text-base font-semibold uppercase tracking-wider text-accent-gold">🏆 2025 Inaugural Gala Awards 🏆</p>
+        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight sm:text-4xl">Award Recipients Selected!</h2>
+        <p class="mt-4 font-body text-lg text-light-gray/90">
+          Thank you to everyone who submitted nominations! We were overwhelmed by your heartfelt stories about community heroes making a difference.
         </p>
         <div class="mt-10 grid grid-cols-1 gap-8 text-left md:grid-cols-2">
-          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 class="font-sans text-xl font-bold text-off-black">Changemaker Award</h3>
-            <p class="mt-2 font-body text-medium-gray">Recognizes someone driving meaningful change through advocacy and community impact.</p>
+          <div class="rounded-xl border border-accent-gold/30 bg-white/5 backdrop-blur-sm p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-3xl">🌟</span>
+              <h3 class="font-sans text-xl font-bold text-accent-gold">Changemaker Award</h3>
+            </div>
+            <p class="font-body text-light-gray/80">Recognizes someone driving meaningful change through advocacy and community impact.</p>
+            <p class="mt-3 font-body text-sm text-vibrant-pink font-semibold">Recipient to be revealed at the gala!</p>
           </div>
-          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 class="font-sans text-xl font-bold text-off-black">Community Icon Award</h3>
-            <p class="mt-2 font-body text-medium-gray">Honors an individual whose ongoing dedication, service, and leadership inspire others and strengthen our communities.</p>
+          <div class="rounded-xl border border-accent-gold/30 bg-white/5 backdrop-blur-sm p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-3xl">👑</span>
+              <h3 class="font-sans text-xl font-bold text-accent-gold">Community Icon Award</h3>
+            </div>
+            <p class="font-body text-light-gray/80">Honors an individual whose ongoing dedication, service, and leadership inspire others and strengthen our communities.</p>
+            <p class="mt-3 font-body text-sm text-vibrant-pink font-semibold">Recipient to be revealed at the gala!</p>
           </div>
         </div>
-        <div class="mt-8">
-          <a href="https://forms.gle/aVv7aq1YWYRGeDEc9" target="_blank" rel="noopener noreferrer" class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
-            Nominate Someone Today
-          </a>
-          <p class="mt-4 font-body text-sm text-medium-gray">
-            Nominations close November 22. Award recipients will be announced at the gala on December 11.
-          </p>
-        </div>
+        <p class="mt-8 font-body text-lg text-accent-gold/80 italic">
+          Join us on December 11th to celebrate these extraordinary individuals! ✨
+        </p>
       </div>
     </section>
-    {/* END: Nominations Section */}
+    {/* END: Awards Section */}
 
     {/* START: Sponsorship Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
@@ -178,18 +235,91 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
     {/* END: Sponsorship Section */}
 
     {/* START: Individual Tickets Section */}
-    <section class="py-12 sm:py-16 lg:py-20">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Get Your Tickets</h2>
-                <p class="mt-4 font-body text-lg text-medium-gray">
-                    Be part of this incredible night and support a great cause. Purchase your individual tickets below.
-                </p>
-            </div>
-            <div class="mt-10 overflow-hidden rounded-lg shadow-xl">
-                <div style="position:relative;overflow:hidden;height:450px;width:100%;padding-top:450px;"><iframe title='Donation form powered by Zeffy' style='position: absolute; border: 0; top:0;left:0;bottom:0;right:0;width:100%;height:100%' src='https://www.zeffy.com/embed/ticketing/noche-inolvidable-a-latina-sweat-project-benefit' allowpaymentrequest allowTransparency="true"></iframe></div>
-            </div>    
+    <section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white to-light-gray/50">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">🎟️ Last Chance to Join Us</p>
+          <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Secure Your Seat at Our Inaugural Gala</h2>
+          <p class="mt-4 font-body text-lg text-medium-gray max-w-2xl mx-auto">
+            This is more than a night out – it's an investment in our community's wellness future.
+          </p>
         </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Value Proposition */}
+          <div class="bg-gradient-to-br from-vibrant-pink/10 to-accent-gold/10 rounded-2xl p-6 sm:p-8 border border-accent-gold/20">
+            <h3 class="text-xl sm:text-2xl font-bold text-off-black mb-6">Your Ticket Supports:</h3>
+            <ul class="space-y-4 text-medium-gray">
+              <li class="flex items-start gap-4">
+                <span class="text-2xl">🧘‍♀️</span>
+                <div>
+                  <strong class="text-off-black block">Free Yoga & Wellness Programs</strong>
+                  <span class="text-sm">Making movement accessible to underrepresented Chicago communities</span>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="text-2xl">🎓</span>
+                <div>
+                  <strong class="text-off-black block">Teacher Training Scholarships</strong>
+                  <span class="text-sm">Empowering the next generation of diverse yoga instructors</span>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="text-2xl">🏠</span>
+                <div>
+                  <strong class="text-off-black block">Community Space Operations</strong>
+                  <span class="text-sm">Keeping our studio doors open for everyone</span>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="text-2xl">💜</span>
+                <div>
+                  <strong class="text-off-black block">Mental Health & Healing Initiatives</strong>
+                  <span class="text-sm">Supporting holistic wellness in our neighborhoods</span>
+                </div>
+              </li>
+            </ul>
+
+            <div class="mt-8 bg-vibrant-pink/90 rounded-xl p-4 text-center">
+              <p class="text-white font-bold text-lg">⚡ Only 3 Days Left!</p>
+              <p class="text-white/90 text-sm">Limited seats remaining – don't miss this historic evening</p>
+            </div>
+          </div>
+
+          {/* Ticket Purchase */}
+          <div class="space-y-6">
+            <div class="text-center lg:text-left">
+              <p class="font-body text-medium-gray mb-4">
+                Join us for dinner, drinks, live entertainment, a silent auction, inspiring speakers, and the celebration of our first Teacher Training graduates!
+              </p>
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/noche-inolvidable-a-latina-sweat-project-benefit"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-accent-gold to-[#e6c55a] px-8 py-4 text-lg font-bold text-off-black shadow-xl shadow-accent-gold/20 transition-all duration-300 hover:scale-105 hover:shadow-accent-gold/40 focus:outline-none focus:ring-4 focus:ring-accent-gold/50"
+              >
+                <span>🎟️ Purchase Tickets</span>
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <p class="mt-3 text-sm text-medium-gray">100% of proceeds support LSP's mission</p>
+            </div>
+
+            <div class="overflow-hidden rounded-xl shadow-xl border border-slate-200">
+              <div style="position:relative;overflow:hidden;height:500px;width:100%;">
+                <iframe 
+                  title='Gala Ticket Purchase' 
+                  style='position: absolute; border: 0; top:0;left:0;bottom:0;right:0;width:100%;height:100%' 
+                  src='https://www.zeffy.com/embed/ticketing/noche-inolvidable-a-latina-sweat-project-benefit' 
+                  allowpaymentrequest 
+                  allowTransparency="true"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     {/* END: Individual Tickets Section */}
 
@@ -256,3 +386,57 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
 
   </main>
 </Layout>
+
+<script>
+  // Gala Countdown Timer - December 11, 2025 at 6:00 PM CT (Chicago Time)
+  function updateHeroCountdown() {
+    // Target: December 11, 2025 at 6:00 PM Chicago time (CST = UTC-6)
+    const galaDate = new Date('2025-12-11T18:00:00-06:00');
+    const now = new Date();
+    const diff = galaDate.getTime() - now.getTime();
+
+    const daysEl = document.getElementById('hero-countdown-days');
+    const hoursEl = document.getElementById('hero-countdown-hours');
+    const minsEl = document.getElementById('hero-countdown-mins');
+    const secsEl = document.getElementById('hero-countdown-secs');
+
+    if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
+
+    if (diff <= 0) {
+      // Event has started or passed
+      daysEl.textContent = '0';
+      hoursEl.textContent = '0';
+      minsEl.textContent = '0';
+      secsEl.textContent = '0';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+    daysEl.textContent = String(days);
+    hoursEl.textContent = String(hours).padStart(2, '0');
+    minsEl.textContent = String(mins).padStart(2, '0');
+    secsEl.textContent = String(secs).padStart(2, '0');
+  }
+
+  // Initial call and set interval
+  updateHeroCountdown();
+  setInterval(updateHeroCountdown, 1000);
+</script>
+
+<style>
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+  .gala-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='none' stroke='%23D4AF37' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 60px 60px;
+  }
+</style>

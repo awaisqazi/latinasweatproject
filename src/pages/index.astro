@@ -51,88 +51,305 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Gala Save the Date Section */}
-    <section id="gala" class="py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    {/* START: Gala Section - Noche Inolvidable */}
+    <section id="gala" class="relative py-16 sm:py-20 lg:py-28 overflow-hidden">
+      {/* Art Deco Background */}
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e]"
+      >
+      </div>
+      <div class="absolute inset-0 opacity-10 gala-art-deco-pattern"></div>
+
+      {/* Decorative Corner Elements */}
+      <div
+        class="absolute top-0 left-0 w-32 h-32 border-l-2 border-t-2 border-accent-gold/40 hidden lg:block"
+      >
+      </div>
+      <div
+        class="absolute top-0 right-0 w-32 h-32 border-r-2 border-t-2 border-accent-gold/40 hidden lg:block"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 left-0 w-32 h-32 border-l-2 border-b-2 border-accent-gold/40 hidden lg:block"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-accent-gold/40 hidden lg:block"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div class="text-center mb-10 sm:mb-16">
+          <p
+            class="font-sans text-sm sm:text-base font-semibold uppercase tracking-[0.3em] text-accent-gold animate-pulse"
+          >
+            ✨ This Thursday ✨
+          </p>
+          <h2
+            class="mt-4 font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white"
+            style="font-family: 'Playfair Display', Georgia, serif;"
+          >
+            Noche Inolvidable
+          </h2>
+          <p class="mt-3 text-lg sm:text-xl text-accent-gold/80 italic">
+            An Unforgettable Evening of 1920s Latin American Glamour
+          </p>
+        </div>
+
+        {/* Countdown Timer */}
+        <div class="flex justify-center mb-10 sm:mb-16">
+          <div
+            id="gala-countdown"
+            class="grid grid-cols-4 gap-3 sm:gap-6 text-center"
+          >
+            <div
+              class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]"
+            >
+              <span
+                id="countdown-days"
+                class="block text-3xl sm:text-5xl font-bold text-white">--</span
+              >
+              <span
+                class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block"
+                >Days</span
+              >
+            </div>
+            <div
+              class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]"
+            >
+              <span
+                id="countdown-hours"
+                class="block text-3xl sm:text-5xl font-bold text-white">--</span
+              >
+              <span
+                class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block"
+                >Hours</span
+              >
+            </div>
+            <div
+              class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]"
+            >
+              <span
+                id="countdown-mins"
+                class="block text-3xl sm:text-5xl font-bold text-white">--</span
+              >
+              <span
+                class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block"
+                >Mins</span
+              >
+            </div>
+            <div
+              class="bg-gradient-to-b from-accent-gold/20 to-transparent backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-gold/30 min-w-[70px] sm:min-w-[100px]"
+            >
+              <span
+                id="countdown-secs"
+                class="block text-3xl sm:text-5xl font-bold text-white">--</span
+              >
+              <span
+                class="text-xs sm:text-sm uppercase tracking-wider text-accent-gold/70 mt-1 block"
+                >Secs</span
+              >
+            </div>
+          </div>
+        </div>
+
         <div
-          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
+          class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center"
         >
-          <div>
-            <p
-              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
-            >
-              Save the Date!
-            </p>
-            <h2
-              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
-            >
-              Noche Inolvidable: Our First Annual Gala
-            </h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>
-                Join us for a 1920s-inspired evening of glamour and elegance as
-                we celebrate our community and the first graduating class of the
-                LSP Teacher Training Program!
-              </p>
-              <ul class="list-none space-y-2 pt-2">
-                <li>
-                  <span class="font-bold text-off-black">When:</span>
-                  <span class="text-accent-gold">December 11, 2025</span>
-                </li>
-                <li>
-                  <span class="font-bold text-off-black">Where:</span> Xoco House
-                  Gallery (<a
+          {/* Left: Event Details */}
+          <div class="space-y-6 sm:space-y-8">
+            {/* Event Info Cards */}
+            <div class="space-y-4">
+              <div
+                class="flex items-start gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-accent-gold/20 hover:border-accent-gold/40 transition-colors"
+              >
+                <span class="text-2xl sm:text-3xl">📅</span>
+                <div>
+                  <p
+                    class="text-xs uppercase tracking-wider text-accent-gold/70"
+                  >
+                    When
+                  </p>
+                  <p class="text-lg sm:text-xl font-bold text-white">
+                    Thursday, December 11, 2025
+                  </p>
+                  <p class="text-accent-gold">6:00 PM – 11:00 PM CT</p>
+                </div>
+              </div>
+              <div
+                class="flex items-start gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-accent-gold/20 hover:border-accent-gold/40 transition-colors"
+              >
+                <span class="text-2xl sm:text-3xl">📍</span>
+                <div>
+                  <p
+                    class="text-xs uppercase tracking-wider text-accent-gold/70"
+                  >
+                    Where
+                  </p>
+                  <p class="text-lg sm:text-xl font-bold text-white">
+                    Xoco House Gallery
+                  </p>
+                  <a
                     href="https://www.google.com/maps/search/?api=1&query=2317+W+18th+St,+Chicago,+IL+60608"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold"
+                    class="text-vibrant-pink underline hover:text-accent-gold transition-colors"
                     >2317 W 18th St, Chicago, IL 60608</a
-                  >)
-                </li>
-                <li>
-                  <span class="font-bold text-off-black">Theme:</span> 1920s Evening
-                  Gowns in Latin America
-                </li>
-              </ul>
-              <p>
-                Early bird tickets are available until October 15th. All
-                proceeds support our mission to create accessible wellness
-                spaces.
-              </p>
-              <div
-                class="mt-4 rounded-lg border border-accent-gold/30 bg-accent-gold/10 p-4"
-              >
-                <h4 class="font-bold text-off-black">Nominations Now Open!</h4>
-                <p class="text-base">
-                  Honor a community hero by nominating them for our Changemaker
-                  or Community Icon Award. <a
-                    href={`${base}gala`}
-                    class="font-bold text-vibrant-pink underline"
-                    >Learn more and submit your nomination!</a
                   >
-                </p>
+                </div>
+              </div>
+              <div
+                class="flex items-start gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-accent-gold/20 hover:border-accent-gold/40 transition-colors"
+              >
+                <span class="text-2xl sm:text-3xl">👗</span>
+                <div>
+                  <p
+                    class="text-xs uppercase tracking-wider text-accent-gold/70"
+                  >
+                    Dress Code
+                  </p>
+                  <p class="text-lg sm:text-xl font-bold text-white">
+                    1920s Evening Gowns in Latin America
+                  </p>
+                  <p class="text-light-gray/80 text-sm">
+                    Think glamour, elegance, and vintage flair
+                  </p>
+                </div>
               </div>
             </div>
-            <div class="mt-8">
+
+            {/* Nominations Closed Notice */}
+            <div
+              class="rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm p-4 sm:p-5"
+            >
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-xl">🏆</span>
+                <h4 class="font-bold text-white text-lg">
+                  Award Recipients Selected!
+                </h4>
+              </div>
+              <p class="text-light-gray/80 text-sm">
+                Thank you for your nominations! Our <span
+                  class="text-accent-gold font-semibold">Changemaker</span
+                > and <span class="text-accent-gold font-semibold"
+                  >Community Icon</span
+                > award recipients will be revealed at the gala. Prepare for an inspiring
+                evening!
+              </p>
+            </div>
+          </div>
+
+          {/* Right: CTA Section */}
+          <div class="space-y-6">
+            {/* Value Proposition */}
+            <div
+              class="bg-gradient-to-br from-vibrant-pink/20 to-accent-gold/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-accent-gold/30"
+            >
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">
+                Your Ticket Makes a Difference
+              </h3>
+              <ul class="space-y-3 text-light-gray">
+                <li class="flex items-start gap-3">
+                  <span class="text-accent-gold text-lg">✓</span>
+                  <span
+                    >Celebrate the <strong class="text-white"
+                      >first graduating class</strong
+                    > of LSP's Yoga Teacher Training Program</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-accent-gold text-lg">✓</span>
+                  <span
+                    >Fund <strong class="text-white"
+                      >free yoga & wellness programs</strong
+                    > for underrepresented Chicago communities</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-accent-gold text-lg">✓</span>
+                  <span
+                    >Enjoy <strong class="text-white"
+                      >dinner, drinks, live entertainment</strong
+                    >, silent auction & more</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-accent-gold text-lg">✓</span>
+                  <span
+                    >Connect with <strong class="text-white"
+                      >passionate community members</strong
+                    > & inspiring speakers</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            {/* Urgency Box */}
+            <div
+              class="bg-vibrant-pink/90 rounded-xl p-5 sm:p-6 text-center animate-pulse-slow"
+            >
+              <p class="text-white font-bold text-lg sm:text-xl mb-1">
+                ⚡ Final Days to Purchase!
+              </p>
+              <p class="text-white/90 text-sm sm:text-base">
+                Limited seats remaining – Reserve your spot now
+              </p>
+            </div>
+
+            {/* CTA Button */}
+            <div class="text-center">
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/noche-inolvidable-a-latina-sweat-project-benefit"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-accent-gold to-[#e6c55a] px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-bold text-off-black shadow-2xl shadow-accent-gold/30 transition-all duration-300 hover:scale-105 hover:shadow-accent-gold/50 focus:outline-none focus:ring-4 focus:ring-accent-gold/50"
+              >
+                <span>🎟️ Get Your Tickets Now</span>
+                <svg
+                  class="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <p class="mt-4 text-accent-gold/70 text-sm">
+                All proceeds support LSP's mission 💛
+              </p>
+            </div>
+
+            {/* More Details Link */}
+            <div class="text-center">
               <a
                 href={`${base}gala`}
-                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+                class="inline-flex items-center gap-2 text-accent-gold hover:text-white transition-colors underline underline-offset-4"
               >
-                Get Tickets & Details
+                View full gala details & sponsorships
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"></path>
+                </svg>
               </a>
             </div>
           </div>
-          <div
-            class="w-full"
-            set:html={`
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPR-uEkCSMf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-            <script async src="//www.instagram.com/embed.js"></script>
-          `}
-          />
         </div>
       </div>
     </section>
-    {/* END: Gala Save the Date Section */}
+    {/* END: Gala Section - Noche Inolvidable */}
 
     {/* START: Holiday Gift Drive Section */}
     <section
@@ -785,4 +1002,61 @@ const base = import.meta.env.BASE_URL;
 
     carousel.addEventListener("mouseleave", stopScrolling);
   }
+
+  // Gala Countdown Timer - December 11, 2025 at 6:00 PM CT (Chicago Time)
+  function updateGalaCountdown() {
+    // Target: December 11, 2025 at 6:00 PM Chicago time (CST = UTC-6)
+    const galaDate = new Date("2025-12-11T18:00:00-06:00");
+    const now = new Date();
+    const diff = galaDate.getTime() - now.getTime();
+
+    const daysEl = document.getElementById("countdown-days");
+    const hoursEl = document.getElementById("countdown-hours");
+    const minsEl = document.getElementById("countdown-mins");
+    const secsEl = document.getElementById("countdown-secs");
+
+    if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
+
+    if (diff <= 0) {
+      // Event has started or passed
+      daysEl.textContent = "0";
+      hoursEl.textContent = "0";
+      minsEl.textContent = "0";
+      secsEl.textContent = "0";
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+    daysEl.textContent = String(days);
+    hoursEl.textContent = String(hours).padStart(2, "0");
+    minsEl.textContent = String(mins).padStart(2, "0");
+    secsEl.textContent = String(secs).padStart(2, "0");
+  }
+
+  // Initial call and set interval
+  updateGalaCountdown();
+  setInterval(updateGalaCountdown, 1000);
 </script>
+
+<style>
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+  .gala-art-deco-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='none' stroke='%23D4AF37' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 60px 60px;
+  }
+</style>
