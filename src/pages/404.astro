@@ -72,11 +72,13 @@ import Header from "../components/Header.astro";
 </Layout>
 
 <script>
-    // Case-insensitive redirect for LSPGala
+    // Case-insensitive redirects
     const path = window.location.pathname.toLowerCase();
     if (path.includes("lspgala")) {
-        // Show a brief loading message or spinner if desired, but immediate redirect is usually best
         window.location.href =
             "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising";
+    } else if (path.includes("silentauction")) {
+        window.location.href =
+            "https://www.zeffy.com/en-US/ticketing/latina-sweat-project-gala-silent-auction";
     }
 </script>
