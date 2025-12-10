@@ -37,7 +37,11 @@
         // Subscribe to real-time vote updates
         unsubscribe = subscribeToVotes((newVotes) => {
             votes = newVotes;
-            tallies = calculateTallies(votes);
+            // Calculate official tallies (exclude community members)
+            const officialVotes = newVotes.filter(
+                (v) => v.affiliation !== "community-member",
+            );
+            tallies = calculateTallies(officialVotes);
             loading = false;
             isLive = true;
         });
@@ -184,8 +188,14 @@
             searchQuery === "" ||
             vote.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             vote.email?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesAffiliation =
-            filterAffiliation === "" || vote.affiliation === filterAffiliation;
+        let matchesAffiliation;
+        if (filterAffiliation === "") {
+            matchesAffiliation = true;
+        } else if (filterAffiliation === "official-only") {
+            matchesAffiliation = vote.affiliation !== "community-member";
+        } else {
+            matchesAffiliation = vote.affiliation === filterAffiliation;
+        }
         return matchesSearch && matchesAffiliation;
     });
 
@@ -212,6 +222,7 @@
             instructor: "Instructor",
             "ytt-student": "YTT Student",
             "board-member": "Board Member",
+            "community-member": "Community Member",
         };
         return map[aff] || aff;
     }
@@ -348,8 +359,12 @@
         <section class="stats-section">
             <div class="stats-grid">
                 <div class="stat-card total">
-                    <div class="stat-number">{votes.length}</div>
-                    <div class="stat-label">Total Votes</div>
+                    <div class="stat-number">
+                        {votes.filter(
+                            (v) => v.affiliation !== "community-member",
+                        ).length}
+                    </div>
+                    <div class="stat-label">Official Votes</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">
@@ -372,12 +387,24 @@
                     </div>
                     <div class="stat-label">Board Members</div>
                 </div>
+                <div class="stat-card community">
+                    <div class="stat-number">
+                        {votes.filter(
+                            (v) => v.affiliation === "community-member",
+                        ).length}
+                    </div>
+                    <div class="stat-label">Community (Advisory)</div>
+                </div>
             </div>
         </section>
 
-        <!-- Vote Tallies -->
+        <!-- Vote Tallies (Official Only) -->
         <section class="tallies-section">
-            <h2>Vote Tallies</h2>
+            <h2>🗳️ Official Vote Tallies</h2>
+            <p class="tallies-note">
+                Includes votes from Instructors, YTT Students, and Board Members
+                only.
+            </p>
             <div class="tallies-grid">
                 {#each Object.entries(roleDisplayNames) as [roleKey, roleTitle]}
                     {@const roleTotalVotes = Object.values(
@@ -442,6 +469,109 @@
             </div>
         </section>
 
+        <!-- Community Popular Vote (Advisory) -->
+        {@const communityVotes = votes.filter(
+            (v) => v.affiliation === "community-member",
+        )}
+        {@const communityTallies = (() => {
+            const roles = [
+                "secretary",
+                "treasurer",
+                "vicePresident",
+                "president",
+            ];
+            const t = {};
+            roles.forEach((role) => (t[role] = {}));
+            communityVotes.forEach((vote) => {
+                roles.forEach((role) => {
+                    const selection = vote[role];
+                    if (selection)
+                        t[role][selection] = (t[role][selection] || 0) + 1;
+                });
+            });
+            return t;
+        })()}
+        <section class="tallies-section community-section">
+            <h2>💜 Community Popular Vote</h2>
+            <p class="tallies-note community-disclaimer">
+                Advisory only — these votes do not count toward official
+                election results. Showing pulse from {communityVotes.length} community
+                member{communityVotes.length !== 1 ? "s" : ""}.
+            </p>
+            {#if communityVotes.length === 0}
+                <div class="no-community-votes">
+                    <p>No community votes have been submitted yet.</p>
+                </div>
+            {:else}
+                <div class="tallies-grid">
+                    {#each Object.entries(roleDisplayNames) as [roleKey, roleTitle]}
+                        {@const roleTotalVotes = Object.values(
+                            communityTallies[roleKey] || {},
+                        ).reduce((a, b) => a + b, 0)}
+                        <div class="tally-card community-card">
+                            <h3>{roleTitle}</h3>
+                            <div class="tally-list">
+                                {#if communityTallies[roleKey] && Object.keys(communityTallies[roleKey]).length > 0}
+                                    {#each Object.entries(communityTallies[roleKey]).sort((a, b) => b[1] - a[1]) as [candidate, count], index}
+                                        {@const percentage =
+                                            roleTotalVotes > 0
+                                                ? (
+                                                      (count / roleTotalVotes) *
+                                                      100
+                                                  ).toFixed(1)
+                                                : 0}
+                                        <div
+                                            class="tally-row"
+                                            class:leading={index === 0 &&
+                                                count > 0}
+                                        >
+                                            <div class="candidate-info">
+                                                <span class="candidate-name"
+                                                    >{candidate}</span
+                                                >
+                                                {#if index === 0 && count > 0 && Object.keys(communityTallies[roleKey]).length > 1}
+                                                    <span
+                                                        class="leading-badge community-badge"
+                                                        >POPULAR</span
+                                                    >
+                                                {/if}
+                                            </div>
+                                            <div
+                                                class="tally-bar-container community-bar"
+                                            >
+                                                <div
+                                                    class="tally-bar"
+                                                    style="width: {percentage}%"
+                                                ></div>
+                                            </div>
+                                            <div class="tally-stats">
+                                                <span class="tally-percentage"
+                                                    >{percentage}%</span
+                                                >
+                                                <span class="tally-count"
+                                                    >{count} vote{count !== 1
+                                                        ? "s"
+                                                        : ""}</span
+                                                >
+                                            </div>
+                                        </div>
+                                    {/each}
+                                    <div class="total-votes-row">
+                                        Total: {roleTotalVotes} vote{roleTotalVotes !==
+                                        1
+                                            ? "s"
+                                            : ""} cast
+                                    </div>
+                                {:else}
+                                    <p class="no-votes">No votes yet</p>
+                                {/if}
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </section>
+
         <!-- Voter List -->
         <section class="voters-section">
             <div class="voters-header">
@@ -458,9 +588,15 @@
                         class="filter-select"
                     >
                         <option value="">All Affiliations</option>
+                        <option value="official-only"
+                            >Official Only (No Community)</option
+                        >
                         <option value="instructor">Instructors</option>
                         <option value="ytt-student">YTT Students</option>
                         <option value="board-member">Board Members</option>
+                        <option value="community-member"
+                            >Community Members</option
+                        >
                     </select>
                 </div>
             </div>
@@ -933,6 +1069,11 @@
         color: white;
     }
 
+    .stat-card.community {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+
     .stat-number {
         font-size: 2.5rem;
         font-weight: 800;
@@ -956,7 +1097,47 @@
         font-size: 1.25rem;
         font-weight: 700;
         color: #1e1e1e;
+        margin-bottom: 0.5rem;
+    }
+
+    .tallies-note {
+        font-size: 0.875rem;
+        color: #6b7280;
         margin-bottom: 1rem;
+    }
+
+    .community-section h2 {
+        color: #7c3aed;
+    }
+
+    .community-disclaimer {
+        color: #8b5cf6;
+        font-style: italic;
+    }
+
+    .no-community-votes {
+        text-align: center;
+        padding: 2rem;
+        background: #f5f3ff;
+        border-radius: 0.75rem;
+        color: #6b7280;
+    }
+
+    .community-card {
+        border: 2px solid #c4b5fd;
+    }
+
+    .community-card h3 {
+        color: #7c3aed !important;
+        border-bottom-color: #c4b5fd !important;
+    }
+
+    .community-bar .tally-bar {
+        background: linear-gradient(90deg, #8b5cf6, #7c3aed) !important;
+    }
+
+    .community-badge {
+        background: linear-gradient(90deg, #8b5cf6, #7c3aed) !important;
     }
 
     .tallies-grid {

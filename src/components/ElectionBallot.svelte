@@ -45,6 +45,7 @@
         { value: "instructor", label: "LSP Instructor" },
         { value: "ytt-student", label: "YTT Student" },
         { value: "board-member", label: "Board Member" },
+        { value: "community-member", label: "Community Member" },
     ];
 
     // Function to compute effective voting status
@@ -327,6 +328,22 @@
                                 <option value={aff.value}>{aff.label}</option>
                             {/each}
                         </select>
+                        {#if voterAffiliation === "community-member"}
+                            <div class="community-note">
+                                <span class="community-note-icon">💜</span>
+                                <div>
+                                    <strong>Thank you for your voice!</strong>
+                                    <p>
+                                        As a Community Member, your vote helps
+                                        us gauge community sentiment but will
+                                        not be counted in the official election
+                                        results. Only LSP Instructors, YTT
+                                        Students, and Board Members are eligible
+                                        to vote in the official election.
+                                    </p>
+                                </div>
+                            </div>
+                        {/if}
                     </div>
                 </div>
             </div>
@@ -414,9 +431,15 @@
                     {/if}
                 </button>
                 <p class="submit-note">
-                    By submitting, you confirm that you are an eligible voter
-                    (LSP Instructor, YTT Student, or Board Member) and that your
-                    selections are final.
+                    {#if voterAffiliation === "community-member"}
+                        By submitting, you acknowledge that your community vote
+                        is advisory only and will not count toward the official
+                        election results.
+                    {:else}
+                        By submitting, you confirm that you are an eligible
+                        voter (LSP Instructor, YTT Student, or Board Member) and
+                        that your selections are final.
+                    {/if}
                 </p>
             </div>
         </form>
@@ -658,6 +681,35 @@
         font-size: 0.75rem;
         color: #ef4444;
         margin-top: 0.25rem;
+    }
+
+    /* Community Member Note */
+    .community-note {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 1px solid #c4b5fd;
+        border-radius: 0.75rem;
+    }
+
+    .community-note-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .community-note strong {
+        display: block;
+        color: #6d28d9;
+        margin-bottom: 0.25rem;
+    }
+
+    .community-note p {
+        font-size: 0.875rem;
+        color: #5b21b6;
+        margin: 0;
+        line-height: 1.5;
     }
 
     /* Role Voting Block */
