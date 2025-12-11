@@ -128,9 +128,9 @@ const roles = [
         >
             <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
                 <span
-                    class="rounded-full bg-vibrant-pink/10 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-vibrant-pink"
+                    class="rounded-full bg-medium-gray/20 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-medium-gray"
                 >
-                    Voting Period: Dec 9 - Dec 10
+                    Voting Closed
                 </span>
                 <h1
                     class="mt-6 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
@@ -278,86 +278,53 @@ const roles = [
             }
         </div>
 
-        {/* Voting Ballot Section - at bottom with attestation */}
+        {/* Voting Closed Section */}
         <section class="bg-off-black py-16" id="vote">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
-                {/* Attestation Gate */}
-                <div id="ballot-gate" class="text-center">
-                    <h3 class="font-sans text-2xl font-bold text-white mb-4">
-                        Ready to Cast Your Vote?
-                    </h3>
-                    <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Before accessing the ballot, please confirm that you
-                        have reviewed all candidate information above. Your vote
-                        matters and should be an informed decision.
-                    </p>
-                    <label
-                        class="inline-flex items-center gap-3 cursor-pointer group mb-6"
+                <div class="text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent-gold/20 mb-6"
                     >
-                        <input
-                            type="checkbox"
-                            id="attestation-checkbox"
-                            class="w-5 h-5 rounded border-2 border-gray-400 text-vibrant-pink focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black cursor-pointer"
-                        />
-                        <span
-                            class="text-white font-medium group-hover:text-vibrant-pink transition-colors"
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-10 w-10 text-accent-gold"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                         >
-                            I confirm that I have reviewed all candidate
-                            information
-                        </span>
-                    </label>
-                    <div>
-                        <button
-                            id="reveal-ballot-btn"
-                            disabled
-                            class="mt-4 inline-flex items-center gap-2 bg-vibrant-pink text-white font-bold py-3 px-8 rounded-full opacity-50 cursor-not-allowed transition-all duration-300"
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-sans text-3xl font-bold text-white mb-4">
+                        ¡Gracias por Votar!
+                    </h3>
+                    <p class="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
+                        Voting for the LSP Junior Board has officially closed.
+                    </p>
+                    <div
+                        class="bg-gradient-to-r from-vibrant-pink/20 via-accent-gold/20 to-vibrant-pink/20 rounded-2xl p-8 border border-white/10"
+                    >
+                        <p class="text-lg text-white font-medium mb-2">
+                            Results will be announced shortly!
+                        </p>
+                        <p class="text-gray-400">
+                            Thank you to everyone who participated in this
+                            election. Stay tuned for the official announcement
+                            of your new Junior Board.
+                        </p>
+                    </div>
+                    <p class="mt-8 text-sm text-gray-500">
+                        Questions? Reach out to us at <a
+                            href="mailto:collab@latinasweatproject.com"
+                            class="text-vibrant-pink hover:underline"
+                            >collab@latinasweatproject.com</a
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                ></path>
-                            </svg>
-                            Access My Ballot
-                        </button>
-                    </div>
-                </div>
-
-                {/* iPhone Troubleshooting Note - visible before ballot */}
-                <div
-                    class="bg-amber-900/30 border border-amber-600/50 rounded-lg p-4 mb-6 text-sm mt-6"
-                >
-                    <div class="flex items-start gap-3">
-                        <span class="text-xl">📱</span>
-                        <div>
-                            <p class="font-semibold text-amber-200 mb-1">
-                                Having trouble on iPhone?
-                            </p>
-                            <p class="text-amber-100/80">
-                                If the ballot is not loading or responding
-                                properly on your iPhone, please tap the
-                                <strong class="text-white">aA</strong> button in
-                                Safari's address bar and select
-                                <strong class="text-white"
-                                    >"Request Desktop Website"</strong
-                                >. This is a known issue we're working to
-                                resolve.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Ballot Container - hidden initially */}
-                <div id="ballot-container" class="hidden">
-                    <ElectionBallot roles={roles} client:load />
+                    </p>
                 </div>
             </div>
         </section>
