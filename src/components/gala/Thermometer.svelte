@@ -9,8 +9,8 @@
     let toastMessage = "";
     let isGoalReached = false;
 
-    const GOAL = 300000;
-    const INCREMENT = 50000;
+    const GOAL = 75000;
+    const INCREMENT = 15000;
 
     // Subscribe to totalRaised to handle celebrations
     $: {
@@ -40,8 +40,8 @@
 
     function triggerIncrementCelebration(amount) {
         toastMessage = `We hit $${amount.toLocaleString()}! Keep the momentum going!`;
-        if (amount === 150000) {
-            toastMessage = "Halfway there! Amazing work!";
+        if (amount === 45000) {
+            toastMessage = "Over halfway there! Amazing work!";
         }
         showToast = true;
         setTimeout(() => {
@@ -141,7 +141,7 @@
         <div
             class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold z-10 text-xl"
         >
-            {isGoalReached ? "GOAL REACHED!" : "$300k Goal"}
+            {isGoalReached ? "GOAL REACHED!" : "$75k Goal"}
         </div>
     </div>
 </div>

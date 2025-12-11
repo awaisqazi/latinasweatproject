@@ -14,7 +14,7 @@
     import { onMount } from "svelte";
 
     // State
-    let activeTab = "pledge"; // 'pledge' or 'external'
+    let activeTab = "pledge"; // 'pledge', 'external', or 'tickets'
     let loading = false;
     let error = "";
     let successMessage = "";
@@ -28,6 +28,10 @@
         email: "",
         description: "",
         amount: "",
+    };
+    let ticketData = {
+        amount: "",
+        description: "",
     };
     let donations = [];
 
@@ -141,6 +145,37 @@
         setTimeout(() => (successMessage = ""), 3000);
     }
 
+    async function submitTicketSales() {
+        if (!ticketData.amount) {
+            error = "Amount is required.";
+            return;
+        }
+
+        loading = true;
+        error = "";
+
+        try {
+            await addDoc(collection(db, "gala_donations"), {
+                type: "TICKET_SALES",
+                donorName: "Ticket Sales",
+                message: ticketData.description || "Ticket revenue",
+                amount: Number(ticketData.amount),
+                hidden: true, // This hides it from ticker and leaderboard
+                timestamp: serverTimestamp(),
+            });
+
+            showSuccess(`Recorded $${ticketData.amount} in ticket sales`);
+            ticketData = {
+                amount: "",
+                description: "",
+            };
+        } catch (err) {
+            error = err.message;
+        } finally {
+            loading = false;
+        }
+    }
+
     function formatTime(timestamp) {
         if (!timestamp) return "";
         return timestamp
@@ -174,6 +209,15 @@
                     on:click={() => (activeTab = "external")}
                 >
                     External / Sponsor
+                </button>
+                <button
+                    class="flex-1 py-4 text-center font-bold transition-colors {activeTab ===
+                    'tickets'
+                        ? 'bg-[var(--color-accent-gold)] text-white'
+                        : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}"
+                    on:click={() => (activeTab = "tickets")}
+                >
+                    🎟️ Ticket Sales
                 </button>
             </div>
 
@@ -296,75 +340,57 @@
                             </div>
                         </div>
                     {/if}
-                {:else}
-                    <form
-                        on:submit|preventDefault={submitExternal}
-                        class="space-y-4"
-                    >
-                        <div class="grid grid-cols-2 gap-4">
+                {:else if activeTab === "tickets"}
+                    <div class="space-y-6">
+                        <div
+                            class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800"
+                        >
+                            <strong>Note:</strong> Ticket sales contribute to the
+                            fundraising total but do NOT appear in the live ticker
+                            or leaderboard.
+                        </div>
+                        <form
+                            on:submit|preventDefault={submitTicketSales}
+                            class="space-y-4"
+                        >
                             <div>
                                 <label
-                                    for="donor-name"
-                                    class="block text-sm font-bold text-gray-700 mb-1"
-                                    >Donor Name</label
-                                >
-                                <input
-                                    id="donor-name"
-                                    type="text"
-                                    bind:value={externalData.donorName}
-                                    class="w-full p-3 border border-gray-300 rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    for="donor-amount"
-                                    class="block text-sm font-bold text-gray-700 mb-1"
+                                    for="ticket-amount"
+                                    class="block text-sm font-bold text-gray-700 mb-2"
                                     >Amount ($)</label
                                 >
                                 <input
-                                    id="donor-amount"
+                                    id="ticket-amount"
                                     type="number"
-                                    bind:value={externalData.amount}
-                                    class="w-full p-3 border border-gray-300 rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
+                                    bind:value={ticketData.amount}
+                                    class="w-full text-4xl p-4 border-2 border-gray-200 rounded-lg focus:border-[var(--color-accent-gold)] focus:ring-0 outline-none font-mono text-center"
+                                    placeholder="0.00"
                                     required
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label
-                                for="donor-email"
-                                class="block text-sm font-bold text-gray-700 mb-1"
-                                >Email (Optional)</label
+                            <div>
+                                <label
+                                    for="ticket-desc"
+                                    class="block text-sm font-bold text-gray-700 mb-1"
+                                    >Description (Optional)</label
+                                >
+                                <input
+                                    id="ticket-desc"
+                                    type="text"
+                                    bind:value={ticketData.description}
+                                    class="w-full p-3 border border-gray-300 rounded focus:ring-1 focus:ring-[var(--color-accent-gold)] outline-none"
+                                    placeholder="e.g. VIP Table, General Admission"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                class="w-full bg-[var(--color-accent-gold)] text-[var(--color-off-black)] text-xl font-bold py-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                             >
-                            <input
-                                id="donor-email"
-                                type="email"
-                                bind:value={externalData.email}
-                                class="w-full p-3 border border-gray-300 rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                for="donor-desc"
-                                class="block text-sm font-bold text-gray-700 mb-1"
-                                >Description / Note</label
-                            >
-                            <textarea
-                                id="donor-desc"
-                                bind:value={externalData.description}
-                                class="w-full p-3 border border-gray-300 rounded focus:ring-1 focus:ring-[var(--color-vibrant-pink)] outline-none"
-                                rows="3"
-                            ></textarea>
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            class="w-full bg-[var(--color-off-black)] text-white text-lg font-bold py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50"
-                        >
-                            {loading ? "Saving..." : "Submit Donation"}
-                        </button>
-                    </form>
+                                {loading ? "Saving..." : "Add Ticket Sales"}
+                            </button>
+                        </form>
+                    </div>
                 {/if}
             </div>
         </div>

@@ -45,15 +45,16 @@ export const totalRaised = derived(donationsStore, ($donations) => {
 
 // 2. Progress Percentage
 export const progressPercentage = derived(totalRaised, ($total) => {
-    const goal = 300000;
+    const goal = 75000;
     const percent = ($total / goal) * 100;
     return Math.min(percent, 100); // Cap at 100 for the bar, but UI can show text if higher
 });
 
-// 3. Recent Donations (Top 10 most recent)
+// 3. Recent Donations (Top 10 most recent, excluding hidden/ticket sales)
 // Donations are already sorted by timestamp desc from the query, but let's be safe
 export const recentDonations = derived([donationsStore, guestsStore], ([$donations, $guests]) => {
     return $donations
+        .filter(d => !d.hidden) // Exclude hidden donations (ticket sales)
         .slice(0, 10)
         .map(d => ({
             ...d,
@@ -61,11 +62,12 @@ export const recentDonations = derived([donationsStore, guestsStore], ([$donatio
         }));
 });
 
-// 4. Top Donors (Top 5 by total contribution)
+// 4. Top Donors (Top 5 by total contribution, excluding hidden/ticket sales)
 export const topDonors = derived([donationsStore, guestsStore], ([$donations, $guests]) => {
     const donorTotals = {};
 
-    $donations.forEach(d => {
+    // Filter out hidden donations (ticket sales) from leaderboard
+    $donations.filter(d => !d.hidden).forEach(d => {
         // Group by paddleNumber if available, otherwise fallback to donorName or 'Anonymous'
         // If paddleNumber exists, we use it as the key to aggregate
         const key = d.paddleNumber || d.donorName || 'Anonymous';
