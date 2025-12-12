@@ -2,124 +2,50 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import CandidateCard from "@/components/CandidateCard.astro";
-import ElectionBallot from "@/components/ElectionBallot.svelte";
 
 const base = import.meta.env.BASE_URL;
 
-const roles = [
+// Election Winners - Junior Board 2025
+const juniorBoard = [
     {
-        title: "Secretary",
-        id: "secretary",
-        responsibilities:
-            "Maintains clear communication on behalf of the Junior Board and documents key ideas, initiatives, and commitments. Represents the board in external storytelling, capturing and sharing narratives of impact, community wins, and program milestones. Acts as a liaison between the Junior Board and the broader Latina Sweat community, ensuring messaging is consistent and rooted in the mission.",
-        candidates: [
-            {
-                name: "Alejandra Garcia",
-                image: "alejandrag.png",
-                bio: `<p class="font-bold italic text-lg">"I am Organized, Driven, and Powered by our People."</p>
-              <p class="mt-4">My name is Alejandra Garcia and I am a south-sider from Chicago with big dreams. All my life I have known I wanted to be a leader and create a positive impact on my community. From being an educator I have learned that these dreams and goals are always bigger than myself. I want to continue to be a representation to little humans and other Latinas that no matter how big or small your dream is... anything is possible. As a secretary I am confident I can meet all the expected requirements and ensure the community continues to prosper.</p>
-              <p class="mt-4 border-t border-slate-200 pt-2 font-bold text-sm text-medium-gray uppercase tracking-wider">LSP Community Impact Board Member • CPS Educator • LSP Teacher Training Student</p>`,
-            },
-        ],
+        role: "President",
+        name: "Yari Jurado",
+        image: "yari.png",
+        bio: `<p>Yari is a wellness leader, yoga instructor and proud mamá who has been part of Latina Sweat Project for three years. She leads with vulnerability, connection and corazón, creating spaces where everyone feels seen, supported and welcomed.</p>
+              <p class="mt-4">She brings a strong track record in leadership and community building. Yari has served on two professional boards, helping create programming that raised over $150K and doubled board membership. She's poured into the next generation as a mentor to a 20-woman undergraduate sorority chapter, guiding them through fundraising, recruitment and operations. In her corporate role she leads DEI programming, lifting voices and making sure people feel connected, seen and valued.</p>
+              <p class="mt-4">As the oldest daughter of immigrants and a first-generation college grad, Yari knows what it means to step into spaces no one before her did. She's committed to strengthening nuestra comunidad, elevating Latina voices and helping LSP grow as a safe powerful space for everyone who walks in.</p>
+              <p class="mt-4">As President, Yari wants to continue expanding access to wellness, deepen community connection and grow opportunities for members to lead, create and shine. Her vision is to make LSP a place where everyone, especially every mujer, feels supported in their healing journey from their first class to their biggest milestone. She hopes to elevate programming, strengthen partnerships, amplify Latina voices and create more spaces where women can show up as their full selves.</p>`,
     },
     {
-        title: "Treasurer",
-        id: "treasurer",
-        responsibilities:
-            "Provides stewardship and awareness around fundraising initiatives, sponsorship opportunities, and community giving that support Latina Sweat Project programming. Serves as a public-facing representative when discussing financial impact, donor engagement, or fundraising campaigns. Mentors peers in understanding the financial sustainability of community wellness work and communicates this effectively in external settings.",
-        candidates: [
-            {
-                name: "Alejandra Soto",
-                image: "alejandra.jpg",
-                bio: `<p>I’m a lover of traveling, hiking, and anything that brings me closer to nature. Some of my happiest moments are spent outdoors, exploring new places, or soaking in quiet views with my little family. I’m a first-generation Latina and proud mama who believes wellness and community should be accessible to all.</p>
-              <p class="mt-4">With eight years of experience in healthcare revenue cycle, rising to become the youngest Operations Manager at my company I bring expertise in budgeting, systems, and heart-centered leadership. This past year was full of challenges: navigating motherhood, completing yoga teacher training, training for the Chicago Marathon, and fundraising for it. Each experience reminded me that when my heart is in something, I show up fully, resilient and full of love.</p>
-              <p class="mt-4">Originally from Arizona, I came to Chicago seeking a new direction, and along the way, I found Latina Sweat Project, una comunidad that offered connection, representation, and the cultural warmth and sisterhood I had been craving. It’s exactly the kind of support I wish had existed for me growing up, which is why this work matters so deeply to me.</p>
-              <p class="mt-4">I’m running for Junior Treasurer to give back to the community that has poured so much into me and to help keep LSP a space that is accessible, empowering, and full of love for all who need it.</p>`,
-            },
-            {
-                name: "Noé Villagomez",
-                image: "noe.png",
-                bio: `<p>Noe Villagomez, Jr. is an operations and community-focused leader with more than twenty years of experience supporting equity-driven programs across Chicago. A bilingual (Spanish/English) immigrant professional, he has dedicated his career to building safe, accessible spaces and expanding resources for communities historically underserved.</p>
-              <p class="mt-4">As Manager for the Chicago Transit Authority, Noe oversees complex operations, safety and compliance programs, and teams. His leadership centers on workforce development, equitable training, and building pathways for community members—values deeply connected to the mission of the Latina Sweat Project.</p>
-              <p class="mt-4">Previously, Noe served nearly 17 years at the Auditorium Theatre, a Chicago RE non-profit, ultimately as Director of House Operations & Guest Experience, where he led accessibility initiatives, community partnerships, and large-scale public events. He worked closely with internal and external clients, city agencies, and neighborhood organizations to ensure cultural programming remained safe and welcoming for families, students, and residents across Chicago’s most impacted communities.</p>
-              <p class="mt-4">Noe’s career reflects the same priorities that drive the Latina Sweat Project—wellness, community care, representation, and access. His experience building and training diverse teams, and strengthening public-serving operations positions him to support Latina Sweat as it expands wellness programs, mutual aid efforts, and its pipeline of new BIPOC instructors.</p>
-              <p class="mt-4">Rooted in service, equity, and community empowerment, Noe Villagomez, Jr. is committed to helping the Latina Sweat Project continue growing its impact across the Southwest Side and beyond.</p>`,
-            },
-            {
-                name: "Arturo Zurita",
-                image: "arturo.png",
-                bio: `<p class="font-bold text-vibrant-pink text-lg text-center mb-2">PUTTING THE FUN IN FUNDRAISING</p>
-              <p>Hola! My name is Arturo, pero mis amigos me llaman Chu. I am lucky to be a 29 year old queer latino from the southside of Chicago and by law of the universe: a Cancer. I was raised by Mexican immigrant parents (so trust me, I can make a dollar stretch) and the youngest of 4 siblings.</p>
-              <p class="mt-4">Currently, I am the office manager of a mental health clinic for a non profit organization. I've been doing this for about 3 years now. This December I will be certified as a 200 hour RYT - thanks to Latina Sweat Project. Beyond everything else, I’m a baddie (so believe, I can earn the coins and spend them).</p>
-               <p class="mt-4 font-bold italic">“Lo bailado no se quita" — that’s the way I live my life.</p>
-               <p class="mt-2">I love to laugh and eat, so pull up to my table. Let’s break bread and have a great time!</p>`,
-            },
-        ],
-    },
-    {
-        title: "Vice President",
-        id: "vice-president",
-        responsibilities:
-            "Supports the President in representing the Junior Board and steps in as needed during public or media engagements. Helps mentor fellow board members, strengthen communication within the cohort, and guide collaborative projects. Works closely with the President to uplift the stories, impact, and mission of the Latina Sweat Project across community spaces.",
-        candidates: [
-            {
-                name: "Krystal Fernandez",
-                image: "krystal.png",
-                bio: `<p>My name is Krystal Fernandez, and I’m a first-generation Mexican American and Pilsen resident with a master’s degree in Genetic Counseling as well as two bachelor’s degrees in Psychology and Molecular Biology. After two demanding years in graduate school, I found Latina Sweat Project at a time when I was searching for community, cultural connection, and a return to wellness.</p>
-              <p class="mt-4">When I started going to LSP classes, I found that every intention about family, ancestry, and community made me feel seen, grounded, and reminded me of home. Coming from a field where I was often the only person of color, it means so much to walk into a wellness space where I feel welcomed.</p>
-              <p class="mt-4">I am running for Vice President because I believe deeply in this community and know that my lived experiences, training in supporting others through complex challenges, and commitment to culturally grounded wellness can help me support and grow LSP’s impact.</p>`,
-            },
-            {
-                name: "Yesi Preyet",
-                image: "yesi.png",
-                bio: `<p>Hola, I’m Yesi! I work as an underwriting assistant at a company that helps 501(c)(3) non-profits, governmental, and tribal entities manage their unemployment costs, allowing them to save money and use that money to help fulfill and expand their missions, which I find intrinsically rewarding.</p>
+        role: "Vice President",
+        name: "Yesi Preyet",
+        image: "yesi.png",
+        bio: `<p>Hola, I'm Yesi! I work as an underwriting assistant at a company that helps 501(c)(3) non-profits, governmental, and tribal entities manage their unemployment costs, allowing them to save money and use that money to help fulfill and expand their missions, which I find intrinsically rewarding.</p>
               <p class="mt-4">I'm also a loving mom of an 8 year old boy and a future yoga teacher at the Latina Sweat Project. I am excited to share the gift of yoga to our communities and help guide others on their yoga journeys soon.</p> 
               <p class="mt-4">In my free time, I love to go on runs or nature walks with my two beloved dogs, Kobyto and Peaches, cuddle and take cozy naps with my cat Benito, or capture precious fleeting moments through my camera lens.</p>`,
-            },
-            {
-                name: "Alondra Alcazar",
-                image: "alondra.png",
-                bio: `<p>Alondra Alcázar is a proud Chicago Latina, born and raised in Gage Park and now representing Back of the Yards. She joined Latina Sweat Project during a moment when she was looking for comunidad, apoyo, and a wellness space where she didn’t have to shrink or explain herself. Coming from a family where wellness wasn’t always a priority, and while navigating her own health journey, Alondra made the choice to rewrite what health, healing, and self-care looked like for her.</p>
-              <p class="mt-4">Desde que llegó a LSP, she felt something different: a space that felt like home. Alondra is passionate, driven, and unapologetically herself. As a content creator, she uses her voice to uplift our comunidad, bring visibility to Latina-led spaces, and share her wellness journey with honesty and corazón. She has held leadership roles throughout high school and college, always bringing intention, creativity, and authenticity to everything she touches.</p>
-              <p class="mt-4">As Vice President, Alondra hopes to bring her creativity, passion, and community-centered leadership into the spaces she touches. She thrives when planning events, strengthening connections, and creating experiences that feel inclusive, empowering, and fun for all mujeres. She is especially excited to help expand Latina Sweat Project’s visibility and reach, ensuring that even more women discover the supportive, transformative community that helped shape her own wellness journey.</p>
-              <p class="mt-4 text-vibrant-pink font-semibold">She’s deeply grateful for the nomination and excited for the opportunity to give back to the comunidad that welcomed her with open arms.</p>`,
-            },
-        ],
     },
     {
-        title: "President",
-        id: "president",
-        responsibilities:
-            "Serves as the primary representative of the Junior Board and a public-facing ambassador for the Latina Sweat Project. Leads the board’s vision, mentors peers in leadership development, and represents the cohort in media, press, and community engagements. Partners with the Executive Director to ensure the Junior Board’s voice reflects community needs and the mission of expanding wellness access.",
-        candidates: [
-            {
-                name: "Yaz Ocampo",
-                image: "yaz.png",
-                bio: `<p>Jazmin “Yaz” Ocampo, is the proud daughter of Mexican immigrant parents. Born & raised in Chicago's Gage Park neighborhood, Yaz is committed to centering Black and Brown joy by combining movement, mindset, and energy to support community-rooted healing. As a wellness coach, she empowers people to live with greater alignment and authenticity.</p>
-              <p class="mt-4">Yaz has over a decade of nonprofit experience, having worked across program management, curriculum design, and administration. She is the Data & Evaluations Manager at AMPT: Advancing Nonprofits, supporting the organizational health and sustainability of small, Black- and Latine-led nonprofits on Chicago’s south and west sides. She also serves as Board Secretary for Fields of Dreams Chicago, which cultivates the innate genius and holistic wellness of Black and Latinx middle school youth as they lead transformative change in their communities.</p>
-              <p class="mt-4">In her free time, Yaz creates social media content emphasizing her health and wellness journey. When she is not practicing yoga, Yaz enjoys taking care of her 75+ houseplants, strength training, salsa dancing, and testing out healthy food recipes.</p>`,
-            },
-            {
-                name: "Diana Tate",
-                image: "diana.png",
-                bio: `<p>I am excited about my candidacy for the position of Junior Board President. I recognize the significant amount of work required, and I deeply value the dedication each of you brings as leaders to make our mission a reality.</p>
-              <p class="mt-4">I am confident that I can help bring our efforts together cohesively and ensure we continue moving effectively toward our goal of making yoga and holistic health accessible to underserved communities.</p>
-               <p class="mt-4">I look forward to connecting with many of you individually. Please feel free to reach out to me directly with any questions or feedback you may have.</p>`,
-            },
-            {
-                name: "Yari Jurado",
-                image: "yari.png",
-                bio: `<p>Yari is a wellness leader, yoga instructor and proud mamá who has been part of Latina Sweat Project for three years. She leads with vulnerability, connection and corazón, creating spaces where everyone feels seen, supported and welcomed.</p>
-              <p class="mt-4">She brings a strong track record in leadership and community building. Yari has served on two professional boards, helping create programming that raised over $150K and doubled board membership. She’s poured into the next generation as a mentor to a 20-woman undergraduate sorority chapter, guiding them through fundraising, recruitment and operations. In her corporate role she leads DEI programming, lifting voices and making sure people feel connected, seen and valued.</p>
-              <p class="mt-4">As the oldest daughter of immigrants and a first-generation college grad, Yari knows what it means to step into spaces no one before her did. She’s committed to strengthening nuestra comunidad, elevating Latina voices and helping LSP grow as a safe powerful space for everyone who walks in.</p>
-              <p class="mt-4">As President, Yari wants to continue expanding access to wellness, deepen community connection and grow opportunities for members to lead, create and shine. Her vision is to make LSP a place where everyone, especially every mujer, feels supported in their healing journey from their first class to their biggest milestone. She hopes to elevate programming, strengthen partnerships, amplify Latina voices and create more spaces where women can show up as their full selves.</p>`,
-            },
-        ],
+        role: "Treasurer",
+        name: "Noé Villagomez",
+        image: "noe.png",
+        bio: `<p>Noe Villagomez, Jr. is an operations and community-focused leader with more than twenty years of experience supporting equity-driven programs across Chicago. A bilingual (Spanish/English) immigrant professional, he has dedicated his career to building safe, accessible spaces and expanding resources for communities historically underserved.</p>
+              <p class="mt-4">As Manager for the Chicago Transit Authority, Noe oversees complex operations, safety and compliance programs, and teams. His leadership centers on workforce development, equitable training, and building pathways for community members—values deeply connected to the mission of the Latina Sweat Project.</p>
+              <p class="mt-4">Previously, Noe served nearly 17 years at the Auditorium Theatre, a Chicago RE non-profit, ultimately as Director of House Operations & Guest Experience, where he led accessibility initiatives, community partnerships, and large-scale public events. He worked closely with internal and external clients, city agencies, and neighborhood organizations to ensure cultural programming remained safe and welcoming for families, students, and residents across Chicago's most impacted communities.</p>
+              <p class="mt-4">Noe's career reflects the same priorities that drive the Latina Sweat Project—wellness, community care, representation, and access. His experience building and training diverse teams, and strengthening public-serving operations positions him to support Latina Sweat as it expands wellness programs, mutual aid efforts, and its pipeline of new BIPOC instructors.</p>
+              <p class="mt-4">Rooted in service, equity, and community empowerment, Noe Villagomez, Jr. is committed to helping the Latina Sweat Project continue growing its impact across the Southwest Side and beyond.</p>`,
+    },
+    {
+        role: "Secretary",
+        name: "Alejandra Garcia",
+        image: "alejandrag.png",
+        bio: `<p class="font-bold italic text-lg">"I am Organized, Driven, and Powered by our People."</p>
+              <p class="mt-4">My name is Alejandra Garcia and I am a south-sider from Chicago with big dreams. All my life I have known I wanted to be a leader and create a positive impact on my community. From being an educator I have learned that these dreams and goals are always bigger than myself. I want to continue to be a representation to little humans and other Latinas that no matter how big or small your dream is... anything is possible. As a secretary I am confident I can meet all the expected requirements and ensure the community continues to prosper.</p>
+              <p class="mt-4 border-t border-slate-200 pt-2 font-bold text-sm text-medium-gray uppercase tracking-wider">LSP Community Impact Board Member • CPS Educator • LSP Teacher Training Student</p>`,
     },
 ];
 ---
 
-<Layout title="Junior Board Election | The Latina Sweat Project">
+<Layout title="Meet Our New Junior Board | The Latina Sweat Project">
     <Header />
     <main>
         {/* Page Header */}
@@ -128,20 +54,22 @@ const roles = [
         >
             <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
                 <span
-                    class="rounded-full bg-medium-gray/20 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-medium-gray"
+                    class="rounded-full bg-vibrant-pink/20 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-vibrant-pink"
                 >
-                    Voting Closed
+                    🎉 Congratulations 🎉
                 </span>
                 <h1
                     class="mt-6 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
                 >
-                    LSP Junior Board Elections
+                    Meet Our New Junior Board
                 </h1>
                 <p
                     class="mx-auto mt-6 max-w-3xl font-body text-xl leading-relaxed text-medium-gray"
                 >
-                    Get to know the incredible leaders stepping up to serve our
-                    community.
+                    We are thrilled to introduce the elected leaders who will
+                    help guide the Latina Sweat Project into its next chapter.
+                    Thank you to everyone who participated in this historic
+                    election!
                 </p>
             </div>
         </section>
@@ -177,11 +105,11 @@ const roles = [
                     <h2
                         class="font-sans text-2xl sm:text-3xl font-bold text-off-black"
                     >
-                        Candidate Speeches
+                        Meet Your New Leaders
                     </h2>
                     <p class="mt-2 text-medium-gray max-w-xl mx-auto">
-                        Watch our candidates share their vision for the Junior
-                        Board and why they're running for their positions.
+                        Watch our Junior Board members share their vision for
+                        the future of Latina Sweat Project.
                     </p>
                 </div>
                 <div
@@ -189,7 +117,7 @@ const roles = [
                 >
                     <iframe
                         src="https://www.youtube.com/embed/skICrn0tgak?si=HEIJzcT9VKoh8Fm4"
-                        title="LSP Junior Board Candidate Speeches"
+                        title="LSP Junior Board Speeches"
                         class="absolute inset-0 w-full h-full"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -199,87 +127,44 @@ const roles = [
             </div>
         </section>
 
-        {/* Eligibility Info - moved up */}
-        <section class="relative -mt-12 px-4 pb-12 sm:px-6">
-            <div class="mx-auto max-w-4xl">
-                <div
-                    class="rounded-2xl bg-gradient-to-br from-slate-50 to-pink-50 p-8 shadow-lg ring-1 ring-black/5"
-                >
-                    <h3
-                        class="font-sans text-xl font-bold text-off-black flex items-center gap-3 mb-4"
+        {/* Junior Board Members Grid */}
+        <section class="bg-white py-16 sm:py-24">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-16 text-center">
+                    <h2
+                        class="inline-block border-b-4 border-accent-gold pb-2 font-sans text-3xl sm:text-4xl font-extrabold uppercase text-off-black tracking-tight"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6 text-vibrant-pink"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                        </svg>
-                        Who Can Vote?
-                    </h3>
-                    <ul
-                        class="list-inside list-disc space-y-2 font-body text-gray-700 ml-9"
+                        Your 2025 Junior Board
+                    </h2>
+                    <p
+                        class="mx-auto mt-8 max-w-3xl font-body text-lg leading-relaxed text-gray-600"
                     >
-                        <li>LSP Instructors</li>
-                        <li>Yoga Teacher Training (YTT) Students</li>
-                        <li>Current Board Members</li>
-                    </ul>
-                    <p class="mt-4 text-sm text-gray-500 italic ml-9">
-                        Please review all candidates below before casting your
-                        vote. Voting eligibility will be verified after
-                        submission.
+                        Click on any card to learn more about each board member
+                        and their vision for our community.
                     </p>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-8 lg:gap-12">
+                    {
+                        juniorBoard.map((member) => (
+                            <CandidateCard
+                                imageSrc={
+                                    member.image
+                                        ? `${base}images/election/${member.image}`
+                                        : `${base}images/candidate_placeholder.png`
+                                }
+                                name={member.name}
+                                title={member.role}
+                                story={member.bio}
+                            />
+                        ))
+                    }
                 </div>
             </div>
         </section>
 
-        {/* Candidates Loop */}
-        <div class="space-y-24 bg-white py-12">
-            {
-                roles.map((role, index) => (
-                    <section
-                        class={`group relative scroll-mt-24 ${index % 2 !== 0 ? "bg-slate-50 py-24" : "bg-white py-12"}`}
-                        id={role.id}
-                    >
-                        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                            <div class="mb-16 text-center">
-                                <h2 class="inline-block border-b-4 border-accent-gold pb-2 font-sans text-4xl font-extrabold uppercase text-off-black tracking-tight">
-                                    {role.title}
-                                </h2>
-                                <p class="mx-auto mt-8 max-w-3xl font-body text-lg leading-relaxed text-gray-600">
-                                    {role.responsibilities}
-                                </p>
-                            </div>
-
-                            <div class="flex flex-wrap justify-center gap-12 lg:gap-16">
-                                {role.candidates.map((candidate) => (
-                                    <CandidateCard
-                                        imageSrc={
-                                            candidate.image
-                                                ? `${base}images/election/${candidate.image}`
-                                                : `${base}images/candidate_placeholder.png`
-                                        }
-                                        name={candidate.name}
-                                        title={`Nominee for ${role.title}`}
-                                        story={candidate.bio}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                ))
-            }
-        </div>
-
-        {/* Voting Closed Section */}
-        <section class="bg-off-black py-16" id="vote">
+        {/* Thank You Section */}
+        <section class="bg-off-black py-16" id="thank-you">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
                 <div class="text-center">
                     <div
@@ -301,21 +186,22 @@ const roles = [
                         </svg>
                     </div>
                     <h3 class="font-sans text-3xl font-bold text-white mb-4">
-                        ¡Gracias por Votar!
+                        ¡Gracias a Todos!
                     </h3>
                     <p class="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
-                        Voting for the LSP Junior Board has officially closed.
+                        Thank you to all the candidates who stepped up to serve
+                        our community.
                     </p>
                     <div
                         class="bg-gradient-to-r from-vibrant-pink/20 via-accent-gold/20 to-vibrant-pink/20 rounded-2xl p-8 border border-white/10"
                     >
                         <p class="text-lg text-white font-medium mb-2">
-                            Results will be announced shortly!
+                            The future of LSP is bright! 🌟
                         </p>
                         <p class="text-gray-400">
-                            Thank you to everyone who participated in this
-                            election. Stay tuned for the official announcement
-                            of your new Junior Board.
+                            Together, we will continue to grow, inspire, and
+                            bring wellness to our communities. Congratulations
+                            to our new Junior Board!
                         </p>
                     </div>
                     <p class="mt-8 text-sm text-gray-500">
@@ -330,37 +216,3 @@ const roles = [
         </section>
     </main>
 </Layout>
-
-<script>
-    const checkbox = document.getElementById("attestation-checkbox");
-    const revealBtn = document.getElementById("reveal-ballot-btn");
-    const ballotGate = document.getElementById("ballot-gate");
-    const ballotContainer = document.getElementById("ballot-container");
-
-    checkbox?.addEventListener("change", (e) => {
-        const isChecked = (e.target as HTMLInputElement).checked;
-        if (revealBtn) {
-            revealBtn.disabled = !isChecked;
-            if (isChecked) {
-                revealBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                revealBtn.classList.add("hover:scale-105", "hover:shadow-lg");
-            } else {
-                revealBtn.classList.add("opacity-50", "cursor-not-allowed");
-                revealBtn.classList.remove(
-                    "hover:scale-105",
-                    "hover:shadow-lg",
-                );
-            }
-        }
-    });
-
-    revealBtn?.addEventListener("click", () => {
-        ballotGate?.classList.add("hidden");
-        ballotContainer?.classList.remove("hidden");
-        // Scroll to ballot
-        ballotContainer?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    });
-</script>

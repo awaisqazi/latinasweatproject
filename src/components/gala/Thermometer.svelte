@@ -4,6 +4,9 @@
     import confetti from "canvas-confetti";
     import { fade, fly } from "svelte/transition";
 
+    // Prop to disable celebrations (for static Thank You page)
+    export let staticMode = false;
+
     let previousTotal = 0;
     let showToast = false;
     let toastMessage = "";
@@ -14,7 +17,7 @@
 
     // Subscribe to totalRaised to handle celebrations
     $: {
-        if ($totalRaised > previousTotal) {
+        if (!staticMode && $totalRaised > previousTotal) {
             checkCelebration($totalRaised, previousTotal);
             previousTotal = $totalRaised;
         }
@@ -23,6 +26,9 @@
     $: isGoalReached = $totalRaised >= GOAL;
 
     function checkCelebration(current, previous) {
+        // Skip celebrations in static mode
+        if (staticMode) return;
+
         // Check for goal reached
         if (current >= GOAL && previous < GOAL) {
             triggerGoalCelebration();
