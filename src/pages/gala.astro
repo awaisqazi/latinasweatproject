@@ -178,76 +178,33 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
     </section>
     {/* END: Fundraising Results Section */}
 
-    {/* START: Gallery First Look Section */}
+    {/* START: Professional Photo Gallery Section */}
     <section class="py-12 sm:py-16 lg:py-20 bg-light-gray">
-      <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">📸 First Look</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Gala Photo Preview</h2>
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">📸 Professional Photography</p>
+        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable Gallery</h2>
         <p class="mt-4 font-body text-lg text-medium-gray max-w-2xl mx-auto">
-          Relive the magic! Here's a sneak peek from our unforgettable evening. Professional photos will be shared soon.
+          Relive the magic of our unforgettable evening! Browse through the professional photos from our inaugural gala.
         </p>
 
-        {/* Elegant Framed Gallery Image */}
-        <div class="mt-10 flex justify-center">
-          <a 
-            href="https://photos.app.goo.gl/pYPR7v5iEzeeSiYK6" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="group relative block"
-          >
-            {/* Outer Art Deco Frame */}
-            <div class="absolute -inset-3 sm:-inset-4 bg-gradient-to-br from-accent-gold via-[#e6c55a] to-accent-gold rounded-lg opacity-80 group-hover:opacity-100 transition-opacity"></div>
-            
-            {/* Inner Frame */}
-            <div class="absolute -inset-2 sm:-inset-3 bg-off-black rounded-lg"></div>
-            
-            {/* Corner Decorations */}
-            <div class="absolute -top-6 -left-6 w-8 h-8 border-l-2 border-t-2 border-accent-gold hidden sm:block"></div>
-            <div class="absolute -top-6 -right-6 w-8 h-8 border-r-2 border-t-2 border-accent-gold hidden sm:block"></div>
-            <div class="absolute -bottom-6 -left-6 w-8 h-8 border-l-2 border-b-2 border-accent-gold hidden sm:block"></div>
-            <div class="absolute -bottom-6 -right-6 w-8 h-8 border-r-2 border-b-2 border-accent-gold hidden sm:block"></div>
-            
-            {/* Image */}
-            <div class="relative overflow-hidden rounded-lg shadow-2xl">
-              <img 
-                src={`${base}images/galalogos/galagallery.jpg`} 
-                alt="Noche Inolvidable Gala - First Look Photos" 
-                class="w-full max-w-lg object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              {/* Hover Overlay - Desktop */}
-              <div class="absolute inset-0 bg-gradient-to-t from-off-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:flex items-end justify-center pb-6">
-                <span class="text-white font-bold text-lg flex items-center gap-2">
-                  View Gallery
-                  <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </span>
-              </div>
-              {/* Always Visible Overlay - Mobile */}
-              <div class="absolute inset-0 bg-gradient-to-t from-off-black/70 via-transparent to-transparent sm:hidden flex items-end justify-center pb-4">
-                <span class="text-white font-bold text-base flex items-center gap-2 animate-pulse-slow">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
-                  </svg>
-                  Tap to View Full Gallery
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </span>
-              </div>
-            </div>
+        {/* Flickr Embedded Album */}
+        <div class="mt-10 flickr-embed-container">
+          <a data-flickr-embed="true" href="https://www.flickr.com/photos/88623248@N07/albums/72177720330894284" title="LSP - Noche Inolvidable 2025">
+            <img src="https://live.staticflickr.com/65535/54979938835_01cb8db4af_h.jpg" width="1600" height="1200" alt="LSP - Noche Inolvidable 2025" class="w-full rounded-xl shadow-2xl" />
           </a>
+          <script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
         </div>
 
-        {/* Notice about professional photos */}
-        <div class="mt-10 inline-block bg-gradient-to-r from-vibrant-pink/10 to-accent-gold/10 rounded-xl px-6 py-4 border border-accent-gold/20">
-          <p class="text-medium-gray font-body">
-            <span class="text-vibrant-pink font-semibold">Note:</span> These are first look photos. Professional photography will be shared soon!
+        {/* Tip for viewing */}
+        <div class="mt-8 inline-flex items-center gap-2 bg-gradient-to-r from-vibrant-pink/10 to-accent-gold/10 rounded-xl px-6 py-3 border border-accent-gold/20">
+          <span class="text-accent-gold text-xl">💡</span>
+          <p class="text-medium-gray font-body text-sm sm:text-base">
+            <span class="text-vibrant-pink font-semibold">Tip:</span> Click or tap any photo to view the full album on Flickr!
           </p>
         </div>
       </div>
     </section>
-    {/* END: Gallery First Look Section */}
+    {/* END: Professional Photo Gallery Section */}
 
     {/* START: Awards Celebration Section */}
     <section class="bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e] py-12 sm:py-16 lg:py-20 text-white">
