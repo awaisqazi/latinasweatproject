@@ -214,11 +214,23 @@ const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
                 alt="Noche Inolvidable Gala - First Look Photos" 
                 class="w-full max-w-lg object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              {/* Hover Overlay */}
-              <div class="absolute inset-0 bg-gradient-to-t from-off-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+              {/* Hover Overlay - Desktop */}
+              <div class="absolute inset-0 bg-gradient-to-t from-off-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:flex items-end justify-center pb-6">
                 <span class="text-white font-bold text-lg flex items-center gap-2">
                   View Gallery
                   <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </span>
+              </div>
+              {/* Always Visible Overlay - Mobile */}
+              <div class="absolute inset-0 bg-gradient-to-t from-off-black/70 via-transparent to-transparent sm:hidden flex items-end justify-center pb-4">
+                <span class="text-white font-bold text-base flex items-center gap-2 animate-pulse-slow">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                  </svg>
+                  Tap to View Full Gallery
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                   </svg>
                 </span>
