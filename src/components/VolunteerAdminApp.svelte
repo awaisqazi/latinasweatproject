@@ -81,6 +81,13 @@
     let searchResults = []; // Array of {shift, registration, registrationIndex}
     let searchStats = { totalShifts: 0, totalHours: 0, checkedInCount: 0 };
 
+    // --- Bulk Shift Time Deletion State ---
+    let bulkDeleteTimeSlot = ""; // Selected time slot (e.g., "08:00-09:00")
+    let isBulkDeleting = false;
+    let bulkDeletePreview = null; // {toDelete: [], conflicts: []}
+    let showBulkDeleteReport = false;
+    let bulkDeleteReport = { deleted: 0, skipped: 0, conflicts: [] };
+
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
         const y = date.getFullYear();
@@ -795,6 +802,174 @@
         searchResults = [];
     }
 
+    // --- Bulk Time Slot Deletion ---
+    // Helper to format hours to 12-hour AM/PM
+    const formatTime12hr = (hours, minutes) => {
+        const period = hours >= 12 ? "PM" : "AM";
+        const hour12 = hours % 12 || 12;
+        const minStr = minutes.toString().padStart(2, "0");
+        return `${hour12}:${minStr} ${period}`;
+    };
+
+    $: uniqueTimeSlots = (() => {
+        const slotsMap = new Map(); // Use map to dedupe by value
+        generatedShifts.forEach((shift) => {
+            const startH = shift.start.getHours();
+            const startM = shift.start.getMinutes();
+            const endH = shift.end.getHours();
+            const endM = shift.end.getMinutes();
+
+            // Value is 24-hour format for internal matching
+            const value = `${startH.toString().padStart(2, "0")}:${startM.toString().padStart(2, "0")}-${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`;
+            // Label is 12-hour AM/PM format for display
+            const label = `${formatTime12hr(startH, startM)} - ${formatTime12hr(endH, endM)}`;
+
+            slotsMap.set(value, { value, label });
+        });
+        return Array.from(slotsMap.values()).sort((a, b) =>
+            a.value.localeCompare(b.value),
+        );
+    })();
+
+    function previewBulkTimeSlotDeletion() {
+        if (!bulkDeleteTimeSlot) {
+            bulkDeletePreview = null;
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [startTime, endTime] = bulkDeleteTimeSlot.split("-");
+        const [startH, startM] = startTime.split(":").map(Number);
+        const [endH, endM] = endTime.split(":").map(Number);
+
+        const toDelete = [];
+        const conflicts = [];
+
+        // Check generated shifts
+        generatedShifts.forEach((shift) => {
+            if (shift.start < today) return; // Skip past shifts
+
+            const shiftStartH = shift.start.getHours();
+            const shiftStartM = shift.start.getMinutes();
+            const shiftEndH = shift.end.getHours();
+            const shiftEndM = shift.end.getMinutes();
+
+            // Check if time matches
+            if (
+                shiftStartH === startH &&
+                shiftStartM === startM &&
+                shiftEndH === endH &&
+                shiftEndM === endM
+            ) {
+                const data = shiftData[shift.id] || {};
+                const hasRegistrations = (data.registrations?.length || 0) > 0;
+                const isCancelled = data.cancelled === true;
+
+                if (isCancelled) return; // Already cancelled
+
+                if (hasRegistrations) {
+                    conflicts.push({
+                        shift,
+                        registrations: data.registrations,
+                    });
+                } else {
+                    toDelete.push(shift);
+                }
+            }
+        });
+
+        // Also check custom shifts with matching times
+        customShifts.forEach((shift) => {
+            if (shift.start < today) return;
+
+            const shiftStartH = shift.start.getHours();
+            const shiftStartM = shift.start.getMinutes();
+            const shiftEndH = shift.end.getHours();
+            const shiftEndM = shift.end.getMinutes();
+
+            if (
+                shiftStartH === startH &&
+                shiftStartM === startM &&
+                shiftEndH === endH &&
+                shiftEndM === endM
+            ) {
+                const data = shiftData[shift.id] || {};
+                const hasRegistrations = (data.registrations?.length || 0) > 0;
+
+                if (hasRegistrations) {
+                    conflicts.push({
+                        shift,
+                        registrations: data.registrations,
+                    });
+                } else {
+                    toDelete.push({ ...shift, isCustom: true });
+                }
+            }
+        });
+
+        bulkDeletePreview = { toDelete, conflicts };
+    }
+
+    async function handleBulkTimeSlotDeletion() {
+        if (!bulkDeletePreview) return;
+
+        const { toDelete, conflicts } = bulkDeletePreview;
+
+        if (toDelete.length === 0 && conflicts.length === 0) {
+            alert("No future shifts found matching this time slot.");
+            return;
+        }
+
+        const confirmMsg =
+            `This will delete ${toDelete.length} shift(s).` +
+            (conflicts.length > 0
+                ? `\n\n${conflicts.length} shift(s) with volunteers will be SKIPPED.`
+                : "") +
+            `\n\nProceed?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        isBulkDeleting = true;
+        let deleted = 0;
+
+        try {
+            for (const shift of toDelete) {
+                if (shift.isCustom) {
+                    await deleteDoc(doc(db, "custom_shifts", shift.id));
+                } else {
+                    await setDoc(
+                        doc(db, "shifts", shift.id),
+                        { cancelled: true },
+                        { merge: true },
+                    );
+                }
+                deleted++;
+            }
+
+            bulkDeleteReport = {
+                deleted,
+                skipped: conflicts.length,
+                conflicts: conflicts.map((c) => ({
+                    date: c.shift.start.toLocaleDateString(),
+                    time: `${c.shift.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${c.shift.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+                    volunteerCount: c.registrations.length,
+                    volunteers: c.registrations.map((r) => r.name || r.email),
+                })),
+            };
+
+            showBulkDeleteReport = true;
+            bulkDeleteTimeSlot = "";
+            bulkDeletePreview = null;
+        } catch (e) {
+            console.error("Bulk deletion failed:", e);
+            alert("Bulk deletion failed: " + e.message);
+        } finally {
+            isBulkDeleting = false;
+        }
+    }
+
     function jumpToShift(shift) {
         clearSearch();
         const weekStart = getStartOfWeek(shift.start);
@@ -1218,6 +1393,84 @@
                         >
                             {isUploading ? "Uploading..." : "Upload CSV"}
                         </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Time Slot Deletion Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-red-100 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4 text-red-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                        </svg>
+                        Bulk Delete Time Slot
+                    </h3>
+                    <p class="text-xs text-gray-500">
+                        Remove a specific shift time from all future
+                        opportunities.
+                    </p>
+                    <div class="space-y-3">
+                        <label class="block">
+                            <span
+                                class="block text-xs font-medium text-gray-500 mb-1"
+                                >Select Time Slot</span
+                            >
+                            <select
+                                bind:value={bulkDeleteTimeSlot}
+                                on:change={previewBulkTimeSlotDeletion}
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                            >
+                                <option value=""
+                                    >-- Select a time slot --</option
+                                >
+                                {#each uniqueTimeSlots as slot}
+                                    <option value={slot.value}
+                                        >{slot.label}</option
+                                    >
+                                {/each}
+                            </select>
+                        </label>
+
+                        {#if bulkDeletePreview}
+                            <div
+                                class="text-xs space-y-2 p-3 bg-gray-50 rounded-lg"
+                            >
+                                <p class="text-green-700">
+                                    ✓ {bulkDeletePreview.toDelete.length} shift(s)
+                                    will be deleted
+                                </p>
+                                {#if bulkDeletePreview.conflicts.length > 0}
+                                    <p class="text-amber-700">
+                                        ⚠ {bulkDeletePreview.conflicts.length} shift(s)
+                                        will be SKIPPED (have volunteers)
+                                    </p>
+                                {/if}
+                            </div>
+
+                            <button
+                                on:click={handleBulkTimeSlotDeletion}
+                                disabled={isBulkDeleting ||
+                                    bulkDeletePreview.toDelete.length === 0}
+                                class="w-full bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                            >
+                                {isBulkDeleting
+                                    ? "Deleting..."
+                                    : "Delete Shifts"}
+                            </button>
+                        {/if}
                     </div>
                 </div>
 
@@ -1958,4 +2211,63 @@
             {/if}
         </div>
     </div>
+
+    <!-- Bulk Delete Report Modal -->
+    {#if showBulkDeleteReport}
+        <div
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
+            <div
+                class="bg-white rounded-xl max-w-lg w-full max-h-[80vh] overflow-auto p-6 space-y-4"
+            >
+                <h3 class="font-bold text-lg text-gray-900">
+                    Bulk Deletion Complete
+                </h3>
+
+                <div class="space-y-2">
+                    <p class="text-sm">
+                        <span class="text-green-600 font-medium"
+                            >✓ {bulkDeleteReport.deleted}</span
+                        > shift(s) deleted
+                    </p>
+                    <p class="text-sm">
+                        <span class="text-amber-600 font-medium"
+                            >⚠ {bulkDeleteReport.skipped}</span
+                        > shift(s) skipped due to conflicts
+                    </p>
+                </div>
+
+                {#if bulkDeleteReport.conflicts.length > 0}
+                    <div class="border-t pt-4">
+                        <h4 class="font-medium text-sm text-gray-800 mb-2">
+                            Skipped Shifts (Manual Review Needed):
+                        </h4>
+                        <div class="space-y-2 max-h-60 overflow-auto">
+                            {#each bulkDeleteReport.conflicts as conflict}
+                                <div
+                                    class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs"
+                                >
+                                    <p class="font-medium text-gray-800">
+                                        {conflict.date} • {conflict.time}
+                                    </p>
+                                    <p class="text-gray-600 mt-1">
+                                        {conflict.volunteerCount} volunteer(s): {conflict.volunteers.join(
+                                            ", ",
+                                        )}
+                                    </p>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+
+                <button
+                    on:click={() => (showBulkDeleteReport = false)}
+                    class="w-full bg-gray-800 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-900 transition-colors text-sm"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    {/if}
 {/if}
