@@ -52,6 +52,74 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Documentary CTA Section */}
+    <section
+      class="bg-gradient-to-r from-vibrant-pink via-accent-gold to-vibrant-pink py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8"
+        >
+          {/* Left: Text Content */}
+          <div class="flex items-center gap-4 text-center md:text-left">
+            <div
+              class="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0"
+            >
+              <svg
+                class="w-8 h-8 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-white/90 text-sm font-semibold uppercase tracking-wider"
+              >
+                🎬 New Mini-Documentary
+              </p>
+              <h3 class="text-white text-xl sm:text-2xl font-bold mt-1">
+                Watch Our Story: Reclaiming Wellness in Pilsen
+              </h3>
+              <p class="text-white/80 text-sm sm:text-base mt-1 max-w-xl">
+                Experience the heart of our movement — community, healing, and
+                resistance through yoga.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: CTA Button */}
+          <a
+            href={`${base}about`}
+            class="group flex-shrink-0 inline-flex items-center gap-3 rounded-full bg-white px-6 sm:px-8 py-3 sm:py-4 font-bold text-vibrant-pink shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/50"
+          >
+            <svg
+              class="w-6 h-6 group-hover:scale-110 transition-transform"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M8 5v14l11-7z"></path>
+            </svg>
+            <span class="text-base sm:text-lg">Watch Now</span>
+            <svg
+              class="w-5 h-5 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+    {/* END: Documentary CTA Section */}
+
     {/* START: Gala Section - Thank You */}
     <section id="gala" class="relative py-16 sm:py-20 lg:py-28 overflow-hidden">
       {/* Art Deco Background */}
@@ -241,159 +309,8 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Junior Board Section */}
 
-    {/* START: Holiday Gift Drive Section */}
-    <section
-      id="holiday-gift-drive"
-      class="py-12 sm:py-16 lg:py-20 bg-[#FFFBF0]"
-    >
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <p
-            class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
-          >
-            The Latina Sweat Project's
-          </p>
-          <h2
-            class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-vibrant-pink sm:text-5xl drop-shadow-sm"
-          >
-            Holiday <span class="text-green-600">Gift Drive</span> ✨
-          </h2>
-          <p class="mt-4 text-xl font-bold text-off-black">
-            On now until <span class="text-vibrant-pink">Dec 18</span>
-          </p>
-          <p class="mt-4 max-w-2xl mx-auto text-lg text-medium-gray">
-            Please help LSP's Community Impact Team in continuing to make an
-            impact this holiday season!
-            <br />
-            Thank you in advance for your generosity!
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <!-- Left Column: How to Donate -->
-          <div
-            class="bg-white rounded-2xl p-8 shadow-xl border-2 border-green-100 relative overflow-hidden"
-          >
-            <div
-              class="absolute top-0 right-0 -mt-4 -mr-4 text-6xl opacity-10 rotate-12"
-            >
-              🎁
-            </div>
-            <h3
-              class="text-2xl font-bold text-off-black mb-6 flex items-center gap-2"
-            >
-              <span class="text-3xl">🎄</span> How to Donate
-            </h3>
-            <ul class="space-y-4 text-lg text-medium-gray">
-              <li class="flex gap-3">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-vibrant-pink text-white flex items-center justify-center font-bold text-sm mt-1"
-                  >1</span
-                >
-                <span
-                  >Stop by LSP & grab an <strong>ornament tag</strong> off our tree.</span
-                >
-              </li>
-              <li class="flex gap-3">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm mt-1"
-                  >2</span
-                >
-                <span
-                  >Buy a few items off the list for an individual (<strong
-                    >max $75</strong
-                  >). Feel free to team up!</span
-                >
-              </li>
-              <li class="flex gap-3">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-vibrant-pink text-white flex items-center justify-center font-bold text-sm mt-1"
-                  >3</span
-                >
-                <span
-                  >Wrap gifts in a <strong>bag</strong> (no wrapping paper please)
-                  so we can check contents.</span
-                >
-              </li>
-              <li class="flex gap-3">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm mt-1"
-                  >4</span
-                >
-                <span
-                  >Return your gifts by <strong>Thursday, December 18</strong
-                  >.</span
-                >
-              </li>
-            </ul>
-            <div
-              class="mt-6 bg-red-50 p-4 rounded-xl border border-red-100 text-sm text-red-800"
-            >
-              <strong>Note:</strong> Not all individuals celebrate Christmas, so please
-              keep wrapping/gifts to a general holiday theme.
-            </div>
-          </div>
-
-          <!-- Right Column: Beneficiaries & Contact -->
-          <div class="space-y-8">
-            <div
-              class="bg-white rounded-2xl p-8 shadow-xl border-2 border-vibrant-pink/20"
-            >
-              <h3 class="text-2xl font-bold text-off-black mb-4">
-                Who are the gifts for?
-              </h3>
-              <p class="text-lg text-medium-gray mb-4">
-                Gifts are based on wish lists from individuals at:
-              </p>
-              <div class="space-y-4">
-                <div class="flex gap-3 items-start">
-                  <span class="text-2xl">🏠</span>
-                  <div>
-                    <strong class="text-off-black block"
-                      >Bethany House of Hospitality</strong
-                    >
-                    <span class="text-medium-gray text-sm"
-                      >Offers housing and support services to young immigrant
-                      women and their children.</span
-                    >
-                  </div>
-                </div>
-                <div class="flex gap-3 items-start">
-                  <span class="text-2xl">🕊️</span>
-                  <div>
-                    <strong class="text-off-black block"
-                      >Viator House of Hospitality</strong
-                    >
-                    <span class="text-medium-gray text-sm"
-                      >Provides compassionate accompaniment of young male
-                      immigrants seeking asylum.</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="bg-green-50 rounded-2xl p-6 border border-green-100 text-center"
-            >
-              <h4 class="font-bold text-green-800 mb-2">Questions?</h4>
-              <p class="text-green-700">
-                Email Lucia, LSP's Community Impact Chair:
-                <a
-                  href="mailto:lucdelrinmar@gmail.com"
-                  class="font-bold underline hover:text-green-900"
-                  >lucdelrinmar@gmail.com</a
-                >
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Holiday Gift Drive Section */}
-
     {/* START: LSP x One Night Only Section */}
-    <section id="one-night-only" class="bg-light-gray py-12 sm:py-16 lg:py-20">
+    <section id="one-night-only" class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
@@ -426,7 +343,7 @@ const base = import.meta.env.BASE_URL;
               </p>
               <p class="font-bold text-off-black">
                 Next Show: <span class="text-accent-gold"
-                  >Friday, November 28th at 8 pm CT</span
+                  >Friday, December 26th at 8 pm CT</span
                 >
               </p>
               <p class="font-bold text-off-black">
@@ -463,83 +380,6 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: LSP x One Night Only Section */}
-
-    {/* START: Embodied Resistance Section */}
-    <section id="embodied-resistance" class="py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24"
-        >
-          <div>
-            <p
-              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
-            >
-              Community Healing
-            </p>
-            <h2
-              class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
-            >
-              LSP Embodied Resistance Session
-            </h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-medium-gray">
-              <p>
-                In light of recent events in our community, we wanted to create
-                a space for individuals who have been working hard to protect
-                our communities. We recognize that resistance can take many
-                forms, but for one night we hope that you can find a space of
-                resistance rooted in meditation, movement, and community.
-              </p>
-              <p>
-                We believe that collective, community care is powerful and that
-                in order to continue to support our communities, we need to take
-                care of ourselves too.
-              </p>
-              <p>
-                Please join us for a night of trauma sensitive yoga, meditation,
-                and dance-movement therapy in community.
-              </p>
-              <ul class="list-none space-y-2 pt-2">
-                <li>
-                  <span class="font-bold text-off-black">When:</span>
-                  <span class="text-accent-gold"
-                    >Sunday, November 30 @ 7:30 PM - 9:00 PM CST</span
-                  >
-                </li>
-                <li>
-                  <span class="font-bold text-off-black">Where:</span>
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=949+W+16th+St,+Chicago,+IL+60608"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="font-normal text-vibrant-pink underline transition-colors hover:text-accent-gold"
-                    >949 W 16th St, Chicago, IL 60608</a
-                  >
-                </li>
-              </ul>
-            </div>
-            <div class="mt-8">
-              <a
-                href="https://www.zeffy.com/en-US/ticketing/embodied-resistance-session"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
-              >
-                RSVP Now
-              </a>
-            </div>
-          </div>
-          <div class="w-full">
-            <div
-              class="mx-auto max-w-[540px] overflow-hidden rounded-lg shadow-lg"
-              set:html={`
-                <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/p/DRaYeikEWRq/?utm_source=ig_embed&utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/p/DRaYeikEWRq/?utm_source=ig_embed&utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style=" display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style=" color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style=" background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style=" width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style=" width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style=" background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style=" width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/p/DRaYeikEWRq/?utm_source=ig_embed&utm_campaign=loading" style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A post shared by The Latina Sweat Project (@latinasweatproject)</a></p></div></blockquote> <script async src="//www.instagram.com/embed.js"></script>
-              `}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Embodied Resistance Section */}
 
     {/* START: Merch Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
@@ -746,32 +586,9 @@ const base = import.meta.env.BASE_URL;
                 href="https://www.zeffy.com/en-US/ticketing/lsp-x-one-night-only"
                 target="_blank"
                 imageSrc={`${base}images/onenightonly.png`}
-                date="NOV 28, 2025"
+                date="DEC 26, 2025"
                 title="LSP x One Night Only"
                 description="A variety show featuring an eclectic selection of Chicago's burlesque and drag artists."
-              />
-            </div>
-            <div
-              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
-            >
-              <EventCard
-                href="https://www.zeffy.com/en-US/ticketing/embodied-resistance-session"
-                target="_blank"
-                imageSrc={`${base}images/embodied.png`}
-                date="NOV 30, 2025"
-                title="Embodied Resistance Session"
-                description="A night of trauma sensitive yoga, meditation, and dance-movement therapy."
-              />
-            </div>
-            <div
-              class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
-            >
-              <EventCard
-                href={`${base}gala`}
-                imageSrc={`${base}images/gala.png`}
-                date="DECEMBER 11, 2025"
-                title="Noche Inolvidable Gala"
-                description="Our first annual gala celebrating community and our teacher training graduates."
               />
             </div>
           </div>
