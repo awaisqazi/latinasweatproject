@@ -1,37 +1,188 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import TeamMemberCard from '@/components/TeamMemberCard.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import TeamMemberCard from "@/components/TeamMemberCard.astro";
 const base = import.meta.env.BASE_URL;
 ---
 
 <Layout title="About Us | The Latina Sweat Project">
   <Header />
   <main>
-    {/* START: Page Header Section */}
-    <section class="bg-light-gray py-16 sm:py-24" >
-      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">About Us</p>
-        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
-          More Than a Yoga Studio, We're a Movement
-        </h1>
-        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
-          Latina Sweat Project is a Chicago-based wellness nonprofit dedicated to making yoga and holistic health accessible to underserved communities.
-        </p>
+    {/* START: Hero Documentary Section */}
+    <section
+      class="relative w-full h-screen min-h-[600px] max-h-[900px] overflow-hidden bg-off-black"
+    >
+      {/* Video Background */}
+      <div class="absolute inset-0 w-full h-full">
+        <div id="video-container" class="absolute inset-0 w-full h-full">
+          <iframe
+            id="hero-video"
+            class="absolute top-1/2 left-1/2 w-[177.78vh] min-w-full h-[56.25vw] min-h-full -translate-x-1/2 -translate-y-1/2"
+            src="https://www.youtube.com/embed/cGz9sqzdXP8?autoplay=1&mute=1&loop=1&playlist=cGz9sqzdXP8&controls=0&showinfo=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=https://latinasweatproject.org"
+            title="Latina Sweat Project: Reclaiming Wellness & Community in Pilsen, Chicago"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen></iframe>
+        </div>
+        {/* Gradient Overlay */}
+        <div
+          id="video-gradient-overlay"
+          class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/60 to-off-black/30 transition-opacity duration-500"
+        >
+        </div>
       </div>
+
+      {/* Content Overlay */}
+      <div
+        id="content-overlay"
+        class="relative z-10 flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-500"
+      >
+        <p
+          class="font-sans text-sm sm:text-base font-semibold uppercase tracking-widest text-vibrant-pink animate-fade-in"
+        >
+          Para la comunidad 🤎
+        </p>
+        <h1
+          class="mt-4 font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl leading-tight animate-fade-in-up"
+        >
+          More Than a Yoga Studio,<br class="hidden sm:block" /> We're a Movement
+        </h1>
+        <p
+          class="mx-auto mt-6 max-w-2xl font-body text-lg sm:text-xl text-white/90 animate-fade-in-up-delay"
+        >
+          Experience our story—a sanctuary where our communities feel seen,
+          empowered, and welcomed.
+        </p>
+
+        {/* Video Controls - Watch Full Video Link (fades with overlay) */}
+        <div
+          class="mt-8 flex flex-wrap items-center justify-center gap-4 animate-fade-in-up-delay-2"
+        >
+          <a
+            href="https://www.youtube.com/watch?v=cGz9sqzdXP8"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 px-6 py-3 bg-vibrant-pink rounded-full text-white font-semibold transition-all hover:bg-accent-gold hover:scale-105 shadow-lg"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
+              ></path>
+            </svg>
+            Watch Full Video
+          </a>
+        </div>
+
+        {/* Credits */}
+        <div class="mt-8 animate-fade-in-up-delay-2">
+          <p class="font-body text-xs sm:text-sm text-white/60">
+            <span class="text-white/80">Credits:</span>
+            Director/Producer: Giselle • Editor: <a
+              href="https://www.instagram.com/kevinreodica"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-vibrant-pink hover:underline">@kevinreodica</a
+            > • DP: <a
+              href="https://www.instagram.com/caincamacho97"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-vibrant-pink hover:underline">@caincamacho97</a
+            > • Cam: Giselle + Kevin
+          </p>
+        </div>
+
+        {/* Scroll Indicator - inside content overlay so it fades */}
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div class="flex flex-col items-center text-white/70">
+            <span class="text-xs uppercase tracking-widest mb-2"
+              >Scroll to explore</span
+            >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {
+        /* Floating Sound Toggle Button - Always visible, positioned outside content overlay */
+      }
+      <button
+        id="unmute-btn"
+        class="absolute bottom-8 right-8 z-20 group flex items-center gap-2 px-5 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white font-semibold transition-all hover:bg-vibrant-pink hover:border-vibrant-pink hover:scale-105 shadow-lg"
+      >
+        <svg
+          id="sound-off-icon"
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+          ></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+        </svg>
+        <svg
+          id="sound-on-icon"
+          class="w-5 h-5 hidden"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+          ></path>
+        </svg>
+        <span id="sound-text">Watch with Sound</span>
+      </button>
     </section>
-    {/* END: Page Header Section */}
+    {/* END: Hero Documentary Section */}
 
     {/* START: Our Studio Is Open Section */}
     <section class="py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">We're Open!</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Our New Studio Is Now Open</h2>
+        <p
+          class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+        >
+          We're Open!
+        </p>
+        <h2
+          class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+        >
+          Our New Studio Is Now Open
+        </h2>
         <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray">
-          We're thrilled to announce our new dedicated studio is now open! This milestone follows a year of rapid growth and community demand, with over <strong>250,000 registrations</strong> for our free wellness programming. Come experience our new home, built to welcome neighbors and longtime supporters.
+          We're thrilled to announce our new dedicated studio is now open! This
+          milestone follows a year of rapid growth and community demand, with
+          over <strong>250,000 registrations</strong> for our free wellness programming.
+          Come experience our new home, built to welcome neighbors and longtime supporters.
         </p>
         <div class="mt-12">
-          <a href={`${base}schedule`} class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900">
+          <a
+            href={`${base}schedule`}
+            class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+          >
             View Class Schedule
           </a>
         </div>
@@ -41,15 +192,29 @@ const base = import.meta.env.BASE_URL;
 
     {/* START: Our Story Section */}
     <section class="bg-light-gray py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+      <div
+        class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8"
+      >
         <div>
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Our Story</h2>
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black"
+          >
+            Our Story
+          </h2>
           <p class="mt-6 font-body text-lg text-medium-gray">
-            Founded in 2022, Latina Sweat began as small pop-up yoga classes in Little Village and mutual aid sessions inside migrant shelters. What started as an effort to normalize yoga in underserved neighborhoods quickly evolved into a movement that combines wellness with community care.
+            Founded in 2022, Latina Sweat began as small pop-up yoga classes in
+            Little Village and mutual aid sessions inside migrant shelters. What
+            started as an effort to normalize yoga in underserved neighborhoods
+            quickly evolved into a movement that combines wellness with
+            community care.
           </p>
         </div>
         <div class="mt-12 lg:mt-0">
-          <img alt="A diverse group of women participating in a community yoga class outdoors" class="rounded-lg shadow-xl" src={`${base}images/story.jpeg`} />
+          <img
+            alt="A diverse group of women participating in a community yoga class outdoors"
+            class="rounded-lg shadow-xl"
+            src={`${base}images/story.jpeg`}
+          />
         </div>
       </div>
     </section>
@@ -59,17 +224,80 @@ const base = import.meta.env.BASE_URL;
     <section class="py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">A Year of Growth</h2>
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black"
+          >
+            A Year of Growth
+          </h2>
           <p class="mx-auto mt-4 max-w-3xl font-body text-lg text-medium-gray">
-            Over the last year, our community's passion and dedication have fueled incredible expansion and impact.
+            Over the last year, our community's passion and dedication have
+            fueled incredible expansion and impact.
           </p>
         </div>
-        <ul class="mt-12 grid grid-cols-1 gap-8 font-body text-lg text-medium-gray md:grid-cols-2">
-          <li class="flex items-start"><svg class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Expanded from one monthly class to daily programming across SW Chicago.</li>
-          <li class="flex items-start"><svg class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Partnered with shelters, parks, and schools to bring wellness directly to communities.</li>
-          <li class="flex items-start"><svg class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Served migrant families, women returning from incarceration, and youth in neighborhoods most impacted by systemic inequities.</li>
-          <li class="flex items-start"><svg class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Built a pipeline of new BIPOC yoga instructors from the community, supporting teacher certifications.</li>
-          <li class="flex items-start md:col-span-2"><svg class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Hosted large-scale community events, including rooftop classes, park district collaborations, and mutual aid drives for clothing, hygiene products, and food.</li>
+        <ul
+          class="mt-12 grid grid-cols-1 gap-8 font-body text-lg text-medium-gray md:grid-cols-2"
+        >
+          <li class="flex items-start">
+            <svg
+              class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              ><path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path></svg
+            >Expanded from one monthly class to daily programming across SW
+            Chicago.
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              ><path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path></svg
+            >Partnered with shelters, parks, and schools to bring wellness
+            directly to communities.
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              ><path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path></svg
+            >Served migrant families, women returning from incarceration, and
+            youth in neighborhoods most impacted by systemic inequities.
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              ><path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path></svg
+            >Built a pipeline of new BIPOC yoga instructors from the community,
+            supporting teacher certifications.
+          </li>
+          <li class="flex items-start md:col-span-2">
+            <svg
+              class="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-vibrant-pink"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              ><path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path></svg
+            >Hosted large-scale community events, including rooftop classes,
+            park district collaborations, and mutual aid drives for clothing,
+            hygiene products, and food.
+          </li>
         </ul>
       </div>
     </section>
@@ -77,18 +305,36 @@ const base = import.meta.env.BASE_URL;
 
     {/* START: Our New Home Section */}
     <section class="bg-light-gray py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+      <div
+        class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8"
+      >
         <div class="order-last lg:order-first">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Our New Home</h2>
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black"
+          >
+            Our New Home
+          </h2>
           <p class="mt-6 font-body text-lg text-medium-gray">
-            Our new studio represents not only a space for yoga, but a home for community healing, leadership, and cultural celebration. Programming will include daily yoga classes, a 200-hour teacher training program, restorative sessions for community partners such as run clubs, food pantries, and ongoing mutual aid initiatives.
+            Our new studio represents not only a space for yoga, but a home for
+            community healing, leadership, and cultural celebration. Programming
+            will include daily yoga classes, a 200-hour teacher training
+            program, restorative sessions for community partners such as run
+            clubs, food pantries, and ongoing mutual aid initiatives.
           </p>
           <p class="mt-4 font-body text-lg text-medium-gray">
-            Latina Sweat’s impact has been made possible by its community, from mothers and students who showed up to the very first free classes, to volunteers who help set up mats and distribute food, to partners like Lululemon who have supported teacher certification and large-scale events.
+            Latina Sweat’s impact has been made possible by its community, from
+            mothers and students who showed up to the very first free classes,
+            to volunteers who help set up mats and distribute food, to partners
+            like Lululemon who have supported teacher certification and
+            large-scale events.
           </p>
         </div>
         <div class="mt-12 lg:mt-0">
-          <img alt="The brand new Latina Sweat Project yoga studio" class="rounded-lg shadow-xl" src={`${base}images/studio.png`} />
+          <img
+            alt="The brand new Latina Sweat Project yoga studio"
+            class="rounded-lg shadow-xl"
+            src={`${base}images/studio.png`}
+          />
         </div>
       </div>
     </section>
@@ -98,12 +344,19 @@ const base = import.meta.env.BASE_URL;
     <section class="py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">Meet Our Board of Directors</h2>
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-off-black"
+          >
+            Meet Our Board of Directors
+          </h2>
           <p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
-            The heart and soul of our project. Get to know the passionate individuals dedicated to your fitness journey.
+            The heart and soul of our project. Get to know the passionate
+            individuals dedicated to your fitness journey.
           </p>
         </div>
-        <div class="mt-16 grid grid-cols-1 justify-items-center gap-y-16 sm:grid-cols-2 sm:gap-x-8">
+        <div
+          class="mt-16 grid grid-cols-1 justify-items-center gap-y-16 sm:grid-cols-2 sm:gap-x-8"
+        >
           <TeamMemberCard
             imageSrc={`${base}images/directors/Margarita.jpg`}
             name="Margarita Quiñones Peña"
@@ -136,12 +389,227 @@ const base = import.meta.env.BASE_URL;
     {/* START: About Section */}
     <section class="bg-light-gray py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">About Latina Sweat Project</h2>
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">
+          About Latina Sweat Project
+        </h2>
         <p class="mx-auto mt-6 font-body text-lg text-medium-gray">
-          Latina Sweat Project is a Chicago-based wellness nonprofit dedicated to making yoga and holistic health accessible to underserved communities. Through free and accessible programming, teacher training scholarships, and community-led events, Latina Sweat aims to normalize yoga in Black and Brown neighborhoods, cultivate wellness leaders, and use movement as a tool for resistance, resilience, and healing.
+          Latina Sweat Project is a Chicago-based wellness nonprofit dedicated
+          to making yoga and holistic health accessible to underserved
+          communities. Through free and accessible programming, teacher training
+          scholarships, and community-led events, Latina Sweat aims to normalize
+          yoga in Black and Brown neighborhoods, cultivate wellness leaders, and
+          use movement as a tool for resistance, resilience, and healing.
         </p>
       </div>
     </section>
     {/* END: About Section */}
   </main>
 </Layout>
+
+<style>
+  /* Hero Video Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-up-delay {
+    animation: fadeInUp 1s ease-out 0.6s forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-up-delay-2 {
+    animation: fadeInUp 1s ease-out 0.9s forwards;
+    opacity: 0;
+  }
+
+  /* Mobile-specific adjustments for hero video - only disable in overview mode via JS */
+</style>
+
+<script>
+  // Type declarations for YouTube IFrame API
+  declare namespace YT {
+    class Player {
+      constructor(elementId: string, options?: object);
+      mute(): void;
+      unMute(): void;
+      isMuted(): boolean;
+      setVolume(volume: number): void;
+    }
+  }
+  declare global {
+    interface Window {
+      onYouTubeIframeAPIReady: () => void;
+    }
+  }
+
+  // YouTube IFrame API for mute/unmute control
+  let player: YT.Player | null = null;
+  let isMuted = true;
+
+  // Load YouTube IFrame API
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  const firstScriptTag = document.getElementsByTagName("script")[0];
+  firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+  // @ts-ignore - YouTube API callback
+  window.onYouTubeIframeAPIReady = function () {
+    const iframe = document.getElementById("hero-video") as HTMLIFrameElement;
+    if (iframe) {
+      // @ts-ignore
+      player = new YT.Player("hero-video", {
+        events: {
+          onReady: onPlayerReady,
+        },
+      });
+    }
+  };
+
+  function onPlayerReady() {
+    // Player is ready
+  }
+
+  // Mute/unmute button functionality
+  const unmuteBtn = document.getElementById("unmute-btn");
+  const soundOffIcon = document.getElementById("sound-off-icon");
+  const soundOnIcon = document.getElementById("sound-on-icon");
+  const soundText = document.getElementById("sound-text");
+  const contentOverlay = document.getElementById("content-overlay");
+  const gradientOverlay = document.getElementById("video-gradient-overlay");
+  const videoContainer = document.getElementById("video-container");
+
+  function hideOverlays() {
+    // Fade out the overlays and disable pointer events so video is interactive
+    contentOverlay?.classList.add("opacity-0", "pointer-events-none");
+    gradientOverlay?.classList.add("opacity-0", "pointer-events-none");
+
+    // Update iframe to show controls and resize to fit properly
+    const iframe = document.getElementById("hero-video") as HTMLIFrameElement;
+    if (iframe) {
+      // Switch to contained video mode so controls are visible
+      iframe.classList.remove(
+        "w-[177.78vh]",
+        "min-w-full",
+        "h-[56.25vw]",
+        "min-h-full",
+        "top-1/2",
+        "left-1/2",
+        "-translate-x-1/2",
+        "-translate-y-1/2",
+      );
+      iframe.classList.add(
+        "w-full",
+        "h-full",
+        "top-0",
+        "left-0",
+        "translate-x-0",
+        "translate-y-0",
+      );
+
+      // Add padding to container for controls visibility
+      videoContainer?.classList.add(
+        "flex",
+        "items-center",
+        "justify-center",
+        "p-4",
+        "sm:p-8",
+      );
+
+      // Update src with controls
+      let newSrc = iframe.src
+        .replace("controls=0", "controls=1")
+        .replace("mute=1", "mute=0");
+      iframe.src = newSrc;
+    }
+  }
+
+  function showOverlays() {
+    // Fade in the overlays and restore pointer events
+    contentOverlay?.classList.remove("opacity-0", "pointer-events-none");
+    gradientOverlay?.classList.remove("opacity-0", "pointer-events-none");
+
+    // Update iframe to hide controls and restore cover mode
+    const iframe = document.getElementById("hero-video") as HTMLIFrameElement;
+    if (iframe) {
+      // Switch back to cover mode
+      iframe.classList.remove(
+        "w-full",
+        "h-full",
+        "top-0",
+        "left-0",
+        "translate-x-0",
+        "translate-y-0",
+      );
+      iframe.classList.add(
+        "w-[177.78vh]",
+        "min-w-full",
+        "h-[56.25vw]",
+        "min-h-full",
+        "top-1/2",
+        "left-1/2",
+        "-translate-x-1/2",
+        "-translate-y-1/2",
+      );
+
+      // Remove padding from container
+      videoContainer?.classList.remove(
+        "flex",
+        "items-center",
+        "justify-center",
+        "p-4",
+        "sm:p-8",
+      );
+
+      // Update src without controls
+      let newSrc = iframe.src
+        .replace("controls=1", "controls=0")
+        .replace("mute=0", "mute=1");
+      iframe.src = newSrc;
+    }
+  }
+
+  if (unmuteBtn) {
+    unmuteBtn.addEventListener("click", () => {
+      if (isMuted) {
+        // User wants to watch with sound
+        isMuted = false;
+        soundOffIcon?.classList.add("hidden");
+        soundOnIcon?.classList.remove("hidden");
+        if (soundText) soundText.textContent = "Return to Overview";
+        hideOverlays();
+      } else {
+        // User wants to go back to overview
+        isMuted = true;
+        soundOffIcon?.classList.remove("hidden");
+        soundOnIcon?.classList.add("hidden");
+        if (soundText) soundText.textContent = "Watch with Sound";
+        showOverlays();
+      }
+    });
+  }
+</script>
