@@ -457,6 +457,86 @@ const slides = [
     }
   });
 
+  // Swipe down to close (Instagram-style) - disabled on last slide with CTAs
+  const phoneFrame = document.querySelector('#wrapped-container > div') as HTMLElement;
+  let touchStartY = 0;
+  let touchCurrentY = 0;
+  let isDragging = false;
+  const SWIPE_THRESHOLD = 100;
+
+  function handleTouchStart(e: TouchEvent) {
+    // Disable on last slide to avoid conflicts with CTA buttons
+    if (currentIndex >= slides.length - 1) return;
+    
+    touchStartY = e.touches[0].clientY;
+    touchCurrentY = touchStartY;
+    isDragging = true;
+  }
+
+  function handleTouchMove(e: TouchEvent) {
+    if (!isDragging || currentIndex >= slides.length - 1) return;
+    
+    touchCurrentY = e.touches[0].clientY;
+    const deltaY = touchCurrentY - touchStartY;
+    
+    // Only allow downward swipe
+    if (deltaY > 0) {
+      const progress = Math.min(deltaY / 200, 1);
+      const scale = 1 - (progress * 0.1);
+      const opacity = 1 - (progress * 0.5);
+      
+      if (phoneFrame) {
+        phoneFrame.style.transform = `translateY(${deltaY}px) scale(${scale})`;
+        phoneFrame.style.opacity = String(opacity);
+        phoneFrame.style.transition = 'none';
+      }
+      
+      // Pause timer while dragging
+      if (!isPaused) pause();
+    }
+  }
+
+  function handleTouchEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const deltaY = touchCurrentY - touchStartY;
+    
+    if (deltaY > SWIPE_THRESHOLD) {
+      // Close the wrapped page
+      if (phoneFrame) {
+        phoneFrame.style.transition = 'all 0.3s ease-out';
+        phoneFrame.style.transform = 'translateY(100vh) scale(0.8)';
+        phoneFrame.style.opacity = '0';
+      }
+      
+      setTimeout(() => {
+        if (document.referrer && document.referrer.includes(window.location.host)) {
+          window.history.back();
+        } else {
+          window.location.href = '/latinasweatproject/';
+        }
+      }, 300);
+    } else {
+      // Reset position
+      if (phoneFrame) {
+        phoneFrame.style.transition = 'all 0.3s ease-out';
+        phoneFrame.style.transform = '';
+        phoneFrame.style.opacity = '';
+      }
+      resume();
+    }
+  }
+
+  // Add touch listeners to the container
+  const container = document.getElementById('wrapped-container');
+  if (container) {
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd);
+    container.addEventListener('touchcancel', handleTouchEnd);
+  }
+
   // Start the experience
   showSlide(0);
 </script>
