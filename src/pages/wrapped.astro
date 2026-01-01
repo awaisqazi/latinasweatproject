@@ -1,0 +1,488 @@
+---
+import Layout from "@/layouts/Layout.astro";
+const base = import.meta.env.BASE_URL;
+
+const slides = [
+  {
+    text: "Latina Sweat Project: 2025 Wrapped",
+    subtext: "Swipe or Tap to See Our Year",
+    image: "/images/wrapped/1.png",
+  },
+  {
+    text: "We expanded our programming from 25 classes in January to 55 in May, 100 in September, and 240 by December.",
+    milestone: "1/13",
+    image: "/images/wrapped/2.png",
+  },
+  {
+    text: "We reached more than 100,000 students and activated a volunteer base of over 100 community members.",
+    milestone: "2/13",
+    image: "/images/wrapped/3.png",
+  },
+  {
+    text: "Participated in 100+ corporate and community collaborations, including lululemon, Chicago Bulls, Chicago White Sox, Make-A-Wish, Hoka, Organic Oneness, ALPFA, Stockyard and Air.",
+    milestone: "3/13",
+    image: "/images/wrapped/4.png",
+  },
+  {
+    text: "Amplified, employed, and collaborated with over 50 BIPOC instructors across Chicago.",
+    milestone: "4/13",
+    image: "/images/wrapped/5.png",
+  },
+  {
+    text: "Created the first-ever Yoga Alliance-approved Latina Sweat 200-Hour Teacher Training curriculum.",
+    milestone: "5/13",
+    image: "/images/wrapped/6.png",
+  },
+  {
+    text: "Moved into our new home — the first yoga nonprofit studio in Pilsen — located on 16th and Morgan.",
+    milestone: "6/13",
+    image: "/images/wrapped/7.png",
+  },
+  {
+    text: "Certified 45 new yoga instructors from the Southwest Side and surrounding communities.",
+    milestone: "7/13",
+    image: "/images/wrapped/8.png",
+  },
+  {
+    text: "Distributed more than 1,000 warm meals to families across our neighborhoods.",
+    milestone: "8/13",
+    image: "/images/wrapped/9.png",
+  },
+  {
+    text: "Gifted 2,500 back-to-school items to local youth.",
+    milestone: "9/13",
+    image: "/images/wrapped/10.png",
+  },
+  {
+    text: "Donated more than 7,500 articles of clothing through our community mutual aid work.",
+    milestone: "10/13",
+    image: "/images/wrapped/11.png",
+  },
+  {
+    text: "Hosted a gallery featuring 25+ BIPOC artists whose work reflects culture, identity, and community.",
+    milestone: "11/13",
+    image: "/images/wrapped/12.png",
+  },
+  {
+    text: "Expanded our leadership ecosystem into five new boards: Advancements & Partnerships, Brand & Visibility, and more.",
+    milestone: "12/13",
+    image: "/images/wrapped/13.png",
+  },
+  {
+    text: "Thank you for an incredible year. Here's to 2026!",
+    isOutro: true,
+    image: "/images/wrapped/14.png",
+  },
+];
+---
+
+<Layout title="2025 Wrapped | Latina Sweat Project" hideFooter={true}>
+  <!-- Desktop blurred background -->
+  <div
+    id="blurred-bg"
+    class="fixed inset-0 hidden lg:block bg-black"
+  >
+    <img
+      id="bg-image"
+      src={`${base}${slides[0].image.slice(1)}`}
+      alt=""
+      class="w-full h-full object-cover blur-3xl scale-110 opacity-50 transition-opacity duration-500"
+    />
+  </div>
+
+  <!-- Main container -->
+  <div
+    id="wrapped-container"
+    class="fixed inset-0 lg:flex lg:items-center lg:justify-center bg-black lg:bg-transparent z-10"
+  >
+    <!-- Phone frame for desktop -->
+    <div
+      class="w-full h-full lg:w-[375px] lg:h-[812px] lg:max-h-[90vh] lg:rounded-3xl lg:overflow-hidden lg:shadow-2xl lg:border lg:border-white/10 relative"
+    >
+      <!-- Close button -->
+      <button
+        id="close-wrapped"
+        class="absolute top-4 right-4 z-50 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full text-white transition-colors"
+        aria-label="Close wrapped"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Progress bars -->
+      <div
+        id="progress-container"
+        class="absolute top-0 left-0 right-0 z-50 flex gap-1 p-3 pt-4"
+      >
+        {slides.map((_, index) => (
+          <div class="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
+            <div
+              class="progress-bar h-full bg-white rounded-full transition-all duration-100"
+              data-index={index}
+              style="width: 0%"
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Slides container -->
+      <div id="slides-wrapper" class="relative w-full h-full">
+        {slides.map((slide, index) => (
+          <div
+            class={`slide absolute inset-0 transition-opacity duration-500 ${index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+            data-index={index}
+          >
+            <!-- Background image -->
+            <img
+              src={`${base}${slide.image.slice(1)}`}
+              alt=""
+              class="absolute inset-0 w-full h-full object-contain"
+            />
+
+            <!-- CTA buttons only on outro slide -->
+            {slide.isOutro && (
+              <div class="absolute inset-x-0 bottom-0 p-6 pb-16 z-20 bg-gradient-to-t from-black/80 to-transparent">
+                <div class="slide-content flex flex-col sm:flex-row gap-3 justify-center items-center opacity-0 translate-y-4 transition-all duration-500">
+                  <a
+                    href="https://www.zeffy.com/en-US/donation-form/support-latina-sweat-project"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-accent-gold to-[#e6c55a] text-black font-bold px-8 py-4 rounded-full shadow-lg hover:scale-105 transition-transform"
+                  >
+                    <span>Donate</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                  <a
+                    href={`${base}schedule`}
+                    class="inline-flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm text-white font-bold px-8 py-4 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
+                  >
+                    Join Us
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <!-- Navigation arrows with tap zones -->
+      <div
+        id="tap-left"
+        class="absolute left-0 top-0 w-1/3 h-full z-30 cursor-pointer group"
+      >
+        <!-- Left arrow indicator -->
+        <div
+          id="arrow-left"
+          class="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 group-hover:opacity-80 transition-opacity duration-200"
+        >
+          <div class="bg-black/30 backdrop-blur-sm rounded-full p-2">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div
+        id="tap-right"
+        class="absolute right-0 top-0 w-2/3 h-full z-30 cursor-pointer group"
+      >
+        <!-- Right arrow indicator -->
+        <div
+          id="arrow-right"
+          class="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 group-hover:opacity-80 transition-opacity duration-200"
+        >
+          <div class="bg-black/30 backdrop-blur-sm rounded-full p-2">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paused indicator -->
+      <div
+        id="paused-indicator"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 opacity-0 transition-opacity duration-200 pointer-events-none"
+      >
+        <div class="bg-black/60 backdrop-blur-sm rounded-full p-4">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const SLIDE_DURATION = 5500; // 5.5 seconds per slide
+  const HOLD_THRESHOLD = 200; // ms to detect long press
+
+  let currentIndex = 0;
+  let timer: number | null = null;
+  let progressTimer: number | null = null;
+  let startTime = 0;
+  let elapsed = 0;
+  let isPaused = false;
+  let holdTimeout: number | null = null;
+  let isHolding = false;
+
+  const slides = document.querySelectorAll<HTMLElement>('.slide');
+  const progressBars = document.querySelectorAll<HTMLElement>('.progress-bar');
+  const tapLeft = document.getElementById('tap-left');
+  const tapRight = document.getElementById('tap-right');
+  const arrowLeft = document.getElementById('arrow-left');
+  const arrowRight = document.getElementById('arrow-right');
+  const pausedIndicator = document.getElementById('paused-indicator');
+  const bgImage = document.getElementById('bg-image') as HTMLImageElement;
+  const closeBtn = document.getElementById('close-wrapped');
+  const base = document.querySelector('meta[name="generator"]')?.closest('html')?.querySelector('img')?.src.split('/images')[0] || '';
+
+  // Update arrow visibility based on current slide
+  function updateArrows() {
+    if (arrowLeft) {
+      arrowLeft.style.opacity = currentIndex === 0 ? '0' : '';
+      arrowLeft.style.pointerEvents = currentIndex === 0 ? 'none' : '';
+    }
+    if (arrowRight) {
+      arrowRight.style.opacity = currentIndex >= slides.length - 1 ? '0' : '';
+      arrowRight.style.pointerEvents = currentIndex >= slides.length - 1 ? 'none' : '';
+    }
+  }
+
+  // Close button handler - go back to previous page
+  closeBtn?.addEventListener('click', () => {
+    if (document.referrer && document.referrer.includes(window.location.host)) {
+      window.history.back();
+    } else {
+      window.location.href = '/latinasweatproject/';
+    }
+  });
+
+  function updateProgressBars() {
+    progressBars.forEach((bar, index) => {
+      if (index < currentIndex) {
+        bar.style.width = '100%';
+      } else if (index === currentIndex) {
+        const progress = (elapsed / SLIDE_DURATION) * 100;
+        bar.style.width = `${Math.min(progress, 100)}%`;
+      } else {
+        bar.style.width = '0%';
+      }
+    });
+  }
+
+  function showSlide(index: number, animate = true) {
+    // Clamp index
+    if (index < 0) index = 0;
+    if (index >= slides.length) index = slides.length - 1;
+
+    currentIndex = index;
+    elapsed = 0;
+    startTime = Date.now();
+
+    // Update slides visibility
+    slides.forEach((slide, i) => {
+      const contents = slide.querySelectorAll<HTMLElement>('.slide-content');
+
+      if (i === index) {
+        slide.classList.remove('opacity-0', 'z-0');
+        slide.classList.add('opacity-100', 'z-10');
+
+        // Animate content in
+        if (animate) {
+          contents.forEach((el, j) => {
+            el.classList.remove('opacity-0', 'translate-y-4');
+          });
+        }
+      } else {
+        slide.classList.remove('opacity-100', 'z-10');
+        slide.classList.add('opacity-0', 'z-0');
+
+        // Reset content for next animation
+        contents.forEach(el => {
+          el.classList.add('opacity-0', 'translate-y-4');
+        });
+      }
+    });
+
+    // Update desktop background
+    if (bgImage && slides[index]) {
+      const slideImg = slides[index].querySelector('img') as HTMLImageElement;
+      if (slideImg) {
+        bgImage.src = slideImg.src;
+      }
+    }
+
+    updateProgressBars();
+    updateArrows();
+    startTimer();
+  }
+
+  function startTimer() {
+    stopTimer();
+
+    if (currentIndex >= slides.length - 1) {
+      // On last slide, don't auto-advance
+      progressTimer = window.setInterval(() => {
+        if (!isPaused) {
+          elapsed = Date.now() - startTime;
+          updateProgressBars();
+          if (elapsed >= SLIDE_DURATION) {
+            // Just fill the bar, don't advance
+            elapsed = SLIDE_DURATION;
+            if (progressTimer) clearInterval(progressTimer);
+          }
+        }
+      }, 50);
+      return;
+    }
+
+    timer = window.setTimeout(() => {
+      if (!isPaused) {
+        showSlide(currentIndex + 1);
+      }
+    }, SLIDE_DURATION - elapsed);
+
+    progressTimer = window.setInterval(() => {
+      if (!isPaused) {
+        elapsed = Date.now() - startTime;
+        updateProgressBars();
+      }
+    }, 50);
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (progressTimer) {
+      clearInterval(progressTimer);
+      progressTimer = null;
+    }
+  }
+
+  function pause() {
+    isPaused = true;
+    stopTimer();
+    if (pausedIndicator) {
+      pausedIndicator.classList.remove('opacity-0');
+      pausedIndicator.classList.add('opacity-100');
+    }
+  }
+
+  function resume() {
+    isPaused = false;
+    startTime = Date.now() - elapsed;
+    startTimer();
+    if (pausedIndicator) {
+      pausedIndicator.classList.remove('opacity-100');
+      pausedIndicator.classList.add('opacity-0');
+    }
+  }
+
+  function handlePointerDown(e: PointerEvent) {
+    isHolding = false;
+    holdTimeout = window.setTimeout(() => {
+      isHolding = true;
+      pause();
+    }, HOLD_THRESHOLD);
+  }
+
+  function handlePointerUp(e: PointerEvent, direction: 'left' | 'right') {
+    if (holdTimeout) {
+      clearTimeout(holdTimeout);
+      holdTimeout = null;
+    }
+
+    if (isHolding) {
+      isHolding = false;
+      resume();
+      return;
+    }
+
+    // Regular tap
+    if (direction === 'left' && currentIndex > 0) {
+      showSlide(currentIndex - 1);
+    } else if (direction === 'right' && currentIndex < slides.length - 1) {
+      showSlide(currentIndex + 1);
+    }
+  }
+
+  function handlePointerLeave() {
+    if (holdTimeout) {
+      clearTimeout(holdTimeout);
+      holdTimeout = null;
+    }
+    if (isHolding) {
+      isHolding = false;
+      resume();
+    }
+  }
+
+  // Initialize
+  if (tapLeft) {
+    tapLeft.addEventListener('pointerdown', handlePointerDown);
+    tapLeft.addEventListener('pointerup', (e) => handlePointerUp(e, 'left'));
+    tapLeft.addEventListener('pointerleave', handlePointerLeave);
+    tapLeft.addEventListener('pointercancel', handlePointerLeave);
+  }
+
+  if (tapRight) {
+    tapRight.addEventListener('pointerdown', handlePointerDown);
+    tapRight.addEventListener('pointerup', (e) => handlePointerUp(e, 'right'));
+    tapRight.addEventListener('pointerleave', handlePointerLeave);
+    tapRight.addEventListener('pointercancel', handlePointerLeave);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' && currentIndex > 0) {
+      showSlide(currentIndex - 1);
+    } else if (e.key === 'ArrowRight' && currentIndex < slides.length - 1) {
+      showSlide(currentIndex + 1);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      if (isPaused) {
+        resume();
+      } else {
+        pause();
+      }
+    }
+  });
+
+  // Start the experience
+  showSlide(0);
+</script>
+
+<style>
+  /* Hide scrollbars */
+  body {
+    overflow: hidden;
+  }
+
+  /* Prevent text selection during tap */
+  #tap-left,
+  #tap-right {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth transitions for slide content */
+  .slide-content {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Safe area insets for modern devices */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    #progress-container {
+      padding-top: calc(1rem + env(safe-area-inset-top));
+    }
+  }
+</style>

@@ -4,221 +4,262 @@ const base = import.meta.env.BASE_URL;
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
+const isWrappedPage = pathname.includes("/wrapped");
 ---
 
-{/* Spacer for fixed header on non-home pages to prevent overlap */}
-{!isHome && <div class="h-20" />}
+{/* Fixed container for banner + header */}
+<div id="header-wrapper" class="fixed top-0 left-0 right-0 z-50">
+    {/* 2025 Wrapped Banner - hidden on wrapped page itself */}
+    {
+        !isWrappedPage && (
+            <div
+                id="wrapped-banner"
+                class="bg-gradient-to-r from-vibrant-pink via-[#ff6b9d] to-accent-gold text-white py-2 px-4 text-center relative"
+            >
+                <a
+                    href={`${base}wrapped`}
+                    class="inline-flex items-center gap-2 text-sm font-semibold hover:underline"
+                >
+                    <span>✨</span>
+                    <span>Check out our 2025 Wrapped!</span>
+                    <span>✨</span>
+                </a>
+                <button
+                    id="close-wrapped-banner"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
+                    aria-label="Close banner"
+                >
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+        )
+    }
 
-<header
-    id="main-header"
-    class:list={[
-        "top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-transparent",
-        "fixed",
-    ]}
->
-    <div
-        class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+    <header
+        id="main-header"
+        class="w-full transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-transparent"
     >
-        {/* Logo */}
-        <div class="flex-shrink-0 relative z-50">
-            <a href={base} class="flex items-center gap-3 group">
-                <img
-                    src={`${base}logo.png`}
-                    alt="The Latina Sweat Project Logo"
-                    class="h-8 w-8 md:h-10 md:w-10 transition-transform duration-300 group-hover:scale-110"
-                />
-                <span
-                    class="text-lg md:text-xl font-bold text-off-black tracking-tight group-hover:text-vibrant-pink transition-colors duration-300"
-                    >The Latina Sweat Project</span
-                >
-            </a>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div class="hidden xl:flex items-center gap-8">
-            <nav class="flex items-center gap-6">
-                <a
-                    href={base}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    Home
+        <div
+            class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+        >
+            {/* Logo */}
+            <div class="flex-shrink-0 relative z-50">
+                <a href={base} class="flex items-center gap-3 group">
+                    <img
+                        src={`${base}logo.png`}
+                        alt="The Latina Sweat Project Logo"
+                        class="h-8 w-8 md:h-10 md:w-10 transition-transform duration-300 group-hover:scale-110"
+                    />
                     <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-                <a
-                    href={`${base}about`}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    About Us
-                    <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-                <a
-                    href={`${base}schedule`}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    Classes
-                    <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-                <a
-                    href={`${base}events`}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    Events
-                    <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-                <a
-                    href={`${base}impact`}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    Impact
-                    <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-                <a
-                    href={`${base}gala`}
-                    class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
-                >
-                    Gala
-                    <span
-                        class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    ></span>
-                </a>
-
-                {/* More Dropdown */}
-                <div class="relative group">
-                    <button
-                        class="flex items-center gap-1 py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors focus:outline-none"
+                        class="text-lg md:text-xl font-bold text-off-black tracking-tight group-hover:text-vibrant-pink transition-colors duration-300"
+                        >The Latina Sweat Project</span
                     >
-                        More
-                        <svg
-                            class="h-4 w-4 transition-transform duration-200 group-hover:rotate-180"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-
-                    <div
-                        class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right"
-                    >
-                        <div
-                            class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
-                        >
-                            <a
-                                href={`${base}shifts`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Volunteer
-                            </a>
-                            <a
-                                href={`${base}pricing`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Pricing
-                            </a>
-                            <a
-                                href={`${base}gallery`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Gallery
-                            </a>
-                            <a
-                                href={`${base}corporate-collaborations`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Corporate Collabs
-                            </a>
-                            <a
-                                href={`${base}community-collaborations`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Community Collabs
-                            </a>
-
-                            <a
-                                href={`${base}faq`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                FAQ
-                            </a>
-                            <a
-                                href={`${base}contact`}
-                                class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
-                            >
-                                Contact
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {/* CTAs */}
-            <div class="flex items-center gap-4 pl-4 border-l border-gray-200">
-                <a
-                    href={`${base}account`}
-                    class="text-sm font-bold text-medium-gray hover:text-vibrant-pink transition-colors"
-                >
-                    My Account
-                </a>
-                <a
-                    href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
-                >
-                    Donate
-                </a>
-                <a
-                    href={`${base}schedule`}
-                    class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-off-black px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-vibrant-pink"
-                >
-                    Book Class
                 </a>
             </div>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div class="xl:hidden flex items-center gap-4">
-            <a
-                href={`${base}schedule`}
-                class="btn inline-flex items-center h-9 rounded-full bg-vibrant-pink px-4 text-xs font-bold text-white shadow-sm sm:hidden"
-            >
-                Book
-            </a>
-            <button
-                id="mobile-menu-toggle"
-                class="relative z-50 p-2 text-off-black focus:outline-none group"
-                aria-label="Toggle Menu"
-            >
-                <div class="w-6 h-5 flex flex-col justify-between relative">
-                    <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
-                        id="hamburger-top"></span>
-                    <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
-                        id="hamburger-middle"></span>
-                    <span
-                        class="w-full h-0.5 bg-current transition-all duration-300 transform"
-                        id="hamburger-bottom"></span>
+            {/* Desktop Navigation */}
+            <div class="hidden xl:flex items-center gap-8">
+                <nav class="flex items-center gap-6">
+                    <a
+                        href={base}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        Home
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+                    <a
+                        href={`${base}about`}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        About Us
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+                    <a
+                        href={`${base}schedule`}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        Classes
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+                    <a
+                        href={`${base}events`}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        Events
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+                    <a
+                        href={`${base}impact`}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        Impact
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+                    <a
+                        href={`${base}gala`}
+                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                    >
+                        Gala
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        ></span>
+                    </a>
+
+                    {/* More Dropdown */}
+                    <div class="relative group">
+                        <button
+                            class="flex items-center gap-1 py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors focus:outline-none"
+                        >
+                            More
+                            <svg
+                                class="h-4 w-4 transition-transform duration-200 group-hover:rotate-180"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div
+                            class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right"
+                        >
+                            <div
+                                class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
+                            >
+                                <a
+                                    href={`${base}shifts`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Volunteer
+                                </a>
+                                <a
+                                    href={`${base}pricing`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Pricing
+                                </a>
+                                <a
+                                    href={`${base}gallery`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Gallery
+                                </a>
+                                <a
+                                    href={`${base}corporate-collaborations`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Corporate Collabs
+                                </a>
+                                <a
+                                    href={`${base}community-collaborations`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Community Collabs
+                                </a>
+
+                                <a
+                                    href={`${base}faq`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    FAQ
+                                </a>
+                                <a
+                                    href={`${base}contact`}
+                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                >
+                                    Contact
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                {/* CTAs */}
+                <div
+                    class="flex items-center gap-4 pl-4 border-l border-gray-200"
+                >
+                    <a
+                        href={`${base}account`}
+                        class="text-sm font-bold text-medium-gray hover:text-vibrant-pink transition-colors"
+                    >
+                        My Account
+                    </a>
+                    <a
+                        href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+                    >
+                        Donate
+                    </a>
+                    <a
+                        href={`${base}schedule`}
+                        class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-off-black px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-vibrant-pink"
+                    >
+                        Book Class
+                    </a>
                 </div>
-            </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div class="xl:hidden flex items-center gap-4">
+                <a
+                    href={`${base}schedule`}
+                    class="btn inline-flex items-center h-9 rounded-full bg-vibrant-pink px-4 text-xs font-bold text-white shadow-sm sm:hidden"
+                >
+                    Book
+                </a>
+                <button
+                    id="mobile-menu-toggle"
+                    class="relative z-50 p-2 text-off-black focus:outline-none group"
+                    aria-label="Toggle Menu"
+                >
+                    <div class="w-6 h-5 flex flex-col justify-between relative">
+                        <span
+                            class="w-full h-0.5 bg-current transition-all duration-300 transform"
+                            id="hamburger-top"></span>
+                        <span
+                            class="w-full h-0.5 bg-current transition-all duration-300 transform"
+                            id="hamburger-middle"></span>
+                        <span
+                            class="w-full h-0.5 bg-current transition-all duration-300 transform"
+                            id="hamburger-bottom"></span>
+                    </div>
+                </button>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
+</div>
+
+{/* Spacer for fixed header + banner to prevent overlap */}
+<div id="header-spacer" class="h-[calc(theme(spacing.20)+2.5rem)]"></div>
 
 {/* Mobile Menu Overlay */}
 <div
@@ -464,5 +505,30 @@ const isHome = pathname === base || pathname === `${base}/`;
         link.addEventListener("click", () => {
             if (isMenuOpen) toggleBtn?.click();
         });
+    });
+
+    // Wrapped Banner close functionality
+    const wrappedBanner = document.getElementById("wrapped-banner");
+    const closeBannerBtn = document.getElementById("close-wrapped-banner");
+    const headerSpacer = document.getElementById("header-spacer");
+
+    function hideBanner() {
+        if (wrappedBanner) {
+            wrappedBanner.style.display = "none";
+        }
+        if (headerSpacer) {
+            headerSpacer.style.height = "5rem"; // Just header height (h-20)
+        }
+    }
+
+    // Check if banner was previously closed in this session
+    if (sessionStorage.getItem("wrappedBannerClosed") === "true") {
+        hideBanner();
+    }
+
+    closeBannerBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        hideBanner();
+        sessionStorage.setItem("wrappedBannerClosed", "true");
     });
 </script>
