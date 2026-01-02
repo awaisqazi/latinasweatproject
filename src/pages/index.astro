@@ -120,19 +120,25 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Documentary CTA Section */}
 
-    {/* START: LSP x Guapos NYE Section */}
+    {/* START: Pilates for Palestine Section */}
     <section
-      id="nye-event"
-      class="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-black"
+      id="pilates-palestine"
+      class="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-[#f5f0e6]"
     >
-      {/* Festive Background Elements */}
+      {/* Palestinian Flag Stripe Decorations */}
       <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-gold/20 via-black to-black opacity-60"
+        class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#000000] via-[#007a3d] to-[#ce1126]"
       >
       </div>
       <div
-        class="absolute inset-0 opacity-20"
-        style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23D4AF37\' fill-opacity=\'1\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E');"
+        class="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ce1126] via-[#007a3d] to-[#000000]"
+      >
+      </div>
+
+      {/* Subtle Pattern Background */}
+      <div
+        class="absolute inset-0 opacity-5"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 0L40 20L20 40L0 20z\' fill=\'none\' stroke=\'%23007a3d\' stroke-width=\'1\'/%3E%3C/svg%3E');"
       >
       </div>
 
@@ -143,96 +149,124 @@ const base = import.meta.env.BASE_URL;
           {/* Image Side */}
           <div class="w-full order-last lg:order-first">
             <div
-              class="mx-auto max-w-[540px] overflow-hidden rounded-2xl shadow-2xl shadow-accent-gold/20 border border-accent-gold/30 transform transition duration-500 hover:scale-[1.02]"
+              class="mx-auto max-w-[540px] overflow-hidden rounded-2xl shadow-2xl shadow-[#007a3d]/20 border-2 border-[#007a3d]/30 transform transition duration-500 hover:scale-[1.02]"
             >
               <img
-                src={`${base}images/nye-guapos.png`}
-                alt="Ring in the New Year with LSP and Los Guapos"
+                src={`${base}images/pilates-palestine.png`}
+                alt="Pilates for Palestine x Latina Sweat Project"
                 class="w-full h-auto object-cover"
               />
             </div>
           </div>
 
           {/* Content Side */}
-          <div class="text-white">
+          <div class="text-[#1a1a1a]">
             <div
-              class="inline-block px-4 py-1.5 rounded-full bg-accent-gold/20 border border-accent-gold/50 mb-6"
+              class="inline-block px-4 py-1.5 rounded-full bg-[#ce1126]/10 border border-[#ce1126]/50 mb-6"
             >
               <p
-                class="font-sans text-sm font-bold uppercase tracking-widest text-accent-gold"
+                class="font-sans text-sm font-bold uppercase tracking-widest text-[#ce1126]"
               >
-                🎉 Special Event
+                🇵🇸 Community Fundraiser
               </p>
             </div>
 
             <h2
               class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight"
             >
-              Ring in the New Year with
+              <span class="text-[#000000]">Pilates</span>
+              <span class="text-[#007a3d]"> for </span>
+              <span class="text-[#ce1126]">Palestine</span>
               <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold via-[#fff5d0] to-accent-gold animate-shimmer"
-                >LSP and Los Guapos</span
+                class="block text-xl sm:text-2xl text-[#007a3d] font-semibold mt-2"
+                >× Latina Sweat Project</span
               >
-              on NYE 🎉
             </h2>
 
-            <div class="space-y-6 font-body text-lg text-slate-300">
+            <div class="space-y-5 font-body text-lg text-[#333333]">
               <p class="text-xl font-light leading-relaxed">
-                Ring in the New Year with purpose at <span
-                  class="font-bold text-white">LSP x Guapos NYE</span
-                > 🎉
+                Join us for a community class with <span
+                  class="font-bold text-[#ce1126]">100% of proceeds</span
+                > going to Palestine Children's Relief Fund (PCRF).
               </p>
               <p>
-                Join us for a 45 minute yoga flow con <span
-                  class="text-white font-medium">Jacky</span
-                >, our very own LSP instructor and Guapa, followed by a 2.6 mile
-                run lead by <span class="text-white font-medium">Javi</span>, El
-                Guapo himself.
-              </p>
-              <p>
-                Come support programs that uplift through fitness, mental
-                wellness, and community.
+                Experience a <span class="font-semibold"
+                  >45-minute Pilates class</span
+                > followed by a <span class="font-semibold"
+                  >15-minute meditation</span
+                >. Hear directly from a PCRF representative and connect with
+                community over light refreshments.
               </p>
 
               <blockquote
-                class="italic text-slate-400 border-l-2 border-accent-gold pl-4 my-6"
+                class="italic text-[#007a3d] border-l-4 border-[#ce1126] pl-4 my-6 bg-white/50 py-3 rounded-r-lg"
               >
-                "Give what feels right for you and celebrate a fresh start
-                together."
+                "Movement in solidarity. Healing for our communities."
               </blockquote>
 
-              <div class="pt-4 space-y-2">
-                <p class="font-bold text-white flex items-center gap-2">
+              <div class="pt-2 space-y-3">
+                <div
+                  class="flex items-center gap-3 bg-white/60 rounded-lg p-3 border border-[#007a3d]/20"
+                >
                   <svg
-                    class="w-5 h-5 text-accent-gold"
+                    class="w-6 h-6 text-[#007a3d] flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    ><path
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  <div>
+                    <p class="font-bold text-[#000000]">
+                      Saturday, January 11th, 2025
+                    </p>
+                    <p class="text-sm text-[#666666]">
+                      Doors: 1:00 PM • Class: 1:30 PM – 2:30 PM CST
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center gap-3 bg-white/60 rounded-lg p-3 border border-[#007a3d]/20"
+                >
+                  <svg
+                    class="w-6 h-6 text-[#ce1126] flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
                       d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    ></path><path
+                    ></path>
+                    <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg
-                  >
-                  949 W. 16th St.
-                </p>
-                <p class="text-sm text-slate-400 ml-7">Donations welcome</p>
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <div>
+                    <p class="font-bold text-[#000000]">949 W 16th St</p>
+                    <p class="text-sm text-[#666666]">Chicago, IL 60608</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <div class="mt-8 flex flex-col sm:flex-row gap-4">
               <a
-                href="https://www.zeffy.com/en-US/ticketing/lsp-guapos-nye"
+                href="https://www.zeffy.com/en-US/ticketing/pilates-for-palestine-x-lsp"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-accent-gold to-[#d4af37] px-8 py-4 text-lg font-bold text-black shadow-[0_0_20px_rgba(212,175,55,0.5)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.7)] focus:outline-none focus:ring-4 focus:ring-accent-gold/50"
+                class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#ce1126] via-[#007a3d] to-[#000000] px-8 py-4 text-lg font-bold text-white shadow-[0_0_20px_rgba(0,122,61,0.4)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(206,17,38,0.5)] focus:outline-none focus:ring-4 focus:ring-[#007a3d]/50"
               >
-                <span>Get Tickets & Donate</span>
+                <span>Register Now</span>
                 <svg
                   class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300"
                   fill="none"
@@ -246,11 +280,16 @@ const base = import.meta.env.BASE_URL;
                 >
               </a>
             </div>
+
+            {/* PCRF Note */}
+            <p class="mt-6 text-sm text-[#666666] italic">
+              All proceeds benefit humanitarian efforts in Gaza through PCRF.
+            </p>
           </div>
         </div>
       </div>
     </section>
-    {/* END: LSP x Guapos NYE Section */}
+    {/* END: Pilates for Palestine Section */}
 
     {/* START: Gala Section - Thank You */}
     <section id="gala" class="relative py-16 sm:py-20 lg:py-28 overflow-hidden">
@@ -643,12 +682,12 @@ const base = import.meta.env.BASE_URL;
               class="min-w-[85%] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center"
             >
               <EventCard
-                href="https://www.zeffy.com/en-US/ticketing/lsp-guapos-nye"
+                href="https://www.zeffy.com/en-US/ticketing/pilates-for-palestine-x-lsp"
                 target="_blank"
-                imageSrc={`${base}images/nye-guapos.png`}
-                date="DEC 31, 2025"
-                title="LSP x Guapos NYE"
-                description="Ring in the New Year with purpose. 45 min yoga flow & 2.6 mile run."
+                imageSrc={`${base}images/pilates-palestine.png`}
+                date="JAN 11, 2025"
+                title="Pilates for Palestine 🇵🇸"
+                description="Community class benefiting PCRF. 45 min Pilates + 15 min meditation."
               />
             </div>
           </div>
