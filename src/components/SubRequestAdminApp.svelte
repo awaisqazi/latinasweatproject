@@ -214,8 +214,9 @@
             return;
         }
 
-        // Open confirmation modal
+        // Open confirmation modal with volunteer selection
         confirmRequest = request;
+        // Default to first volunteer, but allow selection if multiple
         confirmVolunteer = request.volunteers[0];
         confirmAction = "approve";
         showConfirmModal = true;
@@ -674,13 +675,50 @@
                     </div>
 
                     <div class="p-6 space-y-4">
+                        <!-- Volunteer Selection (when multiple volunteers) -->
+                        {#if confirmRequest.volunteers?.length > 1}
+                            <div
+                                class="bg-blue-50 rounded-lg p-4 border border-blue-200"
+                            >
+                                <label
+                                    for="volunteerSelect"
+                                    class="block text-blue-800 font-medium mb-2"
+                                >
+                                    Select which volunteer to approve:
+                                </label>
+                                <select
+                                    id="volunteerSelect"
+                                    class="w-full px-4 py-3 rounded-lg border border-blue-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-900"
+                                    bind:value={confirmVolunteer}
+                                >
+                                    {#each confirmRequest.volunteers as volunteer, index}
+                                        <option value={volunteer}>
+                                            {volunteer.name} ({volunteer.email})
+                                        </option>
+                                    {/each}
+                                </select>
+                                <p class="text-blue-600 text-xs mt-2">
+                                    {confirmRequest.volunteers.length} volunteers
+                                    waiting for approval
+                                </p>
+                            </div>
+                        {/if}
+
                         <div
                             class="bg-green-50 rounded-lg p-4 border border-green-100"
                         >
                             <p class="text-green-800 font-medium">
-                                Approve <span class="font-bold"
+                                {#if confirmRequest.volunteers?.length > 1}
+                                    Selected volunteer:
+                                {:else}
+                                    Approve
+                                {/if}
+                                <span class="font-bold"
                                     >{confirmVolunteer?.name}</span
-                                > as the substitute?
+                                >
+                                {#if confirmRequest.volunteers?.length <= 1}
+                                    as the substitute?
+                                {/if}
                             </p>
                             {#if confirmVolunteer?.phone}
                                 <p class="text-green-700 text-sm mt-1">
