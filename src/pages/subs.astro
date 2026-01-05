@@ -1,0 +1,93 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import SubRequestApp from "../components/SubRequestApp.svelte";
+---
+
+<Layout title="Substitute Requests | The Latina Sweat Project">
+    <Header />
+    <main class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <div class="bg-off-black text-white py-16 px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold font-rubik mb-4">
+                    Substitute Requests
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Help cover classes when instructors need a sub. Sign up
+                    below to volunteer!
+                </p>
+            </div>
+        </div>
+
+        <!-- Info Notices -->
+        <div class="py-8">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
+                <div class="rounded-md bg-red-50 p-4 border border-red-200">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg
+                                class="h-5 w-5 text-red-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                Known Issue on iOS/iPhone
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p>
+                                    We are experiencing interface issues on
+                                    iPhone and iOS Safari browsers. Please try <strong
+                                        >"Request Desktop Website"</strong
+                                    > in your browser menu or switch to a desktop
+                                    computer.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
+                <div class="rounded-md bg-blue-50 p-4 border border-blue-200">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg
+                                class="h-5 w-5 text-blue-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm text-blue-700">
+                                <strong>How it works:</strong> Volunteer to sub for
+                                a class, then wait for admin approval. Once approved,
+                                you'll see calendar buttons to add the class to your
+                                calendar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Container -->
+        <SubRequestApp client:load />
+    </main>
+</Layout>
