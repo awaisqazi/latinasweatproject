@@ -163,6 +163,9 @@
     };
 
     // --- Actions ---
+    // Add Request Success State
+    let addSuccess = false;
+
     async function handleAddRequest(event) {
         isAddingRequest = true;
         const {
@@ -197,14 +200,18 @@
                 createdAt: Timestamp.now(),
             });
 
-            showAddModal = false;
-            alert("Request added successfully!");
+            addSuccess = true; // Show success view in modal
         } catch (e) {
             console.error("Add failed:", e);
             alert("Failed to add request: " + e.message);
         } finally {
             isAddingRequest = false;
         }
+    }
+
+    function handleCloseAddModal() {
+        showAddModal = false;
+        addSuccess = false; // Reset success state when closing
     }
 
     async function handleApprove(event) {
@@ -647,7 +654,8 @@
     <CreateSubRequestModal
         isOpen={showAddModal}
         isSubmitting={isAddingRequest}
-        on:close={() => (showAddModal = false)}
+        success={addSuccess}
+        on:close={handleCloseAddModal}
         on:submit={handleAddRequest}
     />
 

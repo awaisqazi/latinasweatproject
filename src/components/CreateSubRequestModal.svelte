@@ -4,6 +4,7 @@
 
     export let isOpen = false;
     export let isSubmitting = false;
+    export let success = false; // New: shows success view when true
 
     const dispatch = createEventDispatcher();
 
@@ -44,7 +45,6 @@
     // Parse user-entered date to YYYY-MM-DD format
     function parseDateInput(input) {
         if (!input) return "";
-        // Try to parse various formats: MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD
         const cleaned = input.trim();
 
         // Already in YYYY-MM-DD format
@@ -52,16 +52,31 @@
             return cleaned;
         }
 
-        // MM/DD/YYYY or MM-DD-YYYY format
-        const match = cleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        // Handle MM/DD/YYYY or MM-DD-YYYY prefix or suffix
+        // Also handle 2-digit years
+        const match = cleaned.match(
+            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/,
+        );
         if (match) {
             const month = match[1].padStart(2, "0");
             const day = match[2].padStart(2, "0");
-            const year = match[3];
-            return `${year}-${month}-${day}`;
+            let year = match[3];
+
+            if (year.length === 2) {
+                // If 2 digits, assume 20xx
+                year = "20" + year;
+            }
+
+            // Basic bounds check
+            const m = parseInt(month);
+            const d = parseInt(day);
+            const y = parseInt(year);
+            if (m > 0 && m <= 12 && d > 0 && d <= 31 && y > 2000) {
+                return `${year}-${month}-${day}`;
+            }
         }
 
-        return cleaned; // Return as-is, let the submit handler validate
+        return cleaned; // Fallback
     }
 
     // Parse user-entered time to HH:MM format
@@ -108,6 +123,18 @@
     function confirmSubmit() {
         const date = parseDateInput(dateInput);
         const time = parseTimeInput(timeInput);
+
+        // Final validation check for valid formats
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            alert(
+                "Please enter a valid date format (MM/DD/YYYY or YYYY-MM-DD).",
+            );
+            return;
+        }
+        if (!/^\d{2}:\d{2}$/.test(time)) {
+            alert("Please enter a valid time (e.g. 9:00 AM or 14:30).");
+            return;
+        }
 
         dispatch("submit", {
             className,
@@ -189,7 +216,79 @@
             role="dialog"
             aria-modal="true"
         >
-            {#if !showConfirmation}
+            {#if success}
+                <!-- SUCCESS VIEW -->
+                <div class="bg-vibrant-pink p-6 text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 rounded-full p-2">
+                            <svg
+                                class="w-8 h-8 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                ></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold font-rubik">
+                                Request Submitted!
+                            </h2>
+                            <p class="text-white/90 mt-1">
+                                Your substitute request has been created
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div
+                        class="bg-green-50 rounded-xl p-4 border border-green-200"
+                    >
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <div>
+                                <p class="font-bold text-green-800">Success!</p>
+                                <p class="text-green-700 text-sm mt-1">
+                                    Your request for <strong>{className}</strong
+                                    > has been posted. Instructors will be able to
+                                    see it and volunteer to cover the class.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-blue-50 rounded-lg p-4 border border-blue-200"
+                    >
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">ℹ️</span>
+                            <div>
+                                <p class="text-blue-800 text-sm">
+                                    <strong>What's next?</strong> You'll be notified
+                                    when someone volunteers. Check back on the substitute
+                                    requests page to see updates.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-gray-50 flex justify-end">
+                    <button
+                        type="button"
+                        on:click={close}
+                        class="px-6 py-2 rounded-lg bg-vibrant-pink text-white font-bold shadow-lg hover:bg-accent-gold hover:shadow-xl transition-all cursor-pointer"
+                    >
+                        Done
+                    </button>
+                </div>
+            {:else if !showConfirmation}
                 <!-- FORM VIEW -->
                 <!-- Header -->
                 <div class="bg-vibrant-pink p-6 text-white">

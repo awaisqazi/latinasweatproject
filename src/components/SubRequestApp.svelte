@@ -229,6 +229,9 @@
         });
     }
 
+    // Create Request Success State
+    let createSuccess = false;
+
     async function handleCreateRequest(event) {
         isCreatingRequest = true;
         const {
@@ -263,14 +266,18 @@
                 createdAt: Timestamp.now(),
             });
 
-            isCreateModalOpen = false;
-            alert("Sub request submitted successfully!");
+            createSuccess = true; // Show success view in modal
         } catch (e) {
             console.error("Create failed:", e);
             alert("Failed to submit request: " + e.message);
         } finally {
             isCreatingRequest = false;
         }
+    }
+
+    function handleCloseCreateModal() {
+        isCreateModalOpen = false;
+        createSuccess = false; // Reset success state when closing
     }
 </script>
 
@@ -561,6 +568,7 @@
 <CreateSubRequestModal
     isOpen={isCreateModalOpen}
     isSubmitting={isCreatingRequest}
-    on:close={() => (isCreateModalOpen = false)}
+    success={createSuccess}
+    on:close={handleCloseCreateModal}
     on:submit={handleCreateRequest}
 />
