@@ -146,8 +146,6 @@
             location,
             notes,
         });
-        // Reset confirmation state after submit (parent will close modal)
-        showConfirmation = false;
     }
 
     function resetForm() {
