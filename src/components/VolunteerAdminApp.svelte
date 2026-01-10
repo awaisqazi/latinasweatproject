@@ -83,10 +83,31 @@
 
     // --- Bulk Shift Time Deletion State ---
     let bulkDeleteTimeSlot = ""; // Selected time slot (e.g., "08:00-09:00")
+    let bulkDeleteDaysOfWeek = []; // No days selected by default - user must choose
+    const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ];
     let isBulkDeleting = false;
     let bulkDeletePreview = null; // {toDelete: [], conflicts: []}
     let showBulkDeleteReport = false;
     let bulkDeleteReport = { deleted: 0, skipped: 0, conflicts: [] };
+
+    // --- Bulk Recurring Shift Creation State ---
+    let recurringStartDate = "";
+    let recurringEndDate = "";
+    let recurringTime = "18:00";
+    let recurringDuration = 60;
+    let recurringDaysOfWeek = []; // Which days to create shifts on
+    let recurringLeadCap = 1;
+    let recurringVolCap = 2;
+    let isCreatingRecurring = false;
+    let recurringPreview = null; // {dates: [], count: 0}
 
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
@@ -255,6 +276,102 @@
             alert("Failed to add shift: " + e.message);
         } finally {
             isAddingShift = false;
+        }
+    }
+
+    // --- Recurring Shift Functions ---
+    function previewRecurringShifts() {
+        if (
+            !recurringStartDate ||
+            !recurringEndDate ||
+            recurringDaysOfWeek.length === 0
+        ) {
+            recurringPreview = null;
+            return;
+        }
+
+        const [sy, sm, sd] = recurringStartDate.split("-").map(Number);
+        const [ey, em, ed] = recurringEndDate.split("-").map(Number);
+        const startD = new Date(sy, sm - 1, sd);
+        const endD = new Date(ey, em - 1, ed);
+
+        if (endD < startD) {
+            recurringPreview = null;
+            return;
+        }
+
+        const dates = [];
+        const current = new Date(startD);
+
+        while (current <= endD) {
+            if (recurringDaysOfWeek.includes(current.getDay())) {
+                dates.push(new Date(current));
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        recurringPreview = {
+            dates,
+            count: dates.length,
+            firstDate: dates.length > 0 ? dates[0] : null,
+            lastDate: dates.length > 0 ? dates[dates.length - 1] : null,
+        };
+    }
+
+    async function handleCreateRecurringShifts() {
+        if (!recurringPreview || recurringPreview.count === 0) {
+            alert(
+                "Please configure the recurring shift options and preview first.",
+            );
+            return;
+        }
+
+        const confirmMsg = `This will create ${recurringPreview.count} shifts from ${recurringPreview.firstDate.toLocaleDateString()} to ${recurringPreview.lastDate.toLocaleDateString()}.\n\nProceed?`;
+        if (!confirm(confirmMsg)) return;
+
+        isCreatingRecurring = true;
+        let successCount = 0;
+        let failCount = 0;
+
+        try {
+            const [h, min] = recurringTime.split(":").map(Number);
+
+            for (const date of recurringPreview.dates) {
+                try {
+                    const start = new Date(date);
+                    start.setHours(h, min, 0, 0);
+                    const end = new Date(
+                        start.getTime() + recurringDuration * 60000,
+                    );
+
+                    await addDoc(collection(db, "custom_shifts"), {
+                        start: Timestamp.fromDate(start),
+                        end: Timestamp.fromDate(end),
+                        leadCapacity: recurringLeadCap,
+                        volunteerCapacity: recurringVolCap,
+                        createdAt: Timestamp.now(),
+                    });
+                    successCount++;
+                } catch (err) {
+                    console.error("Failed to create shift:", err);
+                    failCount++;
+                }
+            }
+
+            alert(
+                `Created ${successCount} shifts successfully!${failCount > 0 ? ` (${failCount} failed)` : ""}`,
+            );
+
+            // Reset form
+            recurringStartDate = "";
+            recurringEndDate = "";
+            recurringDaysOfWeek = [];
+            recurringPreview = null;
+        } catch (e) {
+            console.error("Bulk create failed:", e);
+            alert("Bulk creation failed: " + e.message);
+        } finally {
+            isCreatingRecurring = false;
         }
     }
 
@@ -813,7 +930,8 @@
 
     $: uniqueTimeSlots = (() => {
         const slotsMap = new Map(); // Use map to dedupe by value
-        generatedShifts.forEach((shift) => {
+        // Include BOTH generated AND custom shifts for dynamic dropdown
+        [...generatedShifts, ...customShifts].forEach((shift) => {
             const startH = shift.start.getHours();
             const startM = shift.start.getMinutes();
             const endH = shift.end.getHours();
@@ -851,6 +969,10 @@
         generatedShifts.forEach((shift) => {
             if (shift.start < today) return; // Skip past shifts
 
+            // Check if day of week is selected
+            const dayOfWeek = shift.start.getDay();
+            if (!bulkDeleteDaysOfWeek.includes(dayOfWeek)) return;
+
             const shiftStartH = shift.start.getHours();
             const shiftStartM = shift.start.getMinutes();
             const shiftEndH = shift.end.getHours();
@@ -883,6 +1005,10 @@
         // Also check custom shifts with matching times
         customShifts.forEach((shift) => {
             if (shift.start < today) return;
+
+            // Check if day of week is selected
+            const dayOfWeek = shift.start.getDay();
+            if (!bulkDeleteDaysOfWeek.includes(dayOfWeek)) return;
 
             const shiftStartH = shift.start.getHours();
             const shiftStartM = shift.start.getMinutes();
@@ -1213,28 +1339,28 @@
                         Export Data
                     </h3>
                     <div class="space-y-3">
-                        <div>
-                            <label
+                        <label class="block">
+                            <span
                                 class="block text-xs font-medium text-gray-500 mb-1"
-                                >Start Date</label
+                                >Start Date</span
                             >
                             <input
                                 type="date"
                                 bind:value={startDate}
                                 class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                             />
-                        </div>
-                        <div>
-                            <label
+                        </label>
+                        <label class="block">
+                            <span
                                 class="block text-xs font-medium text-gray-500 mb-1"
-                                >End Date</label
+                                >End Date</span
                             >
                             <input
                                 type="date"
                                 bind:value={endDate}
                                 class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                             />
-                        </div>
+                        </label>
                         <button
                             on:click={exportCSV}
                             class="w-full bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -1265,46 +1391,46 @@
                         Add Single Shift
                     </h3>
                     <div class="space-y-3">
-                        <div>
-                            <label
+                        <label class="block">
+                            <span
                                 class="block text-xs font-medium text-gray-500 mb-1"
-                                >Date</label
+                                >Date</span
                             >
                             <input
                                 type="date"
                                 bind:value={addShiftDate}
                                 class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                             />
-                        </div>
+                        </label>
                         <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label
+                            <label class="block">
+                                <span
                                     class="block text-xs font-medium text-gray-500 mb-1"
-                                    >Time</label
+                                    >Time</span
                                 >
                                 <input
                                     type="time"
                                     bind:value={addShiftTime}
                                     class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                                 />
-                            </div>
-                            <div>
-                                <label
+                            </label>
+                            <label class="block">
+                                <span
                                     class="block text-xs font-medium text-gray-500 mb-1"
-                                    >Duration (m)</label
+                                    >Duration (m)</span
                                 >
                                 <input
                                     type="number"
                                     bind:value={addShiftDuration}
                                     class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                                 />
-                            </div>
+                            </label>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label
+                            <label class="block">
+                                <span
                                     class="block text-xs font-medium text-gray-500 mb-1"
-                                    >Lead Cap</label
+                                    >Lead Cap</span
                                 >
                                 <input
                                     type="number"
@@ -1312,11 +1438,11 @@
                                     min="0"
                                     class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                                 />
-                            </div>
-                            <div>
-                                <label
+                            </label>
+                            <label class="block">
+                                <span
                                     class="block text-xs font-medium text-gray-500 mb-1"
-                                    >Vol Cap</label
+                                    >Vol Cap</span
                                 >
                                 <input
                                     type="number"
@@ -1324,7 +1450,7 @@
                                     min="0"
                                     class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-vibrant-pink outline-none"
                                 />
-                            </div>
+                            </label>
                         </div>
                         <button
                             on:click={handleAddShift}
@@ -1332,6 +1458,225 @@
                             class="w-full bg-vibrant-pink text-white font-medium py-2 px-4 rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                             {isAddingShift ? "Adding..." : "Add Shift"}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Create Recurring Shifts Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-green-200 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                        </svg>
+                        Bulk Create Recurring Shifts
+                    </h3>
+                    <p class="text-xs text-gray-500">
+                        Create shifts at the same time on specific days until an
+                        end date.
+                    </p>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Start Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={recurringStartDate}
+                                    on:change={previewRecurringShifts}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >End Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={recurringEndDate}
+                                    on:change={previewRecurringShifts}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Time</span
+                                >
+                                <input
+                                    type="time"
+                                    bind:value={recurringTime}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Duration (m)</span
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={recurringDuration}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Lead Cap</span
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={recurringLeadCap}
+                                    min="0"
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Vol Cap</span
+                                >
+                                <input
+                                    type="number"
+                                    bind:value={recurringVolCap}
+                                    min="0"
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                            </label>
+                        </div>
+
+                        <!-- Day of Week Selection -->
+                        <div class="space-y-2">
+                            <span
+                                class="block text-xs font-medium text-gray-500"
+                            >
+                                Repeat on Days
+                            </span>
+                            <div class="flex flex-wrap gap-1">
+                                {#each dayNames as day, index}
+                                    <label class="inline-flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={recurringDaysOfWeek.includes(
+                                                index,
+                                            )}
+                                            on:change={(e) => {
+                                                if (e.target.checked) {
+                                                    recurringDaysOfWeek = [
+                                                        ...recurringDaysOfWeek,
+                                                        index,
+                                                    ];
+                                                } else {
+                                                    recurringDaysOfWeek =
+                                                        recurringDaysOfWeek.filter(
+                                                            (d) => d !== index,
+                                                        );
+                                                }
+                                                previewRecurringShifts();
+                                            }}
+                                            class="rounded border-gray-300 text-green-600 focus:ring-green-500 h-3 w-3"
+                                        />
+                                        <span class="ml-1 text-xs text-gray-600"
+                                            >{day.slice(0, 3)}</span
+                                        >
+                                    </label>
+                                {/each}
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        recurringDaysOfWeek = [
+                                            0, 1, 2, 3, 4, 5, 6,
+                                        ];
+                                        previewRecurringShifts();
+                                    }}
+                                    class="text-green-600 hover:underline"
+                                    >All</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        recurringDaysOfWeek = [0, 6];
+                                        previewRecurringShifts();
+                                    }}
+                                    class="text-green-600 hover:underline"
+                                    >Weekends</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        recurringDaysOfWeek = [1, 2, 3, 4, 5];
+                                        previewRecurringShifts();
+                                    }}
+                                    class="text-green-600 hover:underline"
+                                    >Weekdays</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        recurringDaysOfWeek = [];
+                                        previewRecurringShifts();
+                                    }}
+                                    class="text-gray-500 hover:underline"
+                                    >None</button
+                                >
+                            </div>
+                        </div>
+
+                        {#if recurringPreview && recurringPreview.count > 0}
+                            <div
+                                class="text-xs space-y-2 p-3 bg-green-50 rounded-lg border border-green-200"
+                            >
+                                <p class="text-green-700 font-medium">
+                                    ✓ {recurringPreview.count} shift(s) will be created
+                                </p>
+                                <p class="text-gray-600">
+                                    From {recurringPreview.firstDate?.toLocaleDateString()}
+                                    to {recurringPreview.lastDate?.toLocaleDateString()}
+                                </p>
+                            </div>
+                        {:else if recurringStartDate && recurringEndDate && recurringDaysOfWeek.length === 0}
+                            <div
+                                class="text-xs p-3 bg-amber-50 rounded-lg border border-amber-200"
+                            >
+                                <p class="text-amber-700">
+                                    ⚠ Select at least one day of the week
+                                </p>
+                            </div>
+                        {/if}
+
+                        <button
+                            on:click={handleCreateRecurringShifts}
+                            disabled={isCreatingRecurring ||
+                                !recurringPreview ||
+                                recurringPreview.count === 0}
+                            class="w-full bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                            {isCreatingRecurring
+                                ? "Creating..."
+                                : "Create Recurring Shifts"}
                         </button>
                     </div>
                 </div>
@@ -1443,6 +1788,85 @@
                                 {/each}
                             </select>
                         </label>
+
+                        <!-- Day of Week Filter -->
+                        <div class="space-y-2">
+                            <span
+                                class="block text-xs font-medium text-gray-500"
+                            >
+                                Filter by Day of Week
+                            </span>
+                            <div class="flex flex-wrap gap-1">
+                                {#each dayNames as day, index}
+                                    <label class="inline-flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={bulkDeleteDaysOfWeek.includes(
+                                                index,
+                                            )}
+                                            on:change={(e) => {
+                                                if (e.target.checked) {
+                                                    bulkDeleteDaysOfWeek = [
+                                                        ...bulkDeleteDaysOfWeek,
+                                                        index,
+                                                    ];
+                                                } else {
+                                                    bulkDeleteDaysOfWeek =
+                                                        bulkDeleteDaysOfWeek.filter(
+                                                            (d) => d !== index,
+                                                        );
+                                                }
+                                                previewBulkTimeSlotDeletion();
+                                            }}
+                                            class="rounded border-gray-300 text-red-600 focus:ring-red-500 h-3 w-3"
+                                        />
+                                        <span class="ml-1 text-xs text-gray-600"
+                                            >{day.slice(0, 3)}</span
+                                        >
+                                    </label>
+                                {/each}
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        bulkDeleteDaysOfWeek = [
+                                            0, 1, 2, 3, 4, 5, 6,
+                                        ];
+                                        previewBulkTimeSlotDeletion();
+                                    }}
+                                    class="text-blue-600 hover:underline"
+                                    >All</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        bulkDeleteDaysOfWeek = [0, 6];
+                                        previewBulkTimeSlotDeletion();
+                                    }}
+                                    class="text-blue-600 hover:underline"
+                                    >Weekends</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        bulkDeleteDaysOfWeek = [1, 2, 3, 4, 5];
+                                        previewBulkTimeSlotDeletion();
+                                    }}
+                                    class="text-blue-600 hover:underline"
+                                    >Weekdays</button
+                                >
+                                <button
+                                    type="button"
+                                    on:click={() => {
+                                        bulkDeleteDaysOfWeek = [];
+                                        previewBulkTimeSlotDeletion();
+                                    }}
+                                    class="text-gray-500 hover:underline"
+                                    >None</button
+                                >
+                            </div>
+                        </div>
 
                         {#if bulkDeletePreview}
                             <div
