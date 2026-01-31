@@ -87,18 +87,14 @@
 
     function updateSubscriptionsForWeek(weekStart) {
         const dStart = new Date(weekStart);
-        const dEnd = new Date(dStart);
-        dEnd.setDate(dEnd.getDate() + 6);
 
+        // Fetch only the current month (1 month) based on the week start
         const viewStartYear = dStart.getFullYear();
         const viewStartMonth = dStart.getMonth();
         const startOfFetch = new Date(viewStartYear, viewStartMonth, 1);
-
-        const viewEndYear = dEnd.getFullYear();
-        const viewEndMonth = dEnd.getMonth();
         const endOfFetch = new Date(
-            viewEndYear,
-            viewEndMonth + 1,
+            viewStartYear,
+            viewStartMonth + 1,
             0,
             23,
             59,

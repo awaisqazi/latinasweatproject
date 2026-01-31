@@ -173,28 +173,21 @@
         // If the week straddles two months, we need to fetch both (or the wider range).
 
         const dStart = new Date(weekStart);
-        const dEnd = new Date(dStart);
-        dEnd.setDate(dEnd.getDate() + 6); // End of the visible week
 
-        // Start of the month of the week start
+        // Fetch only the current month (1 month) based on the week start
         const viewStartYear = dStart.getFullYear();
         const viewStartMonth = dStart.getMonth();
         const startOfFetch = new Date(viewStartYear, viewStartMonth, 1);
-
-        // End of the month of the week end
-        const viewEndYear = dEnd.getFullYear();
-        const viewEndMonth = dEnd.getMonth();
         const endOfFetch = new Date(
-            viewEndYear,
-            viewEndMonth + 1,
+            viewStartYear,
+            viewStartMonth + 1,
             0,
             23,
             59,
             59,
         );
 
-        // Create a key based on the fetch range to avoid redundant re-fetches
-        // If we are just moving within the same month(s), the start/end of fetch won't change.
+        // Create a key based on the fetch range
         const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
         if (key === currentSubscriptionKey) return;
 

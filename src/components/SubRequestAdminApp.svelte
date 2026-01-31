@@ -150,9 +150,9 @@
         loading = true;
 
         try {
-            // Fetch data for the selected month with 1 month buffer on each side
-            const startOfWindow = new Date(year, month - 1, 1); // Previous month
-            const endOfWindow = new Date(year, month + 2, 0, 23, 59, 59); // End of next month
+            // Fetch data for the selected month only (no buffer)
+            const startOfWindow = new Date(year, month, 1); // Start of selected month
+            const endOfWindow = new Date(year, month + 1, 0, 23, 59, 59); // End of selected month
 
             const q = query(
                 collection(subsDb, "sub_requests"),
