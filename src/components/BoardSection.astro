@@ -1,0 +1,85 @@
+---
+interface Props {
+    title: string;
+    focus?: string;
+    sectionId: string;
+    variant?: "dark" | "light" | "accent";
+    zIndex?: number;
+}
+const { title, focus, sectionId, variant = "dark", zIndex = 1 } = Astro.props;
+
+const bgClasses = {
+    dark: "bg-off-black text-white",
+    light: "bg-light-gray text-off-black",
+    accent: "bg-gradient-to-br from-vibrant-pink to-rose-600 text-white",
+};
+
+const focusTextClasses = {
+    dark: "text-white/70",
+    light: "text-medium-gray",
+    accent: "text-white/80",
+};
+---
+
+<section
+    id={sectionId}
+    class={`board-section ${bgClasses[variant]}`}
+    data-section={sectionId}
+>
+    <div class="section-content py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            {/* Section Header */}
+            <div class="mb-12">
+                <h2
+                    class="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
+                >
+                    {title}
+                </h2>
+                {
+                    focus && (
+                        <p
+                            class={`font-body text-lg sm:text-xl max-w-3xl ${focusTextClasses[variant]}`}
+                        >
+                            <span class="font-semibold">Focus:</span> {focus}
+                        </p>
+                    )
+                }
+            </div>
+
+            {/* Content slot for board members */}
+            <div class="board-section-content">
+                <slot />
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .board-section {
+        /* Full viewport height for snap scrolling */
+        min-height: 100vh;
+        /* Ensure section fills viewport */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        /* Snap scrolling alignment */
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        /* Add subtle shadow at top to enhance separation */
+        box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* For sections with lots of content, allow scrolling within */
+    @media (max-height: 700px) {
+        .board-section {
+            min-height: auto;
+        }
+    }
+</style>

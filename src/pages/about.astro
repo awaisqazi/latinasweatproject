@@ -2,7 +2,22 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import TeamMemberCard from "@/components/TeamMemberCard.astro";
+import BoardSection from "@/components/BoardSection.astro";
+import BoardMemberCard from "@/components/BoardMemberCard.astro";
 const base = import.meta.env.BASE_URL;
+
+// Board data
+const boards = [
+  { id: "junior-board", name: "Junior Board" },
+  { id: "community-programming", name: "Community Programming" },
+  { id: "instructor-development", name: "Instructor Development" },
+  { id: "advancement-partnerships", name: "Advancement & Partnerships" },
+  { id: "brand-visibility", name: "Brand & Visibility" },
+  { id: "culture-ethics", name: "Culture & Ethics" },
+  { id: "community-impact", name: "Community Impact" },
+  { id: "queer-events", name: "Queer Events" },
+  { id: "web-data-ai", name: "Web Data & AI" },
+];
 ---
 
 <Layout title="About Us | The Latina Sweat Project">
@@ -159,8 +174,336 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Documentary Section */}
 
+    {/* START: Leadership & Governance Section with Parallax */}
+    <div class="leadership-governance-wrapper relative">
+      {
+        /* Sticky Sidebar Navigation - Hidden on mobile, starts hidden until past hero */
+      }
+      <nav
+        id="board-sidebar"
+        class="board-sidebar hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-50 pl-4 transition-all duration-500"
+      >
+        <div class="relative flex items-center gap-2">
+          {/* Navigation List */}
+          <div id="nav-content" class="nav-content">
+            {/* Animated indicator bar */}
+            <div
+              class="board-nav-indicator absolute left-0 top-0 w-1 h-8 bg-vibrant-pink rounded-full transition-all duration-300"
+              id="nav-indicator"
+            >
+            </div>
+
+            <ul class="space-y-3 pl-4">
+              <li>
+                <a
+                  href="#board-of-directors"
+                  class="board-nav-link text-sm font-medium text-white/50 hover:text-white transition-colors"
+                  data-section="board-of-directors"
+                >
+                  Board of Directors
+                </a>
+              </li>
+              {
+                boards.map((board) => (
+                  <li>
+                    <a
+                      href={`#${board.id}`}
+                      class="board-nav-link text-sm font-medium text-white/50 hover:text-white transition-colors"
+                      data-section={board.id}
+                    >
+                      {board.name}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          {/* Toggle Button */}
+          <button
+            id="sidebar-toggle"
+            class="sidebar-toggle flex items-center justify-center w-8 h-8 rounded-full bg-white/20 hover:bg-vibrant-pink text-white transition-all duration-300"
+            title="Toggle navigation"
+          >
+            <svg
+              id="toggle-icon-show"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"></path>
+            </svg>
+            <svg
+              id="toggle-icon-hide"
+              class="w-4 h-4 hidden"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Board Sections Container with Snap Scrolling */}
+      <div id="board-sections" class="board-sections snap-y snap-mandatory">
+        {/* Board of Directors - Special treatment with flip cards */}
+        <BoardSection
+          sectionId="board-of-directors"
+          title="Board of Directors"
+          variant="accent"
+          zIndex={10}
+        >
+          <p class="mb-8 text-white/80 font-body text-lg">
+            The heart and soul of our project. Meet the passionate individuals
+            dedicated to leading our mission.
+          </p>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-8 justify-items-center"
+          >
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Margarita.jpg`}
+              name="Margarita Quiñones Peña"
+              title="Executive Director"
+              story={`<p>Margarita Quiñones Peña is a proud first-generation Mexican-American, born in Durango, Mexico and raised in Chicago, IL. She is the founder of the Latina Sweat Project and a passionate advocate for immigrant rights, mental health access, and wellness equity.</p><p>Her personal journey as an immigrant and DACA recipient inspired her to create a space where BIPOC women and underserved communities could heal, move, and thrive without barriers.</p><p>Margarita is a 500 E-RYT certified yoga instructor through Yoga Alliance and has been teaching yoga for over a decade. Through her leadership, Latina Sweat Project has grown into a grassroots movement serving over 5,000 students monthly across Chicago.</p><p>Margarita continues to lead large-scale community events, drive funding for free teacher training programs, and advocate for inclusive, trauma-informed spaces that reflect the strength of the people they serve.</p>`}
+            />
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Amayrani.jpg`}
+              name="Amayrani Nuñez"
+              title="Director"
+              story={`<p>Amayrani Nunez is a proud Mexican-American from the Southside of Chicago and the eldest daughter of immigrants from Guerrero. She holds a degree in Finance and an MBA from DePaul University, with professional experience in wealth management and financial planning within the renewable energy industry.</p><p>Outside of her career, she has been actively involved in community advocacy, including serving on the fundraising committee for Mujeres Latinas en Acción's Young Professionals Advisory Council (YPAC). Her strong financial acumen has been instrumental in supporting Latina Sweat Project's long-term sustainability and strategic planning.</p><p>Amayrani has created within the Latina Sweat Project an opportunity to build the kind of community she had long been seeking—one rooted in belonging, identity, and collective healing. Inspired by that mission, she became a certified yoga teacher and has been an active part of the project's growth since its inception.</p><p>Through this work, she continues to advocate for healing spaces that reflect the richness, strength, and spirit of her community.</p>`}
+            />
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Vanessa.jpg`}
+              name="Vanessa Tirado"
+              title="Director"
+              story={`<p>Vanessa Tirado is a proud Mexican-American from Chicago's Little Village neighborhood, where she continues to live and serve her community. She holds a Master of Social Work from the University of Illinois at Chicago and is a licensed school social worker with over a decade of experience supporting youth and families citywide. Vanessa is also a registered yoga instructor with additional certifications in Yoga Sculpt and Power Yoga, blending her mental health background with inclusive wellness practices.</p><p>Vanessa's work is rooted in cultural humility, trauma-informed care, and social justice. Through her leadership at the Latina Sweat Project, she has helped lead over 100 community events, distribute yoga mats and essential supplies, and contribute to more than $27,000 in mutual aid and nonprofit support.</p><p>Vanessa continues to advocate for healing spaces that are accessible, affirming, and reflective of the communities they serve.</p>`}
+            />
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Veronica.jpg`}
+              name="Veronica Quiñones"
+              title="Director"
+              story={`<p>Veronica is a proud Mexican-American born and raised in Chicago's Little Village neighborhood. As the daughter of immigrants and a lifelong resident of an underserved community, she has witnessed firsthand the impact of racial and economic disparities. These lived experiences led her to earn a Bachelor's degree in Sociology from the University of Illinois at Chicago, with a focus on social equity and community well-being.</p><p>As Vice President of the Latina Sweat Project, Veronica plays a key role in creating a safe, welcoming, and accessible space for underrepresented communities. Her yoga journey began through community-based classes, which ultimately inspired her to become a certified yoga instructor. Motivated by the lack of cultural representation in traditional wellness spaces, she is committed to offering inclusive, trauma-informed, and culturally rooted yoga experiences.</p><p>Through her work, Veronica continues to advocate for equity in wellness and create healing spaces that uplift the spirit, identity, and resilience of her community.</p>`}
+            />
+          </div>
+        </BoardSection>
+
+        {/* Junior Board */}
+        <BoardSection
+          sectionId="junior-board"
+          title="Junior Board"
+          focus="Operational support in studio application selection processes and program onboarding. Press and media representation of mission, vision, and values."
+          variant="dark"
+          zIndex={11}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="Yari Jurado" role="President" />
+            <BoardMemberCard name="Yesi Peyret" role="Vice President" />
+            <BoardMemberCard name="Noé Villagomez" role="Treasurer" />
+            <BoardMemberCard name="Alejandra Garcia" role="Secretary" />
+          </div>
+        </BoardSection>
+
+        {/* Community Programming Board */}
+        <BoardSection
+          sectionId="community-programming"
+          title="Community Programming Board"
+          focus="Daily class operations, instructor scheduling, registration, studio setup."
+          variant="light"
+          zIndex={12}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard
+              name="Vero Quiñones"
+              role="Chair"
+              variant="light"
+            />
+            <BoardMemberCard
+              name="Brenda Maldonado"
+              role="Co-Chair"
+              variant="light"
+            />
+          </div>
+        </BoardSection>
+
+        {/* Instructor Development Board */}
+        <BoardSection
+          sectionId="instructor-development"
+          title="Instructor Development Board"
+          focus="LSP Yoga Teacher Trainings (curriculum, student management, manual development) and LSP staff development."
+          variant="dark"
+          zIndex={13}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="Brenda Maldonado" role="Co-Chair" />
+            <BoardMemberCard name="Margarita Quiñones-Peña" role="Co-Chair" />
+          </div>
+        </BoardSection>
+
+        {/* Advancement & Partnerships Council */}
+        <BoardSection
+          sectionId="advancement-partnerships"
+          title="Advancement & Partnerships Council"
+          focus="Grant writing, donor outreach, major gifts, cold calls, new funding opportunities."
+          variant="light"
+          zIndex={14}
+        >
+          <div class="space-y-8">
+            {/* Main Council */}
+            <div>
+              <h3 class="text-xl font-bold mb-4 text-off-black">
+                Council Leadership
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <BoardMemberCard
+                  name="Margarita Quiñones-Peña"
+                  role="Chair"
+                  variant="light"
+                />
+                <BoardMemberCard
+                  name="Dinorah Zubieta"
+                  role="Co-Chair"
+                  variant="light"
+                />
+              </div>
+            </div>
+
+            {/* Gala Sub-committee */}
+            <div>
+              <h3 class="text-xl font-bold mb-2 text-off-black">
+                Gala Committee
+              </h3>
+              <p class="text-medium-gray mb-4 font-body">
+                Focus: Major fundraising and future flagship events.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <BoardMemberCard
+                  name="Vacant"
+                  role="Gala Chair"
+                  variant="light"
+                />
+                <BoardMemberCard
+                  name="Vanessa Tirado"
+                  role="Co-Chair"
+                  variant="light"
+                />
+              </div>
+            </div>
+
+            {/* Marathon Sub-committee */}
+            <div>
+              <h3 class="text-xl font-bold mb-2 text-off-black">
+                Marathon Fundraising
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <BoardMemberCard
+                  name="Diana Tate"
+                  role="Chair"
+                  variant="light"
+                />
+                <BoardMemberCard
+                  name="Edy Ramirez"
+                  role="Co-Chair"
+                  variant="light"
+                />
+              </div>
+            </div>
+          </div>
+        </BoardSection>
+
+        {/* Brand & Visibility Board */}
+        <BoardSection
+          sectionId="brand-visibility"
+          title="Brand & Visibility Board"
+          focus="Social media, visual identity, content creation, brand strategy, storytelling."
+          variant="dark"
+          zIndex={15}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="Lyanne Alfaro" role="Chair" />
+            <BoardMemberCard name="Estevan Cruz" role="Co-Chair" />
+          </div>
+        </BoardSection>
+
+        {/* Culture & Ethics Board */}
+        <BoardSection
+          sectionId="culture-ethics"
+          title="Culture & Ethics Board"
+          focus="HR, ethics, team care, internal culture building, feedback, emergency support."
+          variant="light"
+          zIndex={16}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard
+              name="Vanessa Tirado"
+              role="Chair"
+              variant="light"
+            />
+            <BoardMemberCard
+              name="Yari Jurado"
+              role="Co-Chair"
+              variant="light"
+            />
+          </div>
+        </BoardSection>
+
+        {/* Community Impact Board */}
+        <BoardSection
+          sectionId="community-impact"
+          title="Community Impact Board"
+          focus="Donation drives, quarterly giveback events, mutual aid efforts."
+          variant="dark"
+          zIndex={17}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="Lucia Del Rinmar" role="Chair" />
+            <BoardMemberCard name="Martha Rodriguez" role="Co-Chair" />
+          </div>
+        </BoardSection>
+
+        {/* Queer Events Board */}
+        <BoardSection
+          sectionId="queer-events"
+          title="Queer Events Board"
+          focus="Create welcoming spaces for the queer community within the LSP ecosystem."
+          variant="light"
+          zIndex={18}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="David Ruiz" role="Chair" variant="light" />
+            <BoardMemberCard name="Ari" role="Co-Chair" variant="light" />
+          </div>
+        </BoardSection>
+
+        {/* Nonprofit Web Data and AI Board */}
+        <BoardSection
+          sectionId="web-data-ai"
+          title="Nonprofit Web Data and AI Board"
+          focus="Support the nonprofit's technology needs, including but not limited to studio tech support, data analytics, product management, web development, and leveraging AI tools for operational growth."
+          variant="accent"
+          zIndex={19}
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BoardMemberCard name="Awais 'Fez' Qazi" role="Chair" />
+            <BoardMemberCard name="Margarita Quiñones-Peña" role="Co-Chair" />
+          </div>
+        </BoardSection>
+      </div>
+    </div>
+    {/* END: Leadership & Governance Section */}
+
     {/* START: Our Studio Is Open Section */}
-    <section class="py-16 sm:py-24">
+    <section class="py-16 sm:py-24 bg-white">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <p
           class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
@@ -322,7 +665,7 @@ const base = import.meta.env.BASE_URL;
             clubs, food pantries, and ongoing mutual aid initiatives.
           </p>
           <p class="mt-4 font-body text-lg text-medium-gray">
-            Latina Sweat’s impact has been made possible by its community, from
+            Latina Sweat's impact has been made possible by its community, from
             mothers and students who showed up to the very first free classes,
             to volunteers who help set up mats and distribute food, to partners
             like Lululemon who have supported teacher certification and
@@ -340,59 +683,13 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Our New Home Section */}
 
-    {/* START: Meet Our Team Section */}
-    <section class="py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h2
-            class="font-sans text-3xl font-bold tracking-tight text-off-black"
-          >
-            Meet Our Board of Directors
-          </h2>
-          <p class="mx-auto mt-4 max-w-2xl font-body text-lg text-medium-gray">
-            The heart and soul of our project. Get to know the passionate
-            individuals dedicated to your fitness journey.
-          </p>
-        </div>
-        <div
-          class="mt-16 grid grid-cols-1 justify-items-center gap-y-16 sm:grid-cols-2 sm:gap-x-8"
-        >
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Margarita.jpg`}
-            name="Margarita Quiñones Peña"
-            title="CEO & Founder"
-            story={`<p>Margarita Quiñones Peña is a proud first-generation Mexican-American, born in Durango, Mexico and raised in Chicago, IL. She is the founder of the Latina Sweat Project and a passionate advocate for immigrant rights, mental health access, and wellness equity.</p><p>Her personal journey as an immigrant and DACA recipient inspired her to create a space where BIPOC women and underserved communities could heal, move, and thrive without barriers.</p><p>Margarita is a 500 E-RYT certified yoga instructor through Yoga Alliance and has been teaching yoga for over a decade. Through her leadership, Latina Sweat Project has grown into a grassroots movement serving over 5,000 students monthly across Chicago.</p><p>Margarita continues to lead large-scale community events, drive funding for free teacher training programs, and advocate for inclusive, trauma-informed spaces that reflect the strength of the people they serve.</p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Amayrani.jpg`}
-            name="Amayrani Nuñez"
-            title="CFO"
-            story={`<p>Amayrani Nunez is a proud Mexican-American from the Southside of Chicago and the eldest daughter of immigrants from Guerrero. She holds a degree in Finance and an MBA from DePaul University, with professional experience in wealth management and financial planning within the renewable energy industry.</p><p>Outside of her career, she has been actively involved in community advocacy, including serving on the fundraising committee for Mujeres Latinas en Acción’s Young Professionals Advisory Council (YPAC). Her strong financial acumen has been instrumental in supporting Latina Sweat Project’s long-term sustainability and strategic planning.</p><p>Amayrani has created within the Latina Sweat Project an opportunity to build the kind of community she had long been seeking—one rooted in belonging, identity, and collective healing. Inspired by that mission, she became a certified yoga teacher and has been an active part of the project’s growth since its inception.</p><p>Through this work, she continues to advocate for healing spaces that reflect the richness, strength, and spirit of her community.</p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Vanessa.jpg`}
-            name="Vanessa Tirado"
-            title="Director"
-            story={`<p>Vanessa Tirado is a proud Mexican-American from Chicago’s Little Village neighborhood, where she continues to live and serve her community. She holds a Master of Social Work from the University of Illinois at Chicago and is a licensed school social worker with over a decade of experience supporting youth and families citywide. Vanessa is also a registered yoga instructor with additional certifications in Yoga Sculpt and Power Yoga, blending her mental health background with inclusive wellness practices.</p><p>Vanessa's work is rooted in cultural humility, trauma-informed care, and social justice. Through her leadership at the Latina Sweat Project, she has helped lead over 100 community events, distribute yoga mats and essential supplies, and contribute to more than $27,000 in mutual aid and nonprofit support.</p><p>Vanessa continues to advocate for healing spaces that are accessible, affirming, and reflective of the communities they serve.</p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Veronica.jpg`}
-            name="Veronica Quiñones"
-            title="Director"
-            story={`<p>Veronica is a proud Mexican-American born and raised in Chicago’s Little Village neighborhood. As the daughter of immigrants and a lifelong resident of an underserved community, she has witnessed firsthand the impact of racial and economic disparities. These lived experiences led her to earn a Bachelor’s degree in Sociology from the University of Illinois at Chicago, with a focus on social equity and community well-being.</p><p>As Vice President of the Latina Sweat Project, Veronica plays a key role in creating a safe, welcoming, and accessible space for underrepresented communities. Her yoga journey began through community-based classes, which ultimately inspired her to become a certified yoga instructor. Motivated by the lack of cultural representation in traditional wellness spaces, she is committed to offering inclusive, trauma-informed, and culturally rooted yoga experiences.</p><p>Through her work, Veronica continues to advocate for equity in wellness and create healing spaces that uplift the spirit, identity, and resilience of her community.</p>`}
-          />
-        </div>
-      </div>
-    </section>
-    {/* END: Meet Our Team Section */}
-
     {/* START: About Section */}
-    <section class="bg-light-gray py-16 sm:py-24">
+    <section class="bg-off-black py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black">
+        <h2 class="font-sans text-3xl font-bold tracking-tight text-white">
           About Latina Sweat Project
         </h2>
-        <p class="mx-auto mt-6 font-body text-lg text-medium-gray">
+        <p class="mx-auto mt-6 font-body text-lg text-white/80">
           Latina Sweat Project is a Chicago-based wellness nonprofit dedicated
           to making yoga and holistic health accessible to underserved
           communities. Through free and accessible programming, teacher training
@@ -447,7 +744,47 @@ const base = import.meta.env.BASE_URL;
     opacity: 0;
   }
 
-  /* Mobile-specific adjustments for hero video - only disable in overview mode via JS */
+  /* Board Navigation Sidebar */
+  .board-sidebar {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 1.5rem 0.75rem 1.5rem 1rem;
+    border-radius: 0 1rem 1rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: none;
+    opacity: 1;
+  }
+
+  .board-sidebar.hidden-over-hero {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-100%);
+  }
+
+  .board-sidebar.collapsed .nav-content {
+    display: none;
+  }
+
+  .board-sidebar.collapsed {
+    padding: 0.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  .board-nav-link.active {
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Snap scroll behavior for board sections */
+  html {
+    scroll-snap-type: y mandatory;
+  }
+
+  /* Each board section snaps to viewport */
+  .board-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
 </style>
 
 <script>
@@ -612,4 +949,226 @@ const base = import.meta.env.BASE_URL;
       }
     });
   }
+
+  // Board Navigation System
+  function initBoardNavigation() {
+    const sidebar = document.getElementById("board-sidebar");
+    const navContent = document.getElementById("nav-content");
+    const toggleBtn = document.getElementById("sidebar-toggle");
+    const toggleIconShow = document.getElementById("toggle-icon-show");
+    const toggleIconHide = document.getElementById("toggle-icon-hide");
+    const navLinks = document.querySelectorAll(".board-nav-link");
+    const indicator = document.getElementById("nav-indicator");
+    const heroSection = document.querySelector(
+      "section.relative.w-full.h-screen",
+    );
+
+    // Get all board sections by ID
+    const sectionIds = [
+      "board-of-directors",
+      "junior-board",
+      "community-programming",
+      "instructor-development",
+      "advancement-partnerships",
+      "brand-visibility",
+      "culture-ethics",
+      "community-impact",
+      "queer-events",
+      "web-data-ai",
+    ];
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (!sidebar || !sections.length || !navLinks.length) return;
+
+    let isCollapsed = false;
+    let currentSectionIndex = 0;
+    let isScrolling = false;
+
+    // Toggle sidebar collapsed state
+    toggleBtn?.addEventListener("click", () => {
+      isCollapsed = !isCollapsed;
+      sidebar.classList.toggle("collapsed", isCollapsed);
+
+      if (isCollapsed) {
+        toggleIconShow?.classList.remove("hidden");
+        toggleIconHide?.classList.add("hidden");
+      } else {
+        toggleIconShow?.classList.add("hidden");
+        toggleIconHide?.classList.remove("hidden");
+      }
+    });
+
+    // Show/hide sidebar based on scroll position (hide over hero)
+    function updateSidebarVisibility() {
+      if (!sidebar) return;
+
+      if (!heroSection) {
+        sidebar.classList.remove("hidden-over-hero");
+        return;
+      }
+
+      const heroRect = heroSection.getBoundingClientRect();
+      const isPastHero = heroRect.bottom < 100;
+
+      if (isPastHero) {
+        sidebar.classList.remove("hidden-over-hero");
+      } else {
+        sidebar.classList.add("hidden-over-hero");
+      }
+    }
+
+    // Update active section indicator
+    function updateActiveSection(sectionId: string) {
+      navLinks.forEach((link, index) => {
+        const linkSection = link.getAttribute("data-section");
+        if (linkSection === sectionId) {
+          link.classList.add("active");
+          // Move indicator
+          if (indicator && navContent) {
+            const linkElement = link as HTMLElement;
+            const navList = navContent.querySelector("ul");
+            if (navList) {
+              const linkRect = linkElement.getBoundingClientRect();
+              const navRect = navList.getBoundingClientRect();
+              indicator.style.transform = `translateY(${linkRect.top - navRect.top}px)`;
+            }
+          }
+        } else {
+          link.classList.remove("active");
+        }
+      });
+    }
+
+    // Find current section based on scroll position
+    function getCurrentSectionIndex(): number {
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150) {
+          return i;
+        }
+      }
+      return 0;
+    }
+
+    // Scroll to a specific section with smooth animation
+    function scrollToSection(index: number) {
+      if (index < 0 || index >= sections.length || isScrolling) return;
+
+      isScrolling = true;
+      currentSectionIndex = index;
+      const section = sections[index];
+
+      // Smooth scroll animation
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      updateActiveSection(sectionIds[index]);
+
+      // Reset scrolling flag after animation completes
+      setTimeout(() => {
+        isScrolling = false;
+      }, 800);
+    }
+
+    // Handle wheel events for snap scrolling
+    let wheelTimeout: number;
+    let accumulatedDelta = 0;
+    const SCROLL_THRESHOLD = 50;
+
+    function handleWheel(e: WheelEvent) {
+      // Only snap when in the boards area
+      const heroRect = heroSection?.getBoundingClientRect();
+      if (heroRect && heroRect.bottom > 0) return; // Still in hero
+
+      // Accumulate scroll delta
+      accumulatedDelta += e.deltaY;
+
+      clearTimeout(wheelTimeout);
+      wheelTimeout = window.setTimeout(() => {
+        if (Math.abs(accumulatedDelta) > SCROLL_THRESHOLD) {
+          const currentIdx = getCurrentSectionIndex();
+
+          if (accumulatedDelta > 0 && currentIdx < sections.length - 1) {
+            // Scroll down
+            e.preventDefault();
+            scrollToSection(currentIdx + 1);
+          } else if (accumulatedDelta < 0 && currentIdx > 0) {
+            // Scroll up
+            e.preventDefault();
+            scrollToSection(currentIdx - 1);
+          }
+        }
+        accumulatedDelta = 0;
+      }, 50);
+    }
+
+    // Handle nav link clicks
+    navLinks.forEach((link, index) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute("data-section");
+
+        if (targetId) {
+          const targetIndex = sectionIds.indexOf(targetId);
+          if (targetIndex !== -1) {
+            scrollToSection(targetIndex);
+          }
+        }
+      });
+    });
+
+    // Handle keyboard navigation (arrow keys)
+    function handleKeydown(e: KeyboardEvent) {
+      // Only respond when in boards area
+      const heroRect = heroSection?.getBoundingClientRect();
+      if (heroRect && heroRect.bottom > 0) return;
+
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        const currentIdx = getCurrentSectionIndex();
+        if (currentIdx < sections.length - 1) {
+          scrollToSection(currentIdx + 1);
+        }
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        const currentIdx = getCurrentSectionIndex();
+        if (currentIdx > 0) {
+          scrollToSection(currentIdx - 1);
+        }
+      }
+    }
+
+    // Listen for scroll to update sidebar visibility and active section
+    window.addEventListener(
+      "scroll",
+      () => {
+        updateSidebarVisibility();
+
+        if (!isScrolling) {
+          const currentIdx = getCurrentSectionIndex();
+          updateActiveSection(sectionIds[currentIdx]);
+        }
+      },
+      { passive: true },
+    );
+
+    // Add wheel listener for snap scrolling
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    // Add keyboard listener
+    window.addEventListener("keydown", handleKeydown);
+
+    // Initial state
+    updateSidebarVisibility();
+
+    // Set initial active section - default to first board section
+    const heroRect = heroSection?.getBoundingClientRect();
+    if (heroRect && heroRect.bottom < window.innerHeight) {
+      updateActiveSection("board-of-directors");
+    }
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener("DOMContentLoaded", initBoardNavigation);
 </script>
