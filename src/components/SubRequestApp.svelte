@@ -8,6 +8,9 @@
         addDoc,
         runTransaction,
         Timestamp,
+        query,
+        where,
+        orderBy,
     } from "firebase/firestore";
     import SubRequestCard from "./SubRequestCard.svelte";
     import SubVolunteerModal from "./SubVolunteerModal.svelte";
@@ -76,8 +79,18 @@
 
     onMount(() => {
         try {
-            const unsubscribe = onSnapshot(
+            // Limit query to recent requests (last 3 months) to reduce reads
+            const cutoffDate = new Date();
+            cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+
+            const q = query(
                 collection(subsDb, "sub_requests"),
+                where("date", ">=", Timestamp.fromDate(cutoffDate)),
+                orderBy("date", "asc"),
+            );
+
+            const unsubscribe = onSnapshot(
+                q,
                 (snapshot) => {
                     const data = [];
                     snapshot.forEach((docSnap) => {
@@ -93,7 +106,7 @@
                                 : new Date(),
                         });
                     });
-                    // Sort by date
+                    // Sort is handled by query, but keep for safety
                     data.sort((a, b) => a.date - b.date);
                     requests = data;
                     loading = false;

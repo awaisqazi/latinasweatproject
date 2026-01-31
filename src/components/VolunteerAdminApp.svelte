@@ -10,6 +10,11 @@
         deleteDoc,
         setDoc,
         Timestamp,
+        query,
+        where,
+        orderBy,
+        documentId,
+        getDocs,
     } from "firebase/firestore";
     import { generateShifts, getShiftId } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
@@ -137,15 +142,94 @@
     // State is tracked by STRINGS to be browser-safe
     let currentWeekStartStr = toDateStr(getStartOfWeek(new Date()));
 
+    // Track subscriptions
+    let unsubShifts;
+    let unsubCustom;
+    let currentSubscriptionKey = ""; // "YYYY-MM" to track active window
+
     onMount(() => {
         try {
             // Generate including past shifts (start of PREVIOUS year for history)
+            // We still generate all specific shift slots in memory as it's cheap
             const startOfHistory = new Date(new Date().getFullYear() - 1, 0, 1);
             generatedShifts = generateShifts(startOfHistory, 30); // 30 months (2.5 years)
+        } catch (e) {
+            console.error("Initialization Error:", e);
+            error = e.message;
+            loading = false;
+        }
+    });
 
-            // Subscribe to standard shift data (registrations/cancellations)
-            const unsubShifts = onSnapshot(
+    // Reactive subscription based on visible week
+    $: {
+        if (currentWeekStartStr) {
+            updateSubscriptionsForWeek(currentWeekStartStr);
+        }
+    }
+
+    function updateSubscriptionsForWeek(weekStart) {
+        // Determine window: Month of the current view
+        // We must ensure we cover the entire visible week.
+        // If the week straddles two months, we need to fetch both (or the wider range).
+
+        const dStart = new Date(weekStart);
+        const dEnd = new Date(dStart);
+        dEnd.setDate(dEnd.getDate() + 6); // End of the visible week
+
+        // Start of the month of the week start
+        const viewStartYear = dStart.getFullYear();
+        const viewStartMonth = dStart.getMonth();
+        const startOfFetch = new Date(viewStartYear, viewStartMonth, 1);
+
+        // End of the month of the week end
+        const viewEndYear = dEnd.getFullYear();
+        const viewEndMonth = dEnd.getMonth();
+        const endOfFetch = new Date(
+            viewEndYear,
+            viewEndMonth + 1,
+            0,
+            23,
+            59,
+            59,
+        );
+
+        // Create a key based on the fetch range to avoid redundant re-fetches
+        // If we are just moving within the same month(s), the start/end of fetch won't change.
+        const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
+        if (key === currentSubscriptionKey) return;
+
+        currentSubscriptionKey = key;
+        subscribeToData(startOfFetch, endOfFetch);
+    }
+
+    function subscribeToData(start, end) {
+        loading = true;
+        // Unsub previous
+        if (unsubShifts) unsubShifts();
+        if (unsubCustom) unsubCustom();
+
+        try {
+            // 1. Subscribe to 'shifts' (Registrations)
+            // Query by Document ID range
+            // IDs are formatted as "YYYY-MM-DD..."
+            const startId = toDateStr(start); // e.g. "2025-01-01"
+            // For endId, we want to include the last day.
+            // "2025-01-31" should match "2025-01-31_..."
+            // So we use end date + 1 day as exclusive upper bound, or just prefix check?
+            // "2025-02-01" is safer as upper bound
+            const endBoundDate = new Date(end);
+            endBoundDate.setDate(endBoundDate.getDate() + 1);
+            const endId = toDateStr(endBoundDate);
+
+            // Logic: __name__ >= startIdString AND __name__ < endIdString
+            const shiftsQuery = query(
                 collection(db, "shifts"),
+                where(documentId(), ">=", startId),
+                where(documentId(), "<", endId),
+            );
+
+            unsubShifts = onSnapshot(
+                shiftsQuery,
                 (snapshot) => {
                     const data = {};
                     snapshot.forEach((doc) => {
@@ -160,17 +244,22 @@
                 },
             );
 
-            // Subscribe to custom shifts
-            const unsubCustom = onSnapshot(
+            // 2. Subscribe to 'custom_shifts'
+            // Query by 'start' Timestamp
+            const customQuery = query(
                 collection(db, "custom_shifts"),
+                where("start", ">=", Timestamp.fromDate(start)),
+                where("start", "<=", Timestamp.fromDate(end)),
+            );
+
+            unsubCustom = onSnapshot(
+                customQuery,
                 (snapshot) => {
                     const custom = [];
                     snapshot.forEach((doc) => {
                         const d = doc.data();
-                        // Convert Timestamp to Date
                         const start = d.start.toDate();
                         const end = d.end.toDate();
-                        // Create date object for grouping
                         const date = new Date(start);
                         date.setHours(0, 0, 0, 0);
 
@@ -194,16 +283,19 @@
                     error = "Could not load custom shifts.";
                 },
             );
-
-            return () => {
-                unsubShifts();
-                unsubCustom();
-            };
         } catch (e) {
-            console.error("App Error:", e);
+            console.error("Subscription Error:", e);
             error = e.message;
             loading = false;
         }
+    }
+
+    // Cleanup on destroy logic if needed, usually Svelte handles it if we returned it from onMount
+    // but here we manage it manually.
+    import { onDestroy } from "svelte";
+    onDestroy(() => {
+        if (unsubShifts) unsubShifts();
+        if (unsubCustom) unsubCustom();
     });
 
     function combineShifts() {
@@ -551,28 +643,116 @@
         }
     }
 
-    function exportCSV() {
-        // Use string comparison for dates to avoid timezone issues
-        // startDate and endDate are YYYY-MM-DD strings from input
+    async function exportCSV() {
+        // Fetch data specifically for the export range
+        const exportStart = startDate; // YYYY-MM-DD
+        const exportEnd = endDate; // YYYY-MM-DD
 
-        const rows = [
-            [
-                "Name",
-                "Email",
-                "Phone",
-                "Shift Date",
-                "Shift Time",
-                "Shift Duration (Hours)",
-                "Status",
-                "Check-in Time",
-            ],
-        ];
+        loading = true;
+        try {
+            // 1. Fetch Custom Shifts for range
+            const [sy, sm, sd] = exportStart.split("-").map(Number);
+            const [ey, em, ed] = exportEnd.split("-").map(Number);
+            const startD = new Date(sy, sm - 1, sd);
+            const endD = new Date(ey, em - 1, ed, 23, 59, 59);
 
-        shifts.forEach((shift) => {
-            // Check if shift.dateStr is within range [startDate, endDate] (inclusive)
-            // String comparison works for YYYY-MM-DD
-            if (shift.dateStr >= startDate && shift.dateStr <= endDate) {
-                const data = shiftData[shift.id] || {};
+            const customQ = query(
+                collection(db, "custom_shifts"),
+                where("start", ">=", Timestamp.fromDate(startD)),
+                where("start", "<=", Timestamp.fromDate(endD)),
+            );
+            const customSnap = await getDocs(customQ);
+            const customExport = [];
+            customSnap.forEach((doc) => {
+                const d = doc.data();
+                customExport.push({
+                    id: doc.id,
+                    start: d.start.toDate(),
+                    end: d.end.toDate(),
+                    data: d, // raw data
+                });
+            });
+
+            // 2. Fetch Registrations (Shifts) for range
+            // Calculate ID range
+            const endBoundDate = new Date(endD);
+            endBoundDate.setDate(endBoundDate.getDate() + 1);
+            const endId = toDateStr(endBoundDate);
+
+            // Allow fetching in chunks if range is huge?
+            // For now assume standard usage is reasonable.
+            const shiftsQ = query(
+                collection(db, "shifts"),
+                where(documentId(), ">=", exportStart),
+                where(documentId(), "<", endId),
+            );
+            const shiftsSnap = await getDocs(shiftsQ);
+            const shiftsExportData = {};
+            shiftsSnap.forEach((doc) => {
+                shiftsExportData[doc.id] = doc.data();
+            });
+
+            // 3. Merge with Generated Shifts in Memory
+            // We reuse 'generatedShifts' which covers 30 months.
+            // But we need to filter generatedShifts to the export range
+
+            const shiftsInRange = generatedShifts.filter(
+                (s) => s.dateStr >= exportStart && s.dateStr <= exportEnd,
+            );
+
+            // 4. Combine
+            // Similar to combineShifts but local logic
+            const activeGenerated = shiftsInRange.filter((s) => {
+                const data = shiftsExportData[s.id];
+                return !data?.cancelled;
+            });
+
+            // Map custom to common structure
+            const customMapped = customExport.map((c) => ({
+                id: c.id,
+                start: c.start,
+                end: c.end,
+                dateStr: toDateStr(c.start), // Simplified, might need fix
+                isCustom: true,
+            }));
+
+            const combinedExport = [...activeGenerated, ...customMapped];
+            combinedExport.sort((a, b) => a.start - b.start);
+
+            // 5. Generate CSV
+            const rows = [
+                [
+                    "Name",
+                    "Email",
+                    "Phone",
+                    "Shift Date",
+                    "Shift Time",
+                    "Shift Duration (Hours)",
+                    "Status",
+                    "Check-in Time",
+                ],
+            ];
+
+            combinedExport.forEach((shift) => {
+                // Use data from fetches
+                // For generated, data is in shiftsExportData[shift.id]
+                // For custom, data is in existing custom obj or we need to find it?
+                // Custom shifts in fetching also have registrations in them?
+                // Wait, custom shifts structure:
+                // The 'custom_scripts' doc has 'start', 'end', 'leadCapacity', etc.
+                // BUT where are registrations stored?
+                // Check handleAddShift for custom creation.
+                // Registrations for CUSTOM shifts are stored in... 'shifts' collection?
+                // OR inside the custom shift doc?
+                // Let's check handleManualEntry:
+                // It finds 'targetShiftId' (which is the custom shift ID).
+                // Then it writes to `doc(db, "shifts", targetShiftId)`.
+                // SO ALL registrations are in 'shifts' collection, keyed by the shift ID (whether generated or custom).
+                // AHA!
+                // So my fetching of 'shiftsExportData' covers BOTH generated and custom shift registrations.
+                // Perfect.
+
+                const data = shiftsExportData[shift.id] || {};
                 const regs = data.registrations || [];
 
                 regs.forEach((reg) => {
@@ -600,22 +780,27 @@
                         `"${checkInTime}"`,
                     ]);
                 });
-            }
-        });
+            });
 
-        const csvContent =
-            "data:text/csv;charset=utf-8," +
-            rows.map((e) => e.join(",")).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute(
-            "download",
-            `volunteer_report_${startDate}_to_${endDate}.csv`,
-        );
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const csvContent =
+                "data:text/csv;charset=utf-8," +
+                rows.map((e) => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute(
+                "download",
+                `volunteer_report_${startDate}_to_${endDate}.csv`,
+            );
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error("Export failed:", e);
+            alert("Export failed: " + e.message);
+        } finally {
+            loading = false;
+        }
     }
 
     // --- Manual Check-In & Edit Logic ---

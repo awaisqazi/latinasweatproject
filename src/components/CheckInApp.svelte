@@ -1,11 +1,15 @@
 <script>
-    import { onMount, tick } from "svelte";
+    import { onMount, onDestroy, tick } from "svelte";
     import { db } from "../lib/firebase";
     import {
         collection,
         onSnapshot,
         doc,
         runTransaction,
+        query,
+        where,
+        documentId,
+        Timestamp,
     } from "firebase/firestore";
     import { generateShifts } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
@@ -57,12 +61,79 @@
     // State is tracked by STRINGS to be browser-safe
     let currentWeekStartStr = toDateStr(getStartOfWeek(new Date()));
 
+    // Subscription management
+    let unsubShifts;
+    let unsubCustom;
+    let currentSubscriptionKey = "";
+
     onMount(() => {
         try {
             generatedShifts = generateShifts();
+        } catch (e) {
+            console.error("Critical App Error:", e);
+            error = "App failed to load: " + e.message;
+            loading = false;
+        }
+    });
 
-            const unsubShifts = onSnapshot(
+    onDestroy(() => {
+        if (unsubShifts) unsubShifts();
+        if (unsubCustom) unsubCustom();
+    });
+
+    // Reactive subscription based on visible week
+    $: {
+        if (currentWeekStartStr) {
+            updateSubscriptionsForWeek(currentWeekStartStr);
+        }
+    }
+
+    function updateSubscriptionsForWeek(weekStart) {
+        const dStart = new Date(weekStart);
+        const dEnd = new Date(dStart);
+        dEnd.setDate(dEnd.getDate() + 6);
+
+        const viewStartYear = dStart.getFullYear();
+        const viewStartMonth = dStart.getMonth();
+        const startOfFetch = new Date(viewStartYear, viewStartMonth, 1);
+
+        const viewEndYear = dEnd.getFullYear();
+        const viewEndMonth = dEnd.getMonth();
+        const endOfFetch = new Date(
+            viewEndYear,
+            viewEndMonth + 1,
+            0,
+            23,
+            59,
+            59,
+        );
+
+        const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
+        if (key === currentSubscriptionKey) return;
+
+        currentSubscriptionKey = key;
+        subscribeToData(startOfFetch, endOfFetch);
+    }
+
+    function subscribeToData(start, end) {
+        loading = true;
+        if (unsubShifts) unsubShifts();
+        if (unsubCustom) unsubCustom();
+
+        try {
+            const startId = toDateStr(start);
+            const endBoundDate = new Date(end);
+            endBoundDate.setDate(endBoundDate.getDate() + 1);
+            const endId = toDateStr(endBoundDate);
+
+            const shiftsQuery = query(
                 collection(db, "shifts"),
+                where(documentId(), ">=", startId),
+                where(documentId(), "<", endId),
+            );
+
+            unsubShifts = onSnapshot(
+                shiftsQuery,
                 (snapshot) => {
                     const data = {};
                     snapshot.forEach((doc) => {
@@ -78,8 +149,14 @@
                 },
             );
 
-            const unsubCustom = onSnapshot(
+            const customQuery = query(
                 collection(db, "custom_shifts"),
+                where("start", ">=", Timestamp.fromDate(start)),
+                where("start", "<=", Timestamp.fromDate(end)),
+            );
+
+            unsubCustom = onSnapshot(
+                customQuery,
                 (snapshot) => {
                     const custom = [];
                     snapshot.forEach((doc) => {
@@ -107,17 +184,12 @@
                     console.error("Firestore Error (Custom):", err);
                 },
             );
-
-            return () => {
-                unsubShifts();
-                unsubCustom();
-            };
         } catch (e) {
             console.error("Critical App Error:", e);
             error = "App failed to load: " + e.message;
             loading = false;
         }
-    });
+    }
 
     function combineShifts() {
         const activeGenerated = generatedShifts.filter((s) => {

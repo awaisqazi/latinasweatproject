@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { subsDb } from "../lib/subsFirebase";
     import {
         collection,
@@ -9,6 +9,10 @@
         updateDoc,
         deleteDoc,
         Timestamp,
+        query,
+        where,
+        orderBy,
+        getDocs,
     } from "firebase/firestore";
     import SubRequestCard from "./SubRequestCard.svelte";
     import CreateSubRequestModal from "./CreateSubRequestModal.svelte";
@@ -36,6 +40,49 @@
     // --- Search & Filter ---
     let searchQuery = "";
     let statusFilter = "all"; // all, open, pending, approved
+
+    // --- Month Navigation ---
+    let viewMonth = new Date().getMonth();
+    let viewYear = new Date().getFullYear();
+    let currentSubscriptionKey = "";
+
+    $: viewMonthLabel = new Date(viewYear, viewMonth).toLocaleDateString(
+        "en-US",
+        {
+            month: "long",
+            year: "numeric",
+        },
+    );
+
+    function prevMonth() {
+        if (viewMonth === 0) {
+            viewMonth = 11;
+            viewYear -= 1;
+        } else {
+            viewMonth -= 1;
+        }
+    }
+
+    function nextMonth() {
+        if (viewMonth === 11) {
+            viewMonth = 0;
+            viewYear += 1;
+        } else {
+            viewMonth += 1;
+        }
+    }
+
+    function goToCurrentMonth() {
+        const now = new Date();
+        viewMonth = now.getMonth();
+        viewYear = now.getFullYear();
+    }
+
+    // --- Export State ---
+    let showExportModal = false;
+    let exportStartDate = "";
+    let exportEndDate = "";
+    let isExporting = false;
 
     // --- Add Request Modal ---
     let showAddModal = false;
@@ -71,21 +118,51 @@
 
     onMount(() => {
         if (!isAuthenticated) return;
-        subscribeToRequests();
+        // Initial export date setup
+        const now = new Date();
+        exportStartDate = toDateStr(
+            new Date(now.getFullYear(), now.getMonth(), 1),
+        );
+        exportEndDate = toDateStr(
+            new Date(now.getFullYear(), now.getMonth() + 1, 0),
+        );
     });
 
     $: if (isAuthenticated) {
-        subscribeToRequests();
+        updateSubscription(viewYear, viewMonth);
     }
 
     let unsubscribe = null;
 
-    function subscribeToRequests() {
+    onDestroy(() => {
         if (unsubscribe) unsubscribe();
+    });
+
+    function updateSubscription(year, month) {
+        const key = `${year}-${month}`;
+        if (key === currentSubscriptionKey) return;
+        currentSubscriptionKey = key;
+        subscribeToRequests(year, month);
+    }
+
+    function subscribeToRequests(year, month) {
+        if (unsubscribe) unsubscribe();
+        loading = true;
 
         try {
-            unsubscribe = onSnapshot(
+            // Fetch data for the selected month with 1 month buffer on each side
+            const startOfWindow = new Date(year, month - 1, 1); // Previous month
+            const endOfWindow = new Date(year, month + 2, 0, 23, 59, 59); // End of next month
+
+            const q = query(
                 collection(subsDb, "sub_requests"),
+                where("date", ">=", Timestamp.fromDate(startOfWindow)),
+                where("date", "<=", Timestamp.fromDate(endOfWindow)),
+                orderBy("date", "asc"),
+            );
+
+            unsubscribe = onSnapshot(
+                q,
                 (snapshot) => {
                     const data = [];
                     snapshot.forEach((docSnap) => {
@@ -115,6 +192,101 @@
             console.error("App Error:", e);
             error = e.message;
             loading = false;
+        }
+    }
+
+    // --- Export CSV ---
+    async function exportCSV() {
+        if (!exportStartDate || !exportEndDate) {
+            alert("Please select start and end dates.");
+            return;
+        }
+
+        isExporting = true;
+        try {
+            const [sy, sm, sd] = exportStartDate.split("-").map(Number);
+            const [ey, em, ed] = exportEndDate.split("-").map(Number);
+            const startD = new Date(sy, sm - 1, sd);
+            const endD = new Date(ey, em - 1, ed, 23, 59, 59);
+
+            const q = query(
+                collection(subsDb, "sub_requests"),
+                where("date", ">=", Timestamp.fromDate(startD)),
+                where("date", "<=", Timestamp.fromDate(endD)),
+                orderBy("date", "asc"),
+            );
+
+            const snapshot = await getDocs(q);
+            const exportData = [];
+            snapshot.forEach((docSnap) => {
+                const d = docSnap.data();
+                exportData.push({
+                    id: docSnap.id,
+                    ...d,
+                    date: d.date?.toDate ? d.date.toDate() : new Date(d.date),
+                });
+            });
+
+            // Generate CSV
+            const rows = [
+                [
+                    "Class Name",
+                    "Date",
+                    "Time",
+                    "Duration",
+                    "Location",
+                    "Status",
+                    "Requested By",
+                    "Assigned Sub",
+                    "Volunteers",
+                ],
+            ];
+
+            exportData.forEach((req) => {
+                const dateStr = req.date.toLocaleDateString();
+                const timeStr = req.date.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+                const requestedBy = req.requestedBy?.name || "";
+                const assignedSub = req.assignedSub?.name || "";
+                const volunteers = (req.volunteers || [])
+                    .map((v) => v.name)
+                    .join("; ");
+
+                rows.push([
+                    `"${req.className || ""}"`,
+                    `"${dateStr}"`,
+                    `"${timeStr}"`,
+                    `"${req.duration || ""}"`,
+                    `"${req.location || ""}"`,
+                    `"${req.status || ""}"`,
+                    `"${requestedBy}"`,
+                    `"${assignedSub}"`,
+                    `"${volunteers}"`,
+                ]);
+            });
+
+            const csvContent =
+                "data:text/csv;charset=utf-8," +
+                rows.map((e) => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute(
+                "download",
+                `sub_requests_${exportStartDate}_to_${exportEndDate}.csv`,
+            );
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showExportModal = false;
+        } catch (e) {
+            console.error("Export failed:", e);
+            alert("Export failed: " + e.message);
+        } finally {
+            isExporting = false;
         }
     }
 
@@ -416,12 +588,64 @@
                         Manage substitute requests and approvals
                     </p>
                 </div>
-                <button
-                    on:click={() => (showAddModal = true)}
-                    class="px-6 py-3 bg-vibrant-pink text-white rounded-lg font-bold hover:bg-accent-gold transition-colors cursor-pointer"
-                >
-                    + New Request
-                </button>
+                <div class="flex gap-3">
+                    <button
+                        on:click={() => (showExportModal = true)}
+                        class="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            ></path>
+                        </svg>
+                        Export CSV
+                    </button>
+                    <button
+                        on:click={() => (showAddModal = true)}
+                        class="px-6 py-3 bg-vibrant-pink text-white rounded-lg font-bold hover:bg-accent-gold transition-colors cursor-pointer"
+                    >
+                        + New Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month Navigation -->
+            <div
+                class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6"
+            >
+                <div class="flex items-center justify-between">
+                    <button
+                        on:click={prevMonth}
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                        ← Previous
+                    </button>
+                    <div class="text-center">
+                        <span class="font-bold text-gray-800 text-lg"
+                            >{viewMonthLabel}</span
+                        >
+                        <button
+                            on:click={goToCurrentMonth}
+                            class="ml-3 text-sm text-vibrant-pink hover:text-accent-gold cursor-pointer"
+                        >
+                            Today
+                        </button>
+                    </div>
+                    <button
+                        on:click={nextMonth}
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                        Next →
+                    </button>
+                </div>
             </div>
 
             <!-- Stats -->
@@ -993,6 +1217,102 @@
                             Deleting...
                         {:else}
                             🗑️ Delete Permanently
+                        {/if}
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Export CSV Modal -->
+    {#if showExportModal}
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <button
+                class="absolute inset-0 bg-black/50 backdrop-blur-sm w-full h-full border-0 cursor-default"
+                on:click={() => (showExportModal = false)}
+                aria-label="Close export modal"
+            ></button>
+
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+                <div class="bg-vibrant-pink p-6 text-white">
+                    <h2 class="text-2xl font-bold font-rubik">
+                        Export Sub Requests
+                    </h2>
+                    <p class="text-white/90 mt-1">
+                        Download a CSV report for any date range
+                    </p>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label
+                            for="export-start-date"
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Start Date
+                        </label>
+                        <input
+                            id="export-start-date"
+                            type="date"
+                            bind:value={exportStartDate}
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="export-end-date"
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            End Date
+                        </label>
+                        <input
+                            id="export-end-date"
+                            type="date"
+                            bind:value={exportEndDate}
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                        />
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 flex gap-3 justify-end">
+                    <button
+                        type="button"
+                        on:click={() => (showExportModal = false)}
+                        class="px-6 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        on:click={exportCSV}
+                        disabled={isExporting}
+                        class="px-6 py-2 rounded-lg bg-vibrant-pink text-white font-bold hover:bg-accent-gold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                    >
+                        {#if isExporting}
+                            <svg
+                                class="animate-spin h-4 w-4"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                    fill="none"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            Exporting...
+                        {:else}
+                            Download CSV
                         {/if}
                     </button>
                 </div>
