@@ -1,0 +1,18 @@
+# Block crawlers from data-heavy pages that trigger Firebase reads
+User-agent: *
+Disallow: /shifts
+Disallow: /checkin
+Disallow: /volunteeradmin
+Disallow: /subsadmin
+Disallow: /subs
+Disallow: /electionadmin
+Disallow: /elections
+Disallow: /gala/live
+Disallow: /gala/volunteer-checkin
+Disallow: /admin/
+
+# Allow everything else
+Allow: /
+
+# Sitemap (optional - add if you have one)
+# Sitemap: https://latinasweatproject.com/sitemap.xml
