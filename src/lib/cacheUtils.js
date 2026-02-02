@@ -91,3 +91,12 @@ export function getShiftCacheKey(startDate, endDate) {
 export function getSubsCacheKey() {
     return 'subs_requests';
 }
+
+/**
+ * Generate cache key for monthly availability aggregation
+ * @param {string} monthKey - Month in YYYY-MM format
+ * @returns {string}
+ */
+export function getMonthlyAvailabilityCacheKey(monthKey) {
+    return `availability_${monthKey}`;
+}

@@ -20,6 +20,7 @@
         getCache,
         setCache,
         getShiftCacheKey,
+        getMonthlyAvailabilityCacheKey,
         invalidateCacheByPrefix,
     } from "../lib/cacheUtils";
 
@@ -28,6 +29,7 @@
     let customShifts = [];
     let shiftData = {};
     let selectedDate = new Date();
+    let monthlyAvailability = {}; // Aggregation data for calendar
 
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
@@ -66,23 +68,61 @@
     let successTitle = "";
     let successMessage = "";
 
-    // Subscription management
-    let unsubShifts;
-    let unsubCustom;
-    let currentSubscriptionKey = "";
+    // Fetch tracking
+    let currentFetchKey = "";
+    let currentMonthKey = "";
 
     onMount(() => {
         try {
             // Generate shifts for the next 2 months (default)
             generatedShifts = generateShifts();
+            // Fetch aggregation for current month
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            fetchMonthlyAvailability(monthKey);
         } catch (e) {
             console.error("Error initializing shifts:", e);
         }
     });
 
+    // Fetch aggregation data for calendar display (1 read per month)
+    async function fetchMonthlyAvailability(monthKey) {
+        if (monthKey === currentMonthKey) return;
+        currentMonthKey = monthKey;
+
+        const cacheKey = getMonthlyAvailabilityCacheKey(monthKey);
+        const cached = getCache(cacheKey);
+
+        // Load cached data immediately
+        if (cached) {
+            monthlyAvailability = cached.data || {};
+            if (!cached.isStale) return;
+        }
+
+        // Fetch from Firebase
+        try {
+            const { doc: docRef, getDoc } = await import("firebase/firestore");
+            const monthDoc = await getDoc(
+                docRef(db, "monthly_availability", monthKey),
+            );
+            if (monthDoc.exists()) {
+                monthlyAvailability = monthDoc.data();
+                setCache(cacheKey, monthlyAvailability);
+            }
+        } catch (e) {
+            console.error("Error fetching monthly availability:", e);
+        }
+    }
+
+    // Handle month change from calendar navigation
+    function handleMonthChange(event) {
+        const newMonth = event.detail;
+        const monthKey = `${newMonth.getFullYear()}-${String(newMonth.getMonth() + 1).padStart(2, "0")}`;
+        fetchMonthlyAvailability(monthKey);
+    }
+
     onDestroy(() => {
-        if (unsubShifts) unsubShifts();
-        if (unsubCustom) unsubCustom();
+        // No cleanup needed - we use one-time fetches now
     });
 
     // Reactive subscription based on visible week
@@ -109,16 +149,13 @@
         const endOfFetch = new Date(endYear, endMonth + 1, 0, 23, 59, 59);
 
         const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
-        if (key === currentSubscriptionKey) return;
+        if (key === currentFetchKey) return;
 
-        currentSubscriptionKey = key;
-        subscribeToData(startOfFetch, endOfFetch);
+        currentFetchKey = key;
+        fetchData(startOfFetch, endOfFetch);
     }
 
-    function subscribeToData(start, end) {
-        if (unsubShifts) unsubShifts();
-        if (unsubCustom) unsubCustom();
-
+    async function fetchData(start, end) {
         const cacheKey = getShiftCacheKey(start, end);
         const cached = getCache(cacheKey);
 
@@ -139,83 +176,62 @@
             }
         }
 
-        // Fetch fresh data from Firebase
+        // Fetch fresh data from Firebase (one-time, no listener)
         try {
             const startId = toDateStr(start);
             const endBoundDate = new Date(end);
             endBoundDate.setDate(endBoundDate.getDate() + 1);
             const endId = toDateStr(endBoundDate);
 
+            // Fetch shifts
             const shiftsQuery = query(
                 collection(db, "shifts"),
                 where(documentId(), ">=", startId),
                 where(documentId(), "<", endId),
             );
 
-            unsubShifts = onSnapshot(
-                shiftsQuery,
-                (snapshot) => {
-                    const data = {};
-                    snapshot.forEach((doc) => {
-                        data[doc.id] = doc.data();
-                    });
-                    shiftData = data;
-                    combineShifts();
-                    // Update cache
-                    setCache(cacheKey, { shiftData: data, customShifts });
-                },
-                (err) => {
-                    // On Firebase error (quota, network, etc.), keep showing cached data
-                    console.error(
-                        "Firebase error (shifts) - using cached data:",
-                        err,
-                    );
-                },
-            );
+            const shiftsSnapshot = await getDocs(shiftsQuery);
+            const data = {};
+            shiftsSnapshot.forEach((doc) => {
+                data[doc.id] = doc.data();
+            });
+            shiftData = data;
 
+            // Fetch custom shifts
             const customQuery = query(
                 collection(db, "custom_shifts"),
                 where("start", ">=", Timestamp.fromDate(start)),
                 where("start", "<=", Timestamp.fromDate(end)),
             );
 
-            unsubCustom = onSnapshot(
-                customQuery,
-                (snapshot) => {
-                    const custom = [];
-                    snapshot.forEach((doc) => {
-                        const d = doc.data();
-                        const startTime = d.start.toDate();
-                        const endTime = d.end.toDate();
-                        const date = new Date(startTime);
-                        date.setHours(0, 0, 0, 0);
+            const customSnapshot = await getDocs(customQuery);
+            const custom = [];
+            customSnapshot.forEach((doc) => {
+                const d = doc.data();
+                const startTime = d.start.toDate();
+                const endTime = d.end.toDate();
+                const date = new Date(startTime);
+                date.setHours(0, 0, 0, 0);
 
-                        custom.push({
-                            id: doc.id,
-                            start: startTime,
-                            end: endTime,
-                            date,
-                            dateStr: toDateStr(date),
-                            isCustom: true,
-                            leadCapacity: d.leadCapacity,
-                            volunteerCapacity: d.volunteerCapacity,
-                        });
-                    });
-                    customShifts = custom;
-                    combineShifts();
-                    // Update cache
-                    setCache(cacheKey, { shiftData, customShifts: custom });
-                },
-                (err) => {
-                    // On Firebase error, keep showing cached data
-                    console.error(
-                        "Firebase error (custom shifts) - using cached data:",
-                        err,
-                    );
-                },
-            );
+                custom.push({
+                    id: doc.id,
+                    start: startTime,
+                    end: endTime,
+                    date,
+                    dateStr: toDateStr(date),
+                    isCustom: true,
+                    leadCapacity: d.leadCapacity,
+                    volunteerCapacity: d.volunteerCapacity,
+                });
+            });
+            customShifts = custom;
+
+            combineShifts();
+            // Update cache
+            setCache(cacheKey, { shiftData: data, customShifts: custom });
         } catch (e) {
-            console.error("Subscription error:", e);
+            // On Firebase error (quota, network, etc.), keep showing cached data
+            console.error("Firebase fetch error - using cached data:", e);
         }
     }
 
@@ -413,7 +429,9 @@
                 {shifts}
                 {shiftData}
                 {selectedDate}
+                availabilityData={monthlyAvailability}
                 on:select={handleDateSelect}
+                on:monthChange={handleMonthChange}
             />
 
             <div

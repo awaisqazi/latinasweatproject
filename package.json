@@ -13,7 +13,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "astro": "^5.13.5",
     "canvas-confetti": "^1.9.4",
-    "firebase": "^12.6.0",
+    "firebase": "^12.8.0",
     "svelte": "^5.43.14",
     "tailwindcss": "^4.1.12"
   }

@@ -6,6 +6,8 @@
     export let selectedDate = new Date();
     export let dotCondition = null;
     export let clickableCondition = null;
+    // New: Pre-aggregated availability data from monthly_availability collection
+    export let availabilityData = null;
 
     const dispatch = createEventDispatcher();
 
@@ -33,11 +35,13 @@
     function nextMonth() {
         currentMonth.setMonth(currentMonth.getMonth() + 1);
         currentMonth = new Date(currentMonth);
+        dispatch("monthChange", currentMonth);
     }
 
     function prevMonth() {
         currentMonth.setMonth(currentMonth.getMonth() - 1);
         currentMonth = new Date(currentMonth);
+        dispatch("monthChange", currentMonth);
     }
 
     $: year = currentMonth.getFullYear();
@@ -49,8 +53,35 @@
     $: calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
         const date = new Date(year, month, i + 1);
         const dateString = toDateStr(date);
+        const isPast = date < new Date().setHours(0, 0, 0, 0);
+        const isSelected = toDateStr(selectedDate) === dateString;
 
-        // Filter using the safe string key
+        // If we have aggregation data, use it for faster rendering
+        if (
+            availabilityData &&
+            availabilityData.days &&
+            availabilityData.days[dateString]
+        ) {
+            const dayInfo = availabilityData.days[dateString];
+            const hasAvailableShifts = dayInfo.totalAvailable > 0;
+
+            // Check lock time (24 hours before first shift)
+            const now = new Date();
+            const tomorrow = new Date(date);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const isLocked = now >= tomorrow;
+
+            return {
+                date,
+                day: i + 1,
+                isClickable: hasAvailableShifts && !isPast && !isLocked,
+                showDot: hasAvailableShifts && !isPast && !isLocked,
+                isSelected,
+                isPast,
+            };
+        }
+
+        // Fallback to traditional shift-based calculation
         const dayShifts = shifts.filter(
             (s) => (s.dateStr || toDateStr(s.date)) === dateString,
         );
@@ -64,9 +95,6 @@
         const showDot = dayShifts.some((s) =>
             dotCondition ? dotCondition(s, shiftData) : isShiftAvailable(s),
         );
-
-        const isSelected = toDateStr(selectedDate) === dateString;
-        const isPast = date < new Date().setHours(0, 0, 0, 0);
 
         return {
             date,

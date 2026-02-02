@@ -11,6 +11,7 @@
         query,
         where,
         orderBy,
+        getDocs,
     } from "firebase/firestore";
     import SubRequestCard from "./SubRequestCard.svelte";
     import SubVolunteerModal from "./SubVolunteerModal.svelte";
@@ -83,7 +84,7 @@
             .slice(0, 5);
     })();
 
-    onMount(() => {
+    onMount(async () => {
         const cacheKey = getSubsCacheKey();
         const cached = getCache(cacheKey);
 
@@ -102,8 +103,8 @@
             }
         }
 
+        // Fetch fresh data from Firebase (one-time, no listener)
         try {
-            // Query sub requests from 1 month ago through future
             const cutoffDate = new Date();
             cutoffDate.setMonth(cutoffDate.getMonth() - 1);
             cutoffDate.setHours(0, 0, 0, 0);
@@ -114,47 +115,31 @@
                 orderBy("date", "asc"),
             );
 
-            const unsubscribe = onSnapshot(
-                q,
-                (snapshot) => {
-                    const data = [];
-                    snapshot.forEach((docSnap) => {
-                        const d = docSnap.data();
-                        data.push({
-                            id: docSnap.id,
-                            ...d,
-                            date: d.date?.toDate
-                                ? d.date.toDate()
-                                : new Date(d.date),
-                            createdAt: d.createdAt?.toDate
-                                ? d.createdAt.toDate()
-                                : new Date(),
-                        });
-                    });
-                    data.sort((a, b) => a.date - b.date);
-                    requests = data;
-                    loading = false;
-                    // Update cache
-                    setCache(cacheKey, data);
-                },
-                (err) => {
-                    // On Firebase error (quota, network, etc.), keep showing cached data
-                    console.error(
-                        "Firebase error (sub requests) - using cached data:",
-                        err,
-                    );
-                    // Only show error if we don't have cached data
-                    if (!requests || requests.length === 0) {
-                        error = "Could not load sub requests.";
-                    }
-                    loading = false;
-                },
-            );
-
-            return () => unsubscribe();
+            const snapshot = await getDocs(q);
+            const data = [];
+            snapshot.forEach((docSnap) => {
+                const d = docSnap.data();
+                data.push({
+                    id: docSnap.id,
+                    ...d,
+                    date: d.date?.toDate ? d.date.toDate() : new Date(d.date),
+                    createdAt: d.createdAt?.toDate
+                        ? d.createdAt.toDate()
+                        : new Date(),
+                });
+            });
+            data.sort((a, b) => a.date - b.date);
+            requests = data;
+            loading = false;
+            // Update cache
+            setCache(cacheKey, data);
         } catch (e) {
-            console.error("App Error:", e);
-            error = e.message;
+            // On Firebase error (quota, network, etc.), keep showing cached data
+            console.error("Firebase fetch error - using cached data:", e);
+            // Only show error if we don't have cached data
+            if (!requests || requests.length === 0) {
+                error = "Could not load sub requests.";
+            }
             loading = false;
         }
     });

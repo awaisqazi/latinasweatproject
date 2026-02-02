@@ -15,6 +15,7 @@
         orderBy,
         documentId,
         getDocs,
+        getDoc,
     } from "firebase/firestore";
     import { generateShifts, getShiftId } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
@@ -60,6 +61,7 @@
     let expandedDayKeys = new Set(); // Track expanded days
 
     // Export State
+    let isExporting = false;
     let startDate = new Date(new Date().getFullYear(), 0, 1)
         .toISOString()
         .split("T")[0]; // Default to Jan 1st
@@ -79,6 +81,15 @@
     // --- Edit Check-In State ---
     let editingCheckInKey = null; // "shiftId-index"
     let editCheckInValue = ""; // ISO string for input
+
+    // --- Check-In Modal State ---
+    let showCheckInModal = false;
+    let checkInShiftId = "";
+    let checkInIndex = -1;
+    let checkInVolunteerName = "";
+    let checkInShiftInfo = "";
+    let checkInTimeInput = "";
+    let isProcessingCheckIn = false;
 
     // --- Volunteer Search State ---
     let searchQuery = "";
@@ -637,7 +648,7 @@
         const exportStart = startDate; // YYYY-MM-DD
         const exportEnd = endDate; // YYYY-MM-DD
 
-        loading = true;
+        isExporting = true;
         try {
             // 1. Fetch Custom Shifts for range
             const [sy, sm, sd] = exportStart.split("-").map(Number);
@@ -680,6 +691,36 @@
             shiftsSnap.forEach((doc) => {
                 shiftsExportData[doc.id] = doc.data();
             });
+
+            // Also fetch registrations for custom shifts (parallel fetch)
+            if (customExport.length > 0) {
+                const customPromises = customExport.map(async (customShift) => {
+                    try {
+                        const shiftDoc = await getDoc(
+                            doc(db, "shifts", customShift.id),
+                        );
+                        if (shiftDoc.exists()) {
+                            return {
+                                id: customShift.id,
+                                data: shiftDoc.data(),
+                            };
+                        }
+                    } catch (e) {
+                        console.warn(
+                            `Failed to fetch regs for custom shift ${customShift.id}`,
+                            e,
+                        );
+                    }
+                    return null;
+                });
+
+                const customResults = await Promise.all(customPromises);
+                customResults.forEach((res) => {
+                    if (res) {
+                        shiftsExportData[res.id] = res.data;
+                    }
+                });
+            }
 
             // 3. Merge with Generated Shifts in Memory
             // We reuse 'generatedShifts' which covers 30 months.
@@ -771,24 +812,32 @@
                 });
             });
 
-            const csvContent =
-                "data:text/csv;charset=utf-8," +
-                rows.map((e) => e.join(",")).join("\n");
-            const encodedUri = encodeURI(csvContent);
+            // Generate CSV content using Blob (more reliable than encodeURI)
+            const csvString = rows.map((row) => row.join(",")).join("\n");
+
+            // Add BOM for Excel UTF-8 compatibility
+            const BOM = "\uFEFF";
+            const blob = new Blob([BOM + csvString], {
+                type: "text/csv;charset=utf-8;",
+            });
+
+            const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", url);
             link.setAttribute(
                 "download",
                 `volunteer_report_${startDate}_to_${endDate}.csv`,
             );
+            link.style.display = "none";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         } catch (e) {
             console.error("Export failed:", e);
             alert("Export failed: " + e.message);
         } finally {
-            loading = false;
+            isExporting = false;
         }
     }
 
@@ -953,6 +1002,67 @@
             editingCheckInKey = null;
         } catch (e) {
             alert("Failed to update time: " + e);
+        }
+    }
+
+    // --- Check-In Modal Functions ---
+    function openCheckInModal(shiftId, index, volunteerName, shift) {
+        checkInShiftId = shiftId;
+        checkInIndex = index;
+        checkInVolunteerName = volunteerName;
+        checkInShiftInfo = `${shift.start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} at ${shift.start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+
+        // Default to current time
+        const now = new Date();
+        const pad = (num) => String(num).padStart(2, "0");
+        checkInTimeInput = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        showCheckInModal = true;
+    }
+
+    function closeCheckInModal() {
+        showCheckInModal = false;
+        checkInShiftId = "";
+        checkInIndex = -1;
+        checkInVolunteerName = "";
+        checkInShiftInfo = "";
+        checkInTimeInput = "";
+        isProcessingCheckIn = false;
+    }
+
+    async function confirmCheckIn() {
+        if (!checkInTimeInput) {
+            alert("Please select a check-in time.");
+            return;
+        }
+
+        isProcessingCheckIn = true;
+        const shiftRef = doc(db, "shifts", checkInShiftId);
+
+        try {
+            const checkInDate = new Date(checkInTimeInput);
+            const checkInIso = checkInDate.toISOString();
+
+            await runTransaction(db, async (transaction) => {
+                const sfDoc = await transaction.get(shiftRef);
+                if (!sfDoc.exists()) throw "Shift not found";
+
+                const data = sfDoc.data();
+                const registrations = data.registrations || [];
+                if (!registrations[checkInIndex])
+                    throw "Registration not found";
+
+                registrations[checkInIndex].checkedIn = true;
+                registrations[checkInIndex].checkInTime = checkInIso;
+
+                transaction.update(shiftRef, { registrations });
+            });
+
+            closeCheckInModal();
+        } catch (e) {
+            console.error("Check-in failed:", e);
+            alert("Failed to check in: " + e);
+            isProcessingCheckIn = false;
         }
     }
 
@@ -1537,21 +1647,45 @@
                         </label>
                         <button
                             on:click={exportCSV}
-                            class="w-full bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                            disabled={isExporting}
+                            class="w-full bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                ></path></svg
-                            >
-                            Download CSV
+                            {#if isExporting}
+                                <svg
+                                    class="animate-spin w-4 h-4 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    ></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                </svg>
+                                Exporting...
+                            {:else}
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                    ></path></svg
+                                >
+                                Download CSV
+                            {/if}
                         </button>
                     </div>
                 </div>
@@ -2783,6 +2917,32 @@
                                                                         Un-Check
                                                                         In
                                                                     </button>
+                                                                {:else}
+                                                                    <button
+                                                                        on:click={() =>
+                                                                            openCheckInModal(
+                                                                                shift.id,
+                                                                                i,
+                                                                                reg.name,
+                                                                                shift,
+                                                                            )}
+                                                                        class="text-xs text-green-600 hover:text-green-800 font-medium px-3 py-1.5 rounded border border-green-200 hover:bg-green-50 transition-colors bg-white flex items-center gap-1"
+                                                                    >
+                                                                        <svg
+                                                                            class="w-3.5 h-3.5"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                            ><path
+                                                                                stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M5 13l4 4L19 7"
+
+                                                                            ></path></svg
+                                                                        >
+                                                                        Check In
+                                                                    </button>
                                                                 {/if}
                                                                 <button
                                                                     on:click={() =>
@@ -2865,6 +3025,122 @@
                 >
                     Close
                 </button>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Check-In Modal -->
+    {#if showCheckInModal}
+        <div
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
+            <div
+                class="bg-white rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl"
+            >
+                <div class="text-center">
+                    <div
+                        class="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3"
+                    >
+                        <svg
+                            class="w-6 h-6 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-900">
+                        Check In Volunteer
+                    </h3>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">Volunteer:</span>
+                        <span class="font-medium text-gray-900"
+                            >{checkInVolunteerName}</span
+                        >
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">Shift:</span>
+                        <span class="font-medium text-gray-900"
+                            >{checkInShiftInfo}</span
+                        >
+                    </div>
+                </div>
+
+                <label class="block">
+                    <span class="block text-sm font-medium text-gray-700 mb-2">
+                        Check-In Time
+                    </span>
+                    <input
+                        type="datetime-local"
+                        bind:value={checkInTimeInput}
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-gray-900"
+                    />
+                    <p class="text-xs text-gray-500 mt-1">
+                        Defaults to current time. Adjust if needed.
+                    </p>
+                </label>
+
+                <div class="flex gap-3 pt-2">
+                    <button
+                        on:click={closeCheckInModal}
+                        disabled={isProcessingCheckIn}
+                        class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        on:click={confirmCheckIn}
+                        disabled={isProcessingCheckIn}
+                        class="flex-1 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {#if isProcessingCheckIn}
+                            <svg
+                                class="animate-spin w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            Processing...
+                        {:else}
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                ></path>
+                            </svg>
+                            Confirm Check-In
+                        {/if}
+                    </button>
+                </div>
             </div>
         </div>
     {/if}
