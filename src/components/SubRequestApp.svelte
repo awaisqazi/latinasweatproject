@@ -79,9 +79,10 @@
 
     onMount(() => {
         try {
-            // Limit query to recent requests (last 1 month) to reduce reads
+            // Query sub requests from 1 month ago through future
             const cutoffDate = new Date();
             cutoffDate.setMonth(cutoffDate.getMonth() - 1);
+            cutoffDate.setHours(0, 0, 0, 0);
 
             const q = query(
                 collection(subsDb, "sub_requests"),

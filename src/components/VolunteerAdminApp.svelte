@@ -168,24 +168,20 @@
     }
 
     function updateSubscriptionsForWeek(weekStart) {
-        // Determine window: Month of the current view
-        // We must ensure we cover the entire visible week.
-        // If the week straddles two months, we need to fetch both (or the wider range).
-
+        // Determine window: We need to fetch data for the month(s) that contain the visible week
         const dStart = new Date(weekStart);
+        const dEnd = new Date(dStart);
+        dEnd.setDate(dEnd.getDate() + 6); // End of the visible week
 
-        // Fetch only the current month (1 month) based on the week start
-        const viewStartYear = dStart.getFullYear();
-        const viewStartMonth = dStart.getMonth();
-        const startOfFetch = new Date(viewStartYear, viewStartMonth, 1);
-        const endOfFetch = new Date(
-            viewStartYear,
-            viewStartMonth + 1,
-            0,
-            23,
-            59,
-            59,
-        );
+        // Get the months that the week spans (could be 1 or 2 months)
+        const startMonth = dStart.getMonth();
+        const endMonth = dEnd.getMonth();
+        const startYear = dStart.getFullYear();
+        const endYear = dEnd.getFullYear();
+
+        // Fetch from start of first month to end of last month
+        const startOfFetch = new Date(startYear, startMonth, 1);
+        const endOfFetch = new Date(endYear, endMonth + 1, 0, 23, 59, 59);
 
         // Create a key based on the fetch range
         const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
