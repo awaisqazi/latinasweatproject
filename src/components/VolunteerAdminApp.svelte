@@ -17,6 +17,7 @@
         getDocs,
         getDoc,
     } from "firebase/firestore";
+    import { invalidateCacheByPrefix } from "../lib/cacheUtils";
     import { generateShifts, getShiftId } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
 
@@ -111,6 +112,19 @@
     ];
     let isBulkDeleting = false;
     let bulkDeletePreview = null; // {toDelete: [], conflicts: []}
+
+    // Remove Volunteer Modal State
+    let isRemoveModalOpen = false;
+    let volunteerToRemove = null; // { shiftId, index, name, email }
+
+    // --- Delete Shift Modal State ---
+    let isDeleteShiftModalOpen = false;
+    let shiftToDelete = null;
+
+    // --- Success/Message Modal State ---
+    let isSuccessModalOpen = false;
+    let successMessage = "";
+    let successTitle = "";
     let showBulkDeleteReport = false;
     let bulkDeleteReport = { deleted: 0, skipped: 0, conflicts: [] };
 
@@ -202,11 +216,20 @@
         subscribeToData(startOfFetch, endOfFetch);
     }
 
+    let unsubCustomRegistrations; // Track custom registrations listener
+
     function subscribeToData(start, end) {
         loading = true;
         // Unsub previous
         if (unsubShifts) unsubShifts();
         if (unsubCustom) unsubCustom();
+        if (unsubCustomRegistrations) {
+            if (Array.isArray(unsubCustomRegistrations)) {
+                unsubCustomRegistrations.forEach((unsub) => unsub && unsub());
+            } else {
+                unsubCustomRegistrations();
+            }
+        }
 
         try {
             // 1. Subscribe to 'shifts' (Registrations)
@@ -231,12 +254,17 @@
             unsubShifts = onSnapshot(
                 shiftsQuery,
                 (snapshot) => {
-                    const data = {};
-                    snapshot.forEach((doc) => {
-                        data[doc.id] = doc.data();
-                    });
-                    shiftData = data;
-                    combineShifts();
+                    try {
+                        const data = {};
+                        snapshot.forEach((doc) => {
+                            data[doc.id] = doc.data();
+                        });
+                        shiftData = data;
+                        combineShifts();
+                    } catch (e) {
+                        console.error("Error processing shifts snapshot:", e);
+                        error = "Error processing data.";
+                    }
                 },
                 (err) => {
                     console.error("Firestore Error (Shifts):", err);
@@ -275,12 +303,102 @@
                         });
                     });
                     customShifts = custom;
-                    combineShifts();
+
+                    // Clean up previous custom regs listener
+                    if (unsubCustomRegistrations) unsubCustomRegistrations();
+
+                    // 2b. Subscribe to Registrations for these custom shifts
+                    // Since VolunteerApp writes registrations to "shifts" collection using the custom ID,
+                    // we need to fetch/listen to those documents specifically.
+                    const customIds = custom.map((c) => c.id);
+                    console.log(
+                        "[Admin Debug] Custom shifts found:",
+                        customIds.length,
+                        customIds,
+                    );
+
+                    if (customIds.length > 0) {
+                        // Clean up previous listeners
+                        if (unsubCustomRegistrations) {
+                            if (Array.isArray(unsubCustomRegistrations)) {
+                                unsubCustomRegistrations.forEach(
+                                    (unsub) => unsub && unsub(),
+                                );
+                            } else {
+                                unsubCustomRegistrations();
+                            }
+                        }
+
+                        // Firestore 'in' query is limited to 30 items - batch into chunks
+                        const BATCH_SIZE = 30;
+                        const batches = [];
+                        for (let i = 0; i < customIds.length; i += BATCH_SIZE) {
+                            batches.push(customIds.slice(i, i + BATCH_SIZE));
+                        }
+
+                        console.log(
+                            "[Admin Debug] Querying in",
+                            batches.length,
+                            "batches for",
+                            customIds.length,
+                            "custom shifts",
+                        );
+
+                        // Create listeners for each batch
+                        const unsubscribers = [];
+
+                        batches.forEach((batchIds, batchIndex) => {
+                            try {
+                                const q = query(
+                                    collection(db, "shifts"),
+                                    where(documentId(), "in", batchIds),
+                                );
+
+                                const unsub = onSnapshot(q, (snap) => {
+                                    console.log(
+                                        `[Admin Debug] Batch ${batchIndex + 1}/${batches.length}: ${snap.size} docs`,
+                                    );
+                                    snap.forEach((doc) => {
+                                        const regCount =
+                                            doc.data()?.registrations?.length ||
+                                            0;
+                                        if (regCount > 0) {
+                                            console.log(
+                                                "[Admin Debug] Regs found:",
+                                                doc.id,
+                                                "count:",
+                                                regCount,
+                                            );
+                                        }
+                                        shiftData[doc.id] = doc.data();
+                                    });
+                                    shiftData = { ...shiftData };
+                                    combineShifts();
+                                });
+
+                                unsubscribers.push(unsub);
+                            } catch (err) {
+                                console.warn(
+                                    `[Admin Debug] Batch ${batchIndex + 1} failed:`,
+                                    err,
+                                );
+                            }
+                        });
+
+                        unsubCustomRegistrations = unsubscribers;
+                    }
+
+                    try {
+                        combineShifts();
+                    } catch (err) {
+                        console.error("Error combining shifts:", err);
+                    }
                     loading = false;
                 },
                 (err) => {
                     console.error("Firestore Error (Custom):", err);
                     error = "Could not load custom shifts.";
+                    loading = false;
                 },
             );
         } catch (e) {
@@ -296,6 +414,13 @@
     onDestroy(() => {
         if (unsubShifts) unsubShifts();
         if (unsubCustom) unsubCustom();
+        if (unsubCustomRegistrations) {
+            if (Array.isArray(unsubCustomRegistrations)) {
+                unsubCustomRegistrations.forEach((unsub) => unsub && unsub());
+            } else {
+                unsubCustomRegistrations();
+            }
+        }
     });
 
     function combineShifts() {
@@ -337,9 +462,24 @@
 
     // --- Actions ---
 
+    function openSuccessModal(msg, title = "Success") {
+        successMessage = msg;
+        successTitle = title;
+        isSuccessModalOpen = true;
+    }
+
+    function closeSuccessModal() {
+        isSuccessModalOpen = false;
+    }
+
     async function handleAddShift() {
         if (!addShiftDate || !addShiftTime) {
-            alert("Please select date and time.");
+            // Use a simple alert or toast for validation, or the modal?
+            // User requested modal for success presumably, but consistently logic is better.
+            openSuccessModal(
+                "Please select date and time.",
+                "Validation Error",
+            );
             return;
         }
 
@@ -351,18 +491,43 @@
             const start = new Date(y, m - 1, d, h, min);
             const end = new Date(start.getTime() + addShiftDuration * 60000);
 
-            await addDoc(collection(db, "custom_shifts"), {
+            // 1. Generate ID synchronously
+            const newDocRef = doc(collection(db, "custom_shifts"));
+
+            // 2. Optimistic Update
+            const newShift = {
+                id: newDocRef.id,
+                start,
+                end,
+                date: new Date(y, m - 1, d),
+                dateStr: addShiftDate,
+                isCustom: true,
+                leadCapacity: addShiftLeadCap,
+                volunteerCapacity: addShiftVolCap,
+            };
+            customShifts = [...customShifts, newShift];
+            combineShifts();
+
+            // 3. UI Reset (Instant)
+            const successMsg = "Shift added successfully!";
+            isAddingShift = false;
+            openSuccessModal(successMsg);
+
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
+
+            // Reset form
+            addShiftTime = "18:00";
+            addShiftDuration = 60;
+
+            // 4. Background Write
+            await setDoc(newDocRef, {
                 start: Timestamp.fromDate(start),
                 end: Timestamp.fromDate(end),
                 leadCapacity: addShiftLeadCap,
                 volunteerCapacity: addShiftVolCap,
                 createdAt: Timestamp.now(),
             });
-
-            alert("Shift added successfully!");
-            // Reset form
-            addShiftTime = "18:00";
-            addShiftDuration = 60;
         } catch (e) {
             console.error("Add shift failed:", e);
             alert("Failed to add shift: " + e.message);
@@ -454,6 +619,9 @@
                 `Created ${successCount} shifts successfully!${failCount > 0 ? ` (${failCount} failed)` : ""}`,
             );
 
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
+
             // Reset form
             recurringStartDate = "";
             recurringEndDate = "";
@@ -532,6 +700,8 @@
                 alert(
                     `Upload complete. Added: ${successCount}, Failed: ${failCount}`,
                 );
+                invalidateCacheByPrefix("shifts_");
+                invalidateCacheByPrefix("availability_");
                 csvFile = null; // Reset
             } catch (err) {
                 alert("Upload failed: " + err.message);
@@ -543,41 +713,68 @@
         reader.readAsText(csvFile);
     }
 
-    async function handleDeleteShift(shift) {
-        if (
-            !confirm(
-                "Are you sure you want to DELETE this shift? This cannot be undone.",
-            )
-        )
-            return;
+    function openDeleteShiftModal(shift) {
+        shiftToDelete = shift;
+        isDeleteShiftModalOpen = true;
+    }
+
+    function cancelDeleteShift() {
+        isDeleteShiftModalOpen = false;
+        shiftToDelete = null;
+    }
+
+    async function confirmDeleteShift() {
+        if (!shiftToDelete) return;
+        const shiftId = shiftToDelete.id;
+        const wasCustom = shiftToDelete.isCustom;
+        isDeleteShiftModalOpen = false;
+
+        // Optimistic Update
+        if (wasCustom) {
+            customShifts = customShifts.filter((s) => s.id !== shiftId);
+        } else {
+            // Update shiftData map
+            if (!shiftData[shiftId]) shiftData[shiftId] = {};
+            shiftData[shiftId].cancelled = true;
+        }
+        combineShifts();
 
         try {
-            if (shift.isCustom) {
-                // Permanently delete custom shift
-                await deleteDoc(doc(db, "custom_shifts", shift.id));
+            if (wasCustom) {
+                await deleteDoc(doc(db, "custom_shifts", shiftId));
             } else {
-                // "Cancel" standard shift
                 await setDoc(
-                    doc(db, "shifts", shift.id),
-                    {
-                        cancelled: true,
-                    },
+                    doc(db, "shifts", shiftId),
+                    { cancelled: true },
                     { merge: true },
                 );
             }
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
         } catch (e) {
             console.error("Delete failed:", e);
             alert("Failed to delete shift: " + e.message);
+            // Revert optimistic update if needed? (complex, skipping for now as explicit refresh handles it)
+        } finally {
+            shiftToDelete = null;
         }
     }
 
-    async function handleRemoveVolunteer(shiftId, index) {
-        if (
-            !confirm(
-                "Are you sure you want to REMOVE this volunteer? This will open up the spot.",
-            )
-        )
-            return;
+    function openRemoveModal(shiftId, index, name, email) {
+        volunteerToRemove = { shiftId, index, name, email };
+        isRemoveModalOpen = true;
+    }
+
+    function cancelRemove() {
+        isRemoveModalOpen = false;
+        volunteerToRemove = null;
+    }
+
+    async function confirmRemoveVolunteer() {
+        if (!volunteerToRemove) return;
+
+        const { shiftId, index } = volunteerToRemove;
+        isRemoveModalOpen = false; // Close immediately
 
         const shiftRef = doc(db, "shifts", shiftId);
         try {
@@ -607,6 +804,9 @@
 
                 transaction.update(shiftRef, updates);
             });
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
+            volunteerToRemove = null;
         } catch (e) {
             console.error("Remove failed:", e);
             alert("Failed to remove: " + e);
@@ -637,6 +837,8 @@
 
                 transaction.update(shiftRef, { registrations });
             });
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
         } catch (e) {
             console.error("Un-check in failed:", e);
             alert("Failed to un-check in: " + e);
@@ -772,8 +974,6 @@
                 // The 'custom_scripts' doc has 'start', 'end', 'leadCapacity', etc.
                 // BUT where are registrations stored?
                 // Check handleAddShift for custom creation.
-                // Registrations for CUSTOM shifts are stored in... 'shifts' collection?
-                // OR inside the custom shift doc?
                 // Let's check handleManualEntry:
                 // It finds 'targetShiftId' (which is the custom shift ID).
                 // Then it writes to `doc(db, "shifts", targetShiftId)`.
@@ -944,6 +1144,8 @@
             });
 
             alert("Manual check-in added successfully!");
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
 
             // Clear Form
             manualName = "";
@@ -1059,6 +1261,8 @@
             });
 
             closeCheckInModal();
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
         } catch (e) {
             console.error("Check-in failed:", e);
             alert("Failed to check in: " + e);
@@ -1372,6 +1576,8 @@
             showBulkDeleteReport = true;
             bulkDeleteTimeSlot = "";
             bulkDeletePreview = null;
+            invalidateCacheByPrefix("shifts_");
+            invalidateCacheByPrefix("availability_");
         } catch (e) {
             console.error("Bulk deletion failed:", e);
             alert("Bulk deletion failed: " + e.message);
@@ -2493,9 +2699,11 @@
                                         </button>
                                         <button
                                             on:click={() =>
-                                                handleRemoveVolunteer(
+                                                openRemoveModal(
                                                     shift.id,
                                                     result.registrationIndex,
+                                                    reg.name,
+                                                    reg.email,
                                                 )}
                                             class="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1.5 rounded border border-red-200 hover:bg-red-50 transition-colors bg-white"
                                         >
@@ -2731,7 +2939,7 @@
                                                 >
                                                     <button
                                                         on:click|stopPropagation={() =>
-                                                            handleDeleteShift(
+                                                            openDeleteShiftModal(
                                                                 shift,
                                                             )}
                                                         class="p-1 text-gray-400 hover:text-red-500 transition-colors"
@@ -2946,9 +3154,11 @@
                                                                 {/if}
                                                                 <button
                                                                     on:click={() =>
-                                                                        handleRemoveVolunteer(
+                                                                        openRemoveModal(
                                                                             shift.id,
                                                                             i,
+                                                                            reg.name,
+                                                                            reg.email,
                                                                         )}
                                                                     class="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1.5 rounded border border-red-200 hover:bg-red-50 transition-colors bg-white"
                                                                 >
@@ -3141,6 +3351,190 @@
                         {/if}
                     </button>
                 </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Remove Confirmation Modal -->
+    {#if isRemoveModalOpen && volunteerToRemove}
+        <div
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            on:click={cancelRemove}
+            on:keydown={(e) => e.key === "Escape" && cancelRemove()}
+        >
+            <div
+                class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl transform scale-100 transition-all"
+                role="document"
+                on:click|stopPropagation
+                on:keydown|stopPropagation
+            >
+                <div class="text-center mb-6">
+                    <div
+                        class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                    >
+                        <svg
+                            class="w-6 h-6 text-red-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        Remove Volunteer?
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Are you sure you want to remove <span
+                            class="font-bold text-gray-900"
+                            >{volunteerToRemove.name}</span
+                        >? This will open up their spot on the shift.
+                    </p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button
+                        on:click={cancelRemove}
+                        class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        on:click={confirmRemoveVolunteer}
+                        class="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+                    >
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Delete Shift Confirmation Modal -->
+    {#if isDeleteShiftModalOpen && shiftToDelete}
+        <div
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            on:click={cancelDeleteShift}
+            on:keydown={(e) => e.key === "Escape" && cancelDeleteShift()}
+        >
+            <div
+                class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl transform scale-100 transition-all"
+                role="document"
+                on:click|stopPropagation
+                on:keydown|stopPropagation
+            >
+                <div class="text-center mb-6">
+                    <div
+                        class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                    >
+                        <svg
+                            class="w-6 h-6 text-red-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        Delete Shift?
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Are you sure you want to delete this shift? This cannot
+                        be undone.
+                    </p>
+                    <div
+                        class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded"
+                    >
+                        {shiftToDelete.dateStr || "Unknown Date"} • {shiftToDelete.start.toLocaleTimeString(
+                            [],
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            },
+                        )}
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button
+                        on:click={cancelDeleteShift}
+                        class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        on:click={confirmDeleteShift}
+                        class="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Success/Message Modal -->
+    {#if isSuccessModalOpen}
+        <div
+            class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            on:click={closeSuccessModal}
+            on:keydown={(e) => e.key === "Escape" && closeSuccessModal()}
+        >
+            <div
+                class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl transform scale-100 transition-all"
+                role="document"
+                on:click|stopPropagation
+                on:keydown|stopPropagation
+            >
+                <div class="text-center mb-6">
+                    <div
+                        class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                    >
+                        <svg
+                            class="w-6 h-6 text-green-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        {successTitle}
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        {successMessage}
+                    </p>
+                </div>
+
+                <button
+                    on:click={closeSuccessModal}
+                    class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors shadow-lg"
+                >
+                    OK
+                </button>
             </div>
         </div>
     {/if}

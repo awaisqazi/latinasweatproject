@@ -11,6 +11,7 @@
         documentId,
         Timestamp,
         getDocs,
+        getDoc,
     } from "firebase/firestore";
     import { generateShifts } from "../lib/shiftUtils";
     import ShiftCard from "./ShiftCard.svelte";
@@ -76,6 +77,7 @@
         try {
             // Generate shifts for the next 2 months (default)
             generatedShifts = generateShifts();
+            combineShifts(); // Ensure shifts are displayed even if fetch is delayed
             // Fetch aggregation for current month
             const now = new Date();
             const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -225,6 +227,28 @@
                 });
             });
             customShifts = custom;
+
+            // Fetch registrations for custom shifts (since they don't match the date-range ID pattern)
+            if (custom.length > 0) {
+                const customPromises = custom.map(async (c) => {
+                    try {
+                        const sDoc = await getDoc(doc(db, "shifts", c.id));
+                        if (sDoc.exists()) {
+                            return { id: c.id, data: sDoc.data() };
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch custom shift regs", c.id);
+                    }
+                    return null;
+                });
+
+                const customResults = await Promise.all(customPromises);
+                customResults.forEach((res) => {
+                    if (res) {
+                        data[res.id] = res.data;
+                    }
+                });
+            }
 
             combineShifts();
             // Update cache
@@ -403,6 +427,10 @@
             } else if (result.status === "success") {
                 invalidateShiftCache();
                 registrationSuccess = true;
+
+                // Force fresh fetch of the data to update UI immediately
+                currentFetchKey = ""; // Reset key to ensure fetch happens
+                updateSubscriptionsForWeek(currentWeekStartStr);
             }
         } catch (e) {
             console.error("Transaction failed: ", e);

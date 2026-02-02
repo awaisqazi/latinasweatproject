@@ -243,6 +243,10 @@
                                 class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none transition-all"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Please use the same email address that you use
+                                for your LSP Studio Membership.
+                            </p>
                         </div>
 
                         <div>
