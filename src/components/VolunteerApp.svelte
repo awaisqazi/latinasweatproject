@@ -10,11 +10,18 @@
         where,
         documentId,
         Timestamp,
+        getDocs,
     } from "firebase/firestore";
     import { generateShifts } from "../lib/shiftUtils";
     import ShiftCard from "./ShiftCard.svelte";
     import MiniCalendar from "./MiniCalendar.svelte";
     import RegisterModal from "./RegisterModal.svelte";
+    import {
+        getCache,
+        setCache,
+        getShiftCacheKey,
+        invalidateCacheByPrefix,
+    } from "../lib/cacheUtils";
 
     let shifts = [];
     let generatedShifts = [];
@@ -112,6 +119,27 @@
         if (unsubShifts) unsubShifts();
         if (unsubCustom) unsubCustom();
 
+        const cacheKey = getShiftCacheKey(start, end);
+        const cached = getCache(cacheKey);
+
+        // Load cached data immediately (optimistic)
+        if (cached) {
+            shiftData = cached.data.shiftData || {};
+            customShifts = (cached.data.customShifts || []).map((c) => ({
+                ...c,
+                start: new Date(c.start),
+                end: new Date(c.end),
+                date: new Date(c.date),
+            }));
+            combineShifts();
+
+            // If cache is fresh, don't fetch from Firebase
+            if (!cached.isStale) {
+                return;
+            }
+        }
+
+        // Fetch fresh data from Firebase
         try {
             const startId = toDateStr(start);
             const endBoundDate = new Date(end);
@@ -124,14 +152,26 @@
                 where(documentId(), "<", endId),
             );
 
-            unsubShifts = onSnapshot(shiftsQuery, (snapshot) => {
-                const data = {};
-                snapshot.forEach((doc) => {
-                    data[doc.id] = doc.data();
-                });
-                shiftData = data;
-                combineShifts();
-            });
+            unsubShifts = onSnapshot(
+                shiftsQuery,
+                (snapshot) => {
+                    const data = {};
+                    snapshot.forEach((doc) => {
+                        data[doc.id] = doc.data();
+                    });
+                    shiftData = data;
+                    combineShifts();
+                    // Update cache
+                    setCache(cacheKey, { shiftData: data, customShifts });
+                },
+                (err) => {
+                    // On Firebase error (quota, network, etc.), keep showing cached data
+                    console.error(
+                        "Firebase error (shifts) - using cached data:",
+                        err,
+                    );
+                },
+            );
 
             const customQuery = query(
                 collection(db, "custom_shifts"),
@@ -139,32 +179,49 @@
                 where("start", "<=", Timestamp.fromDate(end)),
             );
 
-            unsubCustom = onSnapshot(customQuery, (snapshot) => {
-                const custom = [];
-                snapshot.forEach((doc) => {
-                    const d = doc.data();
-                    const start = d.start.toDate();
-                    const end = d.end.toDate();
-                    const date = new Date(start);
-                    date.setHours(0, 0, 0, 0);
+            unsubCustom = onSnapshot(
+                customQuery,
+                (snapshot) => {
+                    const custom = [];
+                    snapshot.forEach((doc) => {
+                        const d = doc.data();
+                        const startTime = d.start.toDate();
+                        const endTime = d.end.toDate();
+                        const date = new Date(startTime);
+                        date.setHours(0, 0, 0, 0);
 
-                    custom.push({
-                        id: doc.id,
-                        start,
-                        end,
-                        date,
-                        dateStr: toDateStr(date),
-                        isCustom: true,
-                        leadCapacity: d.leadCapacity,
-                        volunteerCapacity: d.volunteerCapacity,
+                        custom.push({
+                            id: doc.id,
+                            start: startTime,
+                            end: endTime,
+                            date,
+                            dateStr: toDateStr(date),
+                            isCustom: true,
+                            leadCapacity: d.leadCapacity,
+                            volunteerCapacity: d.volunteerCapacity,
+                        });
                     });
-                });
-                customShifts = custom;
-                combineShifts();
-            });
+                    customShifts = custom;
+                    combineShifts();
+                    // Update cache
+                    setCache(cacheKey, { shiftData, customShifts: custom });
+                },
+                (err) => {
+                    // On Firebase error, keep showing cached data
+                    console.error(
+                        "Firebase error (custom shifts) - using cached data:",
+                        err,
+                    );
+                },
+            );
         } catch (e) {
             console.error("Subscription error:", e);
         }
+    }
+
+    // Call this after successful registration to invalidate cache
+    function invalidateShiftCache() {
+        invalidateCacheByPrefix("shifts_");
     }
 
     function combineShifts() {
@@ -328,6 +385,7 @@
                 successMessage = `It looks like you are already signed up for this shift on ${dateStr} at ${timeStr}! We look forward to seeing you there.`;
                 registrationSuccess = true;
             } else if (result.status === "success") {
+                invalidateShiftCache();
                 registrationSuccess = true;
             }
         } catch (e) {

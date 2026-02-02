@@ -16,6 +16,12 @@
     import SubVolunteerModal from "./SubVolunteerModal.svelte";
     import CreateSubRequestModal from "./CreateSubRequestModal.svelte";
     import SubsCalendar from "./SubsCalendar.svelte";
+    import {
+        getCache,
+        setCache,
+        getSubsCacheKey,
+        invalidateCache,
+    } from "../lib/cacheUtils";
 
     let requests = [];
     let loading = true;
@@ -78,6 +84,24 @@
     })();
 
     onMount(() => {
+        const cacheKey = getSubsCacheKey();
+        const cached = getCache(cacheKey);
+
+        // Load cached data immediately (optimistic)
+        if (cached) {
+            requests = (cached.data || []).map((r) => ({
+                ...r,
+                date: new Date(r.date),
+                createdAt: new Date(r.createdAt),
+            }));
+            loading = false;
+
+            // If cache is fresh, don't fetch from Firebase
+            if (!cached.isStale) {
+                return;
+            }
+        }
+
         try {
             // Query sub requests from 1 month ago through future
             const cutoffDate = new Date();
@@ -107,14 +131,22 @@
                                 : new Date(),
                         });
                     });
-                    // Sort is handled by query, but keep for safety
                     data.sort((a, b) => a.date - b.date);
                     requests = data;
                     loading = false;
+                    // Update cache
+                    setCache(cacheKey, data);
                 },
                 (err) => {
-                    console.error("Firestore error:", err);
-                    error = "Could not load sub requests.";
+                    // On Firebase error (quota, network, etc.), keep showing cached data
+                    console.error(
+                        "Firebase error (sub requests) - using cached data:",
+                        err,
+                    );
+                    // Only show error if we don't have cached data
+                    if (!requests || requests.length === 0) {
+                        error = "Could not load sub requests.";
+                    }
                     loading = false;
                 },
             );
@@ -126,6 +158,11 @@
             loading = false;
         }
     });
+
+    // Call this after successful form submissions to invalidate cache
+    function invalidateSubsCache() {
+        invalidateCache(getSubsCacheKey());
+    }
 
     // Group by Date
     $: requestsByDate = requests.reduce((acc, req) => {
@@ -226,6 +263,7 @@
             });
 
             volunteerSuccess = true;
+            invalidateSubsCache();
         } catch (e) {
             console.error("Volunteer failed:", e);
             alert("Failed to submit: " + e.message);
@@ -281,6 +319,7 @@
             });
 
             createSuccess = true; // Show success view in modal
+            invalidateSubsCache();
         } catch (e) {
             console.error("Create failed:", e);
             alert("Failed to submit request: " + e.message);

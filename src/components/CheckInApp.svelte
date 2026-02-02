@@ -14,6 +14,12 @@
     import { generateShifts } from "../lib/shiftUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
     import CheckInModal from "./CheckInModal.svelte";
+    import {
+        getCache,
+        setCache,
+        getShiftCacheKey,
+        invalidateCacheByPrefix,
+    } from "../lib/cacheUtils";
 
     let shifts = [];
     let generatedShifts = [];
@@ -112,10 +118,32 @@
     }
 
     function subscribeToData(start, end) {
-        loading = true;
         if (unsubShifts) unsubShifts();
         if (unsubCustom) unsubCustom();
 
+        const cacheKey = getShiftCacheKey(start, end);
+        const cached = getCache(cacheKey);
+
+        // Load cached data immediately (optimistic)
+        if (cached) {
+            shiftData = cached.data.shiftData || {};
+            customShifts = (cached.data.customShifts || []).map((c) => ({
+                ...c,
+                start: new Date(c.start),
+                end: new Date(c.end),
+                date: new Date(c.date),
+            }));
+            combineShifts();
+
+            // If cache is fresh, don't fetch from Firebase
+            if (!cached.isStale) {
+                return;
+            }
+        }
+
+        loading = true;
+
+        // Fetch fresh data from Firebase
         try {
             const startId = toDateStr(start);
             const endBoundDate = new Date(end);
@@ -137,10 +165,19 @@
                     });
                     shiftData = data;
                     combineShifts();
+                    // Update cache
+                    setCache(cacheKey, { shiftData: data, customShifts });
                 },
                 (err) => {
-                    console.error("Firestore Error:", err);
-                    error = "Could not load data. Please refresh.";
+                    // On Firebase error (quota, network, etc.), keep showing cached data
+                    console.error(
+                        "Firebase error (shifts) - using cached data:",
+                        err,
+                    );
+                    // Only show error if we don't have cached data
+                    if (!shiftData || Object.keys(shiftData).length === 0) {
+                        error = "Could not load data. Please refresh.";
+                    }
                     loading = false;
                 },
             );
@@ -157,15 +194,15 @@
                     const custom = [];
                     snapshot.forEach((doc) => {
                         const d = doc.data();
-                        const start = d.start.toDate();
-                        const end = d.end.toDate();
-                        const date = new Date(start);
+                        const startTime = d.start.toDate();
+                        const endTime = d.end.toDate();
+                        const date = new Date(startTime);
                         date.setHours(0, 0, 0, 0);
 
                         custom.push({
                             id: doc.id,
-                            start,
-                            end,
+                            start: startTime,
+                            end: endTime,
                             date,
                             dateStr: toDateStr(date),
                             isCustom: true,
@@ -175,9 +212,15 @@
                     });
                     customShifts = custom;
                     combineShifts();
+                    // Update cache
+                    setCache(cacheKey, { shiftData, customShifts: custom });
                 },
                 (err) => {
-                    console.error("Firestore Error (Custom):", err);
+                    // On Firebase error, keep showing cached data
+                    console.error(
+                        "Firebase error (custom shifts) - using cached data:",
+                        err,
+                    );
                 },
             );
         } catch (e) {
@@ -185,6 +228,11 @@
             error = "App failed to load: " + e.message;
             loading = false;
         }
+    }
+
+    // Call this after successful check-in to invalidate cache
+    function invalidateShiftCache() {
+        invalidateCacheByPrefix("shifts_");
     }
 
     function combineShifts() {
@@ -309,6 +357,7 @@
 
                 transaction.update(shiftRef, { registrations });
             });
+            invalidateShiftCache();
             showModal = false;
         } catch (e) {
             console.error("Check-in failed: ", e);
