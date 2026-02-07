@@ -12,6 +12,7 @@ const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'unde
  * @returns {{ data: any, isStale: boolean } | null}
  */
 export function getCache(key) {
+    if (!isBrowser) return null;
     try {
         const cached = localStorage.getItem(key);
         if (!cached) return null;
@@ -33,6 +34,7 @@ export function getCache(key) {
  * @param {any} data - Data to cache
  */
 export function setCache(key, data) {
+    if (!isBrowser) return;
     try {
         const cacheEntry = {
             data,
@@ -49,6 +51,7 @@ export function setCache(key, data) {
  * @param {string} key - Cache key to invalidate
  */
 export function invalidateCache(key) {
+    if (!isBrowser) return;
     try {
         localStorage.removeItem(key);
     } catch (e) {
@@ -61,6 +64,7 @@ export function invalidateCache(key) {
  * @param {string} prefix - Prefix to match (e.g., "shifts_" or "subs_")
  */
 export function invalidateCacheByPrefix(prefix) {
+    if (!isBrowser) return;
     try {
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {

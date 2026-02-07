@@ -5,6 +5,7 @@
         collection,
         onSnapshot,
         doc,
+        getDoc,
         runTransaction,
         query,
         where,
@@ -74,6 +75,10 @@
     onMount(() => {
         try {
             generatedShifts = generateShifts();
+            // Ensure shifts are combined after generation (fixes race condition on iOS Safari)
+            if (shiftData && Object.keys(shiftData).length > 0) {
+                combineShifts();
+            }
         } catch (e) {
             console.error("Critical App Error:", e);
             error = "App failed to load: " + e.message;
@@ -90,6 +95,14 @@
         if (currentWeekStartStr) {
             updateSubscriptionsForWeek(currentWeekStartStr);
         }
+    }
+
+    // Re-combine shifts whenever generatedShifts changes (fixes race condition on iOS Safari)
+    $: if (
+        generatedShifts.length > 0 &&
+        (shiftData || customShifts.length > 0)
+    ) {
+        combineShifts();
     }
 
     function updateSubscriptionsForWeek(weekStart) {
@@ -188,6 +201,30 @@
             });
             customShifts = custom;
 
+            // Fetch registrations for custom shifts (since they don't match the date-range ID pattern)
+            if (custom.length > 0) {
+                const customPromises = custom.map(async (c) => {
+                    try {
+                        const sDoc = await getDoc(doc(db, "shifts", c.id));
+                        if (sDoc.exists()) {
+                            return { id: c.id, data: sDoc.data() };
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch custom shift regs", c.id);
+                    }
+                    return null;
+                });
+
+                const customResults = await Promise.all(customPromises);
+                customResults.forEach((res) => {
+                    if (res) {
+                        data[res.id] = res.data;
+                    }
+                });
+            }
+
+            // Update shiftData with custom shift registrations
+            shiftData = data;
             combineShifts();
             // Update cache
             setCache(cacheKey, { shiftData: data, customShifts: custom });

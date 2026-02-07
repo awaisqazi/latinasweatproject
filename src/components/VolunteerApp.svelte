@@ -250,6 +250,8 @@
                 });
             }
 
+            // Update shiftData with custom shift registrations
+            shiftData = data;
             combineShifts();
             // Update cache
             setCache(cacheKey, { shiftData: data, customShifts: custom });

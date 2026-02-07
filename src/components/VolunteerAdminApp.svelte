@@ -259,7 +259,18 @@
                         snapshot.forEach((doc) => {
                             data[doc.id] = doc.data();
                         });
-                        shiftData = data;
+                        // Debug: Log all shifts with registration counts
+                        console.log(
+                            "[Admin Debug] Shifts data from Firestore:",
+                            Object.entries(data).map(([id, d]) => ({
+                                id,
+                                regsCount: d.registrations?.length || 0,
+                                regs: d.registrations?.map((r) => r.name) || [],
+                            })),
+                        );
+                        // Merge with existing shiftData to preserve custom shift registrations
+                        // that are loaded by a separate subscription
+                        shiftData = { ...shiftData, ...data };
                         combineShifts();
                     } catch (e) {
                         console.error("Error processing shifts snapshot:", e);
@@ -269,6 +280,7 @@
                 (err) => {
                     console.error("Firestore Error (Shifts):", err);
                     error = "Could not load shift data.";
+                    loading = false;
                 },
             );
 
@@ -437,27 +449,7 @@
         combined.sort((a, b) => a.start - b.start);
 
         shifts = combined;
-
-        // DEBUG LOGS
-        if (shifts.length > 0) {
-            console.log("Combined Shifts Debug:");
-            console.log("Total Shifts:", shifts.length);
-            console.log("First Shift:", shifts[0].dateStr);
-            console.log("Last Shift:", shifts[shifts.length - 1].dateStr);
-
-            // Check November specifically
-            const novShifts = shifts.filter((s) =>
-                s.dateStr.startsWith("2025-11"),
-            );
-            console.log("November 2025 Shifts Count:", novShifts.length);
-
-            // Check registrations in November
-            const novRegs = novShifts.reduce((count, s) => {
-                const data = shiftData[s.id] || {};
-                return count + (data.registrations?.length || 0);
-            }, 0);
-            console.log("Total Registrations in Nov 2025:", novRegs);
-        }
+        loading = false;
     }
 
     // --- Actions ---
@@ -804,6 +796,20 @@
 
                 transaction.update(shiftRef, updates);
             });
+
+            // Optimistically update local state to reflect removal immediately
+            if (shiftData[shiftId]) {
+                const updatedRegs = [
+                    ...(shiftData[shiftId].registrations || []),
+                ];
+                updatedRegs.splice(index, 1);
+                shiftData[shiftId] = {
+                    ...shiftData[shiftId],
+                    registrations: updatedRegs,
+                };
+                shiftData = { ...shiftData }; // Trigger reactivity
+            }
+
             invalidateCacheByPrefix("shifts_");
             invalidateCacheByPrefix("availability_");
             volunteerToRemove = null;
