@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import TeamMemberCard from "@/components/TeamMemberCard.astro";
 import BoardSection from "@/components/BoardSection.astro";
 import BoardMemberCard from "@/components/BoardMemberCard.astro";
+import JuniorBoardCarousel from "@/components/JuniorBoardCarousel.svelte";
 const base = import.meta.env.BASE_URL;
 
 // Board data
@@ -306,11 +307,26 @@ const boards = [
           variant="dark"
           zIndex={11}
         >
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BoardMemberCard name="Yari Jurado" role="President" />
-            <BoardMemberCard name="Yesi Peyret" role="Vice President" />
-            <BoardMemberCard name="Noé Villagomez" role="Treasurer" />
-            <BoardMemberCard name="Alejandra Garcia" role="Secretary" />
+          <JuniorBoardCarousel client:visible baseUrl={base} />
+          <div class="mt-6 text-center">
+            <a
+              href={`${base}elections`}
+              class="inline-flex items-center gap-2 text-accent-gold hover:text-white transition-colors font-semibold text-sm"
+            >
+              Learn more about the Junior Board
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </a>
           </div>
         </BoardSection>
 

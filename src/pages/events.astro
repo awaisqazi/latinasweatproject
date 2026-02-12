@@ -32,17 +32,22 @@ const base = import.meta.env.BASE_URL;
         >
           Upcoming Events
         </h2>
-        {
-          /* We are reusing the EventCard component we already built for the homepage */
-        }
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <EventCard
-            href="https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project"
+            href="https://www.instagram.com/p/DUY7B4yETFV/"
             target="_blank"
-            imageSrc={`${base}images/equal-hope-event.png`}
-            date="JANUARY 31, 2026"
-            title="Equal Hope × LSP: Movement, Art, and Wellness ✨"
-            description="FREE community wellness event! Join us for therapeutic dance with Maria Luisa, LCPC, educational discussion with Gina Menyah, BSN, RN, free food & drinks, and local vendors. Registration required!"
+            imageSrc={`${base}images/galentines-night.jpg`}
+            date="FEBRUARY 13, 2026"
+            title="Galentine's Night 💕"
+            description="Dance fitness class co-led by Kayla & Rut, followed by arts & crafts! Doors open at 7 PM, class starts at 7:30 PM. Sign up through the LSP app. Members, don't forget your guest passes!"
+          />
+          <EventCard
+            href="https://www.chicagoparkdistrict.com/events/girls-day-play-dvorak"
+            target="_blank"
+            imageSrc={`${base}images/girls-day-of-play.png`}
+            date="FEBRUARY 17, 2026"
+            title="Girls Day of Play 🎉"
+            description="FREE event for girls ages 6–12 at Dvorak Park, 9 AM – 3 PM. Sports, dance, arts & crafts, and fun! In partnership with Chicago Park District & UNO Pilsen. Registration is free!"
           />
         </div>
       </div>

@@ -4,48 +4,11 @@ const base = import.meta.env.BASE_URL;
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
-const isWrappedPage = pathname.includes("/wrapped");
 ---
 
 {/* Fixed container for banner + header */}
 <div id="header-wrapper" class="fixed top-0 left-0 right-0 z-50">
-    {/* 2025 Wrapped Banner - hidden on wrapped page itself */}
-    {
-        !isWrappedPage && (
-            <div
-                id="wrapped-banner"
-                class="bg-gradient-to-r from-vibrant-pink via-[#ff6b9d] to-accent-gold text-white py-2 px-4 text-center relative"
-            >
-                <a
-                    href={`${base}wrapped`}
-                    class="inline-flex items-center gap-2 text-sm font-semibold hover:underline"
-                >
-                    <span>✨</span>
-                    <span>Check out our 2025 Wrapped!</span>
-                    <span>✨</span>
-                </a>
-                <button
-                    id="close-wrapped-banner"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
-                    aria-label="Close banner"
-                >
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
-            </div>
-        )
-    }
+
 
     <header
         id="main-header"
@@ -74,63 +37,47 @@ const isWrappedPage = pathname.includes("/wrapped");
                 <nav class="flex items-center gap-6">
                     <a
                         href={base}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Home
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
                     <a
                         href={`${base}about`}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         About Us
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
                     <a
                         href={`${base}schedule`}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Classes
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
                     <a
                         href={`${base}events`}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Events
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
                     <a
                         href={`${base}impact`}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Impact
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
                     <a
                         href={`${base}gala`}
-                        class="relative group py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors"
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Gala
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-0.5 bg-vibrant-pink transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                        ></span>
                     </a>
 
                     {/* More Dropdown */}
-                    <div class="relative group">
+                    <div id="more-dropdown-container" class="relative group">
                         <button
-                            class="flex items-center gap-1 py-2 text-base font-medium text-medium-gray hover:text-off-black transition-colors focus:outline-none"
+                            id="more-dropdown-button"
+                            class="link-underline flex items-center gap-1 py-2 text-base font-medium text-medium-gray focus:outline-none"
+                            aria-expanded="false"
                         >
                             More
                             <svg
@@ -148,53 +95,54 @@ const isWrappedPage = pathname.includes("/wrapped");
                         </button>
 
                         <div
-                            class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right"
+                            id="more-dropdown-menu"
+                            class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50"
                         >
                             <div
                                 class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                             >
                                 <a
                                     href={`${base}shifts`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Volunteer
+                                    <span class="dropdown-link-text">Volunteer</span>
                                 </a>
                                 <a
                                     href={`${base}pricing`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Pricing
+                                    <span class="dropdown-link-text">Pricing</span>
                                 </a>
                                 <a
                                     href={`${base}gallery`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Gallery
+                                    <span class="dropdown-link-text">Gallery</span>
                                 </a>
                                 <a
                                     href={`${base}corporate-collaborations`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Corporate Collabs
+                                    <span class="dropdown-link-text">Corporate Collabs</span>
                                 </a>
                                 <a
                                     href={`${base}community-collaborations`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Community Collabs
+                                    <span class="dropdown-link-text">Community Collabs</span>
                                 </a>
 
                                 <a
                                     href={`${base}faq`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    FAQ
+                                    <span class="dropdown-link-text">FAQ</span>
                                 </a>
                                 <a
                                     href={`${base}contact`}
-                                    class="block px-4 py-2.5 text-sm text-medium-gray hover:bg-[#b5a18d] hover:text-white rounded-lg transition-colors"
+                                    class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
-                                    Contact
+                                    <span class="dropdown-link-text">Contact</span>
                                 </a>
                             </div>
                         </div>
@@ -207,7 +155,7 @@ const isWrappedPage = pathname.includes("/wrapped");
                 >
                     <a
                         href={`${base}account`}
-                        class="text-sm font-bold text-medium-gray hover:text-vibrant-pink transition-colors"
+                        class="link-underline text-sm font-bold text-medium-gray"
                     >
                         My Account
                     </a>
@@ -258,8 +206,8 @@ const isWrappedPage = pathname.includes("/wrapped");
     </header>
 </div>
 
-{/* Spacer for fixed header + banner to prevent overlap */}
-<div id="header-spacer" class="h-[calc(theme(spacing.20)+2.5rem)]"></div>
+{/* Spacer for fixed header to prevent overlap */}
+<div id="header-spacer" class="h-20"></div>
 
 {/* Mobile Menu Overlay */}
 <div
@@ -507,28 +455,42 @@ const isWrappedPage = pathname.includes("/wrapped");
         });
     });
 
-    // Wrapped Banner close functionality
-    const wrappedBanner = document.getElementById("wrapped-banner");
-    const closeBannerBtn = document.getElementById("close-wrapped-banner");
-    const headerSpacer = document.getElementById("header-spacer");
+    // More Dropdown Logic (Click + Hover)
+    const moreBtn = document.getElementById("more-dropdown-button");
+    const moreMenu = document.getElementById("more-dropdown-menu");
+    const moreContainer = document.getElementById("more-dropdown-container");
+    let isDropdownOpen = false;
 
-    function hideBanner() {
-        if (wrappedBanner) {
-            wrappedBanner.style.display = "none";
+    // Function to show/hide
+    const setDropdownState = (isOpen) => {
+        isDropdownOpen = isOpen;
+        moreBtn?.setAttribute("aria-expanded", isOpen.toString());
+        if (isOpen) {
+            moreMenu?.classList.remove("opacity-0", "invisible");
+        } else {
+            moreMenu?.classList.add("opacity-0", "invisible");
         }
-        if (headerSpacer) {
-            headerSpacer.style.height = "5rem"; // Just header height (h-20)
+    };
+
+    // Toggle on click
+    moreBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setDropdownState(!isDropdownOpen);
+    });
+
+    // Hover handling via JS to ensure reliability
+    moreContainer?.addEventListener("mouseenter", () => {
+        setDropdownState(true);
+    });
+
+    moreContainer?.addEventListener("mouseleave", () => {
+        setDropdownState(false);
+    });
+
+    // Close on click outside
+    document.addEventListener("click", (e) => {
+        if (isDropdownOpen && moreContainer && !moreContainer.contains(e.target as Node)) {
+            setDropdownState(false);
         }
-    }
-
-    // Check if banner was previously closed in this session
-    if (sessionStorage.getItem("wrappedBannerClosed") === "true") {
-        hideBanner();
-    }
-
-    closeBannerBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        hideBanner();
-        sessionStorage.setItem("wrappedBannerClosed", "true");
     });
 </script>
