@@ -2,7 +2,6 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import TestimonialCard from "@/components/TestimonialCard.astro";
-import EventCard from "@/components/EventCard.astro";
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -50,302 +49,6 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: Hero Section */}
-
-    {/* START: Galentine's Night Event Section */}
-    <section id="galentines" class="galentines-section relative py-16 sm:py-20 lg:py-28 overflow-hidden">
-      {/* Textured paper background matching flyer */}
-      <div class="absolute inset-0 bg-[#f5f0eb]"></div>
-      {/* Subtle paper texture overlay */}
-      <div class="absolute inset-0 opacity-[0.08]" style="background-image: url('data:image/svg+xml,%3Csvg width=%22200%22 height=%22200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%220.5%22/%3E%3C/svg%3E');"></div>
-
-      {/* Decorative rose SVG — top right */}
-      <svg class="absolute -top-4 -right-4 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 opacity-20 pointer-events-none" viewBox="0 0 512 512" fill="#3a3a3a" xmlns="http://www.w3.org/2000/svg">
-        <path d="M222.598,186.442c29.136,23.184,64.397,10.377,56.084-10.394c-41.721-15.548-58.381-67.814-40.19-87.473c18.173-19.65,56.138,0.338,35.866-15.326c-20.256-15.662-55.515-2.857-69.274,20.549C191.325,117.212,193.461,163.25,222.598,186.442z"/>
-        <path d="M312.038,160.099c33.338-15.939,30.544-70.172,9.025-80.789c-21.501-10.608-34.69-0.446-20.7,19.036c18.404,23.236-18.03,51.821-35.1,44.978C265.262,143.324,278.683,176.047,312.038,160.099z"/>
-        <path d="M285.518,60.451c27.73-3.933,44.319,4.94,55.764,23.797c13.136-20.886-2.865-64.957-47.114-81.128c-44.23-16.161-102.006,33.978-89.209,69.23C212.488,63.486,249.475,43.605,285.518,60.451z"/>
-        <path d="M129.509,238.655c10.804,7.716,51.208,20.54,85.969,31.718c34.744,11.177,69.95-12.353,68.49-50.193c-105.387-7.013-105.174-84.608-99.602-107.346c-45.423-0.392-60.143,40.626-57.046,69.06C130.631,212.152,118.118,230.512,129.509,238.655z"/>
-        <path d="M141.044,111.161c21.074-9.567,34.974-6.168,34.974-6.168s5.286-16.108,12.495-23.717c-1.904-3.15-1.958-13.866-1.958-13.866s0.232-11.997,2.403-20.834c-18.013-8.428-56.744,7.556-58.933,11.035C127.854,61.092,124.935,105.892,141.044,111.161z"/>
-        <path d="M414.044,126.13c-11-53.558-56.423-53.95-56.423-53.95s-0.552,13.243-7.476,19.597c18.475,33.961-13.208,86.912-36.755,88.301c67.778,51.368,100.884-11.053,105.868-20.54C424.278,150.052,416.02,139.995,414.044,126.13z"/>
-        <path d="M373.284,213.728c-15.218,6.025-51.332-5.402-69.719-21.492c-1.21,8.615-12.921,20.032-17.336,19.855c14.346,10.643,22.302,43.83-12.264,68.393c8.276,13.625,54.981,16.126,85.204,5.659c4.913-1.709,18.351-27.65,23.94-43.233C390.532,222.262,396.993,204.348,373.284,213.728z"/>
-        <path d="M259.958,92.045c-19.33,5.989-16.215,37.093,5.464,39.709c31.095-3.115,24.848-32.296,17.069-33.31c-7.795-1.015,1.335,16.383-8.543,16.66c-11.712,0.302-16.766-7.957-10.804-14.239C267.968,95.783,269.142,89.598,259.958,92.045z"/>
-        <path d="M334.66,364.984c-49.267-20.682-83.957-10.51-107.381,4.743c3.329-7.093,6.426-13.972,9.185-20.415c12.797-29.92,19.401-51.466,19.525-51.84l-23.441-7.52l-0.108,0.338c-1.21,3.906-13.117,41.044-34.512,83.228c-7.138,14.097-15.431,28.692-24.598,42.842c11.089-30.792,23.851-63.116-12.424-98.535c-5.5,3.346-5.998,14.951-5.998,14.951s-20.166-51.831-34.529-50.656c-14.364,1.184-39.479,56.023-14.454,87.937c-13.278-3.24-19.276,11.711-10.964,16.081c7.938,4.183,57.278,39.861,60.784,55.097c-14.31,18.262-30.311,34.316-47.63,45.556c-6.016,3.898-8.224,12.264-4.967,18.68c3.275,6.416,10.786,8.446,16.803,4.548c22.89-14.907,42.593-35.759,59.448-58.435c9.006-12.129,17.176-24.794,24.581-37.431c61.958,36.79,105.424,16.5,109.98,6.746c4.912-10.519-17.71-4.326-17.71-4.326S355.164,377.034,334.66,364.984z"/>
-      </svg>
-
-      {/* Decorative rose SVG — bottom left */}
-      <svg class="absolute -bottom-6 -left-6 w-44 h-44 sm:w-56 sm:h-56 lg:w-72 lg:h-72 opacity-15 pointer-events-none rotate-180" viewBox="0 0 512 512" fill="#3a3a3a" xmlns="http://www.w3.org/2000/svg">
-        <path d="M297.941,245.788c-46.436-40.72-103.046-61.562-150.03-72.954c-40.218-9.745-90.838-17.308-45.165-90.155c-19.47,55.351,3.48,64.587,29.684,71.314c-19.142-20.942-17.87-52.526,11.532-76.394c46.115-37.434,75.203-3.648,81.775,9.19c1.834,3.601,4.297,6.312,5.582,9.437c8.018-21.712,15.829-39.569,12.797-48.712c11.385,13.025-4.644,44.522-11.19,66.87c-0.314,1.499-0.703,3.012-1.205,4.511c-7.63,31.478-0.174,60.224,4.738,74.159c29.376,15.655,52.126,32.863,64.655,48.538c22.676-31.564,22.783-75.504-2.617-107.423c-19.564-24.577-46.095-84.493-45.794-97.879c0.295-13.373-37.675-22.562-51.114-0.917c0,0,5.689-28.612-27.736-34.857c-24.255-4.525-83.582,20.547-72.712,80.885c-11.284-1.519-26.357-0.342-36.698,12.784c-18.52,23.499,3.902,51.65,7.616,61.83c-16.364,15.213-6.78,38.244-6.78,38.244c51.925-6.291,76.542,29.208,93.809,50.894c30.641,38.498,86.695,44.864,125.2,14.216C289.428,255.273,293.953,250.694,297.941,245.788z"/>
-        <path d="M181.831,158.418c72.064-60.103,4.591-98.614-33.826-64.507c-29.831,26.491-6.325,63.999,17.743,69.48c19.564,6.292,38.043,13.634,54.829,21.619c-5.334-16.946-3.574-40.841,0.194-58.136C219.372,127.81,197.078,161.062,181.831,158.418z M170.527,129.089c-6.894,5.488-13.915,11.405-17.274,7.189c-5.81-5.234-0.362-18.466,6.579-24.403c18.399-15.748,39.067-9.745,36.792,2.082c-1.747,10.876-10.963,21.746-13.265,20.246C182.233,133.459,181.925,120.02,170.527,129.089z"/>
-        <path d="M447.129,337.148c-7.884,6.867-15.273,10.24-15.273,10.24s-11.352-1.379-21.164,11.72c-9.798,13.098-6.158,39.422-8.206,52.56C430.196,413.04,472.174,362.066,447.129,337.148z"/>
-        <path d="M300.592,351.35c-2.476,5.181,5.368,12.758,5.368,12.758l-24.884-2.129c0,0,12.998,57.178,76.768,29.489C357.402,365.767,333.829,341.338,300.592,351.35z"/>
-        <path d="M402.794,449.23c-10.213-29.168-17.71-64.561-30.493-99.82c1.539-11.994,12.61-21.759,12.61-21.759s-16.88,0.22-25.742-9.417c-11.445-23.633-26.652-46.309-48.257-65.852c-3.815,4.156-7.811,8.239-12.148,12.161c5.964,5.355,11.505,10.93,16.498,16.78c-0.374,10.474-7.041,20.092-7.041,20.092s12.262-3.206,22.449,0.756c3.908,6.091,7.509,12.336,10.776,18.728c16.638,32.488,25.714,68.382,35.178,101.707c0.281,1.011,0.588,1.994,0.87,2.998c-2.49,11.532-13.587,20.34-13.587,20.34s13.614,0.549,22.435,7.965c1.888,5.488,3.855,10.89,6.024,16.083c6.144,14.678,13.574,28.071,23.667,39.194c3.172,3.507,8.594,3.775,12.101,0.59c3.494-3.173,3.761-8.594,0.589-12.095C417.693,485.539,409.634,468.874,402.794,449.23z"/>
-      </svg>
-
-      {/* Floating hearts animation */}
-      <div class="galentines-hearts absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <span class="heart" style="left:5%; animation-delay:0s; font-size:1.2rem;">♥</span>
-        <span class="heart" style="left:15%; animation-delay:1.5s; font-size:0.9rem;">♥</span>
-        <span class="heart" style="left:28%; animation-delay:3s; font-size:1.5rem;">♥</span>
-        <span class="heart" style="left:42%; animation-delay:0.8s; font-size:1rem;">♥</span>
-        <span class="heart" style="left:55%; animation-delay:2.2s; font-size:1.3rem;">♥</span>
-        <span class="heart" style="left:68%; animation-delay:4s; font-size:0.8rem;">♥</span>
-        <span class="heart" style="left:78%; animation-delay:1s; font-size:1.4rem;">♥</span>
-        <span class="heart" style="left:88%; animation-delay:2.8s; font-size:1.1rem;">♥</span>
-        <span class="heart" style="left:95%; animation-delay:3.5s; font-size:0.7rem;">♥</span>
-      </div>
-
-      {/* Top decorative border */}
-      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#d4345e] to-transparent"></div>
-      <div class="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#d4345e] to-transparent"></div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-20">
-          {/* Instagram Embed Side */}
-          <div class="w-full order-last lg:order-first flex justify-center">
-            <div class="w-full max-w-[540px] relative">
-              {/* Decorative frame around embed */}
-              <div class="absolute -inset-3 rounded-2xl border-2 border-dashed border-[#d4345e]/20 pointer-events-none"></div>
-              <div class="relative rounded-xl overflow-hidden shadow-2xl shadow-[#d4345e]/10">
-                <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/p/DUY7B4yETFV/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/p/DUY7B4yETFV/?utm_source=ig_embed&amp;utm_campaign=loading" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style="display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style="width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style="width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style="background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style="width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/p/DUY7B4yETFV/?utm_source=ig_embed&amp;utm_campaign=loading" style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A post shared by The Latina Sweat Project (@latinasweatproject)</a></p></div></blockquote>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Side */}
-          <div>
-            {/* Script-style header like the flyer */}
-            <div class="mb-2">
-              <p class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#1a1a1a]/60">
-                Latina Sweat Project
-              </p>
-            </div>
-
-            <h2 class="font-sans text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-1 leading-[0.9]">
-              <span class="galentines-title-script text-[#d4345e]" style="font-family: 'Georgia', 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em;">Galentine's</span>
-            </h2>
-            <h2 class="font-sans text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight mb-6 text-[#1a1a1a]">
-              Night
-            </h2>
-
-            {/* Heart-shaped date badge */}
-            <div class="inline-flex items-center gap-2 mb-6">
-              <div class="flex items-center justify-center w-16 h-16 relative">
-                <svg class="absolute w-full h-full text-[#d4345e]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                <span class="relative text-white font-black text-lg z-10">13</span>
-              </div>
-              <div>
-                <p class="font-bold text-[#d4345e] text-xl">February</p>
-                <p class="text-sm text-[#1a1a1a]/60 font-medium">This Friday!</p>
-              </div>
-            </div>
-
-            {/* Activity cards with romantic styling */}
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-[#d4345e]/15 shadow-sm hover:shadow-md hover:border-[#d4345e]/30 transition-all duration-300">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[#d4345e]/10 flex items-center justify-center">
-                  <span class="text-2xl">💃</span>
-                </div>
-                <div>
-                  <p class="font-bold text-[#1a1a1a] text-lg">Dance Fitness Class</p>
-                  <p class="text-sm text-[#1a1a1a]/60">7:30 – 8:15 PM · Co-led by Kayla & Rut</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-[#d4345e]/15 shadow-sm hover:shadow-md hover:border-[#d4345e]/30 transition-all duration-300">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[#d4345e]/10 flex items-center justify-center">
-                  <span class="text-2xl">🎨</span>
-                </div>
-                <div>
-                  <p class="font-bold text-[#1a1a1a] text-lg">Arts & Crafts Activity</p>
-                  <p class="text-sm text-[#1a1a1a]/60">8:15 – 9:00 PM</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Location & time */}
-            <div class="space-y-2 mb-8">
-              <div class="flex items-center gap-3 text-[#1a1a1a]/70">
-                <svg class="w-5 h-5 text-[#d4345e] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <p class="font-medium">Friday, February 13th · Doors at 7:00 PM</p>
-              </div>
-              <div class="flex items-center gap-3 text-[#1a1a1a]/70">
-                <svg class="w-5 h-5 text-[#d4345e] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                <p class="font-medium">LSP HQ · 949 W. 16th St., Chicago, IL 60608</p>
-              </div>
-            </div>
-
-            {/* Dual CTAs */}
-            <div class="flex flex-col sm:flex-row gap-3">
-              <a
-                href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[#d4345e] px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-[#d4345e]/30 transform transition-all duration-300 hover:-translate-y-1 hover:brightness-110 hover:shadow-2xl hover:shadow-[#d4345e]/50 focus:outline-none focus:ring-4 focus:ring-[#d4345e]/30"
-              >
-                <span>Sign Up on the App</span>
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-              </a>
-              <a
-                href={`${base}schedule`}
-                class="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-[#d4345e] bg-transparent px-7 py-3.5 text-base font-bold text-[#d4345e] transform transition-all duration-300 hover:-translate-y-1 hover:bg-[#d4345e] hover:text-white hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#d4345e]/30"
-              >
-                <span>View Schedule</span>
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-              </a>
-            </div>
-
-            <p class="mt-5 text-sm text-[#1a1a1a]/50 italic flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-[#d4345e]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              Members — don't forget you have guest passes!
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Galentine's Night Event Section */}
-
-    {/* Galentine's floating hearts animation */}
-    <style>
-      @keyframes floatHeart {
-        0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
-        10% { opacity: 0.6; }
-        50% { opacity: 0.4; }
-        90% { opacity: 0.1; }
-        100% { transform: translateY(-20vh) rotate(360deg) scale(1.2); opacity: 0; }
-      }
-      .galentines-hearts .heart {
-        position: absolute;
-        bottom: -20px;
-        color: #d4345e;
-        opacity: 0;
-        animation: floatHeart 8s ease-in-out infinite;
-      }
-      @keyframes pulseDot {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.5); }
-      }
-      .galentines-section {
-        position: relative;
-      }
-      /* Polka dot pattern overlay like the heart on the flyer */
-      .galentines-section::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(circle, #d4345e 1px, transparent 1px);
-        background-size: 24px 24px;
-        opacity: 0.03;
-        pointer-events: none;
-      }
-    </style>
-
-    {/* START: Girls Day of Play Event Section */}
-    <section class="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-br from-[#e8f4f8] via-white to-[#f0e6ff]">
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
-          {/* Content Side */}
-          <div>
-            <div class="inline-block px-4 py-1.5 rounded-full bg-[#4a7fb5]/10 border border-[#4a7fb5]/30 mb-6">
-              <p class="font-sans text-sm font-bold uppercase tracking-widest text-[#4a7fb5]">
-                🎉 Free Community Event · Ages 6–12
-              </p>
-            </div>
-
-            <h2 class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 leading-tight text-off-black">
-              <span class="text-[#4a7fb5]">Girls Day</span>
-              <span> of </span>
-              <span class="text-[#7b5ea7]">Play</span>
-            </h2>
-            <p class="text-xl sm:text-2xl text-[#4a7fb5] font-semibold italic mb-6">
-              Sports, dance, culture, arts & fun!
-            </p>
-
-            <div class="space-y-5 font-body text-lg text-medium-gray">
-              <p class="text-xl font-light leading-relaxed">
-                LSP is partnering with <span class="font-bold text-[#4a7fb5]">Chicago Park District</span> & <span class="font-bold text-[#7b5ea7]">UNO Pilsen</span> to bring girls together to discover and embrace their abilities through sports, dance, culture, and arts.
-              </p>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#4a7fb5]/20 shadow-sm">
-                  <span class="text-2xl">⚽</span>
-                  <div>
-                    <p class="font-semibold text-off-black">Sports & Athletics</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#7b5ea7]/20 shadow-sm">
-                  <span class="text-2xl">💃</span>
-                  <div>
-                    <p class="font-semibold text-off-black">Dance</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#4a7fb5]/20 shadow-sm">
-                  <span class="text-2xl">🎨</span>
-                  <div>
-                    <p class="font-semibold text-off-black">Arts & Crafts</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#7b5ea7]/20 shadow-sm">
-                  <span class="text-2xl">🌟</span>
-                  <div>
-                    <p class="font-semibold text-off-black">Culture & Fun</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-2 space-y-3">
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#4a7fb5]/20 shadow-sm">
-                  <svg class="w-6 h-6 text-[#4a7fb5] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  <div>
-                    <p class="font-bold text-off-black">Tuesday, February 17th, 2026</p>
-                    <p class="text-sm text-medium-gray">9:00 AM – 3:00 PM</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-[#7b5ea7]/20 shadow-sm">
-                  <svg class="w-6 h-6 text-[#7b5ea7] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <div>
-                    <p class="font-bold text-off-black">Dvorak Park</p>
-                    <p class="text-sm text-medium-gray">1119 W. Cullerton St., Chicago · (312) 746-5083</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-8">
-              <a
-                href="https://www.chicagoparkdistrict.com/events/girls-day-play-dvorak"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#4a7fb5] via-[#7b5ea7] to-[#4a7fb5] bg-[length:200%_auto] animate-gradient-x px-8 py-4 text-lg font-bold text-white shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[#4a7fb5]/50"
-              >
-                <span>Register Free</span>
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-              </a>
-            </div>
-          </div>
-
-          {/* Instagram Embed Side */}
-          <div class="w-full flex justify-center">
-            <div class="w-full max-w-[540px]">
-              <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/p/DUooEQyEZ9m/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/p/DUooEQyEZ9m/?utm_source=ig_embed&amp;utm_campaign=loading" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style="display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style="width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style="width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style="background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style="width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/p/DUooEQyEZ9m/?utm_source=ig_embed&amp;utm_campaign=loading" style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A post shared by The Latina Sweat Project (@latinasweatproject)</a></p></div></blockquote>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Girls Day of Play Event Section */}
-
-    {/* Instagram Embed Script - loads once for both embeds */}
-    <script is:inline async src="//www.instagram.com/embed.js"></script>
 
     {/* START: Documentary CTA Section */}
     <section
@@ -537,36 +240,6 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Grand Opening Section */}
 
-    {/* START: Upcoming Events Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2
-          class="font-sans text-3xl font-bold tracking-tight text-center text-off-black sm:text-4xl"
-        >
-          Upcoming Events
-        </h2>
-        <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:max-w-4xl lg:mx-auto">
-          <EventCard
-            href="https://www.instagram.com/p/DUY7B4yETFV/"
-            target="_blank"
-            imageSrc={`${base}images/galentines-night.jpg`}
-            date="FEB 13, 2026"
-            title="Galentine's Night 💕"
-            description="Dance fitness class co-led by Kayla & Rut, followed by arts & crafts! Doors open at 7 PM. Sign up through the LSP app."
-          />
-          <EventCard
-            href="https://www.chicagoparkdistrict.com/events/girls-day-play-dvorak"
-            target="_blank"
-            imageSrc={`${base}images/girls-day-of-play.png`}
-            date="FEB 17, 2026"
-            title="Girls Day of Play 🎉"
-            description="FREE event for girls ages 6–12 at Dvorak Park, 9 AM – 3 PM. Sports, dance, arts & crafts! In partnership with Chicago Park District & UNO Pilsen."
-          />
-        </div>
-      </div>
-    </section>
-    {/* END: Upcoming Events Section */}
-
     {/* START: Instagram Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -603,23 +276,20 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: Instagram Section */}
-  </main>
-</Layout>
 
-
-
-
-<style>
-  @keyframes pulse-slow {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.85;
-    }
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 2s ease-in-out infinite;
-  }
-</style>
+    <style>
+      @keyframes pulse-slow {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.85;
+        }
+      }
+      .animate-pulse-slow {
+        animation: pulse-slow 2s ease-in-out infinite;
+      }
+    </style>
+  </main></Layout
+>

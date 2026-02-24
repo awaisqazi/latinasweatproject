@@ -200,51 +200,29 @@ const boards = [
         </div>
 
         {/* Pill Navigation */}
-        <div class="relative pill-nav-wrapper">
-          {/* Fade edge to hint there's more */}
-          <div
-            class="sm:hidden absolute right-0 top-0 bottom-6 w-12 bg-gradient-to-l from-[#1a1a1a] to-transparent z-10 pointer-events-none"
+        <div class="flex flex-wrap justify-center pb-6 mb-8 gap-3 pill-nav">
+          <button
+            class="pill-btn active whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-vibrant-pink text-white shadow-lg shadow-vibrant-pink/30 hover:scale-105"
+            data-filter="all"
           >
-          </div>
-          <div
-            class="flex overflow-x-auto pb-4 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center gap-3 no-scrollbar pill-nav"
+            All Members
+          </button>
+          <button
+            class="pill-btn whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-white/10 text-white hover:bg-white/20 hover:scale-105"
+            data-filter="board-of-directors"
           >
-            <button
-              class="pill-btn active whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-vibrant-pink text-white shadow-lg shadow-vibrant-pink/30 hover:scale-105"
-              data-filter="all"
-            >
-              All Members
-            </button>
-            <button
-              class="pill-btn whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-white/10 text-white hover:bg-white/20 hover:scale-105"
-              data-filter="board-of-directors"
-            >
-              Board of Directors
-            </button>
-            {
-              boards.map((board) => (
-                <button
-                  class="pill-btn whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-white/10 text-white hover:bg-white/20 hover:scale-105"
-                  data-filter={board.id}
-                >
-                  {board.name}
-                </button>
-              ))
-            }
-          </div>
-          {/* Swipe hint on mobile */}
-          <p
-            class="sm:hidden flex items-center justify-center gap-1.5 -mt-2 mb-4 text-xs text-white/40 animate-pulse"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg
-            >
-            Swipe to filter
-          </p>
+            Board of Directors
+          </button>
+          {
+            boards.map((board) => (
+              <button
+                class="pill-btn whitespace-nowrap px-6 py-2.5 rounded-full font-sans font-semibold text-sm transition-all duration-300 bg-white/10 text-white hover:bg-white/20 hover:scale-105"
+                data-filter={board.id}
+              >
+                {board.name}
+              </button>
+            ))
+          }
         </div>
 
         {/* Dynamic Grid */}
@@ -600,7 +578,7 @@ const boards = [
             </h3>
           </div>
           <BoardMemberCard
-            name="Awais 'Fez' Qazi"
+            name="Fez Qazi"
             role="Chair"
             boardId="web-data-ai"
             isLeadership={true}
@@ -1254,16 +1232,26 @@ const boards = [
     display: none;
   }
 
-  /* Mobile: stack the carousel differently */
+  /* Mobile: neighbor cards show photo only, no text */
   @media (max-width: 640px) {
     .jb-card {
       height: 260px;
     }
     .jb-expanded {
-      height: 320px;
+      height: 340px;
     }
     .jb-neighbor {
-      flex: 0.5 1 0% !important;
+      flex: 0.4 1 0% !important;
+    }
+    .jb-neighbor .jb-name,
+    .jb-neighbor .jb-hint {
+      display: none;
+    }
+    .jb-neighbor > div:last-child {
+      background: transparent;
+    }
+    .jb-neighbor > div.absolute.inset-0 {
+      opacity: 0.3;
     }
   }
 </style>
