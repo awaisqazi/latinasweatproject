@@ -1,9 +1,5 @@
-<script context="module">
-    import { fade } from "svelte/transition";
-</script>
-
 <script>
-    export let baseUrl = "/";
+        export let baseUrl = "/";
 
     const juniorBoard = [
         {
@@ -113,8 +109,7 @@
                     {#if expandedIndex === index}
                         <p
                             class="member-bio"
-                            in:fade={{ duration: 300, delay: 100 }}
-                        >
+                                                    >
                             {member.bio}
                         </p>
                         <span class="tap-hint">Tap to close</span>
@@ -145,7 +140,7 @@
             stroke="currentColor"
             stroke-width="2"
         >
-            <path d="M5 12h14M12 5l7 7-7 7" />
+            <path d="M 5 12 h 14 M 12 5 l 7 7 l -7 7" />
         </svg>
         Swipe to explore • Tap to expand
     </p>

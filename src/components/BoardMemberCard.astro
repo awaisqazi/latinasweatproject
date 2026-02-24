@@ -5,8 +5,18 @@ interface Props {
     email?: string;
     imageSrc?: string;
     variant?: "dark" | "light";
+    isLeadership?: boolean;
+    boardId?: string;
 }
-const { name, role, email, imageSrc, variant = "dark" } = Astro.props;
+const {
+    name,
+    role,
+    email,
+    imageSrc,
+    variant = "dark",
+    isLeadership = false,
+    boardId,
+} = Astro.props;
 
 // Generate initials from name
 const initials = name
@@ -32,11 +42,20 @@ const colorIndex =
     colors.length;
 const bgColor = colors[colorIndex];
 
-// Styling based on variant
-const cardClasses =
+// Styling based on variant and leadership
+const baseCardClasses =
     variant === "light"
         ? "bg-off-black/10 border-off-black/10 hover:bg-off-black/20"
         : "bg-white/10 border-white/10 hover:bg-white/20";
+
+const spotlightClasses = isLeadership
+    ? "border-vibrant-pink/50 shadow-[0_0_15px_rgba(236,72,153,0.3)] md:col-span-2 scale-[1.02]"
+    : baseCardClasses;
+
+const cardClasses = isLeadership
+    ? `bg-white/10 hover:bg-white/20 ${spotlightClasses}`
+    : baseCardClasses;
+
 const nameClasses = variant === "light" ? "text-off-black" : "text-white";
 const emailClasses =
     variant === "light"
@@ -53,7 +72,9 @@ const iconClasses =
 ---
 
 <div
-    class={`board-member-card flex items-center gap-4 p-4 rounded-xl backdrop-blur-sm border transition-all duration-300 hover:scale-[1.02] ${cardClasses}`}
+    class={`board-member-card flex items-center gap-4 p-4 rounded-xl backdrop-blur-sm border transition-all duration-500 hover:scale-[1.03] animate-fade-in-up filter-item ${cardClasses}`}
+    data-board={boardId}
+    data-leadership={isLeadership ? "true" : "false"}
 >
     {/* Photo or Initials Avatar */}
     <div class="flex-shrink-0">
