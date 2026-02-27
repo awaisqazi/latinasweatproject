@@ -1,185 +1,622 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
 const base = import.meta.env.BASE_URL;
 
-const mutualAidImages = [
-  { src: 'mutual-aid-1.jpg', alt: 'Donation drive with clothing and supplies' },
-  { src: 'mutual-aid-2.jpg', alt: 'Volunteers organizing food donations' },
-  { src: 'mutual-aid-3.jpg', alt: 'Community members receiving aid' },
-  { src: 'mutual-aid-4.jpg', alt: 'A community member receiving a bag of groceries' },
-  { src: 'mutual-aid-5.jpg', alt: 'A table full of donated clothing items' },
-  { src: 'mutual-aid-6.jpg', alt: 'Volunteers smiling together during a donation drive' },
-  { src: 'mutual-aid-7.jpg', alt: 'Boxes of food and supplies ready for distribution' },
+const milestones = [
+  {
+    stat: "100,000+",
+    label: "Students Reached",
+    description:
+      "We reached more than 100,000 students and activated a volunteer base of over 100 community members.",
+    icon: "🙌",
+    image: "3.png",
+  },
+  {
+    stat: "240",
+    label: "Monthly Classes",
+    description:
+      "We expanded our programming from 25 classes in January to 55 in May, 100 in September, and 240 by December.",
+    icon: "📈",
+    image: "2.png",
+  },
+  {
+    stat: "100+",
+    label: "Collaborations",
+    description:
+      "Participated in 100+ corporate and community collaborations, including lululemon, Chicago Bulls, Chicago White Sox, Make-A-Wish, Hoka, Organic Oneness, ALPFA, Stockyard and Air.",
+    icon: "🤝",
+    image: "4.png",
+  },
+  {
+    stat: "50+",
+    label: "BIPOC Instructors",
+    description:
+      "Amplified, employed, and collaborated with over 50 BIPOC instructors across Chicago.",
+    icon: "💪",
+    image: "5.png",
+  },
+  {
+    stat: "First-Ever",
+    label: "YTT Curriculum",
+    description:
+      "Created the first-ever Yoga Alliance–approved Latina Sweat 200-Hour Teacher Training curriculum.",
+    icon: "🎓",
+    image: "6.png",
+  },
+  {
+    stat: "New Home",
+    label: "Pilsen Studio",
+    description:
+      "Moved into our new home—the first yoga nonprofit studio in Pilsen—located on 16th and Morgan.",
+    icon: "🏠",
+    image: "7.png",
+  },
+  {
+    stat: "45",
+    label: "Certified Instructors",
+    description:
+      "Certified 45 new yoga instructors from the Southwest Side and surrounding communities.",
+    icon: "🧘",
+    image: "8.png",
+  },
+  {
+    stat: "1,000+",
+    label: "Warm Meals",
+    description:
+      "Distributed more than 1,000 warm meals to families across our neighborhoods.",
+    icon: "🍲",
+    image: "9.png",
+  },
+  {
+    stat: "2,500",
+    label: "School Items",
+    description: "Gifted 2,500 back-to-school items to local youth.",
+    icon: "🎒",
+    image: "10.png",
+  },
+  {
+    stat: "7,500+",
+    label: "Clothing Donated",
+    description:
+      "Donated more than 7,500 articles of clothing through our community mutual aid work.",
+    icon: "👕",
+    image: "11.png",
+  },
+  {
+    stat: "25+",
+    label: "BIPOC Artists",
+    description:
+      "Hosted a gallery featuring 25+ BIPOC artists whose work reflects culture, identity, and community.",
+    icon: "🎨",
+    image: "12.png",
+  },
+  {
+    stat: "5 New Boards",
+    label: "Leadership Growth",
+    description:
+      "Expanded our leadership ecosystem into five new boards: Advancements & Partnerships, Brand & Visibility, Community Impact, Culture & Ethics, Certification, and the Queer Community Care & Events Board.",
+    icon: "🌟",
+    image: "13.png",
+  },
+];
+
+const heroStats = [
+  { number: "100K+", label: "Students Reached" },
+  { number: "240", label: "Classes / Month" },
+  { number: "50+", label: "BIPOC Instructors" },
+  { number: "45", label: "Newly Certified" },
+];
+
+const timelineSteps = [
+  { month: "Jan", classes: 25 },
+  { month: "May", classes: 55 },
+  { month: "Sep", classes: 100 },
+  { month: "Dec", classes: 240 },
 ];
 ---
 
-<Layout title="Community Impact | The Latina Sweat Project">
+<Layout title="2025 Impact Wrapped | The Latina Sweat Project">
   <Header />
   <main>
-    {/* START: Page Header Section */}
-    <section class="bg-light-gray py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <h1 class="mt-2 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">
-          Community Impact
-        </h1>
-        <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray sm:text-xl">
-          See how we're making a difference, together.
+    {/* ── HERO ── */}
+    <section
+      id="impact-hero"
+      class="relative overflow-hidden bg-off-black py-28 sm:py-36 lg:py-44"
+    >
+      {/* Ambient blurs */}
+      <div
+        class="pointer-events-none absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-vibrant-pink/20 blur-[140px]"
+      >
+      </div>
+      <div
+        class="pointer-events-none absolute -bottom-24 right-1/4 h-[400px] w-[400px] rounded-full bg-accent-gold/15 blur-[120px]"
+      >
+      </div>
+
+      <div
+        class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8"
+      >
+        <p
+          class="font-sans text-sm font-bold uppercase tracking-[0.25em] text-accent-gold animate-hero-fade"
+        >
+          Para la comunidad 🤎
         </p>
+        <h1
+          class="mt-5 font-sans text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-none animate-hero-up"
+        >
+          2025 <span class="text-accent-gold">Wrapped</span><span
+            class="sparkle">✦</span
+          >
+        </h1>
+        <p
+          class="mx-auto mt-6 max-w-2xl font-body text-lg sm:text-xl text-white/75 animate-hero-up-delay"
+        >
+          A year of radical growth, community power, and healing in motion.
+          Here's what we accomplished together.
+        </p>
+
+        {/* Scroll hint */}
+        <div class="mt-12 animate-bounce text-white/40">
+          <svg
+            class="mx-auto h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg
+          >
+        </div>
       </div>
     </section>
-    {/* END: Page Header Section */}
 
-    {/* START: 200Hr Yoga Teacher Training Section */}
-    <section class="py-16 sm:py-24">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/impact/ytt.jpg`} alt="Diverse group of people in a yoga teacher training session" class="h-full w-full object-cover" />
+    {/* ── HEADLINE STATS BANNER ── */}
+    <section
+      class="relative bg-gradient-to-r from-off-black via-[#2a2520] to-off-black py-16 sm:py-20"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+          {
+            heroStats.map((stat) => (
+              <div class="stat-card group text-center" data-reveal>
+                <p class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold text-accent-gold transition-transform duration-300 group-hover:scale-110">
+                  {stat.number}
+                </p>
+                <p class="mt-2 font-body text-sm sm:text-base font-medium uppercase tracking-wider text-white/70">
+                  {stat.label}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ── GROWTH TIMELINE ── */}
+    <section class="relative overflow-hidden bg-off-black py-20 sm:py-28">
+      <div
+        class="pointer-events-none absolute top-0 left-0 h-full w-full bg-gradient-to-b from-vibrant-pink/10 to-transparent"
+      >
+      </div>
+      <div class="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <p
+            class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+          >
+            Programming Growth
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white"
+          >
+            From <span class="text-accent-gold">25</span> to <span
+              class="text-accent-gold">240</span
+            >
+          </h2>
+          <p
+            class="mx-auto mt-4 max-w-xl font-body text-base sm:text-lg text-white/60"
+          >
+            We nearly 10×'d our monthly class programming in a single year.
+          </p>
+        </div>
+
+        {/* Timeline bar */}
+        <div class="timeline-container" data-reveal>
+          <div class="timeline-track">
+            <div class="timeline-progress"></div>
           </div>
-          <div class="lg:order-first">
-            <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">200Hr Yoga Teacher Training</h2>
-            <p class="mt-4 font-sans text-lg font-semibold text-vibrant-pink">August 4 - December 15</p>
-            <p class="mt-4 font-body text-lg text-medium-gray">Our vision is to create community-led, accessible, health and wellness resources by empowering the next generation of instructors from within our community.</p>
-            
-            <div class="mt-8 space-y-6 border-t border-slate-200 pt-6">
-              <h3 class="font-sans text-xl font-bold text-off-black">Application FAQ</h3>
-              <div class="space-y-4">
-                <div>
-                  <h4 class="font-sans font-semibold text-medium-gray">Who can apply?</h4>
-                  <p class="font-body text-medium-gray">This program is open to all dedicated members of our community who are passionate about wellness and leadership.</p>
+          <div class="timeline-steps">
+            {
+              timelineSteps.map((step, i) => (
+                <div class="timeline-step" style={`--delay: ${i * 0.2}s`}>
+                  <div class="timeline-dot" />
+                  <div class="timeline-value">{step.classes}</div>
+                  <div class="timeline-month">{step.month}</div>
                 </div>
-                <div>
-                  <h4 class="font-sans font-semibold text-medium-gray">Where can I apply?</h4>
-                  <p class="font-body text-medium-gray">Applications will be available through a link on our website and social media channels.</p>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── MILESTONES GRID ── */}
+    <section
+      class="relative py-20 sm:py-28 bg-gradient-to-b from-off-black via-[#2a2520] to-off-black"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <p
+            class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+          >
+            2025 Milestones
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white"
+          >
+            What We Accomplished Together
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {
+            milestones.map((m, i) => (
+              <div
+                class="milestone-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8 transition-all duration-500 hover:border-accent-gold/40 hover:bg-white/10 hover:shadow-[0_0_40px_rgba(255,189,89,0.1)]"
+                style={`--delay: ${(i % 3) * 0.1}s`}
+                data-reveal
+              >
+                {/* Background image (very subtle) */}
+                <div class="absolute inset-0 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-700">
+                  <img
+                    src={`${base}images/wrapped/${m.image}`}
+                    alt=""
+                    class="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
-                <div>
-                  <h4 class="font-sans font-semibold text-medium-gray">What is the deadline?</h4>
-                  <p class="font-body text-medium-gray">All applications must be submitted by July 15th, 2025.</p>
+
+                <div class="relative z-10">
+                  <span class="text-3xl">{m.icon}</span>
+                  <p class="mt-4 font-sans text-3xl sm:text-4xl font-extrabold text-accent-gold leading-none">
+                    {m.stat}
+                  </p>
+                  <p class="mt-1 font-sans text-xs font-bold uppercase tracking-[0.15em] text-white/50">
+                    {m.label}
+                  </p>
+                  <p class="mt-4 font-body text-sm sm:text-base text-white/70 leading-relaxed">
+                    {m.description}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
+            ))
+          }
         </div>
       </div>
     </section>
-    {/* END: 200Hr Yoga Teacher Training Section */}
 
-    {/* START: Monthly Impact Section */}
-    <section class="bg-light-gray py-16 sm:py-24">
+    {/* ── PREVIOUS YEARS ── */}
+    <section class="py-16 sm:py-24 bg-off-black">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Monthly Vibe Check: Free Community Classes</h2>
+        <div class="text-center mb-12">
+          <p
+            class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+          >
+            Looking Back
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl font-bold tracking-tight text-white"
+          >
+            Previous Years
+          </h2>
         </div>
-        <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- January Card -->
-          <div class="overflow-hidden rounded-lg bg-white shadow-md">
-            <img src={`${base}images/impact/monthly-jan.jpg`} alt="Community class in January" class="h-48 w-full object-cover">
-            <div class="p-6 text-center">
-              <h3 class="font-sans text-xl font-bold text-off-black">January 2025</h3>
-              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
-                <li><span class="font-semibold">2,940</span> Students Served</li>
-                <li><span class="font-semibold">7</span> Instructors</li>
-                <li><span class="font-semibold">80</span> Classes Led</li>
-              </ul>
-            </div>
-          </div>
-          <!-- February Card -->
-          <div class="overflow-hidden rounded-lg bg-white shadow-md">
-            <img src={`${base}images/impact/monthly-feb.jpg`} alt="Community class in February" class="h-48 w-full object-cover">
-            <div class="p-6 text-center">
-              <h3 class="font-sans text-xl font-bold text-off-black">February 2025</h3>
-              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
-                <li><span class="font-semibold">4,718</span> Students Served</li>
-                <li><span class="font-semibold">11</span> Instructors</li>
-                <li><span class="font-semibold">92</span> Classes Led</li>
-              </ul>
-            </div>
-          </div>
-          <!-- March Card -->
-          <div class="overflow-hidden rounded-lg bg-white shadow-md">
-            <img src={`${base}images/impact/monthly-mar.jpg`} alt="Community class in March" class="h-48 w-full object-cover">
-            <div class="p-6 text-center">
-              <h3 class="font-sans text-xl font-bold text-off-black">March 2025</h3>
-              <ul class="mt-4 list-none space-y-2 font-body text-medium-gray">
-                <li><span class="font-semibold">6,134</span> Students Served</li>
-                <li><span class="font-semibold">15</span> Instructors</li>
-                <li><span class="font-semibold">105</span> Classes Led</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Monthly Impact Section */}
-
-    {/* START: Yearly Vibe Check Section */}
-    <section class="py-16 sm:py-24">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Yearly Vibe Check</h2>
-        </div>
-        <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2">
-          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-            <h3 class="font-sans text-2xl font-bold text-off-black">2024 Impact</h3>
-            <ul class="mt-4 space-y-3 font-body text-medium-gray">
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">2,000+</span> Attendees</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">50</span> Free Community Events</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">$27,000</span> Donated to Non-Profits</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">200</span> Yoga Mats Donated</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">100</span> Emergency Packs</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">35</span> Bags of Clothing Donated</li>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div
+            class="rounded-2xl border border-white/10 bg-white/5 p-8"
+            data-reveal
+          >
+            <h3 class="font-sans text-2xl font-bold text-accent-gold">
+              2024 Impact
+            </h3>
+            <ul class="mt-4 space-y-3 font-body text-white/70">
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">2,000+</span> Attendees
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">50</span> Free Community
+                Events
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">$27,000</span> Donated
+                to Non-Profits
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">200</span> Yoga
+                Mats Donated
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">100</span> Emergency
+                Packs
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">35</span> Bags of
+                Clothing Donated
+              </li>
             </ul>
           </div>
-          <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-            <h3 class="font-sans text-2xl font-bold text-off-black">2023 Impact</h3>
-            <ul class="mt-4 space-y-3 font-body text-medium-gray">
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">1,000+</span> Attendees</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">25</span> Free Community Events</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">750</span> Yoga Mats Donated</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">500</span> Emergency Packs</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">100</span> Children's Snack Packs</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">75</span> Gallons of Soap</li>
-              <li class="flex items-baseline gap-3"><span class="text-2xl font-bold text-vibrant-pink">50</span> Bags of Clothing Donated</li>
+          <div
+            class="rounded-2xl border border-white/10 bg-white/5 p-8"
+            data-reveal
+          >
+            <h3 class="font-sans text-2xl font-bold text-accent-gold">
+              2023 Impact
+            </h3>
+            <ul class="mt-4 space-y-3 font-body text-white/70">
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">1,000+</span> Attendees
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">25</span> Free Community
+                Events
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">750</span> Yoga
+                Mats Donated
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">500</span> Emergency
+                Packs
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">100</span> Children's
+                Snack Packs
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">75</span> Gallons
+                of Soap
+              </li>
+              <li class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-vibrant-pink">50</span> Bags of
+                Clothing Donated
+              </li>
             </ul>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Yearly Vibe Check Section */}
 
-    {/* START: Yoga for Wishes Section */}
-    <section class="bg-light-gray py-16 sm:py-24">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
-          <div>
-            <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Yoga for Wishes</h2>
-            <p class="mt-4 font-body text-lg text-medium-gray">We were honored to host "Yoga for Wishes," a special charity event that brought our community together to support the incredible work of the <span class="font-semibold text-vibrant-pink">Make A Wish Illinois</span> foundation. Together, we flowed with purpose and raised funds to help grant life-changing wishes.</p>
-          </div>
-          <div class="w-full overflow-hidden rounded-lg shadow-xl">
-            <img src={`${base}images/impact/yoga-for-wishes.jpg`} alt="Group of people at the Yoga for Wishes charity event" class="h-full w-full object-cover" />
-          </div>
+    {/* ── CTA ── */}
+    <section
+      class="relative overflow-hidden bg-gradient-to-br from-[#2a2520] via-off-black to-off-black py-20 sm:py-28"
+    >
+      <div
+        class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-vibrant-pink/15 blur-[140px]"
+      >
+      </div>
+      <div
+        class="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8"
+      >
+        <h2
+          class="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white"
+        >
+          Be Part of <span class="text-accent-gold">2026</span>
+        </h2>
+        <p class="mx-auto mt-6 max-w-xl font-body text-lg text-white/70">
+          Like, follow, and share. Sign up for classes and memberships. Join our
+          email list for news, info, and upcoming events.
+        </p>
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <a
+            href={`${base}schedule`}
+            class="btn inline-block rounded-full bg-accent-gold px-8 py-3.5 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/30"
+          >
+            View Schedule
+          </a>
+          <a
+            href={`${base}pricing`}
+            class="inline-block rounded-full border-2 border-white/30 px-8 py-3.5 text-base font-bold text-white transition-all hover:border-accent-gold hover:text-accent-gold hover:scale-105"
+          >
+            Memberships
+          </a>
         </div>
       </div>
     </section>
-    {/* END: Yoga for Wishes Section */}
-
-    {/* START: Community Mutual Aid Section */}
-    <section class="py-16 sm:py-24">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Community Mutual Aid</h2>
-          <p class="mt-4 font-body text-lg text-medium-gray">Our strength is in our solidarity. Through clothing drives, food donations, and resource sharing, we actively support one another, ensuring our community thrives both inside and outside the studio.</p>
-        </div>
-        <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {mutualAidImages.map(image => (
-            <div class="overflow-hidden rounded-lg shadow-md">
-              <img src={`${base}images/impact/${image.src}`} alt={image.alt} class="h-full w-full object-cover" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-    {/* END: Community Mutual Aid Section */}
   </main>
 </Layout>
+
+<style>
+  /* Hero Animations */
+  .animate-hero-fade {
+    animation: heroFade 0.8s ease-out both;
+  }
+  .animate-hero-up {
+    animation: heroUp 0.8s ease-out 0.2s both;
+  }
+  .animate-hero-up-delay {
+    animation: heroUp 0.8s ease-out 0.4s both;
+  }
+
+  @keyframes heroFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes heroUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Sparkle */
+  .sparkle {
+    display: inline-block;
+    color: var(--color-accent-gold);
+    animation: sparkle-pulse 2s ease-in-out infinite;
+  }
+  @keyframes sparkle-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.3);
+    }
+  }
+
+  /* Stat Cards */
+  .stat-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
+  }
+  .stat-card.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Timeline */
+  .timeline-container {
+    position: relative;
+    padding: 3rem 0 1rem;
+  }
+  .timeline-track {
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transform: translateY(-50%);
+  }
+  .timeline-progress {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent-gold),
+      var(--color-vibrant-pink)
+    );
+    border-radius: 4px;
+    transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .timeline-container.revealed .timeline-progress {
+    width: 100%;
+  }
+
+  .timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 5%;
+  }
+  .timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
+    transition-delay: var(--delay);
+  }
+  .timeline-container.revealed .timeline-step {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .timeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-accent-gold);
+    border: 3px solid var(--color-off-black);
+    box-shadow: 0 0 12px rgba(255, 189, 89, 0.4);
+    margin-bottom: 0.75rem;
+  }
+  .timeline-value {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 1.75rem;
+    color: white;
+    line-height: 1;
+  }
+  .timeline-month {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.25rem;
+  }
+
+  /* Milestone Cards */
+  .milestone-card {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out,
+      border-color 0.4s,
+      background-color 0.4s,
+      box-shadow 0.4s;
+    transition-delay: var(--delay);
+  }
+  .milestone-card.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive Timeline */
+  @media (max-width: 640px) {
+    .timeline-value {
+      font-size: 1.25rem;
+    }
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+    }
+  }
+</style>
+
+<script>
+  // Intersection Observer for scroll-triggered reveals
+  document.addEventListener("DOMContentLoaded", () => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
+    );
+
+    document.querySelectorAll("[data-reveal]").forEach((el) => {
+      observer.observe(el);
+    });
+
+    // Also reveal stat-cards and milestone-cards
+    document.querySelectorAll(".stat-card, .milestone-card").forEach((el) => {
+      observer.observe(el);
+    });
+  });
+</script>
