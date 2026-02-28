@@ -23,7 +23,7 @@ const canonicalURL = new URL(
 );
 
 // Google Analytics 4 Measurement ID — replace with your real ID
-const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+const GA_MEASUREMENT_ID = "G-RW22LK0G9J";
 ---
 
 <!doctype html>
@@ -51,23 +51,17 @@ const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
     <meta name="robots" content="index, follow" />
 
     <!-- Google Analytics 4 -->
-    {
-      GA_MEASUREMENT_ID !== "G-XXXXXXXXXX" && (
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        />
-      )
-    }
+    <script
+      async
+      src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+    ></script>
     <script define:vars={{ GA_MEASUREMENT_ID }}>
-      if (GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          dataLayer.push(arguments);
-        }
-        gtag("js", new Date());
-        gtag("config", GA_MEASUREMENT_ID);
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
       }
+      gtag("js", new Date());
+      gtag("config", GA_MEASUREMENT_ID);
     </script>
 
     <!-- Open Graph / Facebook -->
