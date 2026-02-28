@@ -5,16 +5,25 @@ const base = import.meta.env.BASE_URL;
 
 interface Props {
   title: string;
+  description?: string;
   hideFooter?: boolean;
 }
 
-const { title, hideFooter = false } = Astro.props;
+const { title, description: pageDescription, hideFooter = false } = Astro.props;
 const siteName = "The Latina Sweat Project";
 const description =
-  "Empowering through movement, community, and culture. Join our vibrant community in Chicago and experience fitness that celebrates our culture.";
+  pageDescription ||
+  "Free community yoga, fitness classes, and wellness events in Pilsen, Chicago. The Latina Sweat Project empowers through movement, culture, and community on the Southwest Side.";
 const socialImage = "logo2.png";
 const socialImageAlt = "The Latina Sweat Project Logo";
 const socialImageUrl = new URL(base + socialImage, Astro.url);
+const canonicalURL = new URL(
+  Astro.url.pathname,
+  "https://latinasweatproject.com",
+);
+
+// Google Analytics 4 Measurement ID — replace with your real ID
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
 ---
 
 <!doctype html>
@@ -26,6 +35,40 @@ const socialImageUrl = new URL(base + socialImage, Astro.url);
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.ico`} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL.href} />
+
+    <!-- Local SEO: Geo & Keywords -->
+    <meta name="geo.region" content="US-IL" />
+    <meta name="geo.placename" content="Pilsen, Chicago" />
+    <meta name="geo.position" content="41.8584;-87.6510" />
+    <meta name="ICBM" content="41.8584, -87.6510" />
+    <meta
+      name="keywords"
+      content="yoga Pilsen Chicago, free yoga classes Chicago, Latina wellness, community yoga Southwest Side, nonprofit yoga studio Pilsen, fitness classes Pilsen, yoga teacher training Chicago, BIPOC yoga Chicago, wellness events Pilsen, Latina Sweat Project"
+    />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Google Analytics 4 -->
+    {
+      GA_MEASUREMENT_ID !== "G-XXXXXXXXXX" && (
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        />
+      )
+    }
+    <script define:vars={{ GA_MEASUREMENT_ID }}>
+      if (GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+        gtag("config", GA_MEASUREMENT_ID);
+      }
+    </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:site_name" content={siteName} />
@@ -127,6 +170,86 @@ const socialImageUrl = new URL(base + socialImage, Astro.url);
     <!-- Page Password protection script (Before go live remove this script unless you need password on mariana tek pages) -->
 
     {!hideFooter && <Footer />}
-    {/* Add the Footer component here */}
+
+    <!-- Local Business JSON-LD Structured Data -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": ["SportsActivityLocation", "NonprofitOrganization"],
+        name: "The Latina Sweat Project",
+        alternateName: "LSP",
+        description:
+          "Free community yoga, fitness classes, and wellness events empowering Pilsen and Chicago's Southwest Side through movement, culture, and community.",
+        url: "https://latinasweatproject.com",
+        logo: "https://latinasweatproject.com/logo2.png",
+        image: "https://latinasweatproject.com/images/studio.png",
+        telephone: "",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "16th and Morgan",
+          addressLocality: "Chicago",
+          addressRegion: "IL",
+          postalCode: "60608",
+          addressCountry: "US",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 41.8584,
+          longitude: -87.651,
+        },
+        areaServed: [
+          { "@type": "Place", name: "Pilsen, Chicago, IL" },
+          { "@type": "Place", name: "Southwest Side, Chicago, IL" },
+          { "@type": "Place", name: "Chicago, IL" },
+        ],
+        sameAs: [
+          "https://www.instagram.com/latinasweatproject/",
+          "https://www.tiktok.com/@latinasweatproject",
+        ],
+        priceRange: "Free - $",
+        openingHoursSpecification: {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          opens: "06:00",
+          closes: "21:00",
+        },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Yoga & Fitness Classes",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Community Yoga Classes",
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "200-Hour Yoga Teacher Training",
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Bootcamp & Fitness Classes",
+              },
+            },
+          ],
+        },
+      })}
+    />
   </body>
 </html>
