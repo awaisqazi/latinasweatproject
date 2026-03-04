@@ -24,30 +24,265 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Page Header Section */}
 
-    {/* START: Upcoming Events Section */}
-    <section class="py-16 md:py-24">
-      <div class="mx-auto max-w-7xl px-4">
-        <h2
-          class="mb-12 text-center font-sans text-3xl font-bold text-off-black sm:text-4xl"
+    {/* START: Monday Miles Featured Section */}
+    <section class="relative overflow-hidden bg-off-black py-16 md:py-20">
+      {/* Subtle track lines background */}
+      <div class="absolute inset-0 opacity-[0.04]">
+        <div
+          class="absolute inset-0"
+          style="background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, white 60px, white 61px);"
         >
-          Upcoming Events
-        </h2>
-        <div class="text-center py-12">
-          <p class="text-lg text-medium-gray">
-            No upcoming events at this time. Check back soon or follow us on
-            <a
-              href="https://www.instagram.com/latinasweatproject/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-vibrant-pink font-semibold hover:underline"
+        </div>
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div
+          class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12"
+        >
+          {/* Left: Image (2 cols) */}
+          <div class="relative lg:col-span-2">
+            <div
+              class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent-gold/20 via-vibrant-pink/10 to-transparent blur-xl"
             >
-              Instagram
-            </a>
-            for the latest updates!
-          </p>
+            </div>
+            <div
+              class="relative overflow-hidden rounded-2xl border border-white/10"
+            >
+              <img
+                src={`${base}images/monday-miles-runner.png`}
+                alt="Monday Miles — community running group in Pilsen, Chicago"
+                class="h-80 w-full object-cover sm:h-96 lg:h-[28rem]"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-off-black/70 via-transparent to-transparent"
+              >
+              </div>
+              <div
+                class="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2"
+              >
+                <span
+                  class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
+                  >Free</span
+                >
+                <span
+                  class="rounded-full bg-vibrant-pink/80 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white"
+                  >All Levels</span
+                >
+                <span
+                  class="rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm"
+                  >Weekly</span
+                >
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Content (3 cols) */}
+          <div class="lg:col-span-3 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-accent-gold/15 px-4 py-2 mb-5"
+            >
+              <span class="relative flex h-2.5 w-2.5">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"
+                ></span>
+              </span>
+              <span
+                class="text-xs font-bold uppercase tracking-widest text-accent-gold"
+                >New Community Series</span
+              >
+            </div>
+
+            <h2
+              class="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
+            >
+              Monday Miles
+            </h2>
+            <p class="mt-2 text-xl font-semibold text-accent-gold">
+              Weekly Walk & Run Group
+            </p>
+
+            <p
+              class="mt-5 text-lg text-white/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            >
+              Mondays just got better. Meet in the cafe, warm up together, and
+              head out. Walk 1 mile or jog/run 2 — you set the pace. Because
+              movement is medicine, and it's better in community.
+            </p>
+
+            {/* Details grid */}
+            <div
+              class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0"
+            >
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                    When
+                  </p>
+                  <p class="text-sm font-bold text-white">Every Monday</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                    Time
+                  </p>
+                  <p class="text-sm font-bold text-white">6:30 PM</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                    Where
+                  </p>
+                  <p class="text-sm font-bold text-white">LSP Cafe</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Route options */}
+            <div
+              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-6"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="flex h-8 w-8 items-center justify-center rounded-full bg-vibrant-pink/20 text-vibrant-pink"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg
+                  >
+                </span>
+                <span class="text-sm text-white/70"
+                  >Walk <span class="font-bold text-vibrant-pink">1 mile</span
+                  ></span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-gold/20 text-accent-gold"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg
+                  >
+                </span>
+                <span class="text-sm text-white/70"
+                  >Jog / Run <span class="font-bold text-accent-gold"
+                    >2 miles</span
+                  ></span
+                >
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div class="mt-8">
+              <a
+                href={`${base}schedule`}
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/40"
+              >
+                Join for Free
+                <svg
+                  class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
+    {/* END: Monday Miles Featured Section */}
+
+    {/* START: Stay Connected Section */}
+    <section class="py-16 md:py-24">
+      <div class="mx-auto max-w-7xl px-4 text-center">
+        <p class="text-lg text-medium-gray">
+          More events coming soon! Follow us on
+          <a
+            href="https://www.instagram.com/latinasweatproject/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-vibrant-pink font-semibold hover:underline"
+          >
+            Instagram
+          </a>
+          for the latest updates.
+        </p>
+      </div>
+    </section>
+    {/* END: Stay Connected Section */}
   </main>
 </Layout>
-{/* END: Upcoming Events Section */}

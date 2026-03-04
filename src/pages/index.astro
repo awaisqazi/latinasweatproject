@@ -118,6 +118,217 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Documentary CTA Section */}
 
+    {/* START: Monday Miles — Community Runs Section */}
+    <section
+      class="relative overflow-hidden bg-off-black py-16 sm:py-20 lg:py-24"
+    >
+      {/* Animated background pattern */}
+      <div class="absolute inset-0 opacity-10">
+        <div
+          class="absolute inset-0"
+          style="background-image: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,189,89,0.3) 40px, rgba(255,189,89,0.3) 41px); background-size: 100% 100%;"
+        >
+        </div>
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16"
+        >
+          {/* Left: Content */}
+          <div class="text-center lg:text-left">
+            {/* Badge */}
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-accent-gold/15 px-4 py-2 mb-6"
+            >
+              <span class="relative flex h-2.5 w-2.5">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"
+                ></span>
+              </span>
+              <span
+                class="text-sm font-bold uppercase tracking-widest text-accent-gold"
+                >New Weekly Series</span
+              >
+            </div>
+
+            <h2
+              class="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+            >
+              Monday<br />
+              <span class="monday-miles-gradient">Miles</span>
+            </h2>
+
+            <p class="mt-4 text-lg text-white/70 sm:text-xl">
+              Our new weekly walk & run group. Every Monday at
+              <span class="font-bold text-accent-gold">6:30 PM</span>.
+            </p>
+
+            {/* Route options */}
+            <div
+              class="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start"
+            >
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-5 py-4 backdrop-blur-sm"
+              >
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-full bg-vibrant-pink/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-vibrant-pink"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-white">Walk</p>
+                  <p class="text-2xl font-extrabold text-vibrant-pink">
+                    1 Mile
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-5 py-4 backdrop-blur-sm"
+              >
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-gold/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-accent-gold"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-white">Jog / Run</p>
+                  <p class="text-2xl font-extrabold text-accent-gold">
+                    2 Miles
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p class="mt-6 text-base text-white/50 italic">
+              You set the pace. All levels welcome.
+            </p>
+
+            {/* CTA */}
+            <div
+              class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start"
+            >
+              <a
+                href={`${base}schedule`}
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-lg font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/40"
+              >
+                <svg
+                  class="h-5 w-5 transition-transform group-hover:translate-x-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"></path>
+                </svg>
+                Join for Free
+              </a>
+              <span class="text-sm text-white/40"
+                >Meet in the cafe. Warm up together.</span
+              >
+            </div>
+          </div>
+
+          {/* Right: Visual card */}
+          <div class="relative mx-auto w-full max-w-md lg:max-w-none">
+            {/* Decorative glow */}
+            <div
+              class="absolute -inset-4 rounded-3xl bg-gradient-to-br from-accent-gold/20 via-vibrant-pink/10 to-transparent blur-2xl"
+            >
+            </div>
+
+            <div
+              class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm"
+            >
+              <img
+                src={`${base}images/monday-miles-runner.png`}
+                alt="Community members running together at Monday Miles"
+                class="h-72 w-full object-cover sm:h-80"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-off-black/80 via-transparent to-transparent"
+              >
+              </div>
+
+              {/* Overlay info */}
+              <div class="absolute bottom-0 left-0 right-0 p-6">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold"
+                  >
+                    <svg
+                      class="h-5 w-5 text-off-black"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-white/70">
+                      Every Monday
+                    </p>
+                    <p class="text-xl font-extrabold text-white">6:30 PM</p>
+                  </div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <span
+                    class="rounded-full bg-accent-gold/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold"
+                    >Free</span
+                  >
+                  <span
+                    class="rounded-full bg-vibrant-pink/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                    >All Levels</span
+                  >
+                  <span
+                    class="rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white/70"
+                    >Weekly</span
+                  >
+                </div>
+                <p class="mt-3 text-sm text-white/60">
+                  Movement is medicine, and it's better in community.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Monday Miles — Community Runs Section */}
+
     {/* START: Merch Section */}
     <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -240,6 +451,122 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Grand Opening Section */}
 
+    {/* START: Events Section */}
+    <section class="bg-light-gray py-12 sm:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <p
+              class="text-sm font-bold uppercase tracking-widest text-vibrant-pink"
+            >
+              What's Happening
+            </p>
+            <h2
+              class="mt-1 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              Upcoming Events
+            </h2>
+          </div>
+          <a
+            href={`${base}events`}
+            class="inline-flex items-center gap-1 font-sans font-bold text-vibrant-pink transition-colors hover:text-accent-gold"
+          >
+            View All
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+
+        {/* Monday Miles event card */}
+        <div class="mx-auto max-w-md">
+          <a href={`${base}schedule`} class="group block">
+            <div
+              class="relative overflow-hidden rounded-2xl bg-off-black text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/monday-miles-runner.png`}
+                  alt="Monday Miles community run"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/30 to-transparent"
+                >
+                </div>
+                <div class="absolute top-3 left-3 flex gap-2">
+                  <span
+                    class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
+                    >New</span
+                  >
+                  <span
+                    class="rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm"
+                    >Free</span
+                  >
+                </div>
+              </div>
+              <div class="p-5">
+                <div
+                  class="flex items-center gap-2 text-sm text-accent-gold font-semibold"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Every Monday at 6:30 PM
+                </div>
+                <h3
+                  class="mt-2 text-xl font-bold transition-colors group-hover:text-accent-gold"
+                >
+                  Monday Miles
+                </h3>
+                <p class="mt-2 text-sm text-white/60 leading-relaxed">
+                  Walk 1 mile or jog/run 2. You set the pace. All levels
+                  welcome. Meet in the cafe and warm up together.
+                </p>
+                <div
+                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2"
+                >
+                  Join the Run Club
+                  <svg
+                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+    {/* END: Events Section */}
+
     {/* START: Instagram Section */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -289,6 +616,40 @@ const base = import.meta.env.BASE_URL;
       }
       .animate-pulse-slow {
         animation: pulse-slow 2s ease-in-out infinite;
+      }
+
+      /* Monday Miles gradient text */
+      .monday-miles-gradient {
+        background: linear-gradient(
+          135deg,
+          #ffbd59 0%,
+          #b5a18d 50%,
+          #ffbd59 100%
+        );
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer-text 3s ease-in-out infinite;
+      }
+
+      @keyframes shimmer-text {
+        0%,
+        100% {
+          background-position: 0% center;
+        }
+        50% {
+          background-position: 200% center;
+        }
+      }
+
+      /* Hide scrollbar on carousel */
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
       }
     </style>
   </main></Layout
