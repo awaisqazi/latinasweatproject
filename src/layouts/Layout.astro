@@ -24,6 +24,8 @@ const canonicalURL = new URL(
 
 // Google Analytics 4 Measurement ID — replace with your real ID
 const GA_MEASUREMENT_ID = "G-RW22LK0G9J";
+// Google Ads Conversion ID
+const GOOGLE_ADS_ID = "AW-17990206229";
 ---
 
 <!doctype html>
@@ -55,13 +57,14 @@ const GA_MEASUREMENT_ID = "G-RW22LK0G9J";
       async
       src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
     ></script>
-    <script define:vars={{ GA_MEASUREMENT_ID }}>
+    <script define:vars={{ GA_MEASUREMENT_ID, GOOGLE_ADS_ID }}>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
       gtag("config", GA_MEASUREMENT_ID);
+      gtag("config", GOOGLE_ADS_ID);
     </script>
 
     <!-- Open Graph / Facebook -->
