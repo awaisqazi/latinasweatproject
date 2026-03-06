@@ -51,73 +51,41 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Documentary CTA Section */}
-    <section
-      class="bg-gradient-to-r from-vibrant-pink via-accent-gold to-vibrant-pink py-10 sm:py-12"
-    >
+    {/* START: International Women's Day Spotlight */}
+    <section class="bg-purple-950 py-10 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8"
-        >
-          {/* Left: Text Content */}
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
           <div class="flex items-center gap-4 text-center md:text-left">
-            <div
-              class="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0"
-            >
-              <svg
-                class="w-8 h-8 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z"></path>
+            <div class="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-purple-400/20 backdrop-blur-sm flex-shrink-0">
+              <svg class="w-8 h-8 text-purple-300" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm-1 2v3H8v2h3v3h2v-3h3v-2h-3v-3h-2z"></path>
               </svg>
             </div>
             <div>
-              <p
-                class="text-white/90 text-sm font-semibold uppercase tracking-wider"
-              >
-                🎬 New Mini-Documentary
+              <p class="text-purple-300/90 text-sm font-semibold uppercase tracking-wider">
+                March 8th &middot; 8 de Marzo
               </p>
               <h3 class="text-white text-xl sm:text-2xl font-bold mt-1">
-                Watch Our Story: Reclaiming Wellness in Pilsen
+                Honoring International Women's Day
               </h3>
-              <p class="text-white/80 text-sm sm:text-base mt-1 max-w-xl">
-                Experience the heart of our movement — community, healing, and
-                resistance through yoga.
+              <p class="text-purple-200/70 text-sm sm:text-base mt-1 max-w-xl">
+                As a studio founded by Mexican women, we stand in solidarity. Learn about 8M, feminicide, and the movement for justice.
               </p>
             </div>
           </div>
-
-          {/* Right: CTA Button */}
           <a
-            href={`${base}about`}
-            class="group flex-shrink-0 inline-flex items-center gap-3 rounded-full bg-white px-6 sm:px-8 py-3 sm:py-4 font-bold text-vibrant-pink shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/50"
+            href={`${base}womensday`}
+            class="group flex-shrink-0 inline-flex items-center gap-3 rounded-full bg-purple-600 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-purple-500 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-400/50"
           >
-            <svg
-              class="w-6 h-6 group-hover:scale-110 transition-transform"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5v14l11-7z"></path>
-            </svg>
-            <span class="text-base sm:text-lg">Watch Now</span>
-            <svg
-              class="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            <span class="text-base sm:text-lg">Learn More</span>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
             </svg>
           </a>
         </div>
       </div>
     </section>
-    {/* END: Documentary CTA Section */}
+    {/* END: International Women's Day Spotlight */}
 
     {/* START: Monday Miles — Community Runs Section */}
     <section
