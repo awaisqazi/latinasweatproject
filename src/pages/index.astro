@@ -418,8 +418,28 @@ const base = import.meta.env.BASE_URL;
         >
           {/* Flickr Photo Gallery — takes 3 of 5 cols */}
           <div class="lg:col-span-3">
-            <a data-flickr-embed="true" href="https://www.flickr.com/photos/88623248@N07/albums/72177720332218631" title="LSP - WOMEN-MADE 2026 E-comm"><img src="https://live.staticflickr.com/65535/55116794266_5bc13876ae_h.jpg" width="1600" height="1200" alt="LSP - WOMEN-MADE 2026 E-comm" class="w-full h-auto rounded-2xl"/></a>
-            <script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+            {/* Gallery label */}
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-purple-700">
+                The Collection
+              </h3>
+              <div class="flex items-center gap-2 text-sm font-medium text-purple-600">
+                <span>Tap arrows to browse</span>
+                <svg class="w-5 h-5 animate-bounce-x" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden border-2 border-purple-200 shadow-md">
+              <a data-flickr-embed="true" href="https://www.flickr.com/photos/88623248@N07/albums/72177720332218631" title="LSP - WOMEN-MADE 2026 E-comm"><img src="https://live.staticflickr.com/65535/55116794266_5bc13876ae_h.jpg" width="1600" height="1200" alt="LSP - WOMEN-MADE 2026 E-comm" class="w-full h-auto"/></a>
+              <script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+            </div>
+
+            {/* Gallery hint below */}
+            <p class="mt-3 text-center text-xs text-medium-gray/70">
+              Use the <span class="font-semibold text-purple-600">&larr; &rarr;</span> arrows on the image to see all items from the drop
+            </p>
           </div>
 
           {/* Credits + CTA — takes 2 of 5 cols */}
@@ -823,6 +843,18 @@ const base = import.meta.env.BASE_URL;
       }
       .animate-pulse-slow {
         animation: pulse-slow 3s ease-in-out infinite;
+      }
+
+      @keyframes bounce-x {
+        0%, 100% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(4px);
+        }
+      }
+      .animate-bounce-x {
+        animation: bounce-x 1.2s ease-in-out infinite;
       }
 
       /* Merch drop gradient text */
