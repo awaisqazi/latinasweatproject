@@ -8,6 +8,13 @@ export interface PressArticle {
 
 export const pressArticles: PressArticle[] = [
   {
+    outlet: "Negocios Now",
+    title: "Margarita Quiñones Peña: 40 Under 40: Advocate for Holistic Community Empowerment",
+    url: "https://negociosnow.com/margarita-quinones-pena-advocate-for-holistic-community-empowerment/",
+    snippet:
+      "Negocios Now names LSP founder Margarita Quiñones Peña to their 40 Under 40 list, recognizing her work building a grassroots wellness movement rooted in Pilsen that reaches over 250,000 participants yearly through trauma-informed yoga and culturally grounded programming.",
+  },
+  {
     outlet: "Chicago Reader",
     title: "Best Latina-owned inclusive wellness studio building strength together",
     url: "https://chicagoreader.com/best-of-chicago/the-latina-sweat-project/",
