@@ -6,52 +6,230 @@ import Header from "../components/Header.astro";
 <Layout title="Code of Conduct & NDA | The Latina Sweat Project">
     <meta name="robots" content="noindex, nofollow" slot="head" />
     <Header />
-    <main
-        class="min-h-screen bg-white relative flex flex-col items-center py-12 px-4"
-    >
-        <div class="w-full max-w-3xl mx-auto text-center space-y-6">
-            <!-- Heading -->
-            <div
-                class="inline-block px-4 py-1.5 rounded-full bg-pink-50 border border-pink-100 mb-2"
-            >
-                <span
-                    class="text-sm font-bold tracking-wide uppercase text-vibrant-pink"
-                    >Internal Forms</span
-                >
+    <main class="min-h-screen bg-white relative flex flex-col items-center py-12 px-4">
+
+        <!-- ═══════════════ CTA HERO ═══════════════ -->
+        <div class="w-full max-w-3xl mx-auto text-center space-y-6 mb-12">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-pink-50 border border-pink-100 mb-2">
+                <span class="text-sm font-bold tracking-wide uppercase text-vibrant-pink">Internal Forms</span>
             </div>
 
-            <h1
-                class="font-rubik text-4xl md:text-5xl font-bold text-off-black leading-tight tracking-tight"
-            >
-                Code of Conduct & <br class="hidden md:block" />
+            <h1 class="font-rubik text-4xl md:text-5xl font-bold text-off-black leading-tight tracking-tight">
+                Code of Conduct &amp; <br class="hidden md:block" />
                 <span class="text-vibrant-pink">NDA Agreement</span>
             </h1>
 
-            <p class="font-body text-lg text-gray-500 max-w-xl mx-auto">
-                Please review and complete the form below. You can also
+            <p class="font-body text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+                Please review the documents below and then sign both using our form.
+            </p>
+
+            <div class="pt-2">
                 <a
                     href="https://forms.gle/xPLwHHuf26tULkGd9"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-vibrant-pink font-semibold underline hover:text-off-black transition-colors"
-                    >open this form in a new tab&nbsp;↗</a
-                >.
-            </p>
+                    class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-300 bg-off-black rounded-full hover:bg-vibrant-pink hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-vibrant-pink"
+                >
+                    <span>Sign the Forms</span>
+                    <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+            </div>
         </div>
 
-        <!-- Embedded Form -->
-        <div class="w-full max-w-3xl mx-auto mt-8">
-            <iframe
-                src="https://docs.google.com/forms/d/e/1FAIpQLScdZg0YbGkRLgp_pK799YNcZskzf4hfPBl8YwzVPK3C2che-Q/viewform?embedded=true"
-                width="100%"
-                height="4372"
-                frameborder="0"
-                marginheight="0"
-                marginwidth="0"
-                style="border:none; border-radius:12px;"
-                title="Code of Conduct & NDA Form"
-                >Loading…</iframe
-            >
+        <!-- ═══════════════ ACCORDIONS ═══════════════ -->
+        <div class="w-full max-w-3xl mx-auto space-y-4">
+
+            <!-- Code of Conduct Accordion -->
+            <div class="accordion-item border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <button
+                    class="accordion-trigger w-full flex items-center justify-between px-6 py-5 bg-gray-50 hover:bg-gray-100 transition-colors text-left cursor-pointer"
+                    aria-expanded="false"
+                >
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full bg-vibrant-pink/10 text-vibrant-pink">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </span>
+                        <span class="font-rubik text-lg md:text-xl font-bold text-off-black">Code of Conduct</span>
+                    </div>
+                    <svg class="accordion-chevron w-6 h-6 text-gray-400 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="accordion-content" style="max-height:0;overflow:hidden;transition:max-height 0.4s ease;">
+                    <div class="px-6 py-6 prose prose-gray max-w-none font-body text-gray-600 leading-relaxed space-y-5">
+
+                        <h3 class="font-rubik text-xl font-bold text-off-black !mt-0">LSP Code of Conduct</h3>
+                        <p>All instructors, students, board members, and volunteers affiliated with the Latina Sweat Project are expected to treat fellow participants, instructors, staff, and community members with dignity and respect.</p>
+                        <p>Throughout the duration of your involvement with the Latina Sweat Project, you are a direct reflection of the organization and are expected to uphold its values in all settings. How you show up, speak, and carry yourself both on and off the mat sets the tone for others. As a community leader and representative of LSP, you are expected to lead by example.</p>
+                        <p class="italic text-gray-500">The following agreements are rooted in yogic ethics and reflect our shared responsibility to uphold the practice both on and off the mat.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">Participants agree to:</h4>
+                        <ul class="space-y-3 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Maintain confidentiality</strong> and respect others' personal stories and experiences shared during training.<br/><em class="text-sm text-gray-400">→ Aparigraha (Non-Possessiveness) and Satya (Truthfulness)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Uphold inclusivity</strong> and avoid discriminatory, demeaning, or harmful language or behavior.<br/><em class="text-sm text-gray-400">→ Ahimsa (Non-Harming)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Abstain from teaching techniques</strong> outside your scope or engaging in unsafe instruction during peer teaching.<br/><em class="text-sm text-gray-400">→ Satya (Truthfulness) and Svadhyaya (Self-Study)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Remain present</strong> during class sessions, both physically and mentally, and avoid disruptions.<br/><em class="text-sm text-gray-400">→ Dharana (Concentration) and Tapas (Discipline)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Honor time commitments</strong> by arriving on time to all sessions and remaining for the full duration.<br/><em class="text-sm text-gray-400">→ Saucha (Cleanliness/Order) and Asteya (Non-Stealing)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Be responsible</strong> for maintaining the studio or training environment.<br/><em class="text-sm text-gray-400">→ Saucha (Cleanliness) and Seva (Service)</em></span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">•</span><span><strong>Report any concerns</strong> to program leadership promptly.<br/><em class="text-sm text-gray-400">→ Satya (Truthfulness) and Ahimsa (Non-Harming)</em></span></li>
+                        </ul>
+
+                        <p class="text-sm bg-red-50 border border-red-100 rounded-xl p-4 text-gray-600">
+                            <strong>Violation</strong> of the Code of Conduct may result in a verbal warning, written warning, suspension, or removal from the program, depending on the severity and intent.
+                        </p>
+
+                        <h4 class="font-rubik font-bold text-off-black">Anti-Retaliation Policy</h4>
+                        <p>Latina Sweat Project prohibits retaliation against any trainee, staff member, or volunteer who makes a good-faith report of misconduct, discrimination, harassment, or any other concern related to safety or ethical conduct.</p>
+                        <ul class="space-y-2 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">●</span><span>No participant or instructor may intimidate, threaten, coerce, harass, or discriminate against someone for raising concerns or filing a grievance.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">●</span><span>Retaliation includes subtle or overt exclusion, bullying, negative gossip, or undermining someone's participation.</span></li>
+                        </ul>
+                        <p>Anyone found to have retaliated against another individual will be subject to immediate review and may be dismissed.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">Anti-Harassment Policy</h4>
+                        <p>Latina Sweat Project is committed to maintaining a safe and affirming environment for all participants, regardless of race, ethnicity, gender, sexual orientation, body size, disability, immigration status, or religious background.</p>
+                        <p>Harassment of any kind — verbal, physical, sexual, or psychological — will not be tolerated. This includes:</p>
+                        <ul class="space-y-2 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">●</span><span>Unwelcome comments about body, gender identity, or personal appearance</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">●</span><span>Sexual jokes, innuendos, or physical contact without consent</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">●</span><span>Repeated disrespect, intimidation, or personal targeting</span></li>
+                        </ul>
+                        <p>If a participant feels harassed in any way, they are encouraged to report the incident immediately to Ethics. All reports will be reviewed in confidence and responded to appropriately.</p>
+
+                        <!-- Sign reminder -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 mt-6 text-center">
+                            <p class="text-gray-600 font-body mb-3">By reading the above, you acknowledge you have reviewed the Code of Conduct.</p>
+                            <a
+                                href="https://forms.gle/xPLwHHuf26tULkGd9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-vibrant-pink rounded-full hover:bg-off-black transition-colors"
+                            >
+                                Sign via Form
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NDA Accordion -->
+            <div class="accordion-item border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <button
+                    class="accordion-trigger w-full flex items-center justify-between px-6 py-5 bg-gray-50 hover:bg-gray-100 transition-colors text-left cursor-pointer"
+                    aria-expanded="false"
+                >
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full bg-vibrant-pink/10 text-vibrant-pink">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </span>
+                        <span class="font-rubik text-lg md:text-xl font-bold text-off-black">Non-Disclosure &amp; Confidentiality Agreement</span>
+                    </div>
+                    <svg class="accordion-chevron w-6 h-6 text-gray-400 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="accordion-content" style="max-height:0;overflow:hidden;transition:max-height 0.4s ease;">
+                    <div class="px-6 py-6 prose prose-gray max-w-none font-body text-gray-600 leading-relaxed space-y-5">
+
+                        <h3 class="font-rubik text-xl font-bold text-off-black !mt-0">Latina Sweat Project Non-Disclosure &amp; Confidentiality Agreement</h3>
+                        <p>This Non-Disclosure and Confidentiality Agreement ("Agreement") is entered into by and between Latina Sweat Project and Latina Sweat Cares ("LSP") and the individual staff member, volunteer, contractor, or board member signing below ("Member").</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">1. Purpose</h4>
+                        <p>The purpose of this Agreement is to protect the privacy, dignity, and safety of all individuals who participate in, work for, or engage with LSP programs, classes, events, and operations. Members may be exposed to sensitive, personal, or confidential information. This Agreement ensures that such information is never shared, disclosed, or used inappropriately.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">2. Confidential Information</h4>
+                        <p>For the purposes of this Agreement, "Confidential Information" includes, but is not limited to:</p>
+                        <ul class="space-y-1.5 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">a.</span><span>Immigration status or history</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">b.</span><span>Employment status, income, or work-related challenges</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">c.</span><span>Housing or living situations, including instability or insecurity</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">d.</span><span>Health information, wellness needs, or personal circumstances</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">e.</span><span>Any ethics, conduct, grievance, or safety concerns discussed in or outside the LSP studio</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">f.</span><span>Personal identifying information about students, staff, volunteers, or board members</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">g.</span><span>Donation recipients, mutual aid information, and any private support provided to individuals</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">h.</span><span>Internal discussions, board matters, strategy meetings, or organizational decisions</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">i.</span><span>Any non-public information related to LSP operations, finances, training curriculum, or intellectual property</span></li>
+                        </ul>
+                        <p class="text-sm italic text-gray-400">Confidential Information may be spoken, written, digital, photographic, recorded, or observed, and remains protected regardless of format.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">3. Obligations of the Member</h4>
+                        <p>The Member agrees to:</p>
+                        <ul class="space-y-1.5 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">a.</span><span>Maintain the strict confidentiality of all Confidential Information at all times.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">b.</span><span>Not disclose, share, repeat, or reference Confidential Information to any party outside of LSP without explicit written authorization from the LSP Executive Director.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">c.</span><span>Not discuss Confidential Information in public or semi-public spaces, including social media, community events, or personal conversations.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">d.</span><span>Protect all digital or physical records containing Confidential Information.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">e.</span><span>Refrain from taking photos, audio, or video that could reveal sensitive information without consent and approval.</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">f.</span><span>Report any suspected breach of confidentiality to LSP leadership immediately.</span></li>
+                        </ul>
+
+                        <h4 class="font-rubik font-bold text-off-black">4. Exclusions</h4>
+                        <p>Information is not considered confidential if it is required to be disclosed by law (and in such cases, the Member must notify LSP before any disclosure is made).</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">5. Intellectual Property</h4>
+                        <p>All LSP materials, including curriculum, training documents, policies, class formats, outlines, branding, and program tools, are the exclusive property of LSP and may not be shared, reproduced, distributed, or repurposed without written approval.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">6. Duration of Confidentiality</h4>
+                        <p>This Agreement remains in effect:</p>
+                        <ul class="space-y-1.5 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">a.</span><span>For the duration of the Member's involvement with LSP; and</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">b.</span><span>Permanently after the Member's employment, board service, or volunteer activity ends.</span></li>
+                        </ul>
+                        <p class="font-semibold">Confidentiality survives termination indefinitely.</p>
+
+                        <h4 class="font-rubik font-bold text-off-black">7. Consequences of Breach</h4>
+                        <p>A breach of this Agreement may result in:</p>
+                        <ul class="space-y-1.5 list-none !pl-0">
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">a.</span><span>Removal from staff or board positions</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">b.</span><span>Termination of volunteer or contractor involvement</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">c.</span><span>Restriction from LSP spaces or programs</span></li>
+                            <li class="flex gap-2"><span class="text-vibrant-pink font-bold">d.</span><span>Legal remedies available to LSP under applicable law</span></li>
+                        </ul>
+
+                        <!-- Sign reminder -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 mt-6 text-center">
+                            <p class="text-gray-600 font-body mb-3">By reading the above, you acknowledge you have reviewed the NDA. Please sign using the form at the top of this page.</p>
+                            <a
+                                href="https://forms.gle/xPLwHHuf26tULkGd9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-vibrant-pink rounded-full hover:bg-off-black transition-colors"
+                            >
+                                Sign via Form
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 </Layout>
+
+<script>
+    document.querySelectorAll('.accordion-trigger').forEach(button => {
+        button.addEventListener('click', () => {
+            const content = button.nextElementSibling as HTMLElement;
+            const chevron = button.querySelector('.accordion-chevron') as HTMLElement;
+            const isOpen = button.getAttribute('aria-expanded') === 'true';
+
+            if (isOpen) {
+                content.style.maxHeight = '0';
+                chevron.style.transform = 'rotate(0deg)';
+                button.setAttribute('aria-expanded', 'false');
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                chevron.style.transform = 'rotate(180deg)';
+                button.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+</script>
