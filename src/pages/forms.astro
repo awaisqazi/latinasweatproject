@@ -1,0 +1,57 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+---
+
+<Layout title="Code of Conduct & NDA | The Latina Sweat Project">
+    <meta name="robots" content="noindex, nofollow" slot="head" />
+    <Header />
+    <main
+        class="min-h-screen bg-white relative flex flex-col items-center py-12 px-4"
+    >
+        <div class="w-full max-w-3xl mx-auto text-center space-y-6">
+            <!-- Heading -->
+            <div
+                class="inline-block px-4 py-1.5 rounded-full bg-pink-50 border border-pink-100 mb-2"
+            >
+                <span
+                    class="text-sm font-bold tracking-wide uppercase text-vibrant-pink"
+                    >Internal Forms</span
+                >
+            </div>
+
+            <h1
+                class="font-rubik text-4xl md:text-5xl font-bold text-off-black leading-tight tracking-tight"
+            >
+                Code of Conduct & <br class="hidden md:block" />
+                <span class="text-vibrant-pink">NDA Agreement</span>
+            </h1>
+
+            <p class="font-body text-lg text-gray-500 max-w-xl mx-auto">
+                Please review and complete the form below. You can also
+                <a
+                    href="https://forms.gle/xPLwHHuf26tULkGd9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-vibrant-pink font-semibold underline hover:text-off-black transition-colors"
+                    >open this form in a new tab&nbsp;↗</a
+                >.
+            </p>
+        </div>
+
+        <!-- Embedded Form -->
+        <div class="w-full max-w-3xl mx-auto mt-8">
+            <iframe
+                src="https://docs.google.com/forms/d/e/1FAIpQLScdZg0YbGkRLgp_pK799YNcZskzf4hfPBl8YwzVPK3C2che-Q/viewform?embedded=true"
+                width="100%"
+                height="4372"
+                frameborder="0"
+                marginheight="0"
+                marginwidth="0"
+                style="border:none; border-radius:12px;"
+                title="Code of Conduct & NDA Form"
+                >Loading…</iframe
+            >
+        </div>
+    </main>
+</Layout>

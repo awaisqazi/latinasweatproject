@@ -10,6 +10,7 @@ Disallow: /elections
 Disallow: /gala/live
 Disallow: /gala/volunteer-checkin
 Disallow: /admin/
+Disallow: /forms
 
 # Allow everything else
 Allow: /
