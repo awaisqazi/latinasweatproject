@@ -386,6 +386,56 @@ const isHome = pathname === base || pathname === `${base}/`;
                 </svg>
             </div>
         </a>
+        <!-- Android App Available Banner -->
+        <a
+            href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group mt-2 flex items-center justify-center gap-3 rounded-xl border border-green-500/40 bg-off-black px-4 py-3 mobile-link"
+        >
+            <span
+                class="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1"
+            >
+                <img
+                    src={`${base}images/lsp-studio-logo.png`}
+                    alt="LSP Studio App"
+                    class="h-full w-full object-contain"
+                />
+            </span>
+            <div class="flex flex-col text-left">
+                <span
+                    class="text-xs font-semibold uppercase tracking-wider text-green-400"
+                    >Now on Android</span
+                >
+                <span class="text-base font-bold text-white"
+                    >LSP Studio App</span
+                >
+            </div>
+            <div class="flex items-center gap-1 text-green-400">
+                <svg
+                    class="h-4 w-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"
+                    ></path>
+                </svg>
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
+        </a>
         <div class="flex flex-col gap-3 mt-4 pb-8">
             <a
                 href="https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project"
