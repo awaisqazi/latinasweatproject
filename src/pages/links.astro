@@ -1,0 +1,351 @@
+---
+import Layout from "@/layouts/Layout.astro";
+const base = import.meta.env.BASE_URL;
+
+// Define links data
+const links = [
+  {
+    title: "📅 Class Schedule",
+    description: "Book a free yoga, fitness, or wellness class in Pilsen.",
+    url: "https://latinasweatproject.com/schedule/",
+    color: "vibrant-pink",
+    icon: "calendar",
+    featured: true,
+  },
+  {
+    title: "🩺 Equal Hope × LSP",
+    description:
+      "Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN). Grounding practices, vendors, and healing — all in one space.",
+    url: "https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project?utm_source=ig&utm_medium=social&utm_content=link_in_bio",
+    color: "teal",
+    icon: "heart",
+    badge: "Event",
+    featured: true,
+  },
+  {
+    title: "🧠 Free Men's Therapy Group",
+    description:
+      "A bilingual, confidential, cost-free weekly therapy group for men — starting Tuesdays, April 7. Led by Roberto Lopez-Tamayo, Ph.D. Open to all adult men.",
+    url: "https://www.redcap.ihrp.uic.edu/surveys/?s=MDMA4L9CD398798Y&utm_source=ig&utm_medium=social&utm_content=link_in_bio",
+    color: "blue",
+    icon: "mind",
+    badge: "New",
+    featured: true,
+  },
+  {
+    title: "🌐 Visit Our Website",
+    description: "Explore everything The Latina Sweat Project has to offer.",
+    url: "https://latinasweatproject.com/",
+    color: "gold",
+    icon: "globe",
+  },
+];
+
+const socials = [
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/latinasweatproject/",
+    icon: "instagram",
+  },
+  {
+    name: "TikTok",
+    url: "https://www.tiktok.com/@latinasweatproject",
+    icon: "tiktok",
+  },
+];
+---
+
+<Layout title="Latina Sweat Project | Links" description="Quick links from The Latina Sweat Project — classes, events, therapy, and more." hideFooter={true}>
+  <main class="links-page min-h-screen relative overflow-hidden">
+    {/* Animated gradient background */}
+    <div class="links-bg absolute inset-0"></div>
+
+    {/* Floating decorative shapes */}
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="links-blob links-blob-1"></div>
+      <div class="links-blob links-blob-2"></div>
+      <div class="links-blob links-blob-3"></div>
+    </div>
+
+    {/* Content */}
+    <div class="relative z-10 mx-auto max-w-lg px-4 py-10 sm:py-14">
+
+      {/* Profile Header */}
+      <div class="text-center mb-10">
+        <div class="relative inline-block mb-5">
+          {/* Glow ring */}
+          <div class="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] opacity-70 blur-sm animate-pulse"></div>
+          <img
+            src={`${base}logo2.png`}
+            alt="The Latina Sweat Project"
+            class="relative w-24 h-24 rounded-full object-cover border-3 border-white shadow-xl"
+          />
+        </div>
+        <h1 class="font-rubik text-2xl font-extrabold text-white tracking-tight drop-shadow-md">
+          The Latina Sweat Project
+        </h1>
+        <p class="mt-2 text-white/70 text-sm font-medium max-w-xs mx-auto leading-relaxed">
+          Free yoga, fitness & wellness in Pilsen, Chicago&nbsp;🧘🏽‍♀️✨
+        </p>
+
+        {/* Social icons row */}
+        <div class="mt-4 flex items-center justify-center gap-3">
+          {socials.map((social) => (
+            <a
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white hover:scale-110 transition-all duration-300"
+              aria-label={social.name}
+            >
+              {social.icon === "instagram" && (
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                </svg>
+              )}
+              {social.icon === "tiktok" && (
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Links */}
+      <div class="flex flex-col gap-4">
+        {links.map((link, index) => (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class:list={[
+              "link-card group relative block rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5",
+              link.featured ? "link-card-featured" : "link-card-default",
+            ]}
+            style={`animation-delay: ${index * 80}ms`}
+            id={`link-${index}`}
+          >
+            {/* Gradient border via background on the outer, inner has the solid bg */}
+            <div class:list={[
+              "relative rounded-2xl px-5 py-4 backdrop-blur-xl transition-all duration-300",
+              link.featured
+                ? "bg-white/[0.12] group-hover:bg-white/[0.18]"
+                : "bg-white/[0.08] group-hover:bg-white/[0.14]",
+            ]}>
+              {/* Badge */}
+              {link.badge && (
+                <span class:list={[
+                  "absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-lg",
+                  link.color === "teal" && "bg-teal-400 text-teal-950",
+                  link.color === "blue" && "bg-blue-400 text-blue-950",
+                  link.color === "vibrant-pink" && "bg-[#b5a18d] text-white",
+                ]}>
+                  <span class="relative flex h-1.5 w-1.5">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60"></span>
+                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-current"></span>
+                  </span>
+                  {link.badge}
+                </span>
+              )}
+
+              <div class="flex items-start gap-4">
+                {/* Icon */}
+                <div class:list={[
+                  "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
+                  link.color === "vibrant-pink" && "bg-[#b5a18d]/30 text-[#d4b896] group-hover:bg-[#b5a18d]/50",
+                  link.color === "teal" && "bg-teal-500/30 text-teal-300 group-hover:bg-teal-500/50",
+                  link.color === "blue" && "bg-blue-500/30 text-blue-300 group-hover:bg-blue-500/50",
+                  link.color === "gold" && "bg-[#ffbd59]/30 text-[#ffbd59] group-hover:bg-[#ffbd59]/50",
+                ]}>
+                  {link.icon === "calendar" && (
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                  )}
+                  {link.icon === "heart" && (
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                  )}
+                  {link.icon === "mind" && (
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/>
+                      <line x1="9" y1="21" x2="15" y2="21"/>
+                      <line x1="10" y1="24" x2="14" y2="24"/>
+                    </svg>
+                  )}
+                  {link.icon === "globe" && (
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="2" y1="12" x2="22" y2="12"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  )}
+                </div>
+
+                {/* Text */}
+                <div class="flex-1 min-w-0">
+                  <h2 class="text-base font-bold text-white group-hover:text-[#ffbd59] transition-colors duration-300 leading-snug">
+                    {link.title}
+                  </h2>
+                  <p class="mt-1 text-[13px] text-white/55 leading-relaxed group-hover:text-white/70 transition-colors duration-300 line-clamp-3">
+                    {link.description}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <div class="flex-shrink-0 mt-1 text-white/30 group-hover:text-[#ffbd59] transition-all duration-300 group-hover:translate-x-1">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {/* Footer branding */}
+      <div class="mt-12 text-center">
+        <div class="inline-flex items-center gap-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-2">
+          <img
+            src={`${base}logo.png`}
+            alt=""
+            class="w-4 h-4 rounded-full"
+          />
+          <span class="text-xs text-white/40 font-medium">
+            The Latina Sweat Project · Pilsen, Chicago
+          </span>
+        </div>
+        <p class="mt-4 text-[11px] text-white/25">
+          Made with 💛 for our community
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Animated gradient background */
+  .links-bg {
+    background: linear-gradient(
+      135deg,
+      #1E1E1E 0%,
+      #2a1f1a 20%,
+      #1E1E1E 40%,
+      #1a2025 60%,
+      #1E1E1E 80%,
+      #2a1f1a 100%
+    );
+    background-size: 300% 300%;
+    animation: links-gradient-shift 12s ease infinite;
+  }
+
+  @keyframes links-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 50% 0%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 100%; }
+  }
+
+  /* Floating blobs */
+  .links-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+  }
+
+  .links-blob-1 {
+    width: 300px;
+    height: 300px;
+    background: #b5a18d;
+    top: -50px;
+    right: -80px;
+    animation: links-float-1 8s ease-in-out infinite;
+  }
+
+  .links-blob-2 {
+    width: 250px;
+    height: 250px;
+    background: #ffbd59;
+    bottom: 10%;
+    left: -60px;
+    animation: links-float-2 10s ease-in-out infinite;
+  }
+
+  .links-blob-3 {
+    width: 200px;
+    height: 200px;
+    background: #5eead4;
+    top: 40%;
+    right: -40px;
+    animation: links-float-3 7s ease-in-out infinite;
+  }
+
+  @keyframes links-float-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-30px, 40px) scale(1.1); }
+  }
+  @keyframes links-float-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.15); }
+  }
+  @keyframes links-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-20px, -50px) scale(1.05); }
+  }
+
+  /* Link card animations */
+  .link-card {
+    animation: links-slide-up 0.5s ease backwards;
+  }
+
+  @keyframes links-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Featured card glow border */
+  .link-card-featured {
+    background: linear-gradient(135deg, rgba(181,161,141,0.4), rgba(255,189,89,0.2), rgba(181,161,141,0.4));
+    box-shadow: 0 0 0 0 transparent;
+  }
+  .link-card-featured:hover {
+    background: linear-gradient(135deg, rgba(181,161,141,0.6), rgba(255,189,89,0.4), rgba(181,161,141,0.6));
+    box-shadow: 0 8px 32px -8px rgba(181,161,141,0.25);
+  }
+
+  /* Default card border */
+  .link-card-default {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  }
+  .link-card-default:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06));
+    box-shadow: 0 8px 32px -8px rgba(255,255,255,0.1);
+  }
+
+  /* Line clamp utility (fallback for browsers that might not support Tailwind's) */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Profile image border fix */
+  .border-3 {
+    border-width: 3px;
+  }
+</style>
