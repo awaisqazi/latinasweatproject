@@ -1,0 +1,264 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+const base = import.meta.env.BASE_URL;
+
+const organizations = [
+  {
+    name: "Esperanza Health Centers",
+    description:
+      "Esperanza provides bilingual, high-quality primary care, behavioral health and wellness services regardless of immigration status, insurance status, or ability to pay, with five sites on the Southwest Side serving over 35,000 patients annually.",
+    website: "https://www.esperanzachicago.org/",
+    phone: "(773) 584-6200",
+    accent: "emerald",
+  },
+  {
+    name: "Lawndale Christian Health Center (LCHC)",
+    description:
+      "LCHC promotes wellness and provides quality, affordable healthcare for Lawndale and neighboring communities, serving more than 60,000 patients.",
+    website: "https://lawndale.org/",
+    phone: "(872) 588-3000",
+    accent: "sky",
+  },
+  {
+    name: "Erie Family Health Centers",
+    description:
+      "Erie offers full primary medical, dental, and behavioral health services, with some locations also providing HIV/AIDS care and podiatry.",
+    website: "https://www.eriefamilyhealth.org/",
+    phone: "(312) 666-3494",
+    accent: "emerald",
+  },
+  {
+    name: "Alivio Medical Center",
+    description:
+      "Alivio Medical Center provides a wide range of healthcare services with an emphasis on maternal and child health.",
+    website: "https://alivio.org/",
+    phone: "(773) 254-1400",
+    accent: "sky",
+  },
+  {
+    name: "Old Irving Park Community Clinic (OIPCC)",
+    description:
+      "OIPCC is a free clinic that offers culturally competent medical and behavioral health care to uninsured adults.",
+    website: "https://www.oipcc.org/",
+    phone: "(773) 427-0298",
+    accent: "emerald",
+  },
+  {
+    name: "Chicago Women's Health Center",
+    description:
+      "Chicago Women's Health Center provides access to health care and education in a respectful environment where people pay what they can afford, serving women and trans people.",
+    website: "https://www.chicagowomenshealthcenter.org/",
+    phone: "(773) 935-6126",
+    accent: "sky",
+  },
+  {
+    name: "Bridgeport Free Clinic",
+    description:
+      "Organized by University of Chicago medical students, Bridgeport Free Clinic offers free care to the uninsured, especially serving the Asian community.",
+    website: "https://voices.uchicago.edu/bridgeportfreeclinic/",
+    phone: "(773) 888-3368",
+    accent: "emerald",
+  },
+];
+---
+
+<Layout
+  title="World Health Day | The Latina Sweat Project"
+  description="World Health Day: LSP highlights Chicago organizations that show up for our communities every day. Find bilingual healthcare, free clinics, and wellness resources near you."
+>
+  <Header />
+  <main>
+    {/* Hero */}
+    <section class="relative bg-gradient-to-br from-[#0c2d3f] via-[#0f3d52] to-[#0a3328] py-16 sm:py-24 overflow-hidden">
+      {/* Subtle pattern */}
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2220%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 20L20 0l20 20%22 fill=%22none%22 stroke=%22%232ECC71%22 stroke-width=%221.5%22/%3E%3C/svg%3E'); background-size: 40px 20px;"
+      ></div>
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-60"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-16">
+          <div class="text-center lg:text-left">
+            <p class="text-sm font-bold uppercase tracking-[0.25em] text-emerald-400">
+              April 7th
+            </p>
+            <h1 class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              World<br />
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400">Health Day</span>
+            </h1>
+            <p class="mt-3 text-lg text-sky-200/80 font-medium">
+              Dia Mundial de la Salud &middot; 7 de abril
+            </p>
+            <p class="mt-6 max-w-2xl font-body text-lg text-sky-100/70 sm:text-xl leading-relaxed mx-auto lg:mx-0">
+              World Health Day is a reminder that health is a right, not a
+              privilege. April 7th is a day to draw attention to specific public
+              health issues, such as mental health, diabetes, and environmental
+              risks going on globally.
+            </p>
+            <p class="mt-4 max-w-2xl font-body text-lg text-emerald-200/80 sm:text-xl leading-relaxed mx-auto lg:mx-0 font-medium">
+              Today, LSP highlights Chicago organizations that show up for our
+              communities every day.
+            </p>
+          </div>
+          <div class="mx-auto w-full max-w-md lg:max-w-none flex justify-center">
+            {/* Health-themed icon cluster */}
+            <div class="relative w-64 h-64 sm:w-80 sm:h-80">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500/20 via-sky-500/10 to-emerald-500/20 blur-2xl"></div>
+              <div class="relative flex items-center justify-center w-full h-full">
+                <div class="relative">
+                  <div class="absolute -inset-6 rounded-full bg-gradient-to-br from-emerald-400/20 to-sky-400/20 animate-pulse"></div>
+                  <svg class="relative w-32 h-32 sm:w-40 sm:h-40 text-emerald-400 drop-shadow-2xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+                  </svg>
+                  <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent opacity-40"></div>
+    </section>
+
+    {/* Intro banner */}
+    <section class="bg-gradient-to-r from-emerald-600 to-sky-600 py-4">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-white font-bold text-base sm:text-lg">
+          Health is a right · La salud es un derecho
+        </p>
+      </div>
+    </section>
+
+    {/* Organizations Grid */}
+    <section class="py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <div class="inline-flex items-center gap-2 rounded-full bg-emerald-100 border border-emerald-200 px-4 py-2 mb-6">
+            <span class="text-sm font-bold uppercase tracking-widest text-emerald-700">
+              Community Resources
+            </span>
+          </div>
+          <h2 class="font-sans text-3xl font-extrabold tracking-tight text-off-black sm:text-4xl">
+            Chicago Organizations
+          </h2>
+          <p class="mt-1 text-lg text-sky-600 font-medium">
+            Organizaciones de Chicago
+          </p>
+          <p class="mt-4 mx-auto max-w-2xl font-body text-lg text-medium-gray">
+            These organizations are on the front lines of community health, providing
+            affordable, culturally competent care to the neighborhoods that need it most.
+          </p>
+        </div>
+
+        {/* Org Cards */}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {organizations.map((org, i) => (
+            <div
+              class:list={[
+                "group rounded-2xl border p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+                org.accent === "emerald"
+                  ? "border-emerald-200 hover:border-emerald-400 bg-gradient-to-br from-white to-emerald-50/50"
+                  : "border-sky-200 hover:border-sky-400 bg-gradient-to-br from-white to-sky-50/50",
+              ]}
+            >
+              <div class="flex items-start gap-4 mb-4">
+                <div
+                  class:list={[
+                    "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110",
+                    org.accent === "emerald"
+                      ? "bg-emerald-100 text-emerald-600"
+                      : "bg-sky-100 text-sky-600",
+                  ]}
+                >
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                  </svg>
+                </div>
+                <h3
+                  class:list={[
+                    "font-sans text-lg font-bold leading-snug",
+                    org.accent === "emerald" ? "text-emerald-900" : "text-sky-900",
+                  ]}
+                >
+                  {org.name}
+                </h3>
+              </div>
+
+              <p class="font-body text-base text-medium-gray leading-relaxed mb-6">
+                {org.description}
+              </p>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={org.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class:list={[
+                    "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-lg",
+                    org.accent === "emerald"
+                      ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/25"
+                      : "bg-sky-600 hover:bg-sky-500 shadow-sky-600/25",
+                  ]}
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
+                  </svg>
+                  Visit Website
+                </a>
+                <a
+                  href={`tel:${org.phone.replace(/[^0-9+]/g, "")}`}
+                  class:list={[
+                    "inline-flex items-center justify-center gap-2 rounded-full border-2 px-5 py-2.5 text-sm font-bold transition-all hover:scale-105",
+                    org.accent === "emerald"
+                      ? "border-emerald-400 text-emerald-700 hover:bg-emerald-50"
+                      : "border-sky-400 text-sky-700 hover:bg-sky-50",
+                  ]}
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"></path>
+                  </svg>
+                  {org.phone}
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Closing / CTA */}
+    <section class="bg-gradient-to-br from-[#0c2d3f] via-[#0f3d52] to-[#0a3328] py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-emerald-300 text-lg font-medium italic">
+          "La salud no es un privilegio, es un derecho."
+        </p>
+        <p class="mt-2 text-sky-300/60 text-sm">
+          "Health is not a privilege, it is a right."
+        </p>
+        <p class="mt-6 text-sky-100/70 text-base max-w-xl mx-auto leading-relaxed">
+          Movement is medicine. Whether it's a yoga class, a walk with friends, or
+          finding the right provider, we're here for you.
+        </p>
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <a
+            href={`${base}schedule`}
+            class="btn inline-flex items-center gap-2 rounded-full bg-emerald-500 px-8 py-3 text-base font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:bg-emerald-400"
+          >
+            Join a Class
+          </a>
+          <a
+            href={`${base}about`}
+            class="btn inline-flex items-center gap-2 rounded-full border-2 border-sky-400 px-8 py-3 text-base font-bold text-sky-200 transition-all hover:bg-sky-400 hover:text-white"
+          >
+            About LSP
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
