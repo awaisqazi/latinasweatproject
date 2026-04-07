@@ -29,11 +29,11 @@ const faqs = [
   {
     english: {
       title: "Where can I sign up for class?",
-      answer: "You can sign up for classes on our <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>Schedule page</a>, or download our app on <a href='https://apps.apple.com/us/app/latina-sweat-project/id6740261709' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> and <a href='https://play.google.com/store/apps/details?id=com.marianairons.latinasweatproject' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> to browse and book classes on the go. Follow us on Instagram @latinasweatproject to receive registration reminders and the latest info!"
+      answer: "You can sign up for classes on our <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>Schedule page</a>, or download our app on <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> and <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> to browse and book classes on the go. Follow us on Instagram @latinasweatproject to receive registration reminders and the latest info!"
     },
     spanish: {
       title: "¿Dónde puedo inscribirme para la clase?",
-      answer: "Puedes inscribirte en nuestra <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>página de Horarios</a>, o descargar nuestra app en <a href='https://apps.apple.com/us/app/latina-sweat-project/id6740261709' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> y <a href='https://play.google.com/store/apps/details?id=com.marianairons.latinasweatproject' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> para explorar y reservar clases desde tu teléfono. ¡Síguenos en Instagram @latinasweatproject para recibir recordatorios de inscripción y la información más reciente!"
+      answer: "Puedes inscribirte en nuestra <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>página de Horarios</a>, o descargar nuestra app en <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> y <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> para explorar y reservar clases desde tu teléfono. ¡Síguenos en Instagram @latinasweatproject para recibir recordatorios de inscripción y la información más reciente!"
     },
     icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path></svg>`
   },
@@ -143,20 +143,22 @@ const faqs = [
 
               {/* Answer panel */}
               <div id={`faq-answer-${i}`} class="faq-answer">
-                <div class="px-6 pb-6 pt-0">
-                  {/* Language toggle */}
-                  <div class="flex items-center gap-1 mb-4 p-1 rounded-lg bg-slate-100 w-fit">
-                    <button class="lang-btn active-lang rounded-md px-3 py-1.5 text-xs font-bold transition-all" data-lang="en" data-index={i}>
-                      English
-                    </button>
-                    <button class="lang-btn rounded-md px-3 py-1.5 text-xs font-bold text-medium-gray transition-all hover:text-off-black" data-lang="es" data-index={i}>
-                      Español
-                    </button>
+                <div class="faq-answer-inner">
+                  <div class="px-6 pb-6 pt-0">
+                    {/* Language toggle */}
+                    <div class="flex items-center gap-1 mb-4 p-1 rounded-lg bg-slate-100 w-fit">
+                      <button class="lang-btn active-lang rounded-md px-3 py-1.5 text-xs font-bold transition-all" data-lang="en" data-index={i}>
+                        English
+                      </button>
+                      <button class="lang-btn rounded-md px-3 py-1.5 text-xs font-bold text-medium-gray transition-all hover:text-off-black" data-lang="es" data-index={i}>
+                        Español
+                      </button>
+                    </div>
+                    {/* English answer */}
+                    <div class="lang-content lang-en font-body text-base text-medium-gray leading-relaxed" data-index={i} set:html={faq.english.answer}></div>
+                    {/* Spanish answer */}
+                    <div class="lang-content lang-es font-body text-base text-medium-gray leading-relaxed hidden" data-index={i} set:html={faq.spanish.answer}></div>
                   </div>
-                  {/* English answer */}
-                  <div class="lang-content lang-en font-body text-base text-medium-gray leading-relaxed" data-index={i} set:html={faq.english.answer}></div>
-                  {/* Spanish answer */}
-                  <div class="lang-content lang-es font-body text-base text-medium-gray leading-relaxed hidden" data-index={i} set:html={faq.spanish.answer}></div>
                 </div>
               </div>
             </div>
@@ -192,17 +194,13 @@ const faqs = [
 <style>
   /* Accordion animations */
   .faq-answer {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .faq-answer > div {
     overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .faq-item.open .faq-answer {
-    grid-template-rows: 1fr;
+    max-height: 600px;
   }
 
   .faq-item.open .faq-chevron {
