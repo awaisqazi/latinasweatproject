@@ -1,53 +1,61 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
 const base = import.meta.env.BASE_URL;
 
 const faqs = [
   {
     english: {
       title: "How much do classes cost?",
-      answer: "We offer flexible pricing to fit your needs: drop-in classes are $20, a 5-class pack is $90, and a 10-class pack is $160 (class packs must be used within 3 months). For unlimited access, our monthly membership is $125/month, or $600 for a 6-month commitment. New members can try a free week of unlimited classes to get started! We are deeply committed to keeping yoga accessible — if cost is a barrier, we'd love to connect. Email <a href='mailto:membership@latinasweatproject.com' class='text-vibrant-pink underline hover:text-accent-gold'>membership@latinasweatproject.com</a> to learn about more accessible options."
+      answer:
+        "We offer flexible pricing to fit your needs: drop-in classes are $20, a 5-class pack is $90, and a 10-class pack is $160 (class packs must be used within 3 months). For unlimited access, our monthly membership is $125/month, or $600 for a 6-month commitment. New members can try a free week of unlimited classes to get started! We are deeply committed to keeping yoga accessible - if cost is a barrier, we'd love to connect. Email <a href='mailto:membership@latinasweatproject.com' class='text-vibrant-pink underline hover:text-accent-gold'>membership@latinasweatproject.com</a> to learn about more accessible options.",
     },
     spanish: {
       title: "¿Cuánto cuestan las clases?",
-      answer: "Ofrecemos precios flexibles para adaptarnos a tus necesidades: las clases individuales cuestan $20, un paquete de 5 clases es $90, y un paquete de 10 clases es $160 (los paquetes deben usarse dentro de 3 meses). Para acceso ilimitado, nuestra membresía mensual es de $125/mes, o $600 por un compromiso de 6 meses. ¡Los nuevos miembros pueden probar una semana gratis de clases ilimitadas para comenzar! Estamos profundamente comprometidas con mantener el yoga accesible — si el costo es un obstáculo, nos encantaría hablar contigo. Escríbenos a <a href='mailto:membership@latinasweatproject.com' class='text-vibrant-pink underline hover:text-accent-gold'>membership@latinasweatproject.com</a> para conocer opciones más accesibles."
+      answer:
+        "Ofrecemos precios flexibles para adaptarnos a tus necesidades: las clases individuales cuestan $20, un paquete de 5 clases es $90, y un paquete de 10 clases es $160 (los paquetes deben usarse dentro de 3 meses). Para acceso ilimitado, nuestra membresía mensual es de $125/mes, o $600 por un compromiso de 6 meses. ¡Los nuevos miembros pueden probar una semana gratis de clases ilimitadas para comenzar! Estamos profundamente comprometidas con mantener el yoga accesible - si el costo es un obstáculo, nos encantaría hablar contigo. Escríbenos a <a href='mailto:membership@latinasweatproject.com' class='text-vibrant-pink underline hover:text-accent-gold'>membership@latinasweatproject.com</a> para conocer opciones más accesibles.",
     },
-    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
   },
   {
     english: {
       title: "Are my donations tax-deductible?",
-      answer: "YES! Because we are a 501 (c)(3) organization with a mission to make Yoga accessible to ALL, everything you donate to LSP supports our cause and is tax-deductible."
+      answer:
+        "YES! Because we are a 501 (c)(3) organization with a mission to make Yoga accessible to ALL, everything you donate to LSP supports our cause and is tax-deductible.",
     },
     spanish: {
       title: "¿Mis donaciones son deducibles de impuestos?",
-      answer: "¡SÍ! Porque somos una organización 501(c)(3) con la misión de hacer que el Yoga sea accesible para TODOS, todo lo que dones a LSP apoya nuestra causa y es deducible de impuestos."
+      answer:
+        "¡SÍ! Porque somos una organización 501(c)(3) con la misión de hacer que el Yoga sea accesible para TODOS, todo lo que dones a LSP apoya nuestra causa y es deducible de impuestos.",
     },
-    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path></svg>`
+    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path></svg>`,
   },
   {
     english: {
       title: "Where can I sign up for class?",
-      answer: "You can sign up for classes on our <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>Schedule page</a>, or download our app on <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> and <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> to browse and book classes on the go. Follow us on Instagram @latinasweatproject to receive registration reminders and the latest info!"
+      answer:
+        "You can sign up for classes on our <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>Schedule page</a>, or download our app on <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> and <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> to browse and book classes on the go. Follow us on Instagram @latinasweatproject to receive registration reminders and the latest info!",
     },
     spanish: {
       title: "¿Dónde puedo inscribirme para la clase?",
-      answer: "Puedes inscribirte en nuestra <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>página de Horarios</a>, o descargar nuestra app en <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> y <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> para explorar y reservar clases desde tu teléfono. ¡Síguenos en Instagram @latinasweatproject para recibir recordatorios de inscripción y la información más reciente!"
+      answer:
+        "Puedes inscribirte en nuestra <a href='/schedule' class='text-vibrant-pink underline hover:text-accent-gold'>página de Horarios</a>, o descargar nuestra app en <a href='https://apps.apple.com/us/app/lsp-studio/id6755971141' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>iOS</a> y <a href='https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US' target='_blank' rel='noopener noreferrer' class='text-vibrant-pink underline hover:text-accent-gold'>Android</a> para explorar y reservar clases desde tu teléfono. ¡Síguenos en Instagram @latinasweatproject para recibir recordatorios de inscripción y la información más reciente!",
     },
-    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path></svg>`
+    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path></svg>`,
   },
   {
     english: {
       title: "What do I bring?",
-      answer: "Please bring a water and a sweat towel. Both are available for those unable to bring. Community mats are available in the studio space (thanks lululemon), you are welcome to bring your own."
+      answer:
+        "Please bring a water and a sweat towel. Both are available for those unable to bring. Community mats are available in the studio space (thanks lululemon), you are welcome to bring your own.",
     },
     spanish: {
       title: "¿Qué debo llevar?",
-      answer: "Por favor, lleva agua y una toalla para el sudor. Ambos están disponibles para quienes no puedan traerlos. También tenemos tapetes comunitarios en el espacio del estudio (gracias lululemon), pero si prefieres, puedes traer el tuyo."
+      answer:
+        "Por favor, lleva agua y una toalla para el sudor. Ambos están disponibles para quienes no puedan traerlos. También tenemos tapetes comunitarios en el espacio del estudio (gracias lululemon), pero si prefieres, puedes traer el tuyo.",
     },
-    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>`
-  }
+    icon: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>`,
+  },
 ];
 ---
 
@@ -56,55 +64,108 @@ const faqs = [
   <main>
     {/* Hero */}
     <section class="relative bg-off-black py-20 sm:py-28 overflow-hidden">
-      <div class="absolute inset-0 opacity-[0.04]"
-        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;">
+      <div
+        class="absolute inset-0 opacity-[0.04]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
       </div>
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"></div>
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
       <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="text-vibrant-pink text-sm font-bold uppercase tracking-[0.25em]">Preguntas Frecuentes</p>
-        <h1 class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+        <p
+          class="text-vibrant-pink text-sm font-bold uppercase tracking-[0.25em]"
+        >
+          Preguntas Frecuentes
+        </p>
+        <h1
+          class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+        >
           Frequently Asked<br />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold">Questions</span>
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+            >Questions</span
+          >
         </h1>
         <p class="mt-6 font-body text-lg text-slate-400 max-w-2xl mx-auto">
           Everything you need to know about classes, pricing, and our community.
         </p>
       </div>
-      <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"></div>
+      <div
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
+      >
+      </div>
     </section>
 
     {/* Mission — compact bilingual side-by-side */}
-    <section class="bg-gradient-to-b from-off-black to-[#1a1a1a] py-14 sm:py-16">
+    <section
+      class="bg-gradient-to-b from-off-black to-[#1a1a1a] py-14 sm:py-16"
+    >
       <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8">
-            <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-vibrant-pink to-transparent"></div>
-            <h3 class="font-sans text-xl font-bold text-white">Hecha por Latinas.</h3>
-            <p class="mt-2 font-sans text-base font-semibold text-slate-300">This is what the first Latina Yoga non-profit looks like.</p>
-            <p class="mt-3 font-body text-sm text-slate-400">Creating long-term, systemic change in the wellness industry, ensuring that Yoga and mental health resources are led by us.</p>
+          <div
+            class="relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8"
+          >
+            <div
+              class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-vibrant-pink to-transparent"
+            >
+            </div>
+            <h3 class="font-sans text-xl font-bold text-white">
+              Hecha por Latinas.
+            </h3>
+            <p class="mt-2 font-sans text-base font-semibold text-slate-300">
+              This is what the first Latina Yoga non-profit looks like.
+            </p>
+            <p class="mt-3 font-body text-sm text-slate-400">
+              Creating long-term, systemic change in the wellness industry,
+              ensuring that Yoga and mental health resources are led by us.
+            </p>
             <ul class="mt-4 space-y-2 text-sm text-slate-400">
               <li class="flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full bg-vibrant-pink flex-shrink-0"></span>
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-vibrant-pink flex-shrink-0"
+                ></span>
                 Community led Yoga programming. Every day.
               </li>
               <li class="flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full bg-vibrant-pink flex-shrink-0"></span>
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-vibrant-pink flex-shrink-0"
+                ></span>
                 First ever cost-free 200hr Yoga teacher training.
               </li>
             </ul>
           </div>
-          <div class="relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8">
-            <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-accent-gold to-transparent"></div>
-            <h3 class="font-sans text-xl font-bold text-white">Para Nuestra Comunidad.</h3>
-            <p class="mt-2 font-sans text-base font-semibold text-slate-300">Así es como se ve la primera organización de Yoga sin fines de lucro creada por Latinas.</p>
-            <p class="mt-3 font-body text-sm text-slate-400">Creando un cambio sistémico a largo plazo en la industria de Yoga, y asegurando que los recursos de salud mental sean dirigidos por nuestras comunidades.</p>
+          <div
+            class="relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8"
+          >
+            <div
+              class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-accent-gold to-transparent"
+            >
+            </div>
+            <h3 class="font-sans text-xl font-bold text-white">
+              Para Nuestra Comunidad.
+            </h3>
+            <p class="mt-2 font-sans text-base font-semibold text-slate-300">
+              Así es como se ve la primera organización de Yoga sin fines de
+              lucro creada por Latinas.
+            </p>
+            <p class="mt-3 font-body text-sm text-slate-400">
+              Creando un cambio sistémico a largo plazo en la industria de Yoga,
+              y asegurando que los recursos de salud mental sean dirigidos por
+              nuestras comunidades.
+            </p>
             <ul class="mt-4 space-y-2 text-sm text-slate-400">
               <li class="flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold flex-shrink-0"></span>
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-accent-gold flex-shrink-0"
+                ></span>
                 Programación accesible. Todos los días.
               </li>
               <li class="flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold flex-shrink-0"></span>
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-accent-gold flex-shrink-0"
+                ></span>
                 Entrenamiento de certificación de Yoga.
               </li>
             </ul>
@@ -117,52 +178,95 @@ const faqs = [
     <section class="bg-light-gray py-16 sm:py-24">
       <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-flex items-center gap-2 rounded-full bg-vibrant-pink/10 border border-vibrant-pink/20 px-4 py-2">
-            <span class="text-sm font-bold uppercase tracking-widest text-vibrant-pink">FAQ</span>
+          <div
+            class="inline-flex items-center gap-2 rounded-full bg-vibrant-pink/10 border border-vibrant-pink/20 px-4 py-2"
+          >
+            <span
+              class="text-sm font-bold uppercase tracking-widest text-vibrant-pink"
+              >FAQ</span
+            >
           </div>
         </div>
 
         <div class="space-y-4" id="faq-list">
-          {faqs.map((faq, i) => (
-            <div class="faq-item group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-vibrant-pink/30 overflow-hidden" data-index={i}>
-              {/* Question header */}
-              <button
-                class="faq-toggle w-full flex items-center gap-4 px-6 py-5 text-left cursor-pointer"
-                aria-expanded="false"
-                aria-controls={`faq-answer-${i}`}
+          {
+            faqs.map((faq, i) => (
+              <div
+                class="faq-item group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-vibrant-pink/30 overflow-hidden"
+                data-index={i}
               >
-                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-vibrant-pink/10 to-accent-gold/10 text-vibrant-pink transition-all duration-300 group-hover:from-vibrant-pink/20 group-hover:to-accent-gold/20" set:html={faq.icon}></div>
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-sans text-lg font-bold text-off-black leading-snug">{faq.english.title}</h3>
-                  <p class="text-sm text-medium-gray/70 mt-0.5">{faq.spanish.title}</p>
-                </div>
-                <svg class="faq-chevron w-5 h-5 text-medium-gray/50 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </button>
+                {/* Question header */}
+                <button
+                  class="faq-toggle w-full flex items-center gap-4 px-6 py-5 text-left cursor-pointer"
+                  aria-expanded="false"
+                  aria-controls={`faq-answer-${i}`}
+                >
+                  <div
+                    class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-vibrant-pink/10 to-accent-gold/10 text-vibrant-pink transition-all duration-300 group-hover:from-vibrant-pink/20 group-hover:to-accent-gold/20"
+                    set:html={faq.icon}
+                  />
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-sans text-lg font-bold text-off-black leading-snug">
+                      {faq.english.title}
+                    </h3>
+                    <p class="text-sm text-medium-gray/70 mt-0.5">
+                      {faq.spanish.title}
+                    </p>
+                  </div>
+                  <svg
+                    class="faq-chevron w-5 h-5 text-medium-gray/50 flex-shrink-0 transition-transform duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-              {/* Answer panel */}
-              <div id={`faq-answer-${i}`} class="faq-answer">
-                <div class="faq-answer-inner">
-                  <div class="px-6 pb-6 pt-0">
-                    {/* Language toggle */}
-                    <div class="flex items-center gap-1 mb-4 p-1 rounded-lg bg-slate-100 w-fit">
-                      <button class="lang-btn active-lang rounded-md px-3 py-1.5 text-xs font-bold transition-all" data-lang="en" data-index={i}>
-                        English
-                      </button>
-                      <button class="lang-btn rounded-md px-3 py-1.5 text-xs font-bold text-medium-gray transition-all hover:text-off-black" data-lang="es" data-index={i}>
-                        Español
-                      </button>
+                {/* Answer panel */}
+                <div id={`faq-answer-${i}`} class="faq-answer">
+                  <div class="faq-answer-inner">
+                    <div class="px-6 pb-6 pt-0">
+                      {/* Language toggle */}
+                      <div class="flex items-center gap-1 mb-4 p-1 rounded-lg bg-slate-100 w-fit">
+                        <button
+                          class="lang-btn active-lang rounded-md px-3 py-1.5 text-xs font-bold transition-all"
+                          data-lang="en"
+                          data-index={i}
+                        >
+                          English
+                        </button>
+                        <button
+                          class="lang-btn rounded-md px-3 py-1.5 text-xs font-bold text-medium-gray transition-all hover:text-off-black"
+                          data-lang="es"
+                          data-index={i}
+                        >
+                          Español
+                        </button>
+                      </div>
+                      {/* English answer */}
+                      <div
+                        class="lang-content lang-en font-body text-base text-medium-gray leading-relaxed"
+                        data-index={i}
+                        set:html={faq.english.answer}
+                      />
+                      {/* Spanish answer */}
+                      <div
+                        class="lang-content lang-es font-body text-base text-medium-gray leading-relaxed hidden"
+                        data-index={i}
+                        set:html={faq.spanish.answer}
+                      />
                     </div>
-                    {/* English answer */}
-                    <div class="lang-content lang-en font-body text-base text-medium-gray leading-relaxed" data-index={i} set:html={faq.english.answer}></div>
-                    {/* Spanish answer */}
-                    <div class="lang-content lang-es font-body text-base text-medium-gray leading-relaxed hidden" data-index={i} set:html={faq.spanish.answer}></div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          }
         </div>
       </div>
     </section>
@@ -216,66 +320,68 @@ const faqs = [
   .lang-btn.active-lang {
     background: white;
     color: #1a1a1a;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 </style>
 
 <script>
   // Accordion toggle
-  document.querySelectorAll('.faq-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.closest('.faq-item');
+  document.querySelectorAll(".faq-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const item = btn.closest(".faq-item");
       if (!item) return;
-      const isOpen = item.classList.contains('open');
+      const isOpen = item.classList.contains("open");
 
       // Close all
-      document.querySelectorAll('.faq-item').forEach(el => {
-        el.classList.remove('open');
-        const toggle = el.querySelector('.faq-toggle');
-        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      document.querySelectorAll(".faq-item").forEach((el) => {
+        el.classList.remove("open");
+        const toggle = el.querySelector(".faq-toggle");
+        if (toggle) toggle.setAttribute("aria-expanded", "false");
       });
 
       // Toggle current
       if (!isOpen) {
-        item.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
+        item.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
       }
     });
   });
 
   // Language toggle
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const lang = btn.getAttribute('data-lang');
-      const idx = btn.getAttribute('data-index');
-      const faqItem = btn.closest('.faq-item');
+      const lang = btn.getAttribute("data-lang");
+      const idx = btn.getAttribute("data-index");
+      const faqItem = btn.closest(".faq-item");
       if (!faqItem || !lang) return;
 
       // Update buttons
-      faqItem.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active-lang'));
-      btn.classList.add('active-lang');
+      faqItem
+        .querySelectorAll(".lang-btn")
+        .forEach((b) => b.classList.remove("active-lang"));
+      btn.classList.add("active-lang");
 
       // Show/hide content
-      const enContent = faqItem.querySelector('.lang-en');
-      const esContent = faqItem.querySelector('.lang-es');
+      const enContent = faqItem.querySelector(".lang-en");
+      const esContent = faqItem.querySelector(".lang-es");
       if (enContent && esContent) {
-        if (lang === 'en') {
-          enContent.classList.remove('hidden');
-          esContent.classList.add('hidden');
+        if (lang === "en") {
+          enContent.classList.remove("hidden");
+          esContent.classList.add("hidden");
         } else {
-          enContent.classList.add('hidden');
-          esContent.classList.remove('hidden');
+          enContent.classList.add("hidden");
+          esContent.classList.remove("hidden");
         }
       }
     });
   });
 
   // Open first FAQ by default
-  const firstItem = document.querySelector('.faq-item');
+  const firstItem = document.querySelector(".faq-item");
   if (firstItem) {
-    firstItem.classList.add('open');
-    const toggle = firstItem.querySelector('.faq-toggle');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    firstItem.classList.add("open");
+    const toggle = firstItem.querySelector(".faq-toggle");
+    if (toggle) toggle.setAttribute("aria-expanded", "true");
   }
 </script>

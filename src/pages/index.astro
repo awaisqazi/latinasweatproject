@@ -51,6 +51,68 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Free Day Promo */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 py-10 sm:py-14">
+      {/* Decorative warm glows */}
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-16 left-1/4 w-[350px] h-[350px] bg-accent-gold/20 rounded-full blur-[100px]"></div>
+        <div class="absolute -bottom-20 right-1/4 w-[300px] h-[300px] bg-vibrant-pink/15 rounded-full blur-[80px]"></div>
+      </div>
+
+      <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+        {/* Pulsing badge */}
+        <div class="inline-flex items-center gap-2 rounded-full bg-accent-gold/20 border border-accent-gold/40 px-4 py-2 mb-4">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
+            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"></span>
+          </span>
+          <span class="text-sm font-bold uppercase tracking-widest text-amber-800">New at LSP</span>
+        </div>
+
+        <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-off-black">
+          One Free Day <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-vibrant-pink">Every Week</span>&nbsp;🎉
+        </h2>
+        <p class="mt-2 text-amber-900/60 text-base sm:text-lg font-medium">Un dia gratis cada semana · All classes, all day, no membership needed</p>
+
+        <div class="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
+          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-lg shadow-accent-gold/10 px-5 py-3 text-center min-w-[130px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/20 hover:border-accent-gold">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-accent-gold">Mar 30</p>
+            <p class="text-lg font-extrabold text-off-black leading-tight">Monday</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-vibrant-pink mt-0.5">FREE</p>
+          </div>
+          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-lg shadow-accent-gold/10 px-5 py-3 text-center min-w-[130px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/20 hover:border-accent-gold">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-accent-gold">Apr 7</p>
+            <p class="text-lg font-extrabold text-off-black leading-tight">Tuesday</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-vibrant-pink mt-0.5">FREE</p>
+          </div>
+          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-lg shadow-accent-gold/10 px-5 py-3 text-center min-w-[130px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/20 hover:border-accent-gold">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-accent-gold">Apr 15</p>
+            <p class="text-lg font-extrabold text-off-black leading-tight">Wednesday</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-vibrant-pink mt-0.5">FREE</p>
+          </div>
+          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-lg shadow-accent-gold/10 px-5 py-3 text-center min-w-[130px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/20 hover:border-accent-gold">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-accent-gold">Apr 23</p>
+            <p class="text-lg font-extrabold text-off-black leading-tight">Thursday</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-vibrant-pink mt-0.5">FREE</p>
+          </div>
+          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-lg shadow-accent-gold/10 px-5 py-3 text-center min-w-[130px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/20 hover:border-accent-gold">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-accent-gold">May 1</p>
+            <p class="text-lg font-extrabold text-off-black leading-tight">Friday</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-vibrant-pink mt-0.5">FREE</p>
+          </div>
+        </div>
+
+        <a
+          href={`${base}schedule`}
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/40"
+        >
+          View Schedule & Sign Up
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </a>
+      </div>
+    </section>
+    {/* END: Free Day Promo */}
+
     {/* START: We Stand With Her */}
     <section class="relative overflow-hidden bg-off-black py-12 sm:py-16">
       {/* Chevron border pattern inspired by IG post */}
