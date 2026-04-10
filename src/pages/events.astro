@@ -266,6 +266,112 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Monday Miles Featured Section */}
 
+    {/* START: Yoga For Wishes — Make-A-Wish Section */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-sky-50 to-slate-50 py-16 md:py-20">
+      {/* Subtle star decorations */}
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-16 right-1/4 w-[350px] h-[350px] bg-sky-200/30 rounded-full blur-[100px]"></div>
+        <div class="absolute -bottom-20 left-1/4 w-[300px] h-[300px] bg-blue-200/20 rounded-full blur-[80px]"></div>
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
+          {/* Left: Flyer Image (2 cols) */}
+          <div class="relative lg:col-span-2">
+            <div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-sky-300/20 via-blue-200/10 to-transparent blur-xl"></div>
+            <div class="relative overflow-hidden rounded-2xl border-2 border-sky-200/60 shadow-lg">
+              <img
+                src={`${base}images/yoga-for-wishes.png`}
+                alt="Yoga For Wishes — Make-A-Wish Illinois × Latina Sweat Project, April 18"
+                class="w-full object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Right: Content (3 cols) */}
+          <div class="lg:col-span-3 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 rounded-full bg-sky-100 border border-sky-200 px-4 py-2 mb-5">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-500 opacity-75"></span>
+                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-500"></span>
+              </span>
+              <span class="text-xs font-bold uppercase tracking-widest text-sky-700">April 18 · Community Event</span>
+            </div>
+
+            <h2 class="font-sans text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+              Yoga For <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-600">Wishes</span>
+            </h2>
+            <p class="mt-2 text-xl font-semibold text-sky-700">
+              Make‑A‑Wish Illinois × Latina Sweat Project
+            </p>
+
+            <p class="mt-5 text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              Latina Sweat Project is proud to support Make‑A‑Wish Illinois and its mission to grant wishes to children with critical illnesses. Join our <span class="font-bold text-sky-700">3:30 PM donation‑based class</span>, or stop by anytime throughout the day to write a birthday card for a wish child and learn more about other ways to get involved.
+            </p>
+
+            <p class="mt-3 text-base text-slate-500 italic max-w-xl mx-auto lg:mx-0">
+              Move. Breathe. Give back.
+            </p>
+
+            {/* Details grid */}
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0">
+              <div class="flex items-center gap-3 rounded-xl bg-white border border-sky-100 shadow-sm px-4 py-3">
+                <svg class="h-5 w-5 text-sky-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-slate-400 uppercase tracking-wider">When</p>
+                  <p class="text-sm font-bold text-slate-800">April 18</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 rounded-xl bg-white border border-sky-100 shadow-sm px-4 py-3">
+                <svg class="h-5 w-5 text-sky-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-slate-400 uppercase tracking-wider">Class</p>
+                  <p class="text-sm font-bold text-slate-800">3:30 PM</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 rounded-xl bg-white border border-sky-100 shadow-sm px-4 py-3">
+                <svg class="h-5 w-5 text-sky-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-slate-400 uppercase tracking-wider">Where</p>
+                  <p class="text-sm font-bold text-slate-800">949 W 16th St</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2">
+              <span class="rounded-full bg-sky-100 border border-sky-200 px-3 py-1 text-xs font-bold uppercase tracking-wider text-sky-700">Donation‑Based</span>
+              <span class="rounded-full bg-blue-100 border border-blue-200 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700">All‑Day Open House</span>
+              <span class="rounded-full bg-indigo-100 border border-indigo-200 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Birthday Cards</span>
+            </div>
+
+            {/* CTA */}
+            <div class="mt-8">
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/makeawish-together-we-grant-wishes-for-children-with-critical-illnesses"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-sky-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-sky-600/25 transition-all duration-300 hover:scale-105 hover:bg-sky-500 hover:shadow-xl hover:shadow-sky-500/40"
+              >
+                Get Tickets — $15
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Yoga For Wishes — Make-A-Wish Section */}
+
     {/* START: Stay Connected Section */}
     <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-4 text-center">
