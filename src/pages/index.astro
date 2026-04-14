@@ -938,6 +938,50 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Merch Drop Teaser Section */}
 
+    {/* START: Spring Clean Up Banner (Dark Section) */}
+    <section class="relative overflow-hidden bg-gradient-to-r from-[#0a2818] via-[#0f3d24] to-[#0a2818] py-10 sm:py-12">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-0 left-1/3 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-[250px] h-[250px] bg-green-400/8 rounded-full blur-[80px]"></div>
+      </div>
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+          <div class="flex items-center gap-4 text-center md:text-left">
+            <div class="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-emerald-400/20 backdrop-blur-sm flex-shrink-0">
+              <svg class="w-8 h-8 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-emerald-300/90 text-sm font-semibold uppercase tracking-wider">
+                April 25th · Community Event
+              </p>
+              <h3 class="text-white text-xl sm:text-2xl font-bold mt-1">
+                Spring Clean Up 🌿
+              </h3>
+              <p class="text-emerald-200/70 text-sm sm:text-base mt-1 max-w-xl">
+                Roll up your sleeves and help clean up our neighborhood! A collaboration with Alderman Byron Sigcho-Lopez's office. 10 AM – 12 PM at LSP (949 W. 16th St).
+              </p>
+            </div>
+          </div>
+          <a
+            href={`${base}events`}
+            class="group flex-shrink-0 inline-flex items-center gap-3 rounded-full bg-emerald-600 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-emerald-500 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-emerald-400/50"
+          >
+            <span class="text-base sm:text-lg">Learn More</span>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
+    </section>
+    {/* END: Spring Clean Up Banner */}
+
     {
       /*
     START: Testimonials Section
@@ -1044,83 +1088,8 @@ const base = import.meta.env.BASE_URL;
           </a>
         </div>
 
-        {/* Event cards grid — two cards side by side */}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {/* Monday Miles event card */}
-          <a href={`${base}schedule`} class="group block">
-            <div
-              class="relative overflow-hidden rounded-2xl bg-off-black text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20 h-full"
-            >
-              <div class="relative h-52 overflow-hidden">
-                <img
-                  src={`${base}images/monday-miles-runner.png`}
-                  alt="Monday Miles community run"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                  class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/40 to-off-black/10"
-                >
-                </div>
-                <div class="absolute top-3 left-3 flex gap-2">
-                  <span
-                    class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
-                    >New</span
-                  >
-                  <span
-                    class="rounded-full bg-off-black/50 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-white drop-shadow-sm"
-                    >Free</span
-                  >
-                </div>
-              </div>
-              <div class="p-5">
-                <div
-                  class="flex items-center gap-2 text-sm text-accent-gold font-semibold"
-                >
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Every Monday at 6:30 PM
-                </div>
-                <h3
-                  class="mt-2 text-xl font-bold transition-colors group-hover:text-accent-gold"
-                >
-                  Monday Miles
-                </h3>
-                <p class="mt-2 text-sm text-white/60 leading-relaxed">
-                  Walk 1 mile or jog/run 2. You set the pace. All levels
-                  welcome. Meet in the cafe and warm up together.
-                </p>
-                <div
-                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2"
-                >
-                  Join the Run Club
-                  <svg
-                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
+        {/* Event cards grid — three cards side by side */}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Yoga For Wishes event card */}
           <a href="https://www.zeffy.com/en-US/ticketing/makeawish-together-we-grant-wishes-for-children-with-critical-illnesses" target="_blank" rel="noopener noreferrer" class="group block">
             <div
@@ -1178,6 +1147,155 @@ const base = import.meta.env.BASE_URL;
                   class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-sky-600 transition-all group-hover:gap-2"
                 >
                   Get Tickets
+                  <svg
+                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Spring Clean Up event card */}
+          <a href={`${base}events`} class="group block">
+            <div
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 text-slate-900 shadow-lg border border-emerald-200/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-400/20 h-full"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/spring-cleanup.png`}
+                  alt="Spring Clean Up — April 25th at LSP"
+                  class="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent"
+                >
+                </div>
+                <div class="absolute top-3 left-3 flex gap-2">
+                  <span
+                    class="rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white"
+                    >April 25</span
+                  >
+                  <span
+                    class="rounded-full bg-white/80 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700 drop-shadow-sm"
+                    >Free</span
+                  >
+                </div>
+              </div>
+              <div class="p-5">
+                <div
+                  class="flex items-center gap-2 text-sm text-emerald-600 font-semibold"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                  April 25 · 10 AM – 12 PM · 949 W 16th St
+                </div>
+                <h3
+                  class="mt-2 text-xl font-bold transition-colors group-hover:text-emerald-600"
+                >
+                  Spring Clean Up 🌿
+                </h3>
+                <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+                  Help pick up trash and clean up our neighborhood with LSP and Alderman Byron Sigcho-Lopez's office. Light refreshments provided.
+                </p>
+                <div
+                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-emerald-600 transition-all group-hover:gap-2"
+                >
+                  Learn More
+                  <svg
+                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Monday Miles event card */}
+          <a href={`${base}schedule`} class="group block">
+            <div
+              class="relative overflow-hidden rounded-2xl bg-off-black text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20 h-full"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/monday-miles-runner.png`}
+                  alt="Monday Miles community run"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/40 to-off-black/10"
+                >
+                </div>
+                <div class="absolute top-3 left-3 flex gap-2">
+                  <span
+                    class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
+                    >Weekly</span
+                  >
+                  <span
+                    class="rounded-full bg-off-black/50 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-white drop-shadow-sm"
+                    >Free</span
+                  >
+                </div>
+              </div>
+              <div class="p-5">
+                <div
+                  class="flex items-center gap-2 text-sm text-accent-gold font-semibold"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Every Monday at 6:30 PM
+                </div>
+                <h3
+                  class="mt-2 text-xl font-bold transition-colors group-hover:text-accent-gold"
+                >
+                  Monday Miles
+                </h3>
+                <p class="mt-2 text-sm text-white/60 leading-relaxed">
+                  Walk 1 mile or jog/run 2. You set the pace. All levels
+                  welcome. Meet in the cafe and warm up together.
+                </p>
+                <div
+                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2"
+                >
+                  Join the Run Club
                   <svg
                     class="h-4 w-4 transition-transform group-hover:translate-x-1"
                     fill="none"
