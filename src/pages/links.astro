@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 const base = import.meta.env.BASE_URL;
 
-// Define links data
+// Define links data (chronological — upcoming events first, recurring/undated next, past events last)
 const links = [
   {
     title: "⭐ Yoga For Wishes × Make‑A‑Wish",
@@ -25,17 +25,19 @@ const links = [
     featured: true,
   },
   {
-    title: "📅 Class Schedule",
-    description: "Book a yoga, fitness, or wellness class in Pilsen.",
-    url: "https://latinasweatproject.com/schedule/",
-    color: "vibrant-pink",
-    icon: "calendar",
+    title: "🧠 ALPFA × LSP: Mental Health & Business Panel",
+    description:
+      "A powerful panel on the intersection of mental health and business. Balance career growth with well-being. Doors 3:30 PM · Panel 4–5 PM · Networking until 6 PM.",
+    url: "https://latinasweatproject.com/events/",
+    color: "indigo",
+    icon: "panel",
+    badge: "May 2",
     featured: true,
   },
   {
     title: "🩺 Equal Hope × LSP",
     description:
-      "Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN). Grounding practices, vendors, and healing — all in one space.",
+      "Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN). Grounding practices, vendors, and healing, all in one space.",
     url: "https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project?utm_source=ig&utm_medium=social&utm_content=link_in_bio",
     color: "teal",
     icon: "heart",
@@ -50,6 +52,14 @@ const links = [
     color: "blue",
     icon: "mind",
     badge: "New",
+    featured: true,
+  },
+  {
+    title: "📅 Class Schedule",
+    description: "Book a yoga, fitness, or wellness class in Pilsen.",
+    url: "https://latinasweatproject.com/schedule/",
+    color: "vibrant-pink",
+    icon: "calendar",
     featured: true,
   },
   {
@@ -87,7 +97,7 @@ const socials = [
 
 <Layout
   title="Latina Sweat Project | Links"
-  description="Quick links from The Latina Sweat Project — classes, events, therapy, and more."
+  description="Quick links from The Latina Sweat Project: classes, events, therapy, and more."
   hideFooter={true}
 >
   <main class="links-page min-h-screen relative overflow-hidden">
@@ -189,6 +199,7 @@ const socials = [
                       link.color === "sky" && "bg-sky-400 text-sky-950",
                       link.color === "wish" && "bg-rose-400 text-rose-950",
                       link.color === "green" && "bg-emerald-400 text-emerald-950",
+                      link.color === "indigo" && "bg-indigo-400 text-indigo-950",
                       link.color === "vibrant-pink" &&
                         "bg-[#b5a18d] text-white",
                     ]}
@@ -220,6 +231,8 @@ const socials = [
                         "bg-rose-500/30 text-rose-300 group-hover:bg-rose-500/50",
                       link.color === "green" &&
                         "bg-emerald-500/30 text-emerald-300 group-hover:bg-emerald-500/50",
+                      link.color === "indigo" &&
+                        "bg-indigo-500/30 text-indigo-300 group-hover:bg-indigo-500/50",
                     ]}
                   >
                     {link.icon === "calendar" && (
@@ -312,6 +325,17 @@ const socials = [
                         stroke-width="2"
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4.97 0 9 4.03 9 9-4.97 0-9-4.03-9-9zM3 21c0-4.97 4.03-9 9-9" />
+                      </svg>
+                    )}
+                    {link.icon === "panel" && (
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
                       </svg>
                     )}
                   </div>
