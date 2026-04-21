@@ -575,9 +575,16 @@ import Header from "@/components/Header.astro";
     max-width: 420px;
     height: 100%;
     max-height: 100vh;
+    max-height: 100dvh;
     overflow: hidden;
     touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
     animation: yttZoom 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @media (max-width: 500px) {
+    .ytt-slide { padding: 3rem 0.75rem; }
   }
   @keyframes yttZoom {
     from { opacity: 0; transform: scale(0.94); }
@@ -631,6 +638,8 @@ import Header from "@/components/Header.astro";
     object-fit: cover;
     border: 0;
   }
+  /* Critical for mobile: iframe ignores touches so our overlay can catch them */
+  .ytt-slide-frame iframe { pointer-events: none; }
   .ytt-slide-frame .ytt-slide-gradient {
     position: absolute; inset: 0;
     pointer-events: none;
@@ -662,8 +671,9 @@ import Header from "@/components/Header.astro";
     z-index: 5;
     touch-action: none;
     cursor: grab;
+    -webkit-tap-highlight-color: transparent;
   }
-  .ytt-drag-overlay.is-dragging { cursor: grabbing; }
+  .ytt-modal-stage.is-dragging .ytt-drag-overlay { cursor: grabbing; }
 
   .ytt-slide-meta {
     margin-top: 0.9rem;
@@ -735,7 +745,12 @@ import Header from "@/components/Header.astro";
     50% { transform: translate(-50%, -4px); }
   }
 
-  body.ytt-modal-open { overflow: hidden; }
+  body.ytt-modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    overscroll-behavior: none;
+  }
 </style>
 
 <script is:inline>
@@ -925,6 +940,7 @@ import Header from "@/components/Header.astro";
   let modalIndex = 0;
   let isOpen = false;
   let isAnimating = false;
+  let savedScrollY = 0;
 
   function mod(n, m) { return ((n % m) + m) % m; }
 
@@ -1001,6 +1017,8 @@ import Header from "@/components/Header.astro";
     renderNeighbors();
     resetTrack();
 
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = `-${savedScrollY}px`;
     modal.classList.remove("hidden");
     document.body.classList.add("ytt-modal-open");
     isOpen = true;
@@ -1020,6 +1038,8 @@ import Header from "@/components/Header.astro";
     slidePrev.innerHTML = "";
     slideNext.innerHTML = "";
     document.body.classList.remove("ytt-modal-open");
+    document.body.style.top = "";
+    window.scrollTo(0, savedScrollY);
   }
 
   function getFilteredList() {
