@@ -1,0 +1,744 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+---
+
+<Layout title="Meet the 2025 YTT Cohort | The Latina Sweat Project">
+  <Header />
+  <main class="ytt-main">
+    {/* Hero */}
+    <section class="ytt-hero">
+      <div class="ytt-hero-blob ytt-hero-blob--a" aria-hidden="true"></div>
+      <div class="ytt-hero-blob ytt-hero-blob--b" aria-hidden="true"></div>
+      <div class="ytt-hero-inner">
+        <span class="ytt-eyebrow">
+          <span class="ytt-eyebrow-dot"></span>
+          Yoga Teacher Training · Class of 2025
+        </span>
+        <h1 class="ytt-title">
+          Meet the <span class="ytt-title-accent">2025 YTT</span> Cohort
+        </h1>
+        <p class="ytt-lede">
+          One minute tutorials from our graduating teachers. Tap any pose to
+          learn from a new voice in our movement.
+        </p>
+        <div class="ytt-stats" aria-hidden="true">
+          <div class="ytt-stat">
+            <span class="ytt-stat-num" id="ytt-count">0</span>
+            <span class="ytt-stat-label">Teachers</span>
+          </div>
+          <div class="ytt-stat-sep"></div>
+          <div class="ytt-stat">
+            <span class="ytt-stat-num">60s</span>
+            <span class="ytt-stat-label">Per tutorial</span>
+          </div>
+          <div class="ytt-stat-sep"></div>
+          <div class="ytt-stat">
+            <span class="ytt-stat-num">∞</span>
+            <span class="ytt-stat-label">Community</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ytt-section">
+      <div class="ytt-container">
+        {/* Sticky liquid-glass filter bar */}
+        <div class="ytt-filterwrap">
+          <div class="ytt-glass">
+            <label class="ytt-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m20 20-3.5-3.5" stroke-linecap="round"/>
+              </svg>
+              <input
+                id="ytt-search"
+                type="search"
+                placeholder="Search by instructor"
+                autocomplete="off"
+              />
+            </label>
+            <div class="ytt-divider" aria-hidden="true"></div>
+            <div id="ytt-filters" class="ytt-filters"></div>
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div id="ytt-grid" class="ytt-grid"></div>
+
+        <p id="ytt-empty" class="ytt-empty hidden">
+          No teachers match that search. Try another name or category.
+        </p>
+      </div>
+    </section>
+
+    {/* Lightbox modal */}
+    <div
+      id="ytt-modal"
+      class="ytt-modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ytt-modal-title"
+    >
+      <button id="ytt-modal-close" class="ytt-modal-close" aria-label="Close video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="ytt-modal-inner">
+        <div id="ytt-modal-player" class="ytt-modal-player"></div>
+        <div class="ytt-modal-meta">
+          <h3 id="ytt-modal-title"></h3>
+          <p id="ytt-modal-sub"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style is:global>
+  :root {
+    --lsp-gold: #ffbd59;
+    --lsp-ink: #1E1E1E;
+    --lsp-tan: #b5a18d;
+    --lsp-cream: #faf5ed;
+    --lsp-mist: #f3eee6;
+  }
+
+  .ytt-main { background: var(--lsp-cream); }
+
+  /* ---------- Hero ---------- */
+  .ytt-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 1.25rem 4rem;
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgba(255, 189, 89, 0.18), transparent 60%),
+      linear-gradient(180deg, #fff 0%, var(--lsp-cream) 100%);
+    isolation: isolate;
+  }
+  .ytt-hero-inner {
+    position: relative;
+    max-width: 880px;
+    margin: 0 auto;
+    text-align: center;
+    z-index: 1;
+  }
+  .ytt-hero-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.55;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .ytt-hero-blob--a {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, #ffbd59 0%, transparent 65%);
+    top: -120px; left: -80px;
+  }
+  .ytt-hero-blob--b {
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, #b5a18d 0%, transparent 65%);
+    bottom: -220px; right: -120px;
+    opacity: 0.4;
+  }
+
+  .ytt-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 9999px;
+    background: rgba(30, 30, 30, 0.05);
+    border: 1px solid rgba(30, 30, 30, 0.08);
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--lsp-ink);
+  }
+  .ytt-eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: var(--lsp-gold);
+    box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.25);
+    animation: yttPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes yttPulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.25); }
+    50% { box-shadow: 0 0 0 8px rgba(255, 189, 89, 0); }
+  }
+
+  .ytt-title {
+    margin: 1.25rem 0 0;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.25rem, 6vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--lsp-ink);
+  }
+  .ytt-title-accent {
+    position: relative;
+    display: inline-block;
+    color: var(--lsp-ink);
+  }
+  .ytt-title-accent::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0.08em;
+    height: 0.32em;
+    background: var(--lsp-gold);
+    border-radius: 4px;
+    z-index: -1;
+    transform: skewX(-6deg);
+    opacity: 0.9;
+  }
+
+  .ytt-lede {
+    margin: 1.25rem auto 0;
+    max-width: 620px;
+    font-family: 'Rubik', sans-serif;
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
+    line-height: 1.6;
+    color: #555;
+  }
+
+  .ytt-stats {
+    margin-top: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(30, 30, 30, 0.06);
+    box-shadow: 0 10px 30px -15px rgba(30, 30, 30, 0.15);
+  }
+  .ytt-stat { display: flex; flex-direction: column; align-items: center; }
+  .ytt-stat-num {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--lsp-ink);
+    letter-spacing: -0.02em;
+  }
+  .ytt-stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #888;
+    margin-top: 1px;
+  }
+  .ytt-stat-sep { width: 1px; height: 24px; background: rgba(30, 30, 30, 0.1); }
+
+  /* ---------- Section / container ---------- */
+  .ytt-section { padding: 0.5rem 1.25rem 5rem; }
+  .ytt-container { max-width: 1280px; margin: 0 auto; }
+
+  /* ---------- Filter bar ---------- */
+  .ytt-filterwrap {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 40;
+    margin: 0 auto 2rem;
+  }
+  .ytt-glass {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: saturate(170%) blur(20px);
+    -webkit-backdrop-filter: saturate(170%) blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 18px 40px -18px rgba(30, 30, 30, 0.2);
+  }
+  @media (max-width: 720px) {
+    .ytt-glass { flex-direction: column; align-items: stretch; border-radius: 24px; padding: 0.6rem; }
+    .ytt-divider { display: none; }
+  }
+  .ytt-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 0 0 auto;
+    min-width: 220px;
+    padding: 0.55rem 1rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: inset 0 0 0 1px rgba(30, 30, 30, 0.06);
+    transition: box-shadow 180ms ease;
+  }
+  .ytt-search:focus-within {
+    box-shadow: inset 0 0 0 2px var(--lsp-gold);
+  }
+  .ytt-search svg { width: 16px; height: 16px; color: #888; flex-shrink: 0; }
+  .ytt-search input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.9rem;
+    color: var(--lsp-ink);
+    outline: none;
+    min-width: 0;
+  }
+  .ytt-search input::placeholder { color: #999; }
+
+  .ytt-divider { width: 1px; height: 28px; background: rgba(30, 30, 30, 0.1); flex-shrink: 0; }
+
+  .ytt-filters {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 2px;
+    flex: 1;
+    scrollbar-width: none;
+  }
+  .ytt-filters::-webkit-scrollbar { display: none; }
+  @media (min-width: 900px) { .ytt-filters { flex-wrap: wrap; overflow: visible; } }
+
+  .ytt-pill {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0.5rem 0.95rem;
+    border-radius: 9999px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--lsp-ink);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 180ms ease;
+  }
+  .ytt-pill:hover { background: rgba(30, 30, 30, 0.06); }
+  .ytt-pill[aria-pressed="true"] {
+    background: var(--lsp-ink);
+    color: #fff;
+    box-shadow: 0 6px 16px -6px rgba(30, 30, 30, 0.45), inset 0 0 0 2px var(--lsp-gold);
+  }
+
+  /* ---------- Grid ---------- */
+  .ytt-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+  @media (min-width: 640px) { .ytt-grid { gap: 1rem; } }
+  @media (min-width: 768px) { .ytt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .ytt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; } }
+  @media (min-width: 1280px) { .ytt-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+  .ytt-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #111;
+    aspect-ratio: 9 / 16;
+    cursor: pointer;
+    transform: translateZ(0);
+    transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 320ms ease;
+    box-shadow: 0 4px 14px -4px rgba(30, 30, 30, 0.18);
+    text-align: left;
+    font-family: 'Rubik', sans-serif;
+    animation: yttRise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes yttRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ytt-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 45px -18px rgba(30, 30, 30, 0.4);
+  }
+  .ytt-card:focus-visible {
+    outline: 2px solid var(--lsp-gold);
+    outline-offset: 3px;
+  }
+
+  .ytt-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .ytt-card:hover .ytt-card-img { transform: scale(1.06); }
+
+  .ytt-card-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 0) 45%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ytt-card-tag {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    z-index: 3;
+  }
+  .ytt-card-tag-dot {
+    width: 5px; height: 5px; border-radius: 9999px; background: var(--lsp-gold);
+  }
+
+  .ytt-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    width: 58px;
+    height: 58px;
+    border-radius: 9999px;
+    background: rgba(255, 189, 89, 0.96);
+    color: var(--lsp-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.35),
+      0 0 0 0 rgba(255, 189, 89, 0.5);
+    z-index: 3;
+    transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 260ms ease, background 260ms ease;
+    pointer-events: none;
+  }
+  .ytt-card:hover .ytt-play {
+    transform: translate(-50%, -50%) scale(1.05);
+    background: var(--lsp-gold);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 0 10px rgba(255, 189, 89, 0.2);
+  }
+  .ytt-play svg { width: 22px; height: 22px; margin-left: 3px; }
+
+  .ytt-card-body {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 0.85rem 0.95rem 1rem;
+    color: #fff;
+    z-index: 2;
+  }
+  .ytt-card-name {
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  }
+  .ytt-card-pose {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.82);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .ytt-card-pose::before {
+    content: "";
+    width: 4px; height: 4px; border-radius: 9999px;
+    background: var(--lsp-gold);
+  }
+
+  .ytt-empty {
+    margin-top: 4rem;
+    text-align: center;
+    font-family: 'Rubik', sans-serif;
+    color: #666;
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- Modal ---------- */
+  .ytt-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(10, 10, 10, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: yttFade 220ms ease both;
+  }
+  .ytt-modal.hidden { display: none; }
+  @keyframes yttFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .ytt-modal-close {
+    position: absolute;
+    top: 1.25rem; right: 1.25rem;
+    width: 44px; height: 44px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 180ms ease;
+    z-index: 2;
+  }
+  .ytt-modal-close:hover {
+    background: var(--lsp-gold);
+    color: var(--lsp-ink);
+    border-color: var(--lsp-gold);
+    transform: rotate(90deg);
+  }
+  .ytt-modal-close svg { width: 18px; height: 18px; }
+
+  .ytt-modal-inner {
+    width: 100%;
+    max-width: 420px;
+    animation: yttZoom 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes yttZoom {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .ytt-modal-player {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #000;
+    aspect-ratio: 9 / 16;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+  }
+  .ytt-modal-meta { margin-top: 1.1rem; text-align: center; }
+  .ytt-modal-meta h3 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .ytt-modal-meta p {
+    margin-top: 0.25rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  body.ytt-modal-open { overflow: hidden; }
+</style>
+
+<script is:inline>
+  // ------- Video Data (easy to extend) -------
+  const videoData = [
+    {
+      id: "iLkBF7xjgTQ",
+      instructor: "Kayla",
+      pose: "Pigeon Pose",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Restorative", "Seated", "English"],
+    },
+    {
+      id: "xxwzFUzuFJo",
+      instructor: "Mateo Pérez",
+      pose: "Warrior III",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Standing", "Balance", "English"],
+    },
+    {
+      id: "QzF23LW45eQ",
+      instructor: "Fabiola Davila",
+      pose: "High to Low Plank",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Strength", "Core", "English"],
+    },
+  ];
+
+  const CATEGORY_ALIASES = {
+    "En Español": ["Spanish", "Español", "En Español"],
+  };
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const thumbUrl = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  const thumbFallback = (id) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+
+  const state = {
+    videos: shuffle(videoData),
+    activeCategory: "All",
+    query: "",
+  };
+
+  const grid = document.getElementById("ytt-grid");
+  const filtersEl = document.getElementById("ytt-filters");
+  const searchEl = document.getElementById("ytt-search");
+  const emptyEl = document.getElementById("ytt-empty");
+  const countEl = document.getElementById("ytt-count");
+
+  if (countEl) countEl.textContent = videoData.length;
+
+  const baseCategories = ["All", "Restorative", "Standing", "Seated", "Balance", "Strength", "Core", "En Español"];
+  const dataCats = new Set();
+  videoData.forEach((v) => v.categories.forEach((c) => dataCats.add(c)));
+  const filterList = baseCategories.concat(
+    [...dataCats].filter((c) => !baseCategories.includes(c) && c !== "English")
+  );
+
+  function matchesCategory(video, cat) {
+    if (cat === "All") return true;
+    const aliases = CATEGORY_ALIASES[cat] || [cat];
+    return video.categories.some((c) => aliases.includes(c));
+  }
+
+  function renderFilters() {
+    filtersEl.innerHTML = "";
+    filterList.forEach((cat) => {
+      const btn = document.createElement("button");
+      btn.className = "ytt-pill";
+      btn.type = "button";
+      btn.textContent = cat;
+      btn.setAttribute(
+        "aria-pressed",
+        state.activeCategory === cat ? "true" : "false"
+      );
+      btn.addEventListener("click", () => {
+        state.activeCategory = cat;
+        renderFilters();
+        renderGrid();
+      });
+      filtersEl.appendChild(btn);
+    });
+  }
+
+  function primaryCategory(v) {
+    const first = v.categories.find((c) => c !== "English" && c !== "Spanish" && c !== "Español");
+    return first || v.categories[0];
+  }
+
+  function renderGrid() {
+    const q = state.query.trim().toLowerCase();
+    const list = state.videos.filter((v) => {
+      if (!matchesCategory(v, state.activeCategory)) return false;
+      if (q && !v.instructor.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    grid.innerHTML = "";
+    if (list.length === 0) {
+      emptyEl.classList.remove("hidden");
+      return;
+    }
+    emptyEl.classList.add("hidden");
+
+    list.forEach((v, i) => {
+      const card = document.createElement("button");
+      card.className = "ytt-card";
+      card.type = "button";
+      card.style.animationDelay = `${Math.min(i * 40, 400)}ms`;
+      card.setAttribute("aria-label", `Play ${v.pose} with ${v.instructor}`);
+      card.innerHTML = `
+        <img
+          class="ytt-card-img"
+          src="${thumbUrl(v.id)}"
+          onerror="this.onerror=null;this.src='${thumbFallback(v.id)}'"
+          alt="${v.instructor} demonstrating ${v.pose}"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="ytt-card-gradient"></div>
+        <span class="ytt-card-tag">
+          <span class="ytt-card-tag-dot"></span>
+          ${primaryCategory(v)}
+        </span>
+        <span class="ytt-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+        <div class="ytt-card-body">
+          <div class="ytt-card-name">${v.instructor}</div>
+          <div class="ytt-card-pose">${v.pose}</div>
+        </div>
+      `;
+      card.addEventListener("click", () => openModal(v));
+      grid.appendChild(card);
+    });
+  }
+
+  // ------- Modal -------
+  const modal = document.getElementById("ytt-modal");
+  const modalPlayer = document.getElementById("ytt-modal-player");
+  const modalTitle = document.getElementById("ytt-modal-title");
+  const modalSub = document.getElementById("ytt-modal-sub");
+  const modalClose = document.getElementById("ytt-modal-close");
+
+  function openModal(v) {
+    modalTitle.textContent = `${v.pose} with ${v.instructor}`;
+    modalSub.textContent = v.cohort;
+    modalPlayer.innerHTML = `
+      <iframe
+        src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+        title="${v.pose} with ${v.instructor}"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        style="position:absolute;inset:0;width:100%;height:100%;border:0;"
+      ></iframe>
+    `;
+    modal.classList.remove("hidden");
+    document.body.classList.add("ytt-modal-open");
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+    modalPlayer.innerHTML = "";
+    document.body.classList.remove("ytt-modal-open");
+  }
+
+  modalClose.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+  });
+
+  searchEl.addEventListener("input", (e) => {
+    state.query = e.target.value;
+    renderGrid();
+  });
+
+  renderFilters();
+  renderGrid();
+</script>
