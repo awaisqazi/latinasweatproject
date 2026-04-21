@@ -72,7 +72,7 @@ import Header from "@/components/Header.astro";
       </div>
     </section>
 
-    {/* Lightbox modal */}
+    {/* Lightbox modal (Reels-style swipe navigation) */}
     <div
       id="ytt-modal"
       class="ytt-modal hidden"
@@ -85,11 +85,31 @@ import Header from "@/components/Header.astro";
           <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/>
         </svg>
       </button>
-      <div class="ytt-modal-inner">
-        <div id="ytt-modal-player" class="ytt-modal-player"></div>
-        <div class="ytt-modal-meta">
-          <h3 id="ytt-modal-title"></h3>
-          <p id="ytt-modal-sub"></p>
+
+      <button id="ytt-nav-prev" class="ytt-nav-btn ytt-nav-btn--prev" aria-label="Previous video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+          <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="ytt-nav-next" class="ytt-nav-btn ytt-nav-btn--next" aria-label="Next video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div id="ytt-modal-stage" class="ytt-modal-stage">
+        <div id="ytt-modal-track" class="ytt-modal-track">
+          <div id="ytt-slide-prev" class="ytt-slide ytt-slide--peek" aria-hidden="true"></div>
+          <div id="ytt-slide-current" class="ytt-slide ytt-slide--current"></div>
+          <div id="ytt-slide-next" class="ytt-slide ytt-slide--peek" aria-hidden="true"></div>
+        </div>
+
+        <div id="ytt-swipe-hint" class="ytt-swipe-hint" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M7 10l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 18l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Swipe for next</span>
         </div>
       </div>
     </div>
@@ -490,18 +510,18 @@ import Header from "@/components/Header.astro";
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
-    background: rgba(10, 10, 10, 0.88);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     animation: yttFade 220ms ease both;
+    overflow: hidden;
   }
   .ytt-modal.hidden { display: none; }
   @keyframes yttFade { from { opacity: 0; } to { opacity: 1; } }
 
   .ytt-modal-close {
     position: absolute;
-    top: 1.25rem; right: 1.25rem;
+    top: 1.1rem; right: 1.1rem;
     width: 44px; height: 44px;
     border-radius: 9999px;
     background: rgba(255, 255, 255, 0.1);
@@ -510,8 +530,8 @@ import Header from "@/components/Header.astro";
     color: #fff;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    transition: all 180ms ease;
-    z-index: 2;
+    transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 280ms ease;
+    z-index: 10;
   }
   .ytt-modal-close:hover {
     background: var(--lsp-gold);
@@ -521,37 +541,198 @@ import Header from "@/components/Header.astro";
   }
   .ytt-modal-close svg { width: 18px; height: 18px; }
 
-  .ytt-modal-inner {
+  .ytt-nav-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px; height: 42px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 180ms ease, transform 180ms ease;
+    z-index: 10;
+  }
+  .ytt-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateX(-50%) scale(1.05);
+  }
+  .ytt-nav-btn--prev { top: 1.1rem; }
+  .ytt-nav-btn--next { bottom: 1.1rem; }
+  .ytt-nav-btn svg { width: 18px; height: 18px; }
+  @media (min-width: 768px) {
+    .ytt-nav-btn { display: flex; }
+  }
+
+  .ytt-modal-stage {
+    position: relative;
     width: 100%;
     max-width: 420px;
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+    touch-action: none;
     animation: yttZoom 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   @keyframes yttZoom {
     from { opacity: 0; transform: scale(0.94); }
     to { opacity: 1; transform: scale(1); }
   }
-  .ytt-modal-player {
+
+  .ytt-modal-track {
+    position: absolute;
+    inset: 0;
+    transform: translateY(-100%);
+    will-change: transform;
+  }
+  .ytt-modal-track.is-animating {
+    transition: transform 340ms cubic-bezier(0.22, 0.8, 0.25, 1);
+  }
+
+  .ytt-slide {
+    position: absolute;
+    left: 0; right: 0;
+    height: 100%;
+    padding: 3.75rem 1rem 3.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    box-sizing: border-box;
+  }
+  .ytt-slide:nth-child(1) { top: 0; }
+  .ytt-slide:nth-child(2) { top: 100%; }
+  .ytt-slide:nth-child(3) { top: 200%; }
+
+  .ytt-slide-frame {
     position: relative;
     width: 100%;
-    overflow: hidden;
-    border-radius: 22px;
-    background: #000;
     aspect-ratio: 9 / 16;
-    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+    max-height: calc(100% - 70px);
+    margin: 0 auto;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      0 30px 80px -20px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
   }
-  .ytt-modal-meta { margin-top: 1.1rem; text-align: center; }
-  .ytt-modal-meta h3 {
+  .ytt-slide-frame iframe,
+  .ytt-slide-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 0;
+  }
+  .ytt-slide-frame .ytt-slide-gradient {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0) 30%,
+      rgba(0, 0, 0, 0) 55%,
+      rgba(0, 0, 0, 0.75) 100%
+    );
+  }
+  .ytt-slide-frame .ytt-slide-peek-play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 58px; height: 58px;
+    border-radius: 9999px;
+    background: rgba(255, 189, 89, 0.92);
+    color: var(--lsp-ink);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  .ytt-slide-frame .ytt-slide-peek-play svg { width: 22px; height: 22px; margin-left: 3px; }
+
+  /* Invisible drag overlay so pointer events aren't swallowed by the iframe */
+  .ytt-drag-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    touch-action: none;
+    cursor: grab;
+  }
+  .ytt-drag-overlay.is-dragging { cursor: grabbing; }
+
+  .ytt-slide-meta {
+    margin-top: 0.9rem;
+    text-align: center;
+    color: #fff;
+  }
+  .ytt-slide-meta h3 {
     font-family: 'Rubik', sans-serif;
     font-weight: 700;
-    font-size: 1.1rem;
-    color: #fff;
+    font-size: 1.05rem;
     letter-spacing: -0.01em;
   }
-  .ytt-modal-meta p {
-    margin-top: 0.25rem;
+  .ytt-slide-meta p {
+    margin-top: 0.2rem;
     font-family: 'Rubik', sans-serif;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .ytt-slide-counter {
+    display: inline-block;
+    margin-top: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    background: rgba(255, 189, 89, 0.15);
+    color: var(--lsp-gold);
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .ytt-slide--peek .ytt-slide-frame {
+    opacity: 0.55;
+    transform: scale(0.92);
+    transition: opacity 280ms ease, transform 280ms ease;
+  }
+
+  .ytt-swipe-hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    z-index: 8;
+    opacity: 0;
+    animation: yttHintIn 400ms ease 400ms forwards, yttHintBounce 1.6s ease-in-out 900ms infinite;
+  }
+  .ytt-swipe-hint svg { width: 14px; height: 14px; color: var(--lsp-gold); }
+  .ytt-swipe-hint.is-hidden { opacity: 0 !important; animation: none; }
+  @media (min-width: 768px) { .ytt-swipe-hint { display: none; } }
+  @keyframes yttHintIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes yttHintBounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, -4px); }
   }
 
   body.ytt-modal-open { overflow: hidden; }
@@ -728,39 +909,265 @@ import Header from "@/components/Header.astro";
     });
   }
 
-  // ------- Modal -------
+  // ------- Modal (Reels-style swipe navigation) -------
   const modal = document.getElementById("ytt-modal");
-  const modalPlayer = document.getElementById("ytt-modal-player");
-  const modalTitle = document.getElementById("ytt-modal-title");
-  const modalSub = document.getElementById("ytt-modal-sub");
   const modalClose = document.getElementById("ytt-modal-close");
+  const stage = document.getElementById("ytt-modal-stage");
+  const track = document.getElementById("ytt-modal-track");
+  const slidePrev = document.getElementById("ytt-slide-prev");
+  const slideCurrent = document.getElementById("ytt-slide-current");
+  const slideNext = document.getElementById("ytt-slide-next");
+  const navPrev = document.getElementById("ytt-nav-prev");
+  const navNext = document.getElementById("ytt-nav-next");
+  const swipeHint = document.getElementById("ytt-swipe-hint");
+
+  let modalList = [];
+  let modalIndex = 0;
+  let isOpen = false;
+  let isAnimating = false;
+
+  function mod(n, m) { return ((n % m) + m) % m; }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function renderCurrentSlide() {
+    const v = modalList[modalIndex];
+    if (!v) return;
+    const title = escapeHtml(`${v.pose} with ${v.instructor}`);
+    slideCurrent.innerHTML = `
+      <div class="ytt-slide-frame">
+        <iframe
+          src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+          title="${title}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+        <div class="ytt-drag-overlay"></div>
+      </div>
+      <div class="ytt-slide-meta">
+        <h3>${title}</h3>
+        <p>${escapeHtml(v.cohort)}</p>
+        <span class="ytt-slide-counter">${modalIndex + 1} / ${modalList.length}</span>
+      </div>
+    `;
+  }
+
+  function renderPeekSlide(el, v) {
+    if (!v) { el.innerHTML = ""; return; }
+    el.innerHTML = `
+      <div class="ytt-slide-frame">
+        <img src="${thumbUrl(v.id)}"
+             onerror="this.onerror=null;this.src='${thumbFallback(v.id)}'"
+             alt="${escapeHtml(v.instructor)} demonstrating ${escapeHtml(v.pose)}"
+             loading="lazy" />
+        <div class="ytt-slide-gradient"></div>
+        <div class="ytt-slide-peek-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="ytt-slide-meta">
+        <h3>${escapeHtml(v.pose)} with ${escapeHtml(v.instructor)}</h3>
+        <p>${escapeHtml(v.cohort)}</p>
+      </div>
+    `;
+  }
+
+  function renderNeighbors() {
+    if (modalList.length <= 1) {
+      renderPeekSlide(slidePrev, null);
+      renderPeekSlide(slideNext, null);
+      return;
+    }
+    renderPeekSlide(slidePrev, modalList[mod(modalIndex - 1, modalList.length)]);
+    renderPeekSlide(slideNext, modalList[mod(modalIndex + 1, modalList.length)]);
+  }
+
+  function resetTrack() {
+    track.classList.remove("is-animating");
+    track.style.transform = "translateY(-100%)";
+  }
 
   function openModal(v) {
-    modalTitle.textContent = `${v.pose} with ${v.instructor}`;
-    modalSub.textContent = v.cohort;
-    modalPlayer.innerHTML = `
-      <iframe
-        src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
-        title="${v.pose} with ${v.instructor}"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen
-        style="position:absolute;inset:0;width:100%;height:100%;border:0;"
-      ></iframe>
-    `;
+    // snapshot the list in the user's current filtered+shuffled order
+    modalList = getFilteredList();
+    if (modalList.length === 0) modalList = state.videos.slice();
+    modalIndex = Math.max(0, modalList.findIndex((x) => x.id === v.id));
+
+    renderCurrentSlide();
+    renderNeighbors();
+    resetTrack();
+
     modal.classList.remove("hidden");
     document.body.classList.add("ytt-modal-open");
+    isOpen = true;
+
+    if (modalList.length > 1 && swipeHint) {
+      swipeHint.classList.remove("is-hidden");
+    } else if (swipeHint) {
+      swipeHint.classList.add("is-hidden");
+    }
   }
 
   function closeModal() {
+    if (!isOpen) return;
+    isOpen = false;
     modal.classList.add("hidden");
-    modalPlayer.innerHTML = "";
+    slideCurrent.innerHTML = "";
+    slidePrev.innerHTML = "";
+    slideNext.innerHTML = "";
     document.body.classList.remove("ytt-modal-open");
   }
 
+  function getFilteredList() {
+    const q = state.query.trim().toLowerCase();
+    return state.videos.filter((v) => {
+      if (!matchesCategory(v, state.activeCategory)) return false;
+      if (q && !v.instructor.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+
+  function advance(direction) {
+    if (isAnimating || modalList.length <= 1) return;
+    isAnimating = true;
+    if (swipeHint) swipeHint.classList.add("is-hidden");
+
+    track.classList.add("is-animating");
+    track.style.transform = direction === 1 ? "translateY(-200%)" : "translateY(0%)";
+
+    const onEnd = () => {
+      track.removeEventListener("transitionend", onEnd);
+      modalIndex = mod(modalIndex + direction, modalList.length);
+      // Tear down old iframe immediately to stop playback
+      slideCurrent.innerHTML = "";
+      renderCurrentSlide();
+      renderNeighbors();
+      resetTrack();
+      // next frame, clear animating flag
+      requestAnimationFrame(() => { isAnimating = false; });
+    };
+    track.addEventListener("transitionend", onEnd);
+  }
+
+  function snapBack() {
+    track.classList.add("is-animating");
+    track.style.transform = "translateY(-100%)";
+    const onEnd = () => {
+      track.removeEventListener("transitionend", onEnd);
+      track.classList.remove("is-animating");
+    };
+    track.addEventListener("transitionend", onEnd);
+  }
+
+  // ------- Drag / Swipe handling -------
+  let drag = null;
+
+  function onPointerDown(e) {
+    if (isAnimating) return;
+    // Don't start a drag on the close / nav buttons
+    if (e.target.closest(".ytt-modal-close, .ytt-nav-btn")) return;
+    drag = {
+      startY: e.clientY,
+      startX: e.clientX,
+      startTime: performance.now(),
+      deltaY: 0,
+      locked: null, // 'v' | 'h' | null
+      pointerId: e.pointerId,
+      captureEl: e.currentTarget,
+    };
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    stage.classList.add("is-dragging");
+    track.classList.remove("is-animating");
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!drag) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (drag.locked === null) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        drag.locked = Math.abs(dy) > Math.abs(dx) ? "v" : "h";
+      }
+    }
+    if (drag.locked !== "v") return;
+
+    drag.deltaY = dy;
+    // Resistance at ends when only 1 video (shouldn't happen since we check)
+    const h = stage.offsetHeight;
+    const pct = (dy / h) * 100;
+    track.style.transform = `translateY(calc(-100% + ${pct}%))`;
+    if (swipeHint) swipeHint.classList.add("is-hidden");
+  }
+
+  function onPointerUp() {
+    if (!drag) return;
+    if (drag.captureEl) {
+      try { drag.captureEl.releasePointerCapture(drag.pointerId); } catch {}
+    }
+    stage.classList.remove("is-dragging");
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerUp);
+
+    const deltaY = drag.deltaY;
+    const duration = performance.now() - drag.startTime;
+    const velocity = deltaY / Math.max(duration, 1); // px / ms
+    const h = stage.offsetHeight;
+    const distanceThreshold = h * 0.18;
+    const velocityThreshold = 0.5; // px/ms fling
+    drag = null;
+
+    if (modalList.length <= 1) { snapBack(); return; }
+
+    const flung = Math.abs(velocity) > velocityThreshold;
+    if (deltaY < -distanceThreshold || (flung && deltaY < 0)) {
+      advance(1);
+    } else if (deltaY > distanceThreshold || (flung && deltaY > 0)) {
+      advance(-1);
+    } else {
+      snapBack();
+    }
+  }
+
+  // Attach pointerdown once to the stage (pointerdowns from the overlay
+  // and meta area bubble up; iframe swallows them, which is why we have
+  // the transparent overlay on top of it).
+  stage.addEventListener("pointerdown", onPointerDown);
+
+  // Wheel navigation on desktop
+  let wheelLock = false;
+  stage.addEventListener("wheel", (e) => {
+    if (!isOpen || isAnimating || modalList.length <= 1) return;
+    if (Math.abs(e.deltaY) < 20) return;
+    e.preventDefault();
+    if (wheelLock) return;
+    wheelLock = true;
+    advance(e.deltaY > 0 ? 1 : -1);
+    setTimeout(() => { wheelLock = false; }, 450);
+  }, { passive: false });
+
+  // Nav buttons + keyboard
+  navPrev.addEventListener("click", () => advance(-1));
+  navNext.addEventListener("click", () => advance(1));
+
   modalClose.addEventListener("click", closeModal);
-  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  modal.addEventListener("click", (e) => {
+    // close on backdrop (outside stage) click
+    if (e.target === modal) closeModal();
+  });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    if (!isOpen) return;
+    if (e.key === "Escape") closeModal();
+    else if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); advance(1); }
+    else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); advance(-1); }
   });
 
   searchEl.addEventListener("input", (e) => {
