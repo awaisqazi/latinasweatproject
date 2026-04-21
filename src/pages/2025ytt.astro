@@ -954,18 +954,73 @@ import Header from "@/components/Header.astro";
     }[c]));
   }
 
+  // ------- YouTube IFrame API (for iOS-safe programmatic play/pause) -------
+  const ytApiState = { ready: false, pending: [] };
+  function loadYTApi() {
+    if (window.YT && window.YT.Player) { ytApiState.ready = true; return; }
+    if (document.querySelector("script[data-ytt-yt-api]")) return;
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    tag.setAttribute("data-ytt-yt-api", "");
+    document.head.appendChild(tag);
+  }
+  window.onYouTubeIframeAPIReady = function () {
+    ytApiState.ready = true;
+    ytApiState.pending.forEach((cb) => cb());
+    ytApiState.pending = [];
+  };
+  function whenYTReady(cb) {
+    if (ytApiState.ready) cb();
+    else ytApiState.pending.push(cb);
+  }
+  loadYTApi();
+
+  let ytPlayer = null;
+  let ytPlayerReady = false;
+  let ytPlayerVideoId = null;
+
+  function destroyPlayer() {
+    ytPlayerReady = false;
+    ytPlayerVideoId = null;
+    if (ytPlayer) {
+      try { ytPlayer.destroy(); } catch {}
+      ytPlayer = null;
+    }
+  }
+
+  function initPlayer(videoId) {
+    destroyPlayer();
+    ytPlayerVideoId = videoId;
+    whenYTReady(() => {
+      const target = document.getElementById("ytt-yt-player");
+      // Slide may have changed before API loaded
+      if (!target || ytPlayerVideoId !== videoId) return;
+      ytPlayer = new YT.Player("ytt-yt-player", {
+        videoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          playsinline: 1,
+          modestbranding: 1,
+          controls: 1,
+        },
+        events: {
+          onReady: (e) => {
+            ytPlayerReady = true;
+            try { e.target.playVideo(); } catch {}
+          },
+        },
+      });
+    });
+  }
+
   function renderCurrentSlide() {
     const v = modalList[modalIndex];
     if (!v) return;
     const title = escapeHtml(`${v.pose} with ${v.instructor}`);
     slideCurrent.innerHTML = `
       <div class="ytt-slide-frame">
-        <iframe
-          src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
-          title="${title}"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-        ></iframe>
+        <div id="ytt-yt-player" title="${title}"></div>
         <div class="ytt-drag-overlay"></div>
       </div>
       <div class="ytt-slide-meta">
@@ -974,6 +1029,7 @@ import Header from "@/components/Header.astro";
         <span class="ytt-slide-counter">${modalIndex + 1} / ${modalList.length}</span>
       </div>
     `;
+    initPlayer(v.id);
   }
 
   function renderPeekSlide(el, v) {
@@ -1037,6 +1093,7 @@ import Header from "@/components/Header.astro";
   function closeModal() {
     if (!isOpen) return;
     isOpen = false;
+    destroyPlayer();
     modal.classList.add("hidden");
     slideCurrent.innerHTML = "";
     slidePrev.innerHTML = "";
@@ -1066,7 +1123,8 @@ import Header from "@/components/Header.astro";
     const onEnd = () => {
       track.removeEventListener("transitionend", onEnd);
       modalIndex = mod(modalIndex + direction, modalList.length);
-      // Tear down old iframe immediately to stop playback
+      // Tear down the old player immediately to stop audio
+      destroyPlayer();
       slideCurrent.innerHTML = "";
       renderCurrentSlide();
       renderNeighbors();
@@ -1147,7 +1205,23 @@ import Header from "@/components/Header.astro";
     const h = stage.offsetHeight;
     const distanceThreshold = h * 0.18;
     const velocityThreshold = 0.5; // px/ms fling
+    const wasTap = drag.locked === null && duration < 400;
     drag = null;
+
+    // Tap on the video (no drag lock) → toggle play/pause via YT API.
+    // Critical for iOS where autoplay-with-sound is blocked until a
+    // user gesture calls playVideo().
+    if (wasTap) {
+      if (ytPlayerReady && ytPlayer) {
+        try {
+          const YTState = window.YT && window.YT.PlayerState;
+          const s = ytPlayer.getPlayerState();
+          if (YTState && s === YTState.PLAYING) ytPlayer.pauseVideo();
+          else ytPlayer.playVideo();
+        } catch {}
+      }
+      return;
+    }
 
     if (modalList.length <= 1) { snapBack(); return; }
 
