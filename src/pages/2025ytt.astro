@@ -823,6 +823,13 @@ import Header from "@/components/Header.astro";
       cohort: "2025 Teacher Training Cohort",
       categories: ["Restorative", "Supine", "English"],
     },
+    {
+      id: "-hrRkEZf-c8",
+      instructor: "Ariesna Garcia Sedano",
+      pose: "Posición del Niño (Child's Pose)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Restorative", "Floor", "Español"],
+    },
   ];
 
   const CATEGORY_ALIASES = {
@@ -855,7 +862,7 @@ import Header from "@/components/Header.astro";
 
   if (countEl) countEl.textContent = videoData.length;
 
-  const baseCategories = ["All", "Restorative", "Standing", "Seated", "Supine", "Balance", "Strength", "Core", "Flexibility", "Posture", "En Español"];
+  const baseCategories = ["All", "Restorative", "Standing", "Seated", "Supine", "Floor", "Balance", "Strength", "Core", "Flexibility", "Posture", "En Español"];
   const dataCats = new Set();
   videoData.forEach((v) => v.categories.forEach((c) => dataCats.add(c)));
   const languageTags = new Set(["English", "Spanish", "Español", "En Español", "español"]);
