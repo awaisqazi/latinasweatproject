@@ -19,7 +19,7 @@ import Header from "@/components/Header.astro";
           Meet the <span class="ytt-title-accent">2025 YTT</span> Cohort
         </h1>
         <p class="ytt-lede">
-          One minute tutorials from our graduating teachers. Tap any pose to
+          Roughly one-minute clips from our graduating teachers. Tap any pose to
           learn from a new voice in our movement.
         </p>
         <div class="ytt-stats" aria-hidden="true">
@@ -29,8 +29,8 @@ import Header from "@/components/Header.astro";
           </div>
           <div class="ytt-stat-sep"></div>
           <div class="ytt-stat">
-            <span class="ytt-stat-num">60s</span>
-            <span class="ytt-stat-label">Per tutorial</span>
+            <span class="ytt-stat-num">~1 min</span>
+            <span class="ytt-stat-label">Per clip</span>
           </div>
           <div class="ytt-stat-sep"></div>
           <div class="ytt-stat">
@@ -47,9 +47,15 @@ import Header from "@/components/Header.astro";
         <div class="ytt-filterwrap">
           <div class="ytt-glass">
             <label class="ytt-search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="7"/>
-                <path d="m20 20-3.5-3.5" stroke-linecap="round"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.5-3.5" stroke-linecap="round"></path>
               </svg>
               <input
                 id="ytt-search"
@@ -80,34 +86,91 @@ import Header from "@/components/Header.astro";
       aria-modal="true"
       aria-labelledby="ytt-modal-title"
     >
-      <button id="ytt-modal-close" class="ytt-modal-close" aria-label="Close video">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/>
+      <button
+        id="ytt-modal-close"
+        class="ytt-modal-close"
+        aria-label="Close video"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.25"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path>
         </svg>
       </button>
 
-      <button id="ytt-nav-prev" class="ytt-nav-btn ytt-nav-btn--prev" aria-label="Previous video">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
-          <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+      <button
+        id="ytt-nav-prev"
+        class="ytt-nav-btn ytt-nav-btn--prev"
+        aria-label="Previous video"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.25"
+          aria-hidden="true"
+        >
+          <path
+            d="M18 15l-6-6-6 6"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
         </svg>
       </button>
-      <button id="ytt-nav-next" class="ytt-nav-btn ytt-nav-btn--next" aria-label="Next video">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
-          <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+      <button
+        id="ytt-nav-next"
+        class="ytt-nav-btn ytt-nav-btn--next"
+        aria-label="Next video"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.25"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"
+          ></path>
         </svg>
       </button>
 
       <div id="ytt-modal-stage" class="ytt-modal-stage">
         <div id="ytt-modal-track" class="ytt-modal-track">
-          <div id="ytt-slide-prev" class="ytt-slide ytt-slide--peek" aria-hidden="true"></div>
-          <div id="ytt-slide-current" class="ytt-slide ytt-slide--current"></div>
-          <div id="ytt-slide-next" class="ytt-slide ytt-slide--peek" aria-hidden="true"></div>
+          <div
+            id="ytt-slide-prev"
+            class="ytt-slide ytt-slide--peek"
+            aria-hidden="true"
+          >
+          </div>
+          <div id="ytt-slide-current" class="ytt-slide ytt-slide--current">
+          </div>
+          <div
+            id="ytt-slide-next"
+            class="ytt-slide ytt-slide--peek"
+            aria-hidden="true"
+          >
+          </div>
         </div>
 
         <div id="ytt-swipe-hint" class="ytt-swipe-hint" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M7 10l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M7 18l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 10l5-5 5 5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+            <path
+              d="M7 18l5-5 5 5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
           </svg>
           <span>Swipe for next</span>
         </div>
@@ -119,13 +182,15 @@ import Header from "@/components/Header.astro";
 <style is:global>
   :root {
     --lsp-gold: #ffbd59;
-    --lsp-ink: #1E1E1E;
+    --lsp-ink: #1e1e1e;
     --lsp-tan: #b5a18d;
     --lsp-cream: #faf5ed;
     --lsp-mist: #f3eee6;
   }
 
-  .ytt-main { background: var(--lsp-cream); }
+  .ytt-main {
+    background: var(--lsp-cream);
+  }
 
   /* ---------- Hero ---------- */
   .ytt-hero {
@@ -133,7 +198,11 @@ import Header from "@/components/Header.astro";
     overflow: hidden;
     padding: 5rem 1.25rem 4rem;
     background:
-      radial-gradient(80% 60% at 50% 0%, rgba(255, 189, 89, 0.18), transparent 60%),
+      radial-gradient(
+        80% 60% at 50% 0%,
+        rgba(255, 189, 89, 0.18),
+        transparent 60%
+      ),
       linear-gradient(180deg, #fff 0%, var(--lsp-cream) 100%);
     isolation: isolate;
   }
@@ -153,14 +222,18 @@ import Header from "@/components/Header.astro";
     pointer-events: none;
   }
   .ytt-hero-blob--a {
-    width: 380px; height: 380px;
+    width: 380px;
+    height: 380px;
     background: radial-gradient(circle, #ffbd59 0%, transparent 65%);
-    top: -120px; left: -80px;
+    top: -120px;
+    left: -80px;
   }
   .ytt-hero-blob--b {
-    width: 460px; height: 460px;
+    width: 460px;
+    height: 460px;
     background: radial-gradient(circle, #b5a18d 0%, transparent 65%);
-    bottom: -220px; right: -120px;
+    bottom: -220px;
+    right: -120px;
     opacity: 0.4;
   }
 
@@ -172,7 +245,7 @@ import Header from "@/components/Header.astro";
     border-radius: 9999px;
     background: rgba(30, 30, 30, 0.05);
     border: 1px solid rgba(30, 30, 30, 0.08);
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -180,19 +253,26 @@ import Header from "@/components/Header.astro";
     color: var(--lsp-ink);
   }
   .ytt-eyebrow-dot {
-    width: 6px; height: 6px; border-radius: 9999px;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
     background: var(--lsp-gold);
     box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.25);
     animation: yttPulse 2.2s ease-in-out infinite;
   }
   @keyframes yttPulse {
-    0%, 100% { box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.25); }
-    50% { box-shadow: 0 0 0 8px rgba(255, 189, 89, 0); }
+    0%,
+    100% {
+      box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(255, 189, 89, 0);
+    }
   }
 
   .ytt-title {
     margin: 1.25rem 0 0;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-weight: 800;
     font-size: clamp(2.25rem, 6vw, 4.25rem);
     line-height: 1.02;
@@ -207,7 +287,9 @@ import Header from "@/components/Header.astro";
   .ytt-title-accent::after {
     content: "";
     position: absolute;
-    left: 0; right: 0; bottom: 0.08em;
+    left: 0;
+    right: 0;
+    bottom: 0.08em;
     height: 0.32em;
     background: var(--lsp-gold);
     border-radius: 4px;
@@ -219,7 +301,7 @@ import Header from "@/components/Header.astro";
   .ytt-lede {
     margin: 1.25rem auto 0;
     max-width: 620px;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: clamp(1rem, 1.6vw, 1.15rem);
     line-height: 1.6;
     color: #555;
@@ -238,9 +320,13 @@ import Header from "@/components/Header.astro";
     border: 1px solid rgba(30, 30, 30, 0.06);
     box-shadow: 0 10px 30px -15px rgba(30, 30, 30, 0.15);
   }
-  .ytt-stat { display: flex; flex-direction: column; align-items: center; }
+  .ytt-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .ytt-stat-num {
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-weight: 700;
     font-size: 1.1rem;
     color: var(--lsp-ink);
@@ -253,11 +339,20 @@ import Header from "@/components/Header.astro";
     color: #888;
     margin-top: 1px;
   }
-  .ytt-stat-sep { width: 1px; height: 24px; background: rgba(30, 30, 30, 0.1); }
+  .ytt-stat-sep {
+    width: 1px;
+    height: 24px;
+    background: rgba(30, 30, 30, 0.1);
+  }
 
   /* ---------- Section / container ---------- */
-  .ytt-section { padding: 0.5rem 1.25rem 5rem; }
-  .ytt-container { max-width: 1280px; margin: 0 auto; }
+  .ytt-section {
+    padding: 0.5rem 1.25rem 5rem;
+  }
+  .ytt-container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
 
   /* ---------- Filter bar ---------- */
   .ytt-filterwrap {
@@ -281,8 +376,15 @@ import Header from "@/components/Header.astro";
       0 18px 40px -18px rgba(30, 30, 30, 0.2);
   }
   @media (max-width: 720px) {
-    .ytt-glass { flex-direction: column; align-items: stretch; border-radius: 24px; padding: 0.6rem; }
-    .ytt-divider { display: none; }
+    .ytt-glass {
+      flex-direction: column;
+      align-items: stretch;
+      border-radius: 24px;
+      padding: 0.6rem;
+    }
+    .ytt-divider {
+      display: none;
+    }
   }
   .ytt-search {
     display: flex;
@@ -299,20 +401,32 @@ import Header from "@/components/Header.astro";
   .ytt-search:focus-within {
     box-shadow: inset 0 0 0 2px var(--lsp-gold);
   }
-  .ytt-search svg { width: 16px; height: 16px; color: #888; flex-shrink: 0; }
+  .ytt-search svg {
+    width: 16px;
+    height: 16px;
+    color: #888;
+    flex-shrink: 0;
+  }
   .ytt-search input {
     flex: 1;
     background: transparent;
     border: 0;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.9rem;
     color: var(--lsp-ink);
     outline: none;
     min-width: 0;
   }
-  .ytt-search input::placeholder { color: #999; }
+  .ytt-search input::placeholder {
+    color: #999;
+  }
 
-  .ytt-divider { width: 1px; height: 28px; background: rgba(30, 30, 30, 0.1); flex-shrink: 0; }
+  .ytt-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(30, 30, 30, 0.1);
+    flex-shrink: 0;
+  }
 
   .ytt-filters {
     display: flex;
@@ -324,8 +438,15 @@ import Header from "@/components/Header.astro";
     flex: 1;
     scrollbar-width: none;
   }
-  .ytt-filters::-webkit-scrollbar { display: none; }
-  @media (min-width: 900px) { .ytt-filters { flex-wrap: wrap; overflow: visible; } }
+  .ytt-filters::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 900px) {
+    .ytt-filters {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
 
   .ytt-pill {
     display: inline-flex;
@@ -333,7 +454,7 @@ import Header from "@/components/Header.astro";
     white-space: nowrap;
     padding: 0.5rem 0.95rem;
     border-radius: 9999px;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--lsp-ink);
@@ -342,11 +463,15 @@ import Header from "@/components/Header.astro";
     cursor: pointer;
     transition: all 180ms ease;
   }
-  .ytt-pill:hover { background: rgba(30, 30, 30, 0.06); }
+  .ytt-pill:hover {
+    background: rgba(30, 30, 30, 0.06);
+  }
   .ytt-pill[aria-pressed="true"] {
     background: var(--lsp-ink);
     color: #fff;
-    box-shadow: 0 6px 16px -6px rgba(30, 30, 30, 0.45), inset 0 0 0 2px var(--lsp-gold);
+    box-shadow:
+      0 6px 16px -6px rgba(30, 30, 30, 0.45),
+      inset 0 0 0 2px var(--lsp-gold);
   }
 
   /* ---------- Grid ---------- */
@@ -355,10 +480,27 @@ import Header from "@/components/Header.astro";
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.85rem;
   }
-  @media (min-width: 640px) { .ytt-grid { gap: 1rem; } }
-  @media (min-width: 768px) { .ytt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 1024px) { .ytt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; } }
-  @media (min-width: 1280px) { .ytt-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (min-width: 640px) {
+    .ytt-grid {
+      gap: 1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .ytt-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .ytt-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .ytt-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
 
   .ytt-card {
     position: relative;
@@ -373,10 +515,12 @@ import Header from "@/components/Header.astro";
     aspect-ratio: 9 / 16;
     cursor: pointer;
     transform: translateZ(0);
-    transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 320ms ease;
+    transition:
+      transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 320ms ease;
     box-shadow: 0 4px 14px -4px rgba(30, 30, 30, 0.18);
     text-align: left;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     animation: yttRise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -384,8 +528,14 @@ import Header from "@/components/Header.astro";
     appearance: none;
   }
   @keyframes yttRise {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   .ytt-card:hover {
     transform: translateY(-4px);
@@ -404,7 +554,9 @@ import Header from "@/components/Header.astro";
     object-fit: cover;
     transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  .ytt-card:hover .ytt-card-img { transform: scale(1.06); }
+  .ytt-card:hover .ytt-card-img {
+    transform: scale(1.06);
+  }
 
   .ytt-card-gradient {
     position: absolute;
@@ -440,7 +592,10 @@ import Header from "@/components/Header.astro";
     z-index: 3;
   }
   .ytt-card-tag-dot {
-    width: 5px; height: 5px; border-radius: 9999px; background: var(--lsp-gold);
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: var(--lsp-gold);
   }
 
   .ytt-play {
@@ -460,19 +615,30 @@ import Header from "@/components/Header.astro";
       0 10px 30px rgba(0, 0, 0, 0.35),
       0 0 0 0 rgba(255, 189, 89, 0.5);
     z-index: 3;
-    transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 260ms ease, background 260ms ease;
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 260ms ease,
+      background 260ms ease;
     pointer-events: none;
   }
   .ytt-card:hover .ytt-play {
     transform: translate(-50%, -50%) scale(1.05);
     background: var(--lsp-gold);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 0 10px rgba(255, 189, 89, 0.2);
+    box-shadow:
+      0 14px 36px rgba(0, 0, 0, 0.45),
+      0 0 0 10px rgba(255, 189, 89, 0.2);
   }
-  .ytt-play svg { width: 22px; height: 22px; margin-left: 3px; }
+  .ytt-play svg {
+    width: 22px;
+    height: 22px;
+    margin-left: 3px;
+  }
 
   .ytt-card-body {
     position: absolute;
-    left: 0; right: 0; bottom: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     padding: 0.85rem 0.95rem 1rem;
     color: #fff;
     z-index: 2;
@@ -494,17 +660,21 @@ import Header from "@/components/Header.astro";
   }
   .ytt-card-pose::before {
     content: "";
-    width: 4px; height: 4px; border-radius: 9999px;
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
     background: var(--lsp-gold);
   }
 
   .ytt-empty {
     margin-top: 4rem;
     text-align: center;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     color: #666;
   }
-  .hidden { display: none !important; }
+  .hidden {
+    display: none !important;
+  }
 
   /* ---------- Modal ---------- */
   .ytt-modal {
@@ -520,21 +690,38 @@ import Header from "@/components/Header.astro";
     animation: yttFade 220ms ease both;
     overflow: hidden;
   }
-  .ytt-modal.hidden { display: none; }
-  @keyframes yttFade { from { opacity: 0; } to { opacity: 1; } }
+  .ytt-modal.hidden {
+    display: none;
+  }
+  @keyframes yttFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
   .ytt-modal-close {
     position: absolute;
-    top: 1.1rem; right: 1.1rem;
-    width: 44px; height: 44px;
+    top: 1.1rem;
+    right: 1.1rem;
+    width: 44px;
+    height: 44px;
     border-radius: 9999px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(8px);
     color: #fff;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 280ms ease;
+    transition:
+      background 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      transform 280ms ease;
     z-index: 10;
   }
   .ytt-modal-close:hover {
@@ -543,13 +730,17 @@ import Header from "@/components/Header.astro";
     border-color: var(--lsp-gold);
     transform: rotate(90deg);
   }
-  .ytt-modal-close svg { width: 18px; height: 18px; }
+  .ytt-modal-close svg {
+    width: 18px;
+    height: 18px;
+  }
 
   .ytt-nav-btn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 42px; height: 42px;
+    width: 42px;
+    height: 42px;
     border-radius: 9999px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -559,18 +750,29 @@ import Header from "@/components/Header.astro";
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 180ms ease, transform 180ms ease;
+    transition:
+      background 180ms ease,
+      transform 180ms ease;
     z-index: 10;
   }
   .ytt-nav-btn:hover {
     background: rgba(255, 255, 255, 0.18);
     transform: translateX(-50%) scale(1.05);
   }
-  .ytt-nav-btn--prev { top: 1.1rem; }
-  .ytt-nav-btn--next { bottom: 1.1rem; }
-  .ytt-nav-btn svg { width: 18px; height: 18px; }
+  .ytt-nav-btn--prev {
+    top: 1.1rem;
+  }
+  .ytt-nav-btn--next {
+    bottom: 1.1rem;
+  }
+  .ytt-nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
   @media (min-width: 768px) {
-    .ytt-nav-btn { display: flex; }
+    .ytt-nav-btn {
+      display: flex;
+    }
   }
 
   .ytt-modal-stage {
@@ -588,11 +790,19 @@ import Header from "@/components/Header.astro";
     animation: yttZoom 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   @media (max-width: 500px) {
-    .ytt-slide { padding: 3rem 0.75rem; }
+    .ytt-slide {
+      padding: 3rem 0.75rem;
+    }
   }
   @keyframes yttZoom {
-    from { opacity: 0; transform: scale(0.94); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .ytt-modal-track {
@@ -607,7 +817,8 @@ import Header from "@/components/Header.astro";
 
   .ytt-slide {
     position: absolute;
-    left: 0; right: 0;
+    left: 0;
+    right: 0;
     height: 100%;
     padding: 3.75rem 1rem 3.75rem;
     display: flex;
@@ -616,9 +827,15 @@ import Header from "@/components/Header.astro";
     align-items: stretch;
     box-sizing: border-box;
   }
-  .ytt-slide:nth-child(1) { top: 0; }
-  .ytt-slide:nth-child(2) { top: 100%; }
-  .ytt-slide:nth-child(3) { top: 200%; }
+  .ytt-slide:nth-child(1) {
+    top: 0;
+  }
+  .ytt-slide:nth-child(2) {
+    top: 100%;
+  }
+  .ytt-slide:nth-child(3) {
+    top: 200%;
+  }
 
   .ytt-slide-frame {
     position: relative;
@@ -643,9 +860,12 @@ import Header from "@/components/Header.astro";
     border: 0;
   }
   /* Critical for mobile: iframe ignores touches so our overlay can catch them */
-  .ytt-slide-frame iframe { pointer-events: none; }
+  .ytt-slide-frame iframe {
+    pointer-events: none;
+  }
   .ytt-slide-frame .ytt-slide-gradient {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     pointer-events: none;
     background: linear-gradient(
       180deg,
@@ -657,16 +877,24 @@ import Header from "@/components/Header.astro";
   }
   .ytt-slide-frame .ytt-slide-peek-play {
     position: absolute;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    width: 58px; height: 58px;
+    width: 58px;
+    height: 58px;
     border-radius: 9999px;
     background: rgba(255, 189, 89, 0.92);
     color: var(--lsp-ink);
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   }
-  .ytt-slide-frame .ytt-slide-peek-play svg { width: 22px; height: 22px; margin-left: 3px; }
+  .ytt-slide-frame .ytt-slide-peek-play svg {
+    width: 22px;
+    height: 22px;
+    margin-left: 3px;
+  }
 
   /* Invisible drag overlay so pointer events aren't swallowed by the iframe */
   .ytt-drag-overlay {
@@ -677,7 +905,9 @@ import Header from "@/components/Header.astro";
     cursor: grab;
     -webkit-tap-highlight-color: transparent;
   }
-  .ytt-modal-stage.is-dragging .ytt-drag-overlay { cursor: grabbing; }
+  .ytt-modal-stage.is-dragging .ytt-drag-overlay {
+    cursor: grabbing;
+  }
 
   .ytt-slide-meta {
     margin-top: 0.9rem;
@@ -685,14 +915,14 @@ import Header from "@/components/Header.astro";
     color: #fff;
   }
   .ytt-slide-meta h3 {
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-weight: 700;
     font-size: 1.05rem;
     letter-spacing: -0.01em;
   }
   .ytt-slide-meta p {
     margin-top: 0.2rem;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.82rem;
     color: rgba(255, 255, 255, 0.6);
   }
@@ -703,7 +933,7 @@ import Header from "@/components/Header.astro";
     border-radius: 9999px;
     background: rgba(255, 189, 89, 0.15);
     color: var(--lsp-gold);
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -712,7 +942,9 @@ import Header from "@/components/Header.astro";
   .ytt-slide--peek .ytt-slide-frame {
     opacity: 0.55;
     transform: scale(0.92);
-    transition: opacity 280ms ease, transform 280ms ease;
+    transition:
+      opacity 280ms ease,
+      transform 280ms ease;
   }
 
   .ytt-swipe-hint {
@@ -728,25 +960,49 @@ import Header from "@/components/Header.astro";
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.18);
     color: #fff;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     pointer-events: none;
     z-index: 8;
     opacity: 0;
-    animation: yttHintIn 400ms ease 400ms forwards, yttHintBounce 1.6s ease-in-out 900ms infinite;
+    animation:
+      yttHintIn 400ms ease 400ms forwards,
+      yttHintBounce 1.6s ease-in-out 900ms infinite;
   }
-  .ytt-swipe-hint svg { width: 14px; height: 14px; color: var(--lsp-gold); }
-  .ytt-swipe-hint.is-hidden { opacity: 0 !important; animation: none; }
-  @media (min-width: 768px) { .ytt-swipe-hint { display: none; } }
+  .ytt-swipe-hint svg {
+    width: 14px;
+    height: 14px;
+    color: var(--lsp-gold);
+  }
+  .ytt-swipe-hint.is-hidden {
+    opacity: 0 !important;
+    animation: none;
+  }
+  @media (min-width: 768px) {
+    .ytt-swipe-hint {
+      display: none;
+    }
+  }
   @keyframes yttHintIn {
-    from { opacity: 0; transform: translate(-50%, 10px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
+    from {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
   }
   @keyframes yttHintBounce {
-    0%, 100% { transform: translate(-50%, 0); }
-    50% { transform: translate(-50%, -4px); }
+    0%,
+    100% {
+      transform: translate(-50%, 0);
+    }
+    50% {
+      transform: translate(-50%, -4px);
+    }
   }
 
   body.ytt-modal-open {
@@ -830,6 +1086,55 @@ import Header from "@/components/Header.astro";
       cohort: "2025 Teacher Training Cohort",
       categories: ["Restorative", "Floor", "Español"],
     },
+    {
+      id: "uVDtFU2dDmY",
+      instructor: "Auriana Moctezuma",
+      pose: "Upward Facing Dog",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Backbend", "Core", "English"],
+    },
+    {
+      id: "1XoqLCnCnGw",
+      instructor: "Chelsey Munizzi",
+      pose: "Extended Side Angle (Utthita Parsvakonasana)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Standing", "Stretch", "English"],
+    },
+    {
+      id: "MUi-vRRGbFI",
+      instructor: "Diana Contreras",
+      pose: "Low Lunge",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Stretch", "Legs", "English"],
+    },
+    {
+      id: "OLwdJgKNn0k",
+      instructor: "Diane Ortega",
+      pose: "Corpse Pose (Savasana)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Restorative", "Supine", "English"],
+    },
+    {
+      id: "J9jkQG4q7hY",
+      instructor: "Isabel Resendiz",
+      pose: "Cobra Pose (Bhujangasana)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Backbend", "Floor", "English"],
+    },
+    {
+      id: "du__zKdhPpc",
+      instructor: "Jessica Lainez",
+      pose: "Guerrero III (Warrior III)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Standing", "Balance", "Español"],
+    },
+    {
+      id: "N8sUquV35CQ",
+      instructor: "Karina Sanchez (Kari)",
+      pose: "Tree Pose (Vrksasana)",
+      cohort: "2025 Teacher Training Cohort",
+      categories: ["Standing", "Balance", "English"],
+    },
   ];
 
   const CATEGORY_ALIASES = {
@@ -862,12 +1167,33 @@ import Header from "@/components/Header.astro";
 
   if (countEl) countEl.textContent = videoData.length;
 
-  const baseCategories = ["All", "Restorative", "Standing", "Seated", "Supine", "Floor", "Balance", "Strength", "Core", "Flexibility", "Posture", "En Español"];
+  const baseCategories = [
+    "All",
+    "Restorative",
+    "Standing",
+    "Seated",
+    "Supine",
+    "Floor",
+    "Balance",
+    "Strength",
+    "Core",
+    "Flexibility",
+    "Posture",
+    "En Español",
+  ];
   const dataCats = new Set();
   videoData.forEach((v) => v.categories.forEach((c) => dataCats.add(c)));
-  const languageTags = new Set(["English", "Spanish", "Español", "En Español", "español"]);
+  const languageTags = new Set([
+    "English",
+    "Spanish",
+    "Español",
+    "En Español",
+    "español",
+  ]);
   const filterList = baseCategories.concat(
-    [...dataCats].filter((c) => !baseCategories.includes(c) && !languageTags.has(c))
+    [...dataCats].filter(
+      (c) => !baseCategories.includes(c) && !languageTags.has(c),
+    ),
   );
 
   function matchesCategory(video, cat) {
@@ -885,7 +1211,7 @@ import Header from "@/components/Header.astro";
       btn.textContent = cat;
       btn.setAttribute(
         "aria-pressed",
-        state.activeCategory === cat ? "true" : "false"
+        state.activeCategory === cat ? "true" : "false",
       );
       btn.addEventListener("click", () => {
         state.activeCategory = cat;
@@ -897,7 +1223,9 @@ import Header from "@/components/Header.astro";
   }
 
   function primaryCategory(v) {
-    const first = v.categories.find((c) => c !== "English" && c !== "Spanish" && c !== "Español");
+    const first = v.categories.find(
+      (c) => c !== "English" && c !== "Spanish" && c !== "Español",
+    );
     return first || v.categories[0];
   }
 
@@ -967,18 +1295,31 @@ import Header from "@/components/Header.astro";
   let isAnimating = false;
   let savedScrollY = 0;
 
-  function mod(n, m) { return ((n % m) + m) % m; }
+  function mod(n, m) {
+    return ((n % m) + m) % m;
+  }
 
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[c]));
+    return String(s).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
   }
 
   // ------- YouTube IFrame API (for iOS-safe programmatic play/pause) -------
   const ytApiState = { ready: false, pending: [] };
   function loadYTApi() {
-    if (window.YT && window.YT.Player) { ytApiState.ready = true; return; }
+    if (window.YT && window.YT.Player) {
+      ytApiState.ready = true;
+      return;
+    }
     if (document.querySelector("script[data-ytt-yt-api]")) return;
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
@@ -1004,7 +1345,9 @@ import Header from "@/components/Header.astro";
     ytPlayerReady = false;
     ytPlayerVideoId = null;
     if (ytPlayer) {
-      try { ytPlayer.destroy(); } catch {}
+      try {
+        ytPlayer.destroy();
+      } catch {}
       ytPlayer = null;
     }
   }
@@ -1028,7 +1371,9 @@ import Header from "@/components/Header.astro";
         events: {
           onReady: (e) => {
             ytPlayerReady = true;
-            try { e.target.playVideo(); } catch {}
+            try {
+              e.target.playVideo();
+            } catch {}
           },
         },
       });
@@ -1054,7 +1399,10 @@ import Header from "@/components/Header.astro";
   }
 
   function renderPeekSlide(el, v) {
-    if (!v) { el.innerHTML = ""; return; }
+    if (!v) {
+      el.innerHTML = "";
+      return;
+    }
     el.innerHTML = `
       <div class="ytt-slide-frame">
         <img src="${thumbUrl(v.id)}"
@@ -1079,8 +1427,14 @@ import Header from "@/components/Header.astro";
       renderPeekSlide(slideNext, null);
       return;
     }
-    renderPeekSlide(slidePrev, modalList[mod(modalIndex - 1, modalList.length)]);
-    renderPeekSlide(slideNext, modalList[mod(modalIndex + 1, modalList.length)]);
+    renderPeekSlide(
+      slidePrev,
+      modalList[mod(modalIndex - 1, modalList.length)],
+    );
+    renderPeekSlide(
+      slideNext,
+      modalList[mod(modalIndex + 1, modalList.length)],
+    );
   }
 
   function resetTrack() {
@@ -1092,7 +1446,10 @@ import Header from "@/components/Header.astro";
     // snapshot the list in the user's current filtered+shuffled order
     modalList = getFilteredList();
     if (modalList.length === 0) modalList = state.videos.slice();
-    modalIndex = Math.max(0, modalList.findIndex((x) => x.id === v.id));
+    modalIndex = Math.max(
+      0,
+      modalList.findIndex((x) => x.id === v.id),
+    );
 
     renderCurrentSlide();
     renderNeighbors();
@@ -1139,7 +1496,8 @@ import Header from "@/components/Header.astro";
     if (swipeHint) swipeHint.classList.add("is-hidden");
 
     track.classList.add("is-animating");
-    track.style.transform = direction === 1 ? "translateY(-200%)" : "translateY(0%)";
+    track.style.transform =
+      direction === 1 ? "translateY(-200%)" : "translateY(0%)";
 
     const onEnd = () => {
       track.removeEventListener("transitionend", onEnd);
@@ -1151,7 +1509,9 @@ import Header from "@/components/Header.astro";
       renderNeighbors();
       resetTrack();
       // next frame, clear animating flag
-      requestAnimationFrame(() => { isAnimating = false; });
+      requestAnimationFrame(() => {
+        isAnimating = false;
+      });
     };
     track.addEventListener("transitionend", onEnd);
   }
@@ -1182,7 +1542,9 @@ import Header from "@/components/Header.astro";
       pointerId: e.pointerId,
       captureEl: e.currentTarget,
     };
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
     stage.classList.add("is-dragging");
     track.classList.remove("is-animating");
     window.addEventListener("pointermove", onPointerMove);
@@ -1213,7 +1575,9 @@ import Header from "@/components/Header.astro";
   function onPointerUp() {
     if (!drag) return;
     if (drag.captureEl) {
-      try { drag.captureEl.releasePointerCapture(drag.pointerId); } catch {}
+      try {
+        drag.captureEl.releasePointerCapture(drag.pointerId);
+      } catch {}
     }
     stage.classList.remove("is-dragging");
     window.removeEventListener("pointermove", onPointerMove);
@@ -1244,7 +1608,10 @@ import Header from "@/components/Header.astro";
       return;
     }
 
-    if (modalList.length <= 1) { snapBack(); return; }
+    if (modalList.length <= 1) {
+      snapBack();
+      return;
+    }
 
     const flung = Math.abs(velocity) > velocityThreshold;
     if (deltaY < -distanceThreshold || (flung && deltaY < 0)) {
@@ -1263,15 +1630,21 @@ import Header from "@/components/Header.astro";
 
   // Wheel navigation on desktop
   let wheelLock = false;
-  stage.addEventListener("wheel", (e) => {
-    if (!isOpen || isAnimating || modalList.length <= 1) return;
-    if (Math.abs(e.deltaY) < 20) return;
-    e.preventDefault();
-    if (wheelLock) return;
-    wheelLock = true;
-    advance(e.deltaY > 0 ? 1 : -1);
-    setTimeout(() => { wheelLock = false; }, 450);
-  }, { passive: false });
+  stage.addEventListener(
+    "wheel",
+    (e) => {
+      if (!isOpen || isAnimating || modalList.length <= 1) return;
+      if (Math.abs(e.deltaY) < 20) return;
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelLock = true;
+      advance(e.deltaY > 0 ? 1 : -1);
+      setTimeout(() => {
+        wheelLock = false;
+      }, 450);
+    },
+    { passive: false },
+  );
 
   // Nav buttons + keyboard
   navPrev.addEventListener("click", () => advance(-1));
@@ -1285,8 +1658,13 @@ import Header from "@/components/Header.astro";
   document.addEventListener("keydown", (e) => {
     if (!isOpen) return;
     if (e.key === "Escape") closeModal();
-    else if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); advance(1); }
-    else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); advance(-1); }
+    else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      e.preventDefault();
+      advance(1);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      advance(-1);
+    }
   });
 
   searchEl.addEventListener("input", (e) => {

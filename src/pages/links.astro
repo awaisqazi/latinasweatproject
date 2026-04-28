@@ -5,23 +5,13 @@ const base = import.meta.env.BASE_URL;
 // Define links data (chronological — upcoming events first, recurring/undated next, past events last)
 const links = [
   {
-    title: "⭐ Yoga For Wishes × Make‑A‑Wish",
+    title: "🧘🏽‍♀️ Check out our 2025 YTT Cohort",
     description:
-      "Join our 3:30 PM donation‑based class supporting Make‑A‑Wish Illinois, or stop by anytime to write a birthday card for a wish child. Move. Breathe. Give back.",
-    url: "https://www.zeffy.com/en-US/ticketing/makeawish-together-we-grant-wishes-for-children-with-critical-illnesses",
-    color: "wish",
-    icon: "star",
-    badge: "April 18",
-    featured: true,
-  },
-  {
-    title: "🌿 Spring Clean Up",
-    description:
-      "Roll up your sleeves and help clean up our neighborhood! A collaboration with Alderman Byron Sigcho-Lopez's office. Light refreshments provided. 10 AM – 12 PM.",
-    url: "https://www.zeffy.com/en-US/ticketing/spring-clean-up",
-    color: "green",
-    icon: "leaf",
-    badge: "April 25",
+      "Meet our graduating teachers. Roughly one-minute clips of each instructor, tap any pose to learn from a new voice in our movement.",
+    url: "https://latinasweatproject.com/2025ytt/",
+    color: "amber",
+    icon: "yoga",
+    badge: "New",
     featured: true,
   },
   {
@@ -60,16 +50,6 @@ const links = [
     url: "https://latinasweatproject.com/schedule/",
     color: "vibrant-pink",
     icon: "calendar",
-    featured: true,
-  },
-  {
-    title: "🏥 World Health Day",
-    description:
-      "Health is a right, not a privilege. LSP highlights Chicago organizations providing affordable, bilingual healthcare to our communities.",
-    url: "https://latinasweatproject.com/healthday/",
-    color: "sky",
-    icon: "health",
-    badge: "April 7",
     featured: true,
   },
   {
@@ -200,6 +180,7 @@ const socials = [
                       link.color === "wish" && "bg-rose-400 text-rose-950",
                       link.color === "green" && "bg-emerald-400 text-emerald-950",
                       link.color === "indigo" && "bg-indigo-400 text-indigo-950",
+                      link.color === "amber" && "bg-[#ffbd59] text-[#1E1E1E]",
                       link.color === "vibrant-pink" &&
                         "bg-[#b5a18d] text-white",
                     ]}
@@ -233,6 +214,8 @@ const socials = [
                         "bg-emerald-500/30 text-emerald-300 group-hover:bg-emerald-500/50",
                       link.color === "indigo" &&
                         "bg-indigo-500/30 text-indigo-300 group-hover:bg-indigo-500/50",
+                      link.color === "amber" &&
+                        "bg-[#ffbd59]/30 text-[#ffbd59] group-hover:bg-[#ffbd59]/50",
                     ]}
                   >
                     {link.icon === "calendar" && (
@@ -325,6 +308,18 @@ const socials = [
                         stroke-width="2"
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4.97 0 9 4.03 9 9-4.97 0-9-4.03-9-9zM3 21c0-4.97 4.03-9 9-9" />
+                      </svg>
+                    )}
+                    {link.icon === "yoga" && (
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
                       </svg>
                     )}
                     {link.icon === "panel" && (
