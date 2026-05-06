@@ -15,6 +15,16 @@ const links = [
     featured: true,
   },
   {
+    title: "💚 Free Classes in Back of the Yards",
+    description:
+      "Free yoga every Saturday & Sunday at Southside Social (4432 S Ashland). All May & June 2026. Register on Zeffy.",
+    url: "https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes",
+    color: "green",
+    icon: "calendar",
+    badge: "Free",
+    featured: true,
+  },
+  {
     title: "🧠 ALPFA × LSP: Mental Health & Business Panel",
     description:
       "A powerful panel on the intersection of mental health and business. Balance career growth with well-being. Doors 3:30 PM · Panel 4–5 PM · Networking until 6 PM.",
@@ -370,11 +380,8 @@ const socials = [
 
       {/* Free Classes · Two Locations Promo */}
       <div class="mt-8" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 350ms;">
-        <a
-          href={`${base}schedule`}
-          class="free-promo group block rounded-2xl p-[1px] bg-gradient-to-br from-[#ffbd59]/50 via-emerald-400/30 to-[#ffbd59]/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
-        >
-          <div class="rounded-2xl bg-white/[0.08] backdrop-blur-xl px-5 py-5 transition-all duration-300 group-hover:bg-white/[0.14]">
+        <div class="rounded-2xl p-[1px] bg-gradient-to-br from-[#ffbd59]/50 via-emerald-400/30 to-[#ffbd59]/50">
+          <div class="rounded-2xl bg-white/[0.08] backdrop-blur-xl px-5 py-5">
             {/* Header */}
             <div class="text-center">
               <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ffbd59]/20 border border-[#ffbd59]/30 px-3 py-1 mb-3">
@@ -389,14 +396,17 @@ const socials = [
                 Free Classes, <span class="bg-gradient-to-r from-[#ffbd59] to-emerald-400 bg-clip-text text-transparent">Two Locations</span>
               </h3>
               <p class="mt-1 text-[11px] text-white/50 font-medium">
-                Clases gratis · All classes, all day, no membership needed
+                Clases gratis · No membership · Two ways to register
               </p>
             </div>
 
-            {/* Location cards */}
+            {/* Location cards · each links to its own registration path */}
             <div class="mt-5 space-y-3 text-left">
-              {/* PILSEN */}
-              <div class="rounded-xl bg-[#ffbd59]/[0.06] border border-[#ffbd59]/25 px-3.5 py-3">
+              {/* PILSEN → Schedule / LSP app */}
+              <a
+                href={`${base}schedule`}
+                class="free-promo group block rounded-xl bg-[#ffbd59]/[0.06] border border-[#ffbd59]/25 px-3.5 py-3 transition-all duration-300 hover:bg-[#ffbd59]/[0.12] hover:border-[#ffbd59]/45 hover:-translate-y-0.5"
+              >
                 <div class="flex items-center gap-2.5 mb-3">
                   <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1E1E1E] text-[#ffbd59] font-extrabold text-base flex-shrink-0">X</span>
                   <div class="min-w-0 flex-1">
@@ -406,6 +416,9 @@ const socials = [
                     </div>
                     <p class="text-[10px] font-medium text-white/60 leading-tight mt-0.5 truncate">LSP Studio · 949 W 16th St</p>
                   </div>
+                  <svg class="h-3.5 w-3.5 text-[#ffbd59] flex-shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
                 </div>
 
                 <div class="space-y-1.5">
@@ -428,66 +441,97 @@ const socials = [
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* BACK OF THE YARDS */}
-              <div class="rounded-xl bg-emerald-500/[0.06] border border-emerald-400/25 px-3.5 py-3">
-                <div class="flex items-center gap-2.5 mb-3">
+                <p class="mt-2.5 text-[9px] font-bold uppercase tracking-widest text-[#ffbd59]/80 text-center">
+                  Book in LSP app or schedule page →
+                </p>
+              </a>
+
+              {/* SOUTHSIDE SOCIAL → Zeffy */}
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="free-promo group block rounded-xl bg-emerald-500/[0.06] border border-emerald-400/25 px-3.5 py-3 transition-all duration-300 hover:bg-emerald-500/[0.12] hover:border-emerald-400/50 hover:-translate-y-0.5"
+              >
+                <div class="flex items-center gap-2.5 mb-2.5">
                   <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-extrabold text-base flex-shrink-0">X</span>
                   <div class="min-w-0 flex-1">
                     <div class="flex items-baseline gap-1.5">
-                      <p class="text-[12px] font-extrabold uppercase tracking-wider text-emerald-300 leading-none">Back of the Yards</p>
+                      <p class="text-[12px] font-extrabold uppercase tracking-wider text-emerald-300 leading-none">Southside Social</p>
                       <span class="text-[8px] font-bold uppercase tracking-wider text-white/40 leading-none">16 days</span>
                     </div>
-                    <p class="text-[10px] font-medium text-white/60 leading-tight mt-0.5 truncate">Southside Social · Every Sat &amp; Sun</p>
+                    <p class="text-[10px] font-medium text-white/60 leading-tight mt-0.5 truncate">4432 S Ashland · Every Sat &amp; Sun</p>
+                  </div>
+                  <svg class="h-3.5 w-3.5 text-emerald-300 flex-shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </div>
+
+                {/* Compact lineup */}
+                <div class="rounded-lg bg-emerald-500/[0.08] border border-emerald-400/15 px-3 py-2.5 mb-3">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">Saturday</p>
+                      <div class="space-y-1.5">
+                        <div>
+                          <p class="text-[12px] font-bold text-white tabular-nums">8:00 AM</p>
+                          <p class="text-[10px] text-white/55 font-medium">Andrea Fuentes</p>
+                        </div>
+                        <div>
+                          <p class="text-[12px] font-bold text-white tabular-nums">9:15 AM</p>
+                          <p class="text-[10px] text-white/55 font-medium">Melissa Salinas</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">Sunday</p>
+                      <div class="space-y-1.5">
+                        <div>
+                          <p class="text-[12px] font-bold text-white tabular-nums">9:15 AM</p>
+                          <p class="text-[10px] text-white/55 font-medium">Lizsandra Heredia</p>
+                        </div>
+                        <div>
+                          <p class="text-[12px] font-bold text-white tabular-nums">10:30 AM</p>
+                          <p class="text-[10px] text-white/55 font-medium">Arturo Zurita</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70 w-6 flex-shrink-0">May</span>
-                    <div class="grid grid-cols-8 gap-1 flex-1">
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-09" data-free-loc="boty">9</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-10" data-free-loc="boty">10</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-16" data-free-loc="boty">16</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-17" data-free-loc="boty">17</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-23" data-free-loc="boty">23</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-24" data-free-loc="boty">24</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-30" data-free-loc="boty">30</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-05-31" data-free-loc="boty">31</span>
-                    </div>
+                <div class="space-y-2">
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70">May</p>
+                  <div class="grid grid-cols-4 gap-1">
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-09" data-free-loc="boty"><em>Sat</em>9</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-10" data-free-loc="boty"><em>Sun</em>10</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-16" data-free-loc="boty"><em>Sat</em>16</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-17" data-free-loc="boty"><em>Sun</em>17</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-23" data-free-loc="boty"><em>Sat</em>23</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-24" data-free-loc="boty"><em>Sun</em>24</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-30" data-free-loc="boty"><em>Sat</em>30</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-31" data-free-loc="boty"><em>Sun</em>31</span>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70 w-6 flex-shrink-0">Jun</span>
-                    <div class="grid grid-cols-8 gap-1 flex-1">
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-06" data-free-loc="boty">6</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-07" data-free-loc="boty">7</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-13" data-free-loc="boty">13</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-14" data-free-loc="boty">14</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-20" data-free-loc="boty">20</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-21" data-free-loc="boty">21</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-27" data-free-loc="boty">27</span>
-                      <span class="free-pill free-pill--emerald" data-free-date="2026-06-28" data-free-loc="boty">28</span>
-                    </div>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70 pt-1">Jun</p>
+                  <div class="grid grid-cols-4 gap-1">
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-06" data-free-loc="boty"><em>Sat</em>6</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-07" data-free-loc="boty"><em>Sun</em>7</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-13" data-free-loc="boty"><em>Sat</em>13</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-14" data-free-loc="boty"><em>Sun</em>14</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-20" data-free-loc="boty"><em>Sat</em>20</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-21" data-free-loc="boty"><em>Sun</em>21</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-27" data-free-loc="boty"><em>Sat</em>27</span>
+                    <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-28" data-free-loc="boty"><em>Sun</em>28</span>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Booking note + CTA */}
-            <div class="mt-4 flex items-center justify-between gap-3 border-t border-white/5 pt-3">
-              <p class="text-[10px] text-white/55 font-medium leading-tight">
-                📅 Book up to <span class="text-[#ffbd59] font-bold">7 days ahead</span><br/>here or in the LSP Studio app
-              </p>
-              <div class="inline-flex items-center gap-1.5 text-xs font-bold text-[#ffbd59] group-hover:gap-2.5 transition-all duration-300 flex-shrink-0">
-                View Schedule
-                <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </div>
+                <p class="mt-2.5 text-[9px] font-bold uppercase tracking-widest text-emerald-300/90 text-center">
+                  Register on Zeffy ↗
+                </p>
+              </a>
             </div>
           </div>
-        </a>
+        </div>
       </div>
 
       {/* App Download Section */}
@@ -784,13 +828,13 @@ const socials = [
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 24px;
-    padding: 0 4px;
-    border-radius: 6px;
+    height: 30px;
+    padding: 0 6px;
+    border-radius: 7px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 189, 89, 0.3);
     color: #fff;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.02em;
@@ -801,11 +845,11 @@ const socials = [
   }
   /* Wide variant: shows day-of-week + date */
   .free-pill--wide {
-    gap: 4px;
-    padding: 0 6px;
+    gap: 5px;
+    padding: 0 8px;
   }
   .free-pill--wide em {
-    font-size: 9px;
+    font-size: 10px;
     font-style: normal;
     font-weight: 700;
     text-transform: uppercase;
@@ -816,15 +860,19 @@ const socials = [
   .free-pill--wide[data-free-next="true"] em {
     color: rgba(30, 30, 30, 0.7);
   }
-
-  /* Next-up highlight */
+  .free-pill--wide.free-pill--emerald em {
+    color: rgba(110, 231, 183, 0.85);
+  }
+  .free-pill--wide.free-pill--emerald[data-free-next="true"] em {
+    color: rgba(6, 78, 59, 0.7);
+  }
   .free-pill[data-free-next="true"] {
     background: linear-gradient(135deg, #ffbd59, #ffd28a);
     border-color: #ffbd59;
     color: #1E1E1E;
     box-shadow: 0 0 0 0 rgba(255, 189, 89, 0.6);
     animation: free-pulse-gold 2s ease-in-out infinite;
-    transform: scale(1.08);
+    transform: none;
     position: relative;
   }
   .free-pill--emerald[data-free-next="true"] {

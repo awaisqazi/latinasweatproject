@@ -76,12 +76,12 @@ const base = import.meta.env.BASE_URL;
           <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
             Free Classes, <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold via-amber-300 to-emerald-400">Two Locations</span>&nbsp;🎉
           </h2>
-          <p class="mt-3 text-light-gray/70 text-base sm:text-lg font-medium">Clases gratis · All classes, all day, no membership needed</p>
+          <p class="mt-3 text-light-gray/70 text-base sm:text-lg font-medium">Clases gratis · No membership needed · Two locations, two ways to register</p>
         </div>
 
         <div class="mt-10 grid gap-6 lg:grid-cols-2">
           {/* PILSEN CARD */}
-          <div class="group relative rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-accent-gold/30 shadow-2xl shadow-accent-gold/5 p-6 sm:p-7 transition-all duration-300 hover:bg-white/[0.07] hover:border-accent-gold/60 hover:shadow-accent-gold/20">
+          <div class="group relative rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-accent-gold/30 shadow-2xl shadow-accent-gold/5 p-6 sm:p-7 transition-all duration-300 hover:bg-white/[0.07] hover:border-accent-gold/60 hover:shadow-accent-gold/20 flex flex-col">
             {/* Gradient accent edge */}
             <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/60 to-transparent"></div>
 
@@ -117,23 +117,23 @@ const base = import.meta.env.BASE_URL;
             {/* May dates - large grid */}
             <div class="mt-5">
               <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">May 2026</p>
-              <div class="grid grid-cols-4 gap-2">
-                <div class="free-card free-card--gold" data-free-date="2026-05-01" data-free-loc="pilsen">
+              <div class="grid grid-cols-2 gap-3.5">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-01" data-free-loc="pilsen">
                   <p class="free-card__day">Fri</p>
                   <p class="free-card__date">1</p>
                   <p class="free-card__month">May</p>
                 </div>
-                <div class="free-card free-card--gold" data-free-date="2026-05-09" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-09" data-free-loc="pilsen">
                   <p class="free-card__day">Sat</p>
                   <p class="free-card__date">9</p>
                   <p class="free-card__month">May</p>
                 </div>
-                <div class="free-card free-card--gold" data-free-date="2026-05-17" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-17" data-free-loc="pilsen">
                   <p class="free-card__day">Sun</p>
                   <p class="free-card__date">17</p>
                   <p class="free-card__month">May</p>
                 </div>
-                <div class="free-card free-card--gold free-card--holiday" data-free-date="2026-05-25" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg free-card--holiday" data-free-date="2026-05-25" data-free-loc="pilsen">
                   <span class="free-card__badge">Holiday</span>
                   <p class="free-card__day">Mon</p>
                   <p class="free-card__date">25</p>
@@ -145,33 +145,66 @@ const base = import.meta.env.BASE_URL;
             {/* June dates */}
             <div class="mt-4">
               <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">June 2026</p>
-              <div class="grid grid-cols-4 gap-2">
-                <div class="free-card free-card--gold" data-free-date="2026-06-02" data-free-loc="pilsen">
+              <div class="grid grid-cols-2 gap-3.5">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-02" data-free-loc="pilsen">
                   <p class="free-card__day">Tue</p>
                   <p class="free-card__date">2</p>
                   <p class="free-card__month">Jun</p>
                 </div>
-                <div class="free-card free-card--gold" data-free-date="2026-06-10" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-10" data-free-loc="pilsen">
                   <p class="free-card__day">Wed</p>
                   <p class="free-card__date">10</p>
                   <p class="free-card__month">Jun</p>
                 </div>
-                <div class="free-card free-card--gold" data-free-date="2026-06-18" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-18" data-free-loc="pilsen">
                   <p class="free-card__day">Thu</p>
                   <p class="free-card__date">18</p>
                   <p class="free-card__month">Jun</p>
                 </div>
-                <div class="free-card free-card--gold" data-free-date="2026-06-26" data-free-loc="pilsen">
+                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-26" data-free-loc="pilsen">
                   <p class="free-card__day">Fri</p>
                   <p class="free-card__date">26</p>
                   <p class="free-card__month">Jun</p>
                 </div>
               </div>
             </div>
+
+            {/* Pilsen registration */}
+            <div class="mt-auto pt-5 border-t border-accent-gold/15">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold mb-2.5">Reserve your spot</p>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <a
+                  href={`${base}schedule`}
+                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent-gold px-4 py-2.5 text-xs font-bold text-off-black shadow-md shadow-accent-gold/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent-gold/40"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  Schedule
+                </a>
+                <a
+                  href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-white/[0.12] hover:border-white/30"
+                >
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"></path></svg>
+                  iOS
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-white/[0.12] hover:border-white/30"
+                >
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"></path></svg>
+                  Android
+                </a>
+              </div>
+              <p class="mt-2.5 text-[10px] text-light-gray/55 font-medium text-center">Book up to <span class="text-accent-gold font-bold">7 days ahead</span> in the LSP Studio app or schedule page</p>
+            </div>
           </div>
 
           {/* BACK OF THE YARDS CARD */}
-          <div class="group relative rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-emerald-400/30 shadow-2xl shadow-emerald-500/5 p-6 sm:p-7 transition-all duration-300 hover:bg-white/[0.07] hover:border-emerald-400/60 hover:shadow-emerald-500/20">
+          <div class="group relative rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-emerald-400/30 shadow-2xl shadow-emerald-500/5 p-6 sm:p-7 transition-all duration-300 hover:bg-white/[0.07] hover:border-emerald-400/60 hover:shadow-emerald-500/20 flex flex-col">
             {/* Gradient accent edge */}
             <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"></div>
 
@@ -195,9 +228,42 @@ const base = import.meta.env.BASE_URL;
               <p class="text-sm font-semibold text-white/80 mt-0.5">All May &amp; June 2026</p>
             </div>
 
+            {/* Weekly lineup */}
+            <div class="mt-4 rounded-xl bg-emerald-500/[0.07] border border-emerald-400/20 p-3.5">
+              <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-300 mb-2.5">Weekly Lineup</p>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <p class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/80 mb-1.5">Saturday</p>
+                  <div class="space-y-1.5">
+                    <div>
+                      <p class="text-xs font-bold text-white tabular-nums leading-tight">8:00 AM</p>
+                      <p class="text-[11px] text-white/65 font-medium leading-tight">Andrea Fuentes</p>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-white tabular-nums leading-tight">9:15 AM</p>
+                      <p class="text-[11px] text-white/65 font-medium leading-tight">Melissa Salinas</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/80 mb-1.5">Sunday</p>
+                  <div class="space-y-1.5">
+                    <div>
+                      <p class="text-xs font-bold text-white tabular-nums leading-tight">9:15 AM</p>
+                      <p class="text-[11px] text-white/65 font-medium leading-tight">Lizsandra Heredia</p>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-white tabular-nums leading-tight">10:30 AM</p>
+                      <p class="text-[11px] text-white/65 font-medium leading-tight">Arturo Zurita</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="mt-5">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">May 2026</p>
-              <div class="grid grid-cols-4 gap-2">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5 text-center">May 2026</p>
+              <div class="grid grid-cols-4 gap-2.5">
                 <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-09" data-free-loc="boty">
                   <p class="free-card__day">Sat</p>
                   <p class="free-card__date">9</p>
@@ -234,8 +300,8 @@ const base = import.meta.env.BASE_URL;
             </div>
 
             <div class="mt-4">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">June 2026</p>
-              <div class="grid grid-cols-4 gap-2">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5 text-center">June 2026</p>
+              <div class="grid grid-cols-4 gap-2.5">
                 <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-06" data-free-loc="boty">
                   <p class="free-card__day">Sat</p>
                   <p class="free-card__date">6</p>
@@ -270,41 +336,31 @@ const base = import.meta.env.BASE_URL;
                 </div>
               </div>
             </div>
+
+            {/* Southside Social registration */}
+            <div class="mt-auto pt-5 border-t border-emerald-400/15">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-300 mb-2.5">Reserve your spot</p>
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/50"
+              >
+                Register on Zeffy
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+              <p class="mt-2.5 text-[10px] text-light-gray/55 font-medium text-center">Southside Social classes are <span class="text-emerald-300 font-bold">not in the LSP app or schedule page</span></p>
+            </div>
           </div>
         </div>
 
-        {/* Booking note + CTAs */}
-        <div class="mt-8 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/10 p-5 sm:p-6 text-center shadow-2xl">
-          <p class="text-sm sm:text-base font-semibold text-white">
-            📅 Book up to <span class="text-accent-gold">7 days in advance</span> on the schedule page or in the LSP Studio app.
+        {/* Side-by-side path summary */}
+        <div class="mt-8 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 px-5 py-4 sm:px-6 sm:py-5 text-center shadow-2xl">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-light-gray/55 mb-2">Two locations, two ways to register</p>
+          <p class="text-sm text-white/85 font-medium leading-relaxed">
+            <span class="text-accent-gold font-bold">Pilsen</span> → LSP Studio app or schedule page &nbsp;·&nbsp; <span class="text-emerald-300 font-bold">Southside Social</span> → Zeffy
           </p>
-          <div class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href={`${base}schedule`}
-              class="inline-flex items-center gap-2 rounded-full bg-accent-gold px-7 py-3 text-sm font-bold text-off-black shadow-lg shadow-accent-gold/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/50"
-            >
-              View Schedule &amp; Book
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-            </a>
-            <a
-              href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 rounded-full bg-white/[0.08] backdrop-blur-sm border border-white/15 px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:bg-white/[0.15] hover:border-white/30"
-            >
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"></path></svg>
-              iOS App
-            </a>
-            <a
-              href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 rounded-full bg-white/[0.08] backdrop-blur-sm border border-white/15 px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:bg-white/[0.15] hover:border-white/30"
-            >
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"></path></svg>
-              Android App
-            </a>
-          </div>
+          <p class="mt-2 text-[12px] text-light-gray/55 font-medium">All ages 12+ welcome. No membership required at either location.</p>
         </div>
       </div>
     </section>
@@ -1781,7 +1837,19 @@ const base = import.meta.env.BASE_URL;
         border-color: rgba(52, 211, 153, 0.6);
       }
       .free-card--sm {
-        padding: 0.625rem 0.5rem;
+        padding: 0.875rem 0.625rem;
+      }
+      .free-card--lg {
+        padding: 0.875rem 0.75rem;
+      }
+      .free-card--lg .free-card__day {
+        font-size: 10px;
+      }
+      .free-card--lg .free-card__date {
+        font-size: 2rem;
+      }
+      .free-card--lg .free-card__month {
+        font-size: 10px;
       }
       .free-card--holiday {
         background: rgba(255, 189, 89, 0.15);
@@ -1806,7 +1874,7 @@ const base = import.meta.env.BASE_URL;
         margin-top: 2px;
       }
       .free-card--sm .free-card__date {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
       }
       .free-card__month {
         font-size: 9px;
@@ -1833,7 +1901,7 @@ const base = import.meta.env.BASE_URL;
       .free-card[data-free-next="true"] {
         background: linear-gradient(135deg, rgba(255, 189, 89, 0.35), rgba(255, 189, 89, 0.18));
         border-color: #ffbd59;
-        transform: scale(1.06);
+        transform: none;
         box-shadow: 0 8px 24px -6px rgba(255, 189, 89, 0.5);
         animation: free-card-pulse-gold 2.2s ease-in-out infinite;
       }
