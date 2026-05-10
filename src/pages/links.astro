@@ -534,6 +534,28 @@ const socials = [
         }
       </div>
 
+      {/* Newsletter signup */}
+      <div class="newsletter-section mt-10" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 350ms;">
+        <div class="relative rounded-2xl p-[1px] bg-gradient-to-br from-[#b5a18d]/40 via-[#ffbd59]/30 to-[#b5a18d]/40">
+          <div class="rounded-2xl bg-[#1e1e1e] px-4 py-5">
+            <div class="text-center mb-4">
+              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffbd59]/80">
+                Stay in the Loop
+              </p>
+            </div>
+            <div class="newsletter-frame relative w-full overflow-hidden">
+              <iframe
+                title="Signup form powered by Zeffy"
+                src="https://www.zeffy.com/en-US/embed/newsletter-form/sign-up-for-our-newsletter-1965"
+                allowtransparency="true"
+                loading="lazy"
+                class="absolute inset-0 h-full w-full border-0"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* App Download Section */}
       <div class="app-section mt-10 text-center" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 400ms;">
         {/* Gradient divider */}
@@ -921,6 +943,16 @@ const socials = [
   @keyframes free-pulse-emerald {
     0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
     50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+  }
+
+  /* Newsletter iframe sizing */
+  .newsletter-frame {
+    height: 320px;
+  }
+  @media (min-width: 640px) {
+    .newsletter-frame {
+      height: 300px;
+    }
   }
 </style>
 
