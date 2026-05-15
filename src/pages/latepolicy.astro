@@ -1,0 +1,232 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const reasons = [
+  {
+    icon: "🔥",
+    title: "Your safety",
+    body:
+      "The warm up is what gets your body ready to move. Stepping in cold, especially for higher-intensity classes, raises the risk of injury and strain.",
+  },
+  {
+    icon: "🔥",
+    title: "Flow & focus",
+    body:
+      "A late entry pulls energy and attention away from the work everyone else came to do, including your instructor mid-cue.",
+  },
+  {
+    icon: "🔥",
+    title: "Respect for the room",
+    body:
+      "The clients who arrived on time deserve a session that stays grounded from start to finish.",
+  },
+  {
+    icon: "🔥",
+    title: "A calm studio",
+    body:
+      "Locked doors keep the space quiet, undistracted, and intentional, the way our community has asked us to hold it.",
+  },
+];
+---
+
+<Layout title="Late Policy | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* Hero */}
+    <section class="relative bg-off-black py-20 sm:py-28 overflow-hidden">
+      <div
+        class="absolute inset-0 opacity-[0.04]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
+      </div>
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
+      <div
+        class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8"
+      >
+        <p
+          class="text-vibrant-pink text-sm font-bold uppercase tracking-[0.25em]"
+        >
+          Our New Rule Explained
+        </p>
+        <h1
+          class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+        >
+          Why our doors<br />
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+            >lock at class start</span
+          >
+        </h1>
+        <p class="mt-6 font-body text-lg text-slate-300 max-w-2xl mx-auto">
+          Doors close 5 minutes after class begins. We know it can be
+          frustrating, but there's a reason we take it seriously 🤍
+        </p>
+      </div>
+      <div
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
+      >
+      </div>
+    </section>
+
+    {/* Intro Block */}
+    <section class="bg-light-gray py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="rounded-2xl bg-white border-l-4 border-vibrant-pink p-6 sm:p-8 shadow-sm"
+        >
+          <p class="font-sans text-2xl font-extrabold text-off-black">
+            It's not about punishment.
+          </p>
+          <p class="mt-3 font-body text-lg text-medium-gray">
+            It's about safety, structure, and respecting everyone already in
+            the room. Once class starts, the door closes so the practice can
+            stay focused for every single person on a mat.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* Why Grid */}
+    <section class="py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <p
+            class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            What we protect
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+          >
+            Four things the lockout protects
+          </h2>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          {
+            reasons.map((r) => (
+              <div class="rounded-2xl bg-white border border-off-black/10 p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-vibrant-pink/40">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">{r.icon}</span>
+                  <div>
+                    <h3 class="font-sans text-lg font-extrabold text-off-black">
+                      {r.title}
+                    </h3>
+                    <p class="mt-2 font-body text-base text-medium-gray">
+                      {r.body}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* Warm Up Callout */}
+    <section class="bg-gradient-to-br from-amber-50 via-yellow-50 to-rose-50 py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+        <p
+          class="text-accent-gold text-xs font-bold uppercase tracking-[0.25em]"
+        >
+          Missing the warm up
+        </p>
+        <h2
+          class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+        >
+          Your body needs time to prepare
+        </h2>
+        <p class="mt-5 font-body text-lg text-off-black/75">
+          Skipping the warm up, especially in our higher-intensity classes,
+          can increase the chance of injury and strain. Those first few
+          minutes are what get your muscles, joints, and breath ready for
+          everything that comes next.
+        </p>
+        <p class="mt-4 font-body text-lg text-off-black/75">
+          We always recommend arriving <span class="font-bold text-off-black"
+            >5 to 10 minutes early</span
+          > so you can settle in, set up your space, and ease into your
+          session properly 💜
+        </p>
+      </div>
+    </section>
+
+    {/* Life Happens */}
+    <section class="py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="rounded-2xl bg-off-black p-8 sm:p-10 text-center shadow-lg"
+        >
+          <p
+            class="text-accent-gold text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            We know life happens
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl font-extrabold tracking-tight text-white"
+          >
+            Traffic happens. Busy mornings happen.
+          </h2>
+          <p class="mt-4 font-body text-lg text-slate-300">
+            But to keep classes safe and consistent, our lockout policy
+            applies to everyone equally. No favorites, no exceptions, just
+            one standard that lets every class hold its shape.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* Thank You / Closing */}
+    <section class="bg-light-gray py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <h2
+          class="font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+        >
+          Thank you for understanding 🤍
+        </h2>
+        <p class="mt-5 font-body text-lg text-medium-gray">
+          We want every person who steps onto a mat with us to have the best
+          possible experience from the moment they walk in. Showing up early
+          is part of how we hold that for each other.
+        </p>
+        <p class="mt-6 font-body text-base text-medium-gray">
+          Questions? Reach out at
+          <a
+            href="mailto:membership@latinasweatproject.com"
+            class="font-bold text-vibrant-pink underline hover:text-accent-gold transition-colors"
+            >membership@latinasweatproject.com</a
+          >.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/schedule"
+            class="inline-flex items-center gap-2 rounded-lg bg-vibrant-pink px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-accent-gold"
+          >
+            Back to Schedule
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+            >
+          </a>
+          <a
+            href="/faq"
+            class="inline-flex items-center gap-2 rounded-lg border-2 border-off-black/15 bg-white px-5 py-3 text-sm font-bold text-off-black transition-all duration-300 hover:border-off-black/40"
+          >
+            Read the FAQ
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
