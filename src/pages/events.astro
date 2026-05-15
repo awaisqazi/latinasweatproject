@@ -24,7 +24,237 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Page Header Section */}
 
+    {/* START: Equal Hope × LSP Featured Section */}
+    <section
+      class="relative overflow-hidden bg-gradient-to-br from-[#f5ede3] via-[#ece0cf] to-[#e8d8c2] py-16 md:py-20"
+    >
+      {/* Decorative blobs */}
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          class="absolute -top-24 -right-24 w-[420px] h-[420px] bg-teal-300/25 rounded-full blur-[110px]"
+        >
+        </div>
+        <div
+          class="absolute -bottom-32 -left-24 w-[360px] h-[360px] bg-[#b5a18d]/40 rounded-full blur-[100px]"
+        >
+        </div>
+      </div>
 
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div
+          class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12"
+        >
+          {/* Left: Event image (3 cols) */}
+          <div class="relative lg:col-span-3">
+            <div
+              class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-teal-400/30 via-[#b5a18d]/20 to-transparent blur-xl"
+            >
+            </div>
+            <div
+              class="relative overflow-hidden rounded-2xl border border-[#b5a18d]/40 shadow-xl shadow-[#b5a18d]/20"
+            >
+              <img
+                src={`${base}images/equal-hope-event.png`}
+                alt="Equal Hope × Latina Sweat Project · Hormones and Harmony — a free women's health event"
+                class="w-full h-auto object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          {/* Right: Content (2 cols) */}
+          <div class="lg:col-span-2 text-center lg:text-left">
+            {/* Badge */}
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 mb-5 shadow-lg shadow-teal-600/20"
+            >
+              <span class="relative flex h-2.5 w-2.5">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"
+                ></span>
+              </span>
+              <span
+                class="text-xs font-bold uppercase tracking-widest text-white"
+                >Register · Free Event</span
+              >
+            </div>
+
+            <p
+              class="text-xs font-bold uppercase tracking-[0.3em] text-teal-700 mb-2"
+            >
+              Equal Hope × LSP
+            </p>
+
+            <h2
+              class="font-sans text-3xl font-extrabold tracking-tight text-off-black sm:text-4xl lg:text-5xl leading-tight"
+            >
+              Hormones <span class="text-teal-700">&amp;</span> Harmony
+            </h2>
+            <p class="mt-2 text-base font-semibold text-off-black/70">
+              Movement, Art, and Wellness
+            </p>
+
+            <p
+              class="mt-5 text-base text-off-black/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            >
+              A supportive, educational space for women in our community to
+              reconnect with their bodies, explore body literacy, and move
+              beyond shame through conversation, reflection, and shared
+              learning.
+            </p>
+
+            {/* Details grid */}
+            <div
+              class="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto lg:mx-0"
+            >
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-[#b5a18d]/30 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-teal-600 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    When
+                  </p>
+                  <p class="text-sm font-bold text-off-black">Sat, May 30</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-[#b5a18d]/30 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-teal-600 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    Time
+                  </p>
+                  <p class="text-sm font-bold text-off-black">12 to 2 PM CT</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-[#b5a18d]/30 px-4 py-3 sm:col-span-2"
+              >
+                <svg
+                  class="h-5 w-5 text-teal-600 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    Where
+                  </p>
+                  <p class="text-sm font-bold text-off-black">
+                    LSP Studio · 949 W. 16th St, Chicago
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* What's included */}
+            <div class="mt-6">
+              <p
+                class="text-xs font-bold uppercase tracking-widest text-teal-700 mb-2.5"
+              >
+                What's Inside
+              </p>
+              <ul class="space-y-1.5 text-sm text-off-black/75 text-left max-w-xl mx-auto lg:mx-0">
+                <li class="flex items-start gap-2">
+                  <span class="text-teal-600 font-bold mt-0.5">·</span>
+                  <span>Grounding practices to open the day</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-teal-600 font-bold mt-0.5">·</span>
+                  <span
+                    >Salsa-led body literacy workshop with Maria Luisa</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-teal-600 font-bold mt-0.5">·</span>
+                  <span
+                    >Community health talk with Dr. Elizabeth Yepez (Rush
+                    OBGYN)</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-teal-600 font-bold mt-0.5">·</span>
+                  <span
+                    >Community health vendors sharing local resources</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            {/* CTA */}
+            <div class="mt-8">
+              <a
+                href="https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-teal-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-teal-600/30 transition-all duration-300 hover:scale-105 hover:bg-teal-500 hover:shadow-xl hover:shadow-teal-500/40"
+              >
+                Register on Zeffy
+                <svg
+                  class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Equal Hope × LSP Featured Section */}
 
     {/* START: Monday Miles Featured Section (Dark) */}
     <section class="relative overflow-hidden bg-off-black py-16 md:py-20">
