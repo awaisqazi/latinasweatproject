@@ -19,6 +19,7 @@
     } from "firebase/firestore";
     import { invalidateCacheByPrefix } from "../lib/cacheUtils";
     import { generateShifts, getShiftId } from "../lib/shiftUtils";
+    import { generateVolunteerSummary, parseCSV, extractExpectedVolunteers } from "../lib/geminiUtils";
     import MiniCalendar from "./MiniCalendar.svelte";
 
     // --- Authentication ---
@@ -138,6 +139,18 @@
     let recurringVolCap = 2;
     let isCreatingRecurring = false;
     let recurringPreview = null; // {dates: [], count: 0}
+
+    // --- AI Summary State ---
+    let aiStartDate = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+        .toISOString()
+        .split("T")[0]; // Default to start of last month
+    let aiEndDate = new Date().toISOString().split("T")[0]; // Default to today
+    let isGeneratingSummary = false;
+    let aiSummaryResult = null;
+    let aiSummaryError = "";
+    let showAiSummaryModal = false;
+    let uploadedFileName = "";
+    let parsedExpectedVolunteers = null;
 
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
@@ -1592,6 +1605,241 @@
         }
     }
 
+    // --- AI Summary Functions ---
+    function handleCsvUpload(event) {
+        const file = event.target.files?.[0];
+        if (!file) {
+            uploadedFileName = "";
+            parsedExpectedVolunteers = null;
+            return;
+        }
+
+        uploadedFileName = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const csvText = e.target.result;
+                const rows = parseCSV(csvText);
+                parsedExpectedVolunteers = extractExpectedVolunteers(rows);
+                aiSummaryError = "";
+            } catch (err) {
+                console.error("CSV parse error:", err);
+                aiSummaryError = `Failed to parse CSV: ${err.message}`;
+                parsedExpectedVolunteers = null;
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function clearCsvUpload() {
+        uploadedFileName = "";
+        parsedExpectedVolunteers = null;
+        // Reset the file input
+        const fileInput = document.getElementById("csvUploadInput");
+        if (fileInput) fileInput.value = "";
+    }
+
+    async function handleGenerateSummary() {
+        if (!aiStartDate || !aiEndDate) {
+            aiSummaryError = "Please select both start and end dates.";
+            return;
+        }
+
+        isGeneratingSummary = true;
+        aiSummaryError = "";
+        aiSummaryResult = null;
+
+        try {
+            // 1. Fetch data for the date range (same pattern as exportCSV)
+            const [sy, sm, sd] = aiStartDate.split("-").map(Number);
+            const [ey, em, ed] = aiEndDate.split("-").map(Number);
+            const startD = new Date(sy, sm - 1, sd);
+            const endD = new Date(ey, em - 1, ed, 23, 59, 59);
+
+            // Fetch custom shifts
+            const customQ = query(
+                collection(db, "custom_shifts"),
+                where("start", ">=", Timestamp.fromDate(startD)),
+                where("start", "<=", Timestamp.fromDate(endD)),
+            );
+            const customSnap = await getDocs(customQ);
+            const customExport = [];
+            customSnap.forEach((doc) => {
+                const d = doc.data();
+                customExport.push({
+                    id: doc.id,
+                    start: d.start.toDate(),
+                    end: d.end.toDate(),
+                });
+            });
+
+            // Fetch registrations for standard shifts
+            const endBoundDate = new Date(endD);
+            endBoundDate.setDate(endBoundDate.getDate() + 1);
+            const endId = toDateStr(endBoundDate);
+
+            const shiftsQ = query(
+                collection(db, "shifts"),
+                where(documentId(), ">=", aiStartDate),
+                where(documentId(), "<", endId),
+            );
+            const shiftsSnap = await getDocs(shiftsQ);
+            const shiftsExportData = {};
+            shiftsSnap.forEach((doc) => {
+                shiftsExportData[doc.id] = doc.data();
+            });
+
+            // Also fetch registrations for custom shifts
+            if (customExport.length > 0) {
+                const customPromises = customExport.map(async (customShift) => {
+                    try {
+                        const shiftDoc = await getDoc(
+                            doc(db, "shifts", customShift.id),
+                        );
+                        if (shiftDoc.exists()) {
+                            return { id: customShift.id, data: shiftDoc.data() };
+                        }
+                    } catch (e) {
+                        console.warn(`Failed to fetch regs for custom shift ${customShift.id}`, e);
+                    }
+                    return null;
+                });
+                const customResults = await Promise.all(customPromises);
+                customResults.forEach((res) => {
+                    if (res) shiftsExportData[res.id] = res.data;
+                });
+            }
+
+            // Merge with generated shifts in range
+            const shiftsInRange = generatedShifts.filter(
+                (s) => s.dateStr >= aiStartDate && s.dateStr <= aiEndDate,
+            );
+
+            const activeGenerated = shiftsInRange.filter((s) => {
+                const data = shiftsExportData[s.id];
+                return !data?.cancelled;
+            });
+
+            const customMapped = customExport.map((c) => ({
+                id: c.id,
+                start: c.start,
+                end: c.end,
+                dateStr: toDateStr(c.start),
+                isCustom: true,
+            }));
+
+            const combinedShifts = [...activeGenerated, ...customMapped];
+
+            // 2. Build flat records list
+            const records = [];
+            combinedShifts.forEach((shift) => {
+                const data = shiftsExportData[shift.id] || {};
+                const regs = data.registrations || [];
+
+                regs.forEach((reg) => {
+                    const durationHours = (shift.end - shift.start) / (1000 * 60 * 60);
+                    records.push({
+                        name: reg.name || "Unknown",
+                        email: reg.email || "No email",
+                        shiftDate: shift.dateStr || toDateStr(shift.start),
+                        shiftTime: `${shift.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${shift.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+                        durationHours: parseFloat(durationHours.toFixed(2)),
+                        checkedIn: !!reg.checkedIn,
+                    });
+                });
+            });
+
+            if (records.length === 0) {
+                aiSummaryError = "No volunteer records found for the selected date range.";
+                isGeneratingSummary = false;
+                return;
+            }
+
+            // 3. Call Gemini
+            aiSummaryResult = await generateVolunteerSummary(records, {
+                startDate: aiStartDate,
+                endDate: aiEndDate,
+            }, parsedExpectedVolunteers);
+
+            showAiSummaryModal = true;
+        } catch (e) {
+            console.error("AI Summary failed:", e);
+            aiSummaryError = e.message || "Failed to generate summary. Please try again.";
+        } finally {
+            isGeneratingSummary = false;
+        }
+    }
+
+    function closeAiSummaryModal() {
+        showAiSummaryModal = false;
+    }
+
+    function exportAiSummaryCSV() {
+        if (!aiSummaryResult) return;
+
+        const categoryLabels = {
+            met: "Met 4+ Hours",
+            close: "Close to 4 Hours (2-3.99h)",
+            under: "Under 2 Hours - Out of Compliance",
+        };
+
+        // Build CSV rows
+        const headers = [
+            "Name",
+            "Email",
+            "Checked-In Hours",
+            "Registered Hours",
+            "Shifts Checked In",
+            "Total Shifts Registered",
+            "Category",
+            "Confidence",
+            "On Expected List",
+            "Notes",
+        ];
+
+        const rows = aiSummaryResult.volunteers.map((v) => [
+            `"${(v.primaryName || "").replace(/"/g, '""')}"`,
+            `"${(v.primaryEmail || "").replace(/"/g, '""')}"`,
+            v.totalCheckedInHours ?? v.totalHours ?? 0,
+            v.totalRegisteredHours ?? "",
+            v.checkedInShifts ?? 0,
+            v.totalRegisteredShifts ?? 0,
+            `"${categoryLabels[v.category] || v.category}"`,
+            v.confidence || "high",
+            v.onExpectedList != null ? (v.onExpectedList ? "Yes" : "No") : "",
+            `"${(v.uncertaintyNote || "").replace(/"/g, '""')}"`,
+        ]);
+
+        // Add "Not Found" rows if any
+        if (aiSummaryResult.notFound && aiSummaryResult.notFound.length > 0) {
+            rows.push([]); // blank separator row
+            rows.push(["--- NOT FOUND IN CHECK-IN RECORDS ---", "", "", "", "", "", "", "", "", ""]);
+            aiSummaryResult.notFound.forEach((v) => {
+                rows.push([
+                    `"${(v.name || "").replace(/"/g, '""')}"`,
+                    `"${(v.email || "").replace(/"/g, '""')}"`,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '"Not Found"',
+                    "",
+                    "Yes",
+                    `"${(v.note || "No matching check-in records").replace(/"/g, '""')}"`,
+                ]);
+            });
+        }
+
+        const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `volunteer-summary_${aiStartDate}_to_${aiEndDate}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     function jumpToShift(shift) {
         clearSearch();
         const weekStart = getStartOfWeek(shift.start);
@@ -1901,6 +2149,222 @@
                         </button>
                     </div>
                 </div>
+                <!-- AI Volunteer Summary Tool -->
+                <div
+                    class="bg-white rounded-xl p-4 shadow-sm border border-purple-200 space-y-4"
+                >
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4 text-purple-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                            />
+                        </svg>
+                        AI Volunteer Summary
+                    </h3>
+                    <p class="text-xs text-gray-500">
+                        Use AI to analyze check-in data, match duplicate names/emails, and categorize by volunteer hours.
+                    </p>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >Start Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={aiStartDate}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                                />
+                            </label>
+                            <label class="block">
+                                <span
+                                    class="block text-xs font-medium text-gray-500 mb-1"
+                                    >End Date</span
+                                >
+                                <input
+                                    type="date"
+                                    bind:value={aiEndDate}
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                                />
+                            </label>
+                        </div>
+
+                        <!-- CSV Upload -->
+                        <div>
+                            <span
+                                class="block text-xs font-medium text-gray-500 mb-1"
+                                >Expected Volunteers (optional)</span
+                            >
+                            {#if uploadedFileName}
+                                <div
+                                    class="flex items-center gap-2 p-2 bg-purple-50 rounded-lg border border-purple-200 text-sm"
+                                >
+                                    <svg
+                                        class="w-4 h-4 text-purple-600 shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        ></path></svg
+                                    >
+                                    <div class="flex-1 min-w-0">
+                                        <p
+                                            class="text-purple-800 font-medium truncate text-xs"
+                                        >
+                                            {uploadedFileName}
+                                        </p>
+                                        {#if parsedExpectedVolunteers}
+                                            <p
+                                                class="text-xs text-purple-600"
+                                            >
+                                                {parsedExpectedVolunteers.length} volunteers loaded
+                                            </p>
+                                        {/if}
+                                    </div>
+                                    <button
+                                        on:click={clearCsvUpload}
+                                        class="text-purple-400 hover:text-purple-700 shrink-0"
+                                        title="Remove file"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            ><path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            ></path></svg
+                                        >
+                                    </button>
+                                </div>
+                            {:else}
+                                <label
+                                    class="flex items-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50/30 transition-colors cursor-pointer"
+                                >
+                                    <svg
+                                        class="w-5 h-5 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                        ></path></svg
+                                    >
+                                    <span class="text-xs text-gray-500"
+                                        >Upload CSV roster</span
+                                    >
+                                    <input
+                                        id="csvUploadInput"
+                                        type="file"
+                                        accept=".csv"
+                                        on:change={handleCsvUpload}
+                                        class="hidden"
+                                    />
+                                </label>
+                            {/if}
+                        </div>
+
+                        {#if aiSummaryError}
+                            <div
+                                class="text-xs p-3 bg-red-50 rounded-lg border border-red-200 text-red-700"
+                            >
+                                <p class="font-medium">⚠ Error</p>
+                                <p class="mt-1">{aiSummaryError}</p>
+                            </div>
+                        {/if}
+
+                        <button
+                            on:click={handleGenerateSummary}
+                            disabled={isGeneratingSummary}
+                            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                        >
+                            {#if isGeneratingSummary}
+                                <svg
+                                    class="animate-spin w-4 h-4 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    ></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                </svg>
+                                Analyzing with AI...
+                            {:else}
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                                    ></path></svg
+                                >
+                                Generate AI Summary
+                            {/if}
+                        </button>
+
+                        {#if aiSummaryResult && !showAiSummaryModal}
+                            <button
+                                on:click={() => (showAiSummaryModal = true)}
+                                class="w-full text-sm text-purple-600 hover:text-purple-800 py-2 rounded-lg border border-purple-200 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    ></path><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    ></path></svg
+                                >
+                                View Last Summary
+                            </button>
+                        {/if}
+                    </div>
+                </div>
+
                 <!-- Add Shift Tool -->
                 <div
                     class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-4"
@@ -3488,6 +3952,561 @@
                         class="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
                     >
                         Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- AI Summary Results Modal -->
+    {#if showAiSummaryModal && aiSummaryResult}
+        <div
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto"
+        >
+            <div
+                class="bg-white rounded-2xl max-w-3xl w-full my-8 shadow-2xl overflow-hidden"
+            >
+                <!-- Modal Header -->
+                <div
+                    class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white"
+                >
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2
+                                class="text-2xl font-bold flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                                    />
+                                </svg>
+                                AI Volunteer Summary
+                            </h2>
+                            <p class="text-purple-200 text-sm mt-1">
+                                {aiStartDate} to {aiEndDate}
+                            </p>
+                        </div>
+                        <button
+                            on:click={closeAiSummaryModal}
+                            class="text-white/70 hover:text-white transition-colors p-1"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                ></path></svg
+                            >
+                        </button>
+                    </div>
+
+                    <!-- Stats Bar -->
+                    {#if aiSummaryResult.stats}
+                        <div
+                            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4"
+                        >
+                            <div
+                                class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm"
+                            >
+                                <p
+                                    class="text-2xl font-bold"
+                                >
+                                    {aiSummaryResult.stats.totalUniqueVolunteers}
+                                </p>
+                                <p class="text-xs text-purple-200">
+                                    Volunteers
+                                </p>
+                            </div>
+                            <div
+                                class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm"
+                            >
+                                <p
+                                    class="text-2xl font-bold"
+                                >
+                                    {typeof aiSummaryResult.stats.totalCheckedInHours === 'number' ? aiSummaryResult.stats.totalCheckedInHours.toFixed(1) : aiSummaryResult.stats.totalCheckedInHours}
+                                </p>
+                                <p class="text-xs text-purple-200">
+                                    Total Hours
+                                </p>
+                            </div>
+                            <div
+                                class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm"
+                            >
+                                <p class="text-2xl font-bold text-green-300">
+                                    {aiSummaryResult.stats.metCount}
+                                </p>
+                                <p class="text-xs text-purple-200">
+                                    Met 4+ Hours
+                                </p>
+                            </div>
+                            <div
+                                class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm"
+                            >
+                                <p class="text-2xl font-bold text-amber-300">
+                                    {aiSummaryResult.stats.uncertainGroupings}
+                                </p>
+                                <p class="text-xs text-purple-200">
+                                    Uncertain
+                                </p>
+                            </div>
+                            {#if aiSummaryResult.notFound && aiSummaryResult.notFound.length > 0}
+                                <div
+                                    class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm"
+                                >
+                                    <p class="text-2xl font-bold text-red-300">
+                                        {aiSummaryResult.notFound.length}
+                                    </p>
+                                    <p class="text-xs text-purple-200">
+                                        Not Found
+                                    </p>
+                                </div>
+                            {/if}
+                        </div>
+                    {/if}
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+                    <!-- AI Notes -->
+                    {#if aiSummaryResult.notes}
+                        <div
+                            class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-sm text-purple-800"
+                        >
+                            <p class="font-medium mb-1 flex items-center gap-1">
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path></svg
+                                >
+                                AI Notes
+                            </p>
+                            <p class="text-purple-700">
+                                {aiSummaryResult.notes}
+                            </p>
+                        </div>
+                    {/if}
+
+                    <!-- Met 4+ Hours Section -->
+                    {#each [aiSummaryResult.volunteers.filter((v) => v.category === "met")] as metVolunteers}
+                    {#if metVolunteers.length > 0}
+                        <div>
+                            <h3
+                                class="font-bold text-green-800 text-sm uppercase tracking-wide flex items-center gap-2 mb-3"
+                            >
+                                <span
+                                    class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs"
+                                    >✓</span
+                                >
+                                Met 4+ Hours ({metVolunteers.length})
+                            </h3>
+                            <div class="space-y-2">
+                                {#each metVolunteers as vol}
+                                    <div
+                                        class="bg-green-50 border border-green-200 rounded-lg p-4"
+                                    >
+                                        <div
+                                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                        >
+                                            <div class="flex-1">
+                                                <div
+                                                    class="flex items-center gap-2 flex-wrap"
+                                                >
+                                                    <span
+                                                        class="font-bold text-gray-900"
+                                                        >{vol.primaryName}</span
+                                                    >
+                                                    {#if vol.confidence !== "high"}
+                                                        <span
+                                                            class="text-xs px-2 py-0.5 rounded-full font-medium {vol.confidence === 'medium'
+                                                                ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                                                : 'bg-red-100 text-red-700 border border-red-300'}"
+                                                        >
+                                                            ⚠ {vol.confidence} confidence
+                                                        </span>
+                                                    {/if}
+                                                </div>
+                                                <p
+                                                    class="text-sm text-gray-600 mt-0.5"
+                                                >
+                                                    {vol.primaryEmail}
+                                                </p>
+                                                {#if vol.uncertaintyNote}
+                                                    <p
+                                                        class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 inline-block"
+                                                    >
+                                                        ⚠ {vol.uncertaintyNote}
+                                                    </p>
+                                                {/if}
+                                                {#if vol.allNames && vol.allNames.length > 1}
+                                                    <details
+                                                        class="mt-2 text-xs text-gray-500"
+                                                    >
+                                                        <summary
+                                                            class="cursor-pointer hover:text-gray-700"
+                                                            >Merged from {vol.allNames.length} name variation(s)</summary
+                                                        >
+                                                        <div
+                                                            class="mt-1 pl-2 border-l-2 border-gray-200 space-y-0.5"
+                                                        >
+                                                            {#each vol.allNames as name}
+                                                                <p>{name}</p>
+                                                            {/each}
+                                                            {#if vol.allEmails && vol.allEmails.length > 1}
+                                                                <p
+                                                                    class="font-medium mt-1"
+                                                                >
+                                                                    Emails:
+                                                                </p>
+                                                                {#each vol.allEmails as email}
+                                                                    <p>
+                                                                        {email}
+                                                                    </p>
+                                                                {/each}
+                                                            {/if}
+                                                        </div>
+                                                    </details>
+                                                {/if}
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <p
+                                                    class="text-2xl font-bold text-green-700"
+                                                >
+                                                    {typeof (vol.totalCheckedInHours ?? vol.totalHours) === 'number' ? (vol.totalCheckedInHours ?? vol.totalHours).toFixed(1) : (vol.totalCheckedInHours ?? vol.totalHours)}h
+                                                </p>
+                                                <p
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    {vol.checkedInShifts}/{vol.totalRegisteredShifts || vol.checkedInShifts} shifts
+                                                </p>
+                                                {#if vol.totalRegisteredHours && vol.totalRegisteredHours > (vol.totalCheckedInHours ?? vol.totalHours ?? 0) + 0.5}
+                                                    <p class="text-xs text-orange-600 font-medium mt-0.5">
+                                                        {typeof vol.totalRegisteredHours === 'number' ? vol.totalRegisteredHours.toFixed(1) : vol.totalRegisteredHours}h signed up
+                                                    </p>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                    {/each}
+
+                    <!-- Close to 4 Hours Section -->
+                    {#each [aiSummaryResult.volunteers.filter((v) => v.category === "close")] as closeVolunteers}
+                    {#if closeVolunteers.length > 0}
+                        <div>
+                            <h3
+                                class="font-bold text-amber-800 text-sm uppercase tracking-wide flex items-center gap-2 mb-3"
+                            >
+                                <span
+                                    class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-xs"
+                                    >⚡</span
+                                >
+                                Close to 4 Hours (2-3.99h) ({closeVolunteers.length})
+                            </h3>
+                            <div class="space-y-2">
+                                {#each closeVolunteers as vol}
+                                    <div
+                                        class="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                                    >
+                                        <div
+                                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                        >
+                                            <div class="flex-1">
+                                                <div
+                                                    class="flex items-center gap-2 flex-wrap"
+                                                >
+                                                    <span
+                                                        class="font-bold text-gray-900"
+                                                        >{vol.primaryName}</span
+                                                    >
+                                                    {#if vol.confidence !== "high"}
+                                                        <span
+                                                            class="text-xs px-2 py-0.5 rounded-full font-medium {vol.confidence === 'medium'
+                                                                ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                                                : 'bg-red-100 text-red-700 border border-red-300'}"
+                                                        >
+                                                            ⚠ {vol.confidence} confidence
+                                                        </span>
+                                                    {/if}
+                                                </div>
+                                                <p
+                                                    class="text-sm text-gray-600 mt-0.5"
+                                                >
+                                                    {vol.primaryEmail}
+                                                </p>
+                                                {#if vol.uncertaintyNote}
+                                                    <p
+                                                        class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 inline-block"
+                                                    >
+                                                        ⚠ {vol.uncertaintyNote}
+                                                    </p>
+                                                {/if}
+                                                {#if vol.allNames && vol.allNames.length > 1}
+                                                    <details
+                                                        class="mt-2 text-xs text-gray-500"
+                                                    >
+                                                        <summary
+                                                            class="cursor-pointer hover:text-gray-700"
+                                                            >Merged from {vol.allNames.length} name variation(s)</summary
+                                                        >
+                                                        <div
+                                                            class="mt-1 pl-2 border-l-2 border-gray-200 space-y-0.5"
+                                                        >
+                                                            {#each vol.allNames as name}
+                                                                <p>{name}</p>
+                                                            {/each}
+                                                            {#if vol.allEmails && vol.allEmails.length > 1}
+                                                                <p
+                                                                    class="font-medium mt-1"
+                                                                >
+                                                                    Emails:
+                                                                </p>
+                                                                {#each vol.allEmails as email}
+                                                                    <p>
+                                                                        {email}
+                                                                    </p>
+                                                                {/each}
+                                                            {/if}
+                                                        </div>
+                                                    </details>
+                                                {/if}
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <p
+                                                    class="text-2xl font-bold text-amber-700"
+                                                >
+                                                    {typeof (vol.totalCheckedInHours ?? vol.totalHours) === 'number' ? (vol.totalCheckedInHours ?? vol.totalHours).toFixed(1) : (vol.totalCheckedInHours ?? vol.totalHours)}h
+                                                </p>
+                                                <p
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    {vol.checkedInShifts}/{vol.totalRegisteredShifts || vol.checkedInShifts} shifts
+                                                </p>
+                                                {#if vol.totalRegisteredHours && vol.totalRegisteredHours > (vol.totalCheckedInHours ?? vol.totalHours ?? 0) + 0.5}
+                                                    <p class="text-xs text-orange-600 font-medium mt-0.5">
+                                                        {typeof vol.totalRegisteredHours === 'number' ? vol.totalRegisteredHours.toFixed(1) : vol.totalRegisteredHours}h signed up
+                                                    </p>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                    {/each}
+
+                    <!-- Under 4 Hours Section -->
+                    {#each [aiSummaryResult.volunteers.filter((v) => v.category === "under")] as underVolunteers}
+                    {#if underVolunteers.length > 0}
+                        <div>
+                            <h3
+                                class="font-bold text-red-800 text-sm uppercase tracking-wide flex items-center gap-2 mb-3"
+                            >
+                                <span
+                                    class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-xs"
+                                    >✗</span
+                                >
+                                Under 2 Hours - Out of Compliance ({underVolunteers.length})
+                            </h3>
+                            <div class="space-y-2">
+                                {#each underVolunteers as vol}
+                                    <div
+                                        class="bg-red-50 border border-red-200 rounded-lg p-4"
+                                    >
+                                        <div
+                                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                        >
+                                            <div class="flex-1">
+                                                <div
+                                                    class="flex items-center gap-2 flex-wrap"
+                                                >
+                                                    <span
+                                                        class="font-bold text-gray-900"
+                                                        >{vol.primaryName}</span
+                                                    >
+                                                    {#if vol.confidence !== "high"}
+                                                        <span
+                                                            class="text-xs px-2 py-0.5 rounded-full font-medium {vol.confidence === 'medium'
+                                                                ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                                                : 'bg-red-100 text-red-700 border border-red-300'}"
+                                                        >
+                                                            ⚠ {vol.confidence} confidence
+                                                        </span>
+                                                    {/if}
+                                                </div>
+                                                <p
+                                                    class="text-sm text-gray-600 mt-0.5"
+                                                >
+                                                    {vol.primaryEmail}
+                                                </p>
+                                                {#if vol.uncertaintyNote}
+                                                    <p
+                                                        class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 inline-block"
+                                                    >
+                                                        ⚠ {vol.uncertaintyNote}
+                                                    </p>
+                                                {/if}
+                                                {#if vol.allNames && vol.allNames.length > 1}
+                                                    <details
+                                                        class="mt-2 text-xs text-gray-500"
+                                                    >
+                                                        <summary
+                                                            class="cursor-pointer hover:text-gray-700"
+                                                            >Merged from {vol.allNames.length} name variation(s)</summary
+                                                        >
+                                                        <div
+                                                            class="mt-1 pl-2 border-l-2 border-gray-200 space-y-0.5"
+                                                        >
+                                                            {#each vol.allNames as name}
+                                                                <p>{name}</p>
+                                                            {/each}
+                                                            {#if vol.allEmails && vol.allEmails.length > 1}
+                                                                <p
+                                                                    class="font-medium mt-1"
+                                                                >
+                                                                    Emails:
+                                                                </p>
+                                                                {#each vol.allEmails as email}
+                                                                    <p>
+                                                                        {email}
+                                                                    </p>
+                                                                {/each}
+                                                            {/if}
+                                                        </div>
+                                                    </details>
+                                                {/if}
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <p
+                                                    class="text-2xl font-bold text-red-700"
+                                                >
+                                                    {typeof (vol.totalCheckedInHours ?? vol.totalHours) === 'number' ? (vol.totalCheckedInHours ?? vol.totalHours).toFixed(1) : (vol.totalCheckedInHours ?? vol.totalHours)}h
+                                                </p>
+                                                <p
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    {vol.checkedInShifts}/{vol.totalRegisteredShifts || vol.checkedInShifts} shifts
+                                                </p>
+                                                {#if vol.totalRegisteredHours && vol.totalRegisteredHours > (vol.totalCheckedInHours ?? vol.totalHours ?? 0) + 0.5}
+                                                    <p class="text-xs text-orange-600 font-medium mt-0.5">
+                                                        {typeof vol.totalRegisteredHours === 'number' ? vol.totalRegisteredHours.toFixed(1) : vol.totalRegisteredHours}h signed up
+                                                    </p>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                    {/each}
+
+                    <!-- Not Found Section (expected volunteers with no check-ins) -->
+                    {#if aiSummaryResult.notFound && aiSummaryResult.notFound.length > 0}
+                        <div>
+                            <h3
+                                class="font-bold text-gray-800 text-sm uppercase tracking-wide flex items-center gap-2 mb-3"
+                            >
+                                <span
+                                    class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 text-xs"
+                                    >?</span
+                                >
+                                Not Found in Check-In Records ({aiSummaryResult.notFound.length})
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-2">
+                                These expected volunteers had no matching check-in records for this date range.
+                            </p>
+                            <div class="space-y-2">
+                                {#each aiSummaryResult.notFound as vol}
+                                    <div
+                                        class="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center justify-between"
+                                    >
+                                        <div>
+                                            <span
+                                                class="font-medium text-gray-800 text-sm"
+                                                >{vol.name}</span
+                                            >
+                                            {#if vol.email}
+                                                <span
+                                                    class="text-xs text-gray-500 ml-2"
+                                                    >{vol.email}</span
+                                                >
+                                            {/if}
+                                        </div>
+                                        <span
+                                            class="text-xs text-gray-400 italic"
+                                            >{vol.note || "No records found"}</span
+                                        >
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+
+                    <!-- Empty state -->
+                    {#if aiSummaryResult.volunteers.length === 0}
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-lg font-medium">
+                                No volunteers found
+                            </p>
+                            <p class="text-sm mt-1">
+                                The AI could not identify any volunteers in the
+                                data.
+                            </p>
+                        </div>
+                    {/if}
+                </div>
+
+                <!-- Modal Footer -->
+                <div
+                    class="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center"
+                >
+                    <button
+                        on:click={exportAiSummaryCSV}
+                        class="px-4 py-2.5 rounded-lg border border-green-300 text-green-700 font-medium hover:bg-green-50 transition-colors text-sm flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            ></path></svg
+                        >
+                        Export CSV
+                    </button>
+                    <button
+                        on:click={closeAiSummaryModal}
+                        class="px-6 py-2.5 rounded-lg bg-gray-800 text-white font-medium hover:bg-gray-900 transition-colors text-sm"
+                    >
+                        Close
                     </button>
                 </div>
             </div>
