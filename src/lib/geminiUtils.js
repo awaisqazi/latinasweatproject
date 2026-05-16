@@ -1,8 +1,8 @@
 // Gemini AI Utilities for Volunteer Summary Analysis
 // Uses Gemini 3.1 Flash Lite via REST API
-// API key is loaded from .env (VITE_GEMINI_API_KEY) — never hardcoded
+// API key is loaded from .env (PUBLIC_GEMINI_API_KEY) — never hardcoded
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = import.meta.env.PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -87,7 +87,7 @@ export async function generateVolunteerSummary(records, dateRange, expectedVolun
     }
 
     if (!GEMINI_API_KEY) {
-        throw new Error("Gemini API key not configured. Add VITE_GEMINI_API_KEY to your .env file.");
+        throw new Error("Gemini API key not configured. Add PUBLIC_GEMINI_API_KEY to your .env file or GitHub Secrets.");
     }
 
     // Build the CSV-like data string for the prompt
