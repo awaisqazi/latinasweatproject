@@ -50,6 +50,182 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: Hero Section */}
+
+    {/* START: WGN9 Spotlight Section */}
+    <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
+      {/* Background pattern */}
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
+      </div>
+
+      {/* Top accent line */}
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
+
+      {/* Decorative glows */}
+      <div
+        class="absolute -top-32 -left-20 w-[400px] h-[400px] bg-vibrant-pink/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="absolute -bottom-32 -right-20 w-[400px] h-[400px] bg-accent-gold/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+
+      <div
+        class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+      >
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
+          {/* Left: Copy + CTAs */}
+          <div class="lg:col-span-5 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
+                ></span>
+              </span>
+              <p
+                class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+              >
+                As Seen On WGN9 Chicago
+              </p>
+            </div>
+
+            <h2
+              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.05]"
+            >
+              Around Town<br />checks out{" "}
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+                >The Latina<br class="hidden sm:block" /> Sweat Project</span
+              >
+            </h2>
+            <p
+              class="mt-5 font-body text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0"
+            >
+              WGN9's Ana Belaval spent the morning with us in Pilsen. Four
+              segments: a Spanish yoga flow, our community art gallery, the
+              workout, and a conversation with our founder Margarita.
+            </p>
+
+            <div
+              class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3"
+            >
+              <a
+                href={`${base}wgn9-around-town`}
+                class="btn group inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Watch all 4 segments
+              </a>
+              <a
+                href="https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
+              >
+                Read on WGN9
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+              </a>
+            </div>
+
+            {/* Segment chips */}
+            <div
+              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2"
+            >
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">01</span> The Workout
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">02</span> Meet the Founder
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">03</span> Spanish Yoga Flow
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">04</span> Community & Art
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Featured video */}
+          <div class="lg:col-span-7">
+            <div
+              class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
+            >
+              {/* Gradient halo */}
+              <div
+                class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/40 via-transparent to-accent-gold/40 opacity-60 pointer-events-none"
+                aria-hidden="true"
+              >
+              </div>
+
+              <div class="relative aspect-video w-full">
+                <iframe
+                  id="nxs-video-iframe-home"
+                  frameborder="0"
+                  allowfullscreen
+                  loading="lazy"
+                  title="WGN9 Around Town: Ana tries the workout at The Latina Sweat Project"
+                  src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584"
+                  rel="nofollow"
+                  class="absolute inset-0 w-full h-full"
+                ></iframe>
+              </div>
+            </div>
+
+            <p
+              class="mt-3 text-center lg:text-right text-xs font-medium text-white/40 italic"
+            >
+              Featured segment: Ana tries the workout · 3 more on the feature
+              page
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom accent line */}
+      <div
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
+      >
+      </div>
+    </section>
+    {/* END: WGN9 Spotlight Section */}
+
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
       class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50 py-16 sm:py-20 lg:py-24"
@@ -1775,9 +1951,9 @@ const base = import.meta.env.BASE_URL;
           {
             pressArticles.map((article) => (
               <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={article.isInternal ? `${base}${article.url.replace(/^\//, "")}` : article.url}
+                target={article.isInternal ? undefined : "_blank"}
+                rel={article.isInternal ? undefined : "noopener noreferrer"}
                 class="group relative block rounded-2xl bg-white p-6 sm:p-8 shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-vibrant-pink/10 hover:border-vibrant-pink/30"
               >
                 <p class="text-xs font-bold uppercase tracking-widest text-vibrant-pink">
@@ -1787,7 +1963,7 @@ const base = import.meta.env.BASE_URL;
                   {article.title}
                 </h3>
                 <div class="mt-5 inline-flex items-center gap-2 text-sm font-bold text-vibrant-pink transition-all group-hover:gap-3">
-                  {article.isVideo ? "Watch Spotlight" : "Read Article"}
+                  {article.ctaLabel ?? (article.isVideo ? "Watch Spotlight" : "Read Article")}
                   <svg
                     class="h-4 w-4 transition-transform group-hover:translate-x-1"
                     fill="none"

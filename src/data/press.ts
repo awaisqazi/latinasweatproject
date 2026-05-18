@@ -4,9 +4,21 @@ export interface PressArticle {
   url: string;
   snippet: string;
   isVideo?: boolean;
+  isInternal?: boolean;
+  ctaLabel?: string;
 }
 
 export const pressArticles: PressArticle[] = [
+  {
+    outlet: "WGN9 Chicago (Around Town)",
+    title: "Around Town checks out The Latina Sweat Project",
+    url: "/wgn9-around-town",
+    snippet:
+      "WGN9's Ana Belaval visits the studio for a four-part Around Town feature, sampling our Spanish yoga flow, talking with members Rut and Veronica about our community art gallery, trying the workout, and sitting down with founder Margarita to hear the story behind LSP.",
+    isVideo: true,
+    isInternal: true,
+    ctaLabel: "Watch the Feature",
+  },
   {
     outlet: "Negocios Now",
     title: "Margarita Quiñones Peña: 40 Under 40: Advocate for Holistic Community Empowerment",

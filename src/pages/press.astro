@@ -47,12 +47,12 @@ const base = import.meta.env.BASE_URL;
                 {article.snippet}
               </p>
               <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={article.isInternal ? `${base}${article.url.replace(/^\//, "")}` : article.url}
+                target={article.isInternal ? undefined : "_blank"}
+                rel={article.isInternal ? undefined : "noopener noreferrer"}
                 class="mt-6 inline-flex items-center gap-2 rounded-full bg-off-black px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:bg-vibrant-pink hover:scale-105 hover:shadow-lg"
               >
-                {article.isVideo ? "Watch Full Spotlight" : "Read Full Article"}
+                {article.ctaLabel ?? (article.isVideo ? "Watch Full Spotlight" : "Read Full Article")}
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>

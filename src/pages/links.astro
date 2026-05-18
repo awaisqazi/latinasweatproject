@@ -5,6 +5,16 @@ const base = import.meta.env.BASE_URL;
 // Define links data (chronological - upcoming events first, recurring/undated next, past events last)
 const links = [
   {
+    title: "📺 WGN9 Around Town visits LSP",
+    description:
+      "Watch all four Around Town segments: Ana tries the workout, meets founder Margarita, joins our Spanish yoga flow, and tours the community art gallery.",
+    url: `https://latinasweatproject.com/wgn9-around-town/`,
+    color: "wish",
+    icon: "tv",
+    badge: "On TV",
+    featured: true,
+  },
+  {
     title: "🎓 Graduation Drive: Donate Formal Wear",
     description:
       "Help students celebrate graduation in style! Drop off prom dresses, suits, dress shirts, shoes & more at LSP Studio starting May. Distribution event May 16.",
@@ -486,6 +496,20 @@ const socials = [
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
+                      </svg>
+                    )}
+                    {link.icon === "tv" && (
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect x="2" y="5" width="20" height="13" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" stroke-linecap="round" />
+                        <line x1="12" y1="18" x2="12" y2="21" stroke-linecap="round" />
+                        <polygon points="10,9 16,11.5 10,14" fill="currentColor" stroke="none" />
                       </svg>
                     )}
                     {link.icon === "panel" && (

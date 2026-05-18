@@ -1,0 +1,344 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const base = import.meta.env.BASE_URL;
+const articleUrl =
+  "https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/";
+
+const segments = [
+  {
+    number: "01",
+    eyebrow: "On the Mat",
+    title: "Ana tries the workout",
+    description:
+      "From warm-up to cool-down, Ana gets a real taste of what an LSP class feels like.",
+    embed:
+      '<iframe id="nxs-video-iframe-32" frameborder="0" allowfullscreen loading="lazy" style="width: 100%; height: 100%; aspect-ratio: 16/9;" src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584" rel="nofollow" width="640" height="320"></iframe>',
+  },
+  {
+    number: "02",
+    eyebrow: "Meet the Founder",
+    title:
+      "Ana speaks with Margarita, founder of The Latina Sweat Project",
+    description:
+      "Our founder Margarita shares the story, the mission, and the vision behind The Latina Sweat Project.",
+    embed:
+      '<iframe id="nxs-video-iframe-33" frameborder="0" allowfullscreen loading="lazy" style="width: 100%; height: 100%; aspect-ratio: 16/9;" src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802586/embed/?injected_via=embed&post_id=3976584" rel="nofollow" width="640" height="320"></iframe>',
+  },
+  {
+    number: "03",
+    eyebrow: "Spanish Yoga Flow",
+    title: "Ana checks out the Spanish yoga flow class",
+    description:
+      "Ana steps into one of our signature Spanish yoga flow classes, where movement meets language and culture on the mat.",
+    embed:
+      '<iframe id="nxs-video-iframe-30" frameborder="0" allowfullscreen loading="lazy" style="width: 100%; height: 100%; aspect-ratio: 16/9;" src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802595/embed/?injected_via=embed&post_id=3976584" rel="nofollow" width="640" height="320"></iframe>',
+  },
+  {
+    number: "04",
+    eyebrow: "Community & Art",
+    title:
+      "Ana speaks with Rut and Veronica about The Sweat Project and the art gallery",
+    description:
+      "A look at the community we're building and the local artists whose work lives in our space, in conversation with Rut and Veronica.",
+    embed:
+      '<iframe id="nxs-video-iframe-31" frameborder="0" allowfullscreen loading="lazy" style="width: 100%; height: 100%; aspect-ratio: 16/9;" src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802560/embed/?injected_via=embed&post_id=3976584" rel="nofollow" width="640" height="320"></iframe>',
+  },
+];
+---
+
+<Layout title="WGN9 Around Town: The Latina Sweat Project | LSP">
+  <Header />
+  <main>
+    {/* Hero */}
+    <section class="relative bg-off-black py-20 sm:py-28 overflow-hidden">
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
+      </div>
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <div
+          class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
+            ></span>
+            <span
+              class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
+            ></span>
+          </span>
+          <p
+            class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            As Seen On WGN9 Chicago
+          </p>
+        </div>
+
+        <h1
+          class="mt-6 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+        >
+          Around Town checks out<br />
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+            >The Latina Sweat Project</span
+          >
+        </h1>
+        <p
+          class="mt-6 font-body text-lg text-slate-300 max-w-2xl mx-auto sm:text-xl"
+        >
+          WGN9's Ana Belaval came by the studio for a full Around Town segment.
+          Four videos. One incredible look at the movement we're building in
+          Pilsen.
+        </p>
+
+        <div
+          class="mt-10 flex flex-wrap items-center justify-center gap-3"
+        >
+          <a
+            href="#segments"
+            class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            Watch the segments
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg
+            >
+          </a>
+          <a
+            href={articleUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
+          >
+            Read on WGN9
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              ></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
+      >
+      </div>
+    </section>
+
+    {/* Intro Strip */}
+    <section class="bg-light-gray py-12 sm:py-16">
+      <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="rounded-2xl bg-white border-l-4 border-vibrant-pink p-6 sm:p-8 shadow-sm"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div
+              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-off-black"
+            >
+              <svg
+                class="h-7 w-7 text-vibrant-pink"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p
+                class="font-sans text-xl font-extrabold text-off-black sm:text-2xl"
+              >
+                Four segments. One story.
+              </p>
+              <p class="mt-2 font-body text-base text-medium-gray sm:text-lg">
+                From a Spanish-language yoga flow to a conversation with our
+                founder, here's the full WGN9 Around Town feature on what we're
+                building together in Pilsen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Video Segments */}
+    <section id="segments" class="py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <p
+            class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            The Full Feature
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+          >
+            All four Around Town segments
+          </h2>
+          <p class="mt-4 font-body text-base text-medium-gray max-w-2xl mx-auto">
+            Press play on any video below to dive in.
+          </p>
+        </div>
+
+        <div class="space-y-12 sm:space-y-16">
+          {
+            segments.map((segment, idx) => (
+              <article class="group">
+                <div class="grid gap-6 lg:grid-cols-12 lg:gap-8 items-center">
+                  <div
+                    class:list={[
+                      "lg:col-span-4 order-2",
+                      idx % 2 === 1 ? "lg:order-2" : "lg:order-1",
+                    ]}
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="font-sans text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-vibrant-pink to-accent-gold">
+                        {segment.number}
+                      </span>
+                      <span class="h-px flex-1 bg-gradient-to-r from-off-black/20 to-transparent" />
+                    </div>
+                    <p class="mt-3 text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]">
+                      {segment.eyebrow}
+                    </p>
+                    <h3 class="mt-2 font-sans text-2xl sm:text-3xl font-extrabold tracking-tight text-off-black leading-tight">
+                      {segment.title}
+                    </h3>
+                    <p class="mt-4 font-body text-base text-medium-gray leading-relaxed">
+                      {segment.description}
+                    </p>
+                  </div>
+
+                  <div
+                    class:list={[
+                      "lg:col-span-8 order-1",
+                      idx % 2 === 1 ? "lg:order-1" : "lg:order-2",
+                    ]}
+                  >
+                    <div class="relative rounded-2xl overflow-hidden shadow-xl ring-1 ring-off-black/10 bg-off-black transition-all duration-300 group-hover:shadow-2xl group-hover:ring-vibrant-pink/30">
+                      <div
+                        class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/30 via-transparent to-accent-gold/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                        aria-hidden="true"
+                      />
+                      <div class="relative aspect-video w-full">
+                        <Fragment set:html={segment.embed} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* Quote / Callout */}
+    <section
+      class="bg-gradient-to-br from-amber-50 via-yellow-50 to-rose-50 py-16 sm:py-20"
+    >
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+        <svg
+          class="mx-auto h-10 w-10 text-vibrant-pink/60"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"
+          ></path>
+        </svg>
+        <p
+          class="mt-6 font-sans text-2xl sm:text-3xl font-extrabold tracking-tight text-off-black leading-snug"
+        >
+          We're a yoga studio, a fitness community, and a movement<br
+            class="hidden sm:block"
+          />
+          rooted in Pilsen.
+        </p>
+        <p class="mt-5 font-body text-lg text-off-black/75">
+          Thank you to WGN9 and Ana Belaval for telling our story so
+          beautifully, and to every single member who makes this work possible
+          🤍
+        </p>
+      </div>
+    </section>
+
+    {/* CTA */}
+    <section class="py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <p
+          class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+        >
+          Come see for yourself
+        </p>
+        <h2
+          class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+        >
+          Ready to join the project?
+        </h2>
+        <p class="mt-5 font-body text-lg text-medium-gray">
+          Whether it's your first class or your fiftieth, there's a space for
+          you on the mat with us.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={`${base}schedule`}
+            class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02]"
+          >
+            See the schedule
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+            >
+          </a>
+          <a
+            href={`${base}about`}
+            class="inline-flex items-center gap-2 rounded-full border-2 border-off-black/15 bg-white px-6 py-3 text-sm font-bold text-off-black transition-all duration-300 hover:border-off-black/40"
+          >
+            About LSP
+          </a>
+          <a
+            href={`${base}press`}
+            class="inline-flex items-center gap-2 rounded-full border-2 border-off-black/15 bg-white px-6 py-3 text-sm font-bold text-off-black transition-all duration-300 hover:border-off-black/40"
+          >
+            More press
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
