@@ -51,6 +51,252 @@ const base = import.meta.env.BASE_URL;
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Community Graduation Support Drive — Zeffy Modal */}
+    <section
+      class="relative overflow-hidden bg-gradient-to-br from-[#f5ede3] via-[#ece0cf] to-[#e8d8c2] py-16 sm:py-20 lg:py-24"
+    >
+      {/* Soft decorative glows (per design.md Option B: Warm Natural Theme) */}
+      <div
+        class="absolute -top-24 -right-24 w-[460px] h-[460px] bg-accent-gold/30 rounded-full blur-[130px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="absolute -bottom-24 -left-24 w-[420px] h-[420px] bg-vibrant-pink/25 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+      {/* Hairline edges */}
+      <div
+        class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent-gold/40 to-transparent"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-vibrant-pink/40 to-transparent"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-off-black">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-14 items-center">
+          {/* Left: Copy + sponsorship note + CTA */}
+          <div class="lg:col-span-6">
+            <div
+              class="inline-flex items-center gap-2 rounded-full border border-accent-gold/60 bg-white/70 backdrop-blur-sm px-4 py-1.5 shadow-sm"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-80"
+                ></span>
+                <span
+                  class="relative inline-flex h-2 w-2 rounded-full bg-accent-gold"
+                ></span>
+              </span>
+              <p
+                class="text-amber-900 text-xs font-bold uppercase tracking-[0.22em]"
+              >
+                Sponsor a Graduate
+              </p>
+            </div>
+
+            <h2
+              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-off-black leading-[1.05]"
+            >
+              Community Graduation<br />
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-accent-gold to-vibrant-pink"
+                >Support Drive</span
+              >
+            </h2>
+
+            <p
+              class="mt-5 font-body text-base sm:text-lg text-off-black/75 leading-relaxed max-w-xl"
+            >
+              Cover the cost of shoes, a dress, a suit, or a self-care kit for a
+              graduating Chicago Public School student. Each item closes the
+              moment it's fully funded, so your gift lands exactly where it's
+              needed.
+            </p>
+
+            {/* Sponsorship clarification — dark callout */}
+            <div
+              class="mt-6 rounded-2xl bg-off-black p-5 sm:p-6 shadow-xl shadow-off-black/15"
+            >
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.22em] text-accent-gold"
+              >
+                Important note
+              </p>
+              <p class="mt-2 text-sm sm:text-base text-white/85 leading-relaxed">
+                This is a <span class="text-accent-gold font-bold">sponsorship, not a purchase</span>.
+                When you pick an item, you're covering it on behalf of a
+                graduating student. Every contribution, big or small, makes the
+                milestone meaningful and joyful.
+              </p>
+            </div>
+
+            <p
+              class="mt-6 text-[12px] font-semibold uppercase tracking-[0.15em] text-off-black/55"
+            >
+              100% goes to CPS students
+            </p>
+          </div>
+
+          {/* Right: Visual preview of sponsorable items */}
+          <div class="lg:col-span-6">
+            <div class="relative">
+              {/* Frame glow */}
+              <div
+                class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-accent-gold/30 via-amber-200/20 to-vibrant-pink/30 blur-2xl pointer-events-none"
+              >
+              </div>
+
+              <div
+                class="relative rounded-[1.75rem] bg-white/85 backdrop-blur-sm ring-1 ring-amber-200/60 shadow-2xl shadow-amber-900/10 p-5 sm:p-6"
+              >
+                <p
+                  class="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-800/90 text-center"
+                >
+                  Pick an item to sponsor
+                </p>
+                <p
+                  class="mt-1 text-center text-xs sm:text-sm font-medium text-off-black/55 italic"
+                >
+                  Live inventory & availability inside the Zeffy form
+                </p>
+
+                <div class="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
+                  {/* Shoes */}
+                  <div
+                    class="rounded-2xl bg-gradient-to-br from-[#fbf3e7] to-white border border-amber-200/70 p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-3xl sm:text-4xl">👟</span>
+                      <span
+                        class="rounded-full bg-accent-gold/20 border border-accent-gold/40 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900"
+                        >$55</span
+                      >
+                    </div>
+                    <p class="mt-3 text-sm font-bold text-off-black leading-tight">
+                      Sponsor a pair of shoes
+                    </p>
+                    <p class="mt-1 text-[11px] text-off-black/60 leading-snug">
+                      Dress shoes, sneakers, or heels for a graduate.
+                    </p>
+                  </div>
+
+                  {/* Dress */}
+                  <div
+                    class="rounded-2xl bg-gradient-to-br from-[#fbf3e7] to-white border border-amber-200/70 p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-3xl sm:text-4xl">👗</span>
+                      <span
+                        class="rounded-full bg-accent-gold/20 border border-accent-gold/40 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900"
+                        >$60</span
+                      >
+                    </div>
+                    <p class="mt-3 text-sm font-bold text-off-black leading-tight">
+                      Sponsor a grad dress
+                    </p>
+                    <p class="mt-1 text-[11px] text-off-black/60 leading-snug">
+                      A graduation dress for a young woman.
+                    </p>
+                  </div>
+
+                  {/* Suit */}
+                  <div
+                    class="rounded-2xl bg-gradient-to-br from-[#fbf3e7] to-white border border-amber-200/70 p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-3xl sm:text-4xl">🤵</span>
+                      <span
+                        class="rounded-full bg-accent-gold/20 border border-accent-gold/40 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900"
+                        >$85</span
+                      >
+                    </div>
+                    <p class="mt-3 text-sm font-bold text-off-black leading-tight">
+                      Sponsor a suit
+                    </p>
+                    <p class="mt-1 text-[11px] text-off-black/60 leading-snug">
+                      A graduation suit for a young man.
+                    </p>
+                  </div>
+
+                  {/* Self-care / extras */}
+                  <div
+                    class="rounded-2xl bg-gradient-to-br from-vibrant-pink/15 to-white border border-vibrant-pink/30 p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-3xl sm:text-4xl">💝</span>
+                      <span
+                        class="rounded-full bg-vibrant-pink/20 border border-vibrant-pink/40 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900"
+                        >Any</span
+                      >
+                    </div>
+                    <p class="mt-3 text-sm font-bold text-off-black leading-tight">
+                      Self-care & extras
+                    </p>
+                    <p class="mt-1 text-[11px] text-off-black/60 leading-snug">
+                      Self-care kits, celebration essentials, surprise gifts.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  zeffy-form-link="https://www.zeffy.com/embed/ticketing/community-graduation-support-drive?modal=true"
+                  class="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-off-black hover:bg-amber-900 px-5 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:shadow-lg"
+                >
+                  See all items & sponsor
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    stroke-width="2.5"
+                    aria-hidden="true"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg
+                  >
+                </button>
+
+                {/* Subtle fallback to open Zeffy directly */}
+                <p class="mt-3 text-center text-[12px] text-off-black/55 leading-relaxed">
+                  Or{" "}
+                  <a
+                    href="https://www.zeffy.com/en-US/ticketing/community-graduation-support-drive"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-semibold text-amber-800 underline decoration-amber-800/40 underline-offset-2 transition-colors hover:text-off-black hover:decoration-off-black/60"
+                  >
+                    open on Zeffy in a new tab
+                    <svg
+                      class="inline-block w-3 h-3 -mt-0.5 ml-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2.5"
+                      aria-hidden="true"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      ></path></svg
+                    >
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* Zeffy popup modal script — attaches to elements with zeffy-form-link */}
+    <script
+      is:inline
+      src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
+    {/* END: Community Graduation Support Drive */}
+
     {/* START: WGN9 Spotlight Section */}
     <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
       {/* Background pattern */}

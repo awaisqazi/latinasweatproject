@@ -5,6 +5,16 @@ const base = import.meta.env.BASE_URL;
 // Define links data (chronological - upcoming events first, recurring/undated next, past events last)
 const links = [
   {
+    title: "🎁 Sponsor a Graduate · Zeffy Drive",
+    description:
+      "Cover a specific item, shoes, a dress, a suit, a self-care kit, for a graduating Chicago Public School student. Every dollar lands exactly where it's needed.",
+    url: "https://www.zeffy.com/en-US/ticketing/community-graduation-support-drive",
+    color: "amber",
+    icon: "grad",
+    badge: "Sponsor",
+    featured: true,
+  },
+  {
     title: "📺 WGN9 Around Town visits LSP",
     description:
       "Watch all four Around Town segments: Ana tries the workout, meets founder Margarita, joins our Spanish yoga flow, and tours the community art gallery.",
@@ -496,6 +506,17 @@ const socials = [
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
+                      </svg>
+                    )}
+                    {link.icon === "grad" && (
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
                       </svg>
                     )}
                     {link.icon === "tv" && (
