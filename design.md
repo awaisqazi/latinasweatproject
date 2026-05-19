@@ -79,19 +79,31 @@ When adding a new section, identify whether it belongs in a light or dark theme 
 
 The Links page is a crucial portal, housed directly in LSP's social media bios (e.g., Instagram). It is designed to act as an immersive, mobile-first "Linktree" that drives immediate actions like class booking, event signups, and newsletters.
 
-### Standard Operating Procedure for Adding New Links
-All content on the links page is frontmatter-driven. To add, edit, or highlight links, modify the `links` array inside the frontmatter:
+### Bilingual Integration & Content Architecture
+All content (titles, descriptions, and badges) inside both the main `links` list and the `highlights` array supports nested `{ en, es }` localization objects.
+
+#### Standard Operating Procedure for Adding New Links
+To add, edit, or highlight links, modify the `links` array inside the frontmatter:
 
 ```typescript
 // Location: src/pages/links.astro
 const links = [
   {
-    title: "📢 Event or Page Title",
-    description: "Detailed, brief 1-2 sentence description explaining the value proposition.",
-    url: `${base}your-target-slug`, // Use base prefix for internal routes, or direct URL for external (Zeffy, Google Forms)
+    title: {
+      en: "📢 Event or Page Title",
+      es: "📢 Título del Evento o Página"
+    },
+    description: {
+      en: "Detailed, brief 1-2 sentence description explaining the value proposition.",
+      es: "Descripción breve de 1 o 2 oraciones que explique el valor del evento."
+    },
+    url: `${base}your-target-slug`, // Use base prefix for internal routes, or direct URL for external
     color: "teal", // Options: "teal" | "blue" | "sky" | "wish" | "green" | "indigo" | "amber" | "vibrant-pink" | "gold"
-    icon: "calendar", // Options: "calendar" | "heart" | "mind" | "globe" | "star" | "health" | "leaf" | "yoga" | "tv" | "panel"
-    badge: "New / Date", // Optional: text string displaying on top-right badge
+    icon: "calendar", // Options: "calendar" | "heart" | "mind" | "globe" | "star" | "health" | "leaf" | "yoga" | "tv"
+    badge: {
+      en: "New / Date", // Optional: text string displaying on top-right badge
+      es: "Nuevo / Fecha"
+    },
     featured: true, // Optional: applies a glowing border, custom shadows, and elevated scaling
   }
 ];
@@ -104,7 +116,15 @@ const links = [
 > 2. **Recurring, Constant, or Undated Links** (e.g., Class Schedule, Main Website, App Downloads) come SECOND.
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
-### Advanced Highlights on the Links Page
+### Advanced Highlights & Interactive Systems
+- **Liquid Glass Language Switcher**: A premium `EN | ES` toggle shifts a liquid glass background indicator dynamically. The toggle manages parent class bindings (`.lang-active-en` / `.lang-active-es`) that swap visible translations in CSS instantly with zero layout shift, and stores preferences in `localStorage`.
+- **Branded Story Highlights Covers**: Uses custom, high-fidelity AI-generated covers stored in `public/images/highlights/hl_*.png` (Free Classes, Sponsor, WGN Feature, YTT, Therapy, App).
+- **Bubble Sizing and Center Alignment**: 
+  - To prevent sizing shifts and squeezing, bubble elements carry absolute sizes (`w-[66px] h-[66px] flex-shrink-0`).
+  - The parent list `#highlights-bar` is aligned using `items-start` rather than centering. Since each bubble has identical sizing, **all bubble centers align perfectly horizontally**, regardless of whether their labels underneath span one or two lines.
+  - Individual Highlight items apply tailored base scaling factors (`scale-[1.48]`, `scale-[1.38]`, etc.) to crop away any internal margins or outer borders embedded in the graphics, presenting a uniform visual appearance.
+- **High-Momentum Direct Routing**: Clicking a Highlight Story bubble routes users directly to external links (e.g. Zeffy drives, REDCap surveys, or television subpages) in a new tab to maximize conversion. Multi-button hubs (Free Classes and App Download) scroll internally to the corresponding page section.
+- **Tight Newsletter Spacing**: The embedded Zeffy iframe container `.newsletter-frame` is explicitly styled to `195px` tall to eliminate dead space at the bottom of the card and maintain a clean, compact appearance.
 - **Animated Liquid Gradients**: The background is dynamically styled using the `.links-bg` class which rotates a multi-color gradient shifting over 12 seconds (`@keyframes links-gradient-shift`).
 - **Floating Decorative Blobs**: Floating organic circles drift slowly in the background (`links-blob-1`, `2`, and `3`) using independent CSS `@keyframes` floats, giving a highly premium, alive feel.
 - **Main Hero Promotion (Double Schedule Block)**: Highly prominent free class campaign section split between Pilsen studio (directing users to the schedule page/app) and Southside Social (directing users to Zeffy) to capitalize on immediate conversions.
