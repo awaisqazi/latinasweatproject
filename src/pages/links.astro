@@ -2,83 +2,213 @@
 import Layout from "@/layouts/Layout.astro";
 const base = import.meta.env.BASE_URL;
 
-// Define links data (chronological - upcoming events first, recurring/undated next, past events last)
+// Define links data with English and Spanish translations
 const links = [
   {
-    title: "🎁 Sponsor a Graduate · Zeffy Drive",
-    description:
-      "Cover a specific item, shoes, a dress, a suit, a self-care kit, for a graduating Chicago Public School student. Every dollar lands exactly where it's needed.",
+    title: {
+      en: "🎁 Sponsor a Graduate · Zeffy Drive",
+      es: "🎁 Apoya a un Graduado · Campaña Zeffy"
+    },
+    description: {
+      en: "Cover a specific item, shoes, a dress, a suit, a self-care kit, for a graduating Chicago Public School student. Every dollar lands exactly where it's needed.",
+      es: "Cubre ropa formal, zapatos, un vestido, un traje o un kit de cuidado personal para estudiantes graduados de Chicago Public Schools. Cada dólar llega a su destino."
+    },
     url: "https://www.zeffy.com/en-US/ticketing/community-graduation-support-drive",
     color: "amber",
     icon: "grad",
-    badge: "Sponsor",
+    badge: {
+      en: "Sponsor",
+      es: "Apoyar"
+    },
     featured: true,
   },
   {
-    title: "📺 WGN9 Around Town visits LSP",
-    description:
-      "Watch all four Around Town segments: Ana tries the workout, meets founder Margarita, joins our Spanish yoga flow, and tours the community art gallery.",
-    url: `https://latinasweatproject.com/wgn9-around-town/`,
+    title: {
+      en: "📺 WGN9 Around Town visits LSP",
+      es: "📺 WGN9 Around Town visita LSP"
+    },
+    description: {
+      en: "Watch all four Around Town segments: Ana tries the workout, meets founder Margarita, joins our Spanish yoga flow, and tours the community art gallery.",
+      es: "Mira los cuatro segmentos de Around Town: Ana prueba el entrenamiento, conoce a la fundadora Margarita, se une a nuestra clase en español y recorre la galería de arte."
+    },
+    url: "https://latinasweatproject.com/wgn9-around-town/",
     color: "wish",
     icon: "tv",
-    badge: "On TV",
+    badge: {
+      en: "On TV",
+      es: "En TV"
+    },
     featured: true,
   },
   {
-    title: "🎓 Graduation Drive: Donate Formal Wear",
-    description:
-      "Help students celebrate graduation in style! Drop off prom dresses, suits, dress shirts, shoes & more at LSP Studio starting May. Distribution event May 16.",
+    title: {
+      en: "🎓 Graduation Drive: Donate Formal Wear",
+      es: "🎓 Campaña de Graduación: Dona Ropa Formal"
+    },
+    description: {
+      en: "Help students celebrate graduation in style! Drop off prom dresses, suits, dress shirts, shoes & more at LSP Studio starting May. Distribution event May 16.",
+      es: "¡Ayuda a los estudiantes a celebrar la graduación con estilo! Trae vestidos de graduación, trajes, camisas de vestir, zapatos y más a LSP Studio a partir de mayo."
+    },
     url: `${base}schedule`,
     color: "sky",
     icon: "heart",
-    badge: "May",
+    badge: {
+      en: "May",
+      es: "Mayo"
+    },
     featured: true,
   },
   {
-    title: "🧘🏽‍♀️ Check out our 2025 YTT Cohort",
-    description:
-      "Meet our graduating teachers. Roughly one-minute clips of each instructor, tap any pose to learn from a new voice in our movement.",
+    title: {
+      en: "🧘🏽‍♀️ Check out our 2025 YTT Cohort",
+      es: "🧘🏽‍♀️ Conoce nuestra cohorte YTT 2025"
+    },
+    description: {
+      en: "Meet our graduating teachers. Roughly one-minute clips of each instructor, tap any pose to learn from a new voice in our movement.",
+      es: "Conoce a nuestras maestras graduadas. Videos de aproximadamente un minuto de cada instructora, toca cualquier pose para aprender de una nueva voz en nuestro movimiento."
+    },
     url: "https://latinasweatproject.com/2025ytt/",
     color: "amber",
     icon: "yoga",
-    badge: "New",
+    badge: {
+      en: "New",
+      es: "Nuevo"
+    },
     featured: true,
   },
   {
-    title: "🩺 Equal Hope × LSP · Hormones & Harmony",
-    description:
-      "Sat May 30, 12 to 2 PM. A free women's health event at LSP Studio. Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN).",
+    title: {
+      en: "🩺 Equal Hope × LSP · Hormones & Harmony",
+      es: "🩺 Equal Hope × LSP · Hormonas y Armonía"
+    },
+    description: {
+      en: "Sat May 30, 12 to 2 PM. A free women's health event at LSP Studio. Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN).",
+      es: "Sáb 30 de Mayo, 12 a 2 PM. Un evento gratuito de salud femenina en LSP Studio. Taller de alfabetización corporal, clase de salsa con María Luisa y discusión de salud comunitaria."
+    },
     url: "https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project?utm_source=ig&utm_medium=social&utm_content=link_in_bio",
     color: "teal",
     icon: "heart",
-    badge: "May 30",
+    badge: {
+      en: "May 30",
+      es: "30 Mayo"
+    },
     featured: true,
   },
   {
-    title: "🧠 Free Men's Therapy Group",
-    description:
-      "A bilingual, confidential, cost-free weekly therapy group for men, on Tuesdays starting on April 7th. Led by Roberto Lopez-Tamayo, Ph.D. Open to all adult men.",
+    title: {
+      en: "🧠 Free Men's Therapy Group",
+      es: "🧠 Grupo de Terapia Gratuito para Hombres"
+    },
+    description: {
+      en: "A bilingual, confidential, cost-free weekly therapy group for men, on Tuesdays starting on April 7th. Led by Roberto Lopez-Tamayo, Ph.D. Open to all adult men.",
+      es: "Un grupo de terapia semanal bilingüe, confidencial y gratuito para hombres, los martes a partir del 7 de abril. Dirigido por el Dr. Roberto López-Tamayo. Abierto a todos los hombres adultos."
+    },
     url: "https://www.redcap.ihrp.uic.edu/surveys/?s=MDMA4L9CD398798Y&utm_source=ig&utm_medium=social&utm_content=link_in_bio",
     color: "blue",
     icon: "mind",
-    badge: "New",
+    badge: {
+      en: "New",
+      es: "Nuevo"
+    },
     featured: true,
   },
   {
-    title: "📅 Class Schedule",
-    description: "Book a yoga, fitness, or wellness class in Pilsen.",
+    title: {
+      en: "📅 Class Schedule",
+      es: "📅 Horario de Clases"
+    },
+    description: {
+      en: "Book a yoga, fitness, or wellness class in Pilsen.",
+      es: "Reserva una clase de yoga, fitness o bienestar en Pilsen."
+    },
     url: "https://latinasweatproject.com/schedule/",
     color: "vibrant-pink",
     icon: "calendar",
     featured: true,
   },
   {
-    title: "🌐 Visit Our Website",
-    description: "Explore everything The Latina Sweat Project has to offer.",
+    title: {
+      en: "🌐 Visit Our Website",
+      es: "🌐 Visita Nuestro Sitio Web"
+    },
+    description: {
+      en: "Explore everything The Latina Sweat Project has to offer.",
+      es: "Explora todo lo que The Latina Sweat Project tiene para ofrecer."
+    },
     url: "https://latinasweatproject.com/",
     color: "gold",
     icon: "globe",
   },
+];
+
+// Highlight Stories Bar configuration
+const highlights = [
+  {
+    title: {
+      en: "✨ Free Classes",
+      es: "✨ Clases Gratis"
+    },
+    target: "#free-classes",
+    image: `${base}images/highlights/hl_free_classes.png`,
+    scale: "scale-[1.48]",
+    hoverScale: "group-hover:scale-[1.65]",
+    color: "amber"
+  },
+  {
+    title: {
+      en: "🎁 Sponsor CPS",
+      es: "🎁 Apoya CPS"
+    },
+    target: "#link-0",
+    image: `${base}images/highlights/hl_sponsor.png`,
+    scale: "scale-[1.38]",
+    hoverScale: "group-hover:scale-[1.55]",
+    color: "gold"
+  },
+  {
+    title: {
+      en: "📺 WGN Feature",
+      es: "📺 Canal WGN"
+    },
+    target: "#link-1",
+    image: `${base}images/highlights/hl_wgn.png`,
+    scale: "scale-[1.38]",
+    hoverScale: "group-hover:scale-[1.55]",
+    color: "wish"
+  },
+  {
+    title: {
+      en: "🧘🏽‍♀️ YTT 2025",
+      es: "🧘🏽‍♀️ YTT 2025"
+    },
+    url: "https://latinasweatproject.com/2025ytt/",
+    image: `${base}images/highlights/hl_ytt.png`,
+    scale: "scale-[1.35] -translate-y-[2px]",
+    hoverScale: "group-hover:scale-[1.5] group-hover:-translate-y-[2px]",
+    color: "wish"
+  },
+  {
+    title: {
+      en: "🧠 Therapy",
+      es: "🧠 Terapia"
+    },
+    target: "#link-5",
+    image: `${base}images/highlights/hl_therapy.png`,
+    scale: "scale-[1.38]",
+    hoverScale: "group-hover:scale-[1.55]",
+    color: "blue"
+  },
+  {
+    title: {
+      en: "📱 Download App",
+      es: "📱 Descarga App"
+    },
+    target: "#app-download",
+    image: `${base}images/highlights/hl_app.png`,
+    scale: "scale-[1.3]",
+    hoverScale: "group-hover:scale-[1.45]",
+    color: "vibrant-pink"
+  }
 ];
 
 const socials = [
@@ -100,22 +230,22 @@ const socials = [
   description="Quick links from The Latina Sweat Project: classes, events, therapy, and more."
   hideFooter={true}
 >
-  <main class="links-page min-h-screen relative overflow-hidden">
+  <main class="links-page lang-active-en min-h-screen relative overflow-hidden">
     {/* Animated gradient background */}
     <div class="links-bg absolute inset-0"></div>
 
     {/* Floating decorative shapes */}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
       <div class="links-blob links-blob-1"></div>
       <div class="links-blob links-blob-2"></div>
       <div class="links-blob links-blob-3"></div>
     </div>
 
-    {/* Content */}
-    <div class="relative z-10 mx-auto max-w-lg px-4 py-10 sm:py-14">
+    {/* Content Container */}
+    <div class="relative z-10 mx-auto max-w-lg px-4 py-8 sm:py-12">
       {/* Profile Header */}
-      <div class="text-center mb-10">
-        <div class="relative inline-block mb-5">
+      <div class="text-center mb-6">
+        <div class="relative inline-block mb-4">
           {/* Glow ring */}
           <div
             class="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] opacity-70 blur-sm animate-pulse"
@@ -132,10 +262,11 @@ const socials = [
         >
           The Latina Sweat Project
         </h1>
-        <p
-          class="mt-2 text-white/70 text-sm font-medium max-w-xs mx-auto leading-relaxed"
-        >
-          Accessible yoga, fitness & wellness in Pilsen, Chicago&nbsp;🧘🏽‍♀️✨
+        
+        {/* Profile bio (Bilingual) */}
+        <p class="mt-2 text-white/75 text-sm font-medium max-w-xs mx-auto leading-relaxed">
+          <span class="lang-en">Accessible yoga, fitness & wellness in Pilsen, Chicago&nbsp;🧘🏽‍♀️✨</span>
+          <span class="lang-es hidden">Yoga, fitness y bienestar accesible en Pilsen, Chicago&nbsp;🧘🏽‍♀️✨</span>
         </p>
 
         {/* Social icons row */}
@@ -165,13 +296,63 @@ const socials = [
         </div>
       </div>
 
+      {/* Global Bilingual Language Switcher Slider */}
+      <div class="lang-switcher-wrap mb-8 text-center" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 40ms;">
+        <div class="inline-flex items-center justify-center p-[2px] rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-md relative select-none w-[170px] h-[34px] overflow-hidden shadow-inner cursor-pointer" id="global-lang-switcher">
+          <div class="switcher-slider"></div>
+          <button class="switcher-btn w-1/2 text-[11px] font-extrabold uppercase tracking-wider relative z-10 text-white transition-colors duration-300" data-lang="en">
+            EN
+          </button>
+          <button class="switcher-btn w-1/2 text-[11px] font-extrabold uppercase tracking-wider relative z-10 text-white/50 transition-colors duration-300" data-lang="es">
+            ES
+          </button>
+        </div>
+      </div>
+
+      {/* Horizontal scrolling Highlight Stories bar */}
+      <div class="highlights-container-wrap mb-8 relative" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 70ms;">
+        <div class="flex items-start gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none px-2 snap-x select-none" id="highlights-bar">
+          {
+            highlights.map((story) => (
+              <a
+                href={story.target ? story.target : story.url}
+                target={story.url ? "_blank" : undefined}
+                rel={story.url ? "noopener noreferrer" : undefined}
+                class="story-highlight flex flex-col items-center flex-shrink-0 snap-center select-none group"
+                data-target={story.target}
+              >
+                {/* Glow story ring */}
+                <div class="relative w-[66px] h-[66px] flex items-center justify-center flex-shrink-0 rounded-full bg-gradient-to-tr from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_15px_rgba(255,189,89,0.4)] shadow-md">
+                  <div class="w-[62px] h-[62px] rounded-full bg-[#1e1e1e]/85 overflow-hidden flex items-center justify-center border border-white/10 flex-shrink-0">
+                    <img
+                      src={story.image}
+                      alt=""
+                      class:list={[
+                        "w-full h-full object-cover transition-transform duration-300",
+                        story.scale,
+                        story.hoverScale
+                      ]}
+                    />
+                  </div>
+                </div>
+                {/* Labels */}
+                <span class="text-[9px] font-extrabold text-white/55 mt-2 uppercase tracking-widest text-center max-w-[80px] leading-tight transition-colors duration-300 group-hover:text-white">
+                  <span class="lang-en">{story.title.en}</span>
+                  <span class="lang-es hidden">{story.title.es}</span>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
       {/* Free Classes · Two Locations Promo · MAIN CTA */}
-      <div class="free-hero relative mb-8" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms;">
+      <div class="free-hero relative mb-8 scroll-mt-24" id="free-classes" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;">
         {/* Outer glow ring */}
         <div class="free-hero-glow absolute -inset-2 rounded-3xl opacity-70 blur-xl pointer-events-none"></div>
 
         <div class="relative rounded-2xl p-[1.5px] bg-gradient-to-br from-[#ffbd59]/70 via-emerald-400/40 to-[#ffbd59]/70">
-          <div class="rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl px-5 py-5">
+          <div class="rounded-2xl bg-[#1a1a1a]/85 backdrop-blur-xl px-5 py-5 border border-white/5">
             {/* Header */}
             <div class="text-center">
               <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ffbd59]/20 border border-[#ffbd59]/30 px-3 py-1 mb-3">
@@ -179,14 +360,19 @@ const socials = [
                   <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ffbd59] opacity-75"></span>
                   <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#ffbd59]"></span>
                 </span>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-[#ffbd59]">Free · May & June 2026</span>
+                <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]">
+                  <span class="lang-en">Free · May & June 2026</span>
+                  <span class="lang-es hidden">Gratis · Mayo y Junio 2026</span>
+                </span>
               </div>
 
-              <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-tight">
-                Free Classes, <span class="bg-gradient-to-r from-[#ffbd59] to-emerald-400 bg-clip-text text-transparent">Two Locations</span>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-tight font-rubik">
+                <span class="lang-en">Free Classes, <span class="bg-gradient-to-r from-[#ffbd59] to-emerald-400 bg-clip-text text-transparent">Two Locations</span></span>
+                <span class="lang-es hidden">Clases Gratis, <span class="bg-gradient-to-r from-[#ffbd59] to-emerald-400 bg-clip-text text-transparent">Dos Ubicaciones</span></span>
               </h3>
-              <p class="mt-1.5 text-[11px] text-white/55 font-medium">
-                Clases gratis · No membership · Two ways to register
+              <p class="mt-1.5 text-[10px] text-white/55 font-semibold tracking-wide uppercase">
+                <span class="lang-en">Free classes · No membership · Two ways to register</span>
+                <span class="lang-es hidden">Clases gratis · Sin membresía · Dos formas de registrarse</span>
               </p>
             </div>
 
@@ -213,7 +399,10 @@ const socials = [
 
                 <div class="space-y-1.5">
                   <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]/70 w-6 flex-shrink-0">May</span>
+                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]/70 w-6 flex-shrink-0">
+                      <span class="lang-en">May</span>
+                      <span class="lang-es hidden">Mayo</span>
+                    </span>
                     <div class="grid grid-cols-8 gap-1 flex-1">
                       <span class="free-pill free-pill--wide col-span-2" data-free-date="2026-05-01" data-free-loc="pilsen"><em>Fri</em>1</span>
                       <span class="free-pill free-pill--wide col-span-2" data-free-date="2026-05-09" data-free-loc="pilsen"><em>Sat</em>9</span>
@@ -222,7 +411,10 @@ const socials = [
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]/70 w-6 flex-shrink-0">Jun</span>
+                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]/70 w-6 flex-shrink-0">
+                      <span class="lang-en">Jun</span>
+                      <span class="lang-es hidden">Jun</span>
+                    </span>
                     <div class="grid grid-cols-8 gap-1 flex-1">
                       <span class="free-pill free-pill--wide col-span-2" data-free-date="2026-06-02" data-free-loc="pilsen"><em>Tue</em>2</span>
                       <span class="free-pill free-pill--wide col-span-2" data-free-date="2026-06-10" data-free-loc="pilsen"><em>Wed</em>10</span>
@@ -233,7 +425,8 @@ const socials = [
                 </div>
 
                 <p class="mt-2.5 text-[9px] font-bold uppercase tracking-widest text-[#ffbd59]/80 text-center">
-                  Book in LSP app or schedule page →
+                  <span class="lang-en">Book in LSP app or schedule page →</span>
+                  <span class="lang-es hidden">Reserva en la app de LSP o en la web →</span>
                 </p>
               </a>
 
@@ -262,28 +455,34 @@ const socials = [
                 <div class="rounded-lg bg-emerald-500/[0.08] border border-emerald-400/15 px-3 py-2.5 mb-3">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">Saturday</p>
+                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">
+                        <span class="lang-en">Saturday</span>
+                        <span class="lang-es hidden">Sábado</span>
+                      </p>
                       <div class="space-y-1.5">
                         <div>
-                          <p class="text-[12px] font-bold text-white tabular-nums">8:00 AM</p>
-                          <p class="text-[10px] text-white/55 font-medium">Andrea Fuentes</p>
+                          <p class="text-[11px] font-bold text-white tabular-nums">8:00 AM</p>
+                          <p class="text-[9px] text-white/55 font-medium leading-none mt-0.5">Andrea Fuentes</p>
                         </div>
                         <div>
-                          <p class="text-[12px] font-bold text-white tabular-nums">9:15 AM</p>
-                          <p class="text-[10px] text-white/55 font-medium">Melissa Salinas</p>
+                          <p class="text-[11px] font-bold text-white tabular-nums">9:15 AM</p>
+                          <p class="text-[9px] text-white/55 font-medium leading-none mt-0.5">Melissa Salinas</p>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">Sunday</p>
+                      <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/80 mb-1.5">
+                        <span class="lang-en">Sunday</span>
+                        <span class="lang-es hidden">Domingo</span>
+                      </p>
                       <div class="space-y-1.5">
                         <div>
-                          <p class="text-[12px] font-bold text-white tabular-nums">9:15 AM</p>
-                          <p class="text-[10px] text-white/55 font-medium">Lizsandra Heredia</p>
+                          <p class="text-[11px] font-bold text-white tabular-nums">9:15 AM</p>
+                          <p class="text-[9px] text-white/55 font-medium leading-none mt-0.5">Lizsandra Heredia</p>
                         </div>
                         <div>
-                          <p class="text-[12px] font-bold text-white tabular-nums">10:30 AM</p>
-                          <p class="text-[10px] text-white/55 font-medium">Arturo Zurita</p>
+                          <p class="text-[11px] font-bold text-white tabular-nums">10:30 AM</p>
+                          <p class="text-[9px] text-white/55 font-medium leading-none mt-0.5">Arturo Zurita</p>
                         </div>
                       </div>
                     </div>
@@ -291,7 +490,10 @@ const socials = [
                 </div>
 
                 <div class="space-y-2">
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70">May</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/75">
+                    <span class="lang-en">May</span>
+                    <span class="lang-es hidden">Mayo</span>
+                  </p>
                   <div class="grid grid-cols-4 gap-1">
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-09" data-free-loc="boty"><em>Sat</em>9</span>
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-10" data-free-loc="boty"><em>Sun</em>10</span>
@@ -302,7 +504,10 @@ const socials = [
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-30" data-free-loc="boty"><em>Sat</em>30</span>
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-05-31" data-free-loc="boty"><em>Sun</em>31</span>
                   </div>
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/70 pt-1">Jun</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300/75 pt-1">
+                    <span class="lang-en">Jun</span>
+                    <span class="lang-es hidden">Jun</span>
+                  </p>
                   <div class="grid grid-cols-4 gap-1">
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-06" data-free-loc="boty"><em>Sat</em>6</span>
                     <span class="free-pill free-pill--wide free-pill--emerald" data-free-date="2026-06-07" data-free-loc="boty"><em>Sun</em>7</span>
@@ -316,7 +521,8 @@ const socials = [
                 </div>
 
                 <p class="mt-2.5 text-[9px] font-bold uppercase tracking-widest text-emerald-300/90 text-center">
-                  Register on Zeffy ↗
+                  <span class="lang-en">Register on Zeffy ↗</span>
+                  <span class="lang-es hidden">Regístrate en Zeffy ↗</span>
                 </p>
               </a>
             </div>
@@ -324,14 +530,17 @@ const socials = [
         </div>
       </div>
 
-      {/* More from LSP */}
-      <div class="flex items-center gap-3 mb-4" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 200ms;">
+      {/* More from LSP Section Divider */}
+      <div class="flex items-center gap-3 mb-6" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 130ms;">
         <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/15"></div>
-        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">More from LSP</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-[0.2em] text-white/45">
+          <span class="lang-en">More from LSP</span>
+          <span class="lang-es hidden">Más de LSP</span>
+        </span>
         <div class="h-px flex-1 bg-gradient-to-l from-transparent to-white/15"></div>
       </div>
 
-      {/* Links */}
+      {/* Main Links Grid */}
       <div class="flex flex-col gap-4">
         {
           links.map((link, index) => (
@@ -340,26 +549,27 @@ const socials = [
               target="_blank"
               rel="noopener noreferrer"
               class:list={[
-                "link-card group relative block rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5",
+                "link-card group relative block rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 scroll-mt-24 active:scale-[0.98]",
                 link.featured ? "link-card-featured" : "link-card-default",
+                `link-card--${link.color}`
               ]}
-              style={`animation-delay: ${index * 80}ms`}
+              style={`animation-delay: ${150 + index * 60}ms`}
               id={`link-${index}`}
             >
-              {/* Gradient border via background on the outer, inner has the solid bg */}
+              {/* Card Container */}
               <div
                 class:list={[
                   "relative rounded-2xl px-5 py-4 backdrop-blur-xl transition-all duration-300",
                   link.featured
                     ? "bg-white/[0.12] group-hover:bg-white/[0.18]"
-                    : "bg-white/[0.08] group-hover:bg-white/[0.14]",
+                    : "bg-white/[0.07] group-hover:bg-white/[0.13]",
                 ]}
               >
-                {/* Badge */}
+                {/* Custom Badge */}
                 {link.badge && (
                   <span
                     class:list={[
-                      "absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-lg",
+                      "absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[9px] font-extrabold uppercase tracking-widest shadow-lg border border-white/5",
                       link.color === "teal" && "bg-teal-400 text-teal-950",
                       link.color === "blue" && "bg-blue-400 text-blue-950",
                       link.color === "sky" && "bg-sky-400 text-sky-950",
@@ -367,20 +577,21 @@ const socials = [
                       link.color === "green" && "bg-emerald-400 text-emerald-950",
                       link.color === "indigo" && "bg-indigo-400 text-indigo-950",
                       link.color === "amber" && "bg-[#ffbd59] text-[#1E1E1E]",
-                      link.color === "vibrant-pink" &&
-                        "bg-[#b5a18d] text-white",
+                      link.color === "vibrant-pink" && "bg-[#b5a18d] text-white",
+                      link.color === "gold" && "bg-[#ffbd59] text-[#1E1E1E]",
                     ]}
                   >
                     <span class="relative flex h-1.5 w-1.5">
                       <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
                       <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-current" />
                     </span>
-                    {link.badge}
+                    <span class="lang-en">{link.badge.en}</span>
+                    <span class="lang-es hidden">{link.badge.es}</span>
                   </span>
                 )}
 
                 <div class="flex items-start gap-4">
-                  {/* Icon */}
+                  {/* Icon Wrapper */}
                   <div
                     class:list={[
                       "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
@@ -405,128 +616,61 @@ const socials = [
                     ]}
                   >
                     {link.icon === "calendar" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="2"
-                          ry="2"
-                        />
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                         <line x1="16" y1="2" x2="16" y2="6" />
                         <line x1="8" y1="2" x2="8" y2="6" />
                         <line x1="3" y1="10" x2="21" y2="10" />
                       </svg>
                     )}
                     {link.icon === "heart" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                       </svg>
                     )}
                     {link.icon === "mind" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
                         <line x1="9" y1="21" x2="15" y2="21" />
                         <line x1="10" y1="24" x2="14" y2="24" />
                       </svg>
                     )}
                     {link.icon === "globe" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="2" y1="12" x2="22" y2="12" />
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                       </svg>
                     )}
                     {link.icon === "star" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.561 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                       </svg>
                     )}
                     {link.icon === "health" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                       </svg>
                     )}
                     {link.icon === "leaf" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4.97 0 9 4.03 9 9-4.97 0-9-4.03-9-9zM3 21c0-4.97 4.03-9 9-9" />
                       </svg>
                     )}
                     {link.icon === "yoga" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.75"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
                       </svg>
                     )}
                     {link.icon === "grad" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.75"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
                       </svg>
                     )}
                     {link.icon === "tv" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="5" width="20" height="13" rx="2" ry="2" />
                         <line x1="8" y1="21" x2="16" y2="21" stroke-linecap="round" />
                         <line x1="12" y1="18" x2="12" y2="21" stroke-linecap="round" />
@@ -534,29 +678,25 @@ const socials = [
                       </svg>
                     )}
                     {link.icon === "panel" && (
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
+                      <svg class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
                       </svg>
                     )}
                   </div>
 
-                  {/* Text */}
+                  {/* Bilingual Text Content */}
                   <div class="flex-1 min-w-0">
-                    <h2 class="text-base font-bold text-white group-hover:text-[#ffbd59] transition-colors duration-300 leading-snug">
-                      {link.title}
+                    <h2 class="text-base font-extrabold text-white group-hover:text-[#ffbd59] transition-colors duration-300 leading-snug">
+                      <span class="lang-en">{link.title.en}</span>
+                      <span class="lang-es hidden">{link.title.es}</span>
                     </h2>
                     <p class="mt-1 text-[13px] text-white/55 leading-relaxed group-hover:text-white/70 transition-colors duration-300 line-clamp-3">
-                      {link.description}
+                      <span class="lang-en">{link.description.en}</span>
+                      <span class="lang-es hidden">{link.description.es}</span>
                     </p>
                   </div>
 
-                  {/* Arrow */}
+                  {/* Chevron Arrow */}
                   <div class="flex-shrink-0 mt-1 text-white/30 group-hover:text-[#ffbd59] transition-all duration-300 group-hover:translate-x-1">
                     <svg
                       class="w-5 h-5"
@@ -579,13 +719,14 @@ const socials = [
         }
       </div>
 
-      {/* Newsletter signup */}
-      <div class="newsletter-section mt-10" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 350ms;">
+      {/* Newsletter Signup (Embeds Zeffy form) */}
+      <div class="newsletter-section mt-10 scroll-mt-24" id="newsletter" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 300ms;">
         <div class="relative rounded-2xl p-[1px] bg-gradient-to-br from-[#b5a18d]/40 via-[#ffbd59]/30 to-[#b5a18d]/40">
-          <div class="rounded-2xl bg-[#1e1e1e] px-4 py-5">
+          <div class="rounded-2xl bg-[#1e1e1e]/90 backdrop-blur-md px-4 py-5 border border-white/5 shadow-xl">
             <div class="text-center mb-4">
-              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffbd59]/80">
-                Stay in the Loop
+              <p class="text-[9px] font-extrabold uppercase tracking-[0.25em] text-[#ffbd59]">
+                <span class="lang-en">Stay in the Loop</span>
+                <span class="lang-es hidden">Mantente al Día</span>
               </p>
             </div>
             <div class="newsletter-frame relative w-full overflow-hidden">
@@ -601,13 +742,14 @@ const socials = [
         </div>
       </div>
 
-      {/* App Download Section */}
-      <div class="app-section mt-10 text-center" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 400ms;">
+      {/* App Download Center (Bilingual) */}
+      <div class="app-section mt-10 text-center scroll-mt-24" id="app-download" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 350ms;">
         {/* Gradient divider */}
         <div class="mx-auto mb-6 h-px w-2/3 bg-gradient-to-r from-transparent via-[#b5a18d]/40 to-transparent"></div>
 
-        <p class="app-section-label text-xs font-semibold uppercase tracking-[0.2em] mb-5">
-          Download the LSP Studio App
+        <p class="app-section-label text-[11px] font-extrabold uppercase tracking-[0.2em] mb-5">
+          <span class="lang-en">Download the LSP Studio App</span>
+          <span class="lang-es hidden">Descarga la App de LSP Studio</span>
         </p>
 
         <div class="flex items-center justify-center gap-3">
@@ -623,7 +765,10 @@ const socials = [
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
             </svg>
             <div class="text-left">
-              <div class="text-[9px] font-medium text-white/45 uppercase tracking-wider leading-none">Download on the</div>
+              <div class="text-[9px] font-medium text-white/45 uppercase tracking-wider leading-none">
+                <span class="lang-en">Download on the</span>
+                <span class="lang-es hidden">Disponible en</span>
+              </div>
               <div class="text-sm font-bold text-white leading-tight mt-0.5">App Store</div>
             </div>
           </a>
@@ -640,15 +785,18 @@ const socials = [
               <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 13l2.302-2.492zM5.864 2.658L16.8 9.49l-2.302 2.302-8.635-8.635z"/>
             </svg>
             <div class="text-left">
-              <div class="text-[9px] font-medium text-white/45 uppercase tracking-wider leading-none">Get it on</div>
+              <div class="text-[9px] font-medium text-white/45 uppercase tracking-wider leading-none">
+                <span class="lang-en">Get it on</span>
+                <span class="lang-es hidden">Consíguelo en</span>
+              </div>
               <div class="text-sm font-bold text-white leading-tight mt-0.5">Google Play</div>
             </div>
           </a>
         </div>
       </div>
 
-      {/* Footer branding */}
-      <div class="mt-12 text-center">
+      {/* Footer Branding */}
+      <div class="mt-12 text-center" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 420ms;">
         <div
           class="inline-flex items-center gap-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-2"
         >
@@ -657,8 +805,9 @@ const socials = [
             The Latina Sweat Project · Pilsen, Chicago
           </span>
         </div>
-        <p class="mt-4 text-[11px] text-white/25">
-          Made with 💛 for our community
+        <p class="mt-4 text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+          <span class="lang-en">Made with 💛 for our community</span>
+          <span class="lang-es hidden">Hecho con 💛 para nuestra comunidad</span>
         </p>
       </div>
     </div>
@@ -666,38 +815,26 @@ const socials = [
 </Layout>
 
 <style>
-  /* Animated gradient background */
+  /* Animated rotating gradient background */
   .links-bg {
     background: linear-gradient(
       135deg,
       #1e1e1e 0%,
-      #2a1f1a 20%,
-      #1e1e1e 40%,
-      #1a2025 60%,
-      #1e1e1e 80%,
-      #2a1f1a 100%
+      #271c15 25%,
+      #1e1e1e 50%,
+      #121d25 75%,
+      #1e1e1e 100%
     );
-    background-size: 300% 300%;
-    animation: links-gradient-shift 12s ease infinite;
+    background-size: 400% 400%;
+    animation: links-gradient-shift 15s ease infinite;
   }
 
   @keyframes links-gradient-shift {
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-    25% {
-      background-position: 50% 0%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    75% {
-      background-position: 50% 100%;
-    }
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
-  /* Floating blobs */
+  /* Floating background blobs */
   .links-blob {
     position: absolute;
     border-radius: 50%;
@@ -718,7 +855,7 @@ const socials = [
     width: 250px;
     height: 250px;
     background: #ffbd59;
-    bottom: 10%;
+    bottom: 15%;
     left: -60px;
     animation: links-float-2 10s ease-in-out infinite;
   }
@@ -726,49 +863,34 @@ const socials = [
   .links-blob-3 {
     width: 200px;
     height: 200px;
-    background: #5eead4;
-    top: 40%;
+    background: #34d399;
+    top: 45%;
     right: -40px;
     animation: links-float-3 7s ease-in-out infinite;
   }
 
   @keyframes links-float-1 {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(-30px, 40px) scale(1.1);
-    }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-30px, 45px) scale(1.1); }
   }
   @keyframes links-float-2 {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(40px, -30px) scale(1.15);
-    }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.15); }
   }
   @keyframes links-float-3 {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(-20px, -50px) scale(1.05);
-    }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-20px, -45px) scale(1.05); }
   }
 
-  /* Link card animations */
+  /* Link Card slide-up animation */
   .link-card {
-    animation: links-slide-up 0.5s ease backwards;
+    animation: links-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
   @keyframes links-slide-up {
     from {
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
@@ -776,57 +898,130 @@ const socials = [
     }
   }
 
-  /* Featured card glow border */
+  /* Highlights Bar customization */
+  #highlights-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Liquid Glass sliding switcher */
+  .switcher-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    height: calc(100% - 4px);
+    background: linear-gradient(135deg, var(--color-vibrant-pink) 0%, var(--color-accent-gold) 100%);
+    border-radius: 9999px;
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 0;
+    box-shadow: 0 2px 10px rgba(255, 189, 89, 0.3);
+  }
+  
+  .lang-active-es .switcher-slider {
+    transform: translateX(100%);
+  }
+
+  /* Bilingual dynamic toggle styles */
+  .lang-active-en .lang-en { display: inline-block; }
+  .lang-active-en .lang-es { display: none !important; }
+  .lang-active-es .lang-en { display: none !important; }
+  .lang-active-es .lang-es { display: inline-block; }
+
+  .lang-active-en div.lang-en,
+  .lang-active-en p.lang-en,
+  .lang-active-en span.lang-en {
+    display: block;
+  }
+  
+  .lang-active-es div.lang-es,
+  .lang-active-es p.lang-es,
+  .lang-active-es span.lang-es {
+    display: block;
+  }
+
+  /* Targeted flash pulse effect (Triggered when scrolled from highlights) */
+  .targeted-glow {
+    animation: target-flash-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  }
+
+  @keyframes target-flash-pulse {
+    0% {
+      transform: scale(1.04);
+      box-shadow: 0 0 40px 15px rgba(255, 189, 89, 0.65);
+      border-color: rgba(255, 189, 89, 0.85);
+    }
+    40% {
+      transform: scale(1.02);
+      box-shadow: 0 0 25px 8px rgba(181, 161, 141, 0.45);
+      border-color: rgba(181, 161, 141, 0.6);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: none;
+    }
+  }
+
+  /* Custom themed borders and glows on hover */
   .link-card-featured {
     background: linear-gradient(
       135deg,
-      rgba(181, 161, 141, 0.4),
-      rgba(255, 189, 89, 0.2),
-      rgba(181, 161, 141, 0.4)
+      rgba(181, 161, 141, 0.3),
+      rgba(255, 189, 89, 0.15),
+      rgba(181, 161, 141, 0.3)
     );
-    box-shadow: 0 0 0 0 transparent;
   }
-  .link-card-featured:hover {
-    background: linear-gradient(
-      135deg,
-      rgba(181, 161, 141, 0.6),
-      rgba(255, 189, 89, 0.4),
-      rgba(181, 161, 141, 0.6)
-    );
-    box-shadow: 0 8px 32px -8px rgba(181, 161, 141, 0.25);
-  }
-
-  /* Default card border */
+  
   .link-card-default {
     background: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0.03)
+      rgba(255, 255, 255, 0.02)
     );
   }
-  .link-card-default:hover {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.15),
-      rgba(255, 255, 255, 0.06)
-    );
-    box-shadow: 0 8px 32px -8px rgba(255, 255, 255, 0.1);
+
+  .link-card:hover {
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
-  /* Line clamp utility (fallback for browsers that might not support Tailwind's) */
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  /* Color Specific Glow styles */
+  .link-card--amber:hover {
+    box-shadow: 0 10px 30px -8px rgba(255, 189, 89, 0.4);
+    border-color: rgba(255, 189, 89, 0.4);
+  }
+  .link-card--gold:hover {
+    box-shadow: 0 10px 30px -8px rgba(255, 189, 89, 0.4);
+    border-color: rgba(255, 189, 89, 0.4);
+  }
+  .link-card--teal:hover {
+    box-shadow: 0 10px 30px -8px rgba(20, 184, 166, 0.4);
+    border-color: rgba(20, 184, 166, 0.4);
+  }
+  .link-card--blue:hover {
+    box-shadow: 0 10px 30px -8px rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+  .link-card--sky:hover {
+    box-shadow: 0 10px 30px -8px rgba(56, 189, 248, 0.4);
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+  .link-card--wish:hover {
+    box-shadow: 0 10px 30px -8px rgba(244, 63, 94, 0.4);
+    border-color: rgba(244, 63, 94, 0.4);
+  }
+  .link-card--green:hover {
+    box-shadow: 0 10px 30px -8px rgba(16, 185, 129, 0.4);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  .link-card--vibrant-pink:hover {
+    box-shadow: 0 10px 30px -8px rgba(181, 161, 141, 0.4);
+    border-color: rgba(181, 161, 141, 0.4);
   }
 
-  /* Profile image border fix */
-  .border-3 {
-    border-width: 3px;
-  }
-
-  /* App section styling */
+  /* Shimmer text effect on App download label */
   .app-section-label {
     background: linear-gradient(135deg, #b5a18d 0%, #ffbd59 50%, #b5a18d 100%);
     background-size: 200% auto;
@@ -841,13 +1036,13 @@ const socials = [
     50% { background-position: 200% center; }
   }
 
-  /* App badge — glass card with animated gradient border */
+  /* Apple App & Android Store cards styling */
   .app-badge {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 2px 12px -4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.3);
   }
 
   .app-badge::before {
@@ -858,10 +1053,10 @@ const socials = [
     padding: 1px;
     background: linear-gradient(
       135deg,
-      rgba(181, 161, 141, 0.0) 0%,
-      rgba(181, 161, 141, 0.3) 40%,
-      rgba(255, 189, 89, 0.35) 60%,
-      rgba(181, 161, 141, 0.0) 100%
+      rgba(181, 161, 141, 0) 0%,
+      rgba(181, 161, 141, 0.25) 40%,
+      rgba(255, 189, 89, 0.3) 60%,
+      rgba(181, 161, 141, 0) 100%
     );
     background-size: 300% 300%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -879,7 +1074,7 @@ const socials = [
 
   .app-badge:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
     box-shadow:
       0 8px 24px -6px rgba(181, 161, 141, 0.2),
       0 0 20px -8px rgba(255, 189, 89, 0.15);
@@ -890,23 +1085,23 @@ const socials = [
     50% { background-position: 100% 100%; }
   }
 
-  /* Free Classes hero · main CTA glow */
+  /* Free Classes banner glow pulse */
   .free-hero-glow {
     background: radial-gradient(
       ellipse at center,
-      rgba(255, 189, 89, 0.35) 0%,
-      rgba(52, 211, 153, 0.18) 45%,
+      rgba(255, 189, 89, 0.32) 0%,
+      rgba(52, 211, 153, 0.15) 45%,
       transparent 75%
     );
     animation: free-hero-pulse 4s ease-in-out infinite;
   }
 
   @keyframes free-hero-pulse {
-    0%, 100% { opacity: 0.55; transform: scale(1); }
-    50% { opacity: 0.85; transform: scale(1.03); }
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
   }
 
-  /* Free-class date pills */
+  /* Booking pills styling */
   .free-pill {
     display: flex;
     align-items: center;
@@ -914,8 +1109,8 @@ const socials = [
     height: 30px;
     padding: 0 6px;
     border-radius: 7px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 189, 89, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 189, 89, 0.25);
     color: #fff;
     font-size: 13px;
     font-weight: 700;
@@ -923,14 +1118,16 @@ const socials = [
     letter-spacing: 0.02em;
     transition: all 0.25s ease;
   }
+  
   .free-pill--emerald {
-    border-color: rgba(52, 211, 153, 0.3);
+    border-color: rgba(52, 211, 153, 0.25);
   }
-  /* Wide variant: shows day-of-week + date */
+  
   .free-pill--wide {
     gap: 5px;
     padding: 0 8px;
   }
+  
   .free-pill--wide em {
     font-size: 10px;
     font-style: normal;
@@ -940,15 +1137,19 @@ const socials = [
     color: rgba(255, 189, 89, 0.85);
     line-height: 1;
   }
+  
   .free-pill--wide[data-free-next="true"] em {
-    color: rgba(30, 30, 30, 0.7);
+    color: rgba(30, 30, 30, 0.75);
   }
+  
   .free-pill--wide.free-pill--emerald em {
     color: rgba(110, 231, 183, 0.85);
   }
+  
   .free-pill--wide.free-pill--emerald[data-free-next="true"] em {
-    color: rgba(6, 78, 59, 0.7);
+    color: rgba(6, 78, 59, 0.75);
   }
+  
   .free-pill[data-free-next="true"] {
     background: linear-gradient(135deg, #ffbd59, #ffd28a);
     border-color: #ffbd59;
@@ -958,12 +1159,14 @@ const socials = [
     transform: none;
     position: relative;
   }
+  
   .free-pill--emerald[data-free-next="true"] {
     background: linear-gradient(135deg, #34d399, #6ee7b7);
     border-color: #34d399;
     color: #064e3b;
     animation: free-pulse-emerald 2s ease-in-out infinite;
   }
+  
   .free-pill[data-free-next="true"]::after {
     content: 'NEXT';
     position: absolute;
@@ -985,23 +1188,39 @@ const socials = [
     0%, 100% { box-shadow: 0 0 0 0 rgba(255, 189, 89, 0.5); }
     50% { box-shadow: 0 0 0 6px rgba(255, 189, 89, 0); }
   }
+  
   @keyframes free-pulse-emerald {
     0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
     50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
   }
 
-  /* Newsletter iframe sizing */
+  /* Newsletter embed container */
   .newsletter-frame {
-    height: 260px;
+    height: 195px;
   }
+  
   @media (min-width: 640px) {
     .newsletter-frame {
-      height: 240px;
+      height: 195px;
     }
+  }
+
+  /* Profile logo border custom width helper */
+  .border-3 {
+    border-width: 3px;
+  }
+
+  /* Line clamp fallback */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>
 
 <script>
+  // 1. DYNAMIC NEXT FREE CLASS SCRIPT
   (function () {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1023,6 +1242,84 @@ const socials = [
       pills.sort((a, b) => (a.dataset.freeDate || '').localeCompare(b.dataset.freeDate || ''));
       const next = pills.find((p) => (p.dataset.freeDate || '') >= todayStr);
       if (next) next.dataset.freeNext = 'true';
+    });
+  })();
+
+  // 2. INTERACTIVE GLOBAL BILINGUAL LANGUAGE SWITCHER
+  (function () {
+    const switcher = document.getElementById("global-lang-switcher");
+    const mainPage = document.querySelector(".links-page");
+    if (!switcher || !mainPage) return;
+
+    const btns = switcher.querySelectorAll<HTMLButtonElement>(".switcher-btn");
+
+    function setLanguage(lang: "en" | "es") {
+      if (lang === "en") {
+        mainPage!.classList.remove("lang-active-es");
+        mainPage!.classList.add("lang-active-en");
+        btns[0].classList.remove("text-white/50");
+        btns[0].classList.add("text-white");
+        btns[1].classList.remove("text-white");
+        btns[1].classList.add("text-white/50");
+      } else {
+        mainPage!.classList.remove("lang-active-en");
+        mainPage!.classList.add("lang-active-es");
+        btns[0].classList.remove("text-white");
+        btns[0].classList.add("text-white/50");
+        btns[1].classList.remove("text-white/50");
+        btns[1].classList.add("text-white");
+      }
+      localStorage.setItem("lsp-links-language", lang);
+    }
+
+    // Tapping track triggers swap
+    switcher.addEventListener("click", () => {
+      const current = mainPage.classList.contains("lang-active-es") ? "es" : "en";
+      setLanguage(current === "en" ? "es" : "en");
+    });
+
+    // Individual button click prevention override
+    btns.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Prevent duplicate toggle on switcher wrapper
+        const targetLang = btn.dataset.lang as "en" | "es";
+        if (targetLang) setLanguage(targetLang);
+      });
+    });
+
+    // Read stored language or default
+    const saved = localStorage.getItem("lsp-links-language");
+    if (saved === "es" || saved === "en") {
+      setLanguage(saved);
+    } else {
+      setLanguage("en"); // Default
+    }
+  })();
+
+  // 3. STORY HIGHLIGHT SMOOTH SCROLLING & ACTIVE CARD FLASH PULSE
+  (function () {
+    const highlights = document.querySelectorAll(".story-highlight");
+    highlights.forEach((story) => {
+      story.addEventListener("click", function (this: HTMLAnchorElement, e) {
+        const targetSelector = this.getAttribute("data-target");
+        if (!targetSelector || !targetSelector.startsWith("#")) return;
+
+        // If target is valid, intercept scroll
+        e.preventDefault();
+        const targetElement = document.querySelector(targetSelector) as HTMLElement;
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          // Add flash animation glow
+          targetElement.classList.add("targeted-glow");
+          setTimeout(() => {
+            targetElement.classList.remove("targeted-glow");
+          }, 2200);
+        }
+      });
     });
   })();
 </script>
