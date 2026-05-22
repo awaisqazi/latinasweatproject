@@ -429,45 +429,78 @@ const boards = [
             </h3>
           </div>
           <div
-            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-col gap-8"
             data-board="advancement-partnerships"
           >
-            <BoardMemberCard
-              name="Margarita Quiñones-Peña"
-              role="Chair"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
-            <BoardMemberCard
-              name="Dinorah Zubieta"
-              role="Co-Chair"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
-            <BoardMemberCard
-              name="Vacant"
-              role="Gala Chair"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
-            <BoardMemberCard
-              name="Vanessa Tirado"
-              role="Co-Chair (Gala)"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
-            <BoardMemberCard
-              name="Diana Tate"
-              role="Chair (Marathon)"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
-            <BoardMemberCard
-              name="Edy Ramirez"
-              role="Co-Chair (Marathon)"
-              boardId="advancement-partnerships"
-              isLeadership={true}
-            />
+            {/* General Committee */}
+            <div class="flex flex-col items-center gap-4 w-full">
+              <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                <span class="text-sm">🤝</span>
+                <span class="font-sans text-xs font-bold tracking-widest text-white/80 uppercase">General Committee</span>
+              </div>
+              <div class="flex flex-wrap justify-center gap-6 w-full">
+                <BoardMemberCard
+                  name="Margarita Quiñones-Peña"
+                  role="Chair"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+                <BoardMemberCard
+                  name="Dinorah Zubieta"
+                  role="Co-Chair"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+              </div>
+            </div>
+
+            <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-1/3 mx-auto my-2"></div>
+
+            {/* Gala Sub-Committee */}
+            <div class="flex flex-col items-center gap-4 w-full">
+              <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                <span class="text-sm">✨</span>
+                <span class="font-sans text-xs font-bold tracking-widest text-white/80 uppercase">Gala Sub-Committee</span>
+              </div>
+              <div class="flex flex-wrap justify-center gap-6 w-full">
+                <BoardMemberCard
+                  name="Vacant"
+                  role="Gala Chair"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+                <BoardMemberCard
+                  name="Vanessa Tirado"
+                  role="Co-Chair (Gala)"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+              </div>
+            </div>
+
+            <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-1/3 mx-auto my-2"></div>
+
+            {/* Marathon Sub-Committee */}
+            <div class="flex flex-col items-center gap-4 w-full">
+              <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                <span class="text-sm">🏃‍♀️</span>
+                <span class="font-sans text-xs font-bold tracking-widest text-white/80 uppercase">Marathon Sub-Committee</span>
+              </div>
+              <div class="flex flex-wrap justify-center gap-6 w-full">
+                <BoardMemberCard
+                  name="Diana Tate"
+                  role="Chair (Marathon)"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+                <BoardMemberCard
+                  name="Edy Ramirez"
+                  role="Co-Chair (Marathon)"
+                  boardId="advancement-partnerships"
+                  isLeadership={true}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Brand & Visibility Board */}
