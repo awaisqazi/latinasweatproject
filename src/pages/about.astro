@@ -242,30 +242,32 @@ const boards = [
               Board of Directors
             </h3>
           </div>
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Margarita.jpg`}
-            name="Margarita Quiñones Peña"
-            title="Executive Director"
-            story={`<p>Margarita Quiñones Peña is a proud first-generation Mexican-American, born in Durango, Mexico and raised in Chicago, IL. She is the founder of the Latina Sweat Project and a passionate advocate for immigrant rights, mental health access, and wellness equity.</p><p>Her personal journey as an immigrant and DACA recipient inspired her to create a space where BIPOC women and underserved communities could heal, move, and thrive without barriers.</p><p>Margarita is a 500 E-RYT certified yoga instructor through Yoga Alliance and has been teaching yoga for over a decade. Through her leadership, Latina Sweat Project has grown into a grassroots movement serving over 5,000 students monthly across Chicago.</p><p>Margarita continues to lead large-scale community events, drive funding for free teacher training programs, and advocate for inclusive, trauma-informed spaces that reflect the strength of the people they serve.</p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Brenda.jpeg`}
-            name="Brenda Maldonado"
-            title="Director"
-            story={`<p></p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Vanessa.jpg`}
-            name="Vanessa Tirado"
-            title="Director"
-            story={`<p>Vanessa Tirado is a proud Mexican-American from Chicago's Little Village neighborhood, where she continues to live and serve her community. She holds a Master of Social Work from the University of Illinois at Chicago and is a licensed school social worker with over a decade of experience supporting youth and families citywide. Vanessa is also a registered yoga instructor with additional certifications in Yoga Sculpt and Power Yoga, blending her mental health background with inclusive wellness practices.</p><p>Vanessa's work is rooted in cultural humility, trauma-informed care, and social justice. Through her leadership at the Latina Sweat Project, she has helped lead over 100 community events, distribute yoga mats and essential supplies, and contribute to more than $27,000 in mutual aid and nonprofit support.</p><p>Vanessa continues to advocate for healing spaces that are accessible, affirming, and reflective of the communities they serve.</p>`}
-          />
-          <TeamMemberCard
-            imageSrc={`${base}images/directors/Veronica.jpg`}
-            name="Veronica Quiñones"
-            title="Director"
-            story={`<p>Veronica is a proud Mexican-American born and raised in Chicago's Little Village neighborhood. As the daughter of immigrants and a lifelong resident of an underserved community, she has witnessed firsthand the impact of racial and economic disparities. These lived experiences led her to earn a Bachelor's degree in Sociology from the University of Illinois at Chicago, with a focus on social equity and community well-being.</p><p>As Vice President of the Latina Sweat Project, Veronica plays a key role in creating a safe, welcoming, and accessible space for underrepresented communities. Her yoga journey began through community-based classes, which ultimately inspired her to become a certified yoga instructor. Motivated by the lack of cultural representation in traditional wellness spaces, she is committed to offering inclusive, trauma-informed, and culturally rooted yoga experiences.</p><p>Through her work, Veronica continues to advocate for equity in wellness and create healing spaces that uplift the spirit, identity, and resilience of her community.</p>`}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="board-of-directors"
+          >
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Margarita.jpg`}
+              name="Margarita Quiñones Peña"
+              title="Executive Director"
+              imgPosition="object-top"
+              story={`<p>Margarita Quiñones Peña is a proud first-generation Mexican-American, born in Durango, Mexico and raised in Chicago, IL. She is the founder of the Latina Sweat Project and a passionate advocate for immigrant rights, mental health access, and wellness equity.</p><p>Her personal journey as an immigrant and DACA recipient inspired her to create a space where BIPOC women and underserved communities could heal, move, and thrive without barriers.</p><p>Margarita is a 500 E-RYT certified yoga instructor through Yoga Alliance and has been teaching yoga for over a decade. Through her leadership, Latina Sweat Project has grown into a grassroots movement serving over 5,000 students monthly across Chicago.</p><p>Margarita continues to lead large-scale community events, drive funding for free teacher training programs, and advocate for inclusive, trauma-informed spaces that reflect the strength of the people they serve.</p>`}
+            />
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Vanessa.jpg`}
+              name="Vanessa Tirado"
+              title="Director"
+              imgPosition="object-top"
+              story={`<p>Vanessa Tirado is a proud Mexican-American from Chicago's Little Village neighborhood, where she continues to live and serve her community. She holds a Master of Social Work from the University of Illinois at Chicago and is a licensed school social worker with over a decade of experience supporting youth and families citywide. Vanessa is also a registered yoga instructor with additional certifications in Yoga Sculpt and Power Yoga, blending her mental health background with inclusive wellness practices.</p><p>Vanessa's work is rooted in cultural humility, trauma-informed care, and social justice. Through her leadership at the Latina Sweat Project, she has helped lead over 100 community events, distribute yoga mats and essential supplies, and contribute to more than $27,000 in mutual aid and nonprofit support.</p><p>Vanessa continues to advocate for healing spaces that are accessible, affirming, and reflective of the communities they serve.</p>`}
+            />
+            <TeamMemberCard
+              imageSrc={`${base}images/directors/Veronica.jpg`}
+              name="Veronica Quiñones"
+              title="Director"
+              imgPosition="object-top"
+              story={`<p>Veronica is a proud Mexican-American born and raised in Chicago's Little Village neighborhood. As the daughter of immigrants and a lifelong resident of an underserved community, she has witnessed firsthand the impact of racial and economic disparities. These lived experiences led her to earn a Bachelor's degree in Sociology from the University of Illinois at Chicago, with a focus on social equity and community well-being.</p><p>As Vice President of the Latina Sweat Project, Veronica plays a key role in creating a safe, welcoming, and accessible space for underrepresented communities. Her yoga journey began through community-based classes, which ultimately inspired her to become a certified yoga instructor. Motivated by the lack of cultural representation in traditional wellness spaces, she is committed to offering inclusive, trauma-informed, and culturally rooted yoga experiences.</p><p>Through her work, Veronica continues to advocate for equity in wellness and create healing spaces that uplift the spirit, identity, and resilience of her community.</p>`}
+            />
+          </div>
 
           {/* Junior Board - Inline Carousel (no Svelte hydration needed) */}
           <div
@@ -378,18 +380,17 @@ const boards = [
               Community Programming
             </h3>
           </div>
-          <BoardMemberCard
-            name="Vero Quiñones"
-            role="Chair"
-            boardId="community-programming"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Brenda Maldonado"
-            role="Co-Chair"
-            boardId="community-programming"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="community-programming"
+          >
+            <BoardMemberCard
+              name="Vero Quiñones"
+              role="Chair"
+              boardId="community-programming"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Instructor Development Board */}
           <div
@@ -403,18 +404,17 @@ const boards = [
               Instructor Development
             </h3>
           </div>
-          <BoardMemberCard
-            name="Brenda Maldonado"
-            role="Co-Chair"
-            boardId="instructor-development"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Margarita Quiñones-Peña"
-            role="Co-Chair"
-            boardId="instructor-development"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="instructor-development"
+          >
+            <BoardMemberCard
+              name="Margarita Quiñones-Peña"
+              role="Co-Chair"
+              boardId="instructor-development"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Advancement & Partnerships Council */}
           <div
@@ -428,42 +428,47 @@ const boards = [
               Advancement & Partnerships
             </h3>
           </div>
-          <BoardMemberCard
-            name="Margarita Quiñones-Peña"
-            role="Chair"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Dinorah Zubieta"
-            role="Co-Chair"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Vacant"
-            role="Gala Chair"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Vanessa Tirado"
-            role="Co-Chair (Gala)"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Diana Tate"
-            role="Chair (Marathon)"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Edy Ramirez"
-            role="Co-Chair (Marathon)"
-            boardId="advancement-partnerships"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="advancement-partnerships"
+          >
+            <BoardMemberCard
+              name="Margarita Quiñones-Peña"
+              role="Chair"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Dinorah Zubieta"
+              role="Co-Chair"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Vacant"
+              role="Gala Chair"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Vanessa Tirado"
+              role="Co-Chair (Gala)"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Diana Tate"
+              role="Chair (Marathon)"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Edy Ramirez"
+              role="Co-Chair (Marathon)"
+              boardId="advancement-partnerships"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Brand & Visibility Board */}
           <div
@@ -477,18 +482,23 @@ const boards = [
               Brand & Visibility
             </h3>
           </div>
-          <BoardMemberCard
-            name="Lyanne Alfaro"
-            role="Chair"
-            boardId="brand-visibility"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Estevan Cruz"
-            role="Co-Chair"
-            boardId="brand-visibility"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="brand-visibility"
+          >
+            <BoardMemberCard
+              name="Lyanne Alfaro"
+              role="Chair"
+              boardId="brand-visibility"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Estevan Cruz"
+              role="Co-Chair"
+              boardId="brand-visibility"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Culture & Ethics Board */}
           <div
@@ -502,18 +512,23 @@ const boards = [
               Culture & Ethics
             </h3>
           </div>
-          <BoardMemberCard
-            name="Vanessa Tirado"
-            role="Chair"
-            boardId="culture-ethics"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Yari Jurado"
-            role="Co-Chair"
-            boardId="culture-ethics"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="culture-ethics"
+          >
+            <BoardMemberCard
+              name="Vanessa Tirado"
+              role="Chair"
+              boardId="culture-ethics"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Yari Jurado"
+              role="Co-Chair"
+              boardId="culture-ethics"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Community Impact Board */}
           <div
@@ -527,18 +542,23 @@ const boards = [
               Community Impact
             </h3>
           </div>
-          <BoardMemberCard
-            name="Lucia Del Rincon Martinez"
-            role="Chair"
-            boardId="community-impact"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Martha Rodriguez"
-            role="Co-Chair"
-            boardId="community-impact"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="community-impact"
+          >
+            <BoardMemberCard
+              name="Lucia Del Rincon Martinez"
+              role="Chair"
+              boardId="community-impact"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Martha Rodriguez"
+              role="Co-Chair"
+              boardId="community-impact"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Queer Events Board */}
           <div
@@ -552,18 +572,23 @@ const boards = [
               Queer Events
             </h3>
           </div>
-          <BoardMemberCard
-            name="David Ruiz"
-            role="Chair"
-            boardId="queer-events"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Ary Navarro"
-            role="Co-Chair"
-            boardId="queer-events"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="queer-events"
+          >
+            <BoardMemberCard
+              name="David Ruiz"
+              role="Chair"
+              boardId="queer-events"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Ary Navarro"
+              role="Co-Chair"
+              boardId="queer-events"
+              isLeadership={true}
+            />
+          </div>
 
           {/* Web Data & AI Board */}
           <div
@@ -577,18 +602,23 @@ const boards = [
               Web Data & AI
             </h3>
           </div>
-          <BoardMemberCard
-            name="Fez Qazi"
-            role="Chair"
-            boardId="web-data-ai"
-            isLeadership={true}
-          />
-          <BoardMemberCard
-            name="Margarita Quiñones-Peña"
-            role="Co-Chair"
-            boardId="web-data-ai"
-            isLeadership={true}
-          />
+          <div
+            class="filter-item col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 w-full flex flex-wrap justify-center gap-6"
+            data-board="web-data-ai"
+          >
+            <BoardMemberCard
+              name="Fez Qazi"
+              role="Chair"
+              boardId="web-data-ai"
+              isLeadership={true}
+            />
+            <BoardMemberCard
+              name="Margarita Quiñones-Peña"
+              role="Co-Chair"
+              boardId="web-data-ai"
+              isLeadership={true}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -1095,12 +1125,15 @@ const boards = [
       });
 
       setTimeout(() => {
+        // Keep the parent grid class name constant since sections are full-width and center internally
+        grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 transition-all duration-500 mx-auto w-full";
+
         matchedItems.forEach((item, index) => {
-          item.style.display = "block"; // Make sure it's block so we can see it
+          item.style.display = ""; // Allow default stylesheet classes (flex/block) to take effect
           item.style.position = "relative";
           item.style.order = index.toString(); // Use flex/grid order for sorting
 
-          // small timeout to allow display:block to calculate layout before scaling up
+          // small timeout to allow display change to calculate layout before scaling up
           setTimeout(() => {
             item.style.opacity = "1";
             item.style.transform = "scale(1)";

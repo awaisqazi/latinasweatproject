@@ -4,12 +4,13 @@ interface Props {
   name: string;
   title: string;
   story: string;
+  imgPosition?: string;
 }
-const { imageSrc, name, title, story } = Astro.props;
+const { imageSrc, name, title, story, imgPosition = "object-center" } = Astro.props;
 ---
 
 <div
-  class="team-member-card-container h-80 w-full max-w-sm mx-auto cursor-pointer [perspective:1000px] filter-item spotlight-item"
+  class="team-member-card-container h-[350px] w-full max-w-[290px] mx-auto cursor-pointer [perspective:1000px] spotlight-item"
   data-board="board-of-directors"
   data-leadership="true"
 >
@@ -19,7 +20,7 @@ const { imageSrc, name, title, story } = Astro.props;
     <!-- Front of card -->
     <div class="absolute inset-0">
       <img
-        class="h-full w-full rounded-xl object-cover shadow-xl shadow-black/40"
+        class={`h-full w-full rounded-xl object-cover shadow-xl shadow-black/40 ${imgPosition}`}
         src={imageSrc}
         alt={`Photo of ${name}`}
       />
