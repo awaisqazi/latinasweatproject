@@ -1,0 +1,405 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const googleFormAction =
+  "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeaDvWmhbB8zurAcAHfgPIy5Q2BZwEAjfokmvSqWFoAAkvWgQ/formResponse";
+---
+
+<Layout
+  title="Student Feedback | The Latina Sweat Project"
+  description="Share feedback after a Latina Sweat Project class so our community spaces can stay inclusive, trauma-informed, and accessible."
+>
+  <Header />
+
+  <main class="min-h-screen bg-[#f5ede3]">
+    <section class="bg-off-black px-4 py-12 text-white sm:px-6 sm:py-16 lg:px-8">
+      <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent-gold">
+            Student Feedback
+          </p>
+          <h1 class="mt-4 font-sans text-4xl font-extrabold leading-tight text-white sm:text-5xl">
+            Help us care for the next class.
+          </h1>
+        </div>
+
+        <p class="font-body text-lg leading-8 text-white/75">
+          Gracias por fluir con nosotras. Your reflections help LSP keep our
+          classes welcoming, grounded, and responsive to the community.
+        </p>
+      </div>
+    </section>
+
+    <section class="px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <form
+          id="feedback-form"
+          action={googleFormAction}
+          method="POST"
+          target="feedback-submission-frame"
+          class="rounded-lg border border-[#d9c8b3] bg-white p-5 shadow-sm sm:p-8"
+        >
+          <input type="hidden" name="fvv" value="1" />
+          <input type="hidden" name="pageHistory" value="0" />
+          <input type="hidden" name="entry.597003498_hour" id="google-hour" />
+          <input type="hidden" name="entry.597003498_minute" id="google-minute" />
+          <input type="hidden" name="entry.1074384446_sentinel" value="" />
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="class-day" class="feedback-label">Day of class</label>
+              <select
+                id="class-day"
+                name="entry.76550844"
+                required
+                class="feedback-field"
+              >
+                <option value="">Choose a day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="class-time" class="feedback-label">Time of class</label>
+              <input
+                id="class-time"
+                type="time"
+                required
+                class="feedback-field"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="studio-location" class="feedback-label">Studio location</label>
+              <select
+                id="studio-location"
+                name="entry.1359628243"
+                required
+                class="feedback-field"
+              >
+                <option value="">Choose a location</option>
+                <option value="Pilsen Studio- 949 W. 16th St">
+                  Pilsen Studio, 949 W. 16th St
+                </option>
+                <option value="Southside Social-4432 S. Ashland Ave">
+                  Southside Social, 4432 S. Ashland Ave
+                </option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="instructor-name" class="feedback-label">Instructor's name</label>
+              <input
+                id="instructor-name"
+                name="entry.1307649976"
+                type="text"
+                autocomplete="name"
+                required
+                placeholder="Who led class?"
+                class="feedback-field"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="feedback-message" class="feedback-label">
+                Suggestions or constructive feedback
+              </label>
+              <textarea
+                id="feedback-message"
+                name="entry.1108185089"
+                rows="6"
+                required
+                placeholder="Share what felt supportive, what could feel better, or anything the team should know."
+                class="feedback-field resize-y"
+              ></textarea>
+            </div>
+          </div>
+
+          <fieldset class="mt-6">
+            <legend class="feedback-label">
+              Would you like someone from our community team to contact you?
+            </legend>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <label class="feedback-choice">
+                <input
+                  class="peer sr-only"
+                  type="radio"
+                  name="entry.1074384446"
+                  value="Yes"
+                  required
+                />
+                <span>Yes</span>
+              </label>
+              <label class="feedback-choice">
+                <input
+                  class="peer sr-only"
+                  type="radio"
+                  name="entry.1074384446"
+                  value="No"
+                  required
+                />
+                <span>No</span>
+              </label>
+              <label class="feedback-choice">
+                <input
+                  class="peer sr-only"
+                  type="radio"
+                  name="entry.1074384446"
+                  value="Maybe"
+                  required
+                />
+                <span>Maybe</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="mt-6">
+            <label for="contact-info" class="feedback-label">Contact information</label>
+            <input
+              id="contact-info"
+              name="entry.1082735490"
+              type="text"
+              autocomplete="email tel"
+              placeholder="Email or phone, if you would like follow-up"
+              class="feedback-field"
+            />
+          </div>
+
+          <div
+            id="feedback-status"
+            class="mt-6 hidden rounded-md border px-4 py-3 text-sm font-bold"
+            aria-live="polite"
+          >
+          </div>
+
+          <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <button
+              id="feedback-submit"
+              type="submit"
+              class="inline-flex w-full items-center justify-center rounded-full bg-off-black px-6 py-3 font-sans text-base font-bold text-white shadow-md transition hover:bg-vibrant-pink focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 sm:w-auto"
+            >
+              <span id="feedback-submit-text">Send feedback</span>
+            </button>
+            <p class="text-sm leading-6 text-medium-gray">
+              Responses are sent to the Latina Sweat Project feedback form.
+            </p>
+          </div>
+
+          <noscript>
+            <p class="mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              JavaScript is needed for this custom page. You can also open the
+              <a
+                class="underline decoration-2 underline-offset-4"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSeaDvWmhbB8zurAcAHfgPIy5Q2BZwEAjfokmvSqWFoAAkvWgQ/viewform"
+              >
+                original Google feedback form
+              </a>
+              directly.
+            </p>
+          </noscript>
+        </form>
+
+        <aside class="rounded-lg bg-off-black p-6 text-white lg:sticky lg:top-8 lg:self-start">
+          <h2 class="font-sans text-2xl font-bold">What helps most</h2>
+          <ul class="mt-5 space-y-4 font-body text-sm leading-6 text-white/75">
+            <li class="border-l-2 border-accent-gold pl-4">
+              The class day, time, location, and instructor.
+            </li>
+            <li class="border-l-2 border-accent-gold pl-4">
+              A moment that felt supportive or affirming.
+            </li>
+            <li class="border-l-2 border-accent-gold pl-4">
+              A clear suggestion for access, safety, pacing, music, or space.
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <iframe
+    name="feedback-submission-frame"
+    title="Feedback submission"
+    class="hidden"
+  ></iframe>
+</Layout>
+
+<script>
+  const form = document.getElementById("feedback-form");
+  const timeInput = document.getElementById("class-time");
+  const googleHour = document.getElementById("google-hour");
+  const googleMinute = document.getElementById("google-minute");
+  const submitButton = document.getElementById("feedback-submit");
+  const submitText = document.getElementById("feedback-submit-text");
+  const statusBox = document.getElementById("feedback-status");
+  const iframe = document.querySelector('iframe[name="feedback-submission-frame"]');
+  const contactInput = document.getElementById("contact-info");
+  const contactRadios = Array.from(
+    document.querySelectorAll('input[name="entry.1074384446"]'),
+  ).filter((radio): radio is HTMLInputElement => radio instanceof HTMLInputElement);
+  let submitted = false;
+
+  function showStatus(message: string, tone: "success" | "warning") {
+    if (!statusBox) return;
+    statusBox.textContent = message;
+    statusBox.className =
+      tone === "success"
+        ? "mt-6 rounded-md border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800"
+        : "mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800";
+  }
+
+  function syncContactRequirement() {
+    if (!(contactInput instanceof HTMLInputElement)) return;
+    const selected = contactRadios.find((radio) => radio.checked);
+    const wantsFollowUp = selected?.value === "Yes" || selected?.value === "Maybe";
+
+    contactInput.required = wantsFollowUp;
+    contactInput.placeholder = wantsFollowUp
+      ? "Email or phone for follow-up"
+      : "Email or phone, if you would like follow-up";
+  }
+
+  function syncGoogleTimeFields() {
+    if (!(timeInput instanceof HTMLInputElement)) return false;
+    if (!(googleHour instanceof HTMLInputElement)) return false;
+    if (!(googleMinute instanceof HTMLInputElement)) return false;
+
+    const [hour, minute] = timeInput.value.split(":");
+
+    if (!hour || !minute) {
+      googleHour.value = "";
+      googleMinute.value = "";
+      return false;
+    }
+
+    googleHour.value = String(Number(hour));
+    googleMinute.value = minute;
+    return true;
+  }
+
+  contactRadios.forEach((radio) => {
+    radio.addEventListener("change", syncContactRequirement);
+  });
+
+  timeInput?.addEventListener("input", syncGoogleTimeFields);
+  timeInput?.addEventListener("change", syncGoogleTimeFields);
+
+  form?.addEventListener("submit", (event) => {
+    if (!syncGoogleTimeFields()) {
+      event.preventDefault();
+      showStatus("Please choose the class time before sending.", "warning");
+      timeInput instanceof HTMLInputElement && timeInput.focus();
+      return;
+    }
+
+    submitted = true;
+
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-70");
+    }
+
+    if (submitText) {
+      submitText.textContent = "Sending...";
+    }
+
+    showStatus("Sending your feedback...", "warning");
+  });
+
+  iframe?.addEventListener("load", () => {
+    if (!submitted) return;
+
+    showStatus("Thank you. Your feedback has been sent to the LSP team.", "success");
+    form instanceof HTMLFormElement && form.reset();
+    syncContactRequirement();
+
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = false;
+      submitButton.classList.remove("opacity-70");
+    }
+
+    if (submitText) {
+      submitText.textContent = "Send feedback";
+    }
+
+    submitted = false;
+  });
+</script>
+
+<style>
+  .feedback-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-off-black);
+  }
+
+  .feedback-field {
+    margin-top: 0.5rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #cdbda8;
+    background-color: #fffdf9;
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-off-black);
+    outline: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .feedback-field::placeholder {
+    color: #8a8178;
+  }
+
+  .feedback-field:focus {
+    border-color: var(--color-vibrant-pink);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.25);
+  }
+
+  .feedback-choice {
+    cursor: pointer;
+  }
+
+  .feedback-choice span {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    border: 1px solid #cdbda8;
+    background-color: #fffdf9;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-off-black);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .feedback-choice input:checked + span {
+    border-color: var(--color-off-black);
+    background-color: var(--color-off-black);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgb(30 30 30 / 0.16);
+  }
+
+  .feedback-choice input:focus-visible + span {
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.35);
+  }
+</style>

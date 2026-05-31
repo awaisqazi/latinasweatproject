@@ -411,7 +411,42 @@ For quick security control without complex backend authorization, implement the 
 
 ---
 
-## 🔗 11. Silent Case-Insensitive Redirections Engine (`404.astro`)
+## 📝 11. Google-Backed Custom Feedback Form (`src/pages/feedback.astro`)
+
+The `/feedback` page is a custom LSP-branded student feedback form that submits into the existing Google Forms backend while keeping the visitor on the Latina Sweat Project website. It should feel like a native LSP page, not an embedded Google form.
+
+### Visual Structure
+- **Header Frame**: Uses the standard `<Layout />` and `<Header />` stack so global SEO, navigation, analytics, and footer behavior remain consistent.
+- **Dark Intro Band**: Opens with `bg-off-black`, a small uppercase `text-accent-gold` eyebrow, and a large Rubik hero headline. This follows the dark/light contrast cadence from the broader site while keeping the page focused and operational.
+- **Warm Sand Form Section**: The main body uses `#f5ede3` as the page background with a white form panel, restrained `8px` radii, subtle sand borders, and high-legibility Rubik form controls.
+- **Support Sidebar**: A sticky dark sidebar explains what kind of feedback is most useful. It uses accent-gold left borders rather than large decorative graphics so the page remains compact and task-oriented.
+
+### Google Forms Backend Contract
+The form posts directly to the published Google Forms `formResponse` endpoint through a hidden iframe target. This avoids navigating the user away from the website after submission.
+
+```txt
+POST https://docs.google.com/forms/u/0/d/e/1FAIpQLSeaDvWmhbB8zurAcAHfgPIy5Q2BZwEAjfokmvSqWFoAAkvWgQ/formResponse
+
+Day of class: entry.76550844
+Time hour: entry.597003498_hour
+Time minute: entry.597003498_minute
+Studio location: entry.1359628243
+Instructor's name: entry.1307649976
+Suggestions / constructive feedback: entry.1108185089
+Community team contact preference: entry.1074384446
+Contact information: entry.1082735490
+```
+
+### Interaction Rules
+1. The visible time control is a native `<input type="time">`; client-side JavaScript splits it into Google Forms' required hour and minute hidden fields.
+2. Contact information becomes required only when the visitor selects "Yes" or "Maybe" for community team follow-up.
+3. Submission status is announced through an `aria-live` status box and the submit button is disabled while the hidden iframe post is in flight.
+4. Do not submit dummy data to the live Google Form during QA. Validate the payload locally by reading form controls or by intercepting submit before network transmission.
+5. If the Google Form is edited, re-inspect the live form and update both the action URL and every `entry.*` field name in `src/pages/feedback.astro` and this handbook.
+
+---
+
+## 🔗 12. Silent Case-Insensitive Redirections Engine (`404.astro`)
 
 Because physical flyers and social bios are susceptible to casing discrepancies (e.g. `/LSPgala` vs `/lspgala`), the 404 page acts as an intelligent redirect engine.
 
@@ -422,6 +457,7 @@ graph TD
     JSNormalize -- Includes 'lspgala' --> RedirectZeffyGala["Redirect to: Zeffy Fundraising Page"]
     JSNormalize -- Includes 'silentauction' --> RedirectZeffyAuction["Redirect to: Zeffy Auction Page"]
     JSNormalize -- Includes 'forms' --> RedirectLocal["Redirect to: /forms"]
+    JSNormalize -- Includes 'feedback' --> RedirectFeedback["Redirect to: /feedback"]
 ```
 
 ### The Redirect Script
@@ -445,6 +481,8 @@ The engine is written in standard vanilla JavaScript inside a client-side `<scri
         window.location.href = "https://docs.google.com/forms/d/e/.../viewform";
     } else if (path.includes("forms")) {
         window.location.href = "/forms"; // Internal route redirect
+    } else if (path.includes("feedback")) {
+        window.location.href = "/feedback"; // Internal route redirect
     }
 </script>
 ```
@@ -455,15 +493,29 @@ The engine is written in standard vanilla JavaScript inside a client-side `<scri
 > 1. Do **not** create a dedicated routing rule in the hosting configuration.
 > 2. Simply add a new `else if (path.includes("your-campaign"))` redirect inside `404.astro`.
 > 3. This guarantees the URL is case-insensitive, highly resilient, and redirects instantly.
+> 4. When creating a new page in `src/pages/`, add a matching case-insensitive `404.astro` redirect whenever the URL may appear on flyers, social bios, QR codes, texts, or spoken instructions.
 
 ---
 
-## 🚀 12. Summary checklist for Future Developers
+## 🧠 13. Project Memory & Change Record Rules
+
+Treat `design.md` as the durable memory for the website's design system, structure, third-party integrations, and routing conventions.
+
+1. **Always Update This Handbook**: Any change to a website page, layout, component, public route, embedded form, third-party backend integration, navigation surface, or major visual pattern must include a corresponding `design.md` update in the same work session.
+2. **Record Functional Contracts**: When adding forms, iframes, redirects, APIs, analytics events, or external services, document the endpoint, important field IDs, required hidden inputs, and QA expectations.
+3. **Record Visual Decisions**: When adding a new page or major section, document the color theme, layout structure, responsive behavior, and any special interaction rules.
+4. **Use `404.astro` for Case-Insensitive Public Links**: New public pages and campaign links must be considered for `src/pages/404.astro` routing so mixed-case URLs like `/Feedback`, `/FEEDBACK`, or flyer variants still land correctly.
+5. **Keep This File Current Over Perfect**: A concise but accurate update is better than leaving undocumented drift.
+
+---
+
+## 🚀 14. Summary checklist for Future Developers
 
 When modifying or expanding the website, adhere strictly to these principles:
 - **Never use plain color placeholders**: Always match elements to the brand's HSL/Hex token schemes.
 - **Maintain the Alternating Background Cadence**: Keep the rhythmic light/dark layout transitions when building long homepage flows.
 - **Maintain Vertical Video Experience Quirks**: When working with iframe overlays in portals like `2025ytt.astro`, always insert a programmatic `.ytt-drag-overlay` to catch drag events.
 - **Maintain Visual Mobile Framing on Desktop**: When creating immersive, storytelling slides (`wrapped.astro`), use absolute background blurs overlayed by clear device-proportional frames on wide viewports.
-- **Use the 404 Redirect Engine**: Rather than implementing expensive backend routing redirects, append your redirect queries to `src/pages/404.astro`.
+- **Update `design.md` With Every Website Change**: This handbook is the project's memory; keep it synchronized with the actual site.
+- **Use the 404 Redirect Engine**: Rather than implementing expensive backend routing redirects, append public-page and campaign redirect queries to `src/pages/404.astro` so links resolve case-insensitively.
 - **Keep Admin Dashboards Lightweight**: Frame dashboards in Astro, but do the heavy lifting in Svelte components utilizing `client:only="svelte"` for maximum client-side performance.
