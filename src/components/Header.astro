@@ -101,6 +101,15 @@ const isHome = pathname === base || pathname === `${base}/`;
                                 class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                             >
                                 <a
+                                    href={`${base}feedback`}
+                                    class="mb-1 block rounded-lg border border-accent-gold/40 bg-accent-gold/15 px-4 py-3 text-sm text-off-black transition-all hover:border-accent-gold hover:bg-accent-gold/25"
+                                >
+                                    <span class="block font-bold">Share Class Feedback</span>
+                                    <span class="mt-0.5 block text-xs leading-5 text-medium-gray">
+                                        Tell us how class felt.
+                                    </span>
+                                </a>
+                                <a
                                     href={`${base}shifts`}
                                     class="dropdown-link block px-4 py-2.5 text-sm text-medium-gray rounded-lg"
                                 >
@@ -237,6 +246,15 @@ const isHome = pathname === base || pathname === `${base}/`;
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
             Classes
+        </a>
+        <a
+            href={`${base}feedback`}
+            class="mobile-link my-1 rounded-xl border border-accent-gold/50 bg-accent-gold/20 px-4 py-3 text-off-black shadow-sm transition-all hover:bg-accent-gold/30"
+        >
+            <span class="block text-xs font-bold uppercase tracking-[0.18em] text-medium-gray">
+                After class
+            </span>
+            <span class="mt-1 block text-xl font-bold">Share Feedback</span>
         </a>
         <a
             href={`${base}events`}
