@@ -27,3 +27,7 @@ Monthly review cadence:
 5. Pause single-word keywords and keywords with Quality Score 1 or 2 to protect Ad Grants compliance.
 6. Refresh responsive search ad assets with page-specific copy from the website.
 7. Confirm sitemap submission in Search Console uses `https://latinasweatproject.com/sitemap-index.xml`.
+
+## Search Console Follow-Up
+
+On June 2, 2026, Search Console showed `https://latinasweatproject.com/pricing/` as `Discovered - currently not indexed`, and a live URL test classified it as `Soft 404` even though crawl was allowed, fetch was successful, and indexing was allowed. The page was strengthened with static pricing/membership content around the unchanged Mariana Tek buy widget. After deployment, retest `/pricing/` in Search Console and request indexing again.

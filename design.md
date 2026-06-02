@@ -546,6 +546,7 @@ Search Console readiness:
 - Public conversion pages should remain indexable and present in the generated sitemap: `/schedule/`, `/pricing/`, `/contact/`, `/classes/`, `/links/`, and `/impact/`.
 - Internal, admin, noindex, and redirect-only routes must be excluded from the sitemap filter in `astro.config.mjs`.
 - Use the `robots` prop on `<Layout />` for any future page that needs a non-default robots directive, and use the named `head` slot only for extra verification/meta tags that must render in `<head>`.
+- Pages that rely on embedded booking, pricing, donation, or newsletter widgets still need meaningful static content around those embeds. Search Console may classify a widget-heavy public page as a soft 404 if Google can fetch the URL but sees too little page-specific content before or around the embedded experience.
 
 ---
 
