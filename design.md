@@ -504,7 +504,52 @@ The engine is written in standard vanilla JavaScript inside a client-side `<scri
 
 ---
 
-## 🧠 13. Project Memory & Change Record Rules
+## 📈 13. Analytics & Conversion Tracking
+
+The shared analytics base lives in `src/layouts/Layout.astro` and must keep both configured tags active:
+
+- GA4 measurement ID: `G-RW22LK0G9J`
+- Google Ads destination ID: `AW-17990206229`
+
+The layout exposes `window.trackConversion(eventName, params)` and delegates GA4 events through `window.gtag("event", eventName, params)`. Do not add Google Ads event snippets or `send_to` conversion labels for new actions unless the exact label has been created in Google Ads. The default operating model is to mark GA4 events as key events and import those key events into Google Ads.
+
+Tracked website intent events:
+
+- `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, and Southside Social Zeffy registration CTAs.
+- `contact_form_submit`: successful Xplor contact form submission only after the embedded Xplor API renders its success alert for form `8189caeb-de28-43fc-8cf7-858529bcf767`.
+- `membership_purchase_start`: pricing/buy intent from the Mariana Tek external buy fallback on `/pricing`.
+- `donation_click`: outbound support donation CTAs that leave for Zeffy.
+- `app_download_click`: outbound iOS and Android LSP Studio app downloads with a `platform` parameter.
+- `newsletter_signup_start`: first interaction with Zeffy newsletter iframe embeds. This is an intent/start signal only because the cross-origin iframe does not expose reliable submit completion to the parent page.
+
+Use stable attributes on CTAs instead of text matching:
+
+```astro
+data-conversion-event="class_booking_start"
+data-conversion-context="schedule_trouble_link"
+data-conversion-provider="mariana_tek"
+```
+
+For iframe engagement starts, use `data-conversion-interaction-event`. For successful form events that should not fire on click, use a page-specific success hook such as the contact form's `data-conversion-success-event`.
+
+Mariana Tek embeds are cross-origin web integrations. Do not add tracking attributes to the Mariana widget containers or change `data-mariana-integrations` values. The site tracks only the booking CTAs it controls around those widgets; actual reservation starts/completions inside the embedded widget require Mariana Tek/GA4 configuration or Mariana webhooks outside this static Astro page.
+
+QA expectations:
+
+1. Confirm the base GA4 and Ads config calls are still present on every `Layout` page.
+2. In a browser, temporarily wrap `window.gtag` or inspect `window.dataLayer` to confirm CTA clicks emit the intended event names and parameters.
+3. Do not promote old page-view conversions such as the About Us Google Ads conversion as the main Smart Bidding signal once these meaningful GA4 events are active.
+4. Confirm Mariana Tek widget containers remain unmodified except for their original `data-mariana-integrations` attributes.
+
+Search Console readiness:
+
+- Public conversion pages should remain indexable and present in the generated sitemap: `/schedule/`, `/pricing/`, `/contact/`, `/classes/`, `/links/`, and `/impact/`.
+- Internal, admin, noindex, and redirect-only routes must be excluded from the sitemap filter in `astro.config.mjs`.
+- Use the `robots` prop on `<Layout />` for any future page that needs a non-default robots directive, and use the named `head` slot only for extra verification/meta tags that must render in `<head>`.
+
+---
+
+## 🧠 14. Project Memory & Change Record Rules
 
 Treat `design.md` as the durable memory for the website's design system, structure, third-party integrations, and routing conventions.
 
@@ -516,7 +561,7 @@ Treat `design.md` as the durable memory for the website's design system, structu
 
 ---
 
-## 🚀 14. Summary checklist for Future Developers
+## 🚀 15. Summary checklist for Future Developers
 
 When modifying or expanding the website, adhere strictly to these principles:
 - **Never use plain color placeholders**: Always match elements to the brand's HSL/Hex token schemes.

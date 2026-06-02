@@ -24,11 +24,18 @@ import Header from "@/components/Header.astro";
           target="_blank"
           rel="noopener noreferrer"
           class="font-semibold underline transition hover:text-accent-gold"
+          data-conversion-event="class_booking_start"
+          data-conversion-context="classes_trouble_link"
+          data-conversion-provider="mariana_tek"
+          data-conversion-booking-path="external_schedule"
+          data-conversion-location-id="48717"
           >Open in a new window.</a
         >
       </p>
     </div>
-    <div data-mariana-integrations="/schedule/daily/48541?locations=48717">
+    <div
+      data-mariana-integrations="/schedule/daily/48541?locations=48717"
+    >
     </div>
   </main>
 </Layout>

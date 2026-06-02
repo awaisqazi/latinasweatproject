@@ -223,6 +223,18 @@ const socials = [
     icon: "tiktok",
   },
 ];
+
+const getLinkConversionEvent = (url = "") => {
+  if (url.includes("/schedule")) return "class_booking_start";
+  if (url.includes("support-the-latina-sweat-project")) return "donation_click";
+  return undefined;
+};
+
+const getLinkConversionProvider = (url = "") => {
+  if (url.includes("zeffy.com")) return "zeffy";
+  if (url.includes("/schedule")) return "lsp_website";
+  return undefined;
+};
 ---
 
 <Layout
@@ -382,6 +394,10 @@ const socials = [
               <a
                 href={`${base}schedule`}
                 class="free-promo group block rounded-xl bg-[#ffbd59]/[0.06] border border-[#ffbd59]/25 px-3.5 py-3 transition-all duration-300 hover:bg-[#ffbd59]/[0.12] hover:border-[#ffbd59]/45 hover:-translate-y-0.5"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="links_free_classes_pilsen"
+                data-conversion-provider="lsp_website"
+                data-conversion-booking-path="schedule_page"
               >
                 <div class="flex items-center gap-2.5 mb-3">
                   <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1E1E1E] text-[#ffbd59] font-extrabold text-base flex-shrink-0">X</span>
@@ -436,6 +452,11 @@ const socials = [
                 target="_blank"
                 rel="noopener noreferrer"
                 class="free-promo group block rounded-xl bg-emerald-500/[0.06] border border-emerald-400/25 px-3.5 py-3 transition-all duration-300 hover:bg-emerald-500/[0.12] hover:border-emerald-400/50 hover:-translate-y-0.5"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="links_free_classes_southside"
+                data-conversion-provider="zeffy"
+                data-conversion-booking-path="southside_ticketing"
+                data-conversion-location="southside_social"
               >
                 <div class="flex items-center gap-2.5 mb-2.5">
                   <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-extrabold text-base flex-shrink-0">X</span>
@@ -548,6 +569,10 @@ const socials = [
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
+              data-conversion-event={getLinkConversionEvent(link.url)}
+              data-conversion-context="links_card"
+              data-conversion-provider={getLinkConversionProvider(link.url)}
+              data-conversion-booking-path={getLinkConversionEvent(link.url) === "class_booking_start" ? "schedule_page" : undefined}
               class:list={[
                 "link-card group relative block rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 scroll-mt-24 active:scale-[0.98]",
                 link.featured ? "link-card-featured" : "link-card-default",
@@ -729,7 +754,12 @@ const socials = [
                 <span class="lang-es hidden">Mantente al Día</span>
               </p>
             </div>
-            <div class="newsletter-frame relative w-full overflow-hidden">
+            <div
+              class="newsletter-frame relative w-full overflow-hidden"
+              data-conversion-interaction-event="newsletter_signup_start"
+              data-conversion-context="links_newsletter"
+              data-conversion-provider="zeffy"
+            >
               <iframe
                 title="Signup form powered by Zeffy"
                 src="https://www.zeffy.com/en-US/embed/newsletter-form/sign-up-for-our-newsletter-1965"
@@ -760,6 +790,9 @@ const socials = [
             rel="noopener noreferrer"
             class="app-badge group relative flex items-center gap-3 rounded-2xl px-5 py-3 overflow-hidden transition-all duration-300 hover:scale-[1.04] hover:-translate-y-1"
             id="link-app-ios"
+            data-conversion-event="app_download_click"
+            data-conversion-context="links_app_section"
+            data-conversion-platform="ios"
           >
             <svg class="w-7 h-7 text-white/80 flex-shrink-0 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
@@ -780,6 +813,9 @@ const socials = [
             rel="noopener noreferrer"
             class="app-badge group relative flex items-center gap-3 rounded-2xl px-5 py-3 overflow-hidden transition-all duration-300 hover:scale-[1.04] hover:-translate-y-1"
             id="link-app-android"
+            data-conversion-event="app_download_click"
+            data-conversion-context="links_app_section"
+            data-conversion-platform="android"
           >
             <svg class="w-7 h-7 text-white/80 flex-shrink-0 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 13l2.302-2.492zM5.864 2.658L16.8 9.49l-2.302 2.302-8.635-8.635z"/>

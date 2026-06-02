@@ -7,9 +7,15 @@ interface Props {
   title: string;
   description?: string;
   hideFooter?: boolean;
+  robots?: string;
 }
 
-const { title, description: pageDescription, hideFooter = false } = Astro.props;
+const {
+  title,
+  description: pageDescription,
+  hideFooter = false,
+  robots = "index, follow",
+} = Astro.props;
 const siteName = "The Latina Sweat Project";
 const description =
   pageDescription ||
@@ -22,7 +28,7 @@ const canonicalURL = new URL(
   "https://latinasweatproject.com",
 );
 
-// Google Analytics 4 Measurement ID — replace with your real ID
+// Google Analytics 4 Measurement ID
 const GA_MEASUREMENT_ID = "G-RW22LK0G9J";
 // Google Ads Conversion ID
 const GOOGLE_ADS_ID = "AW-17990206229";
@@ -50,7 +56,7 @@ const GOOGLE_ADS_ID = "AW-17990206229";
       name="keywords"
       content="yoga Pilsen Chicago, free yoga classes Chicago, Latina wellness, community yoga Southwest Side, nonprofit yoga studio Pilsen, fitness classes Pilsen, yoga teacher training Chicago, BIPOC yoga Chicago, wellness events Pilsen, Latina Sweat Project"
     />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={robots} />
 
     <!-- Google Analytics 4 -->
     <script
@@ -59,12 +65,115 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     ></script>
     <script define:vars={{ GA_MEASUREMENT_ID, GOOGLE_ADS_ID }}>
       window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", GA_MEASUREMENT_ID);
-      gtag("config", GOOGLE_ADS_ID);
+      window.gtag =
+        window.gtag ||
+        function () {
+          window.dataLayer.push(arguments);
+        };
+      window.gtag("js", new Date());
+      window.gtag("config", GA_MEASUREMENT_ID);
+      window.gtag("config", GOOGLE_ADS_ID);
+    </script>
+    <script>
+      (function () {
+        const DEFAULT_EVENT_PARAMS = {
+          event_source: "lsp_website",
+        };
+        const RESERVED_CONVERSION_KEYS = new Set([
+          "conversionEvent",
+          "conversionInteractionEvent",
+          "conversionSuccessEvent",
+        ]);
+
+        const toSnakeCase = (value) =>
+          value
+            .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+            .replace(/[\s-]+/g, "_")
+            .toLowerCase();
+
+        const readConversionParams = (element) => {
+          const params = {};
+          const dataset = element.dataset || {};
+
+          Object.keys(dataset).forEach((key) => {
+            if (!key.startsWith("conversion") || RESERVED_CONVERSION_KEYS.has(key)) {
+              return;
+            }
+
+            const paramName = toSnakeCase(key.replace(/^conversion/, ""));
+            if (paramName) params[paramName] = dataset[key];
+          });
+
+          if (element instanceof HTMLAnchorElement && element.href) {
+            params.link_url = element.href;
+            params.outbound = element.origin !== window.location.origin;
+          }
+
+          const ctaId =
+            element.id || element.getAttribute("data-conversion-cta-id");
+          if (ctaId && !params.cta_id) params.cta_id = ctaId;
+
+          return params;
+        };
+
+        window.trackConversion = function (eventName, params = {}) {
+          if (!eventName || typeof eventName !== "string") return false;
+
+          const eventParams = {
+            ...DEFAULT_EVENT_PARAMS,
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            ...params,
+            transport_type: "beacon",
+          };
+
+          // Google Ads conversions should import these GA4 events unless real
+          // Ads conversion labels are later added in Google Ads.
+          if (typeof window.gtag !== "function") {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event: eventName, ...eventParams });
+            return false;
+          }
+
+          window.gtag("event", eventName, eventParams);
+          return true;
+        };
+
+        document.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+
+          const trigger = target.closest("[data-conversion-event]");
+          if (!trigger) return;
+
+          window.trackConversion(
+            trigger.getAttribute("data-conversion-event"),
+            readConversionParams(trigger),
+          );
+        });
+
+        const trackedInteractionElements = new WeakSet();
+        const trackInteractionStart = (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+
+          const trigger = target.closest(
+            "[data-conversion-interaction-event]",
+          );
+          if (!trigger || trackedInteractionElements.has(trigger)) return;
+
+          trackedInteractionElements.add(trigger);
+          window.trackConversion(
+            trigger.getAttribute("data-conversion-interaction-event"),
+            readConversionParams(trigger),
+          );
+        };
+
+        document.addEventListener("pointerdown", trackInteractionStart, {
+          passive: true,
+        });
+        document.addEventListener("focusin", trackInteractionStart);
+      })();
     </script>
 
     <!-- Open Graph / Facebook -->
@@ -88,6 +197,8 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageUrl.href} />
     <meta name="twitter:image:alt" content={socialImageAlt} />
+
+    <slot name="head" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -30,7 +30,7 @@ import Header from '@/components/Header.astro';
               Contact Us
             </h2>
             
-            <form method="post" action="https://api.prd.xplorcs.com/forms-v2/forms/answers" onsubmit="onXplFormSubmit(event)" name="8189caeb-de28-43fc-8cf7-858529bcf767" id="bb_form" class="mt-8 space-y-6">
+            <form method="post" action="https://api.prd.xplorcs.com/forms-v2/forms/answers" onsubmit="onXplFormSubmit(event)" name="8189caeb-de28-43fc-8cf7-858529bcf767" id="bb_form" class="mt-8 space-y-6" data-conversion-success-event="contact_form_submit" data-conversion-form-id="8189caeb-de28-43fc-8cf7-858529bcf767" data-conversion-context="contact_page" data-conversion-destination="xplor_growth">
               <div id="alert"></div>
               <input type="hidden" name="uuid" id="bb_uuid" value="8189caeb-de28-43fc-8cf7-858529bcf767">
               
@@ -124,12 +124,42 @@ import Header from '@/components/Header.astro';
           const key = template.use_recaptcha ? template.recaptcha_key : null;
           if (key) XplFormAPI.loadRecaptchaScript(key);
       };
+      const watchContactFormSuccess = (formElement) => {
+          const eventName = formElement.dataset.conversionSuccessEvent;
+          const alert = formElement.querySelector('#alert');
+          if (!eventName || !alert) return;
+
+          alert.classList.remove('success', 'error');
+
+          let tracked = false;
+          const observer = new MutationObserver(() => {
+              if (tracked || !alert.classList.contains('success')) return;
+              tracked = true;
+              window.trackConversion?.(eventName, {
+                  form_id: formElement.dataset.conversionFormId || formElement.name || formUuid,
+                  context: formElement.dataset.conversionContext || 'contact_page',
+                  destination: formElement.dataset.conversionDestination || 'xplor_growth',
+              });
+              observer.disconnect();
+          });
+
+          observer.observe(alert, {
+              attributes: true,
+              childList: true,
+              characterData: true,
+              subtree: true,
+          });
+          window.setTimeout(() => observer.disconnect(), 30000);
+      };
       formContainer.load(formUuid).then(loadRecaptcha);
       window.onXplFormLocationChange = (selectElement) => formContainer.load(selectElement.value);
       window.onXplFormSubmit = async (event) => {
           event.preventDefault();
           event.stopPropagation();
-          const form = new XplFormAPI(FormServiceURL, event.target, formContainer);
+          const formElement = event.target;
+          if (!(formElement instanceof HTMLFormElement)) return;
+          watchContactFormSuccess(formElement);
+          const form = new XplFormAPI(FormServiceURL, formElement, formContainer);
           const recaptchaKey = form.getRecaptchaKey();
           if (recaptchaKey) {
               window.grecaptcha.ready(() => window.grecaptcha.execute(recaptchaKey, { action: 'submit' }).then((recaptchaResponse) => form.submit(recaptchaResponse)));

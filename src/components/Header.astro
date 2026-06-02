@@ -178,12 +178,18 @@ const isHome = pathname === base || pathname === `${base}/`;
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-vibrant-pink px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+                        data-conversion-event="donation_click"
+                        data-conversion-context="desktop_header"
+                        data-conversion-provider="zeffy"
                     >
                         Donate
                     </a>
                     <a
                         href={`${base}schedule`}
                         class="btn hidden sm:inline-flex items-center h-10 rounded-full bg-off-black px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-vibrant-pink"
+                        data-conversion-event="class_booking_start"
+                        data-conversion-context="desktop_header"
+                        data-conversion-booking-path="schedule_page"
                     >
                         Book Class
                     </a>
@@ -195,6 +201,9 @@ const isHome = pathname === base || pathname === `${base}/`;
                 <a
                     href={`${base}schedule`}
                     class="btn inline-flex items-center h-9 rounded-full bg-vibrant-pink px-4 text-xs font-bold text-white shadow-sm sm:hidden"
+                    data-conversion-event="class_booking_start"
+                    data-conversion-context="mobile_header"
+                    data-conversion-booking-path="schedule_page"
                 >
                     Book
                 </a>
@@ -335,6 +344,9 @@ const isHome = pathname === base || pathname === `${base}/`;
             target="_blank"
             rel="noopener noreferrer"
             class="group mt-2 flex items-center justify-center gap-3 rounded-xl border border-accent-gold/40 bg-off-black px-4 py-3 mobile-link"
+            data-conversion-event="app_download_click"
+            data-conversion-context="mobile_menu"
+            data-conversion-platform="ios"
         >
             <span
                 class="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1"
@@ -385,6 +397,9 @@ const isHome = pathname === base || pathname === `${base}/`;
             target="_blank"
             rel="noopener noreferrer"
             class="group mt-2 flex items-center justify-center gap-3 rounded-xl border border-green-500/40 bg-off-black px-4 py-3 mobile-link"
+            data-conversion-event="app_download_click"
+            data-conversion-context="mobile_menu"
+            data-conversion-platform="android"
         >
             <span
                 class="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1"
@@ -435,12 +450,18 @@ const isHome = pathname === base || pathname === `${base}/`;
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn w-full py-3 rounded-full bg-vibrant-pink text-white font-bold shadow-lg text-lg"
+                data-conversion-event="donation_click"
+                data-conversion-context="mobile_menu"
+                data-conversion-provider="zeffy"
             >
                 Donate
             </a>
             <a
                 href={`${base}schedule`}
                 class="btn w-full py-3 rounded-full bg-off-black text-white font-bold shadow-lg text-lg"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="mobile_menu"
+                data-conversion-booking-path="schedule_page"
             >
                 Book a Class
             </a>

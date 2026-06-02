@@ -32,10 +32,17 @@ import Header from '@/components/Header.astro';
           href="https://latinasweatproject.marianatools.com/?_mt=/buy/48717"
           target="_blank"
           rel="noopener noreferrer"
-          class="font-semibold underline transition hover:text-accent-gold">Open in a new window.</a
+          class="font-semibold underline transition hover:text-accent-gold"
+          data-conversion-event="membership_purchase_start"
+          data-conversion-context="pricing_trouble_link"
+          data-conversion-provider="mariana_tek"
+          data-conversion-booking-path="external_buy"
+          data-conversion-location-id="48717">Open in a new window.</a
         >
       </p>
     </div>
-    <div data-mariana-integrations="/buy/48717"></div>
+    <div
+      data-mariana-integrations="/buy/48717"
+    ></div>
   </main>
 </Layout>

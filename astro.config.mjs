@@ -15,8 +15,9 @@ export default defineConfig({
           '/shifts', '/checkin', '/volunteeradmin', '/subsadmin',
           '/subs', '/electionadmin', '/elections', '/admin/',
           '/gala/live', '/gala/volunteer-checkin',
-          '/marketing', '/register', '/account',
-          '/intake', '/lspgala', '/galaraffle', '/silentauction',
+          '/marketing', '/forms', '/register', '/account',
+          '/intake', '/donate', '/lspgala', '/galaraffle',
+          '/silentauction', '/teachertrainingclasses',
         ];
         return !excluded.some((path) => page.includes(path));
       },

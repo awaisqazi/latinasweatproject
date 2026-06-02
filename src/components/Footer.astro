@@ -77,6 +77,9 @@ const base = import.meta.env.BASE_URL;
           target="_blank"
           rel="noopener noreferrer"
           class="group mt-5 flex items-center gap-3 rounded-xl border border-accent-gold/30 bg-off-black px-4 py-3 transform transition-all duration-300 hover:-translate-y-2 hover:border-accent-gold/60 hover:shadow-2xl hover:shadow-accent-gold/20"
+          data-conversion-event="app_download_click"
+          data-conversion-context="footer"
+          data-conversion-platform="ios"
         >
           <span
             class="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1"
@@ -131,6 +134,9 @@ const base = import.meta.env.BASE_URL;
           target="_blank"
           rel="noopener noreferrer"
           class="group mt-3 flex items-center gap-3 rounded-xl border border-green-500/30 bg-off-black px-4 py-3 transform transition-all duration-300 hover:-translate-y-2 hover:border-green-500/60 hover:shadow-2xl hover:shadow-green-500/20"
+          data-conversion-event="app_download_click"
+          data-conversion-context="footer"
+          data-conversion-platform="android"
         >
           <span
             class="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1"
@@ -307,7 +313,12 @@ const base = import.meta.env.BASE_URL;
             >
               Newsletter
             </h3>
-            <div class="footer-newsletter-frame relative mt-4 w-full overflow-hidden">
+            <div
+              class="footer-newsletter-frame relative mt-4 w-full overflow-hidden"
+              data-conversion-interaction-event="newsletter_signup_start"
+              data-conversion-context="footer_newsletter"
+              data-conversion-provider="zeffy"
+            >
               <iframe
                 title="Signup form powered by Zeffy"
                 src="https://www.zeffy.com/en-US/embed/newsletter-form/sign-up-for-our-newsletter-1965"
