@@ -17,10 +17,12 @@ pnpm-debug.log*
 .env
 .env.production
 
+# Supabase CLI cache
+supabase/.temp/
+
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
-
 

@@ -349,65 +349,251 @@ To establish immediate community boundaries, reduce administrative friction, and
 
 ## 🔒 10. Admin Dashboard Blueprint & Security Guidelines
 
-To manage check-ins, verify elections, track gala tickets, and audit volunteer hours, LSP uses a standard Astro-Svelte admin framework under `/src/pages/admin/` or as `*admin.astro` pages.
+LSP now has two categories of administrative surfaces:
 
-### The 4-Tier Admin Architecture
-Every administrative tool must implement these four distinct functional layers:
+1. **Legacy lightweight admin utilities** for narrow internal workflows such as volunteer audits, gala ticket checks, and one-off operational tools.
+2. **The Marketing Management Suite** at `/admin/marketing`, a full Supabase-backed collaborative workspace for the Brand & Visibility team.
 
-#### Tier 1: Astro Layout Frame
-Admin pages wrap content in standard layouts but strip the main footer (`hideFooter={true}`) to preserve clean dashboard layouts:
+Future internal tools should choose the architecture that matches their risk profile. Anything that stores team accounts, project data, assignment history, approvals, or campaign delivery information must follow the Supabase-backed marketing dashboard pattern rather than the older client-side password gate.
+
+### Legacy Astro-Svelte Admin Utility Pattern
+Older admin pages live under `/src/pages/admin/` or as `*admin.astro` pages. They mount Svelte in client-only mode and may include a lightweight session-storage gate for low-risk operational screens.
+
 ```astro
 <Layout title="Volunteer Hour Audit | The Latina Sweat Project" hideFooter={true}>
   <main class="min-h-screen bg-slate-50">
-     ...
+    <VolunteerHourAuditApp client:only="svelte" />
   </main>
 </Layout>
 ```
 
-#### Tier 2: The Svelte Mounting Point
-All reactive interfaces, CSV data parsers, and API integrations are handled inside Svelte. The component is mounted in client-only mode to prevent node hydration discrepancies during server rendering:
+Legacy requirements:
+- Use `hideFooter={true}` to preserve a focused tool layout.
+- Keep admin tools compact and task-first; avoid landing-page composition.
+- Include the known iOS warning banner only when the workflow has mobile/Safari limitations.
+- Do not copy the client-side password pattern into data-sensitive systems. It hides UI but does not protect data.
+
+### Marketing Management Suite (`/admin/marketing`)
+The marketing dashboard is the internal operating system for LSP's Brand & Visibility work. It is intentionally built inside the existing Astro + Svelte + Tailwind site, not as a separate Next.js app, so it remains compatible with static hosting while using Supabase Auth, RLS, and Edge Functions for real data security.
+
+Primary routes:
+- `/admin/marketing` mounts `src/components/admin/marketing/DashboardApp.svelte`.
+- `/admin/marketing/login` mounts `MarketingLoginApp.svelte`.
+- `/admin/marketing/forgot-password` mounts `MarketingForgotPasswordApp.svelte`.
+- `/admin/marketing/reset-password` mounts `MarketingResetPasswordApp.svelte`.
+
 ```astro
-<VolunteerHourAuditApp client:only="svelte" />
+---
+import Layout from "../../../layouts/Layout.astro";
+import DashboardApp from "../../../components/admin/marketing/DashboardApp.svelte";
+---
+
+<Layout title="Marketing Dashboard | The Latina Sweat Project" hideFooter={true}>
+  <DashboardApp client:only="svelte" />
+</Layout>
 ```
 
-#### Tier 3: Known iOS Layout Warning Banner
-Include the standard red warning banner (`bg-red-50 border-red-200`) at the top of the markup to intercept mobile admin layouts.
+### Authentication Model
+The dashboard uses the browser Supabase client from `src/lib/supabaseClient.js` with public environment variables only:
 
-#### Tier 4: Client-Side Password Gate & Session Storage
-For quick security control without complex backend authorization, implement the standard client-side authentication gate script:
-```html
-<!-- Gate Box (Displays by default) -->
-<div id="password-gate" class="flex items-center justify-center min-h-screen">
-  <!-- Interactive Form Card -->
-</div>
-
-<!-- Dashboard Box (Hidden by default) -->
-<div id="admin-dashboard" class="hidden">
-  <VolunteerHourAuditApp client:load />
-</div>
-
-<script>
-    const ADMIN_PASSWORD = "YourSecurePassword!"; 
-    const passwordGate = document.getElementById("password-gate");
-    const adminDashboard = document.getElementById("admin-dashboard");
-    
-    // Auto-login if session token is active
-    if (sessionStorage.getItem("adminAuth") === "true") {
-        showDashboard();
-    }
-    
-    function showDashboard() {
-        passwordGate?.classList.add("hidden");
-        adminDashboard?.classList.remove("hidden");
-    }
-    
-    // Validate input...
-    if (userInput === ADMIN_PASSWORD) {
-        sessionStorage.setItem("adminAuth", "true");
-        showDashboard();
-    }
-</script>
+```txt
+PUBLIC_SUPABASE_URL
+PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ```
+
+Rules:
+- Never expose the service role key to Astro, Svelte, or any `PUBLIC_*` variable.
+- The dashboard shell may be downloadable because the site is statically hosted, but project data remains protected by Supabase Auth and RLS.
+- Login uses `supabase.auth.signInWithPassword()`.
+- Password reset uses `supabase.auth.resetPasswordForEmail()` and redirects to the branded reset page.
+- Invites are created through the `marketing-users` Edge Function and redirect users to the branded password setup/reset flow.
+- Supabase default email templates remain in place unless custom SMTP, Supabase Pro template editing, or a dedicated Send Email hook is configured. Do not add a half-configured Send Email hook, because that can interrupt auth email delivery.
+
+### Data Model and Security Contract
+The marketing dashboard uses Supabase tables and migrations under `docs/supabase/` and `supabase/migrations/`.
+
+Core tables:
+- `profiles`: `id`, `full_name`, `email`, `role`, timestamps.
+- `projects`: title, priority, status, deadline, publish date, links, assignments, approval state, channel tags, intake metadata, timestamps.
+- `project_comments`: collaborative timeline entries for comments, assignment changes, completion events, and status changes.
+
+Security model:
+- Authenticated users can read, insert, and update normal project fields.
+- Only admins can delete projects.
+- Only admins can change `copy_approved`, priority, admin-only review states, and move projects into final publishing/archived states.
+- Members can assign teammates to request help.
+- Members cannot remove another user's assignment; an assignment is removed only when an admin unassigns the person or the assigned person marks their own work complete.
+- Members can move projects through collaborative production states and to `Stuck`; admins can move projects through all statuses.
+- Database triggers log assignment, completion, priority-protected, and status-change activity where possible so the timeline stays trustworthy even if multiple clients are open.
+
+Current project statuses:
+```txt
+Ready for Production
+In Production
+Ready for Copy
+Ready for Review
+Stuck
+Ready to Publish
+Published
+Archived
+```
+
+### Dashboard Navigation and Layout
+`DashboardApp.svelte` owns the authenticated shell, route-hash state, project loading, team-member loading, sidebar state, sign-out, and shared refresh keys.
+
+Navigation:
+- **Workspace**: personal assigned work.
+- **Kanban**: status-based collaboration board.
+- **Project Calendar**: active work calendar for deadlines and in-progress tracking.
+- **Publishing Calendar**: posted and planned campaign calendar.
+- **Admin Overview**: rendered only for `profiles.role = 'admin'`.
+
+Layout standards:
+- The left sidebar is dark, sticky, collapsible, and optimized for repeated internal use.
+- The sign-out control stays anchored at the bottom of the open sidebar viewport rather than stretching with page content.
+- Use lucide Svelte icons for sidebar items, action buttons, toggles, and table controls.
+- Use custom Tailwind/Svelte UI only. Do not add React or shadcn/ui to this Astro app.
+- Prefer slide-over drawers for project detail and edit flows. Avoid inconsistent centered modals unless the task is tiny and isolated.
+- Drawers should share the same behavior: dark header, accessible close affordance, smooth slide transition, sticky footer when actions need to remain visible, backdrop click to close, and safe cleanup after animation.
+
+### Workspace View
+`Workspace.svelte` is the signed-in user's personal dashboard. It queries active reviewed projects where the user's email appears in `assigned_to`.
+
+Workspace sections:
+- **Urgent Tasks**: `P0` projects or projects due within the next 7 days.
+- **My Pipeline**: all other active assigned projects.
+
+Card requirements:
+- Show title, status badge, priority, deadline/publish date, and channel context.
+- Use conditional priority color formatting: `P0` urgent red, `P1` amber, `P2` teal, unset neutral.
+- The detail action opens the shared project drawer/timeline experience instead of navigating away.
+- When a user marks their own assignment complete, the project leaves their pipeline and logs that completion to the timeline.
+
+### Kanban Collaboration Board
+The Kanban board is the main shared production surface.
+
+Column behavior:
+- Columns must be equal-height and independently vertically scrollable.
+- The board must horizontally scroll/snap. Desktop should show roughly four wide columns at a time; mobile should show one column at a time with swipe affordances plus left/right buttons.
+- Arrow keys should support vertical column movement when focused.
+- Large columns must not stretch the whole page.
+
+Card behavior:
+- Cards use priority color accents and compact metadata.
+- Cards open `ProjectDetailDrawer.svelte`.
+- Assignments update immediately in local state and Supabase so the drawer does not require a page refresh.
+- Anyone can assign someone for help; only admins can unassign others.
+- Assigned users can mark their own assignment complete.
+- Moving a card between columns logs a timeline entry: `Moved this project from {old_status} to {new_status}.`
+
+Status movement rules:
+- Members may move projects among `Ready for Production`, `In Production`, `Ready for Copy`, `Ready for Review`, and `Stuck`.
+- Admins may move projects among all statuses.
+- When moving a project into `Ready to Publish`, an admin must set a `publish_date`.
+- The publish-date scheduler should show a preview of the publishing calendar so admins can avoid crowding campaigns.
+
+### Project Detail Drawer and Timeline
+`ProjectDetailDrawer.svelte` is the canonical interaction surface for project details across Kanban, calendars, and admin views.
+
+It must include:
+- Status and priority badges.
+- Assignment picker with searchable team accounts.
+- Status mover honoring member/admin rules.
+- Admin-only priority controls.
+- Link blocks for details, files, and deliverables.
+- Channel tags.
+- Copy approval state.
+- `ProjectTimeline.svelte` for comments and system activity.
+
+Timeline rules:
+- Comments are attributed to the submitter's profile name when available, falling back to email.
+- Assignment, completion, and column/status changes should appear as activity entries.
+- The timeline is collaboration-first; it replaces the old "Edit Notes" mental model for live chatter.
+- `edit_notes` can still store project brief/context, but not threaded collaboration.
+
+### Project Calendar
+`CalendarView.svelte` is for deadlines and active work tracking.
+
+Rules:
+- Query reviewed active projects.
+- Place each project on `publish_date` when present; otherwise place it on `deadline`.
+- Color-code events by `channel_tags`: pink/purple for IG/TikTok, blue for LinkedIn, gray for Website, with sensible neutrals for other channels.
+- Clicking an event opens the shared slide-over detail drawer.
+- This calendar is not the final publishing schedule; it is the operational view of work in motion.
+
+### Publishing Calendar
+`PublishingCalendarView.svelte` is the campaign delivery calendar.
+
+Rules:
+- Focus on projects in `Ready to Publish` and `Published`.
+- Show planned future posts and delivered/past campaigns by `publish_date`.
+- Clicking an event opens the same drawer/timeline pattern.
+- Admins can change status from the drawer according to the full admin status list.
+- Scheduling from Kanban should use the same drawer-style interaction pattern and show surrounding planned/published campaigns.
+
+### Admin Overview
+`AdminOverview.svelte` is admin-only. If a member manipulates client state to render it, show an Unauthorized message and do not fetch admin data.
+
+Admin sections:
+- **Team Accounts**: list auth users/profiles, invite new users, edit `full_name`, and change role between `admin` and `member`.
+- **Google Forms Intake Queue**: list unreviewed `source = 'google_form'` projects, show `intake_payload`, assign teammates, set priority/status, add notes, and approve into the pipeline by setting `intake_reviewed = true`.
+- **Master Project Table**: condensed, scrollable, paginated table with search, filters, sortable columns, copy approval, delete confirmation, export, and project slide-over detail/edit.
+- **Manual Project Creation**: admin drawer, not a mismatched centered modal, for adding `source = 'manual'` and `intake_reviewed = true` projects.
+
+Admin table standards:
+- Default table columns should stay condensed: title, status, priority, date, assigned, copy approval, and actions.
+- Search must cover title, assignee, status, priority, channel, notes, URLs, source, and intake contact fields.
+- Reset filters must reset search, filters, sort field, sort direction, and page.
+- Row counts should support 25, 50, 100, and 200 rows per page.
+- Full details belong in the slide-over, with an edit state toggled by a pencil icon.
+- Channels must be picked from the established channel list: IG, TikTok, LinkedIn, Website, Newsletter, Email, Blog, YouTube, Podcast, Press, Event, Partner, Paid Ads, SMS.
+
+### Google Forms Intake Automation
+The public `/intake` URL can continue sending users to the existing Google Form, while form responses populate Supabase through a webhook.
+
+```mermaid
+graph LR
+    PublicURL["/intake"] --> GoogleForm["Google Form"]
+    GoogleForm --> AppsScript["Google Apps Script onFormSubmit"]
+    AppsScript --> EdgeFunction["/functions/v1/marketing-intake"]
+    EdgeFunction --> Project["projects row: source=google_form, intake_reviewed=false"]
+    Project --> AdminQueue["Admin Intake Queue"]
+    AdminQueue --> Pipeline["Reviewed Kanban/Workspace/Calendars"]
+```
+
+Mapping standards:
+- Event/initiative name becomes `projects.title`.
+- Target live date becomes `publish_date` and initial deadline.
+- Urgency maps to priority: 5 => `P0`, 3-4 => `P1`, 1-2 => `P2`.
+- Uploaded assets and working links should be stored in URL fields when useful and preserved in `intake_payload`.
+- Instagram/LinkedIn handles become useful `channel_tags` and/or context notes.
+- Deduplicate by `intake_response_id`.
+
+### Edge Functions
+Current Supabase Edge Functions:
+- `marketing-intake`: receives Google Forms webhook payloads and upserts intake projects.
+- `marketing-users`: admin-only user management wrapper for listing users, inviting users, and updating profile/role data.
+
+Edge Function rules:
+- Keep CORS explicit.
+- Validate admin context by checking the caller's Supabase Auth token and `profiles.role`.
+- Use the service role key only inside Edge Functions.
+- Keep redirect URLs pointed at `/admin/marketing/reset-password` for invites and password setup.
+- Return clear JSON error messages so Svelte can show accessible inline states.
+
+### Deployment and QA Requirements
+Before shipping dashboard changes:
+- Run `npm run build`.
+- Verify logged-out `/admin/marketing` redirects to `/admin/marketing/login`.
+- Verify member nav hides Admin Overview.
+- Verify admin nav shows Admin Overview.
+- Test assignment add/remove/complete behavior without refreshing.
+- Test member and admin status movement rules.
+- Confirm status changes, assignments, completions, and comments appear in timeline.
+- Confirm Project Calendar and Publishing Calendar open the same drawer style.
+- Confirm Admin search, filters, sort, pagination, export, intake approval, copy approval, manual project creation, and delete confirmation.
+- Confirm mobile sidebar, Kanban snapping, and drawer transitions do not overlap text or controls.
+- Never commit `.env`, service-role secrets, Supabase CLI cache files, or disposable E2E data exports.
 
 ---
 

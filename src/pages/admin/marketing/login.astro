@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import MarketingLoginApp from "@/components/admin/marketing/MarketingLoginApp.svelte";
+---
+
+<Layout
+  title="Marketing Login | The Latina Sweat Project"
+  description="Private marketing dashboard login for The Latina Sweat Project team."
+  hideFooter={true}
+  robots="noindex, nofollow"
+>
+  <MarketingLoginApp client:only="svelte" />
+</Layout>
