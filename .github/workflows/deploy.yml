@@ -40,6 +40,8 @@ jobs:
         run: npm run build
         env:
           PUBLIC_GEMINI_API_KEY: ${{ secrets.PUBLIC_GEMINI_API_KEY }}
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL || secrets.PUBLIC_SUPABASE_URL || 'https://jcseaxtvsozylsbmykka.supabase.co' }}
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ByKQH4QqhYhrT7K-gqEhsw_zqdEvkB_' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
