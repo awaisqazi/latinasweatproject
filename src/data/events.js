@@ -2,6 +2,19 @@
 
 export const allEvents = [
   {
+    slug: "dia-del-nino-kids-day",
+    title: "Kids Day at LSP",
+    imageSrc: "/images/dia-del-nino-kids-day-en.png",
+    date: "Sunday, June 14",
+    time: "1:00 PM - 4:15 PM",
+    location: "LSP Studio",
+    address: "949 W 16th St, Chicago, IL",
+    description: "Celebrate Kids Day at LSP with four free movement, play, and wellness classes grouped by age. Each registration includes a free yoga class and goody bag.",
+    registrationLink: "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day",
+    featured: true,
+    tags: ["Free", "Kids", "Wellness"]
+  },
+  {
     slug: "monday-miles",
     title: "Monday Miles — Community Run & Walk",
     imageSrc: "/images/monday-miles-runner.png",

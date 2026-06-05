@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import EventCard from "@/components/EventCard.astro";
 const base = import.meta.env.BASE_URL;
+const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
 ---
 
 <Layout title="Events | The Latina Sweat Project">
@@ -23,6 +24,220 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
     {/* END: Page Header Section */}
+
+    {/* START: Kids Day at LSP Featured Section */}
+    <section
+      class="relative overflow-hidden bg-gradient-to-br from-[#fbf3ea] via-[#fff8ef] to-[#f4dfcf] py-16 md:py-20"
+    >
+      <div
+        class="absolute inset-0 opacity-[0.22]"
+        style="background-image: linear-gradient(rgba(255,255,255,0.75) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.75) 2px, transparent 2px); background-size: 58px 58px;"
+      >
+      </div>
+      <div
+        class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff7a59] via-accent-gold to-cyan-400"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div
+          class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12"
+        >
+          <div class="relative lg:col-span-3">
+            <div
+              class="relative overflow-hidden rounded-2xl border border-[#c7602d]/20 bg-white/70 shadow-xl shadow-[#c7602d]/10"
+            >
+              <img
+                src={`${base}images/dia-del-nino-kids-day-en.png`}
+                alt="Kids Day at LSP flyer with age-group class times and registration QR code"
+                class="w-full h-auto object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="lg:col-span-2 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-[#c7602d] px-4 py-2 mb-5 shadow-lg shadow-[#c7602d]/20"
+            >
+              <span class="relative flex h-2.5 w-2.5">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"
+                ></span>
+              </span>
+              <span class="text-xs font-bold uppercase tracking-widest text-white">
+                Register · Free Kids Event
+              </span>
+            </div>
+
+            <p
+              class="text-xs font-bold uppercase tracking-[0.3em] text-[#c7602d] mb-2"
+            >
+              Día del Niño en LSP
+            </p>
+
+            <h2
+              class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl lg:text-6xl leading-tight"
+            >
+              Kids Day at LSP
+            </h2>
+            <p class="mt-3 text-base font-semibold text-off-black/70">
+              Movement, play, and wellness for kids and teens
+            </p>
+
+            <p
+              class="mt-5 text-base text-off-black/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            >
+              Celebrate Kids Day with four free yoga classes grouped by age.
+              Every registered child gets a movement-centered class experience
+              and a goody bag.
+            </p>
+
+            <div
+              class="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto lg:mx-0"
+            >
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/80 border border-[#c7602d]/20 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-[#c7602d] flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    When
+                  </p>
+                  <p class="text-sm font-bold text-off-black">Sun, June 14</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/80 border border-[#c7602d]/20 px-4 py-3"
+              >
+                <svg
+                  class="h-5 w-5 text-[#c7602d] flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    Time
+                  </p>
+                  <p class="text-sm font-bold text-off-black">1:00 to 4:15 PM</p>
+                </div>
+              </div>
+              <div
+                class="flex items-center gap-3 rounded-xl bg-white/80 border border-[#c7602d]/20 px-4 py-3 sm:col-span-2"
+              >
+                <svg
+                  class="h-5 w-5 text-[#c7602d] flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div>
+                  <p
+                    class="text-[10px] text-off-black/50 uppercase tracking-wider font-bold"
+                  >
+                    Where
+                  </p>
+                  <p class="text-sm font-bold text-off-black">
+                    LSP Studio · 949 W. 16th St, Chicago
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 rounded-2xl bg-white/80 border border-[#c7602d]/20 p-5 text-left">
+              <p
+                class="text-[11px] font-bold uppercase tracking-[0.25em] text-[#c7602d] mb-3"
+              >
+                Age Group Schedule
+              </p>
+              <div class="space-y-2.5 text-sm text-off-black/75">
+                <div class="flex items-center justify-between gap-4">
+                  <span class="font-bold text-off-black">3-5 years old</span>
+                  <span class="font-semibold tabular-nums">1:00-1:30 PM</span>
+                </div>
+                <div class="h-px bg-[#c7602d]/10"></div>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="font-bold text-off-black">6-9 years old</span>
+                  <span class="font-semibold tabular-nums">1:50-2:20 PM</span>
+                </div>
+                <div class="h-px bg-[#c7602d]/10"></div>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="font-bold text-off-black">10-13 years old</span>
+                  <span class="font-semibold tabular-nums">2:40-3:10 PM</span>
+                </div>
+                <div class="h-px bg-[#c7602d]/10"></div>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="font-bold text-off-black">14-18 years old</span>
+                  <span class="font-semibold tabular-nums">3:30-4:15 PM</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <a
+                href={kidsDayRegistrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-[#c7602d] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#c7602d]/25 transition-all duration-300 hover:scale-105 hover:bg-accent-gold hover:text-off-black hover:shadow-xl hover:shadow-accent-gold/30"
+              >
+                Register on Zeffy
+                <svg
+                  class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Kids Day at LSP Featured Section */}
 
     {/* START: Equal Hope × LSP Featured Section */}
     <section

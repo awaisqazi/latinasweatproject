@@ -16,6 +16,7 @@ LSP utilizes a warm, organic, yet highly vibrant color system that celebrates cu
 | **Off-Black** | `#1e1e1e` / `bg-off-black` | Dominant text color, dark mode sections, primary buttons | Modern, grounding, premium |
 | **Vibrant Pink** | `#b5a18d` / `text-vibrant-pink` | Primary brand accent, brand headers, active focus states, buttons | Warm, elegant, high-energy |
 | **Accent Gold** | `#ffbd59` / `text-accent-gold` | Secondary accent, highlight text, run/miles club badges, warning borders | Energetic, sunny, inviting |
+| **Kids Clay** | `#c7602d` | Youth and family event headings, badges, and CTAs | Playful, warm, legible over sand backgrounds |
 | **Teal** | `text-teal-600` / `bg-teal-600` | Health & wellness collaborations, community safety events | Grounded, calm, medical-community trust |
 | **Sky** | `text-sky-500` / `bg-sky-400` | Giving campaigns, donation cards, spring events | Fresh, airy, hopeful |
 | **Natural Sand** | `#f5ede3` to `#e8d8c2` | Light section gradients, soft block backgrounds | Grounding, earthy, organic |
@@ -32,13 +33,19 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: WGN9 Spotlight (bg-off-black)"]
-    Sec1 --> Sec2["Section 2: Merch Drop (bg-gradient Warm Amber)"]
-    Sec2 --> Sec3["Section 3: Equal Hope Event (bg-gradient Natural Sand)"]
-    Sec3 --> Sec4["Section 4: YTT Showcase (bg-gradient Midnight Blue/Black)"]
-    Sec4 --> Sec5["Section 5: Graduation Drive (bg-gradient Sky/Amber)"]
-    Sec5 --> Sec6["Section 6: 40 Under 40 (bg-white)"]
-    Sec6 --> Sec7["Section 7: Monday Miles (bg-off-black)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Community Graduation Support Drive (Warm Natural)"]
+    Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
+    Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
+    Sec3 --> Sec4["Section 4: Kids Day Event (Dark Youth Variant)"]
+    Sec4 --> Sec5["Section 5: Equal Hope Event (Natural Sand)"]
+    Sec5 --> Sec6["Section 6: Free Classes Promo (bg-off-black)"]
+    Sec6 --> Sec7["Section 7: Graduation Drive (Sky/Amber)"]
+    Sec7 --> Sec8["Section 8: 40 Under 40 (bg-white)"]
+    Sec8 --> Sec9["Section 9: Monday Miles (bg-off-black)"]
+    Sec9 --> Sec10["Section 10: Studio (Light)"]
+    Sec10 --> Sec11["Section 11: Events Carousel (Dark)"]
+    Sec11 --> Sec12["Section 12: Instagram (Light)"]
+    Sec12 --> Sec13["Section 13: Press (Dark)"]
 ```
 
 ### Purpose & Rationale
@@ -72,6 +79,45 @@ When adding a new section, identify whether it belongs in a light or dark theme 
   </div>
 </section>
 ```
+
+#### Option C: Youth / Family Event Theme
+Use this for kid-focused community events that need to feel warm, legible, and playful without drifting into a one-note primary-color palette. The first implementation is **Kids Day at LSP / Día del Niño en LSP** on `src/pages/index.astro`, `src/pages/events.astro`, and the homepage events carousel.
+
+On `src/pages/index.astro`, use the dark youth variant when the surrounding section rhythm needs a contrast reset:
+
+```astro
+<section class="relative overflow-hidden bg-off-black py-16 sm:py-20">
+  <div class="absolute inset-0 opacity-[0.06]" style="background-image: linear-gradient(rgba(255,255,255,0.75) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.75) 2px, transparent 2px); background-size: 58px 58px;"></div>
+  <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff7a59] via-accent-gold to-cyan-400"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-white">
+    <!-- Flyer media + Kids Clay / Accent Gold content/CTA -->
+  </div>
+</section>
+```
+
+On the standalone events page, the lighter playful sand variant is acceptable because it opens after the events page header and before unrelated sections:
+
+```astro
+<section class="relative overflow-hidden bg-gradient-to-br from-[#fbf3ea] via-[#fff8ef] to-[#f4dfcf] py-16 sm:py-20">
+  <div
+    class="absolute inset-0 opacity-[0.2]"
+    style="background-image: linear-gradient(rgba(255,255,255,0.75) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.75) 2px, transparent 2px); background-size: 58px 58px;"
+  ></div>
+  <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff7a59] via-accent-gold to-cyan-400"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <!-- Flyer media + Kids Clay (#c7602d) content/CTA -->
+  </div>
+</section>
+```
+
+Kids Day functional contract:
+- Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`
+- Flyer assets: `public/images/dia-del-nino-kids-day-en.png` and `public/images/dia-del-nino-kids-day-es.png`.
+- Event date/time: Sunday, June 14, 1:00-4:15 PM, with age groups `3-5`, `6-9`, `10-13`, and `14-18`.
+- The homepage carousel card is an outbound Zeffy card and should remain first while the event is upcoming. Pagination dots are generated from direct carousel children, so adding/removing cards requires no dot markup changes.
+- The homepage should preserve the lower-page contrast sequence: Studio light, Events carousel dark, Instagram light, Press dark.
 
 ---
 
@@ -408,6 +454,17 @@ Rules:
 - Password reset uses `supabase.auth.resetPasswordForEmail()` and redirects to the branded reset page.
 - Invites are created through the `marketing-users` Edge Function and redirect users to the branded password setup/reset flow.
 - Supabase default email templates remain in place unless custom SMTP, Supabase Pro template editing, or a dedicated Send Email hook is configured. Do not add a half-configured Send Email hook, because that can interrupt auth email delivery.
+
+Local and live origin contract:
+- Use `npm run dev:local` for dashboard QA so Astro serves one clean local app at `http://localhost:4321/`.
+- Do not run `astro preview` and `astro dev` on the same port. A split IPv4/IPv6 `4321` setup can make the HTML load from one process while Vite/Svelte module imports hit another process, leaving `/admin/marketing` blank.
+- Keep the Astro `site` and canonical URL pointed at `https://latinasweatproject.com`; those are SEO/sitemap settings and should not be used as client-side auth redirect origins.
+- Keep auth redirects origin-aware in code. Browser password resets should use `window.location.origin`; Edge Function invites should derive the reset link from the request `Origin` and fall back to `https://latinasweatproject.com`.
+- Supabase Auth URL Configuration should use `https://latinasweatproject.com` as the Site URL.
+- Supabase Auth Redirect URLs must include both environments used by the dashboard:
+  - `https://latinasweatproject.com/admin/marketing/reset-password`
+  - `http://localhost:4321/admin/marketing/reset-password`
+- If QA intentionally uses another local port, add the matching reset URL to Supabase Redirect URLs or restart the dev server on `localhost:4321`.
 
 ### Data Model and Security Contract
 The marketing dashboard uses Supabase tables and migrations under `docs/supabase/` and `supabase/migrations/`.
