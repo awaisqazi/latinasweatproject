@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import EventCard from "@/components/EventCard.astro";
 const base = import.meta.env.BASE_URL;
 const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
+const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party";
 ---
 
 <Layout title="Events | The Latina Sweat Project">
@@ -24,6 +25,112 @@ const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-de
       </div>
     </section>
     {/* END: Page Header Section */}
+
+    {/* START: World Cup Watch Party Featured Section */}
+    <section class="relative overflow-hidden bg-[#0e6600] py-16 md:py-20 text-white">
+      <div
+        class="absolute inset-0 opacity-[0.16]"
+        style="background-image: linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px); background-size: 72px 72px;"
+      >
+      </div>
+      <div class="absolute -top-28 -left-20 h-72 w-72 rounded-full bg-red-500/30 blur-[110px]"></div>
+      <div class="absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-blue-600/30 blur-[120px]"></div>
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-white to-blue-700"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
+          <div class="relative lg:col-span-2">
+            <div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-white/30 via-accent-gold/20 to-blue-500/20 blur-xl"></div>
+            <div class="relative overflow-hidden rounded-2xl border border-white/20 bg-white p-3 shadow-2xl shadow-black/25">
+              <img
+                src={`${base}images/world-cup-watch-party.png`}
+                alt="LSP World Cup Watch Party event graphic"
+                class="w-full rounded-xl object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 mb-5 shadow-lg shadow-black/10 ring-1 ring-white/20">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
+                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"></span>
+              </span>
+              <span class="text-xs font-bold uppercase tracking-widest text-accent-gold">
+                June 11 to July 4 · $10 Admission
+              </span>
+            </div>
+
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-white/70 mb-2">
+              Futbol, community, and wellness
+            </p>
+
+            <h2 class="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl leading-tight">
+              LSP World Cup Watch Party
+            </h2>
+            <p class="mt-3 text-lg font-semibold text-accent-gold">
+              Watch together at LSP Studio
+            </p>
+
+            <p class="mt-5 text-base text-white/75 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              Join us for a watch party where futbol, community, and wellness
+              come together with a live DJ, games, soccer-themed face painting,
+              cotton candy, popcorn, and aguas frescas.
+            </p>
+            <p class="mt-4 text-base text-white/65 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              Your registration helps us keep creating safe, supportive spaces
+              for our community to move, recharge, and grow together.
+            </p>
+
+            <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 max-w-2xl mx-auto lg:mx-0">
+              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">When</p>
+                <p class="mt-1 text-sm font-bold text-white">Starts June 11</p>
+                <p class="text-xs text-white/55">Runs through July 4</p>
+              </div>
+              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">Where</p>
+                <p class="mt-1 text-sm font-bold text-white">LSP Studio</p>
+                <p class="text-xs text-white/55">949 W 16th St</p>
+              </div>
+              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">Ticket</p>
+                <p class="mt-1 text-sm font-bold text-white">General Admission</p>
+                <p class="text-xs text-white/55">$10</p>
+              </div>
+            </div>
+
+            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {["Live DJ", "Games", "Face painting", "Cotton candy", "Popcorn", "Aguas frescas"].map((item) => (
+                <span class="rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-bold text-white/80">
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <div class="mt-8">
+              <a
+                href={worldCupRegistrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl"
+                data-conversion-event="event_registration_start"
+                data-conversion-context="events_world_cup_watch_party"
+                data-conversion-provider="zeffy"
+                data-conversion-booking-path="world_cup_ticketing"
+              >
+                Save Your Spot
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: World Cup Watch Party Featured Section */}
 
     {/* START: Kids Day at LSP Featured Section */}
     <section

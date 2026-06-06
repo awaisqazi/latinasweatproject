@@ -2,9 +2,30 @@
 import Layout from "@/layouts/Layout.astro";
 const base = import.meta.env.BASE_URL;
 const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
+const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party";
 
 // Define links data with English and Spanish translations
 const links = [
+  {
+    title: {
+      en: "⚽ LSP World Cup Watch Party",
+      es: "⚽ Fiesta Mundialista en LSP"
+    },
+    description: {
+      en: "Join us for futbol, community, and wellness with a live DJ, games, face painting, cotton candy, popcorn, and aguas frescas.",
+      es: "Acompáñanos con futbol, comunidad y bienestar: DJ en vivo, juegos, pintacaritas, algodón de azúcar, palomitas y aguas frescas."
+    },
+    url: worldCupRegistrationUrl,
+    color: "green",
+    icon: "calendar",
+    image: `${base}images/world-cup-watch-party.png`,
+    imageAlt: "LSP World Cup Watch Party flyer",
+    badge: {
+      en: "Jun 11 · $10",
+      es: "11 Jun · $10"
+    },
+    featured: true,
+  },
   {
     title: {
       en: "🎨 Kids Day at LSP",
@@ -179,6 +200,7 @@ const socials = [
 ];
 
 const getLinkConversionEvent = (url = "") => {
+  if (url.includes("lsp-world-cup-watch-party")) return "event_registration_start";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "class_booking_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
@@ -186,6 +208,7 @@ const getLinkConversionEvent = (url = "") => {
 };
 
 const getLinkBookingPath = (url = "") => {
+  if (url.includes("lsp-world-cup-watch-party")) return "world_cup_ticketing";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "kids_day_ticketing";
   if (url.includes("/schedule")) return "schedule_page";
   return undefined;
@@ -577,10 +600,22 @@ const getLinkConversionProvider = (url = "") => {
                 )}
 
                 <div class="flex items-start gap-4">
+                  {link.image && (
+                    <div class="h-20 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-white/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-emerald-400/20">
+                      <img
+                        src={link.image}
+                        alt={link.imageAlt}
+                        class="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+
                   {/* Icon Wrapper */}
                   <div
                     class:list={[
                       "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
+                      link.image && "hidden",
                       link.color === "vibrant-pink" &&
                         "bg-[#b5a18d]/30 text-[#d4b896] group-hover:bg-[#b5a18d]/50",
                       link.color === "teal" &&

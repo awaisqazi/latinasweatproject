@@ -33,16 +33,17 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: WGN9 Spotlight (bg-off-black)"]
-    Sec1 --> Sec2["Section 2: Merch Drop (Warm Amber)"]
-    Sec2 --> Sec3["Section 3: Kids Day Event (Dark Youth Variant)"]
-    Sec3 --> Sec4["Section 4: Free Classes Promo (Light Green/Sand)"]
-    Sec4 --> Sec5["Section 5: 40 Under 40 (bg-off-black)"]
-    Sec5 --> Sec6["Section 6: Monday Miles (Light Sand)"]
-    Sec6 --> Sec7["Section 7: Studio / Grand Opening (bg-off-black)"]
-    Sec7 --> Sec8["Section 8: Events Carousel (Light Sand)"]
-    Sec8 --> Sec9["Section 9: Instagram (bg-off-black)"]
-    Sec9 --> Sec10["Section 10: Press (Light)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: World Cup Watch Party (Light Soccer/Green)"]
+    Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
+    Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
+    Sec3 --> Sec4["Section 4: Kids Day Event (Dark Youth Variant)"]
+    Sec4 --> Sec5["Section 5: Free Classes Promo (Light Green/Sand)"]
+    Sec5 --> Sec6["Section 6: 40 Under 40 (bg-off-black)"]
+    Sec6 --> Sec7["Section 7: Monday Miles (Light Sand)"]
+    Sec7 --> Sec8["Section 8: Studio / Grand Opening (bg-off-black)"]
+    Sec8 --> Sec9["Section 9: Events Carousel (Light Sand)"]
+    Sec9 --> Sec10["Section 10: Instagram (bg-off-black)"]
+    Sec10 --> Sec11["Section 11: Press (Light)"]
 ```
 
 ### Purpose & Rationale
@@ -109,6 +110,16 @@ On the standalone events page, the lighter playful sand variant is acceptable be
 </section>
 ```
 
+#### Option D: Soccer / Watch Party Event Theme
+Use this for community watch-party events where the event identity depends on game-day energy but the site still needs LSP's warm, premium look. The first implementation is **LSP World Cup Watch Party** on `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, `src/data/events.js`, and the homepage events carousel.
+
+- On the homepage, place the World Cup spotlight immediately after the hero as a **light green/soccer** section so the sequence remains Hero dark overlay -> World Cup light -> WGN dark.
+- On the standalone events page, the richer green field variant is acceptable because it opens after the light events header and before the light Kids Day section.
+- Pair green with white, accent gold, red, and blue so the event does not become a one-note green palette.
+- Use `public/images/world-cup-watch-party.png` as the event graphic. It is the supplied portrait flyer (`watch party.png`) copied into the local public asset directory so the homepage, event cards, links page, and event detail page do not depend on a remote image request.
+- Portrait event flyers should declare `imageFrameClass: "aspect-[4/5]"` and `imageClass: "h-full w-full object-contain"` in `src/data/events.js` so `/events/[slug]` displays the full flyer instead of cropping it into a landscape frame.
+- On `src/pages/links.astro`, event cards may use an optional `image` / `imageAlt` thumbnail in place of the default icon when a current event has a strong flyer or campaign visual.
+
 ### Alternating Media Sides on the Homepage
 Beyond alternating section backgrounds, two-column event spotlights on `src/pages/index.astro` should also alternate which side the graphic/flyer sits on as the user scrolls. Consecutive spotlights must not stack their media on the same edge, because a repeated image-left, image-left rhythm reads as a rigid template and flattens the page. Letting the photo swing left, then right, then left creates a zig-zag reading path that keeps the eye moving and feels more intentionally designed.
 
@@ -116,7 +127,7 @@ Implementation notes:
 - Use Tailwind `lg:order-*` utilities on the two grid children to control desktop placement rather than reordering the markup, so the natural DOM order (media first) is preserved for mobile and assistive tech.
 - Keep the text column readable on the side it lands on by pairing `lg:text-left` / `lg:text-right` and `justify-center lg:justify-start` / `lg:justify-end` as needed.
 - The Kids Day spotlight places its flyer on the **right** (`lg:order-2`) with copy on the **left** (`lg:order-1`) so it contrasts with the media side of the spotlight directly above it.
-- Current desktop media rhythm: WGN9 video on the right, merch tee on the left, Kids Day flyer on the right, 40 Under 40 photo on the left, Monday Miles visual on the right, and Studio / Grand Opening image on the left.
+- Current desktop media rhythm: World Cup event graphic on the left, WGN9 video on the right, merch tee on the left, Kids Day flyer on the right, 40 Under 40 photo on the left, Monday Miles visual on the right, and Studio / Grand Opening image on the left.
 
 Event and section change checklist:
 - Whenever an event is added, removed, expired, or promoted, update every affected placement in the same change: `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, carousel cards, and `design.md` when applicable.
@@ -124,12 +135,20 @@ Event and section change checklist:
 - After adding or removing any two-column homepage spotlight, re-audit the desktop media-side zig-zag and update `lg:order-*` classes as needed.
 - When changing the homepage events carousel, keep each event card as a direct child of `#events-carousel` so the generated pagination dots stay in sync with the card count.
 
+World Cup Watch Party functional contract:
+- Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party`
+- Event graphic: `public/images/world-cup-watch-party.png`, the local portrait watch-party flyer.
+- Event window: June 11-July 4, 2026. The Zeffy screenshot shows the event starting June 11 at 1:00 PM; avoid inventing a precise July 4 end time unless Zeffy exposes it clearly.
+- Venue and ticket: LSP Studio, `949 W 16th St`, General Admission, `$10`.
+- Required placements while upcoming: homepage spotlight after the hero, first homepage events carousel card, first `links` card, top featured section on `src/pages/events.astro`, and `src/data/events.js` for `/events/world-cup-watch-party`.
+- Tracking: outbound Zeffy CTAs use `event_registration_start` with `data-conversion-booking-path="world_cup_ticketing"` and `data-conversion-provider="zeffy"`.
+
 Kids Day functional contract:
 - Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`
 - Flyer assets: `public/images/dia-del-nino-kids-day-en.png` and `public/images/dia-del-nino-kids-day-es.png`.
 - Event date/time: Sunday, June 14, 1:00-4:15 PM, with age groups `3-5`, `6-9`, `10-13`, and `14-18`.
-- The homepage carousel card is an outbound Zeffy card and should remain first while the event is upcoming. Pagination dots are generated from direct carousel children, so adding/removing cards requires no dot markup changes.
-- The `src/pages/links.astro` social hub carries Kids Day as the first featured active event link while the event is upcoming, using the same Zeffy registration URL and a `Free · Jun 14` / `Gratis · 14 Jun` badge.
+- The homepage carousel card is an outbound Zeffy card and should follow earlier-dated active event cards while the event is upcoming. Pagination dots are generated from direct carousel children, so adding/removing cards requires no dot markup changes.
+- The `src/pages/links.astro` social hub carries Kids Day after earlier-dated active event links while it is upcoming, using the same Zeffy registration URL and a `Free · Jun 14` / `Gratis · 14 Jun` badge.
 - The homepage should preserve the lower-page contrast sequence: Studio / Grand Opening dark, Events carousel light, Instagram dark, Press light.
 
 ---
@@ -176,7 +195,8 @@ const links = [
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
 Current active event link:
-- **Kids Day at LSP / DÍA DEL NIÑO EN LSP**: first featured card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`, amber calendar styling, badge `Free · Jun 14` / `Gratis · 14 Jun`, and `class_booking_start` tracking with booking path `kids_day_ticketing`.
+- **LSP World Cup Watch Party / Fiesta Mundialista en LSP**: first featured card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party`, green calendar styling, badge `Jun 11 · $10` / `11 Jun · $10`, and `event_registration_start` tracking with booking path `world_cup_ticketing`.
+- **Kids Day at LSP / DÍA DEL NIÑO EN LSP**: second featured active event card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`, amber calendar styling, badge `Free · Jun 14` / `Gratis · 14 Jun`, and `class_booking_start` tracking with booking path `kids_day_ticketing`.
 
 ### Advanced Highlights & Interactive Systems
 - **Liquid Glass Language Switcher**: A premium `EN | ES` toggle shifts a liquid glass background indicator dynamically. The toggle manages parent class bindings (`.lang-active-en` / `.lang-active-es`) that swap visible translations in CSS instantly with zero layout shift, and stores preferences in `localStorage`.
@@ -775,6 +795,7 @@ The layout exposes `window.trackConversion(eventName, params)` and delegates GA4
 Tracked website intent events:
 
 - `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, Southside Social Zeffy registration CTAs, and Kids Day Zeffy registration CTAs.
+- `event_registration_start`: outbound event registration intent for non-class ticketed events such as the World Cup Watch Party.
 - `contact_form_submit`: successful Xplor contact form submission only after the embedded Xplor API renders its success alert for form `8189caeb-de28-43fc-8cf7-858529bcf767`.
 - `membership_purchase_start`: pricing/buy intent from the Mariana Tek external buy fallback on `/pricing`.
 - `donation_click`: outbound support donation CTAs that leave for Zeffy.

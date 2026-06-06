@@ -2,9 +2,30 @@
 
 export const allEvents = [
   {
+    slug: "world-cup-watch-party",
+    title: "LSP World Cup Watch Party",
+    imageSrc: "/images/world-cup-watch-party.png",
+    imageFrameClass: "aspect-[4/5]",
+    imageClass: "h-full w-full object-contain",
+    date: "June 11 - July 4",
+    time: "Starts at 1:00 PM on June 11",
+    location: "LSP Studio",
+    address: "949 W 16th St, Chicago, IL",
+    description: "Join us for a fun watch party where futbol, community, and wellness come together with a live DJ, games, soccer-themed face painting, cotton candy, popcorn, and aguas frescas. Your registration helps us keep creating safe, supportive spaces for our community to move, recharge, and grow together.",
+    registrationLink: "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party",
+    registrationLabel: "Save Your Spot",
+    conversionEvent: "event_registration_start",
+    conversionProvider: "zeffy",
+    conversionBookingPath: "world_cup_ticketing",
+    featured: true,
+    tags: ["Watch Party", "$10", "Community"]
+  },
+  {
     slug: "dia-del-nino-kids-day",
     title: "Kids Day at LSP",
     imageSrc: "/images/dia-del-nino-kids-day-en.png",
+    imageFrameClass: "aspect-[4/5]",
+    imageClass: "h-full w-full object-contain",
     date: "Sunday, June 14",
     time: "1:00 PM - 4:15 PM",
     location: "LSP Studio",

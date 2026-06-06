@@ -14,6 +14,11 @@ export function getStaticPaths() {
 
 // 3. Get the props for this specific page
 const event = Astro.props;
+const registrationIsExternal =
+  typeof event.registrationLink === "string" &&
+  event.registrationLink.startsWith("http");
+const imageFrameClass = event.imageFrameClass || "aspect-video";
+const imageClass = event.imageClass || "h-full w-full object-cover";
 ---
 
 <Layout title={`${event.title} | The Latina Sweat Project`}>
@@ -24,8 +29,8 @@ const event = Astro.props;
         
         {/* Left Column: Image */}
         <div class="lg:col-span-3">
-          <div class="aspect-video overflow-hidden rounded-2xl shadow-lg">
-            <img alt={event.title} class="h-full w-full object-cover" src={event.imageSrc} />
+          <div class={`overflow-hidden rounded-2xl bg-white shadow-lg ${imageFrameClass}`}>
+            <img alt={event.title} class={imageClass} src={event.imageSrc} />
           </div>
         </div>
 
@@ -55,8 +60,17 @@ const event = Astro.props;
               </div>
             </div>
             <div class="mt-6">
-              <a href={event.registrationLink} class="flex w-full items-center justify-center rounded-full h-12 px-6 bg-vibrant-pink font-sans text-lg font-bold text-white shadow-md transition hover:scale-105 hover:bg-accent-gold">
-                Register Now
+              <a
+                href={event.registrationLink}
+                target={registrationIsExternal ? "_blank" : undefined}
+                rel={registrationIsExternal ? "noopener noreferrer" : undefined}
+                class="flex w-full items-center justify-center rounded-full h-12 px-6 bg-vibrant-pink font-sans text-lg font-bold text-white shadow-md transition hover:scale-105 hover:bg-accent-gold"
+                data-conversion-event={event.conversionEvent}
+                data-conversion-context={`event_detail_${event.slug}`}
+                data-conversion-provider={event.conversionProvider}
+                data-conversion-booking-path={event.conversionBookingPath}
+              >
+                {event.registrationLabel || "Register Now"}
               </a>
             </div>
           </div>
