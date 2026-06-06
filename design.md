@@ -33,19 +33,16 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Community Graduation Support Drive (Warm Natural)"]
-    Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
-    Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
-    Sec3 --> Sec4["Section 4: Kids Day Event (Dark Youth Variant)"]
-    Sec4 --> Sec5["Section 5: Equal Hope Event (Natural Sand)"]
-    Sec5 --> Sec6["Section 6: Free Classes Promo (bg-off-black)"]
-    Sec6 --> Sec7["Section 7: Graduation Drive (Sky/Amber)"]
-    Sec7 --> Sec8["Section 8: 40 Under 40 (bg-white)"]
-    Sec8 --> Sec9["Section 9: Monday Miles (bg-off-black)"]
-    Sec9 --> Sec10["Section 10: Studio (Light)"]
-    Sec10 --> Sec11["Section 11: Events Carousel (Dark)"]
-    Sec11 --> Sec12["Section 12: Instagram (Light)"]
-    Sec12 --> Sec13["Section 13: Press (Dark)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: WGN9 Spotlight (bg-off-black)"]
+    Sec1 --> Sec2["Section 2: Merch Drop (Warm Amber)"]
+    Sec2 --> Sec3["Section 3: Kids Day Event (Dark Youth Variant)"]
+    Sec3 --> Sec4["Section 4: Free Classes Promo (Light Green/Sand)"]
+    Sec4 --> Sec5["Section 5: 40 Under 40 (bg-off-black)"]
+    Sec5 --> Sec6["Section 6: Monday Miles (Light Sand)"]
+    Sec6 --> Sec7["Section 7: Studio / Grand Opening (bg-off-black)"]
+    Sec7 --> Sec8["Section 8: Events Carousel (Light Sand)"]
+    Sec8 --> Sec9["Section 9: Instagram (bg-off-black)"]
+    Sec9 --> Sec10["Section 10: Press (Light)"]
 ```
 
 ### Purpose & Rationale
@@ -54,7 +51,7 @@ graph TD
 3. **Optimized Readability**: Alternating layouts forces contrast resets, ensuring the eye is consistently re-focused on the next primary call to action (CTA).
 
 ### Standard Code Blueprint for Alternating Sections
-When adding a new section, identify whether it belongs in a light or dark theme and use the established tailwind and decorative classes:
+When adding, removing, or reordering a section, recalculate the entire homepage sequence from the neighboring sections and restore the light/dark cadence before shipping. Identify whether the changed section belongs in a light or dark theme and use the established tailwind and decorative classes:
 
 #### Option A: Dark Theme (Charcoal / Midnight)
 ```astro
@@ -112,12 +109,28 @@ On the standalone events page, the lighter playful sand variant is acceptable be
 </section>
 ```
 
+### Alternating Media Sides on the Homepage
+Beyond alternating section backgrounds, two-column event spotlights on `src/pages/index.astro` should also alternate which side the graphic/flyer sits on as the user scrolls. Consecutive spotlights must not stack their media on the same edge, because a repeated image-left, image-left rhythm reads as a rigid template and flattens the page. Letting the photo swing left, then right, then left creates a zig-zag reading path that keeps the eye moving and feels more intentionally designed.
+
+Implementation notes:
+- Use Tailwind `lg:order-*` utilities on the two grid children to control desktop placement rather than reordering the markup, so the natural DOM order (media first) is preserved for mobile and assistive tech.
+- Keep the text column readable on the side it lands on by pairing `lg:text-left` / `lg:text-right` and `justify-center lg:justify-start` / `lg:justify-end` as needed.
+- The Kids Day spotlight places its flyer on the **right** (`lg:order-2`) with copy on the **left** (`lg:order-1`) so it contrasts with the media side of the spotlight directly above it.
+- Current desktop media rhythm: WGN9 video on the right, merch tee on the left, Kids Day flyer on the right, 40 Under 40 photo on the left, Monday Miles visual on the right, and Studio / Grand Opening image on the left.
+
+Event and section change checklist:
+- Whenever an event is added, removed, expired, or promoted, update every affected placement in the same change: `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, carousel cards, and `design.md` when applicable.
+- After adding or removing any homepage section, re-audit the section background cadence so adjacent full-width sections do not accidentally share the same light or dark treatment unless the exception is intentional and documented here.
+- After adding or removing any two-column homepage spotlight, re-audit the desktop media-side zig-zag and update `lg:order-*` classes as needed.
+- When changing the homepage events carousel, keep each event card as a direct child of `#events-carousel` so the generated pagination dots stay in sync with the card count.
+
 Kids Day functional contract:
 - Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`
 - Flyer assets: `public/images/dia-del-nino-kids-day-en.png` and `public/images/dia-del-nino-kids-day-es.png`.
 - Event date/time: Sunday, June 14, 1:00-4:15 PM, with age groups `3-5`, `6-9`, `10-13`, and `14-18`.
 - The homepage carousel card is an outbound Zeffy card and should remain first while the event is upcoming. Pagination dots are generated from direct carousel children, so adding/removing cards requires no dot markup changes.
-- The homepage should preserve the lower-page contrast sequence: Studio light, Events carousel dark, Instagram light, Press dark.
+- The `src/pages/links.astro` social hub carries Kids Day as the first featured active event link while the event is upcoming, using the same Zeffy registration URL and a `Free · Jun 14` / `Gratis · 14 Jun` badge.
+- The homepage should preserve the lower-page contrast sequence: Studio / Grand Opening dark, Events carousel light, Instagram dark, Press light.
 
 ---
 
@@ -162,9 +175,12 @@ const links = [
 > 2. **Recurring, Constant, or Undated Links** (e.g., Class Schedule, Main Website, App Downloads) come SECOND.
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
+Current active event link:
+- **Kids Day at LSP / DÍA DEL NIÑO EN LSP**: first featured card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`, amber calendar styling, badge `Free · Jun 14` / `Gratis · 14 Jun`, and `class_booking_start` tracking with booking path `kids_day_ticketing`.
+
 ### Advanced Highlights & Interactive Systems
 - **Liquid Glass Language Switcher**: A premium `EN | ES` toggle shifts a liquid glass background indicator dynamically. The toggle manages parent class bindings (`.lang-active-en` / `.lang-active-es`) that swap visible translations in CSS instantly with zero layout shift, and stores preferences in `localStorage`.
-- **Branded Story Highlights Covers**: Uses custom, high-fidelity AI-generated covers stored in `public/images/highlights/hl_*.png` (Free Classes, Sponsor, WGN Feature, YTT, Therapy, App).
+- **Branded Story Highlights Covers**: Uses custom, high-fidelity AI-generated covers stored in `public/images/highlights/hl_*.png` (Free Classes, WGN Feature, YTT, Therapy, App).
 - **Bubble Sizing and Center Alignment**: 
   - To prevent sizing shifts and squeezing, bubble elements carry absolute sizes (`w-[66px] h-[66px] flex-shrink-0`).
   - The parent list `#highlights-bar` is aligned using `items-start` rather than centering. Since each bubble has identical sizing, **all bubble centers align perfectly horizontally**, regardless of whether their labels underneath span one or two lines.
@@ -758,7 +774,7 @@ The layout exposes `window.trackConversion(eventName, params)` and delegates GA4
 
 Tracked website intent events:
 
-- `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, and Southside Social Zeffy registration CTAs.
+- `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, Southside Social Zeffy registration CTAs, and Kids Day Zeffy registration CTAs.
 - `contact_form_submit`: successful Xplor contact form submission only after the embedded Xplor API renders its success alert for form `8189caeb-de28-43fc-8cf7-858529bcf767`.
 - `membership_purchase_start`: pricing/buy intent from the Mariana Tek external buy fallback on `/pricing`.
 - `donation_click`: outbound support donation CTAs that leave for Zeffy.
@@ -801,7 +817,8 @@ Treat `design.md` as the durable memory for the website's design system, structu
 2. **Record Functional Contracts**: When adding forms, iframes, redirects, APIs, analytics events, or external services, document the endpoint, important field IDs, required hidden inputs, and QA expectations.
 3. **Record Visual Decisions**: When adding a new page or major section, document the color theme, layout structure, responsive behavior, and any special interaction rules.
 4. **Use `404.astro` for Case-Insensitive Public Links**: New public pages and campaign links must be considered for `src/pages/404.astro` routing so mixed-case URLs like `/Feedback`, `/FEEDBACK`, or flyer variants still land correctly.
-5. **Keep This File Current Over Perfect**: A concise but accurate update is better than leaving undocumented drift.
+5. **Event Changes Must Update the Map**: When events are added, removed, expired, or reordered, update the event listings, homepage carousel, relevant route/link surfaces, and this handbook's current section/event notes together.
+6. **Keep This File Current Over Perfect**: A concise but accurate update is better than leaving undocumented drift.
 
 ---
 
@@ -810,6 +827,8 @@ Treat `design.md` as the durable memory for the website's design system, structu
 When modifying or expanding the website, adhere strictly to these principles:
 - **Never use plain color placeholders**: Always match elements to the brand's HSL/Hex token schemes.
 - **Maintain the Alternating Background Cadence**: Keep the rhythmic light/dark layout transitions when building long homepage flows.
+- **Alternate Media Sides on the Homepage**: For two-column spotlights on `index.astro`, swing the graphic/flyer from one side to the other between consecutive sections (use `lg:order-*`) so the layout zig-zags instead of stacking every image on the same edge.
+- **Re-audit After Event Adds/Removals**: Event changes on the homepage must include a background-cadence check, a media-side check, and a `design.md` update in the same work session.
 - **Maintain Vertical Video Experience Quirks**: When working with iframe overlays in portals like `2025ytt.astro`, always insert a programmatic `.ytt-drag-overlay` to catch drag events.
 - **Maintain Visual Mobile Framing on Desktop**: When creating immersive, storytelling slides (`wrapped.astro`), use absolute background blurs overlayed by clear device-proportional frames on wide viewports.
 - **Update `design.md` With Every Website Change**: This handbook is the project's memory; keep it synchronized with the actual site.

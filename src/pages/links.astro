@@ -1,24 +1,25 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 const base = import.meta.env.BASE_URL;
+const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
 
 // Define links data with English and Spanish translations
 const links = [
   {
     title: {
-      en: "🎁 Sponsor a Graduate · Zeffy Drive",
-      es: "🎁 Apoya a un Graduado · Campaña Zeffy"
+      en: "🎨 Kids Day at LSP",
+      es: "🎨 DÍA DEL NIÑO EN LSP"
     },
     description: {
-      en: "Cover a specific item, shoes, a dress, a suit, a self-care kit, for a graduating Chicago Public School student. Every dollar lands exactly where it's needed.",
-      es: "Cubre ropa formal, zapatos, un vestido, un traje o un kit de cuidado personal para estudiantes graduados de Chicago Public Schools. Cada dólar llega a su destino."
+      en: "Four age-group yoga classes full of movement, play, and wellness. Bring the kids for a free class and goody bag with peers their age.",
+      es: "Cuatro clases de yoga por edad llenas de movimiento, juego y bienestar. Trae a los niños a una clase gratis con bolsita de regalo."
     },
-    url: "https://www.zeffy.com/en-US/ticketing/community-graduation-support-drive",
+    url: kidsDayRegistrationUrl,
     color: "amber",
-    icon: "grad",
+    icon: "calendar",
     badge: {
-      en: "Sponsor",
-      es: "Apoyar"
+      en: "Free · Jun 14",
+      es: "Gratis · 14 Jun"
     },
     featured: true,
   },
@@ -42,24 +43,6 @@ const links = [
   },
   {
     title: {
-      en: "🎓 Graduation Drive: Donate Formal Wear",
-      es: "🎓 Campaña de Graduación: Dona Ropa Formal"
-    },
-    description: {
-      en: "Help students celebrate graduation in style! Drop off prom dresses, suits, dress shirts, shoes & more at LSP Studio starting May. Distribution event May 16.",
-      es: "¡Ayuda a los estudiantes a celebrar la graduación con estilo! Trae vestidos de graduación, trajes, camisas de vestir, zapatos y más a LSP Studio a partir de mayo."
-    },
-    url: `${base}schedule`,
-    color: "sky",
-    icon: "heart",
-    badge: {
-      en: "May",
-      es: "Mayo"
-    },
-    featured: true,
-  },
-  {
-    title: {
       en: "🧘🏽‍♀️ Check out our 2025 YTT Cohort",
       es: "🧘🏽‍♀️ Conoce nuestra cohorte YTT 2025"
     },
@@ -73,24 +56,6 @@ const links = [
     badge: {
       en: "New",
       es: "Nuevo"
-    },
-    featured: true,
-  },
-  {
-    title: {
-      en: "🩺 Equal Hope × LSP · Hormones & Harmony",
-      es: "🩺 Equal Hope × LSP · Hormonas y Armonía"
-    },
-    description: {
-      en: "Sat May 30, 12 to 2 PM. A free women's health event at LSP Studio. Body literacy workshop, salsa class with Maria Luisa, and a community health discussion with Dr. Elizabeth Yepez (Rush OBGYN).",
-      es: "Sáb 30 de Mayo, 12 a 2 PM. Un evento gratuito de salud femenina en LSP Studio. Taller de alfabetización corporal, clase de salsa con María Luisa y discusión de salud comunitaria."
-    },
-    url: "https://www.zeffy.com/en-US/ticketing/equal-hope-x-latina-sweat-project?utm_source=ig&utm_medium=social&utm_content=link_in_bio",
-    color: "teal",
-    icon: "heart",
-    badge: {
-      en: "May 30",
-      es: "30 Mayo"
     },
     featured: true,
   },
@@ -156,17 +121,6 @@ const highlights = [
   },
   {
     title: {
-      en: "🎁 Sponsor CPS",
-      es: "🎁 Apoya CPS"
-    },
-    url: "https://www.zeffy.com/en-US/ticketing/community-graduation-support-drive",
-    image: `${base}images/highlights/hl_sponsor.png`,
-    scale: "scale-[1.38]",
-    hoverScale: "group-hover:scale-[1.55]",
-    color: "gold"
-  },
-  {
-    title: {
       en: "📺 WGN Feature",
       es: "📺 Canal WGN"
     },
@@ -225,8 +179,15 @@ const socials = [
 ];
 
 const getLinkConversionEvent = (url = "") => {
+  if (url.includes("lsp-dia-del-nino-kids-day")) return "class_booking_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
+  return undefined;
+};
+
+const getLinkBookingPath = (url = "") => {
+  if (url.includes("lsp-dia-del-nino-kids-day")) return "kids_day_ticketing";
+  if (url.includes("/schedule")) return "schedule_page";
   return undefined;
 };
 
@@ -572,7 +533,7 @@ const getLinkConversionProvider = (url = "") => {
               data-conversion-event={getLinkConversionEvent(link.url)}
               data-conversion-context="links_card"
               data-conversion-provider={getLinkConversionProvider(link.url)}
-              data-conversion-booking-path={getLinkConversionEvent(link.url) === "class_booking_start" ? "schedule_page" : undefined}
+              data-conversion-booking-path={getLinkBookingPath(link.url)}
               class:list={[
                 "link-card group relative block rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 scroll-mt-24 active:scale-[0.98]",
                 link.featured ? "link-card-featured" : "link-card-default",
