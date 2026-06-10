@@ -23,6 +23,13 @@ export default defineConfig({
       },
     }),
   ],
+  // Legacy admin dashboards, consolidated into the unified portal at /admin
+  redirects: {
+    '/volunteeradmin': '/admin',
+    '/subsadmin': '/admin',
+    '/electionadmin': '/admin',
+  },
+
   // Your existing Vite config for Tailwind v4
   vite: {
     plugins: [tailwindcss()]

@@ -1,5 +1,5 @@
 // Cache utility for storing and retrieving data from localStorage
-// Used to reduce Firebase reads on public pages
+// Used to reduce database reads on public pages
 
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
