@@ -10,9 +10,27 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   email text not null unique,
-  role text not null default 'member' check (role in ('admin', 'member')),
+  role text not null default 'member' check (role in ('superuser', 'admin', 'member')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+create table if not exists public.profile_modules (
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  module text not null check (
+    module in (
+      'marketing',
+      'board_projects',
+      'volunteers',
+      'subs',
+      'events',
+      'elections',
+      'gala'
+    )
+  ),
+  granted_by uuid references public.profiles(id) on delete set null,
+  granted_at timestamptz not null default now(),
+  primary key (profile_id, module)
 );
 
 create table if not exists public.projects (
@@ -62,21 +80,25 @@ create index if not exists projects_intake_review_idx
   on public.projects(source, intake_reviewed, intake_submitted_at);
 
 alter table public.profiles enable row level security;
+alter table public.profile_modules enable row level security;
 alter table public.projects enable row level security;
 
 revoke all on table public.profiles from anon;
+revoke all on table public.profile_modules from anon;
 revoke all on table public.projects from anon;
 
 grant select on table public.profiles to authenticated;
 grant insert (id, full_name, email) on table public.profiles to authenticated;
 grant update (full_name, email) on table public.profiles to authenticated;
 
+grant select, insert, delete on table public.profile_modules to authenticated;
 grant select, insert, update, delete on table public.projects to authenticated;
 
 grant all on table public.profiles to service_role;
+grant all on table public.profile_modules to service_role;
 grant all on table public.projects to service_role;
 
-create or replace function app_private.is_admin()
+create or replace function app_private.is_superuser()
 returns boolean
 language sql
 stable
@@ -87,12 +109,66 @@ as $$
     select 1
     from public.profiles
     where id = (select auth.uid())
-      and role = 'admin'
+      and role = 'superuser'
   );
+$$;
+
+revoke all on function app_private.is_superuser() from public;
+grant execute on function app_private.is_superuser() to authenticated, service_role;
+
+create or replace function app_private.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select (select app_private.is_superuser());
 $$;
 
 revoke all on function app_private.is_admin() from public;
 grant execute on function app_private.is_admin() to authenticated, service_role;
+
+create or replace function app_private.has_module(p_module text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, app_private, pg_temp
+as $$
+  select (select app_private.is_superuser())
+    or exists (
+      select 1
+      from public.profile_modules
+      where profile_id = (select auth.uid())
+        and module = p_module
+    );
+$$;
+
+revoke all on function app_private.has_module(text) from public;
+grant execute on function app_private.has_module(text) to authenticated, service_role;
+
+create or replace function app_private.has_admin_module(p_module text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, app_private, pg_temp
+as $$
+  select (select app_private.is_superuser())
+    or exists (
+      select 1
+      from public.profiles
+      join public.profile_modules
+        on profile_modules.profile_id = profiles.id
+       and profile_modules.module = p_module
+      where profiles.id = (select auth.uid())
+        and profiles.role = 'admin'
+    );
+$$;
+
+revoke all on function app_private.has_admin_module(text) from public;
+grant execute on function app_private.has_admin_module(text) to authenticated, service_role;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -148,21 +224,21 @@ begin
 
   if tg_op = 'INSERT'
      and new.copy_approved is true
-     and not (select app_private.is_admin()) then
+     and not (select app_private.has_admin_module('marketing')) then
     raise exception 'Only admins can create already-approved projects.'
       using errcode = '42501';
   end if;
 
   if tg_op = 'UPDATE'
      and old.copy_approved is distinct from new.copy_approved
-     and not (select app_private.is_admin()) then
+     and not (select app_private.has_admin_module('marketing')) then
     raise exception 'Only admins can change copy approval.'
       using errcode = '42501';
   end if;
 
   if tg_op = 'UPDATE'
      and old.intake_reviewed is distinct from new.intake_reviewed
-     and not (select app_private.is_admin()) then
+     and not (select app_private.has_admin_module('marketing')) then
     raise exception 'Only admins can change intake review state.'
       using errcode = '42501';
   end if;
@@ -225,36 +301,60 @@ to authenticated
 using (id = (select auth.uid()))
 with check (id = (select auth.uid()));
 
+drop policy if exists "Users can read own grants and superusers can read all grants" on public.profile_modules;
+create policy "Users can read own grants and superusers can read all grants"
+on public.profile_modules
+for select
+to authenticated
+using (
+  profile_id = (select auth.uid())
+  or (select app_private.is_superuser())
+);
+
+drop policy if exists "Superusers can grant modules" on public.profile_modules;
+create policy "Superusers can grant modules"
+on public.profile_modules
+for insert
+to authenticated
+with check ((select app_private.is_superuser()));
+
+drop policy if exists "Superusers can revoke modules" on public.profile_modules;
+create policy "Superusers can revoke modules"
+on public.profile_modules
+for delete
+to authenticated
+using ((select app_private.is_superuser()));
+
 drop policy if exists "Authenticated users can read projects" on public.projects;
 create policy "Authenticated users can read projects"
 on public.projects
 for select
 to authenticated
-using (true);
+using ((select app_private.has_module('marketing')));
 
 drop policy if exists "Authenticated users can insert projects" on public.projects;
 create policy "Authenticated users can insert projects"
 on public.projects
 for insert
 to authenticated
-with check ((select auth.uid()) is not null);
+with check ((select app_private.has_module('marketing')));
 
 drop policy if exists "Authenticated users can update projects" on public.projects;
 create policy "Authenticated users can update projects"
 on public.projects
 for update
 to authenticated
-using ((select auth.uid()) is not null)
-with check ((select auth.uid()) is not null);
+using ((select app_private.has_module('marketing')))
+with check ((select app_private.has_module('marketing')));
 
 drop policy if exists "Admins can delete projects" on public.projects;
 create policy "Admins can delete projects"
 on public.projects
 for delete
 to authenticated
-using ((select app_private.is_admin()));
+using ((select app_private.has_admin_module('marketing')));
 
--- Run after Lyanne and Estevan have Supabase Auth accounts:
+-- Seed the launch owner after the Supabase Auth account exists:
 -- update public.profiles
--- set role = 'admin'
--- where lower(email) in ('lyannealfaro@gmail.com', 'estevansta7@gmail.com');
+-- set role = 'superuser'
+-- where lower(email) = 'awais.a.qazi@gmail.com';

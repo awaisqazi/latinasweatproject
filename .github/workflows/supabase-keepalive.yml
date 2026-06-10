@@ -1,0 +1,23 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase projects pause after ~7 days without activity. This ping
+# keeps the database awake so public shift signups never hit a paused project.
+on:
+  schedule:
+    - cron: "0 12 * * 1,4" # Mondays and Thursdays, 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL || secrets.PUBLIC_SUPABASE_URL || 'https://jcseaxtvsozylsbmykka.supabase.co' }}
+          SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ByKQH4QqhYhrT7K-gqEhsw_zqdEvkB_' }}
+        run: |
+          curl --fail --silent --show-error \
+            "$SUPABASE_URL/rest/v1/events?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY" \
+            -o /dev/null
+          echo "Supabase responded."

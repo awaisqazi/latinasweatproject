@@ -15,10 +15,16 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.local
 .env.production
 
 # Supabase CLI cache
 supabase/.temp/
+supabase/.branches/
+scripts/migration/supabase/
+
+# Firebase CLI debug output
+firebase-debug.log
 
 # macOS-specific files
 .DS_Store
@@ -26,3 +32,7 @@ supabase/.temp/
 # jetbrains setting folder
 .idea/
 
+# Firebase -> Supabase migration artifacts (keys + exported PII, never commit)
+scripts/migration/keys/
+scripts/migration/exports/
+scripts/migration/node_modules/

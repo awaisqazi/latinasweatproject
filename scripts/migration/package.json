@@ -1,0 +1,11 @@
+{
+  "name": "lsp-firebase-supabase-migration",
+  "private": true,
+  "type": "module",
+  "description": "One-time Firebase -> Supabase data migration scripts for latinasweatproject.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "firebase-admin": "^13.4.0",
+    "luxon": "^3.6.1"
+  }
+}
