@@ -14,6 +14,9 @@
     export let success = false;
     export let successTitle = "";
     export let successMessage = "";
+    export let errorMessage = "";
+    export let canCancel = false;
+    export let isCancelling = false;
 
     const dispatch = createEventDispatcher();
 
@@ -32,6 +35,10 @@
     function submit() {
         if (!name || !email || !phone) return;
         dispatch("submit", { name, email, phone, shift, role });
+    }
+
+    function cancelRegistration() {
+        dispatch("cancelRegistration", { shift, email });
     }
 
     function downloadICS() {
@@ -182,6 +189,27 @@
                         </button>
                     </div>
 
+                    {#if canCancel}
+                        <button
+                            on:click={cancelRegistration}
+                            disabled={isCancelling}
+                            class="w-full px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isCancelling
+                                ? "Cancelling..."
+                                : "Cancel this registration"}
+                        </button>
+                    {/if}
+
+                    {#if errorMessage}
+                        <div
+                            class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700"
+                            role="alert"
+                        >
+                            {errorMessage}
+                        </div>
+                    {/if}
+
                     <button
                         on:click={close}
                         class="w-full px-4 py-2 text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors"
@@ -207,6 +235,14 @@
                 <form on:submit|preventDefault={submit}>
                     <!-- Body -->
                     <div class="p-6 space-y-4">
+                        {#if errorMessage}
+                            <div
+                                class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700"
+                                role="alert"
+                            >
+                                {errorMessage}
+                            </div>
+                        {/if}
                         <div>
                             <label
                                 for="name"

@@ -1,5 +1,4 @@
 <script>
-  import { tick } from "svelte";
   import {
     CalendarDays,
     ChevronLeft,
@@ -7,6 +6,7 @@
     CircleAlert,
     X,
   } from "@lucide/svelte";
+  import SlideOver from "./SlideOver.svelte";
 
   export let open = false;
   export let project = null;
@@ -17,18 +17,14 @@
   export let onCancel = () => {};
   export let onConfirm = () => {};
 
-  let scheduleDialog;
   let displayedProject = null;
   let selectedDate = "";
   let currentMonth = getMonthStart(new Date());
   let activeProjectId = "";
-  let isVisible = false;
-  let isClosing = false;
-  let wasOpen = false;
+  let drawerOpen = false;
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const publishingStatuses = ["Ready to Publish", "Published"];
-  const ANIMATION_MS = 190;
 
   $: currentProject = project || displayedProject;
   $: scheduledProjects = projects
@@ -45,38 +41,19 @@
     prepareDialog(project);
   }
 
-  $: if (open !== wasOpen) {
-    wasOpen = open;
-
-    if (open) {
-      openDialog();
-    } else if (scheduleDialog?.open) {
-      closeDialogWithAnimation();
-    } else {
-      clearDialogState();
-    }
+  $: if (open && currentProject && !drawerOpen) {
+    drawerOpen = true;
   }
 
-  async function prepareDialog(nextProject) {
+  $: if (!open && drawerOpen) {
+    drawerOpen = false;
+  }
+
+  function prepareDialog(nextProject) {
     displayedProject = nextProject;
     activeProjectId = nextProject.id;
     selectedDate = initialDate || nextProject.publish_date || toDateKey(new Date());
     currentMonth = getMonthStart(new Date(`${selectedDate}T00:00:00`));
-    await tick();
-  }
-
-  async function openDialog() {
-    isClosing = false;
-    isVisible = false;
-    await tick();
-
-    if (scheduleDialog && !scheduleDialog.open) {
-      scheduleDialog.showModal();
-    }
-
-    window.requestAnimationFrame(() => {
-      isVisible = true;
-    });
   }
 
   function requestClose() {
@@ -85,35 +62,10 @@
     onCancel();
   }
 
-  function closeDialogWithAnimation() {
-    if (isClosing) return;
-
-    isClosing = true;
-    isVisible = false;
-    window.setTimeout(() => {
-      scheduleDialog?.close();
-    }, ANIMATION_MS);
-  }
-
-  function handleDialogClose() {
-    if (open) {
-      onCancel();
-    } else {
-      clearDialogState();
-    }
-  }
-
-  function handleDialogClick(event) {
-    if (event.target === scheduleDialog) {
-      requestClose();
-    }
-  }
-
   function clearDialogState() {
     activeProjectId = "";
     displayedProject = null;
-    isVisible = false;
-    isClosing = false;
+    drawerOpen = false;
   }
 
   function setMonth(offset) {
@@ -187,15 +139,17 @@
   }
 </script>
 
-<dialog
-  bind:this={scheduleDialog}
-  class="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(100vw,42rem)] rounded-none border-0 bg-transparent p-0 text-[#1E1E1E] backdrop:bg-black/35"
-  onclick={handleDialogClick}
-  onclose={handleDialogClose}
+<SlideOver
+  open={drawerOpen}
+  showHeader={false}
+  width="min(100vw, 42rem)"
+  closeDisabled={isSaving}
+  onClose={requestClose}
+  onClosed={clearDialogState}
 >
   {#if currentProject}
     <form
-      class="flex h-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-out {isVisible && !isClosing ? 'translate-x-0' : 'translate-x-full'}"
+      class="flex min-h-full flex-col bg-white"
       onsubmit={confirmDate}
     >
       <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
@@ -322,4 +276,4 @@
       </div>
     </form>
   {/if}
-</dialog>
+</SlideOver>

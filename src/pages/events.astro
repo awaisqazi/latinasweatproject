@@ -2,7 +2,15 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import EventCard from "@/components/EventCard.astro";
+import EventsList from "@/components/EventsList.svelte";
 const base = import.meta.env.BASE_URL;
+// Events already featured in the hand-designed sections below; the
+// Supabase-driven list skips these so they don't appear twice.
+const featuredSlugs = [
+  "world-cup-watch-party",
+  "dia-del-nino-kids-day",
+  "monday-miles",
+];
 const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
 const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party";
 ---
@@ -586,6 +594,10 @@ const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world
       </div>
     </section>
     {/* END: Monday Miles Featured Section */}
+
+    {/* START: Dashboard-managed events (Supabase) */}
+    <EventsList client:load excludeSlugs={featuredSlugs} />
+    {/* END: Dashboard-managed events */}
 
     {/* START: Stay Connected Section */}
     <section class="py-16 md:py-24">

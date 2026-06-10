@@ -1,14 +1,10 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
-    import {
-        collection,
-        onSnapshot,
-        deleteDoc,
-        doc,
-        orderBy,
-        query,
-    } from "firebase/firestore";
     import { onMount } from "svelte";
+    import {
+        subscribeToGuests,
+        subscribeToDonations,
+        deleteDonation,
+    } from "../../lib/galaUtils";
 
     let donations = [];
     let guests = {}; // Map: paddleNumber -> { fullName, email }
@@ -27,28 +23,19 @@
     );
 
     onMount(() => {
-        // 1. Listen to Guests for Lookup
-        const unsubGuests = onSnapshot(
-            collection(db, "gala_guests"),
-            (snapshot) => {
-                const map = {};
-                snapshot.forEach((doc) => {
-                    map[doc.id] = doc.data();
-                });
-                guests = map;
-            },
-        );
+        // 1. Listen to Guests for Lookup (keyed by paddle number, matching
+        // the legacy doc ids)
+        const unsubGuests = subscribeToGuests((docs) => {
+            const map = {};
+            docs.forEach((guest) => {
+                map[String(guest.paddleNumber)] = guest;
+            });
+            guests = map;
+        });
 
-        // 2. Listen to Donations
-        const q = query(
-            collection(db, "gala_donations"),
-            orderBy("timestamp", "desc"),
-        );
-        const unsubDonations = onSnapshot(q, (snapshot) => {
-            donations = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+        // 2. Listen to Donations (already newest first)
+        const unsubDonations = subscribeToDonations((docs) => {
+            donations = docs;
         });
 
         return () => {
@@ -56,6 +43,18 @@
             unsubDonations();
         };
     });
+
+    function formatTimestamp(timestamp, timeOnly = false) {
+        if (!timestamp) return "";
+        const date = new Date(timestamp);
+        if (Number.isNaN(date.getTime())) return "";
+        return timeOnly
+            ? date.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+              })
+            : date.toLocaleString();
+    }
 
     // Filter Logic
     $: {
@@ -104,7 +103,7 @@
         if (!donationToDelete) return;
 
         try {
-            await deleteDoc(doc(db, "gala_donations", donationToDelete.id));
+            await deleteDonation(donationToDelete.id);
             closeDeleteModal();
         } catch (err) {
             console.error(err);
@@ -138,9 +137,7 @@
                 }
             }
 
-            const time = d.timestamp
-                ? d.timestamp.toDate().toLocaleString()
-                : "";
+            const time = formatTimestamp(d.timestamp);
 
             return [
                 `"${time}"`,
@@ -273,14 +270,8 @@
                             <td
                                 class="px-4 py-3 text-gray-500 whitespace-nowrap"
                             >
-                                {donation.timestamp
-                                    ? donation.timestamp
-                                          .toDate()
-                                          .toLocaleTimeString([], {
-                                              hour: "2-digit",
-                                              minute: "2-digit",
-                                          })
-                                    : "-"}
+                                {formatTimestamp(donation.timestamp, true) ||
+                                    "-"}
                             </td>
                             <td class="px-4 py-3">
                                 <span

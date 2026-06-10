@@ -688,6 +688,24 @@ Before shipping dashboard changes:
 - Confirm mobile sidebar, Kanban snapping, and drawer transitions do not overlap text or controls.
 - Never commit `.env`, service-role secrets, Supabase CLI cache files, or disposable E2E data exports.
 
+### Unified Admin Platform (June 2026 consolidation)
+The marketing dashboard shell is now the org-wide dashboard. `/admin` and `/admin/marketing` mount the same `DashboardApp.svelte`; auth routes stay under `/admin/marketing/*` because they are registered in Supabase Auth redirect URLs.
+
+**Module permissions.** `public.profile_modules` holds per-profile grants (`marketing`, `board_projects`, `volunteers`, `subs`, `events`, `elections`, `gala`, `users`). `app_private.has_module(text)` gates every new table's RLS; admins (`profiles.role = 'admin'`) implicitly pass. Grants are managed in Admin Overview → Team Accounts (Access column) and at invite time; writes to `profile_modules` are admin-only by policy, so members cannot self-grant. Client nav gating lives in `src/lib/dashboard/modules.js` + `permissions.js` and is UX only; RLS is the enforcement.
+
+**Module surfaces** (sidebar sections: Marketing · Planning · Operations · Admin):
+- Board Projects (`board_projects`, `board_project_tasks`, `board_project_comments`): general statuses Planning / In Progress / Blocked / Done, task checklists with assignees and due dates, comments via the shared `ProjectTimeline` (it takes a `table` prop). Components in `src/components/admin/board/`.
+- Project Calendar (`#calendar`) is the unified view: marketing deadlines/publish dates plus board due dates (gold left border + Board badge). `src/components/admin/dashboard/UnifiedCalendarView.svelte`.
+- Events (`public.events`): DB-driven public events. Published rows render on `/events` via the `EventsList.svelte` island with no deploy; the three hand-designed featured sections stay in `events.astro` and their slugs are excluded from the island. `/events/[slug]` static pages remain for evergreen events only.
+- Volunteers (`shift_templates`, `volunteer_shifts`, `shift_registrations`): recurring shifts are materialized ~70 days ahead by `app_private.generate_shift_instances` (monthly pg_cron + `generate_volunteer_shifts` RPC from the dashboard). `kind = 'opportunity'` rows are one-off volunteer opportunities with variable capacity, shown on `/shifts`. Public flows are RPC-only: `register_for_shift` (row-locked capacity check), `cancel_shift_registration`, `set_shift_check_in` (kiosk `?code=` from `app_private.settings`, revealed via `get_volunteer_check_in_code`), `get_month_availability`. Anon never reads registrant emails/phones; public views are `shifts_public` and `shift_registrations_public` (name/role only).
+- Subs (`sub_requests`, `sub_volunteers`): public surface is `sub_requests_public` (requester email hidden) plus `create_sub_request` / `volunteer_for_sub` RPCs.
+- Elections (`elections`, `election_votes`): ballots are never anon-readable; public RPCs are `get_voting_status`, `has_voted`, `cast_vote`. Email dedup is honor-system (legacy parity); the documented upgrade path is Supabase Auth email OTP with a `voter_id` column.
+- Gala (`gala_guests`, `gala_donations`): staff tools require the `gala` module; the public thermometer polls `gala_donations_public` (no Realtime).
+
+**Firebase decommission.** The four Firestore projects (volunteerapp-74ebe, substracker-c0a34, lspelections, galathermometerapp) are replaced by the tables above. Data migration scripts live in `scripts/migration/` (export.mjs / import.mjs / verify.mjs, idempotent; see its README for the cutover freeze runbook). After 1 to 2 weeks of verified parallel running: set Firestore rules to deny-all, then delete the projects and remove `firebase` deps, `functions/`, `firebase.json`, `.firebaserc`, and the `src/lib/*Firebase.js` clients. Legacy admin pages (`/volunteeradmin`, `/subsadmin`, `/electionadmin`) stay live until their dashboard replacement is verified, then become redirect stubs to `/admin#volunteers` etc.
+
+**Ops.** `.github/workflows/supabase-keepalive.yml` pings PostgREST twice weekly so the free-tier project never pauses. The `marketing-users` edge function also accepts `modules: []` on invite.
+
 ---
 
 ## 📝 11. Google-Backed Custom Feedback Form (`src/pages/feedback.astro`)
@@ -727,6 +745,7 @@ Contact information: entry.1082735490
 - **Desktop Header**: `/feedback` appears as the topmost highlighted row in the `More` dropdown. It should not be placed in the top-level header action cluster because the desktop header is already dense with account, donation, and booking CTAs.
 - **Mobile Navigation**: `/feedback` appears immediately after Classes as an accent-gold "After class / Share Feedback" action block so students can find it quickly after a class experience.
 - **Footer Newsletter Area**: `/feedback` appears below the newsletter signup embed as an accent-bordered "After class / Share Feedback" card. Keep it out of the footer Navigation list so it reads like a purposeful post-class CTA instead of another utility route.
+- **Links Page**: `/links` includes a featured bilingual "Post-Class Feedback Survey" card that routes internally to `/feedback` in the same tab. Keep it after active dated event cards and before evergreen media, therapy, schedule, and website links so students can find it quickly after class without burying current events.
 - **Shared Nav Data**: `src/data/nav.js` includes `/feedback` so any future data-driven navigation surfaces inherit the route.
 - **404 Redirect Engine**: `/feedback` is also represented in `src/pages/404.astro`, so mixed-case public links such as `/Feedback` or `/FEEDBACK` still resolve.
 
@@ -796,6 +815,7 @@ Tracked website intent events:
 
 - `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, Southside Social Zeffy registration CTAs, and Kids Day Zeffy registration CTAs.
 - `event_registration_start`: outbound event registration intent for non-class ticketed events such as the World Cup Watch Party.
+- `feedback_start`: internal click intent into the post-class feedback survey, including the featured `/links` feedback card.
 - `contact_form_submit`: successful Xplor contact form submission only after the embedded Xplor API renders its success alert for form `8189caeb-de28-43fc-8cf7-858529bcf767`.
 - `membership_purchase_start`: pricing/buy intent from the Mariana Tek external buy fallback on `/pricing`.
 - `donation_click`: outbound support donation CTAs that leave for Zeffy.

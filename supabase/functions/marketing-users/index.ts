@@ -7,7 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
 };
 
-type UserRole = "admin" | "member";
+type UserRole = "superuser" | "admin" | "member";
+
+const MODULE_KEYS = [
+  "marketing",
+  "board_projects",
+  "volunteers",
+  "subs",
+  "events",
+  "elections",
+  "gala",
+] as const;
 
 type Profile = {
   id: string;
@@ -49,7 +59,7 @@ Deno.serve(async (req: Request) => {
     },
   });
 
-  const authContext = await getAdminContext(req, adminClient);
+  const authContext = await getSuperuserContext(req, adminClient);
 
   if ("error" in authContext) {
     return jsonResponse({ error: authContext.error }, authContext.status);
@@ -64,7 +74,7 @@ Deno.serve(async (req: Request) => {
       const payload = await readJson(req);
 
       if (payload.action === "invite") {
-        return await inviteUser(req, adminClient, payload);
+        return await inviteUser(req, adminClient, payload, authContext.userId);
       }
 
       return jsonResponse({ error: "Unsupported action" }, 400);
@@ -89,7 +99,7 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-async function getAdminContext(
+async function getSuperuserContext(
   req: Request,
   adminClient: ReturnType<typeof createClient>,
 ): Promise<{ userId: string } | { error: string; status: number }> {
@@ -115,7 +125,7 @@ async function getAdminContext(
     return { error: profileError.message, status: 500 };
   }
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "superuser") {
     return { error: "Forbidden", status: 403 };
   }
 
@@ -123,16 +133,25 @@ async function getAdminContext(
 }
 
 async function listMarketingUsers(adminClient: ReturnType<typeof createClient>) {
-  const [{ data: profilesData, error: profilesError }, authResult] = await Promise.all([
+  const [
+    { data: profilesData, error: profilesError },
+    { data: grantsData, error: grantsError },
+    authResult,
+  ] = await Promise.all([
     adminClient
       .from("profiles")
       .select("id, full_name, email, role, created_at, updated_at")
       .order("full_name", { ascending: true, nullsFirst: false }),
+    adminClient.from("profile_modules").select("profile_id, module"),
     adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
 
   if (profilesError) {
     throw new Error(profilesError.message);
+  }
+
+  if (grantsError) {
+    throw new Error(grantsError.message);
   }
 
   if (authResult.error) {
@@ -141,10 +160,17 @@ async function listMarketingUsers(adminClient: ReturnType<typeof createClient>) 
 
   const profiles = (profilesData || []) as Profile[];
   const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const modulesByProfileId = getModulesByProfileId(grantsData || []);
   const authUsers = (authResult.data.users || []) as AuthUser[];
 
   const users = authUsers
-    .map((user) => mergeAuthUserWithProfile(user, profilesById.get(user.id)))
+    .map((user) =>
+      mergeAuthUserWithProfile(
+        user,
+        profilesById.get(user.id),
+        modulesByProfileId.get(user.id) || [],
+      ),
+    )
     .sort((a, b) =>
       String(a.full_name || a.email).localeCompare(String(b.full_name || b.email)),
     );
@@ -164,12 +190,32 @@ async function listMarketingUsers(adminClient: ReturnType<typeof createClient>) 
       confirmed_at: null,
       email_confirmed_at: null,
       account_status: "profile_only",
+      modules: modulesByProfileId.get(profile.id) || [],
     }));
 
   return [...users, ...profileOnlyUsers];
 }
 
-function mergeAuthUserWithProfile(user: AuthUser, profile?: Profile) {
+function getModulesByProfileId(rows: Array<{ profile_id: string; module: string }>) {
+  const modulesByProfileId = new Map<string, string[]>();
+
+  for (const row of rows) {
+    if (!MODULE_KEYS.includes(row.module as (typeof MODULE_KEYS)[number])) continue;
+
+    modulesByProfileId.set(row.profile_id, [
+      ...(modulesByProfileId.get(row.profile_id) || []),
+      row.module,
+    ]);
+  }
+
+  return modulesByProfileId;
+}
+
+function mergeAuthUserWithProfile(
+  user: AuthUser,
+  profile?: Profile,
+  modules: string[] = [],
+) {
   const fullNameFromMetadata =
     typeof user.user_metadata?.full_name === "string"
       ? user.user_metadata.full_name
@@ -189,11 +235,14 @@ function mergeAuthUserWithProfile(user: AuthUser, profile?: Profile) {
     confirmed_at: user.confirmed_at || null,
     email_confirmed_at: user.email_confirmed_at || null,
     account_status: getAccountStatus(user),
+    modules,
   };
 }
 
 function metadataRole(value: unknown): UserRole {
-  return value === "admin" ? "admin" : "member";
+  if (value === "superuser") return "superuser";
+  if (value === "admin") return "admin";
+  return "member";
 }
 
 function getAccountStatus(user: AuthUser): "active" | "invited" | "pending" {
@@ -212,10 +261,12 @@ async function inviteUser(
   req: Request,
   adminClient: ReturnType<typeof createClient>,
   payload: Record<string, unknown>,
+  currentUserId: string,
 ) {
   const email = normalizeEmail(payload.email);
   const fullName = normalizeString(payload.full_name);
   const role = normalizeRole(payload.role);
+  const modules = normalizeModules(payload.modules);
 
   if (!email) {
     return jsonResponse({ error: "Email is required" }, 400);
@@ -251,6 +302,20 @@ async function inviteUser(
 
   await updateAuthRole(adminClient, user.id, role, user.app_metadata);
 
+  const grantsResult = await replaceModuleGrants(
+    adminClient,
+    user.id,
+    role === "superuser" ? [] : modules,
+    currentUserId,
+  );
+
+  if ("error" in grantsResult) {
+    return jsonResponse(
+      { error: `Invite sent, but module access could not be saved: ${grantsResult.error}` },
+      500,
+    );
+  }
+
   return jsonResponse({
     ok: true,
     user: mergeAuthUserWithProfile(
@@ -266,6 +331,7 @@ async function inviteUser(
         app_metadata: { ...(user.app_metadata || {}), role },
       },
       profile,
+      role === "superuser" ? [] : modules,
     ),
   });
 }
@@ -283,12 +349,12 @@ async function updateUserProfile(
     return jsonResponse({ error: "User ID is required" }, 400);
   }
 
-  if (currentUserId === userId && role !== "admin") {
-    return jsonResponse({ error: "You cannot remove your own admin access." }, 400);
+  if (currentUserId === userId && role !== "superuser") {
+    return jsonResponse({ error: "You cannot remove your own superuser access." }, 400);
   }
 
-  if (role !== "admin" && (await isLastAdmin(adminClient, userId))) {
-    return jsonResponse({ error: "At least one admin account is required." }, 400);
+  if (role !== "superuser" && (await isLastSuperuser(adminClient, userId))) {
+    return jsonResponse({ error: "At least one superuser account is required." }, 400);
   }
 
   const { data: existingProfile, error: profileError } = await adminClient
@@ -338,6 +404,18 @@ async function updateUserProfile(
     updatedProfile.full_name,
   );
 
+  const modules = role === "superuser" ? [] : normalizeModules(payload.modules);
+  const grantsResult = await replaceModuleGrants(
+    adminClient,
+    userId,
+    modules,
+    currentUserId,
+  );
+
+  if ("error" in grantsResult) {
+    return jsonResponse({ error: grantsResult.error }, 500);
+  }
+
   return jsonResponse({
     ok: true,
     user: mergeAuthUserWithProfile(
@@ -346,6 +424,7 @@ async function updateUserProfile(
         app_metadata: { ...(user.app_metadata || {}), role },
       },
       updatedProfile as Profile,
+      modules,
     ),
   });
 }
@@ -421,14 +500,48 @@ async function updateAuthProfile(
   }
 }
 
-async function isLastAdmin(
+async function replaceModuleGrants(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string,
+  modules: string[],
+  grantedBy: string,
+): Promise<{ ok: true } | { error: string }> {
+  const { error: deleteError } = await adminClient
+    .from("profile_modules")
+    .delete()
+    .eq("profile_id", userId);
+
+  if (deleteError) {
+    return { error: deleteError.message };
+  }
+
+  if (!modules.length) {
+    return { ok: true };
+  }
+
+  const { error: insertError } = await adminClient.from("profile_modules").insert(
+    modules.map((module) => ({
+      profile_id: userId,
+      module,
+      granted_by: grantedBy,
+    })),
+  );
+
+  if (insertError) {
+    return { error: insertError.message };
+  }
+
+  return { ok: true };
+}
+
+async function isLastSuperuser(
   adminClient: ReturnType<typeof createClient>,
   userId: string,
 ): Promise<boolean> {
   const { count, error } = await adminClient
     .from("profiles")
     .select("id", { count: "exact", head: true })
-    .eq("role", "admin");
+    .eq("role", "superuser");
 
   if (error) {
     throw new Error(error.message);
@@ -448,7 +561,7 @@ async function isLastAdmin(
     throw new Error(profileError.message);
   }
 
-  return profile?.role === "admin";
+  return profile?.role === "superuser";
 }
 
 async function readJson(req: Request): Promise<Record<string, unknown>> {
@@ -482,5 +595,23 @@ function normalizeEmail(value: unknown): string {
 }
 
 function normalizeRole(value: unknown): UserRole {
-  return value === "admin" ? "admin" : "member";
+  if (value === "superuser") return "superuser";
+  if (value === "admin") return "admin";
+  return "member";
+}
+
+function normalizeModules(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const allowed = new Set<string>(MODULE_KEYS);
+
+  return Array.from(
+    new Set(
+      value
+        .map((item) => normalizeString(item))
+        .filter((item) => allowed.has(item)),
+    ),
+  );
 }

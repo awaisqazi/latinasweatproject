@@ -64,13 +64,11 @@
       );
 
       if (error) {
-        projects = [];
         errorMessage = error.message;
       } else {
         projects = data || [];
       }
     } catch (error) {
-      projects = [];
       errorMessage =
         error?.message ||
         "Assigned projects took too long to load. Please refresh and try again.";

@@ -1,5 +1,4 @@
 <script>
-  import { tick } from "svelte";
   import {
     CalendarClock,
     CheckCircle2,
@@ -7,10 +6,11 @@
     ExternalLink,
     Search,
     UserPlus,
-    X,
   } from "@lucide/svelte";
+  import { isOperationalAdmin } from "../../../lib/dashboard/roles";
   import ProjectTimeline from "./ProjectTimeline.svelte";
   import PublishScheduleDialog from "./PublishScheduleDialog.svelte";
+  import SlideOver from "./SlideOver.svelte";
 
   export let project = null;
   export let supabase;
@@ -23,8 +23,8 @@
   export let onClose = () => {};
   export let onProjectUpdated = () => {};
 
-  let detailsDrawer;
   let displayedProject = null;
+  let drawerOpen = false;
   let assignmentSearch = "";
   let assignmentSaving = false;
   let assignmentError = "";
@@ -39,8 +39,6 @@
   let publishScheduleSaving = false;
   let publishScheduleError = "";
   let timelineRefreshKey = 0;
-  let isClosing = false;
-  let isVisible = false;
 
   const defaultStatuses = [
     "Ready for Production",
@@ -60,7 +58,6 @@
     "Stuck",
   ];
   const priorityOptions = ["P0", "P1", "P2"];
-  const ANIMATION_MS = 190;
   const projectSelectColumns =
     "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
 
@@ -72,14 +69,14 @@
   $: currentUserIsAssigned = assignedEmails.some(
     (email) => normalizeEmail(email) === normalizeEmail(currentUserEmail),
   );
-  $: isCurrentUserAdmin = currentUserRole === "admin";
+  $: isCurrentUserAdmin = isOperationalAdmin(currentUserRole);
   $: statusOptions = getStatusOptions(displayedProject?.status);
   $: unlistedAssignedEmails = assignedEmails.filter(
     (email) =>
       !teamMembers.some((member) => normalizeEmail(member.email) === normalizeEmail(email)),
   );
 
-  async function openDrawer(nextProject) {
+  function openDrawer(nextProject) {
     displayedProject = nextProject;
     assignmentSearch = "";
     assignmentError = "";
@@ -90,42 +87,22 @@
     prioritySuccess = "";
     publishScheduleOpen = false;
     publishScheduleError = "";
-    isClosing = false;
-    isVisible = false;
-    await tick();
-
-    if (detailsDrawer && !detailsDrawer.open) {
-      detailsDrawer.showModal();
-    }
-
-    window.requestAnimationFrame(() => {
-      isVisible = true;
-    });
+    drawerOpen = true;
   }
 
   function requestClose() {
-    if (!detailsDrawer?.open || isClosing) return;
+    if (assignmentSaving || statusSaving || prioritySaving || publishScheduleSaving) {
+      return;
+    }
 
-    isClosing = true;
-    isVisible = false;
-    window.setTimeout(() => {
-      detailsDrawer?.close();
-    }, ANIMATION_MS);
+    drawerOpen = false;
   }
 
   function handleClose() {
-    isClosing = false;
-    isVisible = false;
     publishScheduleOpen = false;
     publishScheduleError = "";
     displayedProject = null;
     onClose();
-  }
-
-  function handleDrawerClick(event) {
-    if (event.target === detailsDrawer) {
-      requestClose();
-    }
   }
 
   function formatDate(value) {
@@ -481,34 +458,17 @@
   }
 </script>
 
-<dialog
-  bind:this={detailsDrawer}
-  class="project-detail-drawer {isVisible ? 'is-visible' : ''} {isClosing ? 'is-closing' : ''} fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(100vw,32rem)] rounded-none border-0 bg-transparent p-0 text-[#1E1E1E] backdrop:bg-black/35"
-  onclick={handleDrawerClick}
-  onclose={handleClose}
+<SlideOver
+  open={drawerOpen}
+  title={displayedProject?.title || ""}
+  {eyebrow}
+  closeLabel="Close project details"
+  closeDisabled={assignmentSaving || statusSaving || prioritySaving || publishScheduleSaving}
+  onClose={requestClose}
+  onClosed={handleClose}
 >
   {#if displayedProject}
-    <div class="drawer-panel flex h-full flex-col bg-white shadow-2xl">
-      <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#ffbd59]">
-              {eyebrow}
-            </p>
-            <h3 class="mt-2 text-xl font-bold leading-tight">{displayedProject.title}</h3>
-          </div>
-          <button
-            type="button"
-            class="rounded-md p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
-            aria-label="Close project details"
-            onclick={requestClose}
-          >
-            <X class="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-
-      <div class="flex-1 overflow-y-auto px-5 py-5">
+    <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
           <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(displayedProject.status)}">
             {displayedProject.status}
@@ -762,9 +722,8 @@
           Close
         </button>
       </div>
-    </div>
-  {/if}
-</dialog>
+    {/if}
+</SlideOver>
 
 <PublishScheduleDialog
   open={publishScheduleOpen}
@@ -776,27 +735,3 @@
   onCancel={closePublishScheduler}
   onConfirm={confirmPublishSchedule}
 />
-
-<style>
-  .drawer-panel {
-    backface-visibility: hidden;
-    contain: layout paint;
-    transform: translate3d(100%, 0, 0);
-    transition: transform 190ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    will-change: transform;
-  }
-
-  .project-detail-drawer.is-visible .drawer-panel {
-    transform: translate3d(0, 0, 0);
-  }
-
-  .project-detail-drawer.is-closing .drawer-panel {
-    transform: translate3d(100%, 0, 0);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .drawer-panel {
-      transition-duration: 1ms;
-    }
-  }
-</style>

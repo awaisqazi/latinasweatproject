@@ -1,12 +1,9 @@
 <script>
     import { onMount, onDestroy } from "svelte";
     import {
-        submitVote,
-        isVotingOpen,
-        hasAlreadyVoted,
-        subscribeToVotingPeriod,
-        getScheduledVotingStatus,
-    } from "../lib/electionFirebase.js";
+        supabase,
+        SUPABASE_CONFIG_ERROR,
+    } from "../lib/supabaseClient.js";
 
     // Props - candidate data passed from parent
     export let roles = [];
@@ -19,7 +16,11 @@
     };
     let votingStatusLoading = true;
     let votingStatusError = false;
-    let unsubscribeVotingPeriod = null;
+    let statusPollInterval = null;
+
+    // Schedule details from the server (for the closed-state schedule box)
+    let opensAt = null;
+    let closesAt = null;
 
     // Form state
     let voterName = "";
@@ -48,73 +49,89 @@
         { value: "community-member", label: "Community Member" },
     ];
 
-    // Function to compute effective voting status
-    function computeVotingStatus(override) {
-        const scheduled = getScheduledVotingStatus();
-
-        if (override === "open") {
-            return {
-                isOpen: true,
-                message: `Voting is open (manually enabled by admin).`,
-                status: "manual-open",
-            };
-        }
-
-        if (override === "closed") {
-            return {
-                isOpen: false,
-                message: `Voting is currently closed. Please check back later.`,
-                status: "manual-closed",
-            };
-        }
-
-        // No override, use scheduled status
-        return {
-            isOpen: scheduled.isOpen,
-            message: scheduled.message,
-            status: scheduled.isOpen ? "scheduled" : "before-period",
-        };
+    function formatDateTime(iso) {
+        if (!iso) return "";
+        return new Intl.DateTimeFormat("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
+        }).format(new Date(iso));
     }
 
-    onMount(async () => {
-        // Try to subscribe to real-time voting period updates
-        try {
-            unsubscribeVotingPeriod = subscribeToVotingPeriod((settings) => {
-                votingStatus = computeVotingStatus(settings.override);
-                votingStatusLoading = false;
-                votingStatusError = false;
-            });
-
-            // Also do an initial async check as fallback
-            setTimeout(async () => {
-                if (votingStatusLoading) {
-                    // Subscription hasn't fired yet, try direct fetch
-                    try {
-                        votingStatus = await isVotingOpen();
-                        votingStatusLoading = false;
-                    } catch (e) {
-                        console.error("Error fetching voting status:", e);
-                        // Fall back to scheduled status
-                        votingStatus = computeVotingStatus(null);
-                        votingStatusLoading = false;
-                    }
-                }
-            }, 2000);
-        } catch (error) {
-            console.error(
-                "Error setting up voting period subscription:",
-                error,
-            );
-            // Fall back to scheduled status (client-side only)
-            votingStatus = computeVotingStatus(null);
+    // Fetch the effective voting status from the server (RPC handles the
+    // schedule and any admin override).
+    async function fetchVotingStatus() {
+        if (!supabase) {
+            console.error(SUPABASE_CONFIG_ERROR);
+            votingStatus = {
+                isOpen: false,
+                message:
+                    "We could not check the voting status. Please try again later.",
+                status: "error",
+            };
             votingStatusLoading = false;
             votingStatusError = true;
+            return;
         }
+
+        const { data, error } = await supabase.rpc("get_voting_status");
+
+        if (error) {
+            console.error("Error fetching voting status:", error.message);
+            votingStatus = {
+                isOpen: false,
+                message:
+                    "We could not check the voting status. Please try again.",
+                status: "error",
+            };
+            votingStatusLoading = false;
+            votingStatusError = true;
+            return;
+        }
+
+        opensAt = data?.opensAt || null;
+        closesAt = data?.closesAt || null;
+
+        if (data?.open) {
+            votingStatus = {
+                isOpen: true,
+                message: closesAt
+                    ? `Voting is open until ${formatDateTime(closesAt)}.`
+                    : "Voting is open.",
+                status: "open",
+            };
+        } else if (opensAt && new Date(opensAt) > new Date()) {
+            votingStatus = {
+                isOpen: false,
+                message: `Voting opens on ${formatDateTime(opensAt)}.`,
+                status: "before-period",
+            };
+        } else {
+            votingStatus = {
+                isOpen: false,
+                message:
+                    "Voting is currently closed. Please check back later.",
+                status: "closed",
+            };
+        }
+
+        votingStatusLoading = false;
+        votingStatusError = false;
+    }
+
+    onMount(() => {
+        fetchVotingStatus();
+        // Poll periodically so the page reacts when the board opens or
+        // closes voting (replaces the old realtime listener).
+        statusPollInterval = setInterval(fetchVotingStatus, 60000);
     });
 
     onDestroy(() => {
-        if (unsubscribeVotingPeriod) {
-            unsubscribeVotingPeriod();
+        if (statusPollInterval) {
+            clearInterval(statusPollInterval);
         }
     });
 
@@ -122,21 +139,21 @@
     async function retryVotingStatus() {
         votingStatusLoading = true;
         votingStatusError = false;
-        try {
-            votingStatus = await isVotingOpen();
-            votingStatusLoading = false;
-        } catch (e) {
-            console.error("Retry failed:", e);
-            votingStatus = computeVotingStatus(null);
-            votingStatusLoading = false;
-            votingStatusError = true;
-        }
+        await fetchVotingStatus();
     }
 
     // Check if email has voted when email changes
     async function checkEmail() {
+        if (!supabase) return;
         if (voterEmail && voterEmail.includes("@")) {
-            hasVotedBefore = await hasAlreadyVoted(voterEmail);
+            const { data, error } = await supabase.rpc("has_voted", {
+                p_email: voterEmail.trim(),
+            });
+            if (error) {
+                console.error("Error checking email:", error.message);
+                return;
+            }
+            hasVotedBefore = data === true;
         }
     }
 
@@ -154,26 +171,40 @@
 
         if (!isFormValid || isSubmitting) return;
 
+        if (!supabase) {
+            submitError =
+                "Voting is unavailable right now. Please try again later.";
+            return;
+        }
+
         isSubmitting = true;
         submitError = "";
 
-        const voteData = {
-            name: voterName.trim(),
-            email: voterEmail.trim(),
-            affiliation: voterAffiliation,
-            secretary: selections.secretary || "abstain",
-            treasurer: selections.treasurer || "abstain",
-            vicePresident: selections["vice-president"] || "abstain",
-            president: selections.president || "abstain",
-        };
+        const { data, error } = await supabase.rpc("cast_vote", {
+            p_email: voterEmail.trim(),
+            p_president: selections.president || "abstain",
+            p_vice_president: selections["vice-president"] || "abstain",
+            p_treasurer: selections.treasurer || "abstain",
+            p_secretary: selections.secretary || "abstain",
+        });
 
-        const result = await submitVote(voteData);
-
-        if (result.success) {
+        if (error) {
+            console.error("Error submitting vote:", error.message);
+            submitError = "Failed to submit vote. Please try again.";
+        } else if (data?.ok) {
             submitSuccess = true;
-        } else {
+        } else if (data?.reason === "duplicate") {
+            submitError = "This email address has already submitted a vote.";
+            hasVotedBefore = true;
+        } else if (data?.reason === "closed") {
             submitError =
-                result.error || "An error occurred. Please try again.";
+                "Voting is currently closed, so your vote could not be recorded.";
+            fetchVotingStatus();
+        } else if (data?.reason === "invalid_input") {
+            submitError =
+                "Please double-check your email address and try again.";
+        } else {
+            submitError = "An error occurred. Please try again.";
         }
 
         isSubmitting = false;
@@ -255,11 +286,18 @@
             <div class="voting-schedule-info">
                 <div class="schedule-box">
                     <span class="schedule-label">Official Voting Period</span>
-                    <span class="schedule-dates"
-                        >December 9 – December 10, 2025</span
-                    >
-                    <span class="schedule-times">12:00 AM – 11:59 PM (CST)</span
-                    >
+                    {#if opensAt && closesAt}
+                        <span class="schedule-dates"
+                            >{formatDateTime(opensAt)}</span
+                        >
+                        <span class="schedule-times"
+                            >through {formatDateTime(closesAt)}</span
+                        >
+                    {:else}
+                        <span class="schedule-dates"
+                            >Voting dates will be announced soon</span
+                        >
+                    {/if}
                 </div>
                 <p class="closed-note">
                     Please come back during the voting period to cast your vote.

@@ -21,8 +21,9 @@
     const requestedRedirect = params.get("redirectTo");
 
     if (
-      requestedRedirect?.startsWith("/admin/marketing") &&
-      requestedRedirect !== "/admin/marketing/login"
+      requestedRedirect?.startsWith("/admin") &&
+      !requestedRedirect.startsWith("//") &&
+      !requestedRedirect.startsWith("/admin/marketing/login")
     ) {
       redirectTo = requestedRedirect;
     }

@@ -6,34 +6,70 @@
     import GalaOverview from "./GalaOverview.svelte";
     import DonationManager from "./DonationManager.svelte";
 
+    import {
+        supabase,
+        SUPABASE_CONFIG_ERROR,
+    } from "../../lib/supabaseClient";
+
     // State
-    let isAuthenticated = false;
-    let passwordInput = "";
-    let error = "";
+    let session = null;
+    let authChecked = false;
+    let configError = SUPABASE_CONFIG_ERROR;
+    let moduleWarning = false;
     let activeTab = "overview"; // 'overview', 'checkin', 'paddle', 'donations'
 
-    // Password Check
-    function handleLogin() {
-        if (passwordInput === "XavierLSP123!") {
-            isAuthenticated = true;
-            error = "";
-            // Persist session if needed, but for now simple state is fine
-            sessionStorage.setItem("galaAdminAuth", "true");
-        } else {
-            error = "Incorrect password";
+    $: isAuthenticated = Boolean(session);
+
+    // If the signed-in account lacks the gala module, RLS returns zero rows
+    // everywhere with no error. Probe both tables so we can hint at the cause.
+    async function probeGalaAccess() {
+        if (!supabase) return;
+        try {
+            const [guestsRes, donationsRes] = await Promise.all([
+                supabase
+                    .from("gala_guests")
+                    .select("id", { count: "exact", head: true }),
+                supabase
+                    .from("gala_donations")
+                    .select("id", { count: "exact", head: true }),
+            ]);
+            moduleWarning =
+                (guestsRes.count || 0) === 0 &&
+                (donationsRes.count || 0) === 0;
+        } catch {
+            moduleWarning = false;
         }
     }
 
     onMount(() => {
-        if (sessionStorage.getItem("galaAdminAuth") === "true") {
-            isAuthenticated = true;
+        if (!supabase) {
+            authChecked = true;
+            return;
         }
+
+        supabase.auth.getSession().then(({ data }) => {
+            session = data?.session || null;
+            authChecked = true;
+            if (session) probeGalaAccess();
+        });
+
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, newSession) => {
+                const hadSession = Boolean(session);
+                session = newSession;
+                authChecked = true;
+                if (session && !hadSession) probeGalaAccess();
+            },
+        );
+
+        return () => listener?.subscription?.unsubscribe();
     });
 
-    function handleLogout() {
-        isAuthenticated = false;
-        sessionStorage.removeItem("galaAdminAuth");
-        passwordInput = "";
+    async function handleLogout() {
+        if (supabase) {
+            await supabase.auth.signOut();
+        }
+        session = null;
     }
 
     // Navigation Items
@@ -47,44 +83,38 @@
 </script>
 
 <div class="min-h-screen bg-[var(--color-light-gray)]">
-    {#if !isAuthenticated}
-        <!-- Login Screen -->
+    {#if !authChecked}
+        <!-- Checking session -->
         <div class="flex flex-col items-center justify-center min-h-screen p-8">
-            <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <p class="text-[var(--color-medium-gray)]">Checking session...</p>
+        </div>
+    {:else if !isAuthenticated}
+        <!-- Sign-in Required Screen -->
+        <div class="flex flex-col items-center justify-center min-h-screen p-8">
+            <div
+                class="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center"
+            >
                 <h2
-                    class="text-2xl font-bold text-[var(--color-off-black)] mb-6 text-center"
+                    class="text-2xl font-bold text-[var(--color-off-black)] mb-4"
                 >
                     Gala Admin Access
                 </h2>
-                {#if error}
+                {#if configError}
                     <div
                         class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm"
                     >
-                        {error}
+                        {configError}
                     </div>
                 {/if}
-                <form on:submit|preventDefault={handleLogin} class="space-y-4">
-                    <div>
-                        <label
-                            for="password-input"
-                            class="block text-sm font-medium text-[var(--color-medium-gray)] mb-1"
-                            >Password</label
-                        >
-                        <input
-                            id="password-input"
-                            type="password"
-                            bind:value={passwordInput}
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[var(--color-vibrant-pink)] focus:border-transparent outline-none"
-                            placeholder="Enter admin password"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        class="w-full bg-[var(--color-vibrant-pink)] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity"
-                    >
-                        Unlock Dashboard
-                    </button>
-                </form>
+                <p class="text-[var(--color-medium-gray)] mb-6">
+                    Sign in to the team dashboard to use gala tools
+                </p>
+                <a
+                    href="/admin/marketing/login?redirectTo=/admin/gala"
+                    class="inline-block w-full bg-[var(--color-vibrant-pink)] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity"
+                >
+                    Go to Dashboard Login
+                </a>
             </div>
         </div>
     {:else}
@@ -144,6 +174,17 @@
                         {new Date().toLocaleDateString()}
                     </div>
                 </header>
+
+                {#if moduleWarning}
+                    <div
+                        class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-6 text-sm"
+                    >
+                        No gala data is visible to this account. If you expect
+                        to see guests or donations, your account may not have
+                        the gala module enabled. Ask a dashboard admin to grant
+                        it.
+                    </div>
+                {/if}
 
                 <!-- Dynamic Content -->
                 <div class="bg-white rounded-xl shadow-sm p-6 min-h-[500px]">

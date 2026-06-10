@@ -1,36 +1,21 @@
 <script>
-    import { onMount, onDestroy, tick } from "svelte";
-    import { db } from "../lib/firebase";
+    import { onDestroy, onMount, tick } from "svelte";
     import {
-        collection,
-        onSnapshot,
-        doc,
-        runTransaction,
-        query,
-        where,
-        documentId,
-        Timestamp,
-        getDocs,
-        getDoc,
-    } from "firebase/firestore";
-    import { generateShifts } from "../lib/shiftUtils";
+        getSupabaseClient,
+        SUPABASE_CONFIG_ERROR,
+    } from "../lib/supabaseClient";
     import ShiftCard from "./ShiftCard.svelte";
     import MiniCalendar from "./MiniCalendar.svelte";
     import RegisterModal from "./RegisterModal.svelte";
-    import {
-        getCache,
-        setCache,
-        getShiftCacheKey,
-        getMonthlyAvailabilityCacheKey,
-        invalidateCacheByPrefix,
-    } from "../lib/cacheUtils";
 
-    let shifts = [];
-    let generatedShifts = [];
-    let customShifts = [];
-    let shiftData = {};
+    const supabase = SUPABASE_CONFIG_ERROR ? null : getSupabaseClient();
+
+    let shifts = []; // Week shifts (legacy shape: start/end Dates)
+    let opportunities = [];
+    let shiftData = {}; // { [shiftId]: { registrations: [{name, role}] } }
     let selectedDate = new Date();
-    let monthlyAvailability = {}; // Aggregation data for calendar
+    let monthlyAvailability = {}; // { days: { 'YYYY-MM-DD': [...] } }
+    let loadError = "";
 
     // Helper: Convert Date -> "YYYY-MM-DD" safely
     const toDateStr = (date) => {
@@ -68,52 +53,141 @@
     let registrationSuccess = false;
     let successTitle = "";
     let successMessage = "";
+    let registerError = "";
+    let canCancelRegistration = false;
+    let isCancelling = false;
 
     // Fetch tracking
     let currentFetchKey = "";
     let currentMonthKey = "";
+    let mounted = false;
+    let realtimeChannel = null;
+    let realtimeRefreshTimer = null;
+    let realtimeMonthKeys = new Set();
 
     onMount(() => {
-        try {
-            // Generate shifts for the next 2 months (default)
-            generatedShifts = generateShifts();
-            combineShifts(); // Ensure shifts are displayed even if fetch is delayed
-            // Fetch aggregation for current month
-            const now = new Date();
-            const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-            fetchMonthlyAvailability(monthKey);
-        } catch (e) {
-            console.error("Error initializing shifts:", e);
+        mounted = true;
+
+        if (!supabase) {
+            loadError =
+                "The shift schedule is temporarily unavailable. Please try again later.";
+            return;
+        }
+
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        fetchMonthlyAvailability(monthKey);
+        fetchOpportunities();
+        startRealtime();
+    });
+
+    onDestroy(() => {
+        if (realtimeRefreshTimer) {
+            clearTimeout(realtimeRefreshTimer);
+        }
+
+        if (realtimeChannel) {
+            supabase?.removeChannel(realtimeChannel);
+            realtimeChannel = null;
         }
     });
 
-    // Fetch aggregation data for calendar display (1 read per month)
-    async function fetchMonthlyAvailability(monthKey) {
-        if (monthKey === currentMonthKey) return;
+    // Map a shifts_public row to the legacy shift shape used by ShiftCard.
+    function mapShiftRow(row) {
+        const start = new Date(row.starts_at);
+        const end = new Date(row.ends_at);
+        const date = new Date(start);
+        date.setHours(0, 0, 0, 0);
+
+        return {
+            id: row.id,
+            kind: row.kind,
+            title: row.title,
+            description: row.description,
+            location: row.location,
+            start,
+            end,
+            date,
+            dateStr: toDateStr(date),
+            leadCapacity: row.lead_capacity,
+            volunteerCapacity: row.volunteer_capacity,
+            leadCount: Number(row.lead_count) || 0,
+            volunteerCount: Number(row.volunteer_count) || 0,
+            cancelled: row.cancelled,
+        };
+    }
+
+    function monthKeyForDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function queueRealtimeRefresh(payload = {}) {
+        if (payload.starts_at) {
+            const changedAt = new Date(payload.starts_at);
+            if (!Number.isNaN(changedAt.getTime())) {
+                realtimeMonthKeys.add(monthKeyForDate(changedAt));
+            }
+        }
+
+        if (realtimeRefreshTimer) {
+            clearTimeout(realtimeRefreshTimer);
+        }
+
+        realtimeRefreshTimer = setTimeout(() => {
+            refreshAfterRealtime();
+        }, 200);
+    }
+
+    function startRealtime() {
+        if (!supabase || realtimeChannel) return;
+
+        realtimeChannel = supabase
+            .channel("volunteer-shifts")
+            .on("broadcast", { event: "shift-changed" }, ({ payload }) => {
+                queueRealtimeRefresh(payload);
+            })
+            .subscribe((status, error) => {
+                if (status === "CHANNEL_ERROR") {
+                    console.error("Volunteer realtime channel error:", error);
+                }
+            });
+    }
+
+    function broadcastShiftChange(shift, operation) {
+        if (!realtimeChannel || !shift) return;
+
+        realtimeChannel
+            .send({
+                type: "broadcast",
+                event: "shift-changed",
+                payload: {
+                    shift_id: shift.id,
+                    starts_at: shift.start?.toISOString?.() || null,
+                    kind: shift.kind || null,
+                    cancelled: Boolean(shift.cancelled),
+                    operation,
+                },
+            })
+            .catch((error) => {
+                console.error("Volunteer realtime broadcast failed:", error);
+            });
+    }
+
+    // Fetch availability data for the calendar (one RPC per month)
+    async function fetchMonthlyAvailability(monthKey, { force = false } = {}) {
+        if (!supabase || (!force && monthKey === currentMonthKey)) return;
         currentMonthKey = monthKey;
 
-        const cacheKey = getMonthlyAvailabilityCacheKey(monthKey);
-        const cached = getCache(cacheKey);
+        const { data, error } = await supabase.rpc("get_month_availability", {
+            p_month: monthKey,
+        });
 
-        // Load cached data immediately
-        if (cached) {
-            monthlyAvailability = cached.data || {};
-            if (!cached.isStale) return;
+        if (error) {
+            console.error("Error fetching monthly availability:", error);
+            return;
         }
 
-        // Fetch from Firebase
-        try {
-            const { doc: docRef, getDoc } = await import("firebase/firestore");
-            const monthDoc = await getDoc(
-                docRef(db, "monthly_availability", monthKey),
-            );
-            if (monthDoc.exists()) {
-                monthlyAvailability = monthDoc.data();
-                setCache(cacheKey, monthlyAvailability);
-            }
-        } catch (e) {
-            console.error("Error fetching monthly availability:", e);
-        }
+        monthlyAvailability = data || {};
     }
 
     // Handle month change from calendar navigation
@@ -123,162 +197,121 @@
         fetchMonthlyAvailability(monthKey);
     }
 
-    onDestroy(() => {
-        // No cleanup needed - we use one-time fetches now
-    });
+    async function fetchOpportunities() {
+        if (!supabase) return;
 
-    // Reactive subscription based on visible week
-    $: {
-        if (currentWeekStartStr) {
-            updateSubscriptionsForWeek(currentWeekStartStr);
-        }
-    }
+        const { data, error } = await supabase
+            .from("shifts_public")
+            .select("*")
+            .eq("kind", "opportunity")
+            .eq("cancelled", false)
+            .gte("starts_at", new Date().toISOString())
+            .order("starts_at", { ascending: true });
 
-    function updateSubscriptionsForWeek(weekStart) {
-        // Determine window: We need to fetch data for the month(s) that contain the visible week
-        const dStart = new Date(weekStart);
-        const dEnd = new Date(dStart);
-        dEnd.setDate(dEnd.getDate() + 6); // End of the visible week
-
-        // Get the months that the week spans (could be 1 or 2 months)
-        const startMonth = dStart.getMonth();
-        const endMonth = dEnd.getMonth();
-        const startYear = dStart.getFullYear();
-        const endYear = dEnd.getFullYear();
-
-        // Fetch from start of first month to end of last month
-        const startOfFetch = new Date(startYear, startMonth, 1);
-        const endOfFetch = new Date(endYear, endMonth + 1, 0, 23, 59, 59);
-
-        const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
-        if (key === currentFetchKey) return;
-
-        currentFetchKey = key;
-        fetchData(startOfFetch, endOfFetch);
-    }
-
-    async function fetchData(start, end) {
-        const cacheKey = getShiftCacheKey(start, end);
-        const cached = getCache(cacheKey);
-
-        // Load cached data immediately (optimistic)
-        if (cached) {
-            shiftData = cached.data.shiftData || {};
-            customShifts = (cached.data.customShifts || []).map((c) => ({
-                ...c,
-                start: new Date(c.start),
-                end: new Date(c.end),
-                date: new Date(c.date),
-            }));
-            combineShifts();
-
-            // If cache is fresh, don't fetch from Firebase
-            if (!cached.isStale) {
-                return;
-            }
+        if (error) {
+            console.error("Error fetching opportunities:", error);
+            return;
         }
 
-        // Fetch fresh data from Firebase (one-time, no listener)
-        try {
-            const startId = toDateStr(start);
-            const endBoundDate = new Date(end);
-            endBoundDate.setDate(endBoundDate.getDate() + 1);
-            const endId = toDateStr(endBoundDate);
+        opportunities = (data || []).map(mapShiftRow);
+        fetchRegistrants(opportunities.map((s) => s.id));
+    }
 
-            // Fetch shifts
-            const shiftsQuery = query(
-                collection(db, "shifts"),
-                where(documentId(), ">=", startId),
-                where(documentId(), "<", endId),
-            );
+    // Reactive fetch based on visible week
+    $: if (mounted && supabase && currentWeekStartStr) {
+        fetchWeek(currentWeekStartStr);
+    }
 
-            const shiftsSnapshot = await getDocs(shiftsQuery);
-            const data = {};
-            shiftsSnapshot.forEach((doc) => {
-                data[doc.id] = doc.data();
-            });
-            shiftData = data;
+    async function fetchWeek(weekStart) {
+        if (weekStart === currentFetchKey) return;
+        currentFetchKey = weekStart;
 
-            // Fetch custom shifts
-            const customQuery = query(
-                collection(db, "custom_shifts"),
-                where("start", ">=", Timestamp.fromDate(start)),
-                where("start", "<=", Timestamp.fromDate(end)),
-            );
+        const [y, m, d] = weekStart.split("-").map(Number);
+        const rangeStart = new Date(y, m - 1, d);
+        const rangeEnd = new Date(y, m - 1, d + 7);
 
-            const customSnapshot = await getDocs(customQuery);
-            const custom = [];
-            customSnapshot.forEach((doc) => {
-                const d = doc.data();
-                const startTime = d.start.toDate();
-                const endTime = d.end.toDate();
-                const date = new Date(startTime);
-                date.setHours(0, 0, 0, 0);
+        const { data, error } = await supabase
+            .from("shifts_public")
+            .select("*")
+            .gte("starts_at", rangeStart.toISOString())
+            .lt("starts_at", rangeEnd.toISOString())
+            .eq("cancelled", false)
+            .neq("kind", "opportunity")
+            .order("starts_at", { ascending: true });
 
-                custom.push({
-                    id: doc.id,
-                    start: startTime,
-                    end: endTime,
-                    date,
-                    dateStr: toDateStr(date),
-                    isCustom: true,
-                    leadCapacity: d.leadCapacity,
-                    volunteerCapacity: d.volunteerCapacity,
-                });
-            });
-            customShifts = custom;
+        if (weekStart !== currentFetchKey) return;
 
-            // Fetch registrations for custom shifts (since they don't match the date-range ID pattern)
-            if (custom.length > 0) {
-                const customPromises = custom.map(async (c) => {
-                    try {
-                        const sDoc = await getDoc(doc(db, "shifts", c.id));
-                        if (sDoc.exists()) {
-                            return { id: c.id, data: sDoc.data() };
-                        }
-                    } catch (e) {
-                        console.warn("Failed to fetch custom shift regs", c.id);
-                    }
-                    return null;
-                });
-
-                const customResults = await Promise.all(customPromises);
-                customResults.forEach((res) => {
-                    if (res) {
-                        data[res.id] = res.data;
-                    }
-                });
-            }
-
-            // Update shiftData with custom shift registrations
-            shiftData = data;
-            combineShifts();
-            // Update cache
-            setCache(cacheKey, { shiftData: data, customShifts: custom });
-        } catch (e) {
-            // On Firebase error (quota, network, etc.), keep showing cached data
-            console.error("Firebase fetch error - using cached data:", e);
+        if (error) {
+            console.error("Error fetching shifts:", error);
+            loadError =
+                "Could not load shifts right now. Please refresh the page.";
+            return;
         }
+
+        loadError = "";
+        shifts = (data || []).map(mapShiftRow);
+        fetchRegistrants(shifts.map((s) => s.id));
     }
 
-    // Call this after successful registration to invalidate cache
-    function invalidateShiftCache() {
-        invalidateCacheByPrefix("shifts_");
+    // Fetch public registrant names (no emails or phone numbers)
+    async function fetchRegistrants(shiftIds) {
+        if (!supabase || !shiftIds.length) return;
+
+        const { data, error } = await supabase
+            .from("shift_registrations_public")
+            .select("id, shift_id, name, role, checked_in")
+            .in("shift_id", shiftIds);
+
+        if (error) {
+            console.error("Error fetching registrants:", error);
+            return;
+        }
+
+        const next = { ...shiftData };
+        for (const id of shiftIds) {
+            next[id] = { registrations: [] };
+        }
+        for (const reg of data || []) {
+            next[reg.shift_id].registrations.push(reg);
+        }
+        shiftData = next;
     }
 
-    function combineShifts() {
-        const activeGenerated = generatedShifts.filter((s) => {
-            const data = shiftData[s.id];
-            return !data?.cancelled;
-        });
+    function refreshAfterRegistration() {
+        currentFetchKey = "";
+        fetchWeek(currentWeekStartStr);
+        fetchOpportunities();
+        currentMonthKey = "";
+        const [y, m] = currentWeekStartStr.split("-");
+        fetchMonthlyAvailability(`${y}-${m}`, { force: true });
+    }
 
-        const combined = [...activeGenerated, ...customShifts];
-        combined.sort((a, b) => a.start - b.start);
-        shifts = combined;
+    function refreshAfterRealtime() {
+        realtimeRefreshTimer = null;
+
+        currentFetchKey = "";
+        fetchWeek(currentWeekStartStr);
+        fetchOpportunities();
+
+        const monthKeys = realtimeMonthKeys;
+        realtimeMonthKeys = new Set();
+
+        if (currentMonthKey) {
+            monthKeys.add(currentMonthKey);
+        }
+
+        if (monthKeys.size === 0) {
+            const [y, m] = currentWeekStartStr.split("-");
+            monthKeys.add(`${y}-${m}`);
+        }
+
+        for (const monthKey of monthKeys) {
+            fetchMonthlyAvailability(monthKey, { force: true });
+        }
     }
 
     function isShiftUnavailable(shift) {
-        const data = shiftData[shift.id] || { lead: 0, volunteer: 0 };
+        const data = shiftData[shift.id] || {};
         const now = new Date();
         const lockTime = new Date(shift.start.getTime() - 24 * 60 * 60 * 1000);
         const isLocked =
@@ -286,21 +319,17 @@
             now.getTime() >= shift.start.getTime();
 
         if (isLocked) return true;
+
         const registrations = data.registrations || [];
-        const leadCount = registrations.filter((r) => r.role === "lead").length;
-        const volunteerCount = registrations.filter(
-            (r) => r.role === "volunteer",
-        ).length;
+        const leadCount = registrations.length
+            ? registrations.filter((r) => r.role === "lead").length
+            : shift.leadCount;
+        const volunteerCount = registrations.length
+            ? registrations.filter((r) => r.role === "volunteer").length
+            : shift.volunteerCount;
 
-        if (isLocked) return true;
-
-        const leadCap =
-            shift.leadCapacity !== undefined ? shift.leadCapacity : 1;
-        const volCap =
-            shift.volunteerCapacity !== undefined ? shift.volunteerCapacity : 2;
-
-        const isLeadFull = leadCount >= leadCap;
-        const isVolunteerFull = volunteerCount >= volCap;
+        const isLeadFull = leadCount >= shift.leadCapacity;
+        const isVolunteerFull = volunteerCount >= shift.volunteerCapacity;
         return isLeadFull && isVolunteerFull;
     }
 
@@ -354,92 +383,117 @@
         selectedRole = event.detail.role;
         isModalOpen = true;
         registrationSuccess = false;
+        registerError = "";
+        canCancelRegistration = false;
+        successTitle = "";
+        successMessage = "";
+    }
+
+    function openOpportunityModal(shift, role) {
+        openModal({ detail: { shift, role } });
+    }
+
+    function isOpportunityLocked(shift) {
+        return new Date() >= shift.start;
     }
 
     async function handleRegistration(event) {
+        if (!supabase) return;
+
         isSubmitting = true;
+        registerError = "";
         successTitle = "";
         successMessage = "";
+        canCancelRegistration = false;
         const { name, email, phone, shift, role } = event.detail;
-        const shiftId = shift.id;
-        const shiftRef = doc(db, "shifts", shiftId);
-        try {
-            const result = await runTransaction(db, async (transaction) => {
-                const sfDoc = await transaction.get(shiftRef);
-                let currentData = sfDoc.exists()
-                    ? sfDoc.data()
-                    : { lead: 0, volunteer: 0, registrations: [] };
 
-                const registrations = currentData.registrations || [];
+        const { data, error } = await supabase.rpc("register_for_shift", {
+            p_shift_id: shift.id,
+            p_name: name,
+            p_email: email,
+            p_phone: phone,
+            p_role: role,
+        });
 
-                // Duplicate Check
-                const normalizedEmail = email.toLowerCase();
-                const isDuplicate = registrations.some(
-                    (r) => r.email.toLowerCase() === normalizedEmail,
-                );
+        isSubmitting = false;
 
-                if (isDuplicate) {
-                    return { status: "duplicate" };
-                }
-
-                const currentRoleCount = registrations.filter(
-                    (r) => r.role === role,
-                ).length;
-
-                const capacity =
-                    role === "lead"
-                        ? shift.leadCapacity !== undefined
-                            ? shift.leadCapacity
-                            : 1
-                        : shift.volunteerCapacity !== undefined
-                          ? shift.volunteerCapacity
-                          : 2;
-                if (currentRoleCount >= capacity)
-                    throw "Sorry, this spot was just taken!";
-
-                const newRegistration = {
-                    name,
-                    email,
-                    phone,
-                    role,
-                    timestamp: new Date().toISOString(),
-                };
-
-                transaction.set(shiftRef, {
-                    ...currentData,
-                    registrations: [...registrations, newRegistration],
-                });
-
-                return { status: "success" };
-            });
-
-            if (result.status === "duplicate") {
-                successTitle = "Already Signed Up!";
-                const dateStr = shift.start.toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                });
-                const timeStr = shift.start.toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                });
-                successMessage = `It looks like you are already signed up for this shift on ${dateStr} at ${timeStr}! We look forward to seeing you there.`;
-                registrationSuccess = true;
-            } else if (result.status === "success") {
-                invalidateShiftCache();
-                registrationSuccess = true;
-
-                // Force fresh fetch of the data to update UI immediately
-                currentFetchKey = ""; // Reset key to ensure fetch happens
-                updateSubscriptionsForWeek(currentWeekStartStr);
-            }
-        } catch (e) {
-            console.error("Transaction failed: ", e);
-            alert("Registration failed: " + e);
-        } finally {
-            isSubmitting = false;
+        if (error) {
+            registerError =
+                "Registration failed: " + (error.message || "please try again.");
+            return;
         }
+
+        if (data?.ok) {
+            registrationSuccess = true;
+            broadcastShiftChange(shift, "INSERT");
+            refreshAfterRegistration();
+            return;
+        }
+
+        const reason = data?.reason || "";
+
+        if (reason === "duplicate") {
+            successTitle = "Already Signed Up!";
+            const dateStr = shift.start.toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+            });
+            const timeStr = shift.start.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+            });
+            successMessage = `It looks like you are already signed up for this shift on ${dateStr} at ${timeStr}! We look forward to seeing you there.`;
+            registrationSuccess = true;
+            canCancelRegistration = true;
+        } else if (reason === "full") {
+            registerError =
+                "This shift just filled up. Please pick another time.";
+            refreshAfterRegistration();
+        } else if (reason === "past") {
+            registerError = "This shift has already started or ended.";
+        } else if (reason === "cancelled") {
+            registerError = "This shift has been cancelled.";
+        } else if (reason === "not_found") {
+            registerError = "This shift is no longer available.";
+        } else if (reason === "invalid_input") {
+            registerError =
+                "Please double-check your name and email address and try again.";
+        } else {
+            registerError = "Registration failed. Please try again.";
+        }
+    }
+
+    async function handleCancelRegistration(event) {
+        if (!supabase) return;
+
+        const { shift, email } = event.detail;
+        if (!shift || !email) return;
+
+        isCancelling = true;
+
+        const { data, error } = await supabase.rpc(
+            "cancel_shift_registration",
+            {
+                p_shift_id: shift.id,
+                p_email: email,
+            },
+        );
+
+        isCancelling = false;
+
+        if (error || !data?.ok) {
+            registerError =
+                "We could not cancel that registration. Please contact us if you need help.";
+            return;
+        }
+
+        canCancelRegistration = false;
+        successTitle = "Registration Cancelled";
+        successMessage =
+            "Your spot has been released. We hope to see you at another shift soon!";
+        broadcastShiftChange(shift, "DELETE");
+        refreshAfterRegistration();
     }
 </script>
 
@@ -495,6 +549,129 @@
     </div>
 
     <div class="flex-1 space-y-6">
+        {#if loadError}
+            <div
+                class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 text-center"
+            >
+                <p class="font-bold">Something went wrong</p>
+                <p class="text-sm">{loadError}</p>
+            </div>
+        {/if}
+
+        {#if opportunities.length > 0}
+            <div
+                class="bg-white rounded-xl shadow-sm border border-gray-100 p-5"
+            >
+                <h2 class="text-xl font-bold text-gray-800 font-rubik mb-1">
+                    Upcoming Volunteer Opportunities
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">
+                    One-off events that need extra hands, sign up below.
+                </p>
+                <div class="space-y-3">
+                    {#each opportunities as opportunity (opportunity.id)}
+                        {@const regs =
+                            shiftData[opportunity.id]?.registrations || []}
+                        {@const volCount = regs.length
+                            ? regs.filter((r) => r.role === "volunteer").length
+                            : opportunity.volunteerCount}
+                        {@const leadCount = regs.length
+                            ? regs.filter((r) => r.role === "lead").length
+                            : opportunity.leadCount}
+                        {@const volFull =
+                            volCount >= opportunity.volunteerCapacity}
+                        {@const leadFull =
+                            leadCount >= opportunity.leadCapacity}
+                        {@const locked = isOpportunityLocked(opportunity)}
+                        <div
+                            class="border border-gray-100 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/60"
+                        >
+                            <div>
+                                <p class="font-bold text-gray-900 font-rubik">
+                                    {opportunity.title ||
+                                        "Volunteer Opportunity"}
+                                </p>
+                                <p class="text-sm text-gray-600 mt-0.5">
+                                    {opportunity.start.toLocaleDateString(
+                                        "en-US",
+                                        {
+                                            weekday: "long",
+                                            month: "long",
+                                            day: "numeric",
+                                        },
+                                    )} ·
+                                    {opportunity.start.toLocaleTimeString(
+                                        "en-US",
+                                        {
+                                            hour: "numeric",
+                                            minute: "2-digit",
+                                        },
+                                    )} -
+                                    {opportunity.end.toLocaleTimeString(
+                                        "en-US",
+                                        {
+                                            hour: "numeric",
+                                            minute: "2-digit",
+                                        },
+                                    )}
+                                </p>
+                                {#if opportunity.location}
+                                    <p class="text-sm text-gray-600">
+                                        📍 {opportunity.location}
+                                    </p>
+                                {/if}
+                                {#if opportunity.description}
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        {opportunity.description}
+                                    </p>
+                                {/if}
+                                <p class="text-xs text-gray-500 mt-2">
+                                    {volCount}/{opportunity.volunteerCapacity} volunteer
+                                    spots filled
+                                    {#if opportunity.leadCapacity > 0}
+                                        · {leadCount}/{opportunity.leadCapacity}
+                                        lead spots filled
+                                    {/if}
+                                </p>
+                            </div>
+                            <div class="flex gap-3 w-full md:w-auto">
+                                {#if opportunity.leadCapacity > 0}
+                                    <button
+                                        class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border
+                                        {locked || leadFull
+                                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                            : 'bg-off-black text-white border-off-black hover:bg-medium-gray hover:border-medium-gray hover:shadow-md'}"
+                                        disabled={locked || leadFull}
+                                        on:click={() =>
+                                            openOpportunityModal(
+                                                opportunity,
+                                                "lead",
+                                            )}
+                                    >
+                                        {leadFull ? "Lead Full" : "Lead"}
+                                    </button>
+                                {/if}
+                                <button
+                                    class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border
+                                    {locked || volFull
+                                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                        : 'bg-vibrant-pink text-white border-vibrant-pink hover:bg-accent-gold hover:border-accent-gold hover:shadow-md'}"
+                                    disabled={locked || volFull}
+                                    on:click={() =>
+                                        openOpportunityModal(
+                                            opportunity,
+                                            "volunteer",
+                                        )}
+                                >
+                                    {volFull ? "Full" : "Volunteer"}
+                                </button>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        {/if}
+
         <div
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
@@ -568,9 +745,15 @@
     success={registrationSuccess}
     {successTitle}
     {successMessage}
+    errorMessage={registerError}
+    canCancel={canCancelRegistration}
+    {isCancelling}
     on:close={() => {
         isModalOpen = false;
         registrationSuccess = false;
+        registerError = "";
+        canCancelRegistration = false;
     }}
     on:submit={handleRegistration}
+    on:cancelRegistration={handleCancelRegistration}
 />

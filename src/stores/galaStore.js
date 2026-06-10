@@ -1,38 +1,18 @@
 import { writable, derived } from 'svelte/store';
-import { collection, onSnapshot, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '../lib/galaFirebase';
+import { subscribeToPublicDonations } from '../lib/galaUtils';
 
 // Internal stores
 const donationsStore = writable([]);
 const guestsStore = writable({}); // Map: paddleNumber -> fullName
 
-// Subscribe to donations (Real-time)
-// We'll export a function to initialize listeners to avoid side effects on import if needed,
-// but for a singleton app store, running it top-level is often acceptable.
-// However, to be safe with SSR/Astro, we should probably check if we are in the browser or just let it run.
-// Given the context, let's start subscriptions immediately but handle cleanup if we were to wrap this.
-// For simplicity in this specific task, we'll just start them.
-
+// Donations now come from the Supabase gala_donations_public view via polling
+// (initial fetch + refresh every 20 seconds). The anon key cannot read the
+// gala_guests table, but the public view already resolves donor names from
+// guest records server-side, so each donation arrives with donorName set and
+// the guests map can stay empty (lookups fall through to donation.donorName).
 if (typeof window !== 'undefined') {
-    const donationsQuery = query(collection(db, 'gala_donations'), orderBy('timestamp', 'desc'));
-    onSnapshot(donationsQuery, (snapshot) => {
-        const donations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    subscribeToPublicDonations((donations) => {
         donationsStore.set(donations);
-    });
-
-    // Fetch guests (One-time or Real-time)
-    // Using onSnapshot for guests too, just in case of last minute changes/additions
-    const guestsCollection = collection(db, 'gala_guests');
-    onSnapshot(guestsCollection, (snapshot) => {
-        const guestsMap = {};
-        snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            // Assuming paddleNumber is a string or number in the DB. Key by it.
-            if (data.paddleNumber) {
-                guestsMap[data.paddleNumber] = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-            }
-        });
-        guestsStore.set(guestsMap);
     });
 }
 

@@ -1,18 +1,12 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
-    import {
-        collection,
-        doc,
-        writeBatch,
-        getDoc,
-        setDoc,
-        deleteDoc,
-        updateDoc,
-        onSnapshot,
-        query,
-        orderBy,
-    } from "firebase/firestore";
     import { onMount } from "svelte";
+    import {
+        subscribeToGuests,
+        addGuest,
+        updateGuest,
+        deleteGuest as deleteGuestById,
+        isDuplicatePaddleError,
+    } from "../../lib/galaUtils";
 
     let guests = [];
     let loading = false;
@@ -56,6 +50,12 @@
         selectedGuests = newSet;
     }
 
+    function findGuestByPaddle(paddleNumber) {
+        return guests.find(
+            (g) => Number(g.paddleNumber) === Number(paddleNumber),
+        );
+    }
+
     async function deleteSelectedGuests() {
         if (selectedGuests.size === 0) return;
 
@@ -65,13 +65,11 @@
         showDeleteModal = false;
 
         try {
-            const batch = writeBatch(db);
-            selectedGuests.forEach((paddleNumber) => {
-                const docRef = doc(db, "gala_guests", String(paddleNumber));
-                batch.delete(docRef);
-            });
+            const targets = [...selectedGuests]
+                .map((paddleNumber) => findGuestByPaddle(paddleNumber))
+                .filter(Boolean);
 
-            await batch.commit();
+            await Promise.all(targets.map((g) => deleteGuestById(g.id)));
             successMessage = `Successfully deleted ${selectedGuests.size} guest(s).`;
             selectedGuests = new Set();
         } catch (err) {
@@ -91,12 +89,8 @@
     };
 
     onMount(() => {
-        const q = query(collection(db, "gala_guests"), orderBy("paddleNumber"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            guests = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+        const unsubscribe = subscribeToGuests((docs) => {
+            guests = docs;
         });
         return unsubscribe;
     });
@@ -133,7 +127,6 @@
                     );
                 }
 
-                const batch = writeBatch(db);
                 let count = 0;
 
                 for (let i = 1; i < lines.length; i++) {
@@ -148,8 +141,7 @@
 
                     if (!data.PaddleNumber) continue;
 
-                    const docRef = doc(db, "gala_guests", data.PaddleNumber);
-                    batch.set(docRef, {
+                    const payload = {
                         paddleNumber: Number(data.PaddleNumber),
                         fullName: data.FullName,
                         email: data.Email,
@@ -157,11 +149,29 @@
                         guestCount: Number(data.GuestCount) || 1,
                         checkedIn: false,
                         checkInTime: null,
-                    });
+                    };
+
+                    // Legacy CSV import upserted by paddle number. Update the
+                    // existing guest when the paddle is already in the list,
+                    // otherwise create a new row.
+                    const existing = findGuestByPaddle(data.PaddleNumber);
+                    try {
+                        if (existing) {
+                            await updateGuest(existing.id, payload);
+                        } else {
+                            await addGuest(payload);
+                        }
+                    } catch (rowErr) {
+                        if (isDuplicatePaddleError(rowErr)) {
+                            throw new Error(
+                                `Paddle ${data.PaddleNumber} is already taken.`,
+                            );
+                        }
+                        throw rowErr;
+                    }
                     count++;
                 }
 
-                await batch.commit();
                 successMessage = `Successfully uploaded ${count} guests.`;
                 event.target.value = ""; // Reset input
             } catch (err) {
@@ -185,20 +195,13 @@
         successMessage = "";
 
         try {
-            const docRef = doc(
-                db,
-                "gala_guests",
-                String(newGuest.paddleNumber),
-            );
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
+            if (findGuestByPaddle(newGuest.paddleNumber)) {
                 throw new Error(
                     `Guest with Paddle #${newGuest.paddleNumber} already exists.`,
                 );
             }
 
-            await setDoc(docRef, {
+            await addGuest({
                 paddleNumber: Number(newGuest.paddleNumber),
                 fullName: newGuest.fullName,
                 email: newGuest.email,
@@ -217,7 +220,9 @@
                 guestCount: 1,
             };
         } catch (err) {
-            error = err.message;
+            error = isDuplicatePaddleError(err)
+                ? `Paddle ${newGuest.paddleNumber} is already taken.`
+                : err.message;
         } finally {
             loading = false;
         }
@@ -230,7 +235,11 @@
             return;
 
         try {
-            await deleteDoc(doc(db, "gala_guests", String(paddleNumber)));
+            const guest = findGuestByPaddle(paddleNumber);
+            if (!guest) {
+                throw new Error(`Paddle #${paddleNumber} not found.`);
+            }
+            await deleteGuestById(guest.id);
         } catch (err) {
             error = "Failed to delete guest: " + err.message;
         }
@@ -277,61 +286,45 @@
             const oldPaddleNumber = editingGuest;
             const newPaddleNumber = Number(editForm.paddleNumber);
 
-            // If paddle number changed, we need to create new doc and delete old
+            const guest = findGuestByPaddle(oldPaddleNumber);
+            if (!guest) {
+                throw new Error(`Paddle #${oldPaddleNumber} not found.`);
+            }
+
+            const updates = {
+                fullName: editForm.fullName.trim(),
+                email: editForm.email.trim(),
+                phone: editForm.phone.trim(),
+                guestCount: Number(editForm.guestCount),
+            };
+
+            // Rows have stable ids now, so a paddle change is a simple update.
             if (oldPaddleNumber !== newPaddleNumber) {
                 // Check if new paddle number already exists
-                const newDocRef = doc(
-                    db,
-                    "gala_guests",
-                    String(newPaddleNumber),
-                );
-                const newDocSnap = await getDoc(newDocRef);
-
-                if (newDocSnap.exists()) {
+                if (findGuestByPaddle(newPaddleNumber)) {
                     throw new Error(
                         `Paddle #${newPaddleNumber} already exists.`,
                     );
                 }
 
-                // Get old doc data to preserve other fields
-                const oldDocRef = doc(
-                    db,
-                    "gala_guests",
-                    String(oldPaddleNumber),
-                );
-                const oldDocSnap = await getDoc(oldDocRef);
-                const oldData = oldDocSnap.data();
-
-                // Create new doc with updated data
-                await setDoc(newDocRef, {
-                    ...oldData,
+                await updateGuest(guest.id, {
+                    ...updates,
                     paddleNumber: newPaddleNumber,
-                    fullName: editForm.fullName.trim(),
-                    email: editForm.email.trim(),
-                    phone: editForm.phone.trim(),
-                    guestCount: Number(editForm.guestCount),
                 });
-
-                // Delete old doc
-                await deleteDoc(oldDocRef);
 
                 successMessage = `Updated and moved Paddle #${oldPaddleNumber} → #${newPaddleNumber}`;
             } else {
                 // Simple update, paddle number unchanged
-                const docRef = doc(db, "gala_guests", String(oldPaddleNumber));
-                await updateDoc(docRef, {
-                    fullName: editForm.fullName.trim(),
-                    email: editForm.email.trim(),
-                    phone: editForm.phone.trim(),
-                    guestCount: Number(editForm.guestCount),
-                });
+                await updateGuest(guest.id, updates);
 
                 successMessage = `Updated Paddle #${oldPaddleNumber}`;
             }
 
             cancelEdit();
         } catch (err) {
-            error = "Failed to save: " + err.message;
+            error = isDuplicatePaddleError(err)
+                ? `Paddle ${editForm.paddleNumber} is already taken.`
+                : "Failed to save: " + err.message;
         } finally {
             editLoading = false;
         }

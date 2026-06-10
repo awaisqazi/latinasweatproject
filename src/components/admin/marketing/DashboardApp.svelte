@@ -2,32 +2,49 @@
   import { onMount } from "svelte";
   import {
     AlertCircle,
+    ArrowLeftRight,
     CalendarDays,
     ChevronLeft,
     ChevronRight,
+    ClipboardList,
+    HeartHandshake,
     Home,
     Kanban,
+    Lock,
     LogOut,
     Menu,
     PanelLeftClose,
     PanelLeftOpen,
+    PartyPopper,
     RefreshCw,
     ShieldCheck,
+    Ticket,
     UserCircle,
+    Users,
+    Vote,
     X,
   } from "@lucide/svelte";
   import {
     getSupabaseClient,
     SUPABASE_CONFIG_ERROR,
   } from "../../../lib/supabaseClient";
+  import { hasModule, loadModuleGrants } from "../../../lib/dashboard/permissions";
+  import { isOperationalAdmin, isSuperuser } from "../../../lib/dashboard/roles";
   import AdminOverview from "./AdminOverview.svelte";
-  import CalendarView from "./CalendarView.svelte";
   import Panel from "./Panel.svelte";
   import ProjectCard from "./ProjectCard.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
   import PublishingCalendarView from "./PublishingCalendarView.svelte";
   import PublishScheduleDialog from "./PublishScheduleDialog.svelte";
+  import UserAccessView from "./UserAccessView.svelte";
   import Workspace from "./Workspace.svelte";
+  import UnifiedCalendarView from "../dashboard/UnifiedCalendarView.svelte";
+  import BoardProjectsView from "../board/BoardProjectsView.svelte";
+  import EventsView from "../events/EventsView.svelte";
+  import VolunteersView from "../volunteers/VolunteersView.svelte";
+  import SubsView from "../subs/SubsView.svelte";
+  import ElectionsView from "../elections/ElectionsView.svelte";
+  import GalaView from "../gala/GalaView.svelte";
 
   const LOGIN_PATH = "/admin/marketing/login";
   const DASHBOARD_PATH = "/admin/marketing";
@@ -53,11 +70,18 @@
     "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
 
   const navItems = [
-    { id: "workspace", label: "Workspace", icon: Home },
-    { id: "kanban", label: "Kanban", icon: Kanban },
-    { id: "calendar", label: "Project Calendar", icon: CalendarDays },
-    { id: "publishing", label: "Publishing Calendar", icon: CalendarDays },
-    { id: "admin", label: "Admin Overview", icon: ShieldCheck, adminOnly: true },
+    { id: "workspace", label: "Workspace", icon: Home, section: "Marketing", modules: ["marketing"] },
+    { id: "kanban", label: "Kanban", icon: Kanban, section: "Marketing", modules: ["marketing"] },
+    { id: "publishing", label: "Publishing Calendar", icon: CalendarDays, section: "Marketing", modules: ["marketing"] },
+    { id: "calendar", label: "Project Calendar", icon: CalendarDays, section: "Planning", modules: ["marketing", "board_projects"] },
+    { id: "board", label: "Board Projects", icon: ClipboardList, section: "Planning", modules: ["board_projects"] },
+    { id: "volunteers", label: "Volunteers", icon: HeartHandshake, section: "Operations", modules: ["volunteers"] },
+    { id: "subs", label: "Sub Requests", icon: ArrowLeftRight, section: "Operations", modules: ["subs"] },
+    { id: "events", label: "Events", icon: Ticket, section: "Operations", modules: ["events"] },
+    { id: "elections", label: "Elections", icon: Vote, section: "Operations", modules: ["elections"] },
+    { id: "gala", label: "Gala", icon: PartyPopper, section: "Operations", modules: ["gala"] },
+    { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
+    { id: "admin", label: "Admin Overview", icon: ShieldCheck, section: "Admin", modules: ["marketing"], adminOnly: true },
   ];
 
   let activeView = "workspace";
@@ -66,6 +90,8 @@
   let supabase;
   let user = null;
   let profile = null;
+  let moduleGrants = [];
+  let dashboardPath = DASHBOARD_PATH;
   let projects = [];
   let projectUpdatesById = {};
   let latestProjects = [];
@@ -78,6 +104,13 @@
   let calendarRefreshKey = 0;
   let publishingRefreshKey = 0;
   let adminRefreshKey = 0;
+  let userAccessRefreshKey = 0;
+  let boardRefreshKey = 0;
+  let eventsRefreshKey = 0;
+  let volunteersRefreshKey = 0;
+  let subsRefreshKey = 0;
+  let electionsRefreshKey = 0;
+  let galaRefreshKey = 0;
   let selectedKanbanProject = null;
   let publishScheduleProject = null;
   let publishScheduleStatus = "";
@@ -94,8 +127,19 @@
   let errorMessage = SUPABASE_CONFIG_ERROR;
   let projectError = "";
 
-  $: isAdmin = profile?.role === "admin";
-  $: visibleNavItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+  $: isAdmin = isOperationalAdmin(profile);
+  $: visibleNavItems = navItems.filter((item) => canSeeNavItem(item, profile, moduleGrants));
+  $: navSections = visibleNavItems.reduce((sections, item) => {
+    const lastSection = sections[sections.length - 1];
+
+    if (lastSection && lastSection.title === item.section) {
+      lastSection.items.push(item);
+    } else {
+      sections.push({ title: item.section, items: [item] });
+    }
+    return sections;
+  }, []);
+  $: canViewActive = visibleNavItems.some((item) => item.id === activeView);
   $: activeNavItem =
     navItems.find((item) => item.id === activeView) || visibleNavItems[0];
   $: latestProjects = projects.map(getLatestProject);
@@ -117,6 +161,7 @@
     }
 
     supabase = getSupabaseClient();
+    dashboardPath = window.location.pathname.replace(/\/+$/, "") || DASHBOARD_PATH;
     setInitialViewFromHash();
     initializeDashboard();
     window.addEventListener("hashchange", syncViewFromHash);
@@ -151,8 +196,46 @@
     }
 
     user = data.session.user;
-    await Promise.all([loadProfile(), loadProjects(), loadTeamMembers()]);
+    await Promise.all([
+      loadProfile(),
+      loadGrants(),
+      loadProjects(),
+      loadTeamMembers(),
+    ]);
+
+    // If the default view isn't granted (and the user didn't deep-link it),
+    // land on their first granted view instead.
+    const hashView = window.location.hash.replace("#", "");
+    if (
+      !visibleNavItems.some((item) => item.id === activeView) &&
+      hashView !== activeView
+    ) {
+      activeView = visibleNavItems[0]?.id || "workspace";
+    }
+
     isLoading = false;
+  }
+
+  async function loadGrants() {
+    moduleGrants = await loadModuleGrants(supabase, user.id);
+  }
+
+  function canSeeNavItem(item, currentProfile, grants) {
+    if (item.superuserOnly) return isSuperuser(currentProfile);
+    if (item.adminOnly) {
+      return (
+        isOperationalAdmin(currentProfile) &&
+        (!item.modules?.length ||
+          item.modules.some((moduleKey) =>
+            hasModule(currentProfile, grants, moduleKey),
+          ))
+      );
+    }
+    if (!item.modules?.length) return true;
+
+    return item.modules.some((moduleKey) =>
+      hasModule(currentProfile, grants, moduleKey),
+    );
   }
 
   async function loadProfile() {
@@ -189,7 +272,6 @@
 
     if (error) {
       projectError = error.message;
-      projects = [];
     } else {
       projects = data || [];
       projectUpdatesById = {};
@@ -244,7 +326,7 @@
     const hashView = window.location.hash.replace("#", "");
     const nextView = navItems.some((item) => item.id === hashView)
       ? hashView
-      : "workspace";
+      : visibleNavItems[0]?.id || "workspace";
 
     activeView = nextView;
     sidebarOpen = false;
@@ -255,33 +337,29 @@
     sidebarOpen = false;
 
     if (updateHash) {
-      window.history.replaceState(null, "", `${DASHBOARD_PATH}#${view}`);
+      window.history.replaceState(null, "", `${dashboardPath}#${view}`);
     }
   }
 
   function refreshActiveView() {
-    if (activeView === "workspace") {
-      workspaceRefreshKey += 1;
-      return;
-    }
+    const refreshers = {
+      workspace: () => (workspaceRefreshKey += 1),
+      calendar: () => (calendarRefreshKey += 1),
+      publishing: () => (publishingRefreshKey += 1),
+      board: () => (boardRefreshKey += 1),
+      events: () => (eventsRefreshKey += 1),
+      volunteers: () => (volunteersRefreshKey += 1),
+      subs: () => (subsRefreshKey += 1),
+      elections: () => (electionsRefreshKey += 1),
+      gala: () => (galaRefreshKey += 1),
+      "user-access": () => (userAccessRefreshKey += 1),
+      admin: () => {
+        adminRefreshKey += 1;
+        loadProjects();
+      },
+    };
 
-    if (activeView === "calendar") {
-      calendarRefreshKey += 1;
-      return;
-    }
-
-    if (activeView === "publishing") {
-      publishingRefreshKey += 1;
-      return;
-    }
-
-    if (activeView === "admin") {
-      adminRefreshKey += 1;
-      loadProjects();
-      return;
-    }
-
-    loadProjects();
+    (refreshers[activeView] || loadProjects)();
   }
 
   function getKanbanColumns() {
@@ -661,7 +739,7 @@
           class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin"
           aria-hidden="true"
         ></span>
-        Loading marketing workspace
+        Loading dashboard
       </div>
     </div>
   {:else if errorMessage}
@@ -689,7 +767,7 @@
     <div class="min-h-screen lg:flex">
       <aside
         class="fixed inset-y-0 left-0 z-40 w-[min(18rem,86vw)] transform border-r border-black/10 bg-[#1E1E1E] text-white transition-[transform,width] duration-200 lg:translate-x-0 lg:transform-none {sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full'}"
-        aria-label="Marketing dashboard navigation"
+        aria-label="Dashboard navigation"
       >
         <div class="flex h-full min-h-dvh flex-col">
           <div class="flex items-center justify-between border-b border-white/10 px-5 py-5 {sidebarCollapsed ? 'lg:px-3' : ''}">
@@ -698,7 +776,7 @@
                 LSP
               </p>
               <h1 class="mt-1 text-lg font-bold {sidebarCollapsed ? 'lg:hidden' : ''}">
-                Marketing
+                Dashboard
               </h1>
             </div>
             <button
@@ -724,18 +802,29 @@
             </button>
           </div>
 
-          <nav class="flex-1 space-y-1 px-3 py-4">
-            {#each visibleNavItems as item}
-              {@const Icon = item.icon}
-              <a
-                href={`#${item.id}`}
-                class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition {sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''} {activeView === item.id ? 'bg-[#ffbd59] text-[#1E1E1E]' : 'text-white/74 hover:bg-white/10 hover:text-white'}"
-                aria-current={activeView === item.id ? "page" : undefined}
-                title={item.label}
-              >
-                <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">{item.label}</span>
-              </a>
+          <nav class="flex-1 space-y-4 overflow-y-auto px-3 py-4">
+            {#each navSections as section}
+              <div>
+                {#if section.title}
+                  <p class="px-3 pb-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-white/40 {sidebarCollapsed ? 'lg:hidden' : ''}">
+                    {section.title}
+                  </p>
+                {/if}
+                <div class="space-y-1">
+                  {#each section.items as item}
+                    {@const Icon = item.icon}
+                    <a
+                      href={`#${item.id}`}
+                      class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition {sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''} {activeView === item.id ? 'bg-[#ffbd59] text-[#1E1E1E]' : 'text-white/74 hover:bg-white/10 hover:text-white'}"
+                      aria-current={activeView === item.id ? "page" : undefined}
+                      title={item.label}
+                    >
+                      <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">{item.label}</span>
+                    </a>
+                  {/each}
+                </div>
+              </div>
             {/each}
           </nav>
 
@@ -783,7 +872,7 @@
                   Dashboard
                 </p>
                 <h2 class="truncate text-xl font-bold md:text-2xl">
-                  {activeNavItem?.label || "Marketing"}
+                  {activeNavItem?.label || "Dashboard"}
                 </h2>
               </div>
             </div>
@@ -815,7 +904,27 @@
             </div>
           {/if}
 
-          {#if activeView === "workspace"}
+          {#if !canViewActive}
+            <Panel title="No access" id="no-access-title">
+              <div class="flex items-start gap-3 text-gray-700">
+                <Lock class="mt-1 h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
+                <div>
+                  <p class="text-sm leading-6">
+                    You don't have access to this section yet. A superuser can grant
+                    module access from User Access.
+                  </p>
+                  {#if visibleNavItems.length}
+                    <a
+                      class="mt-3 inline-flex min-h-10 items-center rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
+                      href={`#${visibleNavItems[0].id}`}
+                    >
+                      Go to {visibleNavItems[0].label}
+                    </a>
+                  {/if}
+                </div>
+              </div>
+            </Panel>
+          {:else if activeView === "workspace"}
             <Workspace
               {supabase}
               email={profile?.email || user?.email}
@@ -935,7 +1044,7 @@
               </Panel>
             </section>
           {:else if activeView === "calendar"}
-            <CalendarView
+            <UnifiedCalendarView
               {supabase}
               refreshKey={calendarRefreshKey}
               {teamMembers}
@@ -943,7 +1052,54 @@
               currentUserRole={profile?.role || "member"}
               availableStatuses={statuses}
               scheduleProjects={latestProjects}
+              showMarketing={canSeeNavItem(
+                { modules: ["marketing"] },
+                profile,
+                moduleGrants,
+              )}
+              showBoard={canSeeNavItem(
+                { modules: ["board_projects"] },
+                profile,
+                moduleGrants,
+              )}
               onProjectUpdated={handleProjectUpdated}
+            />
+          {:else if activeView === "board"}
+            <BoardProjectsView
+              {supabase}
+              {profile}
+              {teamMembers}
+              refreshKey={boardRefreshKey}
+            />
+          {:else if activeView === "events"}
+            <EventsView
+              {supabase}
+              {profile}
+              refreshKey={eventsRefreshKey}
+            />
+          {:else if activeView === "volunteers"}
+            <VolunteersView
+              {supabase}
+              {profile}
+              refreshKey={volunteersRefreshKey}
+            />
+          {:else if activeView === "subs"}
+            <SubsView
+              {supabase}
+              {profile}
+              refreshKey={subsRefreshKey}
+            />
+          {:else if activeView === "elections"}
+            <ElectionsView
+              {supabase}
+              {profile}
+              refreshKey={electionsRefreshKey}
+            />
+          {:else if activeView === "gala"}
+            <GalaView
+              {supabase}
+              {profile}
+              refreshKey={galaRefreshKey}
             />
           {:else if activeView === "publishing"}
             <PublishingCalendarView
@@ -962,6 +1118,12 @@
               {profile}
               refreshKey={adminRefreshKey}
               onProjectsChanged={loadProjects}
+            />
+          {:else if activeView === "user-access"}
+            <UserAccessView
+              {supabase}
+              {profile}
+              refreshKey={userAccessRefreshKey}
             />
           {/if}
         </div>

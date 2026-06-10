@@ -1,27 +1,19 @@
 <script>
     import { onMount } from "svelte";
-    import { auth, db } from "../../lib/galaFirebase";
     import {
-        signInWithEmailAndPassword,
-        onAuthStateChanged,
-        signOut,
-    } from "firebase/auth";
+        supabase,
+        SUPABASE_CONFIG_ERROR,
+    } from "../../lib/supabaseClient";
     import {
-        collection,
-        query,
-        orderBy,
-        onSnapshot,
-        doc,
-        updateDoc,
-        addDoc,
-        serverTimestamp,
-    } from "firebase/firestore";
+        subscribeToGuests,
+        subscribeToDonations,
+        updateGuest,
+        isDuplicatePaddleError,
+    } from "../../lib/galaUtils";
 
     let user = null;
-    let email = "";
-    let password = "";
+    let authChecked = false;
     let error = "";
-    let loading = false;
 
     let activeTab = "guests"; // 'guests' or 'donations'
 
@@ -34,41 +26,54 @@
     let donations = [];
     let totalRaised = 0;
 
+    let unsubGuests = null;
+    let unsubDonations = null;
+
     onMount(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-            user = currentUser;
-            if (user) {
-                subscribeToGuests();
-                subscribeToDonations();
-            }
+        if (!supabase) {
+            error = SUPABASE_CONFIG_ERROR;
+            authChecked = true;
+            return;
+        }
+
+        supabase.auth.getSession().then(({ data }) => {
+            setUser(data?.session?.user || null);
+            authChecked = true;
         });
 
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setUser(session?.user || null);
+                authChecked = true;
+            },
+        );
+
         return () => {
-            unsubscribeAuth();
+            listener?.subscription?.unsubscribe();
+            stopSubscriptions();
         };
     });
 
-    function subscribeToGuests() {
-        const q = query(collection(db, "guests"), orderBy("lastName"));
-        onSnapshot(q, (snapshot) => {
-            guests = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            filterGuests();
-        });
+    function setUser(nextUser) {
+        const hadUser = Boolean(user);
+        user = nextUser;
+        if (user && !hadUser) {
+            startSubscriptions();
+        } else if (!user) {
+            stopSubscriptions();
+        }
     }
 
-    function subscribeToDonations() {
-        const q = query(
-            collection(db, "donations"),
-            orderBy("createdAt", "desc"),
-        );
-        onSnapshot(q, (snapshot) => {
-            donations = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+    function startSubscriptions() {
+        stopSubscriptions();
+        unsubGuests = subscribeToGuests((docs) => {
+            guests = [...docs].sort((a, b) =>
+                (a.lastName || "").localeCompare(b.lastName || ""),
+            );
+            filterGuests();
+        });
+        unsubDonations = subscribeToDonations((docs) => {
+            donations = docs;
             totalRaised = donations.reduce(
                 (sum, d) => sum + (Number(d.amount) || 0),
                 0,
@@ -76,20 +81,24 @@
         });
     }
 
-    async function handleLogin() {
-        loading = true;
-        error = "";
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (e) {
-            error = e.message;
-        } finally {
-            loading = false;
-        }
+    function stopSubscriptions() {
+        if (unsubGuests) unsubGuests();
+        if (unsubDonations) unsubDonations();
+        unsubGuests = null;
+        unsubDonations = null;
     }
 
     async function handleLogout() {
-        await signOut(auth);
+        if (supabase) {
+            await supabase.auth.signOut();
+        }
+    }
+
+    function formatDonationTime(createdAt) {
+        if (!createdAt) return "Just now";
+        const date = new Date(createdAt);
+        if (Number.isNaN(date.getTime())) return "Just now";
+        return date.toLocaleTimeString();
     }
 
     function filterGuests() {
@@ -110,29 +119,43 @@
     $: searchTerm, filterGuests();
 
     async function toggleCheckIn(guest) {
-        const guestRef = doc(db, "guests", guest.id);
-        await updateDoc(guestRef, {
-            checkedIn: !guest.checkedIn,
-            checkInTime: !guest.checkedIn ? serverTimestamp() : null,
-        });
+        try {
+            await updateGuest(guest.id, {
+                checkedIn: !guest.checkedIn,
+                checkInTime: !guest.checkedIn ? new Date().toISOString() : null,
+            });
+        } catch (err) {
+            error = err.message;
+        }
     }
 
     async function updatePaddleNumber(guest, newNumber) {
-        const guestRef = doc(db, "guests", guest.id);
-        await updateDoc(guestRef, {
-            paddleNumber: newNumber,
-        });
+        try {
+            await updateGuest(guest.id, {
+                paddleNumber: Number(newNumber),
+            });
+        } catch (err) {
+            error = isDuplicatePaddleError(err)
+                ? `Paddle ${newNumber} is already taken.`
+                : err.message;
+        }
     }
 </script>
 
 <div
     class="bg-[var(--color-light-gray)] min-h-[600px] rounded-xl shadow-lg p-6"
 >
-    {#if !user}
+    {#if !authChecked}
         <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-            <h2
-                class="text-2xl font-bold text-[var(--color-off-black)] mb-6 text-center"
-            >
+            <p class="text-center text-[var(--color-medium-gray)]">
+                Checking session...
+            </p>
+        </div>
+    {:else if !user}
+        <div
+            class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10 text-center"
+        >
+            <h2 class="text-2xl font-bold text-[var(--color-off-black)] mb-4">
                 Admin Login
             </h2>
             {#if error}
@@ -142,39 +165,15 @@
                     {error}
                 </div>
             {/if}
-            <form on:submit|preventDefault={handleLogin} class="space-y-4">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-[var(--color-medium-gray)] mb-1"
-                        >Email</label
-                    >
-                    <input
-                        type="email"
-                        bind:value={email}
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[var(--color-vibrant-pink)] focus:border-transparent outline-none"
-                        required
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-[var(--color-medium-gray)] mb-1"
-                        >Password</label
-                    >
-                    <input
-                        type="password"
-                        bind:value={password}
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[var(--color-vibrant-pink)] focus:border-transparent outline-none"
-                        required
-                    />
-                </div>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    class="w-full bg-[var(--color-vibrant-pink)] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
+            <p class="text-[var(--color-medium-gray)] mb-6">
+                Sign in to the team dashboard to use gala tools
+            </p>
+            <a
+                href="/admin/marketing/login?redirectTo=/admin/gala"
+                class="inline-block w-full bg-[var(--color-vibrant-pink)] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity"
+            >
+                Go to Dashboard Login
+            </a>
         </div>
     {:else}
         <div class="flex justify-between items-center mb-8">
@@ -366,11 +365,7 @@
                                         ).toLocaleString()}
                                     </p>
                                     <p class="text-xs text-gray-400">
-                                        {donation.createdAt?.toDate
-                                            ? donation.createdAt
-                                                  .toDate()
-                                                  .toLocaleTimeString()
-                                            : "Just now"}
+                                        {formatDonationTime(donation.createdAt)}
                                     </p>
                                 </div>
                             </div>

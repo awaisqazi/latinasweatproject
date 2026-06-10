@@ -46,6 +46,25 @@ const links = [
   },
   {
     title: {
+      en: "💬 Post-Class Feedback Survey",
+      es: "💬 Encuesta después de clase"
+    },
+    description: {
+      en: "Just took a yoga or fitness class? Share what felt supportive and what could be better so we can keep caring for the next class.",
+      es: "¿Acabas de tomar una clase de yoga o fitness? Cuéntanos qué se sintió bien y qué podemos mejorar para cuidar la próxima clase."
+    },
+    url: `${base}feedback`,
+    target: "_self",
+    color: "teal",
+    icon: "heart",
+    badge: {
+      en: "After Class",
+      es: "Después"
+    },
+    featured: true,
+  },
+  {
+    title: {
       en: "📺 WGN9 Around Town visits LSP",
       es: "📺 WGN9 Around Town visita LSP"
     },
@@ -202,6 +221,7 @@ const socials = [
 const getLinkConversionEvent = (url = "") => {
   if (url.includes("lsp-world-cup-watch-party")) return "event_registration_start";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "class_booking_start";
+  if (url.includes("/feedback")) return "feedback_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
   return undefined;
@@ -210,12 +230,14 @@ const getLinkConversionEvent = (url = "") => {
 const getLinkBookingPath = (url = "") => {
   if (url.includes("lsp-world-cup-watch-party")) return "world_cup_ticketing";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "kids_day_ticketing";
+  if (url.includes("/feedback")) return "post_class_feedback";
   if (url.includes("/schedule")) return "schedule_page";
   return undefined;
 };
 
 const getLinkConversionProvider = (url = "") => {
   if (url.includes("zeffy.com")) return "zeffy";
+  if (url.includes("/feedback")) return "lsp_website";
   if (url.includes("/schedule")) return "lsp_website";
   return undefined;
 };
@@ -551,8 +573,8 @@ const getLinkConversionProvider = (url = "") => {
           links.map((link, index) => (
             <a
               href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={link.target || "_blank"}
+              rel={link.target === "_self" ? undefined : "noopener noreferrer"}
               data-conversion-event={getLinkConversionEvent(link.url)}
               data-conversion-context="links_card"
               data-conversion-provider={getLinkConversionProvider(link.url)}

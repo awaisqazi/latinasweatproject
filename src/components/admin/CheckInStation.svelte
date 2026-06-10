@@ -1,17 +1,11 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
-    import {
-        collection,
-        query,
-        orderBy,
-        onSnapshot,
-        doc,
-        updateDoc,
-        setDoc,
-        getDoc,
-        serverTimestamp,
-    } from "firebase/firestore";
     import { onMount } from "svelte";
+    import {
+        subscribeToGuests,
+        updateGuest,
+        addGuest,
+        isDuplicatePaddleError,
+    } from "../../lib/galaUtils";
 
     let guests = [];
     let searchTerm = "";
@@ -52,10 +46,8 @@
     );
 
     onMount(() => {
-        const q = query(collection(db, "gala_guests"), orderBy("paddleNumber"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            guests = snapshot.docs.map((doc) => {
-                const data = doc.data();
+        const unsubscribe = subscribeToGuests((docs) => {
+            guests = docs.map((data) => {
                 // Backward compatibility: if checkedInCount is missing, use checkedIn boolean
                 const currentCount =
                     data.checkedInCount !== undefined
@@ -65,7 +57,6 @@
                           : 0;
 
                 return {
-                    id: doc.id,
                     ...data,
                     checkedInCount: currentCount,
                 };
@@ -118,11 +109,10 @@
         if (newCount < 0 || newCount > max) return;
 
         try {
-            const guestRef = doc(db, "gala_guests", String(guest.paddleNumber));
-            await updateDoc(guestRef, {
+            await updateGuest(guest.id, {
                 checkedInCount: newCount,
                 checkedIn: newCount > 0,
-                checkInTime: newCount > 0 ? serverTimestamp() : null,
+                checkInTime: newCount > 0 ? new Date().toISOString() : null,
             });
 
             // Show success message for check-in (not check-out)
@@ -144,12 +134,7 @@
 
         missingDetailsLoading = true;
         try {
-            const guestRef = doc(
-                db,
-                "gala_guests",
-                String(pendingCheckInGuest.paddleNumber),
-            );
-            await updateDoc(guestRef, {
+            await updateGuest(pendingCheckInGuest.id, {
                 email: missingDetailsForm.email,
                 phone: missingDetailsForm.phone,
             });
@@ -214,33 +199,37 @@
         try {
             const newPaddleNumber = getNextPaddleNumber();
 
+            // Create new guest paddle first so the unique constraint can
+            // reject a taken paddle before the original is modified
+            try {
+                await addGuest({
+                    paddleNumber: newPaddleNumber,
+                    fullName: splitForm.newName.trim(),
+                    email: splitForm.newEmail.trim() || "",
+                    phone: splitForm.newPhone.trim() || "",
+                    guestCount: splitForm.newGuestCount,
+                    checkedInCount: 0,
+                    checkedIn: false,
+                    checkInTime: null,
+                    needsDetails: !splitForm.newEmail || !splitForm.newPhone,
+                });
+            } catch (addErr) {
+                if (isDuplicatePaddleError(addErr)) {
+                    throw new Error(
+                        `Paddle ${newPaddleNumber} is already taken.`,
+                    );
+                }
+                throw addErr;
+            }
+
             // Update original guest's count
-            const originalRef = doc(
-                db,
-                "gala_guests",
-                String(splitGuest.paddleNumber),
-            );
-            await updateDoc(originalRef, {
+            await updateGuest(splitGuest.id, {
                 guestCount: splitForm.keepCount,
                 // Adjust checkedInCount if it exceeds new guestCount
                 checkedInCount: Math.min(
                     splitGuest.checkedInCount || 0,
                     splitForm.keepCount,
                 ),
-            });
-
-            // Create new guest paddle
-            const newRef = doc(db, "gala_guests", String(newPaddleNumber));
-            await setDoc(newRef, {
-                paddleNumber: newPaddleNumber,
-                fullName: splitForm.newName.trim(),
-                email: splitForm.newEmail.trim() || "",
-                phone: splitForm.newPhone.trim() || "",
-                guestCount: splitForm.newGuestCount,
-                checkedInCount: 0,
-                checkedIn: false,
-                checkInTime: null,
-                needsDetails: !splitForm.newEmail || !splitForm.newPhone,
             });
 
             // Store split details for confirmation
@@ -258,7 +247,11 @@
             splitGuest = null;
         } catch (err) {
             console.error("Error splitting paddle:", err);
-            alert("Failed to split paddle. Please try again.");
+            alert(
+                err?.message
+                    ? `Failed to split paddle: ${err.message}`
+                    : "Failed to split paddle. Please try again.",
+            );
         } finally {
             splitLoading = false;
         }

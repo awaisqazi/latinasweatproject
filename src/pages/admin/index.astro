@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import DashboardApp from "@/components/admin/marketing/DashboardApp.svelte";
+---
+
+<Layout
+  title="LSP Dashboard | The Latina Sweat Project"
+  description="Private team dashboard for The Latina Sweat Project."
+  hideFooter={true}
+  robots="noindex, nofollow"
+>
+  <DashboardApp client:only="svelte" />
+</Layout>

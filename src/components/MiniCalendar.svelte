@@ -56,14 +56,18 @@
         const isPast = date < new Date().setHours(0, 0, 0, 0);
         const isSelected = toDateStr(selectedDate) === dateString;
 
-        // If we have aggregation data, use it for faster rendering
+        // If we have aggregation data, use it for faster rendering.
+        // Supports both the array shape (get_month_availability RPC) and the
+        // legacy { totalAvailable } object shape.
         if (
             availabilityData &&
             availabilityData.days &&
             availabilityData.days[dateString]
         ) {
             const dayInfo = availabilityData.days[dateString];
-            const hasAvailableShifts = dayInfo.totalAvailable > 0;
+            const hasAvailableShifts = Array.isArray(dayInfo)
+                ? dayInfo.some((s) => s.hasAvailability)
+                : dayInfo.totalAvailable > 0;
 
             // Check lock time (24 hours before first shift)
             const now = new Date();

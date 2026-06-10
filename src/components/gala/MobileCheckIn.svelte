@@ -1,17 +1,10 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
+    import { supabase } from "../../lib/supabaseClient";
     import {
-        collection,
-        query,
-        orderBy,
-        onSnapshot,
-        doc,
-        updateDoc,
-        setDoc,
-        serverTimestamp,
-        limit,
-        getDocs,
-    } from "firebase/firestore";
+        subscribeToGuests,
+        updateGuest,
+        addGuest,
+    } from "../../lib/galaUtils";
     import { onMount } from "svelte";
 
     // State
@@ -19,6 +12,15 @@
     let guests = [];
     let searchTerm = "";
     let filteredGuests = [];
+
+    // Check-ins write to Supabase, which requires a signed-in account with
+    // the gala module. Anonymous visitors see a sign-in note instead of data.
+    let isSignedIn = false;
+    let authChecked = false;
+    const dashboardUrl = `${import.meta.env.BASE_URL || "/"}admin#gala`.replace(
+        "//admin",
+        "/admin",
+    );
 
     // Add Guest Form
     let newGuest = {
@@ -52,10 +54,28 @@
     let successDetails = null; // For split confirmation details
 
     onMount(() => {
-        const q = query(collection(db, "gala_guests"), orderBy("paddleNumber"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            guests = snapshot.docs.map((doc) => {
-                const data = doc.data();
+        let unsubscribeAuth = null;
+
+        if (supabase) {
+            supabase.auth.getSession().then(({ data }) => {
+                isSignedIn = !!data?.session;
+                authChecked = true;
+            });
+            const { data: authListener } = supabase.auth.onAuthStateChange(
+                (_event, session) => {
+                    isSignedIn = !!session;
+                    authChecked = true;
+                },
+            );
+            unsubscribeAuth = () =>
+                authListener?.subscription?.unsubscribe?.();
+        } else {
+            authChecked = true;
+        }
+
+        // Initial fetch + 20-second polling (replaces the Firestore listener).
+        const unsubscribeGuests = subscribeToGuests((docs) => {
+            guests = docs.map((data) => {
                 // Backward compatibility for checkedInCount
                 const currentCount =
                     data.checkedInCount !== undefined
@@ -65,13 +85,16 @@
                           : 0;
 
                 return {
-                    id: doc.id,
                     ...data,
                     checkedInCount: currentCount,
                 };
             });
         });
-        return unsubscribe;
+
+        return () => {
+            unsubscribeGuests();
+            if (unsubscribeAuth) unsubscribeAuth();
+        };
     });
 
     // Filter Logic
@@ -119,11 +142,10 @@
         if (newCount < 0 || newCount > max) return;
 
         try {
-            const guestRef = doc(db, "gala_guests", String(guest.paddleNumber));
-            await updateDoc(guestRef, {
+            await updateGuest(guest.id, {
                 checkedInCount: newCount,
                 checkedIn: newCount > 0,
-                checkInTime: newCount > 0 ? serverTimestamp() : null,
+                checkInTime: newCount > 0 ? new Date().toISOString() : null,
             });
 
             // Show success message for check-in (not check-out)
@@ -145,12 +167,7 @@
 
         missingDetailsLoading = true;
         try {
-            const guestRef = doc(
-                db,
-                "gala_guests",
-                String(pendingCheckInGuest.paddleNumber),
-            );
-            await updateDoc(guestRef, {
+            await updateGuest(pendingCheckInGuest.id, {
                 email: missingDetailsForm.email,
                 phone: missingDetailsForm.phone,
             });
@@ -216,12 +233,7 @@
             const newPaddleNumber = getNextPaddleNumber();
 
             // Update original guest's count
-            const originalRef = doc(
-                db,
-                "gala_guests",
-                String(splitGuest.paddleNumber),
-            );
-            await updateDoc(originalRef, {
+            await updateGuest(splitGuest.id, {
                 guestCount: splitForm.keepCount,
                 checkedInCount: Math.min(
                     splitGuest.checkedInCount || 0,
@@ -230,8 +242,7 @@
             });
 
             // Create new guest paddle
-            const newRef = doc(db, "gala_guests", String(newPaddleNumber));
-            await setDoc(newRef, {
+            await addGuest({
                 paddleNumber: newPaddleNumber,
                 fullName: splitForm.newName.trim(),
                 email: splitForm.newEmail.trim() || "",
@@ -290,12 +301,7 @@
 
         loading = true;
         try {
-            const docRef = doc(
-                db,
-                "gala_guests",
-                String(newGuest.paddleNumber),
-            );
-            await setDoc(docRef, {
+            await addGuest({
                 paddleNumber: Number(newGuest.paddleNumber),
                 fullName: newGuest.fullName,
                 email: newGuest.email,
@@ -303,7 +309,7 @@
                 guestCount: Number(newGuest.guestCount),
                 checkedInCount: Number(newGuest.guestCount), // Auto check-in all
                 checkedIn: true,
-                checkInTime: serverTimestamp(),
+                checkInTime: new Date().toISOString(),
             });
 
             successMessage = `Paddle #${newGuest.paddleNumber} Assigned!`;
@@ -328,6 +334,25 @@
 </script>
 
 <div class="min-h-screen bg-gray-50 pb-24">
+    {#if authChecked && !isSignedIn}
+        <div class="bg-amber-50 border-b border-amber-200">
+            <div
+                class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4"
+            >
+                <p class="text-sm font-medium text-amber-800">
+                    Sign in to the dashboard to check in guests. Guest data is
+                    only visible to signed-in gala staff.
+                </p>
+                <a
+                    href={dashboardUrl}
+                    class="inline-flex items-center justify-center px-4 py-2 bg-amber-600 text-white text-sm font-bold rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
+                >
+                    Go to dashboard
+                </a>
+            </div>
+        </div>
+    {/if}
+
     {#if successMessage}
         <div
             class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md"

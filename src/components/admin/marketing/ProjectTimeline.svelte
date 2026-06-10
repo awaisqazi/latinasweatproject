@@ -12,6 +12,8 @@
   export let supabase;
   export let project = null;
   export let refreshKey = 0;
+  // Comments table to read/write; board projects pass "board_project_comments".
+  export let table = "project_comments";
 
   let comments = [];
   let draftComment = "";
@@ -60,7 +62,7 @@
     try {
       const { data, error } = await withTimeout(
         supabase
-          .from("project_comments")
+          .from(table)
           .select("id, project_id, author_id, author_name, author_email, body, created_at")
           .eq("project_id", project.id)
           .order("created_at", { ascending: true }),
@@ -94,7 +96,7 @@
     try {
       const { data, error } = await withTimeout(
         supabase
-          .from("project_comments")
+          .from(table)
           .insert({
             project_id: project.id,
             body,
@@ -130,7 +132,7 @@
     try {
       const { error } = await withTimeout(
         supabase
-          .from("project_comments")
+          .from(table)
           .delete()
           .eq("id", comment.id),
       );

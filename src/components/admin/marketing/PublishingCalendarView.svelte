@@ -85,13 +85,11 @@
       );
 
       if (error) {
-        projects = [];
         errorMessage = error.message;
       } else {
         projects = data || [];
       }
     } catch (error) {
-      projects = [];
       errorMessage =
         error?.message ||
         "Publishing calendar took too long to load. Please refresh and try again.";

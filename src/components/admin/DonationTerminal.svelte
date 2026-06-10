@@ -1,17 +1,10 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
-    import {
-        collection,
-        addDoc,
-        serverTimestamp,
-        query,
-        orderBy,
-        limit,
-        onSnapshot,
-        doc,
-        getDoc,
-    } from "firebase/firestore";
     import { onMount } from "svelte";
+    import {
+        subscribeToDonations,
+        addDonation,
+        getGuestByPaddle,
+    } from "../../lib/galaUtils";
 
     // State
     let activeTab = "pledge"; // 'pledge', 'external', or 'tickets'
@@ -35,18 +28,10 @@
     };
     let donations = [];
 
-    // Live Feed
+    // Live Feed (newest first; keep the 15 most recent like the old query)
     onMount(() => {
-        const q = query(
-            collection(db, "gala_donations"),
-            orderBy("timestamp", "desc"),
-            limit(15),
-        );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            donations = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+        const unsubscribe = subscribeToDonations((docs) => {
+            donations = docs.slice(0, 15);
         });
         return unsubscribe;
     });
@@ -62,15 +47,10 @@
         error = "";
 
         try {
-            const docRef = doc(
-                db,
-                "gala_guests",
-                String(pledgeData.paddleNumber),
-            );
-            const docSnap = await getDoc(docRef);
+            const guest = await getGuestByPaddle(pledgeData.paddleNumber);
 
-            if (docSnap.exists()) {
-                confirmGuestName = docSnap.data().fullName;
+            if (guest) {
+                confirmGuestName = guest.fullName;
                 showConfirm = true;
             } else {
                 error = `Paddle #${pledgeData.paddleNumber} not found.`;
@@ -85,12 +65,11 @@
     async function submitPledge() {
         loading = true;
         try {
-            await addDoc(collection(db, "gala_donations"), {
+            await addDonation({
                 type: "PLEDGE",
                 paddleNumber: Number(pledgeData.paddleNumber),
                 donorName: confirmGuestName, // Store name for easier display
                 amount: Number(pledgeData.amount),
-                timestamp: serverTimestamp(),
             });
 
             showSuccess(
@@ -115,13 +94,12 @@
         error = "";
 
         try {
-            await addDoc(collection(db, "gala_donations"), {
+            await addDonation({
                 type: "EXTERNAL",
                 donorName: externalData.donorName,
                 donorEmail: externalData.email,
                 message: externalData.description,
                 amount: Number(externalData.amount),
-                timestamp: serverTimestamp(),
             });
 
             showSuccess(
@@ -155,13 +133,12 @@
         error = "";
 
         try {
-            await addDoc(collection(db, "gala_donations"), {
+            await addDonation({
                 type: "TICKET_SALES",
                 donorName: "Ticket Sales",
                 message: ticketData.description || "Ticket revenue",
                 amount: Number(ticketData.amount),
                 hidden: true, // This hides it from ticker and leaderboard
-                timestamp: serverTimestamp(),
             });
 
             showSuccess(`Recorded $${ticketData.amount} in ticket sales`);
@@ -178,9 +155,12 @@
 
     function formatTime(timestamp) {
         if (!timestamp) return "";
-        return timestamp
-            .toDate()
-            .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const date = new Date(timestamp);
+        if (Number.isNaN(date.getTime())) return "";
+        return date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     }
 </script>
 

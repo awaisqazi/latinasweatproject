@@ -1,29 +1,15 @@
 <script>
     import { onMount, tick } from "svelte";
-    import { subsDb } from "../lib/subsFirebase";
     import {
-        collection,
-        onSnapshot,
-        doc,
-        addDoc,
-        runTransaction,
-        Timestamp,
-        query,
-        where,
-        orderBy,
-        getDocs,
-    } from "firebase/firestore";
+        getSupabaseClient,
+        SUPABASE_CONFIG_ERROR,
+    } from "../lib/supabaseClient";
     import SubRequestCard from "./SubRequestCard.svelte";
     import SubVolunteerModal from "./SubVolunteerModal.svelte";
     import CreateSubRequestModal from "./CreateSubRequestModal.svelte";
     import SubsCalendar from "./SubsCalendar.svelte";
-    import {
-        getCache,
-        setCache,
-        getSubsCacheKey,
-        invalidateCache,
-    } from "../lib/cacheUtils";
 
+    let supabase = null;
     let requests = [];
     let loading = true;
     let error = null;
@@ -84,70 +70,67 @@
             .slice(0, 5);
     })();
 
-    onMount(async () => {
-        const cacheKey = getSubsCacheKey();
-        const cached = getCache(cacheKey);
+    // Map a sub_requests_public row to the shape the cards and modals expect
+    function mapPublicRequest(row) {
+        const [y, m, d] = row.date.split("-").map(Number);
+        return {
+            id: row.id,
+            className: row.class_name,
+            date: new Date(y, m - 1, d),
+            duration: row.duration_minutes || 60,
+            location: row.location || "",
+            notes: row.notes || "",
+            requestedBy: { name: row.requested_by_name },
+            status: row.status,
+            assignedSub: row.assigned_sub_name
+                ? { name: row.assigned_sub_name }
+                : null,
+            volunteers: Array.from(
+                { length: Number(row.volunteer_count) || 0 },
+                () => ({ name: "" }),
+            ),
+            createdAt: row.created_at ? new Date(row.created_at) : new Date(),
+        };
+    }
 
-        // Load cached data immediately (optimistic)
-        if (cached) {
-            requests = (cached.data || []).map((r) => ({
-                ...r,
-                date: new Date(r.date),
-                createdAt: new Date(r.createdAt),
-            }));
-            loading = false;
-
-            // If cache is fresh, don't fetch from Firebase
-            if (!cached.isStale) {
-                return;
-            }
-        }
-
-        // Fetch fresh data from Firebase (one-time, no listener)
+    async function loadRequests() {
         try {
+            // Show requests from a few days back onward
             const cutoffDate = new Date();
-            cutoffDate.setMonth(cutoffDate.getMonth() - 1);
-            cutoffDate.setHours(0, 0, 0, 0);
+            cutoffDate.setDate(cutoffDate.getDate() - 7);
+            const cutoffKey = toDateStr(cutoffDate);
 
-            const q = query(
-                collection(subsDb, "sub_requests"),
-                where("date", ">=", Timestamp.fromDate(cutoffDate)),
-                orderBy("date", "asc"),
-            );
+            const { data, error: loadError } = await supabase
+                .from("sub_requests_public")
+                .select(
+                    "id, class_name, date, duration_minutes, location, notes, requested_by_name, status, assigned_sub_name, created_at, volunteer_count",
+                )
+                .gte("date", cutoffKey)
+                .order("date", { ascending: true });
 
-            const snapshot = await getDocs(q);
-            const data = [];
-            snapshot.forEach((docSnap) => {
-                const d = docSnap.data();
-                data.push({
-                    id: docSnap.id,
-                    ...d,
-                    date: d.date?.toDate ? d.date.toDate() : new Date(d.date),
-                    createdAt: d.createdAt?.toDate
-                        ? d.createdAt.toDate()
-                        : new Date(),
-                });
-            });
-            data.sort((a, b) => a.date - b.date);
-            requests = data;
-            loading = false;
-            // Update cache
-            setCache(cacheKey, data);
+            if (loadError) throw loadError;
+
+            requests = (data || []).map(mapPublicRequest);
         } catch (e) {
-            // On Firebase error (quota, network, etc.), keep showing cached data
-            console.error("Firebase fetch error - using cached data:", e);
-            // Only show error if we don't have cached data
+            console.error("Supabase fetch error:", e);
             if (!requests || requests.length === 0) {
                 error = "Could not load sub requests.";
             }
+        } finally {
             loading = false;
         }
-    });
-
-    // Call this after successful form submissions to invalidate cache
-    function invalidateSubsCache() {
-        invalidateCache(getSubsCacheKey());
     }
+
+    onMount(async () => {
+        if (SUPABASE_CONFIG_ERROR) {
+            error = "Could not load sub requests.";
+            loading = false;
+            return;
+        }
+
+        supabase = getSupabaseClient();
+        await loadRequests();
+    });
 
     // Group by Date
     $: requestsByDate = requests.reduce((acc, req) => {
@@ -210,45 +193,48 @@
         volunteerSuccess = false;
     }
 
+    const VOLUNTEER_ERROR_MESSAGES = {
+        duplicate: "You have already volunteered for this class!",
+        already_filled: "This class already has a confirmed sub. Thank you for offering!",
+        past: "This class date has already passed.",
+        not_found: "This request no longer exists. Please refresh the page.",
+        invalid_input:
+            "Please double-check your name, email, and phone number.",
+    };
+
     async function handleVolunteer(event) {
         isSubmitting = true;
         const { name, email, phone, request } = event.detail;
 
         try {
-            const requestRef = doc(subsDb, "sub_requests", request.id);
+            const { data, error: rpcError } = await supabase.rpc(
+                "volunteer_for_sub",
+                {
+                    p_request_id: request.id,
+                    p_name: name,
+                    p_email: email,
+                    p_phone: phone,
+                },
+            );
 
-            await runTransaction(subsDb, async (transaction) => {
-                const reqDoc = await transaction.get(requestRef);
-                if (!reqDoc.exists()) throw new Error("Request not found!");
-
-                const data = reqDoc.data();
-                const volunteers = data.volunteers || [];
-
-                // Check for duplicate
-                const isDuplicate = volunteers.some(
-                    (v) => v.email.toLowerCase() === email.toLowerCase(),
+            if (rpcError) throw new Error(rpcError.message);
+            if (!data?.ok) {
+                throw new Error(
+                    VOLUNTEER_ERROR_MESSAGES[data?.reason] ||
+                        "Something went wrong. Please try again.",
                 );
-                if (isDuplicate) {
-                    throw new Error(
-                        "You have already volunteered for this class!",
-                    );
-                }
-
-                volunteers.push({
-                    name,
-                    email,
-                    phone,
-                    timestamp: new Date().toISOString(),
-                });
-
-                transaction.update(requestRef, {
-                    volunteers,
-                    status: "pending",
-                });
-            });
+            }
 
             volunteerSuccess = true;
-            invalidateSubsCache();
+            requests = requests.map((r) =>
+                r.id === request.id
+                    ? {
+                          ...r,
+                          status: r.status === "open" ? "pending" : r.status,
+                          volunteers: [...r.volunteers, { name, email, phone }],
+                      }
+                    : r,
+            );
         } catch (e) {
             console.error("Volunteer failed:", e);
             alert("Failed to submit: " + e.message);
@@ -269,6 +255,23 @@
     // Create Request Success State
     let createSuccess = false;
 
+    const CREATE_ERROR_MESSAGES = {
+        invalid_date: "Please choose a date that hasn't passed.",
+        invalid_input:
+            "Please double-check the form. A valid email address is required.",
+    };
+
+    function formatTimeLabel(time) {
+        if (!/^\d{2}:\d{2}$/.test(time || "")) return "";
+        const [h, min] = time.split(":").map(Number);
+        const tempDate = new Date();
+        tempDate.setHours(h, min);
+        return tempDate.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+        });
+    }
+
     async function handleCreateRequest(event) {
         isCreatingRequest = true;
         const {
@@ -283,28 +286,38 @@
         } = event.detail;
 
         try {
-            const [y, m, d] = date.split("-").map(Number);
-            const [h, min] = time.split(":").map(Number);
-            const dateObj = new Date(y, m - 1, d, h, min);
+            // The class time is no longer a separate field, so keep it in the notes
+            const timeLabel = formatTimeLabel(time);
+            const mergedNotes = [
+                timeLabel ? `Class time: ${timeLabel}` : "",
+                notes || "",
+            ]
+                .filter(Boolean)
+                .join(" · ");
 
-            await addDoc(collection(subsDb, "sub_requests"), {
-                className,
-                date: Timestamp.fromDate(dateObj),
-                duration,
-                location,
-                notes,
-                requestedBy: {
-                    name: instructorName,
-                    email: instructorEmail,
+            const { data, error: rpcError } = await supabase.rpc(
+                "create_sub_request",
+                {
+                    p_class_name: className,
+                    p_date: date,
+                    p_duration_minutes: Number(duration) || null,
+                    p_location: location,
+                    p_notes: mergedNotes,
+                    p_requested_by_name: instructorName,
+                    p_requested_by_email: instructorEmail,
                 },
-                status: "open",
-                volunteers: [],
-                assignedSub: null,
-                createdAt: Timestamp.now(),
-            });
+            );
+
+            if (rpcError) throw new Error(rpcError.message);
+            if (!data?.ok) {
+                throw new Error(
+                    CREATE_ERROR_MESSAGES[data?.reason] ||
+                        "Something went wrong. Please try again.",
+                );
+            }
 
             createSuccess = true; // Show success view in modal
-            invalidateSubsCache();
+            await loadRequests();
         } catch (e) {
             console.error("Create failed:", e);
             alert("Failed to submit request: " + e.message);

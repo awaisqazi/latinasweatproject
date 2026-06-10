@@ -1,7 +1,9 @@
 <script>
-    import { db } from "../../lib/galaFirebase";
-    import { collection, onSnapshot, query, where } from "firebase/firestore";
     import { onMount } from "svelte";
+    import {
+        subscribeToGuests,
+        subscribeToDonations,
+    } from "../../lib/galaUtils";
 
     let totalRaised = 0;
     let attendanceCount = 0;
@@ -9,37 +11,26 @@
 
     onMount(() => {
         // Listen to Donations
-        const donationsUnsub = onSnapshot(
-            collection(db, "gala_donations"),
-            (snapshot) => {
-                let sum = 0;
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.amount) sum += Number(data.amount);
-                });
-                totalRaised = sum;
-            },
-        );
+        const donationsUnsub = subscribeToDonations((docs) => {
+            totalRaised = docs.reduce(
+                (sum, d) => sum + (Number(d.amount) || 0),
+                0,
+            );
+        });
 
         // Listen to Guests (Attendance)
-        const guestsUnsub = onSnapshot(
-            collection(db, "gala_guests"),
-            (snapshot) => {
-                let count = 0;
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    // Handle backward compatibility
-                    const current =
-                        data.checkedInCount !== undefined
-                            ? data.checkedInCount
-                            : data.checkedIn
-                              ? data.guestCount || 1
-                              : 0;
-                    count += current;
-                });
-                attendanceCount = count;
-            },
-        );
+        const guestsUnsub = subscribeToGuests((docs) => {
+            attendanceCount = docs.reduce((count, data) => {
+                // Handle backward compatibility
+                const current =
+                    data.checkedInCount !== undefined
+                        ? data.checkedInCount
+                        : data.checkedIn
+                          ? data.guestCount || 1
+                          : 0;
+                return count + current;
+            }, 0);
+        });
 
         return () => {
             donationsUnsub();

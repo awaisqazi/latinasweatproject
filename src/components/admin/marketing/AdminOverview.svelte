@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import {
     AlertCircle,
     ArrowUpDown,
@@ -8,7 +8,6 @@
     ExternalLink,
     FilePlus2,
     Inbox,
-    MailPlus,
     Pencil,
     Plus,
     RefreshCw,
@@ -17,11 +16,12 @@
     Search,
     ShieldAlert,
     Trash2,
-    Users,
     X,
   } from "@lucide/svelte";
   import EmptyState from "./EmptyState.svelte";
   import Panel from "./Panel.svelte";
+  import SlideOver from "./SlideOver.svelte";
+  import { isOperationalAdmin } from "../../../lib/dashboard/roles";
 
   export let supabase;
   export let profile;
@@ -69,31 +69,23 @@
   ];
   const projectSelectColumns =
     "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,intake_respondent_email,intake_contact_name,intake_urgency,intake_payload,created_at";
-  const userFunctionUrl = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/marketing-users`;
-  const supabasePublishableKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   let intakeProjects = [];
   let allProjects = [];
   let teamMembers = [];
   let assignableTeamMembers = [];
   let accountUsers = [];
-  let userDrafts = {};
   let intakeDrafts = {};
   let projectDrafts = {};
   let assignmentSearches = {};
   let projectAssignmentSearches = {};
   let manualTeamSearch = "";
   let editProjectAssignmentSearch = "";
-  let manualDialog;
   let manualDrawerVisible = false;
-  let manualDrawerClosing = false;
-  let editProjectDialog;
   let editingProject = null;
   let isProjectDrawerEditing = false;
   let projectDrawerVisible = false;
-  let projectDrawerClosing = false;
   let manualForm = getEmptyManualForm();
-  let inviteForm = getEmptyInviteForm();
   let projectSearch = "";
   let projectStatusFilter = "all";
   let projectPriorityFilter = "all";
@@ -108,17 +100,14 @@
   let isLoading = true;
   let isRefreshing = false;
   let errorMessage = "";
-  let userManagementError = "";
   let successMessage = "";
   let savingIntakeId = "";
-  let savingUserId = "";
-  let invitingUser = false;
   let savingProjectId = "";
   let deletingProjectId = "";
   let savingManualProject = false;
   let lastRefreshKey = refreshKey;
 
-  $: isAdmin = profile?.role === "admin";
+  $: isAdmin = isOperationalAdmin(profile);
   $: assignableTeamMembers = getAssignableTeamMembers(teamMembers, accountUsers);
   $: copyPendingCount = allProjects.filter((project) => !project.copy_approved).length;
   $: filteredProjects = getFilteredProjects(
@@ -165,27 +154,24 @@
 
     isRefreshing = true;
     errorMessage = "";
-    userManagementError = "";
 
     try {
-      const [membersResult, intakeResult, projectsResult, accountUsersResult] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, full_name, email, role")
-            .order("full_name", { ascending: true, nullsFirst: false }),
-          supabase
-            .from("projects")
-            .select(projectSelectColumns)
-            .eq("source", "google_form")
-            .eq("intake_reviewed", false)
-            .order("intake_submitted_at", { ascending: true, nullsFirst: false }),
-          supabase
-            .from("projects")
-            .select(projectSelectColumns)
-            .order("created_at", { ascending: false, nullsFirst: false }),
-          fetchAccountUsers().catch((error) => ({ error })),
-        ]);
+      const [membersResult, intakeResult, projectsResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, full_name, email, role")
+          .order("full_name", { ascending: true, nullsFirst: false }),
+        supabase
+          .from("projects")
+          .select(projectSelectColumns)
+          .eq("source", "google_form")
+          .eq("intake_reviewed", false)
+          .order("intake_submitted_at", { ascending: true, nullsFirst: false }),
+        supabase
+          .from("projects")
+          .select(projectSelectColumns)
+          .order("created_at", { ascending: false, nullsFirst: false }),
+      ]);
 
       const firstError =
         membersResult.error || intakeResult.error || projectsResult.error;
@@ -197,27 +183,9 @@
       teamMembers = membersResult.data || [];
       intakeProjects = intakeResult.data || [];
       allProjects = projectsResult.data || [];
-
-      if (accountUsersResult.error) {
-        userManagementError =
-          accountUsersResult.error?.message ||
-          "User management tools could not load yet.";
-        accountUsers = teamMembers.map(profileToAccountUser);
-      } else {
-        userManagementError = "";
-        accountUsers = accountUsersResult.users || [];
-        teamMembers = accountUsers
-          .filter((user) => user.email)
-          .map((user) => ({
-            id: user.id,
-            full_name: user.full_name,
-            email: user.email,
-            role: user.role,
-          }));
-      }
+      accountUsers = teamMembers.map(profileToAccountUser);
 
       seedIntakeDrafts(intakeProjects);
-      seedUserDrafts(accountUsers);
       seedProjectDrafts(allProjects);
     } catch (error) {
       errorMessage = error?.message || "Admin projects could not be loaded.";
@@ -225,40 +193,6 @@
       isLoading = false;
       isRefreshing = false;
     }
-  }
-
-  async function fetchAccountUsers() {
-    return callUserManagementFunction({ method: "GET" });
-  }
-
-  async function callUserManagementFunction({ method = "GET", body = null } = {}) {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (!data.session?.access_token) {
-      throw new Error("Your session expired. Please sign in again.");
-    }
-
-    const response = await fetch(userFunctionUrl, {
-      method,
-      headers: {
-        apikey: supabasePublishableKey,
-        authorization: `Bearer ${data.session.access_token}`,
-        "content-type": "application/json",
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(result.error || "User management request failed.");
-    }
-
-    return result;
   }
 
   function profileToAccountUser(profile) {
@@ -275,21 +209,6 @@
       email_confirmed_at: null,
       account_status: "active",
     };
-  }
-
-  function seedUserDrafts(users) {
-    const nextDrafts = { ...userDrafts };
-
-    for (const user of users) {
-      if (nextDrafts[user.id]) continue;
-
-      nextDrafts[user.id] = {
-        full_name: user.full_name || "",
-        role: user.role || "member",
-      };
-    }
-
-    userDrafts = nextDrafts;
   }
 
   function seedIntakeDrafts(projects) {
@@ -471,19 +390,9 @@
   async function openProjectDrawer(project, editing = false) {
     editingProject = project;
     isProjectDrawerEditing = editing;
-    projectDrawerClosing = false;
-    projectDrawerVisible = false;
     editProjectAssignmentSearch = "";
     resetProjectDraft(project);
-    await tick();
-
-    if (editProjectDialog && !editProjectDialog.open) {
-      editProjectDialog.showModal();
-    }
-
-    window.requestAnimationFrame(() => {
-      projectDrawerVisible = true;
-    });
+    projectDrawerVisible = true;
   }
 
   function openEditProjectModal(project) {
@@ -505,27 +414,16 @@
   }
 
   function closeEditProjectModal() {
-    if (savingProjectId || projectDrawerClosing) return;
+    if (savingProjectId) return;
 
     if (editingProject) {
       resetProjectDraft(editingProject);
     }
 
-    projectDrawerClosing = true;
     projectDrawerVisible = false;
-    window.setTimeout(() => {
-      editProjectDialog?.close();
-    }, 190);
-  }
-
-  function handleEditProjectDialogClick(event) {
-    if (event.target === editProjectDialog) {
-      closeEditProjectModal();
-    }
   }
 
   function handleProjectDrawerClose() {
-    projectDrawerClosing = false;
     projectDrawerVisible = false;
     editingProject = null;
     isProjectDrawerEditing = false;
@@ -608,133 +506,6 @@
     if (urgency >= 5) return "P0";
     if (urgency >= 3) return "P1";
     return "P2";
-  }
-
-  function getUserDraft(userId) {
-    return userDrafts[userId] || {
-      full_name: "",
-      role: "member",
-    };
-  }
-
-  function updateUserDraft(userId, field, value) {
-    const draft = getUserDraft(userId);
-
-    userDrafts = {
-      ...userDrafts,
-      [userId]: {
-        ...draft,
-        [field]: value,
-      },
-    };
-  }
-
-  function isUserDraftDirty(user) {
-    const draft = getUserDraft(user.id);
-
-    return (
-      (draft.full_name || "") !== (user.full_name || "") ||
-      (draft.role || "member") !== (user.role || "member")
-    );
-  }
-
-  function getEmptyInviteForm() {
-    return {
-      email: "",
-      full_name: "",
-      role: "member",
-    };
-  }
-
-  function updateInviteForm(field, value) {
-    inviteForm = {
-      ...inviteForm,
-      [field]: value,
-    };
-  }
-
-  async function inviteMarketingUser(event) {
-    event.preventDefault();
-
-    if (!inviteForm.email.trim()) {
-      errorMessage = "Enter an email address to invite.";
-      return;
-    }
-
-    invitingUser = true;
-    errorMessage = "";
-    userManagementError = "";
-    successMessage = "";
-
-    try {
-      await callUserManagementFunction({
-        method: "POST",
-        body: {
-          action: "invite",
-          email: inviteForm.email.trim(),
-          full_name: inviteForm.full_name.trim(),
-          role: inviteForm.role,
-        },
-      });
-
-      successMessage = `Invite sent to ${inviteForm.email.trim()}.`;
-      inviteForm = getEmptyInviteForm();
-      await loadAdminData();
-    } catch (error) {
-      userManagementError =
-        error?.message || "The invite could not be sent right now.";
-    } finally {
-      invitingUser = false;
-    }
-  }
-
-  async function saveUserProfile(user) {
-    const draft = getUserDraft(user.id);
-
-    if (!isUserDraftDirty(user)) return;
-
-    savingUserId = user.id;
-    errorMessage = "";
-    userManagementError = "";
-    successMessage = "";
-
-    try {
-      const result = await callUserManagementFunction({
-        method: "PATCH",
-        body: {
-          action: "updateProfile",
-          userId: user.id,
-          full_name: draft.full_name.trim(),
-          role: draft.role,
-        },
-      });
-
-      const updatedUser = result.user;
-      accountUsers = accountUsers.map((item) =>
-        item.id === user.id ? updatedUser : item,
-      );
-      teamMembers = accountUsers
-        .filter((item) => item.email)
-        .map((item) => ({
-          id: item.id,
-          full_name: item.full_name,
-          email: item.email,
-          role: item.role,
-        }));
-      userDrafts = {
-        ...userDrafts,
-        [updatedUser.id]: {
-          full_name: updatedUser.full_name || "",
-          role: updatedUser.role || "member",
-        },
-      };
-      successMessage = `${updatedUser.email} was updated.`;
-    } catch (error) {
-      userManagementError =
-        error?.message || "The account could not be updated right now.";
-    } finally {
-      savingUserId = "";
-    }
   }
 
   function updateIntakeDraft(projectId, field, value) {
@@ -1215,37 +986,16 @@
   async function openManualProjectModal() {
     manualForm = getEmptyManualForm();
     manualTeamSearch = "";
-    manualDrawerClosing = false;
-    manualDrawerVisible = false;
-    await tick();
-
-    if (manualDialog && !manualDialog.open) {
-      manualDialog.showModal();
-    }
-
-    window.requestAnimationFrame(() => {
-      manualDrawerVisible = true;
-    });
+    manualDrawerVisible = true;
   }
 
   function closeManualProjectModal() {
-    if (savingManualProject || manualDrawerClosing) return;
+    if (savingManualProject) return;
 
-    manualDrawerClosing = true;
     manualDrawerVisible = false;
-    window.setTimeout(() => {
-      manualDialog?.close();
-    }, 190);
-  }
-
-  function handleManualDialogClick(event) {
-    if (event.target === manualDialog) {
-      closeManualProjectModal();
-    }
   }
 
   function handleManualDrawerClose() {
-    manualDrawerClosing = false;
     manualDrawerVisible = false;
     manualTeamSearch = "";
   }
@@ -1558,8 +1308,8 @@
           Unauthorized
         </h3>
         <p class="mt-2 text-sm leading-6">
-          This admin view is only available to profiles with the admin role.
-          Your account can still use Workspace, Kanban, Project Calendar, and Publishing Calendar.
+          This admin view is available to superusers and admins with Marketing access.
+          A superuser can update module access from User Access.
         </p>
       </div>
     </div>
@@ -1631,173 +1381,6 @@
         <p class="mt-2 text-3xl font-bold">{allProjects.length}</p>
       </div>
     </div>
-
-    <Panel title="Team Accounts" id="team-accounts" loading={isRefreshing}>
-      {#if userManagementError}
-        <div
-          class="mb-4 flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-          role="alert"
-        >
-          <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>{userManagementError}</span>
-        </div>
-      {/if}
-
-      <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
-        <div class="min-w-0">
-          <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-600">
-            <Users class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
-            {accountUsers.length} account{accountUsers.length === 1 ? "" : "s"} with dashboard access
-          </div>
-
-          <div class="overflow-x-auto rounded-md border border-black/10">
-            <table class="min-w-[56rem] w-full divide-y divide-gray-200 bg-white text-left text-sm">
-              <thead class="bg-gray-50 text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
-                <tr>
-                  <th scope="col" class="px-3 py-3">Person</th>
-                  <th scope="col" class="px-3 py-3">Status</th>
-                  <th scope="col" class="px-3 py-3">Role</th>
-                  <th scope="col" class="px-3 py-3">Last sign-in</th>
-                  <th scope="col" class="px-3 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                {#each accountUsers as account}
-                  {@const draft = getUserDraft(account.id)}
-                  <tr class="align-top transition hover:bg-gray-50">
-                    <td class="px-3 py-3">
-                      <label class="sr-only" for={`account-name-${account.id}`}>
-                        Full name for {account.email}
-                      </label>
-                      <input
-                        id={`account-name-${account.id}`}
-                        type="text"
-                        class="min-h-10 w-full min-w-44 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-                        bind:value={userDrafts[account.id].full_name}
-                        placeholder="Add name"
-                      />
-                      <p class="mt-1 break-words text-xs text-gray-500">{account.email}</p>
-                    </td>
-                    <td class="px-3 py-3">
-                      <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-bold {getAccountStatusClass(account)}">
-                        {getAccountStatusLabel(account)}
-                      </span>
-                      {#if account.invited_at}
-                        <p class="mt-1 text-xs text-gray-500">
-                          Invited {formatShortDateTime(account.invited_at)}
-                        </p>
-                      {/if}
-                    </td>
-                    <td class="px-3 py-3">
-                      <label class="sr-only" for={`account-role-${account.id}`}>
-                        Role for {account.email}
-                      </label>
-                      <select
-                        id={`account-role-${account.id}`}
-                        class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
-                        bind:value={userDrafts[account.id].role}
-                        disabled={account.id === profile?.id}
-                        title={account.id === profile?.id ? "You cannot remove your own admin role." : undefined}
-                      >
-                        <option value="member">Member</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </td>
-                    <td class="px-3 py-3 text-gray-700">
-                      {formatShortDateTime(account.last_sign_in_at)}
-                    </td>
-                    <td class="px-3 py-3">
-                      <button
-                        type="button"
-                        class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                        onclick={() => saveUserProfile(account)}
-                        disabled={!isUserDraftDirty(account) || savingUserId === account.id}
-                      >
-                        {#if savingUserId === account.id}
-                          <span class="h-4 w-4 rounded-full border-2 border-[#0f766e] border-t-transparent animate-spin" aria-hidden="true"></span>
-                          Saving
-                        {:else}
-                          <Save class="h-4 w-4" aria-hidden="true" />
-                          Save
-                        {/if}
-                      </button>
-                    </td>
-                  </tr>
-                {:else}
-                  <tr>
-                    <td colspan="5" class="px-3 py-10">
-                      <EmptyState
-                        title="No team accounts yet"
-                        message="Invite your first marketing team member to start assigning projects."
-                      />
-                    </td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <form
-          class="rounded-md border border-black/10 bg-gray-50 p-4"
-          onsubmit={inviteMarketingUser}
-        >
-          <div class="flex items-center gap-2">
-            <MailPlus class="h-5 w-5 text-[#0f766e]" aria-hidden="true" />
-            <h4 class="font-bold">Invite New User</h4>
-          </div>
-
-          <label class="mt-4 block text-sm font-bold">
-            Email
-            <input
-              type="email"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-              value={inviteForm.email}
-              autocomplete="email"
-              required
-              oninput={(event) => updateInviteForm("email", event.currentTarget.value)}
-            />
-          </label>
-
-          <label class="mt-3 block text-sm font-bold">
-            Full name
-            <input
-              type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-              value={inviteForm.full_name}
-              autocomplete="name"
-              oninput={(event) => updateInviteForm("full_name", event.currentTarget.value)}
-            />
-          </label>
-
-          <label class="mt-3 block text-sm font-bold">
-            Role
-            <select
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-              value={inviteForm.role}
-              onchange={(event) => updateInviteForm("role", event.currentTarget.value)}
-            >
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
-          </label>
-
-          <button
-            type="submit"
-            class="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={invitingUser}
-          >
-            {#if invitingUser}
-              <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-              Sending Invite
-            {:else}
-              <MailPlus class="h-4 w-4" aria-hidden="true" />
-              Send Invite
-            {/if}
-          </button>
-        </form>
-      </div>
-    </Panel>
 
     <Panel title="Google Forms Intake Queue" id="google-forms-intake-queue" loading={isLoading}>
       {#if isLoading}
@@ -2349,11 +1932,13 @@
     </Panel>
   </section>
 
-  <dialog
-    bind:this={editProjectDialog}
-    class="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(100vw,42rem)] rounded-none border-0 bg-transparent p-0 text-[#1E1E1E] backdrop:bg-black/35"
-    onclick={handleEditProjectDialogClick}
-    onclose={handleProjectDrawerClose}
+  <SlideOver
+    open={projectDrawerVisible}
+    showHeader={false}
+    width="min(100vw, 42rem)"
+    closeDisabled={savingProjectId === editingProject?.id}
+    onClose={closeEditProjectModal}
+    onClosed={handleProjectDrawerClose}
   >
     {#if editingProject}
       {@const draft = getProjectDraft(editingProject.id)}
@@ -2361,7 +1946,7 @@
       {@const detailReferences = getProjectReferences(editingProject)}
       {@const payloadEntries = getPayloadEntries(editingProject.intake_payload)}
 
-      <div class="flex h-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-out {projectDrawerVisible && !projectDrawerClosing ? 'translate-x-0' : 'translate-x-full'}">
+      <div class="flex min-h-full flex-col bg-white">
         <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
@@ -2785,16 +2370,18 @@
         {/if}
       </div>
     {/if}
-  </dialog>
+  </SlideOver>
 
-  <dialog
-    bind:this={manualDialog}
-    class="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(100vw,42rem)] rounded-none border-0 bg-transparent p-0 text-[#1E1E1E] backdrop:bg-black/35"
-    onclick={handleManualDialogClick}
-    onclose={handleManualDrawerClose}
+  <SlideOver
+    open={manualDrawerVisible}
+    showHeader={false}
+    width="min(100vw, 42rem)"
+    closeDisabled={savingManualProject}
+    onClose={closeManualProjectModal}
+    onClosed={handleManualDrawerClose}
   >
     <form
-      class="flex h-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-out {manualDrawerVisible && !manualDrawerClosing ? 'translate-x-0' : 'translate-x-full'}"
+      class="flex min-h-full flex-col bg-white"
       onsubmit={createManualProject}
     >
       <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
@@ -3004,5 +2591,5 @@
         </button>
       </div>
     </form>
-  </dialog>
+  </SlideOver>
 {/if}

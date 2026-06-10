@@ -1,35 +1,20 @@
 <script>
-    import { onMount, onDestroy, tick } from "svelte";
-    import { db } from "../lib/firebase";
+    import { onMount } from "svelte";
     import {
-        collection,
-        onSnapshot,
-        doc,
-        getDoc,
-        runTransaction,
-        query,
-        where,
-        documentId,
-        Timestamp,
-        getDocs,
-    } from "firebase/firestore";
-    import { generateShifts } from "../lib/shiftUtils";
-    import MiniCalendar from "./MiniCalendar.svelte";
+        getSupabaseClient,
+        SUPABASE_CONFIG_ERROR,
+    } from "../lib/supabaseClient";
     import CheckInModal from "./CheckInModal.svelte";
-    import {
-        getCache,
-        setCache,
-        getShiftCacheKey,
-        invalidateCacheByPrefix,
-    } from "../lib/cacheUtils";
 
-    let shifts = [];
-    let generatedShifts = [];
-    let customShifts = [];
-    let shiftData = {};
+    const supabase = SUPABASE_CONFIG_ERROR ? null : getSupabaseClient();
+
+    let kioskCode = "";
+    let missingCode = false;
+    let invalidCode = false;
+
+    let shifts = []; // Today's shifts with their registrations
     let loading = true;
     let error = null;
-    let selectedDate = new Date();
 
     // Collapsible State
     let expandedShiftIds = new Set();
@@ -39,287 +24,95 @@
     let showModal = false;
     let selectedVolunteer = null;
     let selectedShift = null;
-    let selectedIndex = -1;
-
-    // Helper: Convert Date -> "YYYY-MM-DD" safely
-    const toDateStr = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
-    };
-
-    // Helper: Get start of week (Sunday)
-    const getStartOfWeek = (date) => {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day;
-        d.setDate(diff);
-        return d;
-    };
-
-    // Helper: Add days to a Date string
-    const addDays = (dateStr, days) => {
-        const [y, m, d] = dateStr.split("-").map(Number);
-        const date = new Date(y, m - 1, d);
-        date.setDate(date.getDate() + days);
-        return toDateStr(date);
-    };
-
-    // State is tracked by STRINGS to be browser-safe
-    let currentWeekStartStr = toDateStr(getStartOfWeek(new Date()));
-
-    // Fetch tracking
-    let currentFetchKey = "";
+    let isProcessing = false;
 
     onMount(() => {
-        try {
-            generatedShifts = generateShifts();
-            // Ensure shifts are combined after generation (fixes race condition on iOS Safari)
-            if (shiftData && Object.keys(shiftData).length > 0) {
-                combineShifts();
-            }
-        } catch (e) {
-            console.error("Critical App Error:", e);
-            error = "App failed to load: " + e.message;
+        const params = new URLSearchParams(window.location.search);
+        kioskCode = params.get("code") || "";
+
+        if (!kioskCode) {
+            missingCode = true;
             loading = false;
+            return;
         }
+
+        if (!supabase) {
+            error = "Check-in is temporarily unavailable. Please ask an admin for help.";
+            loading = false;
+            return;
+        }
+
+        loadToday();
     });
 
-    onDestroy(() => {
-        // No cleanup needed - we use one-time fetches now
-    });
+    async function loadToday() {
+        loading = true;
+        error = null;
 
-    // Reactive subscription based on visible week
-    $: {
-        if (currentWeekStartStr) {
-            updateSubscriptionsForWeek(currentWeekStartStr);
+        const now = new Date();
+        const dayStart = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+        );
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+
+        const { data: shiftRows, error: shiftError } = await supabase
+            .from("shifts_public")
+            .select("*")
+            .gte("starts_at", dayStart.toISOString())
+            .lt("starts_at", dayEnd.toISOString())
+            .eq("cancelled", false)
+            .order("starts_at", { ascending: true });
+
+        if (shiftError) {
+            error = "Could not load today's shifts. Please refresh.";
+            loading = false;
+            return;
         }
-    }
 
-    // Re-combine shifts whenever generatedShifts changes (fixes race condition on iOS Safari)
-    $: if (
-        generatedShifts.length > 0 &&
-        (shiftData || customShifts.length > 0)
-    ) {
-        combineShifts();
-    }
+        let registrationsByShift = {};
+        const ids = (shiftRows || []).map((s) => s.id);
+        if (ids.length) {
+            const { data: regs, error: regError } = await supabase.rpc(
+                "get_shift_check_in_registrations",
+                {
+                    p_code: kioskCode,
+                    p_shift_ids: ids,
+                },
+            );
 
-    function updateSubscriptionsForWeek(weekStart) {
-        // Determine window: We need to fetch data for the month(s) that contain the visible week
-        const dStart = new Date(weekStart);
-        const dEnd = new Date(dStart);
-        dEnd.setDate(dEnd.getDate() + 6); // End of the visible week
+            if (regError) {
+                if (regError.code === "42501") {
+                    invalidCode = true;
+                    loading = false;
+                    return;
+                }
 
-        // Get the months that the week spans (could be 1 or 2 months)
-        const startMonth = dStart.getMonth();
-        const endMonth = dEnd.getMonth();
-        const startYear = dStart.getFullYear();
-        const endYear = dEnd.getFullYear();
-
-        // Fetch from start of first month to end of last month
-        const startOfFetch = new Date(startYear, startMonth, 1);
-        const endOfFetch = new Date(endYear, endMonth + 1, 0, 23, 59, 59);
-
-        const key = `${startOfFetch.getTime()}-${endOfFetch.getTime()}`;
-        if (key === currentFetchKey) return;
-
-        currentFetchKey = key;
-        fetchData(startOfFetch, endOfFetch);
-    }
-
-    async function fetchData(start, end) {
-        const cacheKey = getShiftCacheKey(start, end);
-        const cached = getCache(cacheKey);
-
-        // Load cached data immediately (optimistic)
-        if (cached) {
-            shiftData = cached.data.shiftData || {};
-            customShifts = (cached.data.customShifts || []).map((c) => ({
-                ...c,
-                start: new Date(c.start),
-                end: new Date(c.end),
-                date: new Date(c.date),
-            }));
-            combineShifts();
-
-            // If cache is fresh, don't fetch from Firebase
-            if (!cached.isStale) {
+                error = "Could not load registrations. Please refresh.";
+                loading = false;
                 return;
             }
+
+            for (const reg of regs || []) {
+                if (!registrationsByShift[reg.shift_id]) {
+                    registrationsByShift[reg.shift_id] = [];
+                }
+                registrationsByShift[reg.shift_id].push(reg);
+            }
         }
 
-        loading = true;
+        shifts = (shiftRows || []).map((row) => ({
+            id: row.id,
+            kind: row.kind,
+            title: row.title,
+            start: new Date(row.starts_at),
+            end: new Date(row.ends_at),
+            registrations: registrationsByShift[row.id] || [],
+        }));
 
-        // Fetch fresh data from Firebase (one-time, no listener)
-        try {
-            const startId = toDateStr(start);
-            const endBoundDate = new Date(end);
-            endBoundDate.setDate(endBoundDate.getDate() + 1);
-            const endId = toDateStr(endBoundDate);
-
-            // Fetch shifts
-            const shiftsQuery = query(
-                collection(db, "shifts"),
-                where(documentId(), ">=", startId),
-                where(documentId(), "<", endId),
-            );
-
-            const shiftsSnapshot = await getDocs(shiftsQuery);
-            const data = {};
-            shiftsSnapshot.forEach((doc) => {
-                data[doc.id] = doc.data();
-            });
-            shiftData = data;
-
-            // Fetch custom shifts
-            const customQuery = query(
-                collection(db, "custom_shifts"),
-                where("start", ">=", Timestamp.fromDate(start)),
-                where("start", "<=", Timestamp.fromDate(end)),
-            );
-
-            const customSnapshot = await getDocs(customQuery);
-            const custom = [];
-            customSnapshot.forEach((doc) => {
-                const d = doc.data();
-                const startTime = d.start.toDate();
-                const endTime = d.end.toDate();
-                const date = new Date(startTime);
-                date.setHours(0, 0, 0, 0);
-
-                custom.push({
-                    id: doc.id,
-                    start: startTime,
-                    end: endTime,
-                    date,
-                    dateStr: toDateStr(date),
-                    isCustom: true,
-                    leadCapacity: d.leadCapacity,
-                    volunteerCapacity: d.volunteerCapacity,
-                });
-            });
-            customShifts = custom;
-
-            // Fetch registrations for custom shifts (since they don't match the date-range ID pattern)
-            if (custom.length > 0) {
-                const customPromises = custom.map(async (c) => {
-                    try {
-                        const sDoc = await getDoc(doc(db, "shifts", c.id));
-                        if (sDoc.exists()) {
-                            return { id: c.id, data: sDoc.data() };
-                        }
-                    } catch (e) {
-                        console.warn("Failed to fetch custom shift regs", c.id);
-                    }
-                    return null;
-                });
-
-                const customResults = await Promise.all(customPromises);
-                customResults.forEach((res) => {
-                    if (res) {
-                        data[res.id] = res.data;
-                    }
-                });
-            }
-
-            // Update shiftData with custom shift registrations
-            shiftData = data;
-            combineShifts();
-            // Update cache
-            setCache(cacheKey, { shiftData: data, customShifts: custom });
-        } catch (e) {
-            // On Firebase error (quota, network, etc.), keep showing cached data
-            console.error("Firebase fetch error - using cached data:", e);
-            // Only show error if we don't have cached data
-            if (!shiftData || Object.keys(shiftData).length === 0) {
-                error = "Could not load data. Please refresh.";
-            }
-            loading = false;
-        }
-    }
-
-    // Call this after successful check-in to invalidate cache
-    function invalidateShiftCache() {
-        invalidateCacheByPrefix("shifts_");
-    }
-
-    function combineShifts() {
-        const activeGenerated = generatedShifts.filter((s) => {
-            const data = shiftData[s.id];
-            return !data?.cancelled;
-        });
-
-        const combined = [...activeGenerated, ...customShifts];
-        combined.sort((a, b) => a.start - b.start);
-        shifts = combined;
         loading = false;
-    }
-
-    // Grouping by Safe String Keys
-    $: shiftsByDate = shifts.reduce((acc, shift) => {
-        const data = shiftData[shift.id] || { registrations: [] };
-        const registrations = data.registrations || [];
-        const isEnded = isShiftEnded(shift);
-
-        // Filter Logic
-        if (hideInactive) {
-            if (isEnded || registrations.length === 0) {
-                return acc;
-            }
-        }
-
-        const dateKey = shift.dateStr || toDateStr(shift.date);
-        if (!acc[dateKey]) acc[dateKey] = [];
-        acc[dateKey].push(shift);
-        return acc;
-    }, {});
-
-    $: sortedDates = Object.keys(shiftsByDate).sort();
-
-    // Filter by String Comparison (Week View)
-    $: visibleDates = sortedDates.filter((dateKey) => {
-        const endOfWeekStr = addDays(currentWeekStartStr, 6);
-        return dateKey >= currentWeekStartStr && dateKey <= endOfWeekStr;
-    });
-
-    // Display Title
-    $: currentWeekDisplay = (() => {
-        const [y, m, d] = currentWeekStartStr.split("-").map(Number);
-        return new Date(y, m - 1, d).toLocaleDateString();
-    })();
-
-    function nextWeek() {
-        currentWeekStartStr = addDays(currentWeekStartStr, 7);
-    }
-
-    function prevWeek() {
-        currentWeekStartStr = addDays(currentWeekStartStr, -7);
-    }
-
-    async function handleDateSelect(event) {
-        const date = event.detail;
-        const weekStart = getStartOfWeek(date);
-        currentWeekStartStr = toDateStr(weekStart);
-
-        await tick();
-
-        const dateKey = toDateStr(date);
-        const element = document.getElementById(`date-${dateKey}`);
-        if (element) {
-            element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-    }
-
-    // Toggle Collapsible
-    function toggleShift(shiftId) {
-        if (expandedShiftIds.has(shiftId)) {
-            expandedShiftIds.delete(shiftId);
-            expandedShiftIds = new Set(expandedShiftIds); // Trigger reactivity
-        } else {
-            expandedShiftIds.add(shiftId);
-            expandedShiftIds = new Set(expandedShiftIds);
-        }
     }
 
     // Check if shift is ended
@@ -327,372 +120,312 @@
         return new Date() > shift.end;
     }
 
-    // Custom Dot Condition for CheckInApp: Only show dots if there are registrations
-    const checkInDotCondition = (shift, data) => {
-        const regs = data[shift.id]?.registrations || [];
-        return regs.length > 0;
-    };
+    $: visibleShifts = shifts.filter((shift) => {
+        if (!hideInactive) return true;
+        return !isShiftEnded(shift) && shift.registrations.length > 0;
+    });
 
-    // Custom Clickable Condition: Always clickable if shift exists (so users can see empty shifts)
-    const checkInClickableCondition = (shift, data) => true;
+    $: todayDisplay = new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+    });
 
-    function handleCheckInClick(shift, volunteer, index) {
+    // Toggle Collapsible
+    function toggleShift(shiftId) {
+        if (expandedShiftIds.has(shiftId)) {
+            expandedShiftIds.delete(shiftId);
+        } else {
+            expandedShiftIds.add(shiftId);
+        }
+        expandedShiftIds = new Set(expandedShiftIds);
+    }
+
+    function handleCheckInClick(shift, volunteer) {
         selectedShift = shift;
         selectedVolunteer = volunteer;
-        selectedIndex = index;
         showModal = true;
     }
 
     async function confirmCheckIn() {
-        if (!selectedShift || selectedIndex === -1) return;
+        if (!selectedShift || !selectedVolunteer || isProcessing) return;
 
-        const shiftId = selectedShift.id;
-        const shiftRef = doc(db, "shifts", shiftId);
+        isProcessing = true;
 
-        try {
-            await runTransaction(db, async (transaction) => {
-                const sfDoc = await transaction.get(shiftRef);
-                if (!sfDoc.exists()) throw "Shift does not exist!";
+        const { data, error: rpcError } = await supabase.rpc(
+            "set_shift_check_in",
+            {
+                p_registration_id: selectedVolunteer.id,
+                p_checked_in: true,
+                p_code: kioskCode,
+            },
+        );
 
-                const data = sfDoc.data();
-                const registrations = data.registrations || [];
+        isProcessing = false;
+        showModal = false;
 
-                if (!registrations[selectedIndex])
-                    throw "Registration not found!";
-
-                registrations[selectedIndex].checkedIn = true;
-                registrations[selectedIndex].checkInTime =
-                    new Date().toISOString();
-
-                transaction.update(shiftRef, { registrations });
-            });
-            invalidateShiftCache();
-            showModal = false;
-        } catch (e) {
-            console.error("Check-in failed: ", e);
-            alert("Check-in failed: " + e);
+        if (rpcError) {
+            error = "Check-in failed. Please try again.";
+            return;
         }
+
+        if (!data?.ok) {
+            if (data?.reason === "invalid_code") {
+                invalidCode = true;
+            } else {
+                error = "Check-in failed. Please refresh and try again.";
+            }
+            return;
+        }
+
+        // Update local state
+        shifts = shifts.map((shift) => {
+            if (shift.id !== selectedShift.id) return shift;
+            return {
+                ...shift,
+                registrations: shift.registrations.map((reg) =>
+                    reg.id === selectedVolunteer.id
+                        ? { ...reg, checked_in: true }
+                        : reg,
+                ),
+            };
+        });
+        selectedShift = null;
+        selectedVolunteer = null;
     }
 </script>
 
-<div class="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
-    <!-- Sidebar -->
-    <div class="lg:w-1/3 xl:w-1/4">
-        <div class="sticky top-24 space-y-6">
-            <div
-                class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-            >
-                <h1 class="text-2xl font-bold font-rubik text-gray-900 mb-2">
-                    Volunteer Check-in
-                </h1>
-                <p class="text-gray-500 text-sm">
-                    Manage volunteer attendance for upcoming shifts.
-                </p>
-            </div>
-
-            <MiniCalendar
-                {shifts}
-                {shiftData}
-                {selectedDate}
-                dotCondition={checkInDotCondition}
-                clickableCondition={checkInClickableCondition}
-                on:select={handleDateSelect}
-            />
-
-            <!-- Filter Toggle -->
-            <div
-                class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between"
-            >
-                <span class="text-sm font-medium text-gray-700"
-                    >Hide Inactive</span
-                >
-                <button
-                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 {hideInactive
-                        ? 'bg-vibrant-pink'
-                        : 'bg-gray-200'}"
-                    on:click={() => (hideInactive = !hideInactive)}
-                    role="switch"
-                    aria-checked={hideInactive}
-                >
-                    <span class="sr-only">Hide inactive shifts</span>
-                    <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {hideInactive
-                            ? 'translate-x-6'
-                            : 'translate-x-1'}"
-                    ></span>
-                </button>
-            </div>
-
-            <div
-                class="bg-blue-50 rounded-xl p-4 text-sm text-blue-800 shadow-sm"
-            >
-                <p class="font-bold mb-1">ℹ️ Note</p>
-                <p>Check-in is disabled after the shift ends.</p>
-            </div>
-        </div>
+<div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h1 class="text-2xl font-bold font-rubik text-gray-900 mb-2">
+            Volunteer Check-in
+        </h1>
+        <p class="text-gray-500 text-sm">
+            {todayDisplay} · Tap your shift below, find your name, and check in.
+        </p>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 space-y-6">
-        <!-- Week Navigation -->
+    {#if missingCode || invalidCode}
         <div
-            class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
+            class="bg-amber-50 text-amber-800 p-6 rounded-xl border border-amber-200 text-center"
         >
+            <p class="font-bold text-lg">Kiosk link not active</p>
+            <p class="text-sm mt-2">
+                This kiosk link is missing its access code, ask an admin for
+                the current link.
+            </p>
+        </div>
+    {:else if error}
+        <div
+            class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 text-center"
+        >
+            <p class="font-bold">Something went wrong</p>
+            <p class="text-sm">{error}</p>
+        </div>
+    {:else if loading}
+        <div class="text-center py-12">
+            <div
+                class="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-pink mx-auto"
+            ></div>
+            <p class="mt-4 text-gray-500">Loading shifts...</p>
+        </div>
+    {:else}
+        <!-- Filter Toggle -->
+        <div
+            class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between"
+        >
+            <span class="text-sm font-medium text-gray-700"
+                >Hide ended and empty shifts</span
+            >
             <button
-                on:click={prevWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 {hideInactive
+                    ? 'bg-vibrant-pink'
+                    : 'bg-gray-200'}"
+                on:click={() => (hideInactive = !hideInactive)}
+                role="switch"
+                aria-checked={hideInactive}
             >
-                &larr; Previous Week
-            </button>
-            <span class="font-bold text-gray-800 hidden md:block"
-                >Week of {currentWeekDisplay}</span
-            >
-            <button
-                on:click={nextWeek}
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors flex items-center gap-2"
-            >
-                Next Week &rarr;
+                <span class="sr-only">Hide inactive shifts</span>
+                <span
+                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {hideInactive
+                        ? 'translate-x-6'
+                        : 'translate-x-1'}"
+                ></span>
             </button>
         </div>
 
-        {#if error}
-            <div
-                class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 text-center"
-            >
-                <p class="font-bold">Something went wrong</p>
-                <p class="text-sm">{error}</p>
-            </div>
-        {:else if loading}
-            <div class="text-center py-12">
-                <div
-                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-pink mx-auto"
-                ></div>
-                <p class="mt-4 text-gray-500">Loading shifts...</p>
-            </div>
-        {:else if visibleDates.length === 0}
+        {#if visibleShifts.length === 0}
             <div
                 class="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100"
             >
                 <p class="text-lg">
                     {hideInactive
-                        ? "No shifts to check in to for this week."
-                        : "No shifts found for this week."}
+                        ? "No shifts to check in to right now."
+                        : "No shifts scheduled for today."}
                 </p>
-                <p class="text-sm mt-2">Try navigating to a different week.</p>
             </div>
         {:else}
-            {#each visibleDates as dateKey (dateKey)}
-                <div id="date-{dateKey}" class="scroll-mt-32">
-                    <h3
-                        class="text-xl font-bold text-gray-800 mb-4 py-2 border-b border-gray-100"
-                    >
-                        {(() => {
-                            const [y, m, d] = dateKey.split("-").map(Number);
-                            return new Date(y, m - 1, d).toLocaleDateString(
-                                "en-US",
-                                {
-                                    weekday: "long",
-                                    month: "long",
-                                    day: "numeric",
-                                },
-                            );
-                        })()}
-                    </h3>
-                    <div class="space-y-4">
-                        {#each shiftsByDate[dateKey] as shift (shift.id)}
-                            {@const data = shiftData[shift.id] || {
-                                registrations: [],
-                            }}
-                            {@const registrations = data.registrations || []}
-                            {@const isEnded = isShiftEnded(shift)}
-                            {@const isExpanded = expandedShiftIds.has(shift.id)}
+            <div class="space-y-4">
+                {#each visibleShifts as shift (shift.id)}
+                    {@const isEnded = isShiftEnded(shift)}
+                    {@const isExpanded = expandedShiftIds.has(shift.id)}
 
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200 {isExpanded
+                            ? 'ring-2 ring-vibrant-pink/10'
+                            : ''}"
+                    >
+                        <!-- Header (Click to Toggle) -->
+                        <button
+                            on:click={() => toggleShift(shift.id)}
+                            class="w-full text-left bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center gap-4 hover:bg-gray-100 transition-colors"
+                        >
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <p class="text-lg font-bold text-gray-900">
+                                        {shift.start.toLocaleTimeString(
+                                            "en-US",
+                                            {
+                                                hour: "numeric",
+                                                minute: "2-digit",
+                                            },
+                                        )} -
+                                        {shift.end.toLocaleTimeString("en-US", {
+                                            hour: "numeric",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                    {#if isEnded}
+                                        <span
+                                            class="px-2 py-0.5 rounded text-xs font-bold bg-gray-200 text-gray-600"
+                                            >Ended</span
+                                        >
+                                    {/if}
+                                </div>
+                                {#if shift.title}
+                                    <p
+                                        class="text-sm font-medium text-gray-700 mt-0.5"
+                                    >
+                                        {shift.title}
+                                    </p>
+                                {/if}
+                                <p class="text-sm text-gray-500 mt-1">
+                                    {shift.registrations.length} Volunteer{shift
+                                        .registrations.length !== 1
+                                        ? "s"
+                                        : ""}
+                                </p>
+                            </div>
                             <div
-                                class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200 {isExpanded
-                                    ? 'ring-2 ring-vibrant-pink/10'
+                                class="text-gray-400 transform transition-transform duration-200 {isExpanded
+                                    ? 'rotate-180'
                                     : ''}"
                             >
-                                <!-- Header (Click to Toggle) -->
-                                <button
-                                    on:click={() => toggleShift(shift.id)}
-                                    class="w-full text-left bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center gap-4 hover:bg-gray-100 transition-colors"
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    ></path></svg
                                 >
-                                    <div>
-                                        <div class="flex items-center gap-3">
-                                            <p
-                                                class="text-lg font-bold text-gray-900"
-                                            >
-                                                {shift.start.toLocaleTimeString(
-                                                    "en-US",
-                                                    {
-                                                        hour: "numeric",
-                                                        minute: "2-digit",
-                                                    },
-                                                )} -
-                                                {shift.end.toLocaleTimeString(
-                                                    "en-US",
-                                                    {
-                                                        hour: "numeric",
-                                                        minute: "2-digit",
-                                                    },
-                                                )}
-                                            </p>
-                                            {#if isEnded}
-                                                <span
-                                                    class="px-2 py-0.5 rounded text-xs font-bold bg-gray-200 text-gray-600"
-                                                    >Ended</span
-                                                >
-                                            {/if}
-                                        </div>
-                                        <p class="text-sm text-gray-500 mt-1">
-                                            {registrations.length} Volunteer{registrations.length !==
-                                            1
-                                                ? "s"
-                                                : ""}
-                                        </p>
-                                    </div>
+                            </div>
+                        </button>
+
+                        <!-- Body (Collapsible) -->
+                        {#if isExpanded}
+                            <div class="divide-y divide-gray-100">
+                                {#if shift.registrations.length === 0}
                                     <div
-                                        class="text-gray-400 transform transition-transform duration-200 {isExpanded
-                                            ? 'rotate-180'
-                                            : ''}"
+                                        class="p-8 text-center text-gray-400 italic"
                                     >
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            ><path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 9l-7 7-7-7"
-                                            ></path></svg
+                                        No volunteers registered for this
+                                        shift.
+                                    </div>
+                                {:else}
+                                    {#each shift.registrations as reg (reg.id)}
+                                        <div
+                                            class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                                         >
-                                    </div>
-                                </button>
-
-                                <!-- Body (Collapsible) -->
-                                {#if isExpanded}
-                                    <div class="divide-y divide-gray-100">
-                                        {#if registrations.length === 0}
-                                            <div
-                                                class="p-8 text-center text-gray-400 italic"
-                                            >
-                                                No volunteers registered for
-                                                this shift.
-                                            </div>
-                                        {:else}
-                                            {#each registrations as reg, i}
+                                            <div class="flex-1">
                                                 <div
-                                                    class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                                                    class="flex items-center gap-2"
                                                 >
-                                                    <div class="flex-1">
-                                                        <div
-                                                            class="flex items-center gap-2 mb-1"
-                                                        >
-                                                            <h4
-                                                                class="font-bold text-gray-900"
-                                                            >
-                                                                {reg.name}
-                                                            </h4>
-                                                            <span
-                                                                class="text-xs px-2 py-0.5 rounded-full font-medium {reg.role ===
-                                                                'lead'
-                                                                    ? 'bg-purple-100 text-purple-700'
-                                                                    : 'bg-pink-100 text-pink-700'}"
-                                                            >
-                                                                {reg.role ===
-                                                                "lead"
-                                                                    ? "Lead"
-                                                                    : "Volunteer"}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            class="text-sm text-gray-500 space-y-0.5"
-                                                        >
-                                                            <p>{reg.email}</p>
-                                                            <p>{reg.phone}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        {#if reg.checkedIn}
-                                                            <div
-                                                                class="text-right"
-                                                            >
-                                                                <span
-                                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                                                >
-                                                                    <svg
-                                                                        class="w-4 h-4"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                        ><path
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M5 13l4 4L19 7"
-
-                                                                        ></path></svg
-                                                                    >
-                                                                    Checked In
-                                                                </span>
-                                                                <span
-                                                                    class="text-xs text-gray-400 mt-1 block"
-                                                                >
-                                                                    {#if reg.checkInTime}
-                                                                        {(() => {
-                                                                            try {
-                                                                                return new Date(
-                                                                                    reg.checkInTime,
-                                                                                ).toLocaleString(
-                                                                                    "en-US",
-                                                                                    {
-                                                                                        month: "short",
-                                                                                        day: "numeric",
-                                                                                        hour: "numeric",
-                                                                                        minute: "2-digit",
-                                                                                    },
-                                                                                );
-                                                                            } catch (e) {
-                                                                                return "";
-                                                                            }
-                                                                        })()}
-                                                                    {/if}
-                                                                </span>
-                                                            </div>
-                                                        {:else}
-                                                            <button
-                                                                on:click={() =>
-                                                                    handleCheckInClick(
-                                                                        shift,
-                                                                        reg,
-                                                                        i,
-                                                                    )}
-                                                                disabled={isEnded}
-                                                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed {isEnded
-                                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-                                                                    : 'bg-vibrant-pink hover:bg-pink-600 text-white hover:shadow-lg focus:ring-pink-200'}"
-                                                            >
-                                                                {isEnded
-                                                                    ? "Ended"
-                                                                    : "Check In"}
-                                                            </button>
-                                                        {/if}
-                                                    </div>
+                                                    <h4
+                                                        class="font-bold text-gray-900"
+                                                    >
+                                                        {reg.name}
+                                                    </h4>
+                                                    <span
+                                                        class="text-xs px-2 py-0.5 rounded-full font-medium {reg.role ===
+                                                        'lead'
+                                                            ? 'bg-purple-100 text-purple-700'
+                                                            : 'bg-pink-100 text-pink-700'}"
+                                                    >
+                                                        {reg.role === "lead"
+                                                            ? "Lead"
+                                                            : "Volunteer"}
+                                                    </span>
                                                 </div>
-                                            {/each}
-                                        {/if}
-                                    </div>
+                                            </div>
+
+                                            <div>
+                                                {#if reg.checked_in}
+                                                    <span
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                                    >
+                                                        <svg
+                                                            class="w-4 h-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                            ><path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M5 13l4 4L19 7"
+                                                            ></path></svg
+                                                        >
+                                                        Checked In
+                                                    </span>
+                                                {:else}
+                                                    <button
+                                                        on:click={() =>
+                                                            handleCheckInClick(
+                                                                shift,
+                                                                reg,
+                                                            )}
+                                                        disabled={isEnded ||
+                                                            isProcessing}
+                                                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed {isEnded
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                                            : 'bg-vibrant-pink hover:bg-pink-600 text-white hover:shadow-lg focus:ring-pink-200'}"
+                                                    >
+                                                        {isEnded
+                                                            ? "Ended"
+                                                            : "Check In"}
+                                                    </button>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {/each}
                                 {/if}
                             </div>
-                        {/each}
+                        {/if}
                     </div>
-                </div>
-            {/each}
+                {/each}
+            </div>
         {/if}
-    </div>
+
+        <div class="bg-blue-50 rounded-xl p-4 text-sm text-blue-800 shadow-sm">
+            <p class="font-bold mb-1">ℹ️ Note</p>
+            <p>Check-in is disabled after the shift ends.</p>
+        </div>
+    {/if}
 </div>
 
 <CheckInModal
