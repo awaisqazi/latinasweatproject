@@ -85,13 +85,13 @@
   const SOURCE_TONES = { manual: "neutral", google_form: "teal" };
 
   const projectColumns = [
-    { key: "title", label: "Project" },
-    { key: "status", label: "Status" },
-    { key: "priority", label: "Priority" },
-    { key: "deadline", label: "Deadline", hideBelow: "lg" },
-    { key: "publish_date", label: "Publish", hideBelow: "lg" },
-    { key: "assigned_to", label: "Assigned", hideBelow: "xl" },
-    { key: "copy_approved", label: "Copy" },
+    { key: "title", label: "Project", sortable: true },
+    { key: "status", label: "Status", sortable: true },
+    { key: "priority", label: "Priority", sortable: true },
+    { key: "deadline", label: "Deadline", hideBelow: "lg", sortable: true },
+    { key: "publish_date", label: "Publish", hideBelow: "lg", sortable: true },
+    { key: "assigned_to", label: "Assigned", hideBelow: "xl", sortable: true },
+    { key: "copy_approved", label: "Copy", sortable: true },
     { key: "actions", label: "Actions" },
   ];
 
@@ -749,6 +749,18 @@
 
   function updateProjectSortField(field) {
     projectSortField = field;
+    currentProjectPage = 1;
+  }
+
+  // Header-click sorting: same column toggles direction, new column starts
+  // ascending (restores the pre-redesign affordance).
+  function setProjectSort(field) {
+    if (projectSortField === field) {
+      projectSortDirection = projectSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      projectSortField = field;
+      projectSortDirection = "asc";
+    }
     currentProjectPage = 1;
   }
 
@@ -1692,6 +1704,9 @@
         emptyTitle="No projects yet"
         emptyMessage="Add a manual project or approve an intake request to start the pipeline."
         onRowClick={(project) => openProjectDrawer(project)}
+        sortField={projectSortField}
+        sortDirection={projectSortDirection}
+        onSort={setProjectSort}
         class="max-h-[64vh]"
       >
         <svelte:fragment slot="cell" let:row let:column>

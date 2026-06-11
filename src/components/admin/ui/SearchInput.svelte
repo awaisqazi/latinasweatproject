@@ -50,7 +50,7 @@
   {:else if value}
     <button
       type="button"
-      class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink/40 transition hover:text-ink"
+      class="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-ink/40 transition hover:text-ink"
       aria-label="Clear search"
       onclick={clear}
     >

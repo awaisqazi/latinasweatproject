@@ -1,6 +1,10 @@
 <script>
   import { onMount } from "svelte";
   import { ChevronLeft, ChevronRight, RefreshCw } from "@lucide/svelte";
+  import {
+    getChannelChipClass,
+    getChannelDotClass,
+  } from "../../../lib/dashboard/channelColors";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
@@ -234,54 +238,13 @@
       return "border-brand border-l-4 bg-brand-soft/50 text-brand-ink hover:bg-brand-soft";
     }
 
-    const tags = normalizeTags(item.record.channel_tags);
-    const joinedTags = tags.join(" ");
-
-    if (joinedTags.includes("linkedin")) {
-      return "border-blue-200 bg-blue-50 text-blue-800 hover:border-blue-300 hover:bg-blue-100";
-    }
-    if (joinedTags.includes("website")) {
-      return "border-gray-200 bg-gray-100 text-gray-800 hover:border-gray-300 hover:bg-gray-200";
-    }
-    if (
-      joinedTags.includes("ig") ||
-      joinedTags.includes("instagram") ||
-      joinedTags.includes("tiktok")
-    ) {
-      return "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-800 hover:border-fuchsia-300 hover:bg-fuchsia-100";
-    }
-    if (joinedTags.includes("newsletter")) {
-      return "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 hover:bg-emerald-100";
-    }
-    return "border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-300 hover:bg-teal-100";
+    return getChannelChipClass(item.record.channel_tags);
   }
 
   function getItemDotClass(item) {
     if (item.source === "board") return "bg-brand";
 
-    const tags = normalizeTags(item.record.channel_tags);
-    const joinedTags = tags.join(" ");
-
-    if (joinedTags.includes("linkedin")) return "bg-blue-500";
-    if (joinedTags.includes("website")) return "bg-gray-500";
-    if (
-      joinedTags.includes("ig") ||
-      joinedTags.includes("instagram") ||
-      joinedTags.includes("tiktok")
-    ) {
-      return "bg-fuchsia-500";
-    }
-    if (joinedTags.includes("newsletter")) return "bg-emerald-500";
-    return "bg-teal-500";
-  }
-
-  function normalizeTags(tags) {
-    if (!Array.isArray(tags)) return [];
-
-    return tags
-      .flatMap((tag) => String(tag).split(","))
-      .map((tag) => tag.trim().toLowerCase())
-      .filter(Boolean);
+    return getChannelDotClass(item.record.channel_tags);
   }
 
   function openItemDetails(item) {

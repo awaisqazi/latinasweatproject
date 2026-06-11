@@ -18,19 +18,19 @@
 </script>
 
 {#if isSuperuser}
-  <p class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600">
+  <p class="rounded-control border border-ink/10 bg-ink/[0.04] px-3 py-2 text-xs font-semibold text-ink/65">
     Superusers have access to every module and manage user access.
   </p>
 {:else}
   <div class="grid gap-1.5 sm:grid-cols-2">
     {#each MODULES as module (module.key)}
       <label
-        class="flex items-start gap-2 rounded-md border px-2.5 py-2 text-xs transition {grants.includes(module.key) ? 'border-[#0f766e]/40 bg-teal-50/50' : 'border-gray-200 bg-white'} {disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-[#0f766e]/30'}"
+        class="flex items-start gap-2 rounded-control border px-2.5 py-2 text-xs transition {grants.includes(module.key) ? 'border-accent/40 bg-accent-soft/50' : 'border-ink/10 bg-white'} {disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-accent/30'}"
         title={module.description}
       >
         <input
           type="checkbox"
-          class="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+          class="mt-0.5 h-3.5 w-3.5 rounded border-ink/20 text-accent focus:ring-accent"
           checked={grants.includes(module.key)}
           {disabled}
           onchange={(event) => toggle(module.key, event.currentTarget.checked)}

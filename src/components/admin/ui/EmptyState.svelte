@@ -12,7 +12,7 @@
   </span>
   <h4 class="mt-3 font-bold text-ink">{title}</h4>
   {#if message}
-    <p class="mx-auto mt-1 max-w-md text-sm leading-6 text-ink/55">{message}</p>
+    <p class="mx-auto mt-1 max-w-md text-sm leading-6 text-ink/65">{message}</p>
   {/if}
   {#if $$slots.actions}
     <div class="mt-4 flex flex-wrap items-center justify-center gap-2">

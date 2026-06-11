@@ -39,7 +39,7 @@
   {#if onDismiss}
     <button
       type="button"
-      class="-m-1 rounded p-1 opacity-60 transition hover:opacity-100"
+      class="-m-1.5 grid h-6 w-6 place-items-center rounded opacity-60 transition hover:opacity-100"
       aria-label="Dismiss"
       onclick={onDismiss}
     >

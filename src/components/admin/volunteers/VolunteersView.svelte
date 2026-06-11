@@ -4,7 +4,6 @@
     CalendarDays,
     ChevronLeft,
     ChevronRight,
-    CircleAlert,
     ClipboardCheck,
     KeyRound,
     Megaphone,
@@ -273,12 +272,12 @@
 
   function shiftChipClass(shift) {
     if (shift.cancelled) return "border-red-200 bg-red-50 text-red-700";
-    if (shift.kind === "opportunity") return "border-[#ffbd59]/60 bg-[#fff3d8] text-[#8a5700]";
+    if (shift.kind === "opportunity") return "border-brand/60 bg-brand-soft text-brand-ink";
     const full =
       shift.leadCount >= shift.lead_capacity &&
       shift.volunteerCount >= shift.volunteer_capacity;
-    if (full) return "border-gray-200 bg-gray-100 text-gray-500";
-    return "border-teal-200 bg-teal-50 text-teal-900";
+    if (full) return "border-ink/10 bg-ink/[0.06] text-ink/45";
+    return "border-accent/30 bg-accent-soft text-accent-strong";
   }
 </script>
 
@@ -319,78 +318,52 @@
   </div>
 
   {#if showCreateForm}
-    <form class="rounded-md border border-black/10 bg-white p-4 shadow-sm" onsubmit={createShift}>
+    <form class="rounded-card border border-ink/8 bg-white p-4 shadow-card" onsubmit={createShift}>
       <h4 class="font-bold">New custom shift</h4>
       <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <label class="block text-xs font-bold text-gray-700">
+        <label class="block text-xs font-bold text-ink/70">
           Date
-          <input type="date" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={newShiftDate} disabled={isCreatingShift} />
+          <input type="date" class="input mt-1" bind:value={newShiftDate} disabled={isCreatingShift} />
         </label>
-        <label class="block text-xs font-bold text-gray-700">
+        <label class="block text-xs font-bold text-ink/70">
           Start time
-          <input type="time" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={newShiftTime} disabled={isCreatingShift} />
+          <input type="time" class="input mt-1" bind:value={newShiftTime} disabled={isCreatingShift} />
         </label>
-        <label class="block text-xs font-bold text-gray-700">
+        <label class="block text-xs font-bold text-ink/70">
           Duration (minutes)
-          <input type="number" min="15" step="15" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={newShiftDuration} disabled={isCreatingShift} />
+          <input type="number" min="15" step="15" class="input mt-1" bind:value={newShiftDuration} disabled={isCreatingShift} />
         </label>
-        <label class="block text-xs font-bold text-gray-700">
+        <label class="block text-xs font-bold text-ink/70">
           Lead spots
-          <input type="number" min="0" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={newShiftLeadCap} disabled={isCreatingShift} />
+          <input type="number" min="0" class="input mt-1" bind:value={newShiftLeadCap} disabled={isCreatingShift} />
         </label>
-        <label class="block text-xs font-bold text-gray-700">
+        <label class="block text-xs font-bold text-ink/70">
           Volunteer spots
-          <input type="number" min="0" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={newShiftVolCap} disabled={isCreatingShift} />
+          <input type="number" min="0" class="input mt-1" bind:value={newShiftVolCap} disabled={isCreatingShift} />
         </label>
       </div>
       {#if createError}
-        <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-          <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>{createError}</span>
-        </div>
+        <Banner tone="error" message={createError} class="mt-3" />
       {/if}
-      <button
+      <Button
         type="submit"
-        class="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isCreatingShift || !newShiftDate || !newShiftTime}
+        variant="dark"
+        loading={isCreatingShift}
+        disabled={!newShiftDate || !newShiftTime}
+        class="mt-3"
       >
-        {#if isCreatingShift}
-          <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-          Creating
-        {:else}
-          Create shift
-        {/if}
-      </button>
+        Create shift
+      </Button>
     </form>
   {/if}
 
   <Panel title="Week schedule" id="volunteers-week-title" loading={isLoadingWeek}>
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm font-bold text-gray-700">{weekRangeLabel}</p>
+      <p class="text-sm font-bold text-ink/70">{weekRangeLabel}</p>
       <div class="flex items-center gap-1.5">
-        <button
-          type="button"
-          class="inline-flex min-h-9 items-center rounded-md border border-gray-300 bg-white px-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-100"
-          aria-label="Previous week"
-          onclick={prevWeek}
-        >
-          <ChevronLeft class="h-4 w-4" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          class="inline-flex min-h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-bold text-gray-700 transition hover:bg-gray-100"
-          onclick={goToToday}
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          class="inline-flex min-h-9 items-center rounded-md border border-gray-300 bg-white px-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-100"
-          aria-label="Next week"
-          onclick={nextWeek}
-        >
-          <ChevronRight class="h-4 w-4" aria-hidden="true" />
-        </button>
+        <Button size="sm" iconOnly icon={ChevronLeft} label="Previous week" onclick={prevWeek} />
+        <Button size="sm" onclick={goToToday}>Today</Button>
+        <Button size="sm" iconOnly icon={ChevronRight} label="Next week" onclick={nextWeek} />
       </div>
     </div>
 
@@ -403,8 +376,8 @@
       <!-- Desktop: 7-column week grid -->
       <div class="hidden gap-2 lg:grid lg:grid-cols-7">
         {#each weekDays as day (day.dateStr)}
-          <div class="flex min-h-48 flex-col rounded-md border border-black/10 bg-gray-50 p-2 {day.isToday ? 'ring-2 ring-[#0f766e]/30' : ''}">
-            <p class="mb-2 text-center text-xs font-bold {day.isToday ? 'text-[#0f766e]' : 'text-gray-600'}">
+          <div class="flex min-h-48 flex-col rounded-md border border-black/10 bg-canvas/60 p-2 {day.isToday ? 'ring-2 ring-accent/30' : ''}">
+            <p class="mb-2 text-center text-xs font-bold {day.isToday ? 'text-accent' : 'text-ink/65'}">
               {day.shortLabel}
             </p>
             <div class="flex-1 space-y-1.5">
@@ -440,7 +413,7 @@
         {#each weekDays as day (day.dateStr)}
           {#if day.shifts.length}
             <div>
-              <h4 class="mb-1.5 text-sm font-bold {day.isToday ? 'text-[#0f766e]' : 'text-gray-800'}">
+              <h4 class="mb-1.5 text-sm font-bold {day.isToday ? 'text-accent' : 'text-ink'}">
                 {day.label}{day.isToday ? " · Today" : ""}
               </h4>
               <div class="space-y-1.5">

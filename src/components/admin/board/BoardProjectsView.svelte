@@ -235,7 +235,7 @@
 
   <Panel title="Board Projects" id="board-projects-panel-title" loading={isLoading}>
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <Tabs tabs={VIEW_TABS} bind:active={viewMode} variant="segmented" label="View mode" />
+      <Tabs tabs={VIEW_TABS} bind:active={viewMode} variant="segmented" label="View mode" hasPanels={false} />
 
       <Button
         variant="primary"

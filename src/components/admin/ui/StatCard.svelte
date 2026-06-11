@@ -23,14 +23,14 @@
   <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full {tone === 'teal' ? 'bg-accent' : tone === 'rose' ? 'bg-red-400' : tone === 'neutral' ? 'bg-ink/20' : 'bg-brand'}" aria-hidden="true"></span>
   <div class="flex items-center justify-between gap-3 pl-2">
     <div class="min-w-0">
-      <p class="truncate text-[13px] font-medium uppercase tracking-wide text-ink/55">{label}</p>
+      <p class="truncate text-[13px] font-medium uppercase tracking-wide text-ink/65">{label}</p>
       {#if loading}
         <Skeleton variant="text" class="mt-2.5 h-7 w-16" />
       {:else}
         <p class="mt-1.5 text-3xl font-bold tabular-nums text-ink">{value}</p>
       {/if}
       {#if hint}
-        <p class="mt-1 truncate text-xs text-ink/50">{hint}</p>
+        <p class="mt-1 truncate text-xs text-ink/65">{hint}</p>
       {/if}
     </div>
     {#if icon}

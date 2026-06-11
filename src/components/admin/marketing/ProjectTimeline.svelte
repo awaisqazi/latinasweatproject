@@ -1,9 +1,12 @@
 <script>
   import { onMount } from "svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
   import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Field from "../ui/Field.svelte";
   import {
     ArrowRight,
-    CircleAlert,
     MessageSquareText,
     RefreshCw,
     Send,
@@ -213,62 +216,51 @@
 <section aria-labelledby="project-timeline-title">
   <div class="mb-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
-      <MessageSquareText class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
+      <MessageSquareText class="h-4 w-4 text-accent" aria-hidden="true" />
       <h4 id="project-timeline-title" class="font-bold">Timeline</h4>
     </div>
 
-    <button
-      type="button"
-      class="inline-flex min-h-9 items-center gap-2 rounded-md border border-black/10 px-3 text-xs font-bold text-gray-700 transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
+    <Button
+      size="sm"
+      icon={RefreshCw}
+      loading={isLoading}
       onclick={loadComments}
       disabled={isLoading || !project?.id}
     >
-      <RefreshCw class="h-3.5 w-3.5 {isLoading ? 'animate-spin' : ''}" aria-hidden="true" />
       Refresh
-    </button>
+    </Button>
   </div>
 
   {#if errorMessage}
-    <div
-      class="mb-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-      role="alert"
-    >
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" class="mb-3" message={errorMessage} onRetry={loadComments} />
   {/if}
 
-  <form class="rounded-md border border-black/10 bg-gray-50 p-3" onsubmit={submitComment}>
-    <label class="block text-sm font-bold" for={`timeline-comment-${project?.id || "project"}`}>
-      Add a comment
-    </label>
-    <textarea
-      id={`timeline-comment-${project?.id || "project"}`}
-      class="mt-2 min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-      bind:value={draftComment}
-      placeholder="Share an update, question, blocker, or handoff note."
-      disabled={isSubmitting}
-    ></textarea>
+  <form class="rounded-card border border-ink/10 bg-canvas/60 p-3" onsubmit={submitComment}>
+    <Field label="Add a comment" id={`timeline-comment-${project?.id || "project"}`}>
+      <textarea
+        id={`timeline-comment-${project?.id || "project"}`}
+        class="textarea"
+        bind:value={draftComment}
+        placeholder="Share an update, question, blocker, or handoff note."
+        disabled={isSubmitting}
+      ></textarea>
+    </Field>
     <div class="mt-2 flex justify-end">
-      <button
+      <Button
         type="submit"
-        class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        variant="primary"
+        icon={Send}
+        loading={isSubmitting}
         disabled={!draftComment.trim() || isSubmitting}
       >
-        {#if isSubmitting}
-          <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Posting
-        {:else}
-          <Send class="h-4 w-4" aria-hidden="true" />
-          Post comment
-        {/if}
-      </button>
+        {isSubmitting ? "Posting" : "Post comment"}
+      </Button>
     </div>
   </form>
 
   <div class="mt-4 space-y-3">
     {#if project?.edit_notes}
-      <article class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+      <article class="rounded-card border border-amber-200 bg-amber-50 px-4 py-3">
         <p class="text-xs font-bold uppercase tracking-[0.12em] text-amber-700">
           Original project note
         </p>
@@ -279,15 +271,15 @@
     {/if}
 
     {#if isLoading}
-      <div class="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
-        <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
+      <div class="flex items-center gap-3 rounded-card border border-ink/10 bg-white px-4 py-3 text-sm text-ink/65">
+        <span class="h-4 w-4 rounded-full border-2 border-brand border-t-transparent animate-spin" aria-hidden="true"></span>
         Loading timeline
       </div>
     {:else if comments.length}
       {#each comments as comment}
         {@const statusMove = getStatusMoveParts(comment)}
-        <article class="flex gap-3 rounded-md border px-4 py-3 {statusMove ? 'border-teal-200 bg-teal-50' : 'border-gray-200 bg-white'}">
-          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {statusMove ? 'bg-[#0f766e] text-white' : 'bg-[#1E1E1E] text-[#ffbd59]'} text-xs font-bold">
+        <article class="flex gap-3 rounded-card border px-4 py-3 {statusMove ? 'border-teal-200 bg-teal-50' : 'border-ink/10 bg-white'}">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {statusMove ? 'bg-accent text-white' : 'bg-ink text-brand'} text-xs font-bold">
             {#if statusMove}
               <ArrowRight class="h-4 w-4" aria-hidden="true" />
             {:else}
@@ -298,51 +290,49 @@
             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <p class="font-bold">{comment.author_name}</p>
               {#if statusMove}
-                <span class="rounded-full bg-white px-2 py-0.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#0f766e]">
+                <span class="rounded-full bg-white px-2 py-0.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-accent">
                   Column change
                 </span>
               {/if}
-              <time class="text-xs font-semibold text-gray-500" datetime={comment.created_at}>
+              <time class="text-xs font-semibold text-ink/65" datetime={comment.created_at}>
                 {formatDateTime(comment.created_at)}
               </time>
             </div>
             {#if statusMove}
               <p class="mt-2 flex flex-wrap items-center gap-2 text-sm leading-6 text-teal-950">
-                <span class="rounded-md border border-teal-200 bg-white px-2 py-1 font-bold">
+                <span class="rounded-control border border-teal-200 bg-white px-2 py-1 font-bold">
                   {statusMove.from}
                 </span>
-                <ArrowRight class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
-                <span class="rounded-md border border-teal-200 bg-white px-2 py-1 font-bold">
+                <ArrowRight class="h-4 w-4 text-accent" aria-hidden="true" />
+                <span class="rounded-control border border-teal-200 bg-white px-2 py-1 font-bold">
                   {statusMove.to}
                 </span>
               </p>
             {:else}
-              <p class="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">{comment.body}</p>
+              <p class="mt-1 whitespace-pre-wrap text-sm leading-6 text-ink/80">{comment.body}</p>
             {/if}
             {#if canDeleteComment(comment)}
-              <button
-                type="button"
-                class="mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-md border border-red-200 px-2.5 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label={`Delete timeline comment from ${formatDateTime(comment.created_at)}`}
+              <Button
+                size="sm"
+                variant="danger"
+                icon={Trash2}
+                class="mt-2"
+                title={`Delete timeline comment from ${formatDateTime(comment.created_at)}`}
+                loading={deletingCommentId === comment.id}
                 onclick={() => requestDeleteComment(comment)}
-                disabled={deletingCommentId === comment.id}
               >
-                {#if deletingCommentId === comment.id}
-                  <span class="h-3.5 w-3.5 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Deleting
-                {:else}
-                  <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
-                  Delete
-                {/if}
-              </button>
+                {deletingCommentId === comment.id ? "Deleting" : "Delete"}
+              </Button>
             {/if}
           </div>
         </article>
       {/each}
     {:else}
-      <p class="rounded-md border border-dashed border-gray-300 bg-white px-4 py-5 text-center text-sm text-gray-500">
-        No timeline comments yet. Add the first update to start the thread.
-      </p>
+      <EmptyState
+        icon={MessageSquareText}
+        title="No timeline comments yet"
+        message="Add the first update to start the thread."
+      />
     {/if}
   </div>
 </section>

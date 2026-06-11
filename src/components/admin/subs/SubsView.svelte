@@ -572,6 +572,7 @@
         bind:active={statusFilter}
         variant="segmented"
         label="Filter by status"
+        hasPanels={false}
       />
     </div>
 

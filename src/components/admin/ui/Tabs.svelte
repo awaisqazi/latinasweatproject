@@ -7,6 +7,9 @@
   export let variant = "underline"; // underline | segmented | pills
   export let label = "Sections";
   export let stretch = false;
+  // Set false when tabs act as filters with no tabpanel elements, so
+  // aria-controls never points at ids that do not exist.
+  export let hasPanels = true;
 
   let buttons = [];
 
@@ -65,7 +68,7 @@
       role="tab"
       id="tab-{tab.id}"
       aria-selected={active === tab.id}
-      aria-controls="tabpanel-{tab.id}"
+      aria-controls={hasPanels ? `tabpanel-${tab.id}` : undefined}
       tabindex={active === tab.id ? 0 : -1}
       class="inline-flex min-h-10 items-center justify-center gap-2 px-3.5 text-sm font-semibold transition-colors duration-150 {tabClass(active === tab.id)} {stretch ? 'flex-1' : ''}"
       onclick={() => select(tab.id)}
@@ -76,7 +79,7 @@
       {/if}
       {tab.label}
       {#if tab.count !== undefined && tab.count !== null}
-        <span class="rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums {active === tab.id ? 'bg-brand-soft text-brand-ink' : 'bg-ink/[0.07] text-ink/55'}">
+        <span class="rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums {active === tab.id ? 'bg-brand-soft text-brand-ink' : 'bg-ink/[0.07] text-ink/65'}">
           {tab.count}
         </span>
       {/if}

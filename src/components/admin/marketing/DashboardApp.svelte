@@ -25,6 +25,7 @@
     X,
   } from "@lucide/svelte";
   import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
   import Panel from "../ui/Panel.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
@@ -170,6 +171,13 @@
     initializeDashboard();
     window.addEventListener("hashchange", syncViewFromHash);
 
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    isDesktop = desktopQuery.matches;
+    const handleViewportChange = (event) => {
+      isDesktop = event.matches;
+    };
+    desktopQuery.addEventListener("change", handleViewportChange);
+
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
         redirectToLogin();
@@ -178,6 +186,7 @@
 
     return () => {
       window.removeEventListener("hashchange", syncViewFromHash);
+      desktopQuery.removeEventListener("change", handleViewportChange);
       data.subscription.unsubscribe();
     };
   });
@@ -744,27 +753,41 @@
     );
   }
 
-  // Cmd/Ctrl+K quick switcher over the visible nav items. Pure hash
-  // navigation; zero coupling to view data.
+  // Cmd/Ctrl+K quick switcher over the visible nav items. Combobox pattern:
+  // focus stays in the input, ArrowUp/Down move the active option, Enter
+  // picks it. Pure hash navigation; zero coupling to view data.
   let switcherOpen = false;
   let switcherQuery = "";
   let switcherInput;
+  let switcherActive = 0;
+  let switcherReturnFocus = null;
 
   $: switcherMatches = switcherQuery.trim()
     ? visibleNavItems.filter((item) =>
         item.label.toLowerCase().includes(switcherQuery.trim().toLowerCase()),
       )
     : visibleNavItems;
+  $: if (switcherActive >= switcherMatches.length) switcherActive = 0;
 
   async function openSwitcher() {
+    switcherReturnFocus = document.activeElement;
     switcherOpen = true;
     switcherQuery = "";
+    switcherActive = 0;
     await tick();
     switcherInput?.focus();
   }
 
-  function pickSwitcherItem(item) {
+  function closeSwitcher() {
     switcherOpen = false;
+    if (switcherReturnFocus instanceof HTMLElement) {
+      switcherReturnFocus.focus({ preventScroll: true });
+    }
+    switcherReturnFocus = null;
+  }
+
+  function pickSwitcherItem(item) {
+    closeSwitcher();
     if (item) window.location.hash = item.id;
   }
 
@@ -772,7 +795,7 @@
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       if (switcherOpen) {
-        switcherOpen = false;
+        closeSwitcher();
       } else {
         openSwitcher();
       }
@@ -782,15 +805,50 @@
     if (switcherOpen) {
       if (event.key === "Escape") {
         event.preventDefault();
-        switcherOpen = false;
+        closeSwitcher();
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        switcherActive = (switcherActive + 1) % Math.max(1, switcherMatches.length);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        switcherActive =
+          (switcherActive - 1 + Math.max(1, switcherMatches.length)) %
+          Math.max(1, switcherMatches.length);
       } else if (event.key === "Enter") {
         event.preventDefault();
-        pickSwitcherItem(switcherMatches[0]);
+        pickSwitcherItem(switcherMatches[switcherActive]);
       }
       return;
     }
 
+    if (event.key === "Escape" && sidebarOpen) {
+      event.preventDefault();
+      closeSidebar();
+      return;
+    }
+
     handleWindowKanbanKeydown(event);
+  }
+
+  // Mobile drawer focus management: move focus in on open, restore on close,
+  // and keep the off-canvas drawer out of the tab order while hidden.
+  let sidebarReturnFocus = null;
+  let sidebarEl;
+  let isDesktop = true;
+
+  async function openSidebar() {
+    sidebarReturnFocus = document.activeElement;
+    sidebarOpen = true;
+    await tick();
+    sidebarEl?.querySelector("nav a")?.focus({ preventScroll: true });
+  }
+
+  function closeSidebar() {
+    sidebarOpen = false;
+    if (sidebarReturnFocus instanceof HTMLElement) {
+      sidebarReturnFocus.focus({ preventScroll: true });
+    }
+    sidebarReturnFocus = null;
   }
 </script>
 
@@ -833,13 +891,15 @@
         type="button"
         class="fixed inset-0 z-30 bg-black/35 lg:hidden"
         aria-label="Close navigation"
-        onclick={() => (sidebarOpen = false)}
+        onclick={closeSidebar}
       ></button>
     {/if}
 
     <div class="min-h-screen lg:flex">
       <aside
-        class="fixed inset-y-0 left-0 z-40 w-[min(18rem,86vw)] transform border-r border-black/10 bg-[#1E1E1E] text-white transition-[transform,width] duration-200 lg:translate-x-0 lg:transform-none {sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full'}"
+        bind:this={sidebarEl}
+        inert={!sidebarOpen && !isDesktop}
+        class="fixed inset-y-0 left-0 z-40 w-[min(18rem,86vw)] transform border-r border-black/10 bg-ink text-white transition-[transform,width] duration-200 lg:translate-x-0 lg:transform-none {sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full'}"
         aria-label="Dashboard navigation"
       >
         <div class="flex h-full min-h-dvh flex-col">
@@ -870,7 +930,7 @@
               type="button"
               class="rounded-md p-2 text-white/72 transition hover:bg-white/10 hover:text-white lg:hidden"
               aria-label="Close navigation"
-              onclick={() => (sidebarOpen = false)}
+              onclick={closeSidebar}
             >
               <X class="h-5 w-5" aria-hidden="true" />
             </button>
@@ -940,9 +1000,9 @@
             <div class="flex min-w-0 items-center gap-3">
               <button
                 type="button"
-                class="rounded-md border border-black/10 bg-white p-2 text-[#1E1E1E] shadow-sm lg:hidden"
+                class="rounded-control border border-ink/12 bg-white p-2 text-ink shadow-card lg:hidden"
                 aria-label="Open navigation"
-                onclick={() => (sidebarOpen = true)}
+                onclick={openSidebar}
               >
                 <Menu class="h-5 w-5" aria-hidden="true" />
               </button>
@@ -1002,42 +1062,46 @@
             class="fixed inset-0 z-50 flex items-start justify-center bg-ink/30 px-4 pt-[18vh]"
             role="presentation"
             onclick={(event) => {
-              if (event.target === event.currentTarget) switcherOpen = false;
+              if (event.target === event.currentTarget) closeSwitcher();
             }}
           >
-            <div
-              class="w-full max-w-md overflow-hidden rounded-card border border-ink/10 bg-white shadow-pop"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Quick navigation"
-            >
+            <!-- Combobox pattern: focus stays in the input; ArrowUp/Down move
+                 the active option, Enter activates it. -->
+            <div class="w-full max-w-md overflow-hidden rounded-card border border-ink/10 bg-white shadow-pop">
               <div class="relative border-b border-ink/8">
                 <Search class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" aria-hidden="true" />
                 <input
                   bind:this={switcherInput}
                   type="text"
+                  role="combobox"
+                  aria-expanded="true"
+                  aria-controls="switcher-listbox"
+                  aria-activedescendant={switcherMatches[switcherActive] ? `switcher-option-${switcherMatches[switcherActive].id}` : undefined}
+                  aria-autocomplete="list"
                   class="w-full border-0 py-3 pl-10 pr-4 text-sm outline-none placeholder:text-ink/35"
                   placeholder="Jump to a section"
-                  aria-label="Filter sections"
+                  aria-label="Jump to a section"
                   bind:value={switcherQuery}
                 />
               </div>
-              <ul class="max-h-72 overflow-y-auto p-1.5" role="listbox" aria-label="Sections">
+              <ul id="switcher-listbox" class="max-h-72 overflow-y-auto p-1.5" role="listbox" aria-label="Sections">
                 {#each switcherMatches as item, i (item.id)}
                   {@const ItemIcon = item.icon}
-                  <li role="option" aria-selected={i === 0}>
-                    <button
-                      type="button"
-                      class="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm font-medium transition-colors {i === 0 ? 'bg-accent-soft text-accent-strong' : 'text-ink/75 hover:bg-ink/[0.05]'}"
-                      onclick={() => pickSwitcherItem(item)}
-                    >
-                      <ItemIcon class="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span class="flex-1">{item.label}</span>
-                      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink/35">{item.section}</span>
-                    </button>
+                  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+                  <li
+                    id="switcher-option-{item.id}"
+                    role="option"
+                    aria-selected={i === switcherActive}
+                    class="flex cursor-pointer items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors {i === switcherActive ? 'bg-accent-soft text-accent-strong' : 'text-ink/75 hover:bg-ink/[0.05]'}"
+                    onclick={() => pickSwitcherItem(item)}
+                    onmouseenter={() => (switcherActive = i)}
+                  >
+                    <ItemIcon class="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span class="flex-1">{item.label}</span>
+                    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink/45">{item.section}</span>
                   </li>
                 {:else}
-                  <li class="px-3 py-6 text-center text-sm text-ink/50">No matching sections</li>
+                  <li class="px-3 py-6 text-center text-sm text-ink/65">No matching sections</li>
                 {/each}
               </ul>
             </div>
@@ -1046,35 +1110,26 @@
 
         <div class="px-4 py-5 md:px-6 md:py-6">
           {#if projectError}
-            <div class="mb-4 flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-              <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{projectError}</span>
-            </div>
+            <Banner tone="error" message={projectError} class="mb-4" />
           {/if}
 
           {#if statusMoveError}
-            <div class="mb-4 flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-              <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{statusMoveError}</span>
-            </div>
+            <Banner tone="error" message={statusMoveError} class="mb-4" />
           {/if}
 
           {#if !canViewActive}
             <Panel title="No access" id="no-access-title">
-              <div class="flex items-start gap-3 text-gray-700">
-                <Lock class="mt-1 h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
+              <div class="flex items-start gap-3 text-ink/75">
+                <Lock class="mt-1 h-5 w-5 shrink-0 text-ink/40" aria-hidden="true" />
                 <div>
                   <p class="text-sm leading-6">
                     You don't have access to this section yet. A superuser can grant
                     module access from User Access.
                   </p>
                   {#if visibleNavItems.length}
-                    <a
-                      class="mt-3 inline-flex min-h-10 items-center rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
-                      href={`#${visibleNavItems[0].id}`}
-                    >
+                    <Button variant="primary" href={`#${visibleNavItems[0].id}`} class="mt-3">
                       Go to {visibleNavItems[0].label}
-                    </a>
+                    </Button>
                   {/if}
                 </div>
               </div>
@@ -1108,15 +1163,20 @@
                       disabled={activeKanbanIndex === 0}
                     />
 
-                    <div class="flex items-center gap-1.5" aria-label="Kanban column position">
+                    <div class="flex items-center gap-0.5" aria-label="Kanban column position">
                       {#each statuses as status, index}
                         <button
                           type="button"
-                          class="h-2.5 rounded-full transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 {activeKanbanIndex === index ? 'w-6 bg-accent' : 'w-2.5 bg-ink/20 hover:bg-ink/35'}"
+                          class="group flex h-6 min-w-6 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                           aria-label={`Show ${status}`}
                           aria-current={activeKanbanIndex === index ? "true" : undefined}
                           onclick={() => scrollKanbanToIndex(index)}
-                        ></button>
+                        >
+                          <span
+                            class="h-2.5 rounded-full transition {activeKanbanIndex === index ? 'w-6 bg-accent' : 'w-2.5 bg-ink/20 group-hover:bg-ink/35'}"
+                            aria-hidden="true"
+                          ></span>
+                        </button>
                       {/each}
                     </div>
 

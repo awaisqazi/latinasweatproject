@@ -236,7 +236,7 @@
           <span class="truncate text-ink/60">{rosterFileName}</span>
           <button
             type="button"
-            class="rounded p-1 text-ink/45 transition hover:text-ink"
+            class="grid h-6 w-6 place-items-center rounded text-ink/45 transition hover:text-ink"
             aria-label="Remove roster"
             onclick={clearRoster}
           >
@@ -291,6 +291,7 @@
             </h3>
             {#if aiResult}
               <Tabs
+                hasPanels={false}
                 variant="segmented"
                 label="Result source"
                 tabs={[
