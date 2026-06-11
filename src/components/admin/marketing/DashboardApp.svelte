@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import {
     AlertCircle,
     ArrowLeftRight,
@@ -17,13 +17,14 @@
     PanelLeftOpen,
     PartyPopper,
     RefreshCw,
+    Search,
     ShieldCheck,
     Ticket,
-    UserCircle,
     Users,
     Vote,
     X,
   } from "@lucide/svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
   import {
     getSupabaseClient,
     SUPABASE_CONFIG_ERROR,
@@ -162,6 +163,7 @@
 
     supabase = getSupabaseClient();
     dashboardPath = window.location.pathname.replace(/\/+$/, "") || DASHBOARD_PATH;
+    sidebarCollapsed = localStorage.getItem("lsp:sidebar-collapsed") === "1";
     setInitialViewFromHash();
     initializeDashboard();
     window.addEventListener("hashchange", syncViewFromHash);
@@ -722,6 +724,71 @@
 
   function toggleSidebarCollapsed() {
     sidebarCollapsed = !sidebarCollapsed;
+    try {
+      localStorage.setItem("lsp:sidebar-collapsed", sidebarCollapsed ? "1" : "0");
+    } catch {
+      // Private mode storage failures are fine; collapse just won't persist.
+    }
+  }
+
+  function getInitials() {
+    const name = getDisplayName();
+    const parts = name
+      .replace(/@.*$/, "")
+      .split(/[\s._-]+/)
+      .filter(Boolean);
+    return (
+      ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "?"
+    );
+  }
+
+  // Cmd/Ctrl+K quick switcher over the visible nav items. Pure hash
+  // navigation; zero coupling to view data.
+  let switcherOpen = false;
+  let switcherQuery = "";
+  let switcherInput;
+
+  $: switcherMatches = switcherQuery.trim()
+    ? visibleNavItems.filter((item) =>
+        item.label.toLowerCase().includes(switcherQuery.trim().toLowerCase()),
+      )
+    : visibleNavItems;
+
+  async function openSwitcher() {
+    switcherOpen = true;
+    switcherQuery = "";
+    await tick();
+    switcherInput?.focus();
+  }
+
+  function pickSwitcherItem(item) {
+    switcherOpen = false;
+    if (item) window.location.hash = item.id;
+  }
+
+  function handleGlobalKeydown(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      if (switcherOpen) {
+        switcherOpen = false;
+      } else {
+        openSwitcher();
+      }
+      return;
+    }
+
+    if (switcherOpen) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        switcherOpen = false;
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        pickSwitcherItem(switcherMatches[0]);
+      }
+      return;
+    }
+
+    handleWindowKanbanKeydown(event);
   }
 </script>
 
@@ -729,17 +796,21 @@
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
-<svelte:window onkeydown={handleWindowKanbanKeydown} />
+<svelte:window onkeydown={handleGlobalKeydown} />
 
 <main class="lsp-portal min-h-screen bg-canvas text-ink">
   {#if isLoading}
-    <div class="flex min-h-screen items-center justify-center px-4">
-      <div class="flex items-center gap-3 rounded-md border border-black/10 bg-white px-5 py-4 text-sm text-gray-600 shadow-sm">
-        <span
-          class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin"
-          aria-hidden="true"
-        ></span>
-        Loading dashboard
+    <div class="min-h-screen lg:flex" aria-busy="true" aria-label="Loading dashboard">
+      <div class="hidden w-72 shrink-0 bg-ink lg:block"></div>
+      <div class="min-w-0 flex-1">
+        <div class="border-b border-ink/10 bg-white/90 px-4 py-4 md:px-6">
+          <div class="skeleton h-7 w-44 rounded-md"></div>
+        </div>
+        <div class="grid gap-3 px-4 py-5 md:grid-cols-2 md:px-6 xl:grid-cols-3">
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={4} />
+          <SkeletonCard lines={3} class="hidden xl:block" />
+        </div>
       </div>
     </div>
   {:else if errorMessage}
@@ -770,14 +841,15 @@
         aria-label="Dashboard navigation"
       >
         <div class="flex h-full min-h-dvh flex-col">
-          <div class="flex items-center justify-between border-b border-white/10 px-5 py-5 {sidebarCollapsed ? 'lg:px-3' : ''}">
-            <div class="min-w-0 {sidebarCollapsed ? 'lg:text-center' : ''}">
-              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#ffbd59] {sidebarCollapsed ? 'lg:tracking-normal' : ''}">
+          <div class="flex items-center justify-between border-b border-white/10 px-4 py-4 {sidebarCollapsed ? 'lg:px-3' : ''}">
+            <div class="flex min-w-0 items-center gap-3 {sidebarCollapsed ? 'lg:justify-center' : ''}">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-brand text-[13px] font-bold tracking-tight text-ink" aria-hidden="true">
                 LSP
-              </p>
-              <h1 class="mt-1 text-lg font-bold {sidebarCollapsed ? 'lg:hidden' : ''}">
-                Dashboard
-              </h1>
+              </span>
+              <div class="min-w-0 {sidebarCollapsed ? 'lg:hidden' : ''}">
+                <h1 class="truncate text-base font-bold leading-tight">Dashboard</h1>
+                <p class="truncate text-[11px] font-medium text-white/55">The Latina Sweat Project</p>
+              </div>
             </div>
             <button
               type="button"
@@ -806,20 +878,24 @@
             {#each navSections as section}
               <div>
                 {#if section.title}
-                  <p class="px-3 pb-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-white/40 {sidebarCollapsed ? 'lg:hidden' : ''}">
+                  <p class="px-3 pb-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-white/50 {sidebarCollapsed ? 'lg:hidden' : ''}">
                     {section.title}
                   </p>
                 {/if}
-                <div class="space-y-1">
+                <div class="space-y-0.5">
                   {#each section.items as item}
                     {@const Icon = item.icon}
+                    {@const isActive = activeView === item.id}
                     <a
                       href={`#${item.id}`}
-                      class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition {sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''} {activeView === item.id ? 'bg-[#ffbd59] text-[#1E1E1E]' : 'text-white/74 hover:bg-white/10 hover:text-white'}"
-                      aria-current={activeView === item.id ? "page" : undefined}
+                      class="relative flex min-h-11 items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors duration-150 {sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''} {isActive ? 'bg-white/[0.09] font-semibold text-white' : 'text-white/70 hover:bg-white/[0.06] hover:text-white'}"
+                      aria-current={isActive ? "page" : undefined}
                       title={item.label}
                     >
-                      <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {#if isActive}
+                        <span class="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-brand" aria-hidden="true"></span>
+                      {/if}
+                      <Icon class="h-4 w-4 shrink-0 {isActive ? 'text-brand' : ''}" aria-hidden="true" />
                       <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">{item.label}</span>
                     </a>
                   {/each}
@@ -828,29 +904,30 @@
             {/each}
           </nav>
 
-          <div class="mt-auto border-t border-white/10 p-4 {sidebarCollapsed ? 'lg:px-3' : ''}">
-            <div class="mb-3 flex items-center gap-3 rounded-md bg-white/7 px-3 py-3 {sidebarCollapsed ? 'lg:justify-center lg:px-2' : ''}">
-              <UserCircle class="h-8 w-8 shrink-0 text-[#ffbd59]" aria-hidden="true" />
-              <div class="min-w-0 {sidebarCollapsed ? 'lg:hidden' : ''}">
-                <p class="truncate text-sm font-bold">{getDisplayName()}</p>
-                <p class="truncate text-xs capitalize text-white/58">{profile?.role || "member"}</p>
+          <div class="mt-auto border-t border-white/10 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] {sidebarCollapsed ? 'lg:px-2' : ''}">
+            <div class="flex items-center gap-3 rounded-control bg-white/[0.07] px-3 py-2.5 {sidebarCollapsed ? 'lg:flex-col lg:gap-2 lg:px-2' : ''}">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-brand-ink" aria-hidden="true">
+                {getInitials()}
+              </span>
+              <div class="min-w-0 flex-1 {sidebarCollapsed ? 'lg:hidden' : ''}">
+                <p class="truncate text-sm font-semibold">{getDisplayName()}</p>
+                <p class="truncate text-xs capitalize text-white/70">{profile?.role || "member"}</p>
               </div>
+              <button
+                type="button"
+                class="shrink-0 rounded-control p-2 text-white/70 transition hover:bg-red-500/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                onclick={handleSignOut}
+                disabled={signingOut}
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                {#if signingOut}
+                  <span class="block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true"></span>
+                {:else}
+                  <LogOut class="h-4 w-4" aria-hidden="true" />
+                {/if}
+              </button>
             </div>
-            <button
-              type="button"
-              class="flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-sm font-bold text-white/82 transition hover:border-red-300/40 hover:bg-red-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#ffbd59] disabled:cursor-not-allowed disabled:opacity-60 {sidebarCollapsed ? 'lg:px-0' : ''}"
-              onclick={handleSignOut}
-              disabled={signingOut}
-              title="Sign Out"
-            >
-              {#if signingOut}
-                <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-                <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">Signing out</span>
-              {:else}
-                <LogOut class="h-4 w-4" aria-hidden="true" />
-                <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">Sign Out</span>
-              {/if}
-            </button>
           </div>
         </div>
       </aside>
@@ -867,27 +944,103 @@
               >
                 <Menu class="h-5 w-5" aria-hidden="true" />
               </button>
-              <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0f766e]">
-                  Dashboard
-                </p>
-                <h2 class="truncate text-xl font-bold md:text-2xl">
-                  {activeNavItem?.label || "Dashboard"}
-                </h2>
+              <div class="flex min-w-0 items-center gap-2.5">
+                {#if activeNavItem?.icon}
+                  {@const ActiveIcon = activeNavItem.icon}
+                  <span class="hidden h-9 w-9 shrink-0 items-center justify-center rounded-control bg-brand-soft text-brand-ink sm:flex" aria-hidden="true">
+                    <ActiveIcon class="h-4 w-4" />
+                  </span>
+                {/if}
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+                    Dashboard
+                  </p>
+                  <h2 class="truncate text-lg font-bold leading-tight md:text-xl">
+                    {activeNavItem?.label || "Dashboard"}
+                  </h2>
+                </div>
               </div>
             </div>
 
-            <button
-              type="button"
-              class="hidden min-h-10 items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-semibold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e] sm:flex"
-              onclick={refreshActiveView}
-              disabled={activeView !== "workspace" && projectsLoading}
-            >
-              <RefreshCw class="h-4 w-4 {projectsLoading ? 'animate-spin' : ''}" aria-hidden="true" />
-              Refresh
-            </button>
+            <div class="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                class="hidden min-h-10 items-center gap-2 rounded-control border border-ink/12 bg-white px-3 text-sm text-ink/45 shadow-card transition hover:border-ink/25 hover:text-ink/70 md:flex"
+                onclick={openSwitcher}
+                aria-label="Open quick navigation"
+              >
+                <Search class="h-3.5 w-3.5" aria-hidden="true" />
+                <span class="font-medium">Jump to</span>
+                <kbd class="rounded border border-ink/15 bg-canvas px-1.5 py-0.5 text-[10px] font-semibold text-ink/50">⌘K</kbd>
+              </button>
+              <button
+                type="button"
+                class="flex h-10 w-10 items-center justify-center rounded-control border border-ink/12 bg-white text-ink shadow-card transition hover:border-accent/40 hover:text-accent sm:hidden"
+                onclick={refreshActiveView}
+                disabled={activeView !== "workspace" && projectsLoading}
+                aria-label="Refresh"
+              >
+                <RefreshCw class="h-4 w-4 {projectsLoading ? 'animate-spin' : ''}" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="hidden min-h-10 items-center gap-2 rounded-control border border-ink/12 bg-white px-3 text-sm font-semibold shadow-card transition hover:border-accent/40 hover:text-accent sm:flex"
+                onclick={refreshActiveView}
+                disabled={activeView !== "workspace" && projectsLoading}
+              >
+                <RefreshCw class="h-4 w-4 {projectsLoading ? 'animate-spin' : ''}" aria-hidden="true" />
+                Refresh
+              </button>
+            </div>
           </div>
         </header>
+
+        {#if switcherOpen}
+          <div
+            class="fixed inset-0 z-50 flex items-start justify-center bg-ink/30 px-4 pt-[18vh]"
+            role="presentation"
+            onclick={(event) => {
+              if (event.target === event.currentTarget) switcherOpen = false;
+            }}
+          >
+            <div
+              class="w-full max-w-md overflow-hidden rounded-card border border-ink/10 bg-white shadow-pop"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Quick navigation"
+            >
+              <div class="relative border-b border-ink/8">
+                <Search class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" aria-hidden="true" />
+                <input
+                  bind:this={switcherInput}
+                  type="text"
+                  class="w-full border-0 py-3 pl-10 pr-4 text-sm outline-none placeholder:text-ink/35"
+                  placeholder="Jump to a section"
+                  aria-label="Filter sections"
+                  bind:value={switcherQuery}
+                />
+              </div>
+              <ul class="max-h-72 overflow-y-auto p-1.5" role="listbox" aria-label="Sections">
+                {#each switcherMatches as item, i (item.id)}
+                  {@const ItemIcon = item.icon}
+                  <li role="option" aria-selected={i === 0}>
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm font-medium transition-colors {i === 0 ? 'bg-accent-soft text-accent-strong' : 'text-ink/75 hover:bg-ink/[0.05]'}"
+                      onclick={() => pickSwitcherItem(item)}
+                    >
+                      <ItemIcon class="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span class="flex-1">{item.label}</span>
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink/35">{item.section}</span>
+                    </button>
+                  </li>
+                {:else}
+                  <li class="px-3 py-6 text-center text-sm text-ink/50">No matching sections</li>
+                {/each}
+              </ul>
+            </div>
+          </div>
+        {/if}
 
         <div class="px-4 py-5 md:px-6 md:py-6">
           {#if projectError}
