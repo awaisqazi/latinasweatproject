@@ -37,6 +37,11 @@ export const MODULES = [
     label: "Gala",
     description: "Gala guests, paddles, and donation tracking.",
   },
+  {
+    key: "spaces",
+    label: "Studio Spaces",
+    description: "Class schedule planning, space bookings, and utilization insights.",
+  },
 ];
 
 export const MODULE_KEYS = MODULES.map((module) => module.key);

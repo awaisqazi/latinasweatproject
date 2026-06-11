@@ -7,6 +7,7 @@
     ChevronLeft,
     ChevronRight,
     ClipboardList,
+    DoorOpen,
     HeartHandshake,
     Home,
     Kanban,
@@ -49,6 +50,7 @@
   import SubsView from "../subs/SubsView.svelte";
   import ElectionsView from "../elections/ElectionsView.svelte";
   import GalaView from "../gala/GalaView.svelte";
+  import SpacesView from "../spaces/SpacesView.svelte";
 
   const LOGIN_PATH = "/admin/marketing/login";
   const DASHBOARD_PATH = "/admin/marketing";
@@ -84,6 +86,7 @@
     { id: "events", label: "Events", icon: Ticket, section: "Operations", modules: ["events"] },
     { id: "elections", label: "Elections", icon: Vote, section: "Operations", modules: ["elections"] },
     { id: "gala", label: "Gala", icon: PartyPopper, section: "Operations", modules: ["gala"] },
+    { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
     { id: "admin", label: "Admin Overview", icon: ShieldCheck, section: "Admin", modules: ["marketing"], adminOnly: true },
   ];
@@ -115,6 +118,7 @@
   let subsRefreshKey = 0;
   let electionsRefreshKey = 0;
   let galaRefreshKey = 0;
+  let spacesRefreshKey = 0;
   let selectedKanbanProject = null;
   let publishScheduleProject = null;
   let publishScheduleStatus = "";
@@ -365,6 +369,7 @@
       subs: () => (subsRefreshKey += 1),
       elections: () => (electionsRefreshKey += 1),
       gala: () => (galaRefreshKey += 1),
+      spaces: () => (spacesRefreshKey += 1),
       "user-access": () => (userAccessRefreshKey += 1),
       admin: () => {
         adminRefreshKey += 1;
@@ -1310,6 +1315,12 @@
               {supabase}
               {profile}
               refreshKey={galaRefreshKey}
+            />
+          {:else if activeView === "spaces"}
+            <SpacesView
+              {supabase}
+              {profile}
+              refreshKey={spacesRefreshKey}
             />
           {:else if activeView === "publishing"}
             <PublishingCalendarView
