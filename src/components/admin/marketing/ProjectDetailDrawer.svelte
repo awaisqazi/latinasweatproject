@@ -99,6 +99,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     publishScheduleOpen = false;
     publishScheduleError = "";
     displayedProject = null;

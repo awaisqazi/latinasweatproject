@@ -54,6 +54,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     displayedRequest = null;
     onClose();
   }

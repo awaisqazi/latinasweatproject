@@ -68,6 +68,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     displayedEventId = "";
     onClose();
   }

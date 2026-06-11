@@ -50,6 +50,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     displayedProject = null;
     onClose();
   }

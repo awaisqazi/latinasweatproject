@@ -209,6 +209,7 @@
   }
 
   function handleDrawerClose() {
+    drawerOpen = false;
     selectedUser = null;
   }
 
