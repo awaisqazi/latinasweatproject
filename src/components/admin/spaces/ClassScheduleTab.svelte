@@ -21,6 +21,7 @@
   import EmptyState from "../ui/EmptyState.svelte";
   import Field from "../ui/Field.svelte";
   import Panel from "../ui/Panel.svelte";
+  import TimeGrid from "./TimeGrid.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
 
   export let supabase;
@@ -111,6 +112,31 @@
       .sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time)),
   );
   $: hasActiveSlots = slotsByDay.some((day) => day.length > 0);
+
+  // Time-grid shape: one generic week (no dates), current weekday highlighted.
+  $: scheduleGridDays = DOW_LABELS.map((label, day) => ({
+    dateStr: label,
+    shortLabel: label,
+    isToday: day === new Date().getDay(),
+    items: slotsByDay[day].map((slot) => {
+      const startMinutes = timeToMinutes(slot.start_time);
+      return {
+        key: slot.id,
+        room: slot.room,
+        startMinutes,
+        endMinutes: startMinutes + (slot.duration_minutes || 60),
+        slot,
+      };
+    }),
+  }));
+  $: scheduleLaneRooms =
+    roomFilter === "all"
+      ? ROOMS.filter(
+          (room) =>
+            room !== "Cafe" ||
+            slots.some((slot) => slot.active && slot.room === "Cafe"),
+        )
+      : [roomFilter];
 
   function formatDateShort(dateStr) {
     if (!dateStr) return "";
@@ -477,50 +503,21 @@
           </Button>
         </EmptyState>
       {:else}
-        <!-- Desktop: 7-column week grid -->
-        <div class="hidden lg:grid lg:grid-cols-7 lg:gap-2">
-          {#each DOW_LABELS as label, day (label)}
-            <div class="min-w-0">
-              <h4 class="text-center text-xs font-semibold uppercase tracking-wide text-ink/55">
-                {label}
-              </h4>
-              <div class="mt-2 space-y-2">
-                {#if slotsByDay[day].length}
-                  {#each slotsByDay[day] as slot (slot.id)}
-                    <button
-                      type="button"
-                      class="w-full rounded-control border border-ink/10 bg-white p-2.5 text-left shadow-card transition hover:border-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                      onclick={() => openEdit(slot)}
-                    >
-                      <p class="text-xs font-semibold text-ink/65">
-                        {formatTime12(slot.start_time)} · {slot.duration_minutes} min
-                      </p>
-                      <p class="mt-0.5 break-words text-sm font-bold leading-snug text-ink">
-                        {slot.class_type}
-                      </p>
-                      {#if slot.instructor}
-                        <p class="mt-0.5 truncate text-xs text-ink/65">{slot.instructor}</p>
-                      {:else}
-                        <p class="mt-0.5 text-xs italic text-ink/45">Unassigned</p>
-                      {/if}
-                      <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <Badge tone={ROOM_TONES[slot.room] || "neutral"} size="xs">
-                          {ROOM_SHORT[slot.room] || slot.room}
-                        </Badge>
-                        {#if windowHint(slot)}
-                          <span class="text-[11px] text-ink/45">{windowHint(slot)}</span>
-                        {/if}
-                      </div>
-                    </button>
-                  {/each}
-                {:else}
-                  <p class="rounded-control border border-dashed border-ink/10 py-3 text-center text-xs text-ink/35">
-                    No classes
-                  </p>
-                {/if}
-              </div>
-            </div>
-          {/each}
+        <!-- Desktop: time-aligned week grid (rooms as lanes, gaps visible) -->
+        <div class="hidden lg:block">
+          <TimeGrid days={scheduleGridDays} rooms={scheduleLaneRooms} let:item>
+            <button
+              type="button"
+              class="block h-full w-full rounded border border-ink/10 border-l-4 {item.slot.room === 'Little Village Room' ? 'border-l-accent' : item.slot.room === 'Gage Park Room' ? 'border-l-brand-strong' : 'border-l-ink/40'} bg-white px-1.5 py-1 text-left text-[10px] leading-tight shadow-card transition hover:border-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              onclick={() => openEdit(item.slot)}
+              title="{formatTime12(item.slot.start_time)} · {item.slot.duration_minutes} min · {item.slot.class_type} · {item.slot.instructor || 'Unassigned'} · {ROOM_SHORT[item.slot.room]}{windowHint(item.slot) ? ` · ${windowHint(item.slot)}` : ''}"
+            >
+              <span class="block truncate font-bold text-ink">{item.slot.class_type}</span>
+              <span class="block truncate {item.slot.instructor ? 'text-ink/65' : 'italic text-ink/45'}">
+                {formatTime12(item.slot.start_time)} · {item.slot.instructor || "Unassigned"}
+              </span>
+            </button>
+          </TimeGrid>
         </div>
 
         <!-- Mobile: stacked day sections, empty days skipped -->

@@ -17,6 +17,7 @@
   import Field from "../ui/Field.svelte";
   import Panel from "../ui/Panel.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import TimeGrid from "./TimeGrid.svelte";
   import {
     BOOKING_KINDS,
     KIND_TONES,
@@ -228,7 +229,9 @@
       day.items.push({
         key: `class-${occ.slot.id}-${occ.dateStr}`,
         type: "class",
+        room: occ.slot.room,
         startMinutes: occ.startMinutes,
+        endMinutes: occ.endMinutes,
         timeLabel: `${formatTime12(occ.slot.start_time)} - ${minutesToTime12(occ.endMinutes)}`,
         slot: occ.slot,
       });
@@ -241,11 +244,15 @@
       if (!day) continue;
       const utilization =
         session.utilization == null ? "" : ` · ${Math.round(Number(session.utilization))}%`;
+      const historyStart = timeToMinutes(session.start_time);
       day.items.push({
         // Matches the class_history_dedupe unique index, so keys are stable.
         key: `history-${session.session_date}-${session.start_time}-${session.classroom}-${session.class_type}-${session.instructors}`,
         type: "history",
-        startMinutes: timeToMinutes(session.start_time),
+        room: session.classroom,
+        startMinutes: historyStart,
+        // The export has no end time; sessions are an hour with rare exceptions.
+        endMinutes: historyStart + 60,
         timeLabel: formatTime12(session.start_time),
         attendanceLabel: `${session.checked_in ?? 0} checked in${utilization}`,
         session,
@@ -255,14 +262,20 @@
     for (const booking of weekBookings || []) {
       if (filter !== "all" && booking.space !== filter) continue;
       const starts = new Date(booking.starts_at);
+      const ends = new Date(booking.ends_at);
       const day = byDate.get(toDateStr(starts));
       if (!day) continue;
+      const startMinutes = starts.getHours() * 60 + starts.getMinutes();
+      const sameDay = toDateStr(starts) === toDateStr(ends);
       day.items.push({
         key: `booking-${booking.id}`,
         type: "booking",
-        startMinutes: starts.getHours() * 60 + starts.getMinutes(),
+        room: booking.space,
+        startMinutes,
+        // Clamp multi-day bookings to the end of their start day on the grid.
+        endMinutes: sameDay ? ends.getHours() * 60 + ends.getMinutes() : 24 * 60,
         timeLabel: formatTimeRange(booking.starts_at, booking.ends_at),
-        isPast: new Date(booking.ends_at).getTime() < now,
+        isPast: ends.getTime() < now,
         booking,
       });
     }
@@ -276,6 +289,16 @@
 
   $: weekDays = buildDays(slots, bookings, history, weekStartStr, roomFilter);
   $: weekHasItems = weekDays.some((day) => day.items.length);
+  // Lanes: the filtered room alone, or every room with content this week
+  // (Little Village and Gage Park always; Cafe only when something is in it).
+  $: laneRooms =
+    roomFilter === "all"
+      ? ROOMS.filter(
+          (room) =>
+            room !== "Cafe" ||
+            weekDays.some((day) => day.items.some((item) => item.room === "Cafe")),
+        )
+      : [roomFilter];
   $: isLoading = isLoadingSlots || isLoadingBookings || isLoadingHistory;
   $: weekRangeLabel = `${formatShortDate(parseDateStr(weekStartStr))} - ${formatShortDate(parseDateStr(addDaysStr(weekStartStr, 6)))}`;
 
@@ -552,73 +575,37 @@
       </svelte:fragment>
     </EmptyState>
   {:else}
-    <!-- Desktop: 7-column week grid -->
-    <div class="hidden gap-2 lg:grid lg:grid-cols-7">
-      {#each weekDays as day (day.dateStr)}
-        <div
-          class="flex min-h-48 flex-col rounded-md border border-black/10 bg-canvas/60 p-2 {day.isToday ? 'ring-2 ring-accent/30' : ''}"
-        >
-          <p class="mb-2 text-center text-xs font-bold {day.isToday ? 'text-accent' : 'text-ink/65'}">
-            {day.shortLabel}
-          </p>
-          <div class="flex-1 space-y-1.5">
-            {#each day.items as item (item.key)}
-              {#if item.type === "class"}
-                <div
-                  class="rounded border border-ink/8 border-l-4 {ROOM_BORDERS[item.slot.room] || 'border-l-ink/30'} bg-white px-1.5 py-1 text-[11px] leading-tight"
-                >
-                  <span class="block font-bold text-ink">{item.timeLabel}</span>
-                  <span class="block text-ink/75">{item.slot.class_type}</span>
-                  {#if item.slot.instructor}
-                    <span class="block text-ink/65">{item.slot.instructor}</span>
-                  {/if}
-                  <span class="mt-1 block">
-                    <Badge tone={ROOM_TONES[item.slot.room] || "neutral"} size="xs">
-                      {ROOM_SHORT[item.slot.room] || item.slot.room}
-                    </Badge>
-                  </span>
-                </div>
-              {:else if item.type === "history"}
-                <div
-                  class="rounded border border-ink/8 border-l-4 {ROOM_BORDERS[item.session.classroom] || 'border-l-ink/30'} bg-white px-1.5 py-1 text-[11px] leading-tight"
-                >
-                  <span class="block font-bold text-ink">{item.timeLabel}</span>
-                  <span class="block text-ink/75">
-                    {item.session.class_type}{item.session.is_free ? " · Free" : ""}
-                  </span>
-                  {#if item.session.instructors}
-                    <span class="block text-ink/65">{item.session.instructors}</span>
-                  {/if}
-                  <span class="block text-ink/65">{item.attendanceLabel}</span>
-                  <span class="mt-1 flex flex-wrap gap-1">
-                    <Badge tone="neutral" size="xs">Taught</Badge>
-                    <Badge tone={ROOM_TONES[item.session.classroom] || "neutral"} size="xs">
-                      {ROOM_SHORT[item.session.classroom] || item.session.classroom}
-                    </Badge>
-                  </span>
-                </div>
-              {:else}
-                <button
-                  type="button"
-                  class="block w-full rounded border border-ink/10 bg-white px-1.5 py-1 text-left text-[11px] leading-tight shadow-card transition hover:border-accent/40 hover:shadow-sm {item.isPast ? 'opacity-55' : ''}"
-                  onclick={() => openEditBooking(item.booking)}
-                >
-                  <span class="flex flex-wrap gap-1">
-                    <Badge tone={KIND_TONES[item.booking.kind] || "neutral"} size="xs">
-                      {kindLabel(item.booking.kind)}
-                    </Badge>
-                    <Badge tone={ROOM_TONES[item.booking.space] || "neutral"} size="xs">
-                      {ROOM_SHORT[item.booking.space] || item.booking.space}
-                    </Badge>
-                  </span>
-                  <span class="mt-1 block font-bold text-ink">{item.booking.title}</span>
-                  <span class="block text-ink/70">{item.timeLabel}</span>
-                </button>
-              {/if}
-            {/each}
+    <!-- Desktop: time-aligned week grid (rooms as lanes, gaps visible) -->
+    <div class="hidden lg:block">
+      <TimeGrid days={weekDays} rooms={laneRooms} let:item>
+        {#if item.type === "class"}
+          <div
+            class="h-full rounded border border-ink/8 border-l-4 {ROOM_BORDERS[item.slot.room] || 'border-l-ink/30'} bg-white px-1.5 py-1 text-[10px] leading-tight"
+            title="{item.timeLabel} · {item.slot.class_type}{item.slot.instructor ? ` · ${item.slot.instructor}` : ''} · {ROOM_SHORT[item.slot.room]}"
+          >
+            <span class="block truncate font-bold text-ink">{item.slot.class_type}</span>
+            <span class="block truncate text-ink/65">{formatTime12(item.slot.start_time)}{item.slot.instructor ? ` · ${item.slot.instructor}` : ""}</span>
           </div>
-        </div>
-      {/each}
+        {:else if item.type === "history"}
+          <div
+            class="h-full rounded border border-ink/8 border-l-4 {ROOM_BORDERS[item.session.classroom] || 'border-l-ink/30'} bg-canvas/80 px-1.5 py-1 text-[10px] leading-tight"
+            title="Taught · {item.timeLabel} · {item.session.class_type}{item.session.instructors ? ` · ${item.session.instructors}` : ''} · {item.attendanceLabel}"
+          >
+            <span class="block truncate font-bold text-ink/80">{item.session.class_type}{item.session.is_free ? " · Free" : ""}</span>
+            <span class="block truncate text-ink/65">{item.attendanceLabel}</span>
+          </div>
+        {:else}
+          <button
+            type="button"
+            class="block h-full w-full rounded border-l-4 {item.booking.kind === 'training' ? 'border-l-amber-400 bg-amber-50' : item.booking.kind === 'event' ? 'border-l-blue-400 bg-blue-50' : 'border-l-ink/40 bg-ink/[0.06]'} border border-ink/10 px-1.5 py-1 text-left text-[10px] leading-tight shadow-card transition hover:border-accent/40 {item.isPast ? 'opacity-55' : ''}"
+            onclick={() => openEditBooking(item.booking)}
+            title="{kindLabel(item.booking.kind)} · {item.booking.title} · {item.timeLabel} · {ROOM_SHORT[item.booking.space]}"
+          >
+            <span class="block truncate font-bold text-ink">{item.booking.title}</span>
+            <span class="block truncate text-ink/65">{kindLabel(item.booking.kind)} · {item.timeLabel}</span>
+          </button>
+        {/if}
+      </TimeGrid>
     </div>
 
     <!-- Mobile: stacked day cards -->
