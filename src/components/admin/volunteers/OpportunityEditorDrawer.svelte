@@ -1,7 +1,10 @@
 <script>
   import { CircleAlert } from "@lucide/svelte";
   import {
+    SHIFT_CATEGORIES,
     composeLocalIso,
+    findOperationalOverlaps,
+    isOverlapError,
     toDateStr,
     toTimeInput,
   } from "../../../lib/dashboard/volunteersAdmin.js";
@@ -14,7 +17,7 @@
   export let onSaved = () => {};
 
   const shiftColumns =
-    "id, kind, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
+    "id, kind, category, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
 
   let editing = null;
   let openToken = null;
@@ -30,6 +33,7 @@
   let endTime = "11:00";
   let volunteerCapacity = 5;
   let leadCapacity = 0;
+  let category = "special_event";
 
   $: if (opportunity && opportunity !== openToken) {
     openDrawer(opportunity);
@@ -50,6 +54,7 @@
       endTime = toTimeInput(editing.ends_at);
       volunteerCapacity = editing.volunteer_capacity;
       leadCapacity = editing.lead_capacity;
+      category = editing.category || "special_event";
     } else {
       title = "";
       description = "";
@@ -59,6 +64,7 @@
       endTime = "11:00";
       volunteerCapacity = 5;
       leadCapacity = 0;
+      category = "special_event";
     }
 
     drawerOpen = true;
@@ -70,6 +76,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     openToken = null;
     editing = null;
     onClose();
@@ -101,6 +108,7 @@
 
     const payload = {
       kind: "opportunity",
+      category,
       title: trimmedTitle,
       description: description.trim() || null,
       location: location.trim() || null,
@@ -109,6 +117,23 @@
       volunteer_capacity: Math.max(0, Number(volunteerCapacity) || 0),
       lead_capacity: Math.max(0, Number(leadCapacity) || 0),
     };
+
+    if (category === "operational") {
+      try {
+        const { conflicts } = await findOperationalOverlaps(supabase, [payload], {
+          excludeId: editing?.id || null,
+        });
+        if (conflicts.length) {
+          errorMessage = `This opportunity ${conflicts[0].reason}. Operational shifts cannot overlap; pick another time or use the Special event / External category.`;
+          isSaving = false;
+          return;
+        }
+      } catch (err) {
+        errorMessage = err?.message || "Could not check for overlapping shifts.";
+        isSaving = false;
+        return;
+      }
+    }
 
     const request = editing
       ? supabase
@@ -126,7 +151,9 @@
     const { data, error } = await request;
 
     if (error) {
-      errorMessage = error.message;
+      errorMessage = isOverlapError(error)
+        ? "An operational shift already covers that time. Pick another time or use the Special event / External category."
+        : error.message;
       isSaving = false;
       return;
     }
@@ -178,6 +205,24 @@
             bind:value={description}
             disabled={isSaving}
           ></textarea>
+        </label>
+
+        <label class="mt-4 block text-sm font-bold" for="opportunity-category">
+          Type
+          <select
+            id="opportunity-category"
+            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            bind:value={category}
+            disabled={isSaving}
+          >
+            {#each SHIFT_CATEGORIES as option (option.value)}
+              <option value={option.value}>{option.label}</option>
+            {/each}
+          </select>
+          <span class="mt-1 block text-xs font-normal text-gray-500">
+            Operational shifts cover studio operations and can never overlap each other.
+            Special events and external opportunities can overlap anything.
+          </span>
         </label>
 
         <label class="mt-4 block text-sm font-bold" for="opportunity-location">

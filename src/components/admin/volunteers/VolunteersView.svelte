@@ -24,10 +24,13 @@
   import {
     addDaysStr,
     buildWeekDays,
+    categoryLabel,
     composeLocalIso,
+    findOperationalOverlaps,
     formatShortDate,
     formatTimeRange,
     getWeekStartStr,
+    isOverlapError,
     parseDateStr,
     shiftLabel,
     toDateStr,
@@ -38,7 +41,7 @@
   export let refreshKey = 0;
 
   const shiftColumns =
-    "id, kind, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
+    "id, kind, category, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
 
   let weekStartStr = getWeekStartStr();
   let weekShifts = [];
@@ -217,16 +220,34 @@
       new Date(startsAt).getTime() + (Number(newShiftDuration) || 60) * 60000,
     ).toISOString();
 
-    const { error } = await supabase.from("volunteer_shifts").insert({
+    const payload = {
       kind: "custom",
+      category: "operational",
       starts_at: startsAt,
       ends_at: endsAt,
       lead_capacity: Math.max(0, Number(newShiftLeadCap) || 0),
       volunteer_capacity: Math.max(0, Number(newShiftVolCap) || 0),
-    });
+    };
+
+    try {
+      const { conflicts } = await findOperationalOverlaps(supabase, [payload]);
+      if (conflicts.length) {
+        createError = `This shift ${conflicts[0].reason}. Cancel that shift first or pick another time.`;
+        isCreatingShift = false;
+        return;
+      }
+    } catch (err) {
+      createError = err?.message || "Could not check for overlapping shifts.";
+      isCreatingShift = false;
+      return;
+    }
+
+    const { error } = await supabase.from("volunteer_shifts").insert(payload);
 
     if (error) {
-      createError = error.message;
+      createError = isOverlapError(error)
+        ? "An operational shift already covers that time. Cancel it first or pick another time."
+        : error.message;
     } else {
       showCreateForm = false;
       newShiftDate = "";
@@ -499,6 +520,11 @@
                   <span class="block">
                     L {shift.leadCount}/{shift.lead_capacity} · V {shift.volunteerCount}/{shift.volunteer_capacity}
                   </span>
+                  {#if shift.category && shift.category !== "operational"}
+                    <span class="mt-0.5 inline-block rounded-sm bg-black/10 px-1 text-[10px] font-bold uppercase tracking-wide">
+                      {categoryLabel(shift.category)}
+                    </span>
+                  {/if}
                 </button>
               {/each}
             </div>
@@ -560,6 +586,11 @@
               </span>
             </span>
             <span class="flex flex-wrap items-center gap-2">
+              {#if opportunity.category}
+                <span class="rounded-full border border-[#ffbd59]/60 bg-[#fff3d8] px-2.5 py-1 text-xs font-bold text-[#8a5700]">
+                  {categoryLabel(opportunity.category)}
+                </span>
+              {/if}
               <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
                 {opportunity.volunteerCount}/{opportunity.volunteer_capacity} volunteers
               </span>

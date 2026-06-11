@@ -4,6 +4,80 @@
 
 const pad = (num) => String(num).padStart(2, "0");
 
+// Shift categories. Operational shifts may never overlap each other (enforced
+// by the prevent_operational_overlap DB trigger); the others may overlap anything.
+export const SHIFT_CATEGORIES = [
+  { value: "operational", label: "Operational" },
+  { value: "special_event", label: "Special event" },
+  { value: "external", label: "External" },
+];
+
+export function categoryLabel(category) {
+  return SHIFT_CATEGORIES.find((c) => c.value === category)?.label || "Operational";
+}
+
+// True when a Supabase/Postgres error is the operational-overlap trigger
+// (exclusion_violation) firing.
+export function isOverlapError(error) {
+  return error?.code === "23P01";
+}
+
+// Timestamps arrive in mixed ISO flavors ("...Z" from toISOString, "...+00:00"
+// from PostgREST), so compare as epoch milliseconds, never as strings.
+const epoch = (ts) => new Date(ts).getTime();
+const rangesOverlap = (a, b) =>
+  epoch(a.starts_at) < epoch(b.ends_at) && epoch(b.starts_at) < epoch(a.ends_at);
+
+// Preflight check for operational shift creation. `rows` are insert payloads
+// with starts_at/ends_at ISO strings. Returns { okRows, conflicts } where
+// conflicts entries are { row, reason }. Checks both the database (active
+// operational shifts in the affected window) and overlaps within the batch.
+export async function findOperationalOverlaps(supabase, rows, { excludeId = null } = {}) {
+  const okRows = [];
+  const conflicts = [];
+  if (!rows?.length) return { okRows, conflicts };
+
+  const minStart = rows.reduce(
+    (m, r) => (epoch(r.starts_at) < epoch(m) ? r.starts_at : m),
+    rows[0].starts_at,
+  );
+  const maxEnd = rows.reduce(
+    (m, r) => (epoch(r.ends_at) > epoch(m) ? r.ends_at : m),
+    rows[0].ends_at,
+  );
+
+  const { data: existing, error } = await supabase
+    .from("volunteer_shifts")
+    .select("id, starts_at, ends_at")
+    .eq("cancelled", false)
+    .eq("category", "operational")
+    .lt("starts_at", maxEnd)
+    .gt("ends_at", minStart);
+
+  if (error) throw new Error(error.message);
+
+  const accepted = [];
+  const candidates = (existing || []).filter((s) => !excludeId || s.id !== excludeId);
+  for (const row of rows) {
+    const dbHit = candidates.find((s) => rangesOverlap(row, s));
+    if (dbHit) {
+      conflicts.push({
+        row,
+        reason: `overlaps the existing ${formatTimeRange(dbHit.starts_at, dbHit.ends_at)} shift on ${formatShortDate(dbHit.starts_at)}`,
+      });
+      continue;
+    }
+    if (accepted.some((s) => rangesOverlap(row, s))) {
+      conflicts.push({ row, reason: "duplicates another row in this batch" });
+      continue;
+    }
+    accepted.push(row);
+    okRows.push(row);
+  }
+
+  return { okRows, conflicts };
+}
+
 // Date -> "YYYY-MM-DD" using local time (Safari-safe, no toISOString).
 export function toDateStr(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
@@ -157,6 +231,7 @@ export function buildRecurringShiftRows({
       const endsAt = new Date(startsAt.getTime() + duration * 60000);
       rows.push({
         kind: "custom",
+        category: "operational",
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),
         lead_capacity: Math.max(0, Number(leadCapacity) || 0),
@@ -199,6 +274,7 @@ export function parseShiftCsv(text) {
 
     rows.push({
       kind: "custom",
+      category: "operational",
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
       lead_capacity: Math.max(0, Number(leadStr) || 1),

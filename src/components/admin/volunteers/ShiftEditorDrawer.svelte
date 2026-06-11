@@ -7,9 +7,11 @@
     UserPlus,
   } from "@lucide/svelte";
   import {
+    categoryLabel,
     formatShortDate,
     formatTimeRange,
     fromDateTimeLocalInput,
+    isOverlapError,
     shiftLabel,
     toDateTimeLocalInput,
   } from "../../../lib/dashboard/volunteersAdmin.js";
@@ -22,7 +24,7 @@
   export let onDeleted = () => {};
 
   const shiftColumns =
-    "id, kind, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
+    "id, kind, category, title, description, location, starts_at, ends_at, lead_capacity, volunteer_capacity, cancelled, created_at, updated_at";
 
   let displayedShift = null;
   let drawerOpen = false;
@@ -103,6 +105,7 @@
   }
 
   function handleClose() {
+    drawerOpen = false;
     displayedShift = null;
     roster = [];
     onClose();
@@ -123,7 +126,9 @@
       .single();
 
     if (error) {
-      errorMessage = error.message;
+      errorMessage = isOverlapError(error)
+        ? "Another operational shift now covers this time, so this one cannot be restored. Cancel the other shift first."
+        : error.message;
     } else {
       displayedShift = data;
       successMessage = successText;
@@ -351,7 +356,7 @@
 <SlideOver
   open={drawerOpen}
   title={displayedShift ? shiftLabel(displayedShift) : ""}
-  eyebrow={displayedShift ? `${kindLabel(displayedShift.kind)} · ${formatShortDate(displayedShift.starts_at)} · ${formatTimeRange(displayedShift.starts_at, displayedShift.ends_at)}` : "Shift details"}
+  eyebrow={displayedShift ? `${kindLabel(displayedShift.kind)} · ${categoryLabel(displayedShift.category)} · ${formatShortDate(displayedShift.starts_at)} · ${formatTimeRange(displayedShift.starts_at, displayedShift.ends_at)}` : "Shift details"}
   closeLabel="Close shift details"
   closeDisabled={isSaving || isDeleting || isAdding}
   onClose={requestClose}

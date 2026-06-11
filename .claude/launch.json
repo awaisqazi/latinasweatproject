@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "astro-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "npx astro dev --port ${PORT:-4321}"],
+      "port": 4321,
+      "autoPort": true
+    }
+  ]
+}

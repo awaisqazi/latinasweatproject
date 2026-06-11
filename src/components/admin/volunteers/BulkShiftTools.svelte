@@ -9,6 +9,7 @@
   import Panel from "../marketing/Panel.svelte";
   import {
     buildRecurringShiftRows,
+    findOperationalOverlaps,
     formatShortDate,
     formatTimeRange,
     parseShiftCsv,
@@ -71,6 +72,36 @@
     successMessage = success || "";
   }
 
+  // Insert operational rows, skipping any that overlap existing active
+  // operational shifts (or each other). Returns a user-facing summary.
+  async function insertSkippingOverlaps(rows, label) {
+    const { okRows, conflicts } = await findOperationalOverlaps(supabase, rows);
+
+    if (!okRows.length) {
+      setMessages(
+        `All ${rows.length} ${label} overlap existing operational shifts, nothing was created.`,
+        "",
+      );
+      return false;
+    }
+
+    const { error } = await supabase.from("volunteer_shifts").insert(okRows);
+
+    if (error) {
+      setMessages(error.message, "");
+      return false;
+    }
+
+    const skippedNote = conflicts.length
+      ? ` Skipped ${conflicts.length} overlapping slot${conflicts.length === 1 ? "" : "s"}: ${conflicts
+          .slice(0, 5)
+          .map((c) => `${formatShortDate(c.row.starts_at)} ${formatTimeRange(c.row.starts_at, c.row.ends_at)}`)
+          .join(", ")}${conflicts.length > 5 ? ", ..." : ""}.`
+      : "";
+    setMessages("", `Created ${okRows.length} shifts.${skippedNote}`);
+    return true;
+  }
+
   async function createRecurring() {
     if (!recurringRows.length || isCreatingRecurring) return;
 
@@ -85,16 +116,16 @@
     isCreatingRecurring = true;
     setMessages("", "");
 
-    const { error } = await supabase.from("volunteer_shifts").insert(recurringRows);
-
-    if (error) {
-      setMessages(error.message, "");
-    } else {
-      setMessages("", `Created ${recurringRows.length} shifts.`);
-      recurringStartDate = "";
-      recurringEndDate = "";
-      recurringDays = [];
-      onChanged();
+    try {
+      const created = await insertSkippingOverlaps(recurringRows, "shifts");
+      if (created) {
+        recurringStartDate = "";
+        recurringEndDate = "";
+        recurringDays = [];
+        onChanged();
+      }
+    } catch (err) {
+      setMessages(err?.message || "Could not check for overlapping shifts.", "");
     }
 
     isCreatingRecurring = false;
@@ -123,20 +154,20 @@
     isUploadingCsv = true;
     setMessages("", "");
 
-    const { error } = await supabase.from("volunteer_shifts").insert(csvRows);
-
-    if (error) {
-      setMessages(error.message, "");
-    } else {
-      setMessages(
-        "",
-        `Uploaded ${csvRows.length} shifts.${csvErrors.length ? ` ${csvErrors.length} lines were skipped.` : ""}`,
-      );
-      csvRows = [];
-      csvErrors = [];
-      csvFileName = "";
-      if (csvInput) csvInput.value = "";
-      onChanged();
+    try {
+      const created = await insertSkippingOverlaps(csvRows, "CSV rows");
+      if (created) {
+        if (csvErrors.length) {
+          successMessage += ` ${csvErrors.length} unreadable lines were skipped.`;
+        }
+        csvRows = [];
+        csvErrors = [];
+        csvFileName = "";
+        if (csvInput) csvInput.value = "";
+        onChanged();
+      }
+    } catch (err) {
+      setMessages(err?.message || "Could not check for overlapping shifts.", "");
     }
 
     isUploadingCsv = false;
