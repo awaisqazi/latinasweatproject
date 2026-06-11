@@ -72,6 +72,8 @@
 
     if (dialog && !dialog.open) {
       dialog.showModal();
+      // Undo any focus-induced scroll of the dialog scrollport (Safari).
+      dialog.scrollTo(0, 0);
     }
 
     // Commit the off-screen starting styles with a forced reflow, then flip
@@ -267,6 +269,15 @@
 {/if}
 
 <style>
+  /* The panel starts translated 100% to the right, overflowing the dialog.
+     Safari scrolls the dialog's scrollport when showModal() moves focus,
+     permanently offsetting the panel by its own width once the slide-in
+     finishes. overflow: clip forbids scrolling entirely (including the
+     programmatic focus scroll), which hidden would not. */
+  .slide-over-dialog {
+    overflow: clip;
+  }
+
   .slide-over-dialog::backdrop {
     background-color: rgb(0 0 0 / 0);
     transition: background-color 210ms ease;
