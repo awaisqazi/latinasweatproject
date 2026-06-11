@@ -11,7 +11,6 @@
     const supabase = SUPABASE_CONFIG_ERROR ? null : getSupabaseClient();
 
     let shifts = []; // Week shifts (legacy shape: start/end Dates)
-    let debugInfo = ""; // TEMP iOS debugging, do not commit
     let opportunities = [];
     let shiftData = {}; // { [shiftId]: { registrations: [{name, role}] } }
     let selectedDate = new Date();
@@ -231,8 +230,6 @@
         const rangeStart = new Date(y, m - 1, d);
         const rangeEnd = new Date(y, m - 1, d + 7);
 
-        debugInfo = `fetchWeek ${weekStart} gte=${rangeStart.toISOString()} lt=${rangeEnd.toISOString()} ...`;
-
         const { data, error } = await supabase
             .from("shifts_public")
             .select("*")
@@ -241,24 +238,6 @@
             .eq("cancelled", false)
             .neq("kind", "opportunity")
             .order("starts_at", { ascending: true });
-
-        debugInfo = `fetchWeek ${weekStart} gte=${rangeStart.toISOString()} lt=${rangeEnd.toISOString()} -> ${error ? "ERROR: " + (error.message || "") + " | code=" + (error.code || "?") + " | details=" + (error.details || "?") : (data || []).length + " rows"}`;
-
-        if (error) {
-            // Raw fetch probe, bypassing supabase-js, to isolate the failure layer.
-            try {
-                const base = import.meta.env.PUBLIC_SUPABASE_URL;
-                const key = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-                const probeUrl =
-                    `${base}/rest/v1/shifts_public?select=id&limit=1` +
-                    `&starts_at=gte.${encodeURIComponent(rangeStart.toISOString())}`;
-                const res = await fetch(probeUrl, { headers: { apikey: key } });
-                debugInfo += `\nprobe: HTTP ${res.status}`;
-            } catch (probeErr) {
-                debugInfo += `\nprobe FAILED: ${probeErr?.name || ""} ${probeErr?.message || probeErr}`;
-            }
-            debugInfo += `\nonline=${navigator.onLine} ua=${navigator.userAgent.slice(-60)}`;
-        }
 
         if (weekStart !== currentFetchKey) return;
 
@@ -693,11 +672,6 @@
             </div>
         {/if}
 
-        {#if debugInfo}
-            <pre
-                style="font-size:10px; line-height:1.5; background:#ffffcc; border:2px solid #cc0000; padding:6px; white-space:pre-wrap; word-break:break-all;">{debugInfo}
-shifts={shifts.length} visibleDates={visibleDates.join(",")} weekStart={currentWeekStartStr}</pre>
-        {/if}
         <div
             class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-20"
         >
