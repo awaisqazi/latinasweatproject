@@ -8,10 +8,6 @@
 
     const supabase = SUPABASE_CONFIG_ERROR ? null : getSupabaseClient();
 
-    let kioskCode = "";
-    let missingCode = false;
-    let invalidCode = false;
-
     let shifts = []; // Today's shifts with their registrations
     let loading = true;
     let error = null;
@@ -27,15 +23,6 @@
     let isProcessing = false;
 
     onMount(() => {
-        const params = new URLSearchParams(window.location.search);
-        kioskCode = params.get("code") || "";
-
-        if (!kioskCode) {
-            missingCode = true;
-            loading = false;
-            return;
-        }
-
         if (!supabase) {
             error = "Check-in is temporarily unavailable. Please ask an admin for help.";
             loading = false;
@@ -75,21 +62,13 @@
         let registrationsByShift = {};
         const ids = (shiftRows || []).map((s) => s.id);
         if (ids.length) {
+            // Today-scoped roster RPC: includes volunteer names and live
+            // check-in state, which the public registrations view masks.
             const { data: regs, error: regError } = await supabase.rpc(
-                "get_shift_check_in_registrations",
-                {
-                    p_code: kioskCode,
-                    p_shift_ids: ids,
-                },
+                "get_today_check_in_roster",
             );
 
             if (regError) {
-                if (regError.code === "42501") {
-                    invalidCode = true;
-                    loading = false;
-                    return;
-                }
-
                 error = "Could not load registrations. Please refresh.";
                 loading = false;
                 return;
@@ -157,24 +136,14 @@
             {
                 p_registration_id: selectedVolunteer.id,
                 p_checked_in: true,
-                p_code: kioskCode,
             },
         );
 
         isProcessing = false;
         showModal = false;
 
-        if (rpcError) {
-            error = "Check-in failed. Please try again.";
-            return;
-        }
-
-        if (!data?.ok) {
-            if (data?.reason === "invalid_code") {
-                invalidCode = true;
-            } else {
-                error = "Check-in failed. Please refresh and try again.";
-            }
+        if (rpcError || !data?.ok) {
+            error = "Check-in failed. Please refresh and try again.";
             return;
         }
 
@@ -205,17 +174,7 @@
         </p>
     </div>
 
-    {#if missingCode || invalidCode}
-        <div
-            class="bg-amber-50 text-amber-800 p-6 rounded-xl border border-amber-200 text-center"
-        >
-            <p class="font-bold text-lg">Kiosk link not active</p>
-            <p class="text-sm mt-2">
-                This kiosk link is missing its access code, ask an admin for
-                the current link.
-            </p>
-        </div>
-    {:else if error}
+    {#if error}
         <div
             class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 text-center"
         >

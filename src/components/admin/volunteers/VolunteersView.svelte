@@ -6,7 +6,6 @@
     ChevronRight,
     CircleAlert,
     ClipboardCheck,
-    Copy,
     KeyRound,
     Megaphone,
     Plus,
@@ -25,6 +24,7 @@
   import OpportunityEditorDrawer from "./OpportunityEditorDrawer.svelte";
   import BulkShiftTools from "./BulkShiftTools.svelte";
   import VolunteerLookup from "./VolunteerLookup.svelte";
+  import DayRosterView from "./DayRosterView.svelte";
   import ComplianceView from "./ComplianceView.svelte";
   import {
     addDaysStr,
@@ -83,11 +83,6 @@
     { id: "tools", label: "Tools", icon: Wrench },
   ];
 
-  let kioskCode = "";
-  let kioskError = "";
-  let isLoadingKiosk = false;
-  let showKiosk = false;
-  let kioskCopied = false;
 
   let lastRefreshKey = refreshKey;
   let lastLoadedWeek = "";
@@ -111,9 +106,6 @@
     );
   }, 0);
   $: weekRangeLabel = `${formatShortDate(parseDateStr(weekStartStr))} - ${formatShortDate(parseDateStr(addDaysStr(weekStartStr, 6)))}`;
-  $: kioskUrl = kioskCode
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/checkin?code=${kioskCode}`
-    : "";
 
   onMount(() => {
     mounted = true;
@@ -272,39 +264,6 @@
     isCreatingShift = false;
   }
 
-  async function loadKioskCode() {
-    if (showKiosk) {
-      showKiosk = false;
-      return;
-    }
-
-    showKiosk = true;
-    if (kioskCode || isLoadingKiosk) return;
-
-    isLoadingKiosk = true;
-    kioskError = "";
-
-    const { data, error } = await supabase.rpc("get_volunteer_check_in_code");
-
-    if (error) {
-      kioskError = error.message;
-    } else {
-      kioskCode = data || "";
-    }
-
-    isLoadingKiosk = false;
-  }
-
-  async function copyKioskUrl() {
-    try {
-      await navigator.clipboard.writeText(kioskUrl);
-      kioskCopied = true;
-      window.setTimeout(() => (kioskCopied = false), 2000);
-    } catch {
-      kioskError = "Could not copy the link, copy it manually instead.";
-    }
-  }
-
   function handleShiftDeleted(deletedId) {
     weekShifts = weekShifts.filter((shift) => shift.id !== deletedId);
     opportunities = opportunities.filter((shift) => shift.id !== deletedId);
@@ -354,43 +313,10 @@
     <Button variant="dark" icon={Megaphone} onclick={() => (editingOpportunity = {})}>
       New opportunity
     </Button>
-    <Button icon={KeyRound} onclick={loadKioskCode}>
-      Check-in kiosk code
+    <Button icon={KeyRound} href="/checkin">
+      Open check-in page
     </Button>
   </div>
-
-  {#if showKiosk}
-    <div class="rounded-md border border-black/10 bg-white p-4 shadow-sm">
-      {#if isLoadingKiosk}
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Loading kiosk code
-        </div>
-      {:else if kioskError}
-        <div class="flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-          <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>{kioskError}</span>
-        </div>
-      {:else if kioskCode}
-        <p class="text-sm font-bold">Check-in kiosk</p>
-        <p class="mt-1 text-sm text-gray-600">
-          Open this link on the front-desk device. Anyone with the link can check volunteers in, so keep it internal.
-        </p>
-        <div class="mt-3 flex flex-wrap items-center gap-2">
-          <code class="rounded-md bg-gray-100 px-3 py-2 text-sm font-bold">{kioskCode}</code>
-          <code class="break-all rounded-md bg-gray-100 px-3 py-2 text-sm">{kioskUrl}</code>
-          <button
-            type="button"
-            class="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 text-xs font-bold text-gray-700 transition hover:bg-gray-100"
-            onclick={copyKioskUrl}
-          >
-            <Copy class="h-3.5 w-3.5" aria-hidden="true" />
-            {kioskCopied ? "Copied" : "Copy link"}
-          </button>
-        </div>
-      {/if}
-    </div>
-  {/if}
 
   {#if showCreateForm}
     <form class="rounded-md border border-black/10 bg-white p-4 shadow-sm" onsubmit={createShift}>
@@ -582,7 +508,8 @@
   </div>
 
   {#if activeTab === "volunteers"}
-    <div id="tabpanel-volunteers" role="tabpanel" aria-labelledby="tab-volunteers">
+    <div id="tabpanel-volunteers" role="tabpanel" aria-labelledby="tab-volunteers" class="space-y-4">
+      <DayRosterView {supabase} />
       <VolunteerLookup {supabase} />
     </div>
   {/if}
