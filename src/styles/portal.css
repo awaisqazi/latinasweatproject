@@ -1,0 +1,115 @@
+/* Admin portal behavioral styles, scoped under .lsp-portal so the public
+   site is untouched. Visual language: "studio ledger" — ink on warm paper,
+   hairline borders, gold foil accents, teal interactivity. */
+
+:where(.lsp-portal) :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Form control recipe shared across the portal. Kept as CSS classes (not a
+   Svelte wrapper) so views keep plain inputs with bind:value. */
+.lsp-portal .input,
+.lsp-portal .select,
+.lsp-portal .textarea {
+  min-height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius-control);
+  border: 1px solid rgb(30 30 30 / 0.14);
+  background: #fff;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-ink);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.lsp-portal .textarea {
+  min-height: 6rem;
+  padding-block: 0.5rem;
+  line-height: 1.5rem;
+  resize: vertical;
+}
+
+.lsp-portal .input:hover,
+.lsp-portal .select:hover,
+.lsp-portal .textarea:hover {
+  border-color: rgb(30 30 30 / 0.26);
+}
+
+.lsp-portal .input:focus,
+.lsp-portal .select:focus,
+.lsp-portal .textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgb(15 118 110 / 0.15);
+}
+
+.lsp-portal .input:disabled,
+.lsp-portal .select:disabled,
+.lsp-portal .textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lsp-portal .input::placeholder,
+.lsp-portal .textarea::placeholder {
+  color: rgb(30 30 30 / 0.38);
+}
+
+/* Skeleton shimmer */
+.lsp-portal .skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgb(30 30 30 / 0.07);
+  border-radius: 6px;
+}
+
+.lsp-portal .skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgb(255 255 255 / 0.65) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: lsp-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes lsp-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Thin scrollbars for kanban lanes and wide tables */
+.lsp-portal .thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(30 30 30 / 0.25) transparent;
+}
+
+.lsp-portal .thin-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.lsp-portal .thin-scroll::-webkit-scrollbar-thumb {
+  background: rgb(30 30 30 / 0.22);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lsp-portal *,
+  .lsp-portal *::before,
+  .lsp-portal *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

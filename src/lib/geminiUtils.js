@@ -6,6 +6,12 @@ const GEMINI_API_KEY = import.meta.env.PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
+// True when the build carried a Gemini key; the UI offers AI refinement only
+// when this holds and falls back to deterministic matching otherwise.
+export function isGeminiConfigured() {
+    return Boolean(GEMINI_API_KEY);
+}
+
 /**
  * Parse a CSV string with quoted fields into an array of objects.
  * Handles quoted fields with commas inside, and strips surrounding quotes.

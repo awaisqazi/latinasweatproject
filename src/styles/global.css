@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./portal.css";
 
 @theme {
   --color-vibrant-pink: #b5a18d;
@@ -6,6 +7,24 @@
   --color-off-black: #1E1E1E;
   --color-medium-gray: #555555;
   --color-light-gray: #FDF2F2;
+
+  /* Admin portal palette ("studio ledger"): ink on warm paper, gold as foil
+     accent (never text on light backgrounds; use brand-ink for that), teal
+     as the interactive hue. */
+  --color-ink: #1e1e1e;
+  --color-canvas: #f7f7f4;
+  --color-brand: #ffbd59;
+  --color-brand-strong: #f4a833;
+  --color-brand-soft: #fff3d8;
+  --color-brand-ink: #8a5700;
+  --color-accent: #0f766e;
+  --color-accent-strong: #115e59;
+  --color-accent-soft: #f0fdfa;
+
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+  --shadow-card: 0 1px 2px rgb(30 30 30 / 0.05), 0 1px 1px rgb(30 30 30 / 0.04);
+  --shadow-pop: 0 10px 30px -12px rgb(30 30 30 / 0.25);
 
   --font-sans: "Rubik", sans-serif;
   --font-body: "Rubik", sans-serif;

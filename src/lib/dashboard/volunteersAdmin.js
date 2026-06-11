@@ -302,6 +302,204 @@ export function serializeCsv(rows) {
 // Trigger a client-side CSV download (UTF-8 BOM for Excel).
 const CSV_BOM = String.fromCharCode(0xfeff);
 
+// ---------------------------------------------------------------------------
+// Monthly volunteer compliance (the "4 hour" rule)
+// ---------------------------------------------------------------------------
+
+export const COMPLIANCE_MET_HOURS = 4;
+export const COMPLIANCE_CLOSE_HOURS = 2;
+
+// First/last day of the last full calendar month, browser-local.
+// endStr is INCLUSIVE (UI-facing); queries add a day for the exclusive bound.
+export function getLastFullMonthRange(today = new Date()) {
+  const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const end = new Date(today.getFullYear(), today.getMonth(), 0);
+  return { startStr: toDateStr(start), endStr: toDateStr(end) };
+}
+
+const round2 = (n) => Math.round(n * 100) / 100;
+
+function categorize(hours) {
+  if (hours >= COMPLIANCE_MET_HOURS) return "met";
+  if (hours >= COMPLIANCE_CLOSE_HOURS) return "close";
+  return "under";
+}
+
+// Deterministic compliance pass: exact lowercase-email grouping over
+// shift_registrations rows joined to their shift. Returns the SAME shape as
+// geminiUtils.generateVolunteerSummary so one render path and one CSV
+// builder serve both the exact and the AI-merged result.
+// registrations: [{ name, email, checked_in, shift: { starts_at, ends_at, cancelled } }]
+// roster: extractExpectedVolunteers() output ([{ name, email }]) or null.
+export function buildCompliance(registrations, roster = null) {
+  const byEmail = new Map();
+
+  for (const reg of registrations || []) {
+    if (!reg?.shift || reg.shift.cancelled || !reg.email) continue;
+    const key = reg.email.trim().toLowerCase();
+    if (!byEmail.has(key)) {
+      byEmail.set(key, {
+        primaryName: reg.name || "",
+        primaryEmail: key,
+        allNames: new Set(),
+        allEmails: new Set([key]),
+        totalCheckedInHours: 0,
+        totalRegisteredHours: 0,
+        checkedInShifts: 0,
+        totalRegisteredShifts: 0,
+      });
+    }
+    const entry = byEmail.get(key);
+    if (reg.name) entry.allNames.add(reg.name.trim());
+    const hours =
+      (new Date(reg.shift.ends_at) - new Date(reg.shift.starts_at)) / 3600000;
+    if (!Number.isFinite(hours) || hours <= 0) continue;
+    entry.totalRegisteredShifts += 1;
+    entry.totalRegisteredHours += hours;
+    if (reg.checked_in) {
+      entry.checkedInShifts += 1;
+      entry.totalCheckedInHours += hours;
+    }
+  }
+
+  const rosterByEmail = new Map(
+    (roster || [])
+      .filter((v) => v.email)
+      .map((v) => [v.email.trim().toLowerCase(), v]),
+  );
+
+  const volunteers = [...byEmail.values()].map((entry) => {
+    const onList = roster ? rosterByEmail.has(entry.primaryEmail) : null;
+    return {
+      primaryName: entry.primaryName || [...entry.allNames][0] || entry.primaryEmail,
+      primaryEmail: entry.primaryEmail,
+      allNames: [...entry.allNames],
+      allEmails: [...entry.allEmails],
+      totalCheckedInHours: round2(entry.totalCheckedInHours),
+      totalRegisteredHours: round2(entry.totalRegisteredHours),
+      checkedInShifts: entry.checkedInShifts,
+      totalRegisteredShifts: entry.totalRegisteredShifts,
+      category: categorize(entry.totalCheckedInHours),
+      confidence: "high",
+      uncertaintyNote:
+        onList === false ? "Not on expected volunteer list" : null,
+      onExpectedList: onList,
+    };
+  });
+
+  // Compliance-first reading order: under, close, met; lowest hours first.
+  const order = { under: 0, close: 1, met: 2 };
+  volunteers.sort(
+    (a, b) =>
+      order[a.category] - order[b.category] ||
+      a.totalCheckedInHours - b.totalCheckedInHours ||
+      a.primaryName.localeCompare(b.primaryName),
+  );
+
+  const notFound = roster
+    ? (roster || [])
+        .filter(
+          (v) => !v.email || !byEmail.has(v.email.trim().toLowerCase()),
+        )
+        .map((v) => ({
+          name: v.name || "",
+          email: v.email || "",
+          note: "No check-in records found in this range",
+        }))
+    : [];
+
+  return {
+    volunteers,
+    notFound,
+    stats: {
+      totalUniqueVolunteers: volunteers.length,
+      totalCheckedInHours: round2(
+        volunteers.reduce((sum, v) => sum + v.totalCheckedInHours, 0),
+      ),
+      metCount: volunteers.filter((v) => v.category === "met").length,
+      closeCount: volunteers.filter((v) => v.category === "close").length,
+      underCount: volunteers.filter((v) => v.category === "under").length,
+      uncertainGroupings: 0,
+      ...(roster
+        ? { notFoundCount: notFound.length, expectedTotal: roster.length }
+        : {}),
+    },
+    notes:
+      "Exact email matching only. Use Refine with AI to merge identities across name and email variations.",
+  };
+}
+
+// Map Supabase registration rows to the record shape generateVolunteerSummary
+// expects: { name, email, shiftDate, shiftTime, durationHours, checkedIn }.
+export function toGeminiRecords(registrations) {
+  return (registrations || [])
+    .filter((reg) => reg?.shift && !reg.shift.cancelled)
+    .map((reg) => ({
+      name: reg.name || "",
+      email: reg.email || "",
+      shiftDate: toDateStr(new Date(reg.shift.starts_at)),
+      shiftTime: formatTimeRange(reg.shift.starts_at, reg.shift.ends_at),
+      durationHours: round2(
+        (new Date(reg.shift.ends_at) - new Date(reg.shift.starts_at)) / 3600000,
+      ),
+      checkedIn: !!reg.checked_in,
+    }));
+}
+
+const CATEGORY_LABELS = {
+  met: "Met 4+ Hours",
+  close: "Close to 4 Hours (2-3.99h)",
+  under: "Under 2 Hours - Out of Compliance",
+};
+
+// Legacy-parity CSV rows for downloadCsv(): header + volunteers + blank row +
+// NOT FOUND section (when a roster was checked).
+export function buildComplianceCsvRows(result) {
+  const rows = [
+    [
+      "Name",
+      "Email",
+      "Checked-In Hours",
+      "Registered Hours",
+      "Shifts Checked In",
+      "Total Shifts Registered",
+      "Category",
+      "Confidence",
+      "On Expected List",
+      "Notes",
+    ],
+  ];
+
+  for (const v of result?.volunteers || []) {
+    rows.push([
+      v.primaryName,
+      v.primaryEmail,
+      v.totalCheckedInHours,
+      v.totalRegisteredHours,
+      v.checkedInShifts,
+      v.totalRegisteredShifts,
+      CATEGORY_LABELS[v.category] || v.category,
+      v.confidence || "",
+      v.onExpectedList === null || v.onExpectedList === undefined
+        ? ""
+        : v.onExpectedList
+          ? "Yes"
+          : "No",
+      v.uncertaintyNote || "",
+    ]);
+  }
+
+  if (result?.notFound?.length) {
+    rows.push([]);
+    rows.push(["--- NOT FOUND IN CHECK-IN RECORDS ---"]);
+    for (const v of result.notFound) {
+      rows.push([v.name, v.email, 0, 0, 0, 0, "Not Found", "", "Yes", v.note || ""]);
+    }
+  }
+
+  return rows;
+}
+
 export function downloadCsv(filename, rows) {
   const blob = new Blob([CSV_BOM + serializeCsv(rows)], {
     type: "text/csv;charset=utf-8;",

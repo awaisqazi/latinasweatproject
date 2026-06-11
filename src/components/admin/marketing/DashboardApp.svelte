@@ -731,7 +731,7 @@
 
 <svelte:window onkeydown={handleWindowKanbanKeydown} />
 
-<main class="min-h-screen bg-[#f7f7f4] text-[#1E1E1E]">
+<main class="lsp-portal min-h-screen bg-canvas text-ink">
   {#if isLoading}
     <div class="flex min-h-screen items-center justify-center px-4">
       <div class="flex items-center gap-3 rounded-md border border-black/10 bg-white px-5 py-4 text-sm text-gray-600 shadow-sm">
