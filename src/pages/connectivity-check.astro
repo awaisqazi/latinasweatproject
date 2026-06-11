@@ -1,0 +1,72 @@
+---
+// Temporary diagnostic page: isolates how Supabase requests fail on a given
+// device. Safe to expose: uses only the public URL and publishable key.
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Connectivity check</title>
+    <style>
+      body { font-family: -apple-system, sans-serif; padding: 16px; }
+      .row { padding: 12px; margin: 8px 0; border-radius: 8px; font-size: 15px; font-weight: 600; }
+      .ok { background: #dcfce7; color: #14532d; }
+      .fail { background: #fee2e2; color: #7f1d1d; }
+      .pending { background: #f3f4f6; color: #374151; }
+      pre { font-size: 11px; white-space: pre-wrap; word-break: break-all; background: #f9fafb; padding: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>Connectivity check</h1>
+    <div id="t1" class="row pending">1. API key in header: running...</div>
+    <div id="t2" class="row pending">2. API key in URL param: running...</div>
+    <div id="t3" class="row pending">3. Custom header survives: running...</div>
+    <pre id="meta"></pre>
+
+    <script define:vars={{ supabaseUrl, supabaseKey }}>
+      const set = (id, ok, text) => {
+        const el = document.getElementById(id);
+        el.className = `row ${ok ? "ok" : "fail"}`;
+        el.textContent = text;
+      };
+
+      async function run() {
+        document.getElementById("meta").textContent =
+          `UA: ${navigator.userAgent}\nonline: ${navigator.onLine} | cookies: ${navigator.cookieEnabled}`;
+
+        // 1. apikey as request header (how supabase-js sends it)
+        try {
+          const r = await fetch(`${supabaseUrl}/rest/v1/events?select=id&limit=1`, {
+            headers: { apikey: supabaseKey },
+          });
+          set("t1", r.ok, `1. API key in header: HTTP ${r.status}${r.ok ? " (OK)" : " - " + (await r.text()).slice(0, 80)}`);
+        } catch (e) {
+          set("t1", false, `1. API key in header: FAILED - ${e.name}: ${e.message}`);
+        }
+
+        // 2. apikey as URL param (no custom headers at all)
+        try {
+          const r = await fetch(`${supabaseUrl}/rest/v1/events?select=id&limit=1&apikey=${encodeURIComponent(supabaseKey)}`);
+          set("t2", r.ok, `2. API key in URL param: HTTP ${r.status}${r.ok ? " (OK)" : " - " + (await r.text()).slice(0, 80)}`);
+        } catch (e) {
+          set("t2", false, `2. API key in URL param: FAILED - ${e.name}: ${e.message}`);
+        }
+
+        // 3. echo check: does an arbitrary custom header reach the server?
+        // (httpbin-style echo via Supabase isn't available, so infer from #1 vs #2)
+        const t1ok = document.getElementById("t1").className.includes("ok");
+        const t2ok = document.getElementById("t2").className.includes("ok");
+        if (t1ok && t2ok) set("t3", true, "3. Verdict: headers arrive intact on this device");
+        else if (!t1ok && t2ok) set("t3", false, "3. Verdict: HEADERS ARE BEING STRIPPED on this device");
+        else if (!t1ok && !t2ok) set("t3", false, "3. Verdict: Supabase is unreachable from this device");
+        else set("t3", true, "3. Verdict: header works, URL param blocked (unusual)");
+      }
+
+      run();
+    </script>
+  </body>
+</html>
