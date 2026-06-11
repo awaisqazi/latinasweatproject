@@ -14,13 +14,18 @@
     UsersRound,
     Wrench,
   } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import StatCard from "../ui/StatCard.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import Tabs from "../ui/Tabs.svelte";
+  import Badge from "../ui/Badge.svelte";
   import ShiftEditorDrawer from "./ShiftEditorDrawer.svelte";
   import OpportunityEditorDrawer from "./OpportunityEditorDrawer.svelte";
   import BulkShiftTools from "./BulkShiftTools.svelte";
   import VolunteerLookup from "./VolunteerLookup.svelte";
+  import ComplianceView from "./ComplianceView.svelte";
   import {
     addDaysStr,
     buildWeekDays,
@@ -65,8 +70,18 @@
   let isCreatingShift = false;
   let createError = "";
 
-  let showBulkTools = false;
-  let showLookup = false;
+  // Module tabs: search, compliance, and bulk tools are first-class sections
+  // instead of being buried behind toggle buttons.
+  let activeTab = "schedule";
+  let complianceVisited = false;
+  $: if (activeTab === "compliance") complianceVisited = true;
+
+  const moduleTabs = [
+    { id: "schedule", label: "Schedule", icon: CalendarDays },
+    { id: "volunteers", label: "Volunteers", icon: Search },
+    { id: "compliance", label: "Compliance", icon: ClipboardCheck },
+    { id: "tools", label: "Tools", icon: Wrench },
+  ];
 
   let kioskCode = "";
   let kioskError = "";
@@ -312,66 +327,36 @@
   <h3 id="volunteers-view-title" class="sr-only">Volunteers</h3>
 
   <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    <SummaryCard label="Shifts this week" value={activeWeekShifts.length} icon={CalendarDays} tone="teal" />
-    <SummaryCard label="Open spots this week" value={openSpotsThisWeek} icon={UsersRound} tone="gold" />
-    <SummaryCard label="Check-ins today" value={checkInsToday} icon={ClipboardCheck} tone="teal" />
-    <SummaryCard label="Upcoming opportunities" value={opportunities.length} icon={Megaphone} tone="gold" />
+    <StatCard label="Shifts this week" value={activeWeekShifts.length} icon={CalendarDays} tone="teal" />
+    <StatCard label="Open spots this week" value={openSpotsThisWeek} icon={UsersRound} tone="gold" />
+    <StatCard label="Check-ins today" value={checkInsToday} icon={ClipboardCheck} tone="teal" />
+    <StatCard label="Upcoming opportunities" value={opportunities.length} icon={Megaphone} tone="gold" />
   </div>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
+  <Tabs tabs={moduleTabs} bind:active={activeTab} label="Volunteer sections" />
+
+  <div id="tabpanel-schedule" role="tabpanel" aria-labelledby="tab-schedule" class="space-y-4" class:hidden={activeTab !== "schedule"}>
   <div class="flex flex-wrap items-center gap-2">
-    <button
-      type="button"
-      class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
+    <Button
+      variant="primary"
+      icon={Plus}
       onclick={() => {
         showCreateForm = !showCreateForm;
         createError = "";
       }}
     >
-      <Plus class="h-4 w-4" aria-hidden="true" />
       New shift
-    </button>
-    <button
-      type="button"
-      class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black"
-      onclick={() => (editingOpportunity = {})}
-    >
-      <Megaphone class="h-4 w-4" aria-hidden="true" />
+    </Button>
+    <Button variant="dark" icon={Megaphone} onclick={() => (editingOpportunity = {})}>
       New opportunity
-    </button>
-    <button
-      type="button"
-      class="inline-flex min-h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100 {showBulkTools ? 'border-[#0f766e] text-[#0f766e]' : ''}"
-      aria-pressed={showBulkTools}
-      onclick={() => (showBulkTools = !showBulkTools)}
-    >
-      <Wrench class="h-4 w-4" aria-hidden="true" />
-      Bulk tools
-    </button>
-    <button
-      type="button"
-      class="inline-flex min-h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100 {showLookup ? 'border-[#0f766e] text-[#0f766e]' : ''}"
-      aria-pressed={showLookup}
-      onclick={() => (showLookup = !showLookup)}
-    >
-      <Search class="h-4 w-4" aria-hidden="true" />
-      Volunteer lookup
-    </button>
-    <button
-      type="button"
-      class="inline-flex min-h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100 {showKiosk ? 'border-[#0f766e] text-[#0f766e]' : ''}"
-      aria-pressed={showKiosk}
-      onclick={loadKioskCode}
-    >
-      <KeyRound class="h-4 w-4" aria-hidden="true" />
+    </Button>
+    <Button icon={KeyRound} onclick={loadKioskCode}>
       Check-in kiosk code
-    </button>
+    </Button>
   </div>
 
   {#if showKiosk}
@@ -451,14 +436,6 @@
         {/if}
       </button>
     </form>
-  {/if}
-
-  {#if showBulkTools}
-    <BulkShiftTools {supabase} onChanged={handleDataChanged} />
-  {/if}
-
-  {#if showLookup}
-    <VolunteerLookup {supabase} />
   {/if}
 
   <Panel title="Week schedule" id="volunteers-week-title" loading={isLoadingWeek}>
@@ -572,57 +549,60 @@
     {:else}
       <div class="space-y-2">
         {#each opportunities as opportunity (opportunity.id)}
-          <button
-            type="button"
-            class="flex w-full flex-wrap items-center justify-between gap-3 rounded-md border border-black/10 bg-white px-4 py-3 text-left transition hover:border-[#0f766e]/40 hover:shadow-sm"
-            onclick={() => (editingOpportunity = opportunity)}
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 rounded-card border border-ink/8 bg-white px-4 py-3 shadow-card transition hover:border-accent/40"
           >
-            <span class="min-w-0">
-              <span class="block font-bold leading-snug {opportunity.cancelled ? 'text-gray-400 line-through' : ''}">
+            <button
+              type="button"
+              class="min-w-0 flex-1 text-left"
+              onclick={() => (editingOpportunity = opportunity)}
+            >
+              <span class="block font-bold leading-snug {opportunity.cancelled ? 'text-ink/35 line-through' : 'text-ink'}">
                 {opportunity.title || "Untitled opportunity"}
               </span>
-              <span class="mt-1 block text-sm text-gray-600">
+              <span class="mt-1 block text-sm text-ink/60">
                 {formatShortDate(opportunity.starts_at)} · {formatTimeRange(opportunity.starts_at, opportunity.ends_at)}{opportunity.location ? ` · ${opportunity.location}` : ""}
               </span>
-            </span>
+            </button>
             <span class="flex flex-wrap items-center gap-2">
               {#if opportunity.category}
-                <span class="rounded-full border border-[#ffbd59]/60 bg-[#fff3d8] px-2.5 py-1 text-xs font-bold text-[#8a5700]">
-                  {categoryLabel(opportunity.category)}
-                </span>
+                <Badge tone="gold">{categoryLabel(opportunity.category)}</Badge>
               {/if}
-              <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
-                {opportunity.volunteerCount}/{opportunity.volunteer_capacity} volunteers
-              </span>
+              <Badge tone="neutral">{opportunity.volunteerCount}/{opportunity.volunteer_capacity} volunteers</Badge>
               {#if opportunity.lead_capacity > 0}
-                <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
-                  {opportunity.leadCount}/{opportunity.lead_capacity} leads
-                </span>
+                <Badge tone="neutral">{opportunity.leadCount}/{opportunity.lead_capacity} leads</Badge>
               {/if}
-              <span
-                role="button"
-                tabindex="0"
-                class="rounded-md border border-[#0f766e]/40 bg-teal-50 px-2.5 py-1 text-xs font-bold text-[#0f766e] transition hover:bg-teal-100"
-                onclick={(event) => {
-                  event.stopPropagation();
-                  selectedShift = opportunity;
-                }}
-                onkeydown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    selectedShift = opportunity;
-                  }
-                }}
-              >
-                Roster
-              </span>
+              <Button size="sm" onclick={() => (selectedShift = opportunity)}>Roster</Button>
             </span>
-          </button>
+          </div>
         {/each}
       </div>
     {/if}
   </Panel>
+  </div>
+
+  {#if activeTab === "volunteers"}
+    <div id="tabpanel-volunteers" role="tabpanel" aria-labelledby="tab-volunteers">
+      <VolunteerLookup {supabase} />
+    </div>
+  {/if}
+
+  {#if complianceVisited}
+    <div
+      id="tabpanel-compliance"
+      role="tabpanel"
+      aria-labelledby="tab-compliance"
+      class:hidden={activeTab !== "compliance"}
+    >
+      <ComplianceView {supabase} />
+    </div>
+  {/if}
+
+  {#if activeTab === "tools"}
+    <div id="tabpanel-tools" role="tabpanel" aria-labelledby="tab-tools">
+      <BulkShiftTools {supabase} onChanged={handleDataChanged} />
+    </div>
+  {/if}
 </section>
 
 <ShiftEditorDrawer

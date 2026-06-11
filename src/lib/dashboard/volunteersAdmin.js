@@ -429,6 +429,88 @@ export function buildCompliance(registrations, roster = null) {
   };
 }
 
+// Rebuild an AI result's numbers deterministically. The model is good at
+// identity grouping but unreliable at arithmetic, so we keep its groupings
+// (allEmails per volunteer) and recompute every hour/shift total from the raw
+// registrations. Emails the AI failed to group are appended from the exact
+// pass so no volunteer is ever dropped.
+export function reconcileAiResult(aiResult, registrations, roster = null) {
+  if (!aiResult?.volunteers) return aiResult;
+
+  const exact = buildCompliance(registrations, roster);
+  const byEmail = new Map(exact.volunteers.map((v) => [v.primaryEmail, v]));
+  const claimed = new Set();
+
+  const volunteers = aiResult.volunteers.map((v) => {
+    const emails = [
+      ...new Set(
+        [v.primaryEmail, ...(v.allEmails || [])]
+          .filter(Boolean)
+          .map((e) => e.trim().toLowerCase()),
+      ),
+    ];
+    const parts = emails
+      .filter((e) => byEmail.has(e) && !claimed.has(e))
+      .map((e) => {
+        claimed.add(e);
+        return byEmail.get(e);
+      });
+
+    if (!parts.length) return null; // hallucinated identity: no real records
+
+    const sum = (key) =>
+      Math.round(parts.reduce((total, p) => total + p[key], 0) * 100) / 100;
+    const checkedInHours = sum("totalCheckedInHours");
+
+    return {
+      ...v,
+      allEmails: emails,
+      totalCheckedInHours: checkedInHours,
+      totalRegisteredHours: sum("totalRegisteredHours"),
+      checkedInShifts: parts.reduce((t, p) => t + p.checkedInShifts, 0),
+      totalRegisteredShifts: parts.reduce((t, p) => t + p.totalRegisteredShifts, 0),
+      category:
+        checkedInHours >= COMPLIANCE_MET_HOURS
+          ? "met"
+          : checkedInHours >= COMPLIANCE_CLOSE_HOURS
+            ? "close"
+            : "under",
+    };
+  });
+
+  const kept = volunteers.filter(Boolean);
+  for (const v of exact.volunteers) {
+    if (!claimed.has(v.primaryEmail)) {
+      kept.push({
+        ...v,
+        uncertaintyNote: v.uncertaintyNote || "Not grouped by AI; added from exact match",
+      });
+    }
+  }
+
+  const order = { under: 0, close: 1, met: 2 };
+  kept.sort(
+    (a, b) =>
+      order[a.category] - order[b.category] ||
+      a.totalCheckedInHours - b.totalCheckedInHours ||
+      (a.primaryName || "").localeCompare(b.primaryName || ""),
+  );
+
+  return {
+    ...aiResult,
+    volunteers: kept,
+    stats: {
+      ...aiResult.stats,
+      totalUniqueVolunteers: kept.length,
+      totalCheckedInHours:
+        Math.round(kept.reduce((t, v) => t + v.totalCheckedInHours, 0) * 100) / 100,
+      metCount: kept.filter((v) => v.category === "met").length,
+      closeCount: kept.filter((v) => v.category === "close").length,
+      underCount: kept.filter((v) => v.category === "under").length,
+    },
+  };
+}
+
 // Map Supabase registration rows to the record shape generateVolunteerSummary
 // expects: { name, email, shiftDate, shiftTime, durationHours, checkedIn }.
 export function toGeminiRecords(registrations) {

@@ -93,16 +93,32 @@
     const rangeEnd = parseDateStr(exportEnd);
     rangeEnd.setDate(rangeEnd.getDate() + 1);
 
-    const { data, error } = await supabase
-      .from("shift_registrations")
-      .select(
-        "id, name, email, phone, role, checked_in, check_in_time, shift:volunteer_shifts!inner(id, kind, title, starts_at, ends_at, cancelled)",
-      )
-      .gte("shift.starts_at", rangeStart.toISOString())
-      .lt("shift.starts_at", rangeEnd.toISOString());
+    // Paginate: PostgREST caps unranged selects at 1000 rows, which silently
+    // truncated busy ranges before.
+    const pageSize = 1000;
+    const data = [];
+    let pageError = null;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data: page, error } = await supabase
+        .from("shift_registrations")
+        .select(
+          "id, name, email, phone, role, checked_in, check_in_time, shift:volunteer_shifts!inner(id, kind, title, starts_at, ends_at, cancelled)",
+        )
+        .gte("shift.starts_at", rangeStart.toISOString())
+        .lt("shift.starts_at", rangeEnd.toISOString())
+        .order("id")
+        .range(offset, offset + pageSize - 1);
 
-    if (error) {
-      exportError = error.message;
+      if (error) {
+        pageError = error;
+        break;
+      }
+      data.push(...(page || []));
+      if (!page || page.length < pageSize) break;
+    }
+
+    if (pageError) {
+      exportError = pageError.message;
       isExporting = false;
       return;
     }
