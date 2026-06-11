@@ -1,0 +1,22 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import InstructorInterestApp from "../components/InstructorInterestApp.svelte";
+---
+
+<Layout title="Teach at LSP | The Latina Sweat Project">
+	<Header />
+	<main class="min-h-screen bg-gray-50">
+		<div class="py-12">
+			<div class="max-w-3xl mx-auto px-4 text-center">
+				<h1 class="text-3xl font-bold font-rubik text-gray-900">
+					Teach at LSP
+				</h1>
+				<p class="mt-2 text-gray-500">
+					Tell us which time slots you'd like to teach next period.
+				</p>
+			</div>
+			<InstructorInterestApp client:load />
+		</div>
+	</main>
+</Layout>

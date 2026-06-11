@@ -89,4 +89,67 @@ export function isConflictError(error) {
   return error?.code === "23P01";
 }
 
+const HISTORY_DOW = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
+// Map parsed MarianaTek "class session utilization details" CSV rows (the
+// object output of geminiUtils.parseCSV) onto class_history insert payloads.
+// Returns { rows, errors }; rows are safe for upsert with ignoreDuplicates
+// on the class_history_dedupe index.
+export function parseHistoryCsvRows(csvRows) {
+  const rows = [];
+  const errors = [];
+
+  (csvRows || []).forEach((r, i) => {
+    const dateStr = (r["Class Date"] || "").trim();
+    const timeStr = (r["Class Time"] || "").trim();
+    const dow = HISTORY_DOW[(r["Class Day of Week"] || "").trim()];
+    const classroom = (r["Classroom"] || "").trim();
+    const classType = (r["Class Type"] || "").trim();
+
+    const dateMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+    if (!dateMatch || !timeMatch || dow === undefined || !classroom || !classType) {
+      errors.push(`Row ${i + 2}: could not read date/time/room/type`);
+      return;
+    }
+
+    let hour = Number(timeMatch[1]) % 12;
+    if (/pm/i.test(timeMatch[3])) hour += 12;
+
+    const toInt = (v) => {
+      const n = parseInt(String(v ?? "").trim(), 10);
+      return Number.isFinite(n) ? n : 0;
+    };
+    const util = String(r["% Utilization"] || "").trim().replace("%", "");
+
+    rows.push({
+      session_date: `${dateMatch[3]}-${String(dateMatch[1]).padStart(2, "0")}-${String(dateMatch[2]).padStart(2, "0")}`,
+      start_time: `${String(hour).padStart(2, "0")}:${timeMatch[2]}`,
+      day_of_week: dow,
+      classroom,
+      class_type: classType,
+      instructors: (r["Instructors"] || "").trim(),
+      has_substitute: (r["Has Substitute?"] || "").trim() === "true",
+      is_free: (r["Class Is Free?"] || "").trim() === "true",
+      checked_in: toInt(r["Checked In Reservations"]),
+      late_cancelled: toInt(r["Late Cancelled Reservations"]),
+      no_showed: toInt(r["No Showed Reservations"]),
+      layout_capacity: toInt(r["Layout Capacity"]),
+      actual_capacity: toInt(r["Actual Capacity"]),
+      utilization: util && !Number.isNaN(Number(util)) ? Number(util) : null,
+    });
+  });
+
+  return { rows, errors };
+}
+
 export { addDaysStr, parseDateStr, toDateStr };

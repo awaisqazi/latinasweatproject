@@ -3,10 +3,11 @@
   // history. Three panels: a day-by-time heatmap per room, class type
   // performance, and instructor performance.
   import { onMount } from "svelte";
-  import { ChartColumn, GraduationCap, Users } from "@lucide/svelte";
+  import { ChartColumn, FileUp, GraduationCap, Users } from "@lucide/svelte";
   import Panel from "../ui/Panel.svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
   import EmptyState from "../ui/EmptyState.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
   import SearchInput from "../ui/SearchInput.svelte";
@@ -16,13 +17,15 @@
     ROOM_TONES,
     DOW_LABELS,
     formatTime12,
+    parseHistoryCsvRows,
     timeToMinutes,
   } from "../../../lib/dashboard/spacesAdmin.js";
   import { formatShortDate } from "../../../lib/dashboard/volunteersAdmin.js";
+  import { parseCSV } from "../../../lib/geminiUtils.js";
 
   export let supabase;
-  // Accepted for prop compatibility with the other tabs; this tab never
-  // mutates data, so onChanged is never invoked.
+  // Accepted for prop compatibility with the other tabs; CSV imports reload
+  // this tab's own panels directly, so onChanged is never invoked.
   export let dataVersion = 0;
   export let onChanged = () => {};
 
@@ -166,9 +169,101 @@
         (r.instructor || "").toLowerCase().includes(instructorQuery.trim().toLowerCase()),
       )
     : instructorRows;
+
+  // ---- History CSV import --------------------------------------------------
+  // The dedupe unique index on class_history plus ignoreDuplicates makes
+  // re-uploading overlapping exports safe: only new sessions land.
+
+  const IMPORT_BATCH_SIZE = 500;
+
+  let importInput;
+  let importBusy = false;
+  let importError = "";
+  let importSuccess = "";
+
+  async function handleImportFile(event) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file || importBusy || !supabase) return;
+
+    importBusy = true;
+    importError = "";
+    importSuccess = "";
+
+    let text = "";
+    try {
+      text = await file.text();
+    } catch (err) {
+      importError = err?.message || "Could not read that CSV file.";
+      importBusy = false;
+      return;
+    }
+
+    const { rows, errors } = parseHistoryCsvRows(parseCSV(text));
+
+    if (!rows.length) {
+      importError =
+        "No readable sessions in that file. Export 'Class Session Utilization Details' from MarianaTek and try again.";
+      importBusy = false;
+      return;
+    }
+
+    let imported = 0;
+    for (let i = 0; i < rows.length; i += IMPORT_BATCH_SIZE) {
+      const batch = rows.slice(i, i + IMPORT_BATCH_SIZE);
+      const { error } = await supabase.from("class_history").upsert(batch, {
+        onConflict: "session_date,start_time,classroom,class_type,instructors",
+        ignoreDuplicates: true,
+      });
+      if (error) {
+        importError = error.message;
+        importBusy = false;
+        return;
+      }
+      imported += batch.length;
+    }
+
+    importSuccess = `Imported ${imported} session${imported === 1 ? "" : "s"} (${errors.length} unreadable line${errors.length === 1 ? "" : "s"} skipped). Duplicate sessions are ignored automatically.`;
+    importBusy = false;
+    loadAll();
+  }
 </script>
 
 <div class="space-y-4">
+  <!-- History CSV import toolbar -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="max-w-xl text-xs leading-5 text-ink/65">
+      Export "Class Session Utilization Details" from MarianaTek and upload it here
+      to keep insights current.
+    </p>
+    <div>
+      <input
+        bind:this={importInput}
+        type="file"
+        accept=".csv"
+        class="hidden"
+        onchange={handleImportFile}
+      />
+      <Button
+        variant="secondary"
+        icon={FileUp}
+        loading={importBusy}
+        onclick={() => importInput?.click()}
+      >
+        Import history CSV
+      </Button>
+    </div>
+  </div>
+
+  {#if importError}
+    <Banner tone="error" message={importError} onDismiss={() => (importError = "")} />
+  {/if}
+
+  {#if importSuccess}
+    <Banner tone="success" message={importSuccess} onDismiss={() => (importSuccess = "")} />
+  {/if}
+
   <!-- Panel 1: day-by-time heatmap per room -->
   {#if slotLoading && !slotRows.length}
     <SkeletonCard lines={8} />

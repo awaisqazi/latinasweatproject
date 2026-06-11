@@ -4,6 +4,7 @@
     CalendarDays,
     CalendarRange,
     ChartColumn,
+    ClipboardList,
     DoorOpen,
     GraduationCap,
   } from "@lucide/svelte";
@@ -11,6 +12,7 @@
   import Tabs from "../ui/Tabs.svelte";
   import SpaceCalendarTab from "./SpaceCalendarTab.svelte";
   import ClassScheduleTab from "./ClassScheduleTab.svelte";
+  import PlanningTab from "./PlanningTab.svelte";
   import InsightsTab from "./InsightsTab.svelte";
 
   export let supabase;
@@ -19,13 +21,16 @@
 
   let activeTab = "calendar";
   let scheduleVisited = false;
+  let planningVisited = false;
   let insightsVisited = false;
   $: if (activeTab === "schedule") scheduleVisited = true;
+  $: if (activeTab === "planning") planningVisited = true;
   $: if (activeTab === "insights") insightsVisited = true;
 
   const moduleTabs = [
     { id: "calendar", label: "Space Calendar", icon: CalendarRange },
     { id: "schedule", label: "Class Schedule", icon: GraduationCap },
+    { id: "planning", label: "Planning", icon: ClipboardList },
     { id: "insights", label: "Insights", icon: ChartColumn },
   ];
 
@@ -126,6 +131,17 @@
       class:hidden={activeTab !== "schedule"}
     >
       <ClassScheduleTab {supabase} {dataVersion} onChanged={handleDataChanged} />
+    </div>
+  {/if}
+
+  {#if planningVisited}
+    <div
+      id="tabpanel-planning"
+      role="tabpanel"
+      aria-labelledby="tab-planning"
+      class:hidden={activeTab !== "planning"}
+    >
+      <PlanningTab {supabase} {dataVersion} onChanged={handleDataChanged} />
     </div>
   {/if}
 

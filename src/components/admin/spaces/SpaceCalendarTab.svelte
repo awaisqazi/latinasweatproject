@@ -60,9 +60,11 @@
 
   let slots = [];
   let bookings = [];
+  let history = [];
   let events = [];
   let isLoadingSlots = true;
   let isLoadingBookings = true;
+  let isLoadingHistory = false;
   let errorMessage = "";
 
   // ----- load orchestration ------------------------------------------------
@@ -76,6 +78,7 @@
   }
   $: if (mounted && supabase && weekStartStr !== lastLoadedWeek) {
     loadBookings();
+    loadHistory();
   }
 
   onMount(() => {
@@ -86,6 +89,7 @@
   function loadAll() {
     loadSlots();
     loadBookings();
+    loadHistory();
     loadEvents();
   }
 
@@ -134,6 +138,42 @@
     isLoadingBookings = false;
   }
 
+  // Past days show what actually ran (class_history) instead of the planned
+  // schedule, so only fetch when the visible week reaches into the past.
+  async function loadHistory() {
+    if (!supabase) return;
+
+    const loadingWeek = weekStartStr;
+
+    if (loadingWeek >= toDateStr(new Date())) {
+      history = [];
+      isLoadingHistory = false;
+      return;
+    }
+
+    isLoadingHistory = true;
+
+    const { data, error } = await supabase
+      .from("class_history")
+      .select(
+        "session_date, start_time, classroom, class_type, instructors, checked_in, actual_capacity, utilization, is_free",
+      )
+      .gte("session_date", loadingWeek)
+      .lte("session_date", addDaysStr(loadingWeek, 6))
+      .order("start_time", { ascending: true });
+
+    // A newer week was requested while this one was in flight.
+    if (loadingWeek !== weekStartStr) return;
+
+    if (error) {
+      errorMessage = error.message;
+    } else {
+      history = data || [];
+    }
+
+    isLoadingHistory = false;
+  }
+
   // Linking a booking to an event is optional, so a failure here stays quiet.
   async function loadEvents() {
     if (!supabase) return;
@@ -158,7 +198,7 @@
     return BOOKING_KINDS.find((k) => k.value === kind)?.label || "Booking";
   }
 
-  function buildDays(allSlots, weekBookings, startStr, filter) {
+  function buildDays(allSlots, weekBookings, weekHistory, startStr, filter) {
     const todayStr = toDateStr(new Date());
     const now = Date.now();
 
@@ -183,13 +223,32 @@
     for (const occ of slotOccurrencesForWeek(allSlots, startStr)) {
       if (filter !== "all" && occ.slot.room !== filter) continue;
       const day = byDate.get(occ.dateStr);
-      if (!day) continue;
+      // Past days render taught history instead of the planned schedule.
+      if (!day || occ.dateStr < todayStr) continue;
       day.items.push({
         key: `class-${occ.slot.id}-${occ.dateStr}`,
         type: "class",
         startMinutes: occ.startMinutes,
         timeLabel: `${formatTime12(occ.slot.start_time)} - ${minutesToTime12(occ.endMinutes)}`,
         slot: occ.slot,
+      });
+    }
+
+    for (const session of weekHistory || []) {
+      if (filter !== "all" && session.classroom !== filter) continue;
+      if (session.session_date >= todayStr) continue;
+      const day = byDate.get(session.session_date);
+      if (!day) continue;
+      const utilization =
+        session.utilization == null ? "" : ` · ${Math.round(Number(session.utilization))}%`;
+      day.items.push({
+        // Matches the class_history_dedupe unique index, so keys are stable.
+        key: `history-${session.session_date}-${session.start_time}-${session.classroom}-${session.class_type}-${session.instructors}`,
+        type: "history",
+        startMinutes: timeToMinutes(session.start_time),
+        timeLabel: formatTime12(session.start_time),
+        attendanceLabel: `${session.checked_in ?? 0} checked in${utilization}`,
+        session,
       });
     }
 
@@ -215,9 +274,9 @@
     return days;
   }
 
-  $: weekDays = buildDays(slots, bookings, weekStartStr, roomFilter);
+  $: weekDays = buildDays(slots, bookings, history, weekStartStr, roomFilter);
   $: weekHasItems = weekDays.some((day) => day.items.length);
-  $: isLoading = isLoadingSlots || isLoadingBookings;
+  $: isLoading = isLoadingSlots || isLoadingBookings || isLoadingHistory;
   $: weekRangeLabel = `${formatShortDate(parseDateStr(weekStartStr))} - ${formatShortDate(parseDateStr(addDaysStr(weekStartStr, 6)))}`;
 
   function prevWeek() {
@@ -519,6 +578,25 @@
                     </Badge>
                   </span>
                 </div>
+              {:else if item.type === "history"}
+                <div
+                  class="rounded border border-ink/8 border-l-4 {ROOM_BORDERS[item.session.classroom] || 'border-l-ink/30'} bg-white px-1.5 py-1 text-[11px] leading-tight"
+                >
+                  <span class="block font-bold text-ink">{item.timeLabel}</span>
+                  <span class="block text-ink/75">
+                    {item.session.class_type}{item.session.is_free ? " · Free" : ""}
+                  </span>
+                  {#if item.session.instructors}
+                    <span class="block text-ink/65">{item.session.instructors}</span>
+                  {/if}
+                  <span class="block text-ink/65">{item.attendanceLabel}</span>
+                  <span class="mt-1 flex flex-wrap gap-1">
+                    <Badge tone="neutral" size="xs">Taught</Badge>
+                    <Badge tone={ROOM_TONES[item.session.classroom] || "neutral"} size="xs">
+                      {ROOM_SHORT[item.session.classroom] || item.session.classroom}
+                    </Badge>
+                  </span>
+                </div>
               {:else}
                 <button
                   type="button"
@@ -566,6 +644,25 @@
                     <Badge tone={ROOM_TONES[item.slot.room] || "neutral"} size="xs">
                       {ROOM_SHORT[item.slot.room] || item.slot.room}
                     </Badge>
+                  </div>
+                {:else if item.type === "history"}
+                  <div
+                    class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink/8 border-l-4 {ROOM_BORDERS[item.session.classroom] || 'border-l-ink/30'} bg-white px-3 py-2 text-sm"
+                  >
+                    <span class="min-w-0">
+                      <span class="block font-bold text-ink">
+                        {item.session.class_type}{item.session.is_free ? " · Free" : ""}{item.session.instructors ? ` · ${item.session.instructors}` : ""}
+                      </span>
+                      <span class="block text-xs text-ink/65">
+                        {item.timeLabel} · {item.attendanceLabel}
+                      </span>
+                    </span>
+                    <span class="flex flex-wrap gap-1">
+                      <Badge tone="neutral" size="xs">Taught</Badge>
+                      <Badge tone={ROOM_TONES[item.session.classroom] || "neutral"} size="xs">
+                        {ROOM_SHORT[item.session.classroom] || item.session.classroom}
+                      </Badge>
+                    </span>
                   </div>
                 {:else}
                   <button

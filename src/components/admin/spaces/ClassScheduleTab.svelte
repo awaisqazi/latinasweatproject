@@ -348,6 +348,68 @@
 
     busySlotId = "";
   }
+
+  // ---- start new period (rolls the active schedule forward) ----
+  let periodOpen = false;
+  let periodShown = false; // keeps content mounted through the close animation
+  let periodStartDraft = "";
+  let isCopyingPeriod = false;
+  let periodError = "";
+  let periodSuccess = "";
+
+  function firstOfNextMonthStr() {
+    const now = new Date();
+    return toDateStr(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+  }
+
+  function openNewPeriod() {
+    periodStartDraft = firstOfNextMonthStr();
+    periodError = "";
+    periodShown = true;
+    periodOpen = true;
+  }
+
+  function requestClosePeriod() {
+    if (isCopyingPeriod) return;
+    periodOpen = false;
+  }
+
+  function handlePeriodClosed() {
+    periodOpen = false;
+    periodShown = false;
+    periodError = "";
+  }
+
+  async function copySchedulePeriod(event) {
+    event?.preventDefault();
+    if (isCopyingPeriod) return;
+
+    if (!periodStartDraft) {
+      periodError = "A start date is required.";
+      return;
+    }
+
+    isCopyingPeriod = true;
+    periodError = "";
+
+    const { data, error } = await supabase.rpc("copy_schedule_to_period", {
+      p_new_start: periodStartDraft,
+    });
+
+    if (error) {
+      periodError = error.message;
+      isCopyingPeriod = false;
+      return;
+    }
+
+    const copied = Number(data?.copied ?? 0);
+    const closed = Number(data?.closed ?? 0);
+    periodSuccess = `Copied ${copied} slot${copied === 1 ? "" : "s"} into the new period (previous period closed with ${closed} slot${closed === 1 ? "" : "s"}).`;
+    isCopyingPeriod = false;
+    periodOpen = false;
+    onChanged();
+    loadSlots();
+  }
 </script>
 
 <div class="space-y-4">
@@ -372,11 +434,20 @@
         </button>
       {/each}
     </div>
-    <Button variant="primary" icon={Plus} onclick={openCreate}>New class slot</Button>
+    <div class="flex flex-wrap items-center gap-2">
+      <Button variant="secondary" icon={CalendarPlus} onclick={openNewPeriod}>
+        Start new period
+      </Button>
+      <Button variant="primary" icon={Plus} onclick={openCreate}>New class slot</Button>
+    </div>
   </div>
 
   {#if actionError}
     <Banner tone="error" message={actionError} onDismiss={() => (actionError = "")} />
+  {/if}
+
+  {#if periodSuccess}
+    <Banner tone="success" message={periodSuccess} onDismiss={() => (periodSuccess = "")} />
   {/if}
 
   {#if !loadedOnce && loadError}
@@ -715,6 +786,52 @@
         {/if}
         <Button type="submit" variant="primary" loading={isSaving} disabled={isDeleting}>
           {editingSlot ? "Save changes" : "Create slot"}
+        </Button>
+      </div>
+    </form>
+  {/if}
+</SlideOver>
+
+<SlideOver
+  open={periodOpen}
+  title="Start new period"
+  eyebrow="Class schedule"
+  closeLabel="Close new period form"
+  closeDisabled={isCopyingPeriod}
+  onClose={requestClosePeriod}
+  onClosed={handlePeriodClosed}
+>
+  {#if periodShown}
+    <form class="flex min-h-full flex-col" onsubmit={copySchedulePeriod}>
+      <div class="flex-1 space-y-4 px-5 py-5">
+        {#if periodError}
+          <Banner tone="error" message={periodError} />
+        {/if}
+
+        <p class="text-sm leading-6 text-ink/65">
+          Copies every active slot into a new period starting on the chosen date.
+          The current schedule ends the day before. Use this to roll last month's
+          schedule forward and then edit instructors.
+        </p>
+
+        <Field label="New period starts" id="period-start" required>
+          <input
+            id="period-start"
+            type="date"
+            class="input"
+            bind:value={periodStartDraft}
+            required
+            disabled={isCopyingPeriod}
+          />
+        </Field>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 border-t border-ink/8 px-5 py-4">
+        <Button variant="ghost" disabled={isCopyingPeriod} onclick={requestClosePeriod}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" icon={CalendarPlus} loading={isCopyingPeriod}>
+          Copy schedule
         </Button>
       </div>
     </form>
