@@ -1,12 +1,11 @@
 <script>
   import { onMount } from "svelte";
-  import {
-    ChevronLeft,
-    ChevronRight,
-    CircleAlert,
-    RefreshCw,
-  } from "@lucide/svelte";
-  import EmptyState from "./EmptyState.svelte";
+  import { ChevronLeft, ChevronRight, RefreshCw } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Skeleton from "../ui/Skeleton.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
 
   export let supabase;
@@ -244,100 +243,64 @@
 </script>
 
 <section class="space-y-4" aria-labelledby="calendar-view-title">
-  <div class="flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between md:p-5">
+  <div class="flex flex-col gap-3 rounded-card border border-ink/8 bg-white p-4 shadow-card md:flex-row md:items-center md:justify-between md:p-5">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0f766e]">
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
         Deadlines and active work
       </p>
       <h3 id="calendar-view-title" class="mt-1 text-2xl font-bold">Project Calendar</h3>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center justify-center rounded-md border border-black/10 bg-white p-2 shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-        aria-label="Previous month"
-        onclick={() => setMonth(-1)}
-      >
-        <ChevronLeft class="h-5 w-5" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        class="min-h-10 rounded-md border border-black/10 bg-white px-3 text-sm font-bold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-        onclick={goToToday}
-      >
-        Today
-      </button>
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center justify-center rounded-md border border-black/10 bg-white p-2 shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-        aria-label="Next month"
-        onclick={() => setMonth(1)}
-      >
-        <ChevronRight class="h-5 w-5" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-semibold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
-        onclick={loadCalendarProjects}
-        disabled={isLoading}
-      >
-        <RefreshCw class="h-4 w-4 {isLoading ? 'animate-spin' : ''}" aria-hidden="true" />
+      <Button iconOnly icon={ChevronLeft} label="Previous month" onclick={() => setMonth(-1)} />
+      <Button onclick={goToToday}>Today</Button>
+      <Button iconOnly icon={ChevronRight} label="Next month" onclick={() => setMonth(1)} />
+      <Button icon={RefreshCw} loading={isLoading} onclick={loadCalendarProjects}>
         Refresh
-      </button>
+      </Button>
     </div>
   </div>
 
   {#if errorMessage}
-    <div
-      class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-      role="alert"
-    >
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
-  <div class="rounded-lg border border-black/10 bg-white shadow-sm">
-    <div class="flex flex-col gap-2 border-b border-black/10 px-4 py-4 md:flex-row md:items-end md:justify-between md:px-5">
+  <div class="rounded-card border border-ink/8 bg-white shadow-card">
+    <div class="flex flex-col gap-2 border-b border-ink/8 px-4 py-4 md:flex-row md:items-end md:justify-between md:px-5">
       <div>
         <h4 class="text-xl font-bold">{monthLabel}</h4>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-ink/60">
           {visibleMonthProjects.length} active project date{visibleMonthProjects.length === 1 ? "" : "s"}
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-2 text-xs font-bold">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-fuchsia-50 px-2.5 py-1 text-fuchsia-800">
-          <span class="h-2 w-2 rounded-full bg-fuchsia-500"></span>
+      <div class="flex flex-wrap gap-2">
+        <Badge tone="neutral">
+          <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-500" aria-hidden="true"></span>
           IG/TikTok
-        </span>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-blue-800">
-          <span class="h-2 w-2 rounded-full bg-blue-500"></span>
-          LinkedIn
-        </span>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-gray-800">
-          <span class="h-2 w-2 rounded-full bg-gray-500"></span>
-          Website
-        </span>
+        </Badge>
+        <Badge tone="blue" dot>LinkedIn</Badge>
+        <Badge tone="neutral" dot>Website</Badge>
       </div>
     </div>
 
     {#if isLoading}
-      <div class="flex min-h-72 items-center justify-center px-4 py-10">
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span
-            class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin"
-            aria-hidden="true"
-          ></span>
-          Loading project calendar
+      <div class="p-4 md:p-5" role="status">
+        <span class="sr-only">Loading project calendar</span>
+        <div class="grid grid-cols-7 gap-2">
+          {#each weekdays as weekday (weekday)}
+            <Skeleton variant="text" class="h-3 w-8" />
+          {/each}
+          {#each Array(35) as _, index (index)}
+            <Skeleton class="h-20" />
+          {/each}
         </div>
       </div>
     {:else if calendarProjects.length}
       <div class="overflow-x-auto">
-        <div class="grid min-w-[56rem] grid-cols-7 border-b border-gray-200 text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <div class="grid min-w-[56rem] grid-cols-7 border-b border-ink/8 text-xs font-bold uppercase tracking-[0.12em] text-ink/45">
           {#each weekdays as weekday}
-            <div class="border-r border-gray-200 px-3 py-3 last:border-r-0">
+            <div class="border-r border-ink/8 px-3 py-3 last:border-r-0">
               {weekday}
             </div>
           {/each}
@@ -346,16 +309,16 @@
         <div class="grid min-w-[56rem] grid-cols-7">
           {#each calendarDays as day}
             <div
-              class="min-h-32 border-r border-t border-gray-200 px-2 py-2 last:border-r-0 {day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-400'}"
+              class="min-h-32 border-r border-t border-ink/8 px-2 py-2 last:border-r-0 {day.isCurrentMonth ? (day.date.getDay() === 0 || day.date.getDay() === 6 ? 'bg-canvas/40' : 'bg-white') : 'bg-canvas/70 text-ink/35'}{day.isToday ? ' ring-2 ring-inset ring-accent/30' : ''}"
             >
               <div class="mb-2 flex items-center justify-between gap-2">
                 <span
-                  class="inline-flex h-7 min-w-7 items-center justify-center rounded-full text-sm font-bold {day.isToday ? 'bg-[#1E1E1E] text-white' : ''}"
+                  class="inline-flex h-7 min-w-7 items-center justify-center rounded-full text-sm font-bold {day.isToday ? 'bg-ink text-white' : ''}"
                 >
                   {day.dayNumber}
                 </span>
                 {#if day.projects.length}
-                  <span class="text-xs font-bold text-gray-500">{day.projects.length}</span>
+                  <span class="text-xs font-bold text-ink/45">{day.projects.length}</span>
                 {/if}
               </div>
 
@@ -363,7 +326,7 @@
                 {#each day.projects as project}
                   <button
                     type="button"
-                    class="group w-full rounded-md border px-2 py-1.5 text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-1 {getChannelClass(project)}"
+                    class="group w-full rounded-md border px-2 py-1.5 text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 {getChannelClass(project)}"
                     onclick={() => openProjectDetails(project)}
                   >
                     <span class="mb-1 flex items-center gap-1.5">
@@ -390,7 +353,7 @@
 
   {#if !isLoading && visibleMonthProjects.length}
     <section
-      class="rounded-lg border border-black/10 bg-white p-4 shadow-sm md:hidden"
+      class="rounded-card border border-ink/8 bg-white p-4 shadow-card md:hidden"
       aria-labelledby="calendar-agenda-title"
     >
       <h4 id="calendar-agenda-title" class="font-bold">This month</h4>
@@ -398,16 +361,16 @@
         {#each visibleMonthProjects as project}
           <button
             type="button"
-            class="flex w-full items-start gap-3 rounded-md border border-black/10 px-3 py-3 text-left transition hover:border-[#0f766e]/30"
+            class="flex w-full items-start gap-3 rounded-control border border-ink/8 px-3 py-3 text-left transition hover:border-accent/30"
             onclick={() => openProjectDetails(project)}
           >
             <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full {getChannelDotClass(project)}"></span>
             <span class="min-w-0">
-              <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+              <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
                 {formatDate(project.calendar_date)}
               </span>
               <span class="mt-1 block font-bold leading-snug">{project.title}</span>
-              <span class="mt-1 block text-sm text-gray-600">{project.status}</span>
+              <span class="mt-1 block text-sm text-ink/60">{project.status}</span>
             </span>
           </button>
         {/each}

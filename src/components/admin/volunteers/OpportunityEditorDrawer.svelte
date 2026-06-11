@@ -1,5 +1,4 @@
 <script>
-  import { CircleAlert } from "@lucide/svelte";
   import {
     SHIFT_CATEGORIES,
     composeLocalIso,
@@ -9,6 +8,9 @@
     toTimeInput,
   } from "../../../lib/dashboard/volunteersAdmin.js";
   import SlideOver from "../marketing/SlideOver.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import Field from "../ui/Field.svelte";
 
   export let supabase;
   // null = closed; {} = create new; volunteer_shifts row = edit existing.
@@ -178,40 +180,39 @@
     <form class="flex min-h-full flex-col" onsubmit={save}>
       <div class="flex-1 px-5 py-5">
         {#if errorMessage}
-          <div class="mb-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{errorMessage}</span>
-          </div>
+          <Banner tone="error" message={errorMessage} class="mb-4" />
         {/if}
 
-        <label class="block text-sm font-bold" for="opportunity-title">
-          Title
+        <Field label="Title" id="opportunity-title">
           <input
             id="opportunity-title"
             type="text"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             placeholder="Community clean-up day"
             bind:value={title}
             disabled={isSaving}
           />
-        </label>
+        </Field>
 
-        <label class="mt-4 block text-sm font-bold" for="opportunity-description">
-          Description
+        <Field label="Description" id="opportunity-description" class="mt-4">
           <textarea
             id="opportunity-description"
-            class="mt-2 min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-normal leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="textarea"
             placeholder="What will volunteers help with?"
             bind:value={description}
             disabled={isSaving}
           ></textarea>
-        </label>
+        </Field>
 
-        <label class="mt-4 block text-sm font-bold" for="opportunity-category">
-          Type
+        <Field
+          label="Type"
+          id="opportunity-category"
+          class="mt-4"
+          hint="Operational shifts cover studio operations and can never overlap each other. Special events and external opportunities can overlap anything."
+        >
           <select
             id="opportunity-category"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select"
             bind:value={category}
             disabled={isSaving}
           >
@@ -219,105 +220,92 @@
               <option value={option.value}>{option.label}</option>
             {/each}
           </select>
-          <span class="mt-1 block text-xs font-normal text-gray-500">
-            Operational shifts cover studio operations and can never overlap each other.
-            Special events and external opportunities can overlap anything.
-          </span>
-        </label>
+        </Field>
 
-        <label class="mt-4 block text-sm font-bold" for="opportunity-location">
-          Location
+        <Field label="Location" id="opportunity-location" class="mt-4">
           <input
             id="opportunity-location"
             type="text"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             placeholder="949 W 16th St, Chicago"
             bind:value={location}
             disabled={isSaving}
           />
-        </label>
+        </Field>
 
-        <label class="mt-4 block text-sm font-bold" for="opportunity-date">
-          Date
+        <Field label="Date" id="opportunity-date" class="mt-4">
           <input
             id="opportunity-date"
             type="date"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             bind:value={date}
             disabled={isSaving}
           />
-        </label>
+        </Field>
 
         <div class="mt-4 grid grid-cols-2 gap-3">
-          <label class="block text-sm font-bold" for="opportunity-start">
-            Start time
+          <Field label="Start time" id="opportunity-start">
             <input
               id="opportunity-start"
               type="time"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={startTime}
               disabled={isSaving}
             />
-          </label>
-          <label class="block text-sm font-bold" for="opportunity-end">
-            End time
+          </Field>
+          <Field label="End time" id="opportunity-end">
             <input
               id="opportunity-end"
               type="time"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={endTime}
               disabled={isSaving}
             />
-          </label>
+          </Field>
         </div>
 
         <div class="mt-4 grid grid-cols-2 gap-3">
-          <label class="block text-sm font-bold" for="opportunity-vol-cap">
-            Volunteer spots
+          <Field label="Volunteer spots" id="opportunity-vol-cap">
             <input
               id="opportunity-vol-cap"
               type="number"
               min="0"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={volunteerCapacity}
               disabled={isSaving}
             />
-          </label>
-          <label class="block text-sm font-bold" for="opportunity-lead-cap">
-            Lead spots
+          </Field>
+          <Field label="Lead spots" id="opportunity-lead-cap">
             <input
               id="opportunity-lead-cap"
               type="number"
               min="0"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={leadCapacity}
               disabled={isSaving}
             />
-          </label>
+          </Field>
         </div>
       </div>
 
-      <div class="flex gap-3 border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 flex-1 items-center justify-center rounded-md border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
+      <div class="flex gap-3 border-t border-ink/8 p-4">
+        <Button
+          variant="secondary"
+          class="min-h-11 flex-1"
           onclick={requestClose}
           disabled={isSaving}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          class="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          disabled={isSaving || !title.trim()}
+          variant="primary"
+          class="min-h-11 flex-1"
+          loading={isSaving}
+          disabled={!title.trim()}
         >
-          {#if isSaving}
-            <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-            Saving
-          {:else}
-            {editing ? "Save changes" : "Create opportunity"}
-          {/if}
-        </button>
+          {isSaving ? "Saving" : editing ? "Save changes" : "Create opportunity"}
+        </Button>
       </div>
     </form>
   {/if}

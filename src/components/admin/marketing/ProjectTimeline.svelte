@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
   import {
     ArrowRight,
     CircleAlert,
@@ -120,12 +121,17 @@
     }
   }
 
+  let commentPendingDelete = null;
+
+  function requestDeleteComment(comment) {
+    if (!comment?.id || deletingCommentId) return;
+    commentPendingDelete = comment;
+  }
+
   async function deleteComment(comment) {
     if (!comment?.id || deletingCommentId) return;
 
-    const shouldDelete = window.confirm("Delete this timeline comment?");
-    if (!shouldDelete) return;
-
+    commentPendingDelete = null;
     deletingCommentId = comment.id;
     errorMessage = "";
 
@@ -318,7 +324,7 @@
                 type="button"
                 class="mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-md border border-red-200 px-2.5 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label={`Delete timeline comment from ${formatDateTime(comment.created_at)}`}
-                onclick={() => deleteComment(comment)}
+                onclick={() => requestDeleteComment(comment)}
                 disabled={deletingCommentId === comment.id}
               >
                 {#if deletingCommentId === comment.id}
@@ -340,3 +346,14 @@
     {/if}
   </div>
 </section>
+
+<ConfirmDialog
+  open={!!commentPendingDelete}
+  title="Delete timeline comment"
+  message="This removes the comment for everyone on the project. This cannot be undone."
+  confirmLabel="Delete comment"
+  tone="danger"
+  busy={!!deletingCommentId}
+  onConfirm={() => deleteComment(commentPendingDelete)}
+  onCancel={() => (commentPendingDelete = null)}
+/>

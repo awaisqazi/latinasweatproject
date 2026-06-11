@@ -3,9 +3,11 @@
     CalendarDays,
     ChevronLeft,
     ChevronRight,
-    CircleAlert,
     X,
   } from "@lucide/svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import Field from "../ui/Field.svelte";
   import SlideOver from "./SlideOver.svelte";
 
   export let open = false;
@@ -152,17 +154,17 @@
       class="flex min-h-full flex-col bg-white"
       onsubmit={confirmDate}
     >
-      <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
+      <div class="border-b border-ink/8 bg-ink px-5 py-5 text-white">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#ffbd59]">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               Schedule publish
             </p>
             <h3 class="mt-2 text-xl font-bold leading-tight">{currentProject.title}</h3>
           </div>
           <button
             type="button"
-            class="rounded-md p-2 text-white/70 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-control p-2 text-white/70 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close publish scheduler"
             onclick={requestClose}
             disabled={isSaving}
@@ -174,54 +176,48 @@
 
       <div class="flex-1 overflow-y-auto px-5 py-5">
         <div class="grid gap-4">
-          <section class="rounded-md border border-black/10 bg-gray-50 p-4">
-            <label class="block text-sm font-bold" for={`publish-date-${currentProject.id}`}>
-              Publish date
+          <section class="rounded-card border border-ink/8 bg-canvas p-4">
+            <Field label="Publish date" id={`publish-date-${currentProject.id}`}>
               <input
                 id={`publish-date-${currentProject.id}`}
                 type="date"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={selectedDate}
                 onchange={(event) => setSelectedDate(event.currentTarget.value)}
                 required
               />
-            </label>
+            </Field>
 
-            <div class="mt-4 flex items-center gap-2 text-sm text-gray-700">
-              <CalendarDays class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
+            <div class="mt-4 flex items-center gap-2 text-sm text-ink/70">
+              <CalendarDays class="h-4 w-4 text-accent" aria-hidden="true" />
               <span>{scheduledProjects.length} scheduled item{scheduledProjects.length === 1 ? "" : "s"}</span>
             </div>
 
             {#if errorMessage}
-              <div class="mt-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-                <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{errorMessage}</span>
-              </div>
+              <Banner tone="error" message={errorMessage} class="mt-4" />
             {/if}
           </section>
 
-          <section class="rounded-md border border-black/10 bg-white">
-            <div class="flex items-center justify-between gap-3 border-b border-black/10 px-3 py-3">
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-black/10 transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-                aria-label="Previous schedule month"
+          <section class="rounded-card border border-ink/8 bg-white">
+            <div class="flex items-center justify-between gap-3 border-b border-ink/8 px-3 py-3">
+              <Button
+                iconOnly
+                icon={ChevronLeft}
+                size="sm"
+                label="Previous schedule month"
                 onclick={() => setMonth(-1)}
-              >
-                <ChevronLeft class="h-4 w-4" aria-hidden="true" />
-              </button>
-              <h4 class="font-bold">{monthLabel}</h4>
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-black/10 transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-                aria-label="Next schedule month"
+              />
+              <h4 class="font-bold text-ink">{monthLabel}</h4>
+              <Button
+                iconOnly
+                icon={ChevronRight}
+                size="sm"
+                label="Next schedule month"
                 onclick={() => setMonth(1)}
-              >
-                <ChevronRight class="h-4 w-4" aria-hidden="true" />
-              </button>
+              />
             </div>
 
-            <div class="grid grid-cols-7 border-b border-gray-200 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-gray-500">
+            <div class="grid grid-cols-7 border-b border-ink/8 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-ink/50">
               {#each weekdays as weekday}
                 <div class="px-2 py-2">{weekday}</div>
               {/each}
@@ -231,10 +227,10 @@
               {#each calendarDays as day}
                 <button
                   type="button"
-                  class="min-h-20 border-r border-t border-gray-200 px-1.5 py-2 text-left transition last:border-r-0 focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-inset sm:min-h-24 sm:px-2 {day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-400'} {day.isSelected ? 'bg-[#fff3d8] ring-2 ring-[#ffbd59] ring-inset' : 'hover:bg-gray-50'}"
+                  class="min-h-20 border-r border-t border-ink/8 px-1.5 py-2 text-left transition last:border-r-0 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-inset sm:min-h-24 sm:px-2 {day.isCurrentMonth ? 'bg-white' : 'bg-canvas text-ink/40'} {day.isSelected ? 'bg-brand-soft ring-2 ring-brand ring-inset' : 'hover:bg-canvas'}"
                   onclick={() => selectDate(day.dateKey)}
                 >
-                  <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full text-xs font-bold {day.isToday ? 'bg-[#1E1E1E] text-white' : ''}">
+                  <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full text-xs font-bold {day.isToday ? 'bg-ink text-white' : ''}">
                     {day.dayNumber}
                   </span>
 
@@ -245,7 +241,7 @@
                       </span>
                     {/each}
                     {#if day.projects.length > 2}
-                      <span class="block text-[0.68rem] font-bold text-gray-500">
+                      <span class="block text-[0.68rem] font-bold text-ink/50">
                         +{day.projects.length - 2} more
                       </span>
                     {/if}
@@ -257,22 +253,18 @@
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-2 border-t border-black/10 bg-white px-5 py-4 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center justify-center rounded-md border border-black/10 px-4 text-sm font-bold transition hover:border-gray-400"
-          onclick={requestClose}
-          disabled={isSaving}
-        >
+      <div class="flex flex-col-reverse gap-2 border-t border-ink/8 bg-white px-5 py-4 sm:flex-row sm:justify-end">
+        <Button onclick={requestClose} disabled={isSaving}>
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          class="inline-flex min-h-10 items-center justify-center rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          variant="primary"
           disabled={!selectedDate || isSaving}
+          loading={isSaving}
         >
           {isSaving ? "Scheduling" : "Schedule"}
-        </button>
+        </Button>
       </div>
     </form>
   {/if}

@@ -1,14 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import {
-    AlertCircle,
-    CheckCircle2,
-    MailPlus,
-    RefreshCw,
-    Save,
-    ShieldAlert,
-    ShieldCheck,
-  } from "@lucide/svelte";
+  import { MailPlus, RefreshCw, Save, ShieldCheck } from "@lucide/svelte";
   import { MODULES, getModuleLabel } from "../../../lib/dashboard/modules";
   import {
     ROLE_ADMIN,
@@ -18,9 +10,14 @@
     isSuperuser,
   } from "../../../lib/dashboard/roles";
   import AccessGrantsEditor from "./AccessGrantsEditor.svelte";
-  import EmptyState from "./EmptyState.svelte";
-  import Panel from "./Panel.svelte";
   import SlideOver from "./SlideOver.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import DataTable from "../ui/DataTable.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import StatCard from "../ui/StatCard.svelte";
 
   export let supabase;
   export let profile;
@@ -29,6 +26,26 @@
   const userFunctionUrl = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/marketing-users`;
   const supabasePublishableKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const roleOptions = [ROLE_MEMBER, ROLE_ADMIN, ROLE_SUPERUSER];
+
+  const ACCOUNT_STATUS_TONES = {
+    active: "green",
+    invited: "blue",
+    pending: "amber",
+    profile_only: "neutral",
+  };
+  const ROLE_TONES = {
+    [ROLE_SUPERUSER]: "gold",
+    [ROLE_ADMIN]: "teal",
+    [ROLE_MEMBER]: "neutral",
+  };
+  const accountColumns = [
+    { key: "person", label: "Person" },
+    { key: "status", label: "Status" },
+    { key: "role", label: "Role" },
+    { key: "access", label: "Access" },
+    { key: "last_sign_in", label: "Last sign-in", hideBelow: "lg" },
+    { key: "actions", label: "Actions" },
+  ];
 
   let users = [];
   let userDrafts = {};
@@ -291,11 +308,12 @@
     return "Active";
   }
 
-  function getAccountStatusClass(user) {
-    if (user.account_status === "invited") return "border-amber-200 bg-amber-50 text-amber-700";
-    if (user.account_status === "pending") return "border-blue-200 bg-blue-50 text-blue-700";
-    if (user.account_status === "profile_only") return "border-gray-200 bg-gray-50 text-gray-600";
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  function getAccountStatusTone(user) {
+    return ACCOUNT_STATUS_TONES[user.account_status] || "green";
+  }
+
+  function getRoleTone(role) {
+    return ROLE_TONES[role] || "neutral";
   }
 
   function formatShortDateTime(value) {
@@ -317,175 +335,132 @@
 </script>
 
 {#if !canManageUsers}
-  <section
-    class="rounded-lg border border-red-200 bg-red-50 p-6 text-red-900 shadow-sm"
-    aria-labelledby="user-access-unauthorized-title"
-    role="alert"
-  >
-    <div class="flex items-start gap-3">
-      <ShieldAlert class="mt-1 h-6 w-6 shrink-0" aria-hidden="true" />
-      <div>
-        <h3 id="user-access-unauthorized-title" class="text-lg font-bold">
-          Unauthorized
-        </h3>
-        <p class="mt-2 text-sm leading-6">
-          User access is available only to superuser profiles.
-        </p>
-      </div>
-    </div>
-  </section>
+  <Banner tone="error">
+    <p class="font-bold">Unauthorized</p>
+    <p class="mt-1">User access is available only to superuser profiles.</p>
+  </Banner>
 {:else}
   <section class="space-y-5" aria-labelledby="user-access-title">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0f766e]">
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
           Access controls
         </p>
-        <h3 id="user-access-title" class="mt-1 text-2xl font-bold">User Access</h3>
+        <h3 id="user-access-title" class="mt-1 text-2xl font-bold text-ink">User Access</h3>
       </div>
 
-      <button
-        type="button"
-        class="inline-flex min-h-10 w-fit items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-semibold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
-        onclick={loadUsers}
-        disabled={isRefreshing}
-      >
-        <RefreshCw class="h-4 w-4 {isRefreshing ? 'animate-spin' : ''}" aria-hidden="true" />
+      <Button icon={RefreshCw} loading={isRefreshing} onclick={loadUsers}>
         Refresh
-      </button>
+      </Button>
     </div>
 
     {#if errorMessage}
-      <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-        <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{errorMessage}</span>
-      </div>
+      <Banner tone="error" message={errorMessage} />
     {/if}
 
     {#if successMessage}
-      <div class="flex gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">
-        <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{successMessage}</span>
-      </div>
+      <Banner tone="success" message={successMessage} />
     {/if}
 
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Accounts</p>
-        <p class="mt-2 text-3xl font-bold">{users.length}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Superusers</p>
-        <p class="mt-2 text-3xl font-bold">{superuserCount}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Admins</p>
-        <p class="mt-2 text-3xl font-bold">{adminCount}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Invited</p>
-        <p class="mt-2 text-3xl font-bold">{invitedCount}</p>
-      </div>
+      <StatCard label="Accounts" value={users.length} tone="neutral" loading={isLoading} />
+      <StatCard label="Superusers" value={superuserCount} tone="gold" loading={isLoading} />
+      <StatCard label="Admins" value={adminCount} tone="teal" loading={isLoading} />
+      <StatCard label="Invited" value={invitedCount} tone="neutral" loading={isLoading} />
     </div>
 
     <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
-      <Panel title="Team Accounts" id="user-access-accounts" loading={isLoading || isRefreshing}>
-        {#if !users.length && !isLoading}
-          <EmptyState
-            title="No team accounts yet"
-            message="Invite your first dashboard user to assign module access."
-          />
-        {:else}
-          <div class="overflow-x-auto rounded-md border border-black/10">
-            <table class="min-w-[54rem] w-full divide-y divide-gray-200 bg-white text-left text-sm">
-              <thead class="bg-gray-50 text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
-                <tr>
-                  <th scope="col" class="px-3 py-3">Person</th>
-                  <th scope="col" class="px-3 py-3">Status</th>
-                  <th scope="col" class="px-3 py-3">Role</th>
-                  <th scope="col" class="px-3 py-3">Access</th>
-                  <th scope="col" class="px-3 py-3">Last sign-in</th>
-                  <th scope="col" class="px-3 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                {#each users as user}
-                  <tr class="align-top transition hover:bg-gray-50">
-                    <td class="px-3 py-3">
-                      <p class="font-bold leading-snug">{user.full_name || user.email}</p>
-                      <p class="mt-1 break-words text-xs text-gray-500">{user.email}</p>
-                    </td>
-                    <td class="px-3 py-3">
-                      <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-bold {getAccountStatusClass(user)}">
-                        {getAccountStatusLabel(user)}
-                      </span>
-                      {#if user.invited_at}
-                        <p class="mt-1 text-xs text-gray-500">
-                          Invited {formatShortDateTime(user.invited_at)}
-                        </p>
-                      {/if}
-                    </td>
-                    <td class="px-3 py-3 font-semibold">{getRoleLabel(user.role)}</td>
-                    <td class="px-3 py-3">
-                      <p class="max-w-xs truncate text-xs font-semibold text-gray-700" title={getAccessLabel(user)}>
-                        {getAccessLabel(user)}
-                      </p>
-                    </td>
-                    <td class="px-3 py-3 text-gray-700">{formatShortDateTime(user.last_sign_in_at)}</td>
-                    <td class="px-3 py-3">
-                      <button
-                        type="button"
-                        class="inline-flex min-h-10 items-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e]"
-                        onclick={() => openUserDrawer(user)}
-                      >
-                        <ShieldCheck class="h-4 w-4" aria-hidden="true" />
-                        Manage
-                      </button>
-                    </td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          </div>
-        {/if}
+      <Panel title="Team Accounts" id="user-access-accounts" loading={isRefreshing}>
+        <DataTable
+          columns={accountColumns}
+          rows={users}
+          rowKey="id"
+          loading={isLoading}
+          minWidth="54rem"
+          emptyTitle="No team accounts yet"
+          emptyMessage="Invite your first dashboard user to assign module access."
+        >
+          <svelte:fragment slot="cell" let:row let:column>
+            {#if column.key === "person"}
+              <p class="font-bold leading-snug text-ink">{row.full_name || row.email}</p>
+              <p class="mt-1 break-words text-xs text-ink/55">{row.email}</p>
+            {:else if column.key === "status"}
+              <Badge tone={getAccountStatusTone(row)}>{getAccountStatusLabel(row)}</Badge>
+              {#if row.invited_at}
+                <p class="mt-1 text-xs text-ink/55">
+                  Invited {formatShortDateTime(row.invited_at)}
+                </p>
+              {/if}
+            {:else if column.key === "role"}
+              <Badge tone={getRoleTone(row.role)}>{getRoleLabel(row.role)}</Badge>
+            {:else if column.key === "access"}
+              <p class="max-w-xs truncate text-xs font-semibold text-ink/70" title={getAccessLabel(row)}>
+                {getAccessLabel(row)}
+              </p>
+            {:else if column.key === "last_sign_in"}
+              {formatShortDateTime(row.last_sign_in_at)}
+            {:else if column.key === "actions"}
+              <Button size="sm" icon={ShieldCheck} onclick={() => openUserDrawer(row)}>
+                Manage
+              </Button>
+            {/if}
+          </svelte:fragment>
+
+          <svelte:fragment slot="card" let:row>
+            <div class="rounded-card border border-ink/8 bg-white p-4 shadow-card">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="font-bold leading-snug text-ink">{row.full_name || row.email}</p>
+                  <p class="mt-0.5 break-words text-xs text-ink/55">{row.email}</p>
+                </div>
+                <Badge tone={getAccountStatusTone(row)}>{getAccountStatusLabel(row)}</Badge>
+              </div>
+              <div class="mt-3">
+                <Button size="sm" icon={ShieldCheck} onclick={() => openUserDrawer(row)}>
+                  Manage
+                </Button>
+              </div>
+            </div>
+          </svelte:fragment>
+        </DataTable>
       </Panel>
 
       <form
-        class="rounded-md border border-black/10 bg-gray-50 p-4"
+        class="rounded-card border border-ink/8 bg-canvas/60 p-4"
         onsubmit={inviteUser}
       >
         <div class="flex items-center gap-2">
-          <MailPlus class="h-5 w-5 text-[#0f766e]" aria-hidden="true" />
-          <h4 class="font-bold">Invite New User</h4>
+          <MailPlus class="h-5 w-5 text-accent" aria-hidden="true" />
+          <h4 class="font-bold text-ink">Invite New User</h4>
         </div>
 
-        <label class="mt-4 block text-sm font-bold">
-          Email
+        <Field label="Email" id="invite-email" required class="mt-4">
           <input
+            id="invite-email"
             type="email"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             value={inviteForm.email}
             autocomplete="email"
             required
             oninput={(event) => updateInviteForm("email", event.currentTarget.value)}
           />
-        </label>
+        </Field>
 
-        <label class="mt-3 block text-sm font-bold">
-          Full name
+        <Field label="Full name" id="invite-full-name" class="mt-3">
           <input
+            id="invite-full-name"
             type="text"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             value={inviteForm.full_name}
             autocomplete="name"
             oninput={(event) => updateInviteForm("full_name", event.currentTarget.value)}
           />
-        </label>
+        </Field>
 
-        <label class="mt-3 block text-sm font-bold">
-          Role
+        <Field label="Role" id="invite-role" class="mt-3">
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            id="invite-role"
+            class="select"
             value={inviteForm.role}
             onchange={(event) => updateInviteForm("role", event.currentTarget.value)}
           >
@@ -493,11 +468,11 @@
               <option value={role}>{getRoleLabel(role)}</option>
             {/each}
           </select>
-        </label>
+        </Field>
 
         <div class="mt-3">
-          <p class="text-sm font-bold">Module access</p>
-          <div class="mt-2">
+          <p class="text-sm font-semibold text-ink">Module access</p>
+          <div class="mt-1.5">
             <AccessGrantsEditor
               grants={inviteModules}
               isSuperuser={inviteForm.role === ROLE_SUPERUSER}
@@ -507,19 +482,15 @@
           </div>
         </div>
 
-        <button
+        <Button
           type="submit"
-          class="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={invitingUser}
+          variant="primary"
+          class="mt-4 w-full"
+          icon={MailPlus}
+          loading={invitingUser}
         >
-          {#if invitingUser}
-            <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-            Sending Invite
-          {:else}
-            <MailPlus class="h-4 w-4" aria-hidden="true" />
-            Send Invite
-          {/if}
-        </button>
+          {invitingUser ? "Sending Invite" : "Send Invite"}
+        </Button>
       </form>
     </div>
   </section>
@@ -536,29 +507,30 @@
     {#if selectedUser}
       {@const draft = getDraft(selectedUser.id)}
       <div class="space-y-4 px-5 py-5">
-        <div class="rounded-md border border-black/10 bg-gray-50 px-4 py-3 text-sm">
-          <p class="font-bold">{selectedUser.email}</p>
-          <p class="mt-1 text-gray-600">
-            {getAccountStatusLabel(selectedUser)} · Last sign-in {formatShortDateTime(selectedUser.last_sign_in_at)}
+        <div class="rounded-control border border-ink/8 bg-canvas/60 px-4 py-3 text-sm">
+          <p class="font-bold text-ink">{selectedUser.email}</p>
+          <p class="mt-1.5 flex flex-wrap items-center gap-2 text-ink/60">
+            <Badge tone={getAccountStatusTone(selectedUser)} size="xs">
+              {getAccountStatusLabel(selectedUser)}
+            </Badge>
+            <span>Last sign-in {formatShortDateTime(selectedUser.last_sign_in_at)}</span>
           </p>
         </div>
 
-        <label class="block text-sm font-bold" for={`access-name-${selectedUser.id}`}>
-          Full name
+        <Field label="Full name" id={`access-name-${selectedUser.id}`}>
           <input
             id={`access-name-${selectedUser.id}`}
             type="text"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             value={draft.full_name}
             oninput={(event) => updateDraft(selectedUser.id, "full_name", event.currentTarget.value)}
           />
-        </label>
+        </Field>
 
-        <label class="block text-sm font-bold" for={`access-role-${selectedUser.id}`}>
-          Role
+        <Field label="Role" id={`access-role-${selectedUser.id}`}>
           <select
             id={`access-role-${selectedUser.id}`}
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+            class="select"
             value={draft.role}
             disabled={selectedUser.id === profile?.id}
             title={selectedUser.id === profile?.id ? "You cannot remove your own superuser access." : undefined}
@@ -568,11 +540,11 @@
               <option value={role}>{getRoleLabel(role)}</option>
             {/each}
           </select>
-        </label>
+        </Field>
 
         <div>
-          <p class="text-sm font-bold">Module access</p>
-          <div class="mt-2">
+          <p class="text-sm font-semibold text-ink">Module access</p>
+          <div class="mt-1.5">
             <AccessGrantsEditor
               grants={draft.modules}
               isSuperuser={draft.role === ROLE_SUPERUSER}
@@ -583,29 +555,24 @@
         </div>
       </div>
 
-      <div class="flex gap-2 border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 flex-1 items-center justify-center rounded-md border border-black/10 px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+      <div class="flex gap-2 border-t border-ink/8 p-4">
+        <Button
+          class="flex-1"
           onclick={requestCloseDrawer}
           disabled={Boolean(savingUserId)}
         >
           Cancel
-        </button>
-        <button
-          type="button"
-          class="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          onclick={saveSelectedUser}
+        </Button>
+        <Button
+          variant="primary"
+          class="flex-1"
+          icon={Save}
+          loading={savingUserId === selectedUser.id}
           disabled={!isDraftDirty(selectedUser) || savingUserId === selectedUser.id}
+          onclick={saveSelectedUser}
         >
-          {#if savingUserId === selectedUser.id}
-            <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-            Saving
-          {:else}
-            <Save class="h-4 w-4" aria-hidden="true" />
-            Save
-          {/if}
-        </button>
+          {savingUserId === selectedUser.id ? "Saving" : "Save"}
+        </Button>
       </div>
     {/if}
   </SlideOver>

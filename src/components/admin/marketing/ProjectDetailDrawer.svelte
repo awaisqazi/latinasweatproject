@@ -1,13 +1,15 @@
 <script>
   import {
     CalendarClock,
-    CheckCircle2,
-    CircleAlert,
     ExternalLink,
     Search,
     UserPlus,
   } from "@lucide/svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import Field from "../ui/Field.svelte";
   import ProjectTimeline from "./ProjectTimeline.svelte";
   import PublishScheduleDialog from "./PublishScheduleDialog.svelte";
   import SlideOver from "./SlideOver.svelte";
@@ -117,18 +119,17 @@
     }).format(new Date(`${value}T00:00:00`));
   }
 
-  function getPriorityClass(priority) {
-    if (priority === "P0") return "bg-red-100 text-red-800 border-red-300";
-    if (priority === "P1") return "bg-amber-100 text-amber-800 border-amber-300";
-    if (priority === "P2") return "bg-teal-100 text-teal-800 border-teal-300";
-    return "bg-gray-50 text-gray-600 border-gray-200";
+  function getPriorityTone(priority) {
+    if (priority === "P0") return "red";
+    if (priority === "P1") return "amber";
+    return "neutral";
   }
 
-  function getStatusClass(status) {
-    if (status === "Stuck") return "bg-red-50 text-red-700 border-red-200";
-    if (status === "In Production") return "bg-blue-50 text-blue-700 border-blue-200";
-    if (status?.startsWith("Ready")) return "bg-amber-50 text-amber-700 border-amber-200";
-    return "bg-gray-50 text-gray-700 border-gray-200";
+  function getStatusTone(status) {
+    if (status === "Stuck") return "red";
+    if (status === "In Production") return "blue";
+    if (status?.startsWith("Ready")) return "amber";
+    return "neutral";
   }
 
   function getDateLabel(item) {
@@ -471,66 +472,57 @@
   {#if displayedProject}
     <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
-          <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(displayedProject.status)}">
+          <Badge tone={getStatusTone(displayedProject.status)}>
             {displayedProject.status}
-          </span>
-          <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getPriorityClass(displayedProject.priority)}">
+          </Badge>
+          <Badge tone={getPriorityTone(displayedProject.priority)}>
             {displayedProject.priority || "Priority unset"}
-          </span>
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+          </Badge>
+          <Badge tone="neutral">
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             {getDateLabel(displayedProject)}
-          </span>
+          </Badge>
         </div>
 
         <dl class="mt-5 grid gap-3 text-sm">
-          <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-            <dt class="font-bold">Channels</dt>
-            <dd class="mt-1 text-gray-700">{formatChannelTags(displayedProject.channel_tags)}</dd>
+          <div class="rounded-card border border-ink/8 bg-canvas px-4 py-3">
+            <dt class="font-bold text-ink">Channels</dt>
+            <dd class="mt-1 text-ink/70">{formatChannelTags(displayedProject.channel_tags)}</dd>
           </div>
-          <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-            <dt class="font-bold">Assigned to</dt>
-            <dd class="mt-1 text-gray-700">
+          <div class="rounded-card border border-ink/8 bg-canvas px-4 py-3">
+            <dt class="font-bold text-ink">Assigned to</dt>
+            <dd class="mt-1 text-ink/70">
               {assignedEmails.length ? assignedEmails.join(", ") : "Unassigned"}
             </dd>
           </div>
-          <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-            <dt class="font-bold">Copy approval</dt>
-            <dd class="mt-1 text-gray-700">{displayedProject.copy_approved ? "Approved" : "Not approved"}</dd>
+          <div class="rounded-card border border-ink/8 bg-canvas px-4 py-3">
+            <dt class="font-bold text-ink">Copy approval</dt>
+            <dd class="mt-1 text-ink/70">{displayedProject.copy_approved ? "Approved" : "Not approved"}</dd>
           </div>
         </dl>
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="drawer-status-title">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="drawer-status-title">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <h4 id="drawer-status-title" class="font-bold">Move status</h4>
+              <h4 id="drawer-status-title" class="font-bold text-ink">Move status</h4>
             </div>
             {#if statusSaving}
-              <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
-                Saving
-              </span>
+              <Badge tone="neutral" class="shrink-0">Saving</Badge>
             {/if}
           </div>
 
           {#if statusError}
-            <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-              <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{statusError}</span>
-            </div>
+            <Banner tone="error" message={statusError} class="mt-3" />
           {/if}
 
           {#if statusSuccess}
-            <div class="mt-3 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-              <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{statusSuccess}</span>
-            </div>
+            <Banner tone="success" message={statusSuccess} class="mt-3" />
           {/if}
 
-          <label class="mt-4 block text-sm font-bold" for={`project-status-${displayedProject.id}`}>
-            Status
+          <Field label="Status" id={`project-status-${displayedProject.id}`} class="mt-4">
             <select
               id={`project-status-${displayedProject.id}`}
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              class="select"
               value={displayedProject.status}
               onchange={(event) => updateProjectStatus(event.currentTarget.value)}
               disabled={statusSaving || statusOptions.length <= 1}
@@ -539,14 +531,13 @@
                 <option value={status}>{status}</option>
               {/each}
             </select>
-          </label>
+          </Field>
 
           {#if isCurrentUserAdmin}
-            <label class="mt-4 block text-sm font-bold" for={`project-priority-${displayedProject.id}`}>
-              Priority
+            <Field label="Priority" id={`project-priority-${displayedProject.id}`} class="mt-4">
               <select
                 id={`project-priority-${displayedProject.id}`}
-                class="mt-2 min-h-10 w-full rounded-md border px-3 text-sm font-bold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 {getPriorityClass(displayedProject.priority)}"
+                class="select font-bold"
                 value={displayedProject.priority || ""}
                 onchange={(event) => updateProjectPriority(event.currentTarget.value)}
                 disabled={prioritySaving}
@@ -556,75 +547,60 @@
                   <option value={priority}>{priority}</option>
                 {/each}
               </select>
-            </label>
+            </Field>
 
             {#if priorityError}
-              <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-                <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{priorityError}</span>
-              </div>
+              <Banner tone="error" message={priorityError} class="mt-3" />
             {/if}
 
             {#if prioritySuccess}
-              <div class="mt-3 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-                <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{prioritySuccess}</span>
-              </div>
+              <Banner tone="success" message={prioritySuccess} class="mt-3" />
             {/if}
           {/if}
         </section>
 
         {#if teamMembers.length}
-          <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="drawer-assignments-title">
+          <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="drawer-assignments-title">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2">
-                  <UserPlus class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
-                  <h4 id="drawer-assignments-title" class="font-bold">Assignments</h4>
+                  <UserPlus class="h-4 w-4 text-accent" aria-hidden="true" />
+                  <h4 id="drawer-assignments-title" class="font-bold text-ink">Assignments</h4>
                 </div>
-                <p class="mt-1 text-sm leading-6 text-gray-600">
+                <p class="mt-1 text-sm leading-6 text-ink/60">
                   Add teammates who need to help with this project.
                 </p>
               </div>
 
               {#if currentUserIsAssigned}
-                <button
-                  type="button"
-                  class="shrink-0 rounded-md bg-[#0f766e] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#115e59] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                <Button
+                  variant="primary"
+                  size="sm"
+                  class="shrink-0"
                   onclick={completeMyAssignment}
-                  disabled={assignmentSaving}
+                  loading={assignmentSaving}
                 >
-                  {#if assignmentSaving}
-                    Saving
-                  {:else}
-                    I’m Done
-                  {/if}
-                </button>
+                  {assignmentSaving ? "Saving" : "I’m Done"}
+                </Button>
               {/if}
             </div>
 
             {#if assignmentError}
-              <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-                <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{assignmentError}</span>
-              </div>
+              <Banner tone="error" message={assignmentError} class="mt-3" />
             {/if}
 
             {#if assignmentSuccess}
-              <div class="mt-3 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-                <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{assignmentSuccess}</span>
-              </div>
+              <Banner tone="success" message={assignmentSuccess} class="mt-3" />
             {/if}
 
             <div class="mt-4">
               <label class="sr-only" for="assignment-search">Search team members</label>
               <div class="relative">
-                <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" aria-hidden="true" />
                 <input
                   id="assignment-search"
                   type="search"
-                  class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                  class="input pl-9"
                   placeholder="Search team members"
                   bind:value={assignmentSearch}
                 />
@@ -634,9 +610,7 @@
             {#if assignedEmails.length}
               <div class="mt-3 flex flex-wrap gap-1.5">
                 {#each assignedEmails as assignedEmail}
-                  <span class="rounded-full border border-teal-100 bg-teal-50 px-2 py-1 text-xs font-bold text-teal-800">
-                    {assignedEmail}
-                  </span>
+                  <Badge tone="teal" size="xs">{assignedEmail}</Badge>
                 {/each}
               </div>
             {/if}
@@ -645,31 +619,31 @@
               {#each filteredTeamMembers as member}
                 {@const memberIsAssigned = isAssigned(member.email)}
                 {@const memberCanToggle = canToggleAssignment(member.email)}
-                <label class="flex items-start gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition {memberCanToggle ? 'cursor-pointer hover:border-[#0f766e]/30 hover:bg-white' : 'cursor-not-allowed opacity-65'}">
+                <label class="flex items-start gap-3 rounded-control border border-ink/8 bg-canvas px-3 py-2 text-sm transition {memberCanToggle ? 'cursor-pointer hover:border-accent/30 hover:bg-white' : 'cursor-not-allowed opacity-65'}">
                   <input
                     type="checkbox"
-                    class="mt-1 h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                    class="mt-1 h-4 w-4 rounded border-ink/25 text-accent focus:ring-accent"
                     checked={memberIsAssigned}
                     onchange={(event) => toggleAssignment(member.email, event.currentTarget.checked)}
                     disabled={assignmentSaving || !memberCanToggle}
                     title={memberCanToggle ? undefined : "Only admins can unassign teammates from here."}
                   />
                   <span class="min-w-0">
-                    <span class="block font-bold">{member.full_name || member.email}</span>
+                    <span class="block font-bold text-ink">{member.full_name || member.email}</span>
                     {#if member.full_name}
-                      <span class="block break-words text-xs text-gray-500">{member.email}</span>
+                      <span class="block break-words text-xs text-ink/50">{member.email}</span>
                     {/if}
                   </span>
                 </label>
               {:else}
-                <p class="rounded-md border border-dashed border-gray-300 px-3 py-4 text-center text-sm text-gray-500">
+                <p class="rounded-card border border-dashed border-ink/15 px-3 py-4 text-center text-sm text-ink/50">
                   No matching team members.
                 </p>
               {/each}
             </div>
 
             {#if unlistedAssignedEmails.length}
-              <p class="mt-3 text-xs leading-5 text-gray-500">
+              <p class="mt-3 text-xs leading-5 text-ink/50">
                 Assigned emails not tied to current accounts: {unlistedAssignedEmails.join(", ")}
               </p>
             {/if}
@@ -682,14 +656,14 @@
 
         {#if getProjectLinks(displayedProject).length}
           <section class="mt-5" aria-labelledby="drawer-links-title">
-            <h4 id="drawer-links-title" class="font-bold">External links</h4>
+            <h4 id="drawer-links-title" class="font-bold text-ink">External links</h4>
             <div class="mt-3 grid gap-2">
               {#each getProjectLinks(displayedProject) as link}
                 <a
                   href={link.url}
                   target="_blank"
                   rel="noreferrer"
-                  class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e]"
+                  class="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-ink/14 px-3 text-sm font-bold text-ink transition hover:border-accent/40 hover:text-accent-strong"
                 >
                   <ExternalLink class="h-4 w-4" aria-hidden="true" />
                   {link.label}
@@ -701,12 +675,12 @@
 
         {#if getProjectReferences(displayedProject).length}
           <section class="mt-5" aria-labelledby="drawer-references-title">
-            <h4 id="drawer-references-title" class="font-bold">Asset references</h4>
+            <h4 id="drawer-references-title" class="font-bold text-ink">Asset references</h4>
             <div class="mt-3 space-y-2">
               {#each getProjectReferences(displayedProject) as item}
-                <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-                  <p class="font-bold">{item.label}</p>
-                  <p class="mt-1 break-words text-gray-700">{item.value}</p>
+                <div class="rounded-card border border-ink/8 bg-canvas px-4 py-3 text-sm">
+                  <p class="font-bold text-ink">{item.label}</p>
+                  <p class="mt-1 break-words text-ink/70">{item.value}</p>
                 </div>
               {/each}
             </div>
@@ -714,14 +688,10 @@
         {/if}
       </div>
 
-      <div class="border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 w-full items-center justify-center rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          onclick={requestClose}
-        >
+      <div class="border-t border-ink/8 p-4">
+        <Button variant="primary" class="w-full" onclick={requestClose}>
           Close
-        </button>
+        </Button>
       </div>
     {/if}
 </SlideOver>

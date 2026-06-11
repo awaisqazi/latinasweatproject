@@ -1,5 +1,10 @@
 <script>
-  import { CircleAlert, ListChecks, Plus, Trash2 } from "@lucide/svelte";
+  import { ListChecks, Plus, Trash2 } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
 
   export let supabase;
   export let projectId = "";
@@ -13,6 +18,7 @@
   let isAdding = false;
   let savingTaskId = "";
   let deletingTaskId = "";
+  let confirmingTask = null;
   let loadedProjectId = "";
 
   const taskColumns =
@@ -106,11 +112,13 @@
     });
   }
 
+  function requestDeleteTask(task) {
+    if (!task?.id || deletingTaskId) return;
+    confirmingTask = task;
+  }
+
   async function deleteTask(task) {
     if (!task?.id || deletingTaskId) return;
-
-    const shouldDelete = window.confirm(`Delete task "${task.title}"?`);
-    if (!shouldDelete) return;
 
     deletingTaskId = task.id;
     errorMessage = "";
@@ -128,6 +136,7 @@
     }
 
     deletingTaskId = "";
+    confirmingTask = null;
   }
 
   function formatDueDate(value) {
@@ -148,66 +157,61 @@
 <section aria-labelledby="board-task-list-title">
   <div class="flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
-      <ListChecks class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
-      <h4 id="board-task-list-title" class="font-bold">Tasks</h4>
+      <ListChecks class="h-4 w-4 text-accent" aria-hidden="true" />
+      <h4 id="board-task-list-title" class="font-bold text-ink">Tasks</h4>
     </div>
     {#if tasks.length}
-      <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
-        {completedCount}/{tasks.length} done
-      </span>
+      <Badge tone="neutral">{completedCount}/{tasks.length} done</Badge>
     {/if}
   </div>
 
   {#if errorMessage}
-    <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} class="mt-3" />
   {/if}
 
   <form class="mt-3 flex gap-2" onsubmit={addTask}>
     <input
       type="text"
-      class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+      class="input"
       placeholder="Add a task"
+      aria-label="Add a task"
       bind:value={newTaskTitle}
       disabled={isAdding}
     />
-    <button
+    <Button
+      variant="primary"
       type="submit"
-      class="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-md bg-[#ffbd59] px-3 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60"
-      disabled={!newTaskTitle.trim() || isAdding}
+      icon={Plus}
+      class="shrink-0"
+      loading={isAdding}
+      disabled={!newTaskTitle.trim()}
     >
-      <Plus class="h-4 w-4" aria-hidden="true" />
       Add
-    </button>
+    </Button>
   </form>
 
   <div class="mt-3 space-y-2">
     {#if isLoading}
-      <div class="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
-        <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-        Loading tasks
-      </div>
+      <SkeletonCard lines={2} />
     {:else if tasks.length}
       {#each tasks as task (task.id)}
-        <article class="rounded-md border px-3 py-2.5 {task.done ? 'border-emerald-200 bg-emerald-50/60' : 'border-gray-200 bg-white'}">
+        <article class="rounded-control border px-3 py-2.5 {task.done ? 'border-green-200 bg-green-50/60' : 'border-ink/8 bg-white'}">
           <div class="flex items-start gap-3">
             <input
               type="checkbox"
-              class="mt-1 h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+              class="mt-1 h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
               checked={task.done}
               aria-label={`Mark "${task.title}" ${task.done ? "not done" : "done"}`}
               disabled={savingTaskId === task.id}
               onchange={(event) => toggleDone(task, event.currentTarget.checked)}
             />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-semibold leading-snug {task.done ? 'text-gray-500 line-through' : ''}">
+              <p class="text-sm font-semibold leading-snug {task.done ? 'text-ink/50 line-through' : 'text-ink'}">
                 {task.title}
               </p>
               <div class="mt-2 flex flex-wrap items-center gap-2">
                 <select
-                  class="min-h-8 rounded-md border border-gray-200 bg-white px-2 text-xs font-semibold text-gray-700 outline-none transition focus:border-[#0f766e]"
+                  class="min-h-8 rounded-control border border-ink/14 bg-white px-2 text-xs font-semibold text-ink/70 outline-none transition focus:border-accent"
                   value={task.assignee_id || ""}
                   aria-label={`Assignee for "${task.title}"`}
                   disabled={savingTaskId === task.id}
@@ -221,7 +225,7 @@
                 </select>
                 <input
                   type="date"
-                  class="min-h-8 rounded-md border border-gray-200 bg-white px-2 text-xs font-semibold text-gray-700 outline-none transition focus:border-[#0f766e]"
+                  class="min-h-8 rounded-control border border-ink/14 bg-white px-2 text-xs font-semibold text-ink/70 outline-none transition focus:border-accent"
                   value={task.due_date || ""}
                   aria-label={`Due date for "${task.title}"`}
                   disabled={savingTaskId === task.id}
@@ -229,31 +233,40 @@
                     updateTask(task, { due_date: event.currentTarget.value || null })}
                 />
                 {#if task.due_date}
-                  <span class="text-xs font-bold text-gray-500">Due {formatDueDate(task.due_date)}</span>
+                  <span class="text-xs font-bold text-ink/50">Due {formatDueDate(task.due_date)}</span>
                 {/if}
                 {#if getAssigneeName(task)}
-                  <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
-                    {getAssigneeName(task)}
-                  </span>
+                  <Badge tone="neutral" size="xs">{getAssigneeName(task)}</Badge>
                 {/if}
               </div>
             </div>
-            <button
-              type="button"
-              class="rounded-md p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label={`Delete task "${task.title}"`}
-              onclick={() => deleteTask(task)}
-              disabled={deletingTaskId === task.id}
-            >
-              <Trash2 class="h-4 w-4" aria-hidden="true" />
-            </button>
+            <Button
+              iconOnly
+              size="sm"
+              variant="ghost"
+              icon={Trash2}
+              label={`Delete task "${task.title}"`}
+              loading={deletingTaskId === task.id}
+              onclick={() => requestDeleteTask(task)}
+            />
           </div>
         </article>
       {/each}
     {:else}
-      <p class="rounded-md border border-dashed border-gray-300 bg-white px-4 py-4 text-center text-sm text-gray-500">
+      <p class="rounded-control border border-dashed border-ink/15 bg-white px-4 py-4 text-center text-sm text-ink/55">
         No tasks yet. Break this project into steps above.
       </p>
     {/if}
   </div>
 </section>
+
+<ConfirmDialog
+  open={Boolean(confirmingTask)}
+  title="Delete this task?"
+  message={`Delete task "${confirmingTask?.title}"? This cannot be undone.`}
+  confirmLabel="Delete task"
+  tone="danger"
+  busy={Boolean(deletingTaskId)}
+  onConfirm={() => deleteTask(confirmingTask)}
+  onCancel={() => (confirmingTask = null)}
+/>

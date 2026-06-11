@@ -1,14 +1,14 @@
 <script>
-  import {
-    CalendarClock,
-    CheckCircle2,
-    CircleAlert,
-    Trash2,
-  } from "@lucide/svelte";
+  import { CalendarClock, Trash2 } from "@lucide/svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
   import BoardTaskList from "./BoardTaskList.svelte";
   import ProjectTimeline from "../marketing/ProjectTimeline.svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import Field from "../ui/Field.svelte";
 
   export let supabase;
   export let project = null;
@@ -19,6 +19,12 @@
   export let onProjectDeleted = () => {};
 
   const BOARD_STATUSES = ["Planning", "In Progress", "Blocked", "Done"];
+  const STATUS_TONES = {
+    Planning: "neutral",
+    "In Progress": "blue",
+    Blocked: "red",
+    Done: "green",
+  };
   const projectColumns =
     "id, title, description, status, owner_id, due_date, created_by, created_at, updated_at";
 
@@ -26,6 +32,7 @@
   let drawerOpen = false;
   let isSaving = false;
   let isDeleting = false;
+  let confirmingDelete = false;
   let errorMessage = "";
   let successMessage = "";
   let descriptionDraft = "";
@@ -88,13 +95,13 @@
     saveUpdates({ description: nextDescription }, "Description saved.");
   }
 
+  function requestDeleteProject() {
+    if (!displayedProject?.id || isDeleting) return;
+    confirmingDelete = true;
+  }
+
   async function deleteProject() {
     if (!displayedProject?.id || isDeleting) return;
-
-    const shouldDelete = window.confirm(
-      `Delete "${displayedProject.title}" and all of its tasks and comments? This cannot be undone.`,
-    );
-    if (!shouldDelete) return;
 
     isDeleting = true;
     errorMessage = "";
@@ -107,11 +114,13 @@
     if (error) {
       errorMessage = error.message;
       isDeleting = false;
+      confirmingDelete = false;
       return;
     }
 
     const deletedId = displayedProject.id;
     isDeleting = false;
+    confirmingDelete = false;
     onProjectDeleted(deletedId);
     requestClose();
   }
@@ -125,13 +134,6 @@
       day: "numeric",
       year: "numeric",
     }).format(new Date(`${value}T00:00:00`));
-  }
-
-  function getStatusClass(status) {
-    if (status === "Blocked") return "bg-red-50 text-red-700 border-red-200";
-    if (status === "In Progress") return "bg-blue-50 text-blue-700 border-blue-200";
-    if (status === "Done") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    return "bg-amber-50 text-amber-700 border-amber-200";
   }
 
   function getOwnerLabel(item) {
@@ -152,47 +154,36 @@
   {#if displayedProject}
     <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
-          <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(displayedProject.status)}">
+          <Badge tone={STATUS_TONES[displayedProject.status] || "neutral"}>
             {displayedProject.status}
-          </span>
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+          </Badge>
+          <Badge tone="neutral">
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             {formatDate(displayedProject.due_date)}
-          </span>
-          <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
-            Owner: {getOwnerLabel(displayedProject)}
-          </span>
+          </Badge>
+          <Badge tone="neutral">Owner: {getOwnerLabel(displayedProject)}</Badge>
         </div>
 
         {#if errorMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{errorMessage}</span>
-          </div>
+          <Banner tone="error" message={errorMessage} class="mt-4" />
         {/if}
 
         {#if successMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{successMessage}</span>
-          </div>
+          <Banner tone="success" message={successMessage} class="mt-4" />
         {/if}
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="board-drawer-settings-title">
+        <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="board-drawer-settings-title">
           <div class="flex items-start justify-between gap-3">
-            <h4 id="board-drawer-settings-title" class="font-bold">Project settings</h4>
+            <h4 id="board-drawer-settings-title" class="font-bold text-ink">Project settings</h4>
             {#if isSaving}
-              <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
-                Saving
-              </span>
+              <Badge tone="neutral" size="xs" class="shrink-0">Saving</Badge>
             {/if}
           </div>
 
-          <label class="mt-4 block text-sm font-bold" for={`board-status-${displayedProject.id}`}>
-            Status
+          <Field label="Status" id={`board-status-${displayedProject.id}`} class="mt-4">
             <select
               id={`board-status-${displayedProject.id}`}
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="select"
               value={displayedProject.status}
               disabled={isSaving}
               onchange={(event) =>
@@ -202,13 +193,12 @@
                 <option value={status}>{status}</option>
               {/each}
             </select>
-          </label>
+          </Field>
 
-          <label class="mt-4 block text-sm font-bold" for={`board-owner-${displayedProject.id}`}>
-            Owner
+          <Field label="Owner" id={`board-owner-${displayedProject.id}`} class="mt-4">
             <select
               id={`board-owner-${displayedProject.id}`}
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="select"
               value={displayedProject.owner_id || ""}
               disabled={isSaving}
               onchange={(event) =>
@@ -219,35 +209,33 @@
                 <option value={member.id}>{member.full_name || member.email}</option>
               {/each}
             </select>
-          </label>
+          </Field>
 
-          <label class="mt-4 block text-sm font-bold" for={`board-due-${displayedProject.id}`}>
-            Due date
+          <Field label="Due date" id={`board-due-${displayedProject.id}`} class="mt-4">
             <input
               id={`board-due-${displayedProject.id}`}
               type="date"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               value={displayedProject.due_date || ""}
               disabled={isSaving}
               onchange={(event) =>
                 saveUpdates({ due_date: event.currentTarget.value || null }, "Due date updated.")}
             />
-          </label>
+          </Field>
 
-          <label class="mt-4 block text-sm font-bold" for={`board-description-${displayedProject.id}`}>
-            Description
+          <Field label="Description" id={`board-description-${displayedProject.id}`} class="mt-4">
             <textarea
               id={`board-description-${displayedProject.id}`}
-              class="mt-2 min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="textarea"
               bind:value={descriptionDraft}
               placeholder="What is this project about? What does done look like?"
               disabled={isSaving}
               onblur={saveDescription}
             ></textarea>
-          </label>
+          </Field>
         </section>
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4">
+        <section class="mt-5 rounded-control border border-ink/8 bg-white p-4">
           <BoardTaskList
             {supabase}
             projectId={displayedProject.id}
@@ -265,33 +253,35 @@
         </div>
 
         {#if isAdmin}
-          <section class="mt-5 rounded-md border border-red-200 bg-red-50/50 p-4">
+          <section class="mt-5 rounded-control border border-red-200 bg-red-50/50 p-4">
             <h4 class="font-bold text-red-800">Danger zone</h4>
-            <button
-              type="button"
-              class="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-              onclick={deleteProject}
-              disabled={isDeleting}
+            <Button
+              variant="danger"
+              icon={Trash2}
+              class="mt-3"
+              loading={isDeleting}
+              onclick={requestDeleteProject}
             >
-              {#if isDeleting}
-                <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-                Deleting
-              {:else}
-                <Trash2 class="h-4 w-4" aria-hidden="true" />
-                Delete project
-              {/if}
-            </button>
+              Delete project
+            </Button>
           </section>
         {/if}
-      <div class="border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 w-full items-center justify-center rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          onclick={requestClose}
-        >
+      <div class="border-t border-ink/8 p-4">
+        <Button variant="secondary" class="w-full" onclick={requestClose}>
           Close
-        </button>
+        </Button>
       </div>
     </div>
   {/if}
 </SlideOver>
+
+<ConfirmDialog
+  open={confirmingDelete}
+  title="Delete this project?"
+  message={`Delete "${displayedProject?.title}" and all of its tasks and comments? This cannot be undone.`}
+  confirmLabel="Delete project"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={deleteProject}
+  onCancel={() => (confirmingDelete = false)}
+/>

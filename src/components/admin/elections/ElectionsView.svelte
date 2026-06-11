@@ -1,16 +1,16 @@
 <script>
   import { onMount } from "svelte";
-  import {
-    CalendarClock,
-    CircleAlert,
-    CircleCheck,
-    Search,
-    Trash2,
-    Vote,
-  } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import { CalendarClock, CircleCheck, Trash2, Vote } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SearchInput from "../ui/SearchInput.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import StatCard from "../ui/StatCard.svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
 
   export let supabase;
@@ -71,6 +71,8 @@
         (vote.email || "").toLowerCase().includes(voteSearch.trim().toLowerCase()),
       )
     : [];
+
+  $: confirmingVote = votes.find((vote) => vote.id === confirmDeleteId) || null;
 
   onMount(() => {
     loadData();
@@ -277,28 +279,24 @@
   <h3 id="elections-view-title" class="sr-only">Elections</h3>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   <div class="grid gap-3 sm:grid-cols-2">
-    <SummaryCard label="Total ballots" value={votes.length} icon={Vote} tone="gold" />
-    <SummaryCard
+    <StatCard label="Total ballots" value={votes.length} icon={Vote} tone="gold" loading={isLoading} />
+    <StatCard
       label="Voting status"
       value={votingState.label}
       icon={votingState.open ? CircleCheck : CalendarClock}
       tone={votingState.open ? "teal" : "rose"}
+      loading={isLoading}
     />
   </div>
 
   {#if isLoading}
-    <div class="flex min-h-48 items-center justify-center rounded-lg border border-black/10 bg-white">
-      <div class="flex items-center gap-3 text-sm text-gray-600">
-        <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-        Loading election data
-      </div>
+    <div class="space-y-4">
+      <SkeletonCard lines={3} />
+      <SkeletonCard lines={4} />
     </div>
   {:else if !election}
     <Panel title="Current election" id="elections-current-panel">
@@ -309,14 +307,14 @@
     </Panel>
   {:else}
     <div
-      class="flex flex-wrap items-center gap-3 rounded-md border px-4 py-3 text-sm {votingState.open
-        ? 'border-teal-200 bg-teal-50 text-teal-900'
+      class="flex flex-wrap items-center gap-3 rounded-control border px-4 py-3 text-sm {votingState.open
+        ? 'border-accent/30 bg-accent-soft text-accent-strong'
         : 'border-amber-200 bg-amber-50 text-amber-900'}"
       role="status"
     >
-      <span class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide {votingState.open ? 'bg-teal-600 text-white' : 'bg-amber-500 text-white'}">
+      <Badge tone={votingState.open ? "teal" : "amber"} variant="solid" class="uppercase tracking-wide">
         {votingState.open ? "Voting open" : "Voting closed"}
-      </span>
+      </Badge>
       <span class="font-semibold">{election.name}</span>
       <span class="text-current/80">{votingState.detail}</span>
     </div>
@@ -324,13 +322,13 @@
     <Panel title="Voting window" id="elections-window-panel" loading={isSavingOverride || isSavingSchedule}>
       <div class="space-y-4">
         <div>
-          <p class="mb-2 text-sm font-semibold text-gray-600">Override</p>
+          <p class="mb-2 text-sm font-semibold text-ink/60">Override</p>
           <div class="flex flex-wrap gap-2" role="group" aria-label="Voting override">
             <button
               type="button"
-              class="inline-flex min-h-10 items-center gap-2 rounded-md border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === 'open'
-                ? 'border-[#0f766e] bg-[#0f766e] text-white'
-                : 'border-gray-200 bg-white text-gray-700 hover:border-[#0f766e]/50'}"
+              class="inline-flex min-h-10 items-center gap-2 rounded-control border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === 'open'
+                ? 'border-accent bg-accent text-white'
+                : 'border-ink/14 bg-white text-ink/70 hover:border-accent/50'}"
               onclick={() => setOverride("open")}
               disabled={isSavingOverride}
             >
@@ -338,9 +336,9 @@
             </button>
             <button
               type="button"
-              class="inline-flex min-h-10 items-center gap-2 rounded-md border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === null
-                ? 'border-[#ffbd59] bg-[#ffbd59] text-[#1E1E1E]'
-                : 'border-gray-200 bg-white text-gray-700 hover:border-[#ffbd59]'}"
+              class="inline-flex min-h-10 items-center gap-2 rounded-control border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === null
+                ? 'border-brand bg-brand text-ink'
+                : 'border-ink/14 bg-white text-ink/70 hover:border-brand'}"
               onclick={() => setOverride(null)}
               disabled={isSavingOverride}
             >
@@ -348,9 +346,9 @@
             </button>
             <button
               type="button"
-              class="inline-flex min-h-10 items-center gap-2 rounded-md border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === 'closed'
+              class="inline-flex min-h-10 items-center gap-2 rounded-control border px-4 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {election.override === 'closed'
                 ? 'border-red-600 bg-red-600 text-white'
-                : 'border-gray-200 bg-white text-gray-700 hover:border-red-300'}"
+                : 'border-ink/14 bg-white text-ink/70 hover:border-red-300'}"
               onclick={() => setOverride("closed")}
               disabled={isSavingOverride}
             >
@@ -359,49 +357,37 @@
           </div>
         </div>
 
-        <form class="rounded-md border border-black/10 bg-gray-50 p-4" onsubmit={saveSchedule}>
-          <p class="mb-3 text-sm font-semibold text-gray-600">
+        <form class="rounded-control border border-ink/8 bg-canvas p-4" onsubmit={saveSchedule}>
+          <p class="mb-3 text-sm font-semibold text-ink/60">
             Schedule (used when no override is set)
           </p>
           <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <label class="block text-sm">
-              <span class="mb-1 block font-semibold text-gray-700">Opens at</span>
+            <Field label="Opens at" id="election-opens-at">
               <input
+                id="election-opens-at"
                 type="datetime-local"
-                class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={opensAtInput}
                 disabled={isSavingSchedule}
               />
-            </label>
-            <label class="block text-sm">
-              <span class="mb-1 block font-semibold text-gray-700">Closes at</span>
+            </Field>
+            <Field label="Closes at" id="election-closes-at">
               <input
+                id="election-closes-at"
                 type="datetime-local"
-                class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={closesAtInput}
                 disabled={isSavingSchedule}
               />
-            </label>
+            </Field>
             <div class="flex items-end">
-              <button
-                type="submit"
-                class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSavingSchedule}
-              >
-                {#if isSavingSchedule}
-                  <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Saving
-                {:else}
-                  Save schedule
-                {/if}
-              </button>
+              <Button variant="primary" type="submit" loading={isSavingSchedule}>
+                Save schedule
+              </Button>
             </div>
           </div>
           {#if scheduleSaved}
-            <p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-teal-700">
-              <CircleCheck class="h-4 w-4" aria-hidden="true" />
-              Schedule saved.
-            </p>
+            <Banner tone="success" message="Schedule saved." class="mt-3" />
           {/if}
         </form>
       </div>
@@ -414,15 +400,15 @@
           message="Ballots will appear here as soon as the first vote is cast in the current election."
         />
       {:else}
-        <p class="mb-4 text-sm text-gray-600">
+        <p class="mb-4 text-sm text-ink/60">
           {votes.length} ballot{votes.length === 1 ? "" : "s"} cast in {election.name}.
         </p>
         <div class="grid gap-4 lg:grid-cols-2">
           {#each tallies as tally (tally.key)}
-            <div class="rounded-md border border-black/10 bg-white p-4">
-              <div class="mb-3 flex items-center justify-between gap-2 border-b-2 border-[#ffbd59] pb-2">
-                <h4 class="text-sm font-bold uppercase tracking-wide text-gray-800">{tally.label}</h4>
-                <span class="text-xs font-semibold text-gray-500">
+            <div class="rounded-control border border-ink/8 bg-white p-4">
+              <div class="mb-3 flex items-center justify-between gap-2 border-b-2 border-brand pb-2">
+                <h4 class="text-sm font-bold uppercase tracking-wide text-ink">{tally.label}</h4>
+                <span class="text-xs font-semibold text-ink/50">
                   {tally.total} vote{tally.total === 1 ? "" : "s"}
                 </span>
               </div>
@@ -431,15 +417,15 @@
                   {#each tally.rows as row, index (row.candidate)}
                     {@const percentage = tally.total > 0 ? Math.round((row.count / tally.total) * 1000) / 10 : 0}
                     <div class="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1">
-                      <span class="truncate text-sm {index === 0 ? 'font-bold' : 'font-medium'} text-gray-800">
+                      <span class="truncate text-sm {index === 0 ? 'font-bold' : 'font-medium'} text-ink">
                         {row.candidate}
                       </span>
-                      <span class="text-xs font-bold text-gray-600">
+                      <span class="text-xs font-bold text-ink/60">
                         {row.count} · {percentage}%
                       </span>
-                      <div class="col-span-2 h-2 overflow-hidden rounded-full bg-gray-100">
+                      <div class="col-span-2 h-2 overflow-hidden rounded-full bg-ink/[0.06]">
                         <div
-                          class="h-full rounded-full {index === 0 ? 'bg-[#0f766e]' : 'bg-[#0f766e]/45'}"
+                          class="h-full rounded-full {index === 0 ? 'bg-accent' : 'bg-accent/45'}"
                           style="width: {percentage}%"
                         ></div>
                       </div>
@@ -447,7 +433,7 @@
                   {/each}
                 </div>
               {:else}
-                <p class="text-sm italic text-gray-500">No selections recorded for this position.</p>
+                <p class="text-sm italic text-ink/50">No selections recorded for this position.</p>
               {/if}
             </div>
           {/each}
@@ -457,86 +443,65 @@
 
     {#if isAdmin}
       <Panel title="Remove a ballot" id="elections-delete-panel">
-        <p class="mb-3 text-sm text-gray-600">
+        <p class="mb-3 text-sm text-ink/60">
           Search by voter email to remove a ballot. Removing a ballot lets that
           email vote again. Admins only.
         </p>
 
         {#if deleteError}
-          <div class="mb-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{deleteError}</span>
-          </div>
+          <Banner tone="error" message={deleteError} class="mb-3" />
         {/if}
 
-        <div class="relative mb-3 max-w-md">
-          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-          <input
-            type="search"
-            class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-            placeholder="Search by voter email"
-            aria-label="Search ballots by voter email"
-            bind:value={voteSearch}
-          />
-        </div>
+        <SearchInput
+          bind:value={voteSearch}
+          placeholder="Search by voter email"
+          label="Search ballots by voter email"
+          class="mb-3 max-w-md"
+        />
 
         {#if voteSearch.trim()}
           {#if matchedVotes.length}
             <ul class="space-y-2">
               {#each matchedVotes as vote (vote.id)}
-                <li class="flex flex-wrap items-center gap-3 rounded-md border border-black/10 bg-white px-4 py-3">
+                <li class="flex flex-wrap items-center gap-3 rounded-control border border-ink/8 bg-white px-4 py-3">
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-bold text-gray-900">{vote.email}</p>
-                    <p class="mt-0.5 text-xs text-gray-500">
+                    <p class="truncate text-sm font-bold text-ink">{vote.email}</p>
+                    <p class="mt-0.5 text-xs text-ink/50">
                       Cast {formatDateTime(vote.created_at)} · Pres: {vote.president || "blank"} ·
                       VP: {vote.vice_president || "blank"} · Treas: {vote.treasurer || "blank"} ·
                       Sec: {vote.secretary || "blank"}
                     </p>
                   </div>
-                  {#if confirmDeleteId === vote.id}
-                    <div class="flex items-center gap-2">
-                      <button
-                        type="button"
-                        class="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                        onclick={() => deleteVote(vote.id)}
-                        disabled={deletingId === vote.id}
-                      >
-                        {#if deletingId === vote.id}
-                          <span class="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-                          Deleting
-                        {:else}
-                          Confirm delete
-                        {/if}
-                      </button>
-                      <button
-                        type="button"
-                        class="inline-flex min-h-9 items-center rounded-md border border-gray-200 bg-white px-3 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
-                        onclick={() => (confirmDeleteId = "")}
-                        disabled={deletingId === vote.id}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  {:else}
-                    <button
-                      type="button"
-                      class="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50"
-                      onclick={() => (confirmDeleteId = vote.id)}
-                    >
-                      <Trash2 class="h-4 w-4" aria-hidden="true" />
-                      Delete
-                    </button>
-                  {/if}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
+                    loading={deletingId === vote.id}
+                    onclick={() => (confirmDeleteId = vote.id)}
+                  >
+                    Delete
+                  </Button>
                 </li>
               {/each}
             </ul>
           {:else}
-            <p class="rounded-md border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">
+            <p class="rounded-control border border-dashed border-ink/15 bg-canvas/60 px-4 py-6 text-center text-sm text-ink/55">
               No ballots match that email.
             </p>
           {/if}
         {/if}
       </Panel>
+
+      <ConfirmDialog
+        open={Boolean(confirmDeleteId)}
+        title="Remove this ballot?"
+        message={`Remove the ballot cast by ${confirmingVote?.email || "this voter"}? That email will be able to vote again. This cannot be undone.`}
+        confirmLabel="Delete ballot"
+        tone="danger"
+        busy={Boolean(deletingId)}
+        onConfirm={() => deleteVote(confirmDeleteId)}
+        onCancel={() => (confirmDeleteId = "")}
+      />
     {/if}
   {/if}
 </section>

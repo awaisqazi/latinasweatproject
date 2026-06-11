@@ -1,7 +1,13 @@
 <script>
-  import { CircleAlert, Download, Search, X } from "@lucide/svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
+  import { Download } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SearchInput from "../ui/SearchInput.svelte";
+  import StatCard from "../ui/StatCard.svelte";
   import {
     downloadCsv,
     formatShortDate,
@@ -18,7 +24,6 @@
   let hasSearched = false;
   let results = [];
   let errorMessage = "";
-  let searchTimer;
 
   // CSV export state
   let exportStart = toDateStr(new Date(new Date().getFullYear(), 0, 1));
@@ -39,15 +44,14 @@
     return { totalShifts, checkedInCount, totalHours: totalHours.toFixed(1) };
   })();
 
-  function handleQueryInput() {
-    window.clearTimeout(searchTimer);
-    const query = searchQuery.trim();
-    if (query.length < 2) {
+  function handleSearch(query) {
+    if (!query) {
       results = [];
       hasSearched = false;
+      errorMessage = "";
       return;
     }
-    searchTimer = window.setTimeout(() => runSearch(query), 300);
+    runSearch(query);
   }
 
   async function runSearch(query) {
@@ -74,13 +78,6 @@
 
     hasSearched = true;
     isSearching = false;
-  }
-
-  function clearSearch() {
-    searchQuery = "";
-    results = [];
-    hasSearched = false;
-    errorMessage = "";
   }
 
   async function exportRangeCsv() {
@@ -163,49 +160,25 @@
 </script>
 
 <Panel title="Volunteer lookup" id="volunteer-lookup-title" loading={isSearching}>
-  <div class="relative">
-    <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-    <input
-      type="search"
-      class="min-h-11 w-full rounded-md border border-gray-200 bg-white pl-9 pr-9 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-      placeholder="Search by name or email (2+ characters)"
-      aria-label="Search volunteers"
-      bind:value={searchQuery}
-      oninput={handleQueryInput}
-    />
-    {#if searchQuery}
-      <button
-        type="button"
-        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-        aria-label="Clear search"
-        onclick={clearSearch}
-      >
-        <X class="h-4 w-4" aria-hidden="true" />
-      </button>
-    {/if}
-  </div>
+  <SearchInput
+    bind:value={searchQuery}
+    placeholder="Search by name or email (2+ characters)"
+    label="Search volunteers"
+    debounce={300}
+    minChars={2}
+    loading={isSearching}
+    onSearch={handleSearch}
+  />
 
   {#if errorMessage}
-    <div class="mt-4 flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} class="mt-4" />
   {/if}
 
   {#if hasSearched && !errorMessage}
-    <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-      <div class="rounded-md border border-black/10 bg-gray-50 p-3">
-        <p class="text-2xl font-bold">{stats.totalShifts}</p>
-        <p class="text-xs font-semibold text-gray-600">Shifts</p>
-      </div>
-      <div class="rounded-md border border-black/10 bg-gray-50 p-3">
-        <p class="text-2xl font-bold">{stats.totalHours}</p>
-        <p class="text-xs font-semibold text-gray-600">Hours</p>
-      </div>
-      <div class="rounded-md border border-black/10 bg-gray-50 p-3">
-        <p class="text-2xl font-bold">{stats.checkedInCount}</p>
-        <p class="text-xs font-semibold text-gray-600">Check-ins</p>
-      </div>
+    <div class="mt-4 grid grid-cols-3 gap-2">
+      <StatCard label="Shifts" value={stats.totalShifts} tone="neutral" />
+      <StatCard label="Hours" value={stats.totalHours} tone="teal" />
+      <StatCard label="Check-ins" value={stats.checkedInCount} tone="gold" />
     </div>
 
     {#if !results.length}
@@ -218,11 +191,11 @@
     {:else}
       <ul class="mt-4 space-y-2">
         {#each results as row (row.id)}
-          <li class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-black/10 bg-white px-4 py-3">
+          <li class="flex flex-wrap items-center justify-between gap-2 rounded-control border border-ink/8 bg-white px-4 py-3">
             <div class="min-w-0">
-              <p class="font-bold leading-snug">{row.name}</p>
-              <p class="break-all text-sm text-gray-600">{row.email}{row.phone ? ` · ${row.phone}` : ""}</p>
-              <p class="mt-1 text-sm text-gray-600">
+              <p class="font-bold leading-snug text-ink">{row.name}</p>
+              <p class="break-all text-sm text-ink/60">{row.email}{row.phone ? ` · ${row.phone}` : ""}</p>
+              <p class="mt-1 text-sm text-ink/60">
                 {formatShortDate(row.shift.starts_at)} · {shiftLabel(row.shift)}
                 {#if row.shift.title}
                   · {formatTimeRange(row.shift.starts_at, row.shift.ends_at)}
@@ -230,13 +203,11 @@
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full px-2 py-0.5 text-xs font-bold {row.role === 'lead' ? 'bg-purple-100 text-purple-700' : 'bg-teal-50 text-teal-700'}">
+              <Badge tone={row.role === "lead" ? "teal" : "neutral"} size="xs">
                 {row.role === "lead" ? "Lead" : "Volunteer"}
-              </span>
+              </Badge>
               {#if row.checked_in}
-                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                  Checked in
-                </span>
+                <Badge tone="green" size="xs">Checked in</Badge>
               {/if}
             </div>
           </li>
@@ -245,45 +216,37 @@
     {/if}
   {/if}
 
-  <div class="mt-5 rounded-md border border-black/10 bg-gray-50 p-4">
-    <h4 class="font-bold">Export registrations (CSV)</h4>
+  <div class="mt-5 rounded-card border border-ink/8 bg-canvas p-4">
+    <h4 class="font-bold text-ink">Export registrations (CSV)</h4>
     <div class="mt-3 flex flex-wrap items-end gap-3">
-      <label class="block text-xs font-bold text-gray-700">
-        From
+      <Field label="From" id="volunteer-export-start" class="w-40">
         <input
+          id="volunteer-export-start"
           type="date"
-          class="mt-1 block min-h-10 rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+          class="input"
           bind:value={exportStart}
         />
-      </label>
-      <label class="block text-xs font-bold text-gray-700">
-        To
+      </Field>
+      <Field label="To" id="volunteer-export-end" class="w-40">
         <input
+          id="volunteer-export-end"
           type="date"
-          class="mt-1 block min-h-10 rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+          class="input"
           bind:value={exportEnd}
         />
-      </label>
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+      </Field>
+      <Button
+        variant="dark"
+        icon={Download}
+        loading={isExporting}
+        disabled={!exportStart || !exportEnd}
         onclick={exportRangeCsv}
-        disabled={isExporting || !exportStart || !exportEnd}
       >
-        {#if isExporting}
-          <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-          Exporting
-        {:else}
-          <Download class="h-4 w-4" aria-hidden="true" />
-          Download CSV
-        {/if}
-      </button>
+        {isExporting ? "Exporting" : "Download CSV"}
+      </Button>
     </div>
     {#if exportError}
-      <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-        <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{exportError}</span>
-      </div>
+      <Banner tone="error" message={exportError} class="mt-3" />
     {/if}
   </div>
 </Panel>

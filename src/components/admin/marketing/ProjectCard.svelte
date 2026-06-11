@@ -1,4 +1,6 @@
 <script>
+  import Badge from "../ui/Badge.svelte";
+
   export let project;
   export let compact = false;
   export let onSelect = null;
@@ -19,27 +21,22 @@
     }).format(new Date(`${value}T00:00:00`));
   }
 
-  function getPriorityClass(priority) {
-    if (priority === "P0") return "bg-red-100 text-red-800 border-red-300";
-    if (priority === "P1") return "bg-amber-100 text-amber-800 border-amber-300";
-    if (priority === "P2") return "bg-teal-100 text-teal-800 border-teal-300";
-    return "bg-gray-50 text-gray-600 border-gray-200";
+  function getPriorityTone(priority) {
+    if (priority === "P0") return "red";
+    if (priority === "P1") return "amber";
+    return "neutral";
   }
 
   function getCardPriorityClass(priority) {
     if (priority === "P0") {
-      return "border-red-300 bg-red-50 shadow-red-100/70 hover:border-red-400";
+      return "border-red-300 bg-red-50/70 hover:border-red-400";
     }
 
     if (priority === "P1") {
-      return "border-amber-300 bg-amber-50 shadow-amber-100/70 hover:border-amber-400";
+      return "border-amber-300 bg-amber-50/70 hover:border-amber-400";
     }
 
-    if (priority === "P2") {
-      return "border-teal-200 bg-teal-50 shadow-teal-100/70 hover:border-teal-300";
-    }
-
-    return "border-black/10 bg-white";
+    return "border-ink/8 bg-white hover:border-ink/20";
   }
 
   function handleSelect() {
@@ -85,7 +82,7 @@
 </script>
 
 <article
-  class="rounded-md border p-3 shadow-sm {getCardPriorityClass(project.priority)} {onSelect ? 'cursor-pointer transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2' : ''} {draggable ? 'active:cursor-grabbing' : ''} {isMoving ? 'opacity-60' : ''}"
+  class="rounded-card border p-3 shadow-card {getCardPriorityClass(project.priority)} {onSelect ? 'cursor-pointer transition hover:shadow-pop focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2' : ''} {draggable ? 'active:cursor-grabbing' : ''} {isMoving ? 'opacity-60' : ''}"
   role={onSelect ? "button" : undefined}
   tabindex={onSelect ? "0" : undefined}
   draggable={draggable}
@@ -97,38 +94,34 @@
 >
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0">
-      <h4 class="line-clamp-2 font-bold leading-snug">{project.title}</h4>
-      <p class="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-gray-500">
+      <h4 class="line-clamp-2 font-bold leading-snug text-ink">{project.title}</h4>
+      <p class="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-ink/50">
         {project.status}
       </p>
     </div>
-    <span
-      class="shrink-0 rounded-full border px-2 py-0.5 text-xs font-bold {getPriorityClass(project.priority)}"
-    >
+    <Badge tone={getPriorityTone(project.priority)} size="xs" class="shrink-0">
       {project.priority || "Unset"}
-    </span>
+    </Badge>
   </div>
 
   {#if !compact}
-    <div class="mt-3 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
+    <div class="mt-3 grid gap-2 text-sm text-ink/60 sm:grid-cols-2">
       <span>Deadline: {formatDate(project.deadline)}</span>
       <span>Publish: {formatDate(project.publish_date)}</span>
     </div>
     {#if project.channel_tags?.length}
       <div class="mt-3 flex flex-wrap gap-1.5">
         {#each project.channel_tags as tag}
-          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
-            {tag}
-          </span>
+          <Badge tone="neutral" size="xs">{tag}</Badge>
         {/each}
       </div>
     {/if}
   {/if}
 
   {#if compact && onSelect}
-    <p class="mt-3 line-clamp-2 text-xs text-gray-600">
+    <p class="mt-3 line-clamp-2 text-xs text-ink/60">
       Assigned: {formatAssignments(project.assigned_to)}
     </p>
-    <p class="mt-3 text-xs font-bold text-[#0f766e]">View details</p>
+    <p class="mt-3 text-xs font-bold text-accent-strong">View details</p>
   {/if}
 </article>

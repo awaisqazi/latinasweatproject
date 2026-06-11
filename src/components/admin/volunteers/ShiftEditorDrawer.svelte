@@ -1,11 +1,5 @@
 <script>
-  import {
-    CalendarClock,
-    CheckCircle2,
-    CircleAlert,
-    Trash2,
-    UserPlus,
-  } from "@lucide/svelte";
+  import { CalendarClock, Trash2, UserPlus } from "@lucide/svelte";
   import {
     categoryLabel,
     formatShortDate,
@@ -16,6 +10,11 @@
     toDateTimeLocalInput,
   } from "../../../lib/dashboard/volunteersAdmin.js";
   import SlideOver from "../marketing/SlideOver.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import Field from "../ui/Field.svelte";
 
   export let supabase;
   export let shift = null;
@@ -53,6 +52,10 @@
   let isAdding = false;
   let addError = "";
 
+  let confirmingUncheck = null; // registration awaiting un-check-in confirm
+  let confirmingRemove = null; // registration awaiting removal confirm
+  let confirmingDelete = false;
+
   $: if (shift?.id && shift.id !== displayedShift?.id) {
     openDrawer(shift);
   }
@@ -75,6 +78,9 @@
     addPhone = "";
     addRole = "volunteer";
     editingTimeId = "";
+    confirmingUncheck = null;
+    confirmingRemove = null;
+    confirmingDelete = false;
     drawerOpen = true;
 
     loadRoster(nextShift.id);
@@ -166,17 +172,19 @@
     );
   }
 
-  async function setCheckIn(registration, checkedIn) {
+  function requestSetCheckIn(registration, checkedIn) {
     if (busyRegistrationId) return;
 
-    if (
-      !checkedIn &&
-      !window.confirm(
-        `Un-check in ${registration.name}? Their check-in time will be cleared.`,
-      )
-    ) {
+    if (!checkedIn) {
+      confirmingUncheck = registration;
       return;
     }
+
+    setCheckIn(registration, checkedIn);
+  }
+
+  async function setCheckIn(registration, checkedIn) {
+    if (busyRegistrationId) return;
 
     busyRegistrationId = registration.id;
     errorMessage = "";
@@ -199,6 +207,13 @@
     }
 
     busyRegistrationId = "";
+  }
+
+  async function confirmUncheck() {
+    const registration = confirmingUncheck;
+    if (!registration) return;
+    await setCheckIn(registration, false);
+    confirmingUncheck = null;
   }
 
   function startEditingTime(registration) {
@@ -234,14 +249,6 @@
   }
 
   async function removeRegistration(registration) {
-    if (
-      !window.confirm(
-        `Remove ${registration.name} (${registration.email}) from this shift?`,
-      )
-    ) {
-      return;
-    }
-
     busyRegistrationId = registration.id;
     errorMessage = "";
 
@@ -258,6 +265,13 @@
     }
 
     busyRegistrationId = "";
+  }
+
+  async function confirmRemove() {
+    const registration = confirmingRemove;
+    if (!registration) return;
+    await removeRegistration(registration);
+    confirmingRemove = null;
   }
 
   async function addRegistration(event) {
@@ -308,11 +322,6 @@
   async function deleteShift() {
     if (!displayedShift?.id || isDeleting) return;
 
-    const shouldDelete = window.confirm(
-      `Delete this shift and all ${roster.length} registration${roster.length === 1 ? "" : "s"}? This cannot be undone.`,
-    );
-    if (!shouldDelete) return;
-
     isDeleting = true;
     errorMessage = "";
 
@@ -324,11 +333,13 @@
     if (error) {
       errorMessage = error.message;
       isDeleting = false;
+      confirmingDelete = false;
       return;
     }
 
     const deletedId = displayedShift.id;
     isDeleting = false;
+    confirmingDelete = false;
     onDeleted(deletedId);
     requestClose();
   }
@@ -366,141 +377,124 @@
     <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
           {#if displayedShift.cancelled}
-            <span class="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">
-              Cancelled
-            </span>
+            <Badge tone="red">Cancelled</Badge>
           {/if}
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+          <Badge tone="neutral">
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             Leads {leadCount}/{displayedShift.lead_capacity} · Volunteers {volunteerCount}/{displayedShift.volunteer_capacity}
-          </span>
+          </Badge>
         </div>
 
         {#if errorMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{errorMessage}</span>
-          </div>
+          <Banner tone="error" message={errorMessage} class="mt-4" />
         {/if}
 
         {#if successMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{successMessage}</span>
-          </div>
+          <Banner tone="success" message={successMessage} class="mt-4" />
         {/if}
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4">
           <div class="flex items-start justify-between gap-3">
-            <h4 class="font-bold">Shift settings</h4>
+            <h4 class="font-bold text-ink">Shift settings</h4>
             {#if isSaving}
-              <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
-                Saving
-              </span>
+              <Badge tone="neutral" class="shrink-0">Saving</Badge>
             {/if}
           </div>
 
           {#if hasDetailsFields}
-            <label class="mt-4 block text-sm font-bold" for="shift-title-input">
-              Title
+            <Field label="Title" id="shift-title-input" class="mt-4">
               <input
                 id="shift-title-input"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={titleDraft}
                 placeholder="Shift title"
                 disabled={isSaving}
                 onblur={saveDetails}
               />
-            </label>
+            </Field>
 
-            <label class="mt-4 block text-sm font-bold" for="shift-location-input">
-              Location
+            <Field label="Location" id="shift-location-input" class="mt-4">
               <input
                 id="shift-location-input"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={locationDraft}
                 placeholder="949 W 16th St, Chicago"
                 disabled={isSaving}
                 onblur={saveDetails}
               />
-            </label>
+            </Field>
 
-            <label class="mt-4 block text-sm font-bold" for="shift-description-input">
-              Description
+            <Field label="Description" id="shift-description-input" class="mt-4">
               <textarea
                 id="shift-description-input"
-                class="mt-2 min-h-20 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-normal leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="textarea min-h-20"
                 bind:value={descriptionDraft}
                 placeholder="What will volunteers do?"
                 disabled={isSaving}
                 onblur={saveDetails}
               ></textarea>
-            </label>
+            </Field>
           {/if}
 
           <div class="mt-4 grid grid-cols-2 gap-3">
-            <label class="block text-sm font-bold" for="shift-lead-cap">
-              Lead spots
+            <Field label="Lead spots" id="shift-lead-cap">
               <input
                 id="shift-lead-cap"
                 type="number"
                 min="0"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={leadCapDraft}
                 disabled={isSaving}
                 onblur={saveCapacities}
               />
-            </label>
-            <label class="block text-sm font-bold" for="shift-vol-cap">
-              Volunteer spots
+            </Field>
+            <Field label="Volunteer spots" id="shift-vol-cap">
               <input
                 id="shift-vol-cap"
                 type="number"
                 min="0"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={volCapDraft}
                 disabled={isSaving}
                 onblur={saveCapacities}
               />
-            </label>
+            </Field>
           </div>
 
-          <button
-            type="button"
-            class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {displayedShift.cancelled
-              ? 'border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50'
-              : 'border-amber-300 bg-white text-amber-700 hover:bg-amber-50'}"
+          <Button
+            variant={displayedShift.cancelled ? "secondary" : "danger"}
+            class="mt-4"
             onclick={toggleCancelled}
             disabled={isSaving}
           >
             {displayedShift.cancelled ? "Restore shift" : "Cancel shift"}
-          </button>
+          </Button>
         </section>
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4">
           <div class="flex items-center justify-between gap-3">
-            <h4 class="font-bold">Roster</h4>
-            <button
-              type="button"
-              class="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-[#ffbd59] px-3 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
+            <h4 class="font-bold text-ink">Roster</h4>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={UserPlus}
               onclick={() => {
                 showAddForm = !showAddForm;
                 addError = "";
               }}
             >
-              <UserPlus class="h-4 w-4" aria-hidden="true" />
               Add
-            </button>
+            </Button>
           </div>
 
           {#if showAddForm}
-            <form class="mt-3 rounded-md border border-black/10 bg-gray-50 p-3" onsubmit={addRegistration}>
+            <form class="mt-3 rounded-card border border-ink/8 bg-canvas p-3" onsubmit={addRegistration}>
               <div class="grid gap-2 sm:grid-cols-2">
                 <input
                   type="text"
-                  class="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                  class="input"
                   placeholder="Full name"
                   aria-label="Full name"
                   bind:value={addName}
@@ -508,7 +502,7 @@
                 />
                 <input
                   type="email"
-                  class="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                  class="input"
                   placeholder="Email"
                   aria-label="Email"
                   bind:value={addEmail}
@@ -516,14 +510,14 @@
                 />
                 <input
                   type="tel"
-                  class="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                  class="input"
                   placeholder="Phone (optional)"
                   aria-label="Phone"
                   bind:value={addPhone}
                   disabled={isAdding}
                 />
                 <select
-                  class="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                  class="select"
                   aria-label="Role"
                   bind:value={addRole}
                   disabled={isAdding}
@@ -533,126 +527,123 @@
                 </select>
               </div>
               {#if addError}
-                <div class="mt-2 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-                  <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>{addError}</span>
-                </div>
+                <Banner tone="error" message={addError} class="mt-2" />
               {/if}
-              <button
+              <Button
                 type="submit"
-                class="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isAdding || !addName.trim() || !addEmail.trim()}
+                variant="dark"
+                class="mt-3"
+                loading={isAdding}
+                disabled={!addName.trim() || !addEmail.trim()}
               >
-                {#if isAdding}
-                  <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Adding
-                {:else}
-                  Add registration
-                {/if}
-              </button>
+                {isAdding ? "Adding" : "Add registration"}
+              </Button>
             </form>
           {/if}
 
           {#if rosterLoading}
-            <div class="mt-4 flex items-center gap-3 text-sm text-gray-600">
-              <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
+            <div class="mt-4 flex items-center gap-3 text-sm text-ink/60">
+              <span class="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" aria-hidden="true"></span>
               Loading roster
             </div>
           {:else if !roster.length}
-            <p class="mt-4 rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 py-5 text-center text-sm text-gray-500">
+            <p class="mt-4 rounded-card border border-dashed border-ink/15 bg-canvas/60 px-3 py-5 text-center text-sm text-ink/50">
               No one is registered for this shift yet.
             </p>
           {:else}
             <ul class="mt-3 space-y-2">
               {#each roster as registration (registration.id)}
-                <li class="rounded-md border border-black/10 bg-white p-3">
+                <li class="rounded-control border border-ink/8 bg-white p-3">
                   <div class="flex flex-wrap items-start justify-between gap-2">
                     <div class="min-w-0">
                       <div class="flex flex-wrap items-center gap-2">
-                        <p class="font-bold leading-snug">{registration.name}</p>
-                        <span class="rounded-full px-2 py-0.5 text-xs font-bold {registration.role === 'lead' ? 'bg-purple-100 text-purple-700' : 'bg-teal-50 text-teal-700'}">
+                        <p class="font-bold leading-snug text-ink">{registration.name}</p>
+                        <Badge tone={registration.role === "lead" ? "teal" : "neutral"} size="xs">
                           {registration.role === "lead" ? "Lead" : "Volunteer"}
-                        </span>
+                        </Badge>
                       </div>
-                      <p class="mt-1 break-all text-sm text-gray-600">{registration.email}</p>
+                      <p class="mt-1 break-all text-sm text-ink/60">{registration.email}</p>
                       {#if registration.phone}
-                        <p class="text-sm text-gray-600">{registration.phone}</p>
+                        <p class="text-sm text-ink/60">{registration.phone}</p>
                       {/if}
                       {#if registration.checked_in}
-                        <p class="mt-1 text-xs font-bold text-emerald-700">
+                        <p class="mt-1 text-xs font-bold text-green-700">
                           Checked in{registration.check_in_time ? `: ${formatCheckInTime(registration.check_in_time)}` : ""}
                         </p>
                       {/if}
                     </div>
-                    <button
-                      type="button"
-                      class="rounded-md p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
-                      aria-label={`Remove ${registration.name}`}
-                      onclick={() => removeRegistration(registration)}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={Trash2}
+                      label={`Remove ${registration.name}`}
+                      onclick={() => (confirmingRemove = registration)}
                       disabled={busyRegistrationId === registration.id}
-                    >
-                      <Trash2 class="h-4 w-4" aria-hidden="true" />
-                    </button>
+                    />
                   </div>
 
                   {#if editingTimeId === registration.id}
                     <div class="mt-3 flex flex-wrap items-center gap-2">
-                      <input
-                        type="datetime-local"
-                        class="min-h-9 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-                        aria-label="Check-in time"
-                        bind:value={editingTimeValue}
-                      />
-                      <button
-                        type="button"
-                        class="min-h-9 rounded-md bg-[#0f766e] px-3 text-xs font-bold text-white transition hover:bg-[#0d655e] disabled:opacity-60"
+                      <div class="w-60 max-w-full">
+                        <input
+                          type="datetime-local"
+                          class="input"
+                          aria-label="Check-in time"
+                          bind:value={editingTimeValue}
+                        />
+                      </div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        loading={busyRegistrationId === registration.id}
+                        disabled={!editingTimeValue}
                         onclick={() => saveCheckInTime(registration)}
-                        disabled={busyRegistrationId === registration.id || !editingTimeValue}
                       >
                         Save time
-                      </button>
-                      <button
-                        type="button"
-                        class="min-h-9 rounded-md border border-gray-200 px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50"
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onclick={() => (editingTimeId = "")}
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   {:else}
                     <div class="mt-3 flex flex-wrap gap-2">
                       {#if registration.checked_in}
-                        <button
-                          type="button"
-                          class="min-h-9 rounded-md border border-amber-300 bg-white px-3 text-xs font-bold text-amber-700 transition hover:bg-amber-50 disabled:opacity-60"
-                          onclick={() => setCheckIn(registration, false)}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onclick={() => requestSetCheckIn(registration, false)}
                           disabled={busyRegistrationId === registration.id}
                         >
                           Un-check in
-                        </button>
-                        <button
-                          type="button"
-                          class="min-h-9 rounded-md border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onclick={() => startEditingTime(registration)}
                         >
                           Edit time
-                        </button>
+                        </Button>
                       {:else}
-                        <button
-                          type="button"
-                          class="min-h-9 rounded-md bg-[#0f766e] px-3 text-xs font-bold text-white transition hover:bg-[#0d655e] disabled:opacity-60"
-                          onclick={() => setCheckIn(registration, true)}
-                          disabled={busyRegistrationId === registration.id}
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          loading={busyRegistrationId === registration.id}
+                          onclick={() => requestSetCheckIn(registration, true)}
                         >
                           Check in
-                        </button>
-                        <button
-                          type="button"
-                          class="min-h-9 rounded-md border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onclick={() => startEditingTime(registration)}
                         >
                           Set time
-                        </button>
+                        </Button>
                       {/if}
                     </div>
                   {/if}
@@ -662,36 +653,60 @@
           {/if}
         </section>
 
-        <section class="mt-5 rounded-md border border-red-200 bg-red-50/50 p-4">
+        <section class="mt-5 rounded-card border border-red-200 bg-red-50/50 p-4">
           <h4 class="font-bold text-red-800">Danger zone</h4>
           <p class="mt-1 text-sm text-red-700">
             Deleting a shift also removes every registration on it.
           </p>
-          <button
-            type="button"
-            class="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-            onclick={deleteShift}
-            disabled={isDeleting}
+          <Button
+            variant="danger"
+            class="mt-3"
+            icon={Trash2}
+            loading={isDeleting}
+            onclick={() => (confirmingDelete = true)}
           >
-            {#if isDeleting}
-              <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-              Deleting
-            {:else}
-              <Trash2 class="h-4 w-4" aria-hidden="true" />
-              Delete shift
-            {/if}
-          </button>
+            {isDeleting ? "Deleting" : "Delete shift"}
+          </Button>
         </section>
       </div>
 
-      <div class="border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 w-full items-center justify-center rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          onclick={requestClose}
-        >
+      <div class="border-t border-ink/8 p-4">
+        <Button variant="primary" class="min-h-11 w-full" onclick={requestClose}>
           Close
-        </button>
+        </Button>
       </div>
   {/if}
 </SlideOver>
+
+<ConfirmDialog
+  open={!!confirmingUncheck}
+  title="Un-check in volunteer?"
+  message={confirmingUncheck ? `Un-check in ${confirmingUncheck.name}? Their check-in time will be cleared.` : ""}
+  confirmLabel="Un-check in"
+  tone="primary"
+  busy={!!confirmingUncheck && busyRegistrationId === confirmingUncheck.id}
+  onConfirm={confirmUncheck}
+  onCancel={() => (confirmingUncheck = null)}
+/>
+
+<ConfirmDialog
+  open={!!confirmingRemove}
+  title="Remove registration?"
+  message={confirmingRemove ? `Remove ${confirmingRemove.name} (${confirmingRemove.email}) from this shift?` : ""}
+  confirmLabel="Remove"
+  tone="danger"
+  busy={!!confirmingRemove && busyRegistrationId === confirmingRemove.id}
+  onConfirm={confirmRemove}
+  onCancel={() => (confirmingRemove = null)}
+/>
+
+<ConfirmDialog
+  open={confirmingDelete}
+  title="Delete shift?"
+  message={`Delete this shift and all ${roster.length} registration${roster.length === 1 ? "" : "s"}? This cannot be undone.`}
+  confirmLabel="Delete shift"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={deleteShift}
+  onCancel={() => (confirmingDelete = false)}
+/>

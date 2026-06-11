@@ -1,16 +1,13 @@
 <script>
   import { onMount } from "svelte";
-  import {
-    CircleAlert,
-    Eye,
-    EyeOff,
-    Plus,
-    Sparkles,
-    Ticket,
-  } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import { Eye, EyeOff, Plus, Sparkles, Ticket } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import StatCard from "../ui/StatCard.svelte";
   import EventEditorDrawer from "./EventEditorDrawer.svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
 
@@ -121,41 +118,36 @@
   <h3 id="events-view-title" class="sr-only">Events</h3>
 
   <div class="grid gap-3 sm:grid-cols-3">
-    <SummaryCard label="Total events" value={events.length} icon={Ticket} tone="gold" />
-    <SummaryCard label="Published" value={publishedCount} icon={Eye} tone="teal" />
-    <SummaryCard label="Featured" value={featuredCount} icon={Sparkles} tone="gold" />
+    <StatCard label="Total events" value={events.length} icon={Ticket} tone="gold" loading={isLoading} />
+    <StatCard label="Published" value={publishedCount} icon={Eye} tone="teal" loading={isLoading} />
+    <StatCard label="Featured" value={featuredCount} icon={Sparkles} tone="gold" loading={isLoading} />
   </div>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   <Panel title="Public Events" id="events-panel-title" loading={isLoading}>
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-gray-600">
-        Published events appear on
-        <a class="font-bold text-[#0f766e] underline" href="/events" target="_blank" rel="noopener">latinasweatproject.com/events</a>
-        within a minute, no deploy needed.
-      </p>
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
-        onclick={() => (selectedEvent = { tags: [] })}
-      >
-        <Plus class="h-4 w-4" aria-hidden="true" />
-        New event
-      </button>
-    </div>
+    <Button
+      slot="actions"
+      variant="primary"
+      icon={Plus}
+      onclick={() => (selectedEvent = { tags: [] })}
+    >
+      New event
+    </Button>
+
+    <p class="mb-4 text-sm text-ink/60">
+      Published events appear on
+      <a class="font-bold text-accent-strong underline" href="/events" target="_blank" rel="noopener">latinasweatproject.com/events</a>
+      within a minute, no deploy needed.
+    </p>
 
     {#if isLoading}
-      <div class="flex min-h-48 items-center justify-center">
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Loading events
-        </div>
+      <div class="space-y-2">
+        {#each Array(3) as _, i (i)}
+          <SkeletonCard lines={2} />
+        {/each}
       </div>
     {:else if !events.length}
       <EmptyState
@@ -165,14 +157,14 @@
     {:else}
       <div class="space-y-2">
         {#each events as event (event.id)}
-          <div class="flex flex-wrap items-center gap-3 rounded-md border border-black/10 bg-white px-4 py-3 {event.published ? '' : 'opacity-70'}">
+          <div class="flex flex-wrap items-center gap-3 rounded-control border border-ink/8 bg-white px-4 py-3 {event.published ? '' : 'opacity-70'}">
             <button
               type="button"
               class="min-w-0 flex-1 text-left"
               onclick={() => (selectedEvent = event)}
             >
-              <span class="block font-bold leading-snug">{event.title}</span>
-              <span class="mt-1 block text-sm text-gray-600">
+              <span class="block font-bold leading-snug text-ink">{event.title}</span>
+              <span class="mt-1 block text-sm text-ink/60">
                 {formatDateRange(event)}
                 {#if event.location}
                   · {event.location}
@@ -181,7 +173,7 @@
               {#if event.tags?.length}
                 <span class="mt-1.5 flex flex-wrap gap-1.5">
                   {#each event.tags as tag}
-                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">{tag}</span>
+                    <Badge tone="neutral" size="xs">{tag}</Badge>
                   {/each}
                 </span>
               {/if}
@@ -189,25 +181,22 @@
 
             <div class="flex items-center gap-2">
               {#if event.featured}
-                <span class="rounded-full bg-[#fff3d8] px-2.5 py-1 text-xs font-bold text-[#8a5700]">Featured</span>
+                <Badge tone="gold">Featured</Badge>
               {/if}
               {#if event.recurring}
-                <span class="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">Recurring</span>
+                <Badge tone="teal">Recurring</Badge>
               {/if}
-              <button
-                type="button"
-                class="inline-flex min-h-9 items-center gap-1.5 rounded-md border px-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 {event.published ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'}"
+              <Badge tone={event.published ? "green" : "neutral"} dot>
+                {event.published ? "Published" : "Draft"}
+              </Badge>
+              <Button
+                size="sm"
+                icon={event.published ? EyeOff : Eye}
+                loading={togglingEventId === event.id}
                 onclick={() => togglePublished(event)}
-                disabled={togglingEventId === event.id}
               >
-                {#if event.published}
-                  <Eye class="h-3.5 w-3.5" aria-hidden="true" />
-                  Published
-                {:else}
-                  <EyeOff class="h-3.5 w-3.5" aria-hidden="true" />
-                  Hidden
-                {/if}
-              </button>
+                {event.published ? "Hide" : "Publish"}
+              </Button>
             </div>
           </div>
         {/each}

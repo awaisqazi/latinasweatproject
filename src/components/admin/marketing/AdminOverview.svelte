@@ -1,8 +1,6 @@
 <script>
   import { onMount } from "svelte";
   import {
-    AlertCircle,
-    ArrowUpDown,
     CheckCircle2,
     Download,
     ExternalLink,
@@ -13,14 +11,21 @@
     RefreshCw,
     RotateCcw,
     Save,
-    Search,
-    ShieldAlert,
     Trash2,
     X,
   } from "@lucide/svelte";
-  import EmptyState from "./EmptyState.svelte";
-  import Panel from "./Panel.svelte";
   import SlideOver from "./SlideOver.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import DataTable from "../ui/DataTable.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SearchInput from "../ui/SearchInput.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import StatCard from "../ui/StatCard.svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
 
   export let supabase;
@@ -70,6 +75,26 @@
   const projectSelectColumns =
     "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,intake_respondent_email,intake_contact_name,intake_urgency,intake_payload,created_at";
 
+  // Badge tone maps for the whole view: status / priority / source pills.
+  const STATUS_TONES = {
+    Stuck: "red",
+    "In Production": "blue",
+    Published: "green",
+  };
+  const PRIORITY_TONES = { P0: "red", P1: "amber", P2: "teal" };
+  const SOURCE_TONES = { manual: "neutral", google_form: "teal" };
+
+  const projectColumns = [
+    { key: "title", label: "Project" },
+    { key: "status", label: "Status" },
+    { key: "priority", label: "Priority" },
+    { key: "deadline", label: "Deadline", hideBelow: "lg" },
+    { key: "publish_date", label: "Publish", hideBelow: "lg" },
+    { key: "assigned_to", label: "Assigned", hideBelow: "xl" },
+    { key: "copy_approved", label: "Copy" },
+    { key: "actions", label: "Actions" },
+  ];
+
   let intakeProjects = [];
   let allProjects = [];
   let teamMembers = [];
@@ -106,6 +131,9 @@
   let deletingProjectId = "";
   let savingManualProject = false;
   let lastRefreshKey = refreshKey;
+  let confirmingSaveProject = null;
+  let saveConfirmResolve = null;
+  let confirmingDeleteProject = null;
 
   $: isAdmin = isOperationalAdmin(profile);
   $: assignableTeamMembers = getAssignableTeamMembers(teamMembers, accountUsers);
@@ -541,13 +569,6 @@
     };
   }
 
-  function setIntakeAssignmentSearch(projectId, value) {
-    assignmentSearches = {
-      ...assignmentSearches,
-      [projectId]: value,
-    };
-  }
-
   function getFilteredTeamMembers(searchValue, members = assignableTeamMembers) {
     const query = normalizeSearch(searchValue);
 
@@ -726,17 +747,6 @@
     });
   }
 
-  function setProjectSort(field) {
-    if (projectSortField === field) {
-      projectSortDirection = projectSortDirection === "asc" ? "desc" : "asc";
-    } else {
-      projectSortField = field;
-      projectSortDirection = "asc";
-    }
-
-    currentProjectPage = 1;
-  }
-
   function updateProjectSortField(field) {
     projectSortField = field;
     currentProjectPage = 1;
@@ -749,22 +759,6 @@
 
   function resetProjectPage() {
     currentProjectPage = 1;
-  }
-
-  function getSortLabel(field) {
-    if (projectSortField !== field) return "Sort";
-
-    return projectSortDirection === "asc" ? "Ascending" : "Descending";
-  }
-
-  function getSortIndicator(field) {
-    if (projectSortField !== field) return "";
-
-    return projectSortDirection === "asc" ? " ↑" : " ↓";
-  }
-
-  function getSortButtonClass(field) {
-    return projectSortField === field ? "text-[#0f766e]" : "text-gray-500";
   }
 
   function updateProjectFilter(field, value) {
@@ -914,9 +908,7 @@
 
     if (!isProjectDraftDirty(project)) return project;
 
-    const confirmed = window.confirm(
-      `Save changes to "${project.title}"? These updates will apply across Workspace, Kanban, Project Calendar, and Publishing Calendar.`,
-    );
+    const confirmed = await requestSaveConfirmation(project);
 
     if (!confirmed) return false;
 
@@ -934,6 +926,7 @@
     if (error) {
       errorMessage = error.message;
       savingProjectId = "";
+      confirmingSaveProject = null;
       return false;
     }
 
@@ -952,19 +945,38 @@
       [data.id]: projectToDraft(data),
     };
     savingProjectId = "";
+    confirmingSaveProject = null;
     successMessage = `"${data.title}" was saved.`;
 
     await onProjectsChanged();
     return data;
   }
 
+  function requestSaveConfirmation(project) {
+    confirmingSaveProject = project;
+
+    return new Promise((resolve) => {
+      saveConfirmResolve = resolve;
+    });
+  }
+
+  function resolveSaveConfirmation(confirmed) {
+    const resolve = saveConfirmResolve;
+
+    saveConfirmResolve = null;
+
+    if (!confirmed) {
+      confirmingSaveProject = null;
+    }
+
+    if (resolve) resolve(confirmed);
+  }
+
+  function requestDeleteProject(project) {
+    confirmingDeleteProject = project;
+  }
+
   async function deleteProject(project) {
-    const confirmed = window.confirm(
-      `Delete "${project.title}"? This cannot be undone.`,
-    );
-
-    if (!confirmed) return;
-
     deletingProjectId = project.id;
     errorMessage = "";
     successMessage = "";
@@ -981,6 +993,7 @@
     }
 
     deletingProjectId = "";
+    confirmingDeleteProject = null;
   }
 
   async function openManualProjectModal() {
@@ -1135,31 +1148,18 @@
     return "Pending";
   }
 
-  function getAccountStatusClass(user) {
-    if (user.account_status === "active") {
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    }
-
-    if (user.account_status === "invited") {
-      return "border-amber-200 bg-amber-50 text-amber-700";
-    }
-
-    return "border-gray-200 bg-gray-50 text-gray-700";
+  function getPriorityTone(priority) {
+    return PRIORITY_TONES[priority] || "neutral";
   }
 
-  function getPriorityClass(priority) {
-    if (priority === "P0") return "bg-red-100 text-red-800 border-red-300";
-    if (priority === "P1") return "bg-amber-100 text-amber-800 border-amber-300";
-    if (priority === "P2") return "bg-teal-100 text-teal-800 border-teal-300";
-    return "bg-gray-50 text-gray-600 border-gray-200";
+  function getStatusTone(status) {
+    if (STATUS_TONES[status]) return STATUS_TONES[status];
+    if (status?.startsWith("Ready")) return "amber";
+    return "neutral";
   }
 
-  function getStatusClass(status) {
-    if (status === "Stuck") return "bg-red-50 text-red-700 border-red-200";
-    if (status === "In Production") return "bg-blue-50 text-blue-700 border-blue-200";
-    if (status?.startsWith("Ready")) return "bg-amber-50 text-amber-700 border-amber-200";
-    if (status === "Published") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    return "bg-gray-50 text-gray-700 border-gray-200";
+  function getSourceTone(source) {
+    return SOURCE_TONES[source] || "neutral";
   }
 
   function formatAssigned(project) {
@@ -1296,102 +1296,48 @@
 </script>
 
 {#if !isAdmin}
-  <section
-    class="rounded-lg border border-red-200 bg-red-50 p-6 text-red-900 shadow-sm"
-    aria-labelledby="admin-unauthorized-title"
-    role="alert"
-  >
-    <div class="flex items-start gap-3">
-      <ShieldAlert class="mt-1 h-6 w-6 shrink-0" aria-hidden="true" />
-      <div>
-        <h3 id="admin-unauthorized-title" class="text-lg font-bold">
-          Unauthorized
-        </h3>
-        <p class="mt-2 text-sm leading-6">
-          This admin view is available to superusers and admins with Marketing access.
-          A superuser can update module access from User Access.
-        </p>
-      </div>
-    </div>
-  </section>
+  <Banner tone="error">
+    <p class="font-bold">Unauthorized</p>
+    <p class="mt-1">
+      This admin view is available to superusers and admins with Marketing access.
+      A superuser can update module access from User Access.
+    </p>
+  </Banner>
 {:else}
   <section class="space-y-5" aria-labelledby="admin-title">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0f766e]">
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
           Admin controls
         </p>
-        <h3 id="admin-title" class="mt-1 text-2xl font-bold">Admin Overview</h3>
+        <h3 id="admin-title" class="mt-1 text-2xl font-bold text-ink">Admin Overview</h3>
       </div>
 
-      <button
-        type="button"
-        class="inline-flex min-h-10 w-fit items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-semibold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
-        onclick={loadAdminData}
-        disabled={isRefreshing}
-      >
-        <RefreshCw class="h-4 w-4 {isRefreshing ? 'animate-spin' : ''}" aria-hidden="true" />
+      <Button icon={RefreshCw} loading={isRefreshing} onclick={loadAdminData}>
         Refresh
-      </button>
+      </Button>
     </div>
 
     {#if errorMessage}
-      <div
-        class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-        role="alert"
-      >
-        <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{errorMessage}</span>
-      </div>
+      <Banner tone="error" message={errorMessage} />
     {/if}
 
     {#if successMessage}
-      <div
-        class="flex gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        role="status"
-      >
-        <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{successMessage}</span>
-      </div>
+      <Banner tone="success" message={successMessage} />
     {/if}
 
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-          Team accounts
-        </p>
-        <p class="mt-2 text-3xl font-bold">{accountUsers.length}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-          Intake queue
-        </p>
-        <p class="mt-2 text-3xl font-bold">{intakeProjects.length}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-          Copy pending
-        </p>
-        <p class="mt-2 text-3xl font-bold">{copyPendingCount}</p>
-      </div>
-      <div class="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-          Total projects
-        </p>
-        <p class="mt-2 text-3xl font-bold">{allProjects.length}</p>
-      </div>
+      <StatCard label="Team accounts" value={accountUsers.length} tone="neutral" loading={isLoading} />
+      <StatCard label="Intake queue" value={intakeProjects.length} tone="gold" loading={isLoading} />
+      <StatCard label="Copy pending" value={copyPendingCount} tone="rose" loading={isLoading} />
+      <StatCard label="Total projects" value={allProjects.length} tone="teal" loading={isLoading} />
     </div>
 
     <Panel title="Google Forms Intake Queue" id="google-forms-intake-queue" loading={isLoading}>
       {#if isLoading}
-        <div class="flex min-h-40 items-center justify-center">
-          <div class="flex items-center gap-3 text-sm text-gray-600">
-            <span
-              class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin"
-              aria-hidden="true"
-            ></span>
-            Loading intake queue
-          </div>
+        <div class="grid gap-4 xl:grid-cols-2">
+          <SkeletonCard lines={4} />
+          <SkeletonCard lines={4} />
         </div>
       {:else if intakeProjects.length}
         <div class="grid gap-4 xl:grid-cols-2">
@@ -1400,41 +1346,39 @@
             {@const payloadEntries = getPayloadEntries(project.intake_payload)}
             {@const searchValue = assignmentSearches[project.id] || ""}
 
-            <article class="rounded-lg border border-amber-200 bg-amber-50/45 p-4 shadow-sm">
+            <article class="rounded-card border border-amber-200 bg-amber-50/45 p-4 shadow-card">
               <div class="flex flex-col gap-2 border-b border-amber-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
-                  <p class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
-                    Pending Review
-                  </p>
-                  <h4 class="mt-3 text-lg font-bold leading-tight">{project.title}</h4>
-                  <p class="mt-1 text-sm text-gray-700">
+                  <Badge tone="amber" class="uppercase tracking-[0.12em]">Pending Review</Badge>
+                  <h4 class="mt-3 text-lg font-bold leading-tight text-ink">{project.title}</h4>
+                  <p class="mt-1 text-sm text-ink/70">
                     Contact: {project.intake_contact_name || project.intake_respondent_email || "Unknown"}
                   </p>
                 </div>
-                <p class="text-sm font-semibold text-gray-600">
+                <p class="text-sm font-semibold text-ink/60">
                   {formatDateTime(project.intake_submitted_at)}
                 </p>
               </div>
 
-              <div class="mt-4 rounded-md border border-amber-200 bg-white p-3">
+              <div class="mt-4 rounded-control border border-amber-200 bg-white p-3">
                 <div class="mb-3 flex items-center gap-2">
-                  <Inbox class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
-                  <h5 class="font-bold">Request details</h5>
+                  <Inbox class="h-4 w-4 text-accent" aria-hidden="true" />
+                  <h5 class="font-bold text-ink">Request details</h5>
                 </div>
 
                 {#if payloadEntries.length}
                   <dl class="grid gap-2 text-sm">
                     {#each payloadEntries as entry}
-                      <div class="rounded-md bg-gray-50 px-3 py-2">
-                        <dt class="font-bold text-gray-900">{entry.key}</dt>
-                        <dd class="mt-1 whitespace-pre-wrap break-words text-gray-700">
+                      <div class="rounded-control bg-canvas/70 px-3 py-2">
+                        <dt class="font-bold text-ink">{entry.key}</dt>
+                        <dd class="mt-1 whitespace-pre-wrap break-words text-ink/70">
                           {entry.value}
                         </dd>
                       </div>
                     {/each}
                   </dl>
                 {:else}
-                  <p class="rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 py-4 text-sm text-gray-600">
+                  <p class="rounded-control border border-dashed border-ink/15 bg-canvas/70 px-3 py-4 text-sm text-ink/60">
                     No intake payload was attached to this submission.
                   </p>
                 {/if}
@@ -1442,39 +1386,28 @@
 
               <form class="mt-4 grid gap-4" onsubmit={(event) => approveIntake(event, project)}>
                 <div>
-                  <label class="text-sm font-bold" for={`intake-assignees-${project.id}`}>
-                    Assign team members
-                  </label>
-                  <div class="mt-2 rounded-md border border-black/10 bg-white p-3">
-                    <div class="relative">
-                      <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-                      <input
-                        id={`intake-assignees-${project.id}`}
-                        type="search"
-                        value={searchValue}
-                        class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-                        placeholder="Search account emails"
-                        oninput={(event) =>
-                          setIntakeAssignmentSearch(project.id, event.currentTarget.value)}
-                      />
-                    </div>
+                  <p class="text-sm font-semibold text-ink">Assign team members</p>
+                  <div class="mt-1.5 rounded-control border border-ink/8 bg-white p-3">
+                    <SearchInput
+                      bind:value={assignmentSearches[project.id]}
+                      placeholder="Search account emails"
+                      label="Search account emails"
+                    />
 
                     {#if draft.assigned_to?.length}
                       <div class="mt-3 flex flex-wrap gap-1.5">
                         {#each draft.assigned_to as email}
-                          <span class="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800">
-                            {email}
-                          </span>
+                          <Badge tone="teal" size="xs">{email}</Badge>
                         {/each}
                       </div>
                     {/if}
 
-                    <div class="mt-3 max-h-44 overflow-y-auto rounded-md border border-gray-200">
+                    <div class="mt-3 max-h-44 overflow-y-auto rounded-control border border-ink/10">
                       {#each getFilteredTeamMembers(searchValue, assignableTeamMembers) as member}
-                        <label class="flex min-h-11 items-center gap-3 border-b border-gray-100 px-3 py-2 text-sm last:border-b-0 hover:bg-gray-50">
+                        <label class="flex min-h-11 items-center gap-3 border-b border-ink/6 px-3 py-2 text-sm last:border-b-0 hover:bg-canvas/70">
                           <input
                             type="checkbox"
-                            class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                            class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
                             checked={draft.assigned_to?.includes(member.email)}
                             onchange={(event) =>
                               updateIntakeAssignment(
@@ -1486,7 +1419,7 @@
                           <span>{formatMember(member)}</span>
                         </label>
                       {:else}
-                        <p class="px-3 py-4 text-sm text-gray-500">
+                        <p class="px-3 py-4 text-sm text-ink/50">
                           No matching accounts.
                         </p>
                       {/each}
@@ -1495,10 +1428,10 @@
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-2">
-                  <label class="text-sm font-bold">
-                    Priority
+                  <Field label="Priority" id={`intake-priority-${project.id}`}>
                     <select
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      id={`intake-priority-${project.id}`}
+                      class="select"
                       value={draft.priority}
                       onchange={(event) =>
                         updateIntakeDraft(project.id, "priority", event.currentTarget.value)}
@@ -1507,12 +1440,12 @@
                         <option value={priority}>{priority}</option>
                       {/each}
                     </select>
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Initial status
+                  <Field label="Initial status" id={`intake-status-${project.id}`}>
                     <select
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      id={`intake-status-${project.id}`}
+                      class="select"
                       value={draft.status}
                       onchange={(event) =>
                         updateIntakeDraft(project.id, "status", event.currentTarget.value)}
@@ -1521,33 +1454,28 @@
                         <option value={status}>{status}</option>
                       {/each}
                     </select>
-                  </label>
+                  </Field>
                 </div>
 
-                <label class="text-sm font-bold">
-                  Edit notes
+                <Field label="Edit notes" id={`intake-notes-${project.id}`}>
                   <textarea
-                    class="mt-2 min-h-28 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                    id={`intake-notes-${project.id}`}
+                    class="textarea min-h-28"
                     value={draft.edit_notes}
                     placeholder="Add production notes, scope, links, or next actions."
                     oninput={(event) =>
                       updateIntakeDraft(project.id, "edit_notes", event.currentTarget.value)}
                   ></textarea>
-                </label>
+                </Field>
 
-                <button
+                <Button
                   type="submit"
-                  class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={savingIntakeId === project.id}
+                  variant="primary"
+                  icon={CheckCircle2}
+                  loading={savingIntakeId === project.id}
                 >
-                  {#if savingIntakeId === project.id}
-                    <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-                    Sending
-                  {:else}
-                    <CheckCircle2 class="h-4 w-4" aria-hidden="true" />
-                    Approve & Send to Pipeline
-                  {/if}
-                </button>
+                  {savingIntakeId === project.id ? "Sending" : "Approve & Send to Pipeline"}
+                </Button>
               </form>
             </article>
           {/each}
@@ -1563,10 +1491,10 @@
     <Panel title="Master Project Table" id="master-project-table" loading={isRefreshing}>
       <div class="mb-4 flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
         <div>
-          <p class="text-sm leading-6 text-gray-600">
+          <p class="text-sm leading-6 text-ink/60">
             Edit project records, search/filter/sort the full pipeline, export data, or add manual work.
           </p>
-          <p class="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+          <p class="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
             {#if sortedProjects.length}
               Showing {projectPageStart + 1}-{projectPageEnd} of {sortedProjects.length} filtered projects
               {#if sortedProjects.length !== allProjects.length}
@@ -1579,89 +1507,69 @@
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start 2xl:justify-end">
-          <button
-            type="button"
-            class="inline-flex min-h-10 w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-md border border-black/10 bg-white px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-            onclick={() => exportProjectsCsv("all")}
-          >
-            <Download class="h-4 w-4" aria-hidden="true" />
+          <Button icon={Download} class="whitespace-nowrap" onclick={() => exportProjectsCsv("all")}>
             Export All
-          </button>
+          </Button>
 
-          <button
-            type="button"
-            class="inline-flex min-h-10 w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-md border border-black/10 bg-white px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-            onclick={() => exportProjectsCsv("filtered")}
-          >
-            <Download class="h-4 w-4" aria-hidden="true" />
+          <Button icon={Download} class="whitespace-nowrap" onclick={() => exportProjectsCsv("filtered")}>
             Export Filtered
-          </button>
+          </Button>
 
-          <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <label class="flex items-center gap-2 text-sm font-semibold text-ink/70">
             Rows
-            <select
-              class="min-h-10 rounded-md border border-black/10 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-              value={projectPageSize}
-              onchange={(event) => setProjectPageSize(event.currentTarget.value)}
-            >
-              {#each projectPageSizes as size}
-                <option value={size}>{size}</option>
-              {/each}
-            </select>
+            <span class="w-20">
+              <select
+                class="select"
+                value={projectPageSize}
+                onchange={(event) => setProjectPageSize(event.currentTarget.value)}
+              >
+                {#each projectPageSizes as size}
+                  <option value={size}>{size}</option>
+                {/each}
+              </select>
+            </span>
           </label>
 
           <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="min-h-10 rounded-md border border-black/10 bg-white px-3 text-sm font-bold transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-50"
+            <Button
               onclick={() => setProjectPage(currentProjectPage - 1)}
               disabled={currentProjectPage <= 1}
             >
               Previous
-            </button>
-            <span class="min-w-20 text-center text-sm font-bold text-gray-700">
+            </Button>
+            <span class="min-w-20 text-center text-sm font-bold text-ink/70">
               {currentProjectPage} / {totalProjectPages}
             </span>
-            <button
-              type="button"
-              class="min-h-10 rounded-md border border-black/10 bg-white px-3 text-sm font-bold transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-50"
+            <Button
               onclick={() => setProjectPage(currentProjectPage + 1)}
               disabled={currentProjectPage >= totalProjectPages}
             >
               Next
-            </button>
+            </Button>
           </div>
 
-          <button
-            type="button"
-            class="inline-flex min-h-10 w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-[#1E1E1E] px-3 text-sm font-bold text-white transition hover:bg-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#ffbd59] focus:ring-offset-2"
-            onclick={openManualProjectModal}
-          >
-            <Plus class="h-4 w-4" aria-hidden="true" />
+          <Button variant="dark" icon={Plus} class="whitespace-nowrap" onclick={openManualProjectModal}>
             Add Manual Project
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div class="mb-4 grid gap-3 rounded-md border border-black/10 bg-gray-50 p-3 lg:grid-cols-[minmax(16rem,2fr)_repeat(3,minmax(10rem,1fr))] xl:grid-cols-[minmax(18rem,2fr)_repeat(4,minmax(9rem,1fr))] 2xl:grid-cols-[minmax(18rem,2fr)_repeat(7,minmax(9rem,1fr))]">
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
-          Search
-          <div class="relative mt-2">
-            <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-            <input
-              type="search"
-              class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-              bind:value={projectSearch}
-              placeholder="Title, assignee, channel, notes, links"
-              oninput={resetProjectPage}
-            />
-          </div>
-        </label>
+      <div class="mb-4 grid gap-3 rounded-control border border-ink/8 bg-canvas/70 p-3 lg:grid-cols-[minmax(16rem,2fr)_repeat(3,minmax(10rem,1fr))] xl:grid-cols-[minmax(18rem,2fr)_repeat(4,minmax(9rem,1fr))] 2xl:grid-cols-[minmax(18rem,2fr)_repeat(7,minmax(9rem,1fr))]">
+        <div class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+          <span>Search</span>
+          <SearchInput
+            class="mt-2"
+            bind:value={projectSearch}
+            placeholder="Title, assignee, channel, notes, links"
+            label="Search projects"
+            onSearch={resetProjectPage}
+          />
+        </div>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Status
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectStatusFilter}
             onchange={resetProjectPage}
           >
@@ -1672,10 +1580,10 @@
           </select>
         </label>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Priority
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectPriorityFilter}
             onchange={resetProjectPage}
           >
@@ -1687,10 +1595,10 @@
           </select>
         </label>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Assignee
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectAssigneeFilter}
             onchange={resetProjectPage}
           >
@@ -1701,10 +1609,10 @@
           </select>
         </label>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Source
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectSourceFilter}
             onchange={resetProjectPage}
           >
@@ -1715,10 +1623,10 @@
           </select>
         </label>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Copy
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectCopyFilter}
             onchange={resetProjectPage}
           >
@@ -1728,10 +1636,10 @@
           </select>
         </label>
 
-        <label class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           Review
           <select
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectReviewFilter}
             onchange={resetProjectPage}
           >
@@ -1741,11 +1649,11 @@
           </select>
         </label>
 
-        <div class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <div class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           <label for="project-sort-field">Sort by</label>
           <select
             id="project-sort-field"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectSortField}
             onchange={(event) => updateProjectSortField(event.currentTarget.value)}
           >
@@ -1755,11 +1663,11 @@
           </select>
         </div>
 
-        <div class="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <div class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
           <label for="project-sort-direction">Direction</label>
           <select
             id="project-sort-direction"
-            class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="select mt-2"
             bind:value={projectSortDirection}
             onchange={(event) => setProjectSortDirection(event.currentTarget.value)}
           >
@@ -1769,166 +1677,125 @@
         </div>
 
         <div class="flex items-end">
-          <button
-            type="button"
-            class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-            onclick={resetProjectFilters}
-          >
-            <RotateCcw class="h-4 w-4" aria-hidden="true" />
+          <Button icon={RotateCcw} class="w-full" onclick={resetProjectFilters}>
             Reset Filters
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div class="max-h-[64vh] overflow-auto rounded-md border border-black/10">
-        <table class="min-w-[68rem] w-full divide-y divide-gray-200 bg-white text-left text-sm">
-          <thead class="sticky top-0 z-10 bg-gray-50 text-xs font-bold uppercase tracking-[0.12em] text-gray-500 shadow-sm">
-            <tr>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('title')}" onclick={() => setProjectSort("title")}>
-                  Project{getSortIndicator("title")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("title")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('status')}" onclick={() => setProjectSort("status")}>
-                  Status{getSortIndicator("status")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("status")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('priority')}" onclick={() => setProjectSort("priority")}>
-                  Priority{getSortIndicator("priority")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("priority")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('deadline')}" onclick={() => setProjectSort("deadline")}>
-                  Deadline{getSortIndicator("deadline")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("deadline")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('publish_date')}" onclick={() => setProjectSort("publish_date")}>
-                  Publish{getSortIndicator("publish_date")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("publish_date")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('assigned_to')}" onclick={() => setProjectSort("assigned_to")}>
-                  Assigned{getSortIndicator("assigned_to")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("assigned_to")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">
-                <button type="button" class="inline-flex items-center gap-1.5 hover:text-[#0f766e] {getSortButtonClass('copy_approved')}" onclick={() => setProjectSort("copy_approved")}>
-                  Copy{getSortIndicator("copy_approved")}
-                  <ArrowUpDown class="h-3.5 w-3.5" aria-label={getSortLabel("copy_approved")} />
-                </button>
-              </th>
-              <th scope="col" class="px-3 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            {#each visibleProjects as project}
-              <tr
-                class="cursor-pointer align-middle transition hover:bg-[#0f766e]/5 focus-within:bg-[#0f766e]/5"
-                onclick={() => openProjectDrawer(project)}
+      <DataTable
+        columns={projectColumns}
+        rows={visibleProjects}
+        rowKey="id"
+        loading={isLoading}
+        minWidth="68rem"
+        emptyTitle="No projects yet"
+        emptyMessage="Add a manual project or approve an intake request to start the pipeline."
+        onRowClick={(project) => openProjectDrawer(project)}
+        class="max-h-[64vh]"
+      >
+        <svelte:fragment slot="cell" let:row let:column>
+          {#if column.key === "title"}
+            <div class="min-w-0 max-w-[24rem]">
+              <p class="line-clamp-2 font-bold leading-snug text-ink">{row.title}</p>
+              <p class="mt-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold text-ink/50">
+                <span>{formatTags(row.channel_tags) || "General"}</span>
+                <Badge tone={getSourceTone(row.source)} size="xs">{row.source || "manual"}</Badge>
+              </p>
+            </div>
+          {:else if column.key === "status"}
+            <Badge tone={getStatusTone(row.status)}>{row.status}</Badge>
+          {:else if column.key === "priority"}
+            <Badge tone={getPriorityTone(row.priority)}>{row.priority || "Unset"}</Badge>
+          {:else if column.key === "deadline"}
+            {formatDate(row.deadline)}
+          {:else if column.key === "publish_date"}
+            {formatDate(row.publish_date)}
+          {:else if column.key === "assigned_to"}
+            <span class="line-clamp-1 max-w-[15rem]">{formatAssignedBrief(row)}</span>
+          {:else if column.key === "copy_approved"}
+            <span class="flex flex-wrap items-center gap-1">
+              <Badge tone={row.copy_approved ? "green" : "amber"}>
+                {row.copy_approved ? "Approved" : "Pending"}
+              </Badge>
+              {#if row.intake_reviewed === false}
+                <Badge tone="red">Unreviewed</Badge>
+              {/if}
+            </span>
+          {:else if column.key === "actions"}
+            <div class="flex items-center gap-2">
+              <Button
+                size="sm"
+                iconOnly
+                icon={Pencil}
+                label={`Edit ${row.title}`}
+                title="Edit project"
+                onclick={(event) => {
+                  event.stopPropagation();
+                  openEditProjectModal(row);
+                }}
+              />
+
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                title="Delete project"
+                loading={deletingProjectId === row.id}
+                onclick={(event) => {
+                  event.stopPropagation();
+                  requestDeleteProject(row);
+                }}
               >
-                <td class="max-w-[24rem] px-3 py-3">
-                  <div class="min-w-0">
-                    <p class="line-clamp-2 font-bold leading-snug text-gray-950">{project.title}</p>
-                    <p class="mt-1 text-xs font-semibold text-gray-500">
-                      {formatTags(project.channel_tags) || "General"} · {project.source || "manual"}
-                    </p>
-                  </div>
-                </td>
+                {deletingProjectId === row.id ? "Deleting" : "Delete"}<span class="sr-only"> {row.title}</span>
+              </Button>
+            </div>
+          {/if}
+        </svelte:fragment>
 
-                <td class="px-3 py-3">
-                  <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(project.status)}">
-                    {project.status}
-                  </span>
-                </td>
-
-                <td class="px-3 py-3">
-                  <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-bold {getPriorityClass(project.priority)}">
-                    {project.priority || "Unset"}
-                  </span>
-                </td>
-
-                <td class="px-3 py-3 text-gray-700">
-                  {formatDate(project.deadline)}
-                </td>
-
-                <td class="px-3 py-3 text-gray-700">
-                  {formatDate(project.publish_date)}
-                </td>
-
-                <td class="max-w-[15rem] px-3 py-3 text-gray-700">
-                  <span class="line-clamp-1">{formatAssignedBrief(project)}</span>
-                </td>
-
-                <td class="px-3 py-3">
-                  <span class="rounded-full px-2.5 py-1 text-xs font-bold {project.copy_approved ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
-                    {project.copy_approved ? "Approved" : "Pending"}
-                  </span>
-                  {#if project.intake_reviewed === false}
-                    <span class="mt-1 inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">
-                      Unreviewed
-                    </span>
-                  {/if}
-                </td>
-
-                <td class="px-3 py-3">
-                  <div class="flex items-center gap-2">
-                    <button
-                      type="button"
-                      class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white text-gray-700 transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-                      aria-label={`Edit ${project.title}`}
-                      title="Edit project"
-                      onclick={(event) => {
-                        event.stopPropagation();
-                        openEditProjectModal(project);
-                      }}
-                    >
-                      <Pencil class="h-4 w-4" aria-hidden="true" />
-                    </button>
-
-                    <button
-                      type="button"
-                      class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 text-sm font-bold text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                      aria-label={`Delete ${project.title}`}
-                      title="Delete project"
-                      onclick={(event) => {
-                        event.stopPropagation();
-                        deleteProject(project);
-                      }}
-                      disabled={deletingProjectId === project.id}
-                    >
-                      {#if deletingProjectId === project.id}
-                        <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-                        Deleting
-                      {:else}
-                        <Trash2 class="h-4 w-4" aria-hidden="true" />
-                        Delete
-                      {/if}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            {:else}
-              <tr>
-                <td colspan="8" class="px-3 py-10">
-                  <EmptyState
-                    title="No projects yet"
-                    message="Add a manual project or approve an intake request to start the pipeline."
-                  />
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+        <svelte:fragment slot="card" let:row>
+          <div class="rounded-card border border-ink/8 bg-white p-4 shadow-card">
+            <button
+              type="button"
+              class="block w-full text-left"
+              onclick={() => openProjectDrawer(row)}
+            >
+              <p class="font-bold leading-snug text-ink">{row.title}</p>
+              <p class="mt-1 text-xs font-semibold text-ink/50">
+                {formatTags(row.channel_tags) || "General"} · {row.source || "manual"}
+              </p>
+              <span class="mt-2 flex flex-wrap gap-1.5">
+                <Badge tone={getStatusTone(row.status)} size="xs">{row.status}</Badge>
+                <Badge tone={getPriorityTone(row.priority)} size="xs">{row.priority || "Unset"}</Badge>
+                <Badge tone={row.copy_approved ? "green" : "amber"} size="xs">
+                  {row.copy_approved ? "Copy approved" : "Copy pending"}
+                </Badge>
+                {#if row.intake_reviewed === false}
+                  <Badge tone="red" size="xs">Unreviewed</Badge>
+                {/if}
+              </span>
+              <p class="mt-2 text-xs text-ink/60">
+                Deadline {formatDate(row.deadline)} · Publish {formatDate(row.publish_date)}
+              </p>
+              <p class="mt-1 truncate text-xs text-ink/60">{formatAssignedBrief(row)}</p>
+            </button>
+            <div class="mt-3 flex items-center gap-2">
+              <Button size="sm" icon={Pencil} onclick={() => openEditProjectModal(row)}>
+                Edit<span class="sr-only"> {row.title}</span>
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                loading={deletingProjectId === row.id}
+                onclick={() => requestDeleteProject(row)}
+              >
+                {deletingProjectId === row.id ? "Deleting" : "Delete"}<span class="sr-only"> {row.title}</span>
+              </Button>
+            </div>
+          </div>
+        </svelte:fragment>
+      </DataTable>
     </Panel>
   </section>
 
@@ -1947,10 +1814,10 @@
       {@const payloadEntries = getPayloadEntries(editingProject.intake_payload)}
 
       <div class="flex min-h-full flex-col bg-white">
-        <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
+        <div class="border-b border-ink/10 bg-ink px-5 py-5 text-white">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
-              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#ffbd59]">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand">
                 {isProjectDrawerEditing ? "Edit project" : "Project details"}
               </p>
               <h3 class="mt-2 text-xl font-bold leading-tight">{editingProject.title}</h3>
@@ -1983,22 +1850,22 @@
           <form class="contents" onsubmit={submitEditProject}>
             <div class="flex-1 overflow-y-auto px-5 py-5">
               <div class="grid gap-4">
-                <label class="text-sm font-bold">
-                  Project title
+                <Field label="Project title" id="edit-project-title" required>
                   <input
+                    id="edit-project-title"
                     type="text"
-                    class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                    class="input"
                     value={draft.title}
                     oninput={(event) => updateProjectDraft(editingProject.id, "title", event.currentTarget.value)}
                     required
                   />
-                </label>
+                </Field>
 
                 <div class="grid gap-3 md:grid-cols-3">
-                  <label class="text-sm font-bold">
-                    Status
+                  <Field label="Status" id="edit-project-status">
                     <select
-                      class="mt-2 min-h-10 w-full rounded-md border px-3 text-sm font-bold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 {getStatusClass(draft.status)}"
+                      id="edit-project-status"
+                      class="select"
                       value={draft.status}
                       onchange={(event) => updateProjectDraft(editingProject.id, "status", event.currentTarget.value)}
                     >
@@ -2006,12 +1873,12 @@
                         <option value={status}>{status}</option>
                       {/each}
                     </select>
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Priority
+                  <Field label="Priority" id="edit-project-priority">
                     <select
-                      class="mt-2 min-h-10 w-full rounded-md border px-3 text-sm font-bold outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 {getPriorityClass(draft.priority)}"
+                      id="edit-project-priority"
+                      class="select"
                       value={draft.priority || ""}
                       onchange={(event) => updateProjectDraft(editingProject.id, "priority", event.currentTarget.value)}
                     >
@@ -2020,12 +1887,12 @@
                         <option value={priority}>{priority}</option>
                       {/each}
                     </select>
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Source
+                  <Field label="Source" id="edit-project-source">
                     <select
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      id="edit-project-source"
+                      class="select"
                       value={draft.source}
                       onchange={(event) => updateProjectDraft(editingProject.id, "source", event.currentTarget.value)}
                     >
@@ -2033,94 +1900,89 @@
                         <option value={source}>{source}</option>
                       {/each}
                     </select>
-                  </label>
+                  </Field>
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-2">
-                  <label class="text-sm font-bold">
-                    Deadline
+                  <Field label="Deadline" id="edit-project-deadline">
                     <input
+                      id="edit-project-deadline"
                       type="date"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.deadline}
                       onchange={(event) => updateProjectDraft(editingProject.id, "deadline", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Publish date
+                  <Field label="Publish date" id="edit-project-publish-date">
                     <input
+                      id="edit-project-publish-date"
                       type="date"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.publish_date}
                       onchange={(event) => updateProjectDraft(editingProject.id, "publish_date", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-3">
-                  <label class="text-sm font-bold">
-                    Details URL
+                  <Field label="Details URL" id="edit-project-details-url">
                     <input
+                      id="edit-project-details-url"
                       type="url"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.details_url}
                       oninput={(event) => updateProjectDraft(editingProject.id, "details_url", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Files URL
+                  <Field label="Files URL" id="edit-project-files-url">
                     <input
+                      id="edit-project-files-url"
                       type="url"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.files_url}
                       oninput={(event) => updateProjectDraft(editingProject.id, "files_url", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Deliverables URL
+                  <Field label="Deliverables URL" id="edit-project-deliverables-url">
                     <input
+                      id="edit-project-deliverables-url"
                       type="url"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.deliverables_url}
                       oninput={(event) => updateProjectDraft(editingProject.id, "deliverables_url", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
                 </div>
 
-                <section class="rounded-md border border-black/10 bg-gray-50 p-3" aria-labelledby="edit-project-assignment-title">
-                  <h4 id="edit-project-assignment-title" class="text-sm font-bold">
+                <section class="rounded-control border border-ink/8 bg-canvas/70 p-3" aria-labelledby="edit-project-assignment-title">
+                  <h4 id="edit-project-assignment-title" class="text-sm font-bold text-ink">
                     Assign team members
                   </h4>
 
-                  <div class="relative mt-2">
-                    <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-                    <input
-                      type="search"
-                      class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-                      bind:value={editProjectAssignmentSearch}
-                      placeholder="Search teammates"
-                    />
-                  </div>
+                  <SearchInput
+                    class="mt-2"
+                    bind:value={editProjectAssignmentSearch}
+                    placeholder="Search teammates"
+                    label="Search teammates"
+                  />
 
                   {#if draft.assigned_to?.length}
                     <div class="mt-3 flex flex-wrap gap-1.5">
                       {#each draft.assigned_to as email}
-                        <span class="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800">
-                          {email}
-                        </span>
+                        <Badge tone="teal" size="xs">{email}</Badge>
                       {/each}
                     </div>
                   {/if}
 
-                  <div class="mt-3 max-h-48 overflow-y-auto rounded-md border border-gray-200 bg-white">
+                  <div class="mt-3 max-h-48 overflow-y-auto rounded-control border border-ink/10 bg-white">
                     {#each getProjectAssignmentOptions(editingProject, draft, editProjectAssignmentSearch, assignableTeamMembers) as option}
-                      <label class="flex min-h-10 items-center gap-3 border-b border-gray-100 px-3 py-2 text-sm last:border-b-0 hover:bg-gray-50">
+                      <label class="flex min-h-10 items-center gap-3 border-b border-ink/6 px-3 py-2 text-sm last:border-b-0 hover:bg-canvas/70">
                         <input
                           type="checkbox"
-                          class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                          class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
                           checked={isProjectAssigned(draft, option.email)}
                           onchange={(event) =>
                             updateProjectAssignment(editingProject.id, option.email, event.currentTarget.checked)}
@@ -2128,7 +1990,7 @@
                         <span>{option.label}</span>
                       </label>
                     {:else}
-                      <p class="px-3 py-4 text-sm text-gray-500">
+                      <p class="px-3 py-4 text-sm text-ink/50">
                         No matching accounts.
                       </p>
                     {/each}
@@ -2136,17 +1998,17 @@
                 </section>
 
                 <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(12rem,16rem)]">
-                  <section class="rounded-md border border-black/10 bg-gray-50 p-3" aria-labelledby="edit-project-channels-title">
-                    <h4 id="edit-project-channels-title" class="text-sm font-bold">
+                  <section class="rounded-control border border-ink/8 bg-canvas/70 p-3" aria-labelledby="edit-project-channels-title">
+                    <h4 id="edit-project-channels-title" class="text-sm font-bold text-ink">
                       Channels
                     </h4>
 
                     <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       {#each channelOptions as channel}
-                        <label class="flex min-h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-semibold transition hover:border-[#0f766e]/30">
+                        <label class="flex min-h-10 items-center gap-2 rounded-control border border-ink/10 bg-white px-3 py-2 text-sm font-semibold transition hover:border-accent/30">
                           <input
                             type="checkbox"
-                            class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                            class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
                             checked={isChannelSelected(draft.channel_tags, channel)}
                             onchange={(event) =>
                               updateProjectChannel(editingProject.id, channel, event.currentTarget.checked)}
@@ -2157,26 +2019,24 @@
                     </div>
 
                     {#if getCustomChannelTags(draft.channel_tags).length}
-                      <div class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                      <div class="mt-3 rounded-control border border-amber-200 bg-amber-50 px-3 py-2">
                         <p class="text-xs font-bold uppercase tracking-[0.1em] text-amber-800">
                           Existing custom tags
                         </p>
                         <div class="mt-2 flex flex-wrap gap-1.5">
                           {#each getCustomChannelTags(draft.channel_tags) as tag}
-                            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-amber-800">
-                              {tag}
-                            </span>
+                            <Badge tone="amber" size="xs">{tag}</Badge>
                           {/each}
                         </div>
                       </div>
                     {/if}
                   </section>
 
-                  <label class="flex min-h-10 items-center gap-3 self-end rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold">
+                  <label class="flex min-h-10 items-center gap-3 self-end rounded-control border border-ink/10 bg-white px-3 py-2 text-sm font-bold">
                     <input
                       type="checkbox"
                       role="switch"
-                      class="h-5 w-5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                      class="h-5 w-5 rounded border-ink/20 text-accent focus:ring-accent"
                       checked={draft.copy_approved}
                       onchange={(event) => updateProjectDraft(editingProject.id, "copy_approved", event.currentTarget.checked)}
                     />
@@ -2185,105 +2045,97 @@
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-3">
-                  <label class="text-sm font-bold">
-                    Contact
+                  <Field label="Contact" id="edit-project-contact">
                     <input
+                      id="edit-project-contact"
                       type="text"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.intake_contact_name}
                       oninput={(event) => updateProjectDraft(editingProject.id, "intake_contact_name", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Respondent email
+                  <Field label="Respondent email" id="edit-project-respondent-email">
                     <input
+                      id="edit-project-respondent-email"
                       type="email"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.intake_respondent_email}
                       oninput={(event) => updateProjectDraft(editingProject.id, "intake_respondent_email", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
 
-                  <label class="text-sm font-bold">
-                    Intake urgency
+                  <Field label="Intake urgency" id="edit-project-urgency">
                     <input
+                      id="edit-project-urgency"
                       type="number"
                       min="1"
                       max="5"
-                      class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                      class="input"
                       value={draft.intake_urgency}
                       oninput={(event) => updateProjectDraft(editingProject.id, "intake_urgency", event.currentTarget.value)}
                     />
-                  </label>
+                  </Field>
                 </div>
 
-                <label class="flex min-h-10 items-center gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold">
+                <label class="flex min-h-10 items-center gap-3 rounded-control border border-ink/10 bg-white px-3 py-2 text-sm font-bold">
                   <input
                     type="checkbox"
-                    class="h-5 w-5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                    class="h-5 w-5 rounded border-ink/20 text-accent focus:ring-accent"
                     checked={draft.intake_reviewed}
                     onchange={(event) => updateProjectDraft(editingProject.id, "intake_reviewed", event.currentTarget.checked)}
                   />
                   Intake reviewed
                 </label>
 
-                <label class="text-sm font-bold">
-                  Timeline / notes
+                <Field label="Timeline / notes" id="edit-project-notes">
                   <textarea
-                    class="mt-2 min-h-32 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                    id="edit-project-notes"
+                    class="textarea min-h-32"
                     value={draft.edit_notes}
                     oninput={(event) => updateProjectDraft(editingProject.id, "edit_notes", event.currentTarget.value)}
                   ></textarea>
-                </label>
+                </Field>
               </div>
             </div>
 
-            <div class="flex flex-col-reverse gap-2 border-t border-black/10 bg-white p-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-black/10 px-4 text-sm font-bold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            <div class="flex flex-col-reverse gap-2 border-t border-ink/8 bg-white p-4 sm:flex-row sm:justify-end">
+              <Button
                 onclick={cancelProjectDrawerEdit}
                 disabled={savingProjectId === editingProject.id}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                variant="primary"
+                icon={Save}
+                loading={savingProjectId === editingProject.id}
                 disabled={!isProjectDraftDirty(editingProject) || savingProjectId === editingProject.id}
               >
-                {#if savingProjectId === editingProject.id}
-                  <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Saving
-                {:else}
-                  <Save class="h-4 w-4" aria-hidden="true" />
-                  Save Changes
-                {/if}
-              </button>
+                {savingProjectId === editingProject.id ? "Saving" : "Save Changes"}
+              </Button>
             </div>
           </form>
         {:else}
           <div class="flex-1 overflow-y-auto px-5 py-5">
             <div class="flex flex-wrap gap-2">
-              <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(editingProject.status)}">
-                {editingProject.status}
-              </span>
-              <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getPriorityClass(editingProject.priority)}">
+              <Badge tone={getStatusTone(editingProject.status)}>{editingProject.status}</Badge>
+              <Badge tone={getPriorityTone(editingProject.priority)}>
                 {editingProject.priority || "Priority unset"}
-              </span>
-              <span class="rounded-full px-2.5 py-1 text-xs font-bold {editingProject.copy_approved ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+              </Badge>
+              <Badge tone={editingProject.copy_approved ? "green" : "amber"}>
                 {editingProject.copy_approved ? "Copy approved" : "Copy pending"}
-              </span>
+              </Badge>
             </div>
 
             <dl class="mt-5 grid gap-3 sm:grid-cols-2">
               {#each getProjectDetailRows(editingProject) as row}
-                <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-                  <dt class="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">
+                <div class="rounded-control border border-ink/8 bg-canvas/70 px-4 py-3">
+                  <dt class="text-xs font-bold uppercase tracking-[0.1em] text-ink/50">
                     {row.label}
                   </dt>
-                  <dd class="mt-1 break-words text-sm font-semibold text-gray-800">
+                  <dd class="mt-1 break-words text-sm font-semibold text-ink/80">
                     {row.value}
                   </dd>
                 </div>
@@ -2291,13 +2143,13 @@
             </dl>
 
             {#if detailLinks.length || detailReferences.length}
-              <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="project-drawer-links">
-                <h4 id="project-drawer-links" class="font-bold">External links</h4>
+              <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="project-drawer-links">
+                <h4 id="project-drawer-links" class="font-bold text-ink">External links</h4>
                 {#if detailLinks.length}
                   <div class="mt-3 flex flex-wrap gap-2">
                     {#each detailLinks as link}
                       <a
-                        class="inline-flex min-h-10 items-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold text-[#0f766e] transition hover:border-[#0f766e]/40 hover:bg-teal-50"
+                        class="inline-flex min-h-10 items-center gap-2 rounded-control border border-ink/10 px-3 text-sm font-bold text-accent-strong transition hover:border-accent/40 hover:bg-accent-soft"
                         href={link.url}
                         target="_blank"
                         rel="noreferrer"
@@ -2312,11 +2164,11 @@
                 {#if detailReferences.length}
                   <dl class="mt-3 grid gap-2">
                     {#each detailReferences as reference}
-                      <div class="rounded-md bg-gray-50 px-3 py-2">
-                        <dt class="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">
+                      <div class="rounded-control bg-canvas/70 px-3 py-2">
+                        <dt class="text-xs font-bold uppercase tracking-[0.1em] text-ink/50">
                           {reference.label}
                         </dt>
-                        <dd class="mt-1 break-words text-sm text-gray-700">
+                        <dd class="mt-1 break-words text-sm text-ink/70">
                           {reference.value}
                         </dd>
                       </div>
@@ -2326,21 +2178,21 @@
               </section>
             {/if}
 
-            <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="project-drawer-notes">
-              <h4 id="project-drawer-notes" class="font-bold">Timeline / notes</h4>
-              <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+            <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="project-drawer-notes">
+              <h4 id="project-drawer-notes" class="font-bold text-ink">Timeline / notes</h4>
+              <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink/70">
                 {editingProject.edit_notes || "No timeline notes yet."}
               </p>
             </section>
 
             {#if payloadEntries.length}
-              <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="project-drawer-intake">
-                <h4 id="project-drawer-intake" class="font-bold">Intake payload</h4>
+              <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="project-drawer-intake">
+                <h4 id="project-drawer-intake" class="font-bold text-ink">Intake payload</h4>
                 <dl class="mt-3 grid gap-2 text-sm">
                   {#each payloadEntries as entry}
-                    <div class="rounded-md bg-gray-50 px-3 py-2">
-                      <dt class="font-bold text-gray-900">{entry.key}</dt>
-                      <dd class="mt-1 whitespace-pre-wrap break-words text-gray-700">
+                    <div class="rounded-control bg-canvas/70 px-3 py-2">
+                      <dt class="font-bold text-ink">{entry.key}</dt>
+                      <dd class="mt-1 whitespace-pre-wrap break-words text-ink/70">
                         {entry.value}
                       </dd>
                     </div>
@@ -2350,22 +2202,13 @@
             {/if}
           </div>
 
-          <div class="flex flex-col-reverse gap-2 border-t border-black/10 bg-white p-4 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              class="inline-flex min-h-11 items-center justify-center rounded-md border border-black/10 px-4 text-sm font-bold transition hover:bg-gray-50"
-              onclick={closeEditProjectModal}
-            >
+          <div class="flex flex-col-reverse gap-2 border-t border-ink/8 bg-white p-4 sm:flex-row sm:justify-end">
+            <Button onclick={closeEditProjectModal}>
               Close
-            </button>
-            <button
-              type="button"
-              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-              onclick={startProjectDrawerEdit}
-            >
-              <Pencil class="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <Button variant="primary" icon={Pencil} onclick={startProjectDrawerEdit}>
               Edit Details
-            </button>
+            </Button>
           </div>
         {/if}
       </div>
@@ -2384,10 +2227,10 @@
       class="flex min-h-full flex-col bg-white"
       onsubmit={createManualProject}
     >
-      <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
+      <div class="border-b border-ink/10 bg-ink px-5 py-5 text-white">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#ffbd59]">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               Manual project
             </p>
             <h3 class="mt-2 text-xl font-bold leading-tight">Add Manual Project</h3>
@@ -2405,123 +2248,114 @@
 
       <div class="flex-1 overflow-y-auto px-5 py-5">
         <div class="grid gap-4">
-          <label class="text-sm font-bold">
-            Project title
+          <Field label="Project title" id="manual-project-title" required>
             <input
+              id="manual-project-title"
               type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={manualForm.title}
               required
             />
-          </label>
+          </Field>
 
           <div class="grid gap-3 md:grid-cols-2">
-            <label class="text-sm font-bold">
-              Priority
+            <Field label="Priority" id="manual-project-priority">
               <select
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                id="manual-project-priority"
+                class="select"
                 bind:value={manualForm.priority}
               >
                 {#each priorities as priority}
                   <option value={priority}>{priority}</option>
                 {/each}
               </select>
-            </label>
+            </Field>
 
-            <label class="text-sm font-bold">
-              Status
+            <Field label="Status" id="manual-project-status">
               <select
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                id="manual-project-status"
+                class="select"
                 bind:value={manualForm.status}
               >
                 {#each statuses as status}
                   <option value={status}>{status}</option>
                 {/each}
               </select>
-            </label>
+            </Field>
           </div>
 
           <div class="grid gap-3 md:grid-cols-2">
-            <label class="text-sm font-bold">
-              Deadline
+            <Field label="Deadline" id="manual-project-deadline">
               <input
+                id="manual-project-deadline"
                 type="date"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={manualForm.deadline}
               />
-            </label>
+            </Field>
 
-            <label class="text-sm font-bold">
-              Publish date
+            <Field label="Publish date" id="manual-project-publish-date">
               <input
+                id="manual-project-publish-date"
                 type="date"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={manualForm.publish_date}
               />
-            </label>
+            </Field>
           </div>
 
           <div class="grid gap-3 md:grid-cols-3">
-            <label class="text-sm font-bold">
-              Details URL
+            <Field label="Details URL" id="manual-project-details-url">
               <input
+                id="manual-project-details-url"
                 type="url"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={manualForm.details_url}
               />
-            </label>
+            </Field>
 
-            <label class="text-sm font-bold">
-              Files URL
+            <Field label="Files URL" id="manual-project-files-url">
               <input
+                id="manual-project-files-url"
                 type="url"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={manualForm.files_url}
               />
-            </label>
+            </Field>
 
-            <label class="text-sm font-bold">
-              Deliverables URL
+            <Field label="Deliverables URL" id="manual-project-deliverables-url">
               <input
+                id="manual-project-deliverables-url"
                 type="url"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={manualForm.deliverables_url}
               />
-            </label>
+            </Field>
           </div>
 
           <div>
-            <label class="text-sm font-bold" for="manual-assignees">
-              Assign team members
-            </label>
-            <div class="mt-2 rounded-md border border-black/10 bg-white p-3">
-              <div class="relative">
-                <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-                <input
-                  id="manual-assignees"
-                  type="search"
-                  bind:value={manualTeamSearch}
-                  class="min-h-10 w-full rounded-md border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
-                  placeholder="Search account emails"
-                />
-              </div>
+            <p class="text-sm font-semibold text-ink">Assign team members</p>
+            <div class="mt-1.5 rounded-control border border-ink/8 bg-white p-3">
+              <SearchInput
+                bind:value={manualTeamSearch}
+                placeholder="Search account emails"
+                label="Search account emails"
+              />
 
               {#if manualForm.assigned_to?.length}
                 <div class="mt-3 flex flex-wrap gap-1.5">
                   {#each manualForm.assigned_to as email}
-                    <span class="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800">
-                      {email}
-                    </span>
+                    <Badge tone="teal" size="xs">{email}</Badge>
                   {/each}
                 </div>
               {/if}
 
-              <div class="mt-3 max-h-44 overflow-y-auto rounded-md border border-gray-200">
+              <div class="mt-3 max-h-44 overflow-y-auto rounded-control border border-ink/10">
                 {#each getFilteredTeamMembers(manualTeamSearch, assignableTeamMembers) as member}
-                  <label class="flex min-h-11 items-center gap-3 border-b border-gray-100 px-3 py-2 text-sm last:border-b-0 hover:bg-gray-50">
+                  <label class="flex min-h-11 items-center gap-3 border-b border-ink/6 px-3 py-2 text-sm last:border-b-0 hover:bg-canvas/70">
                     <input
                       type="checkbox"
-                      class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                      class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
                       checked={manualForm.assigned_to?.includes(member.email)}
                       onchange={(event) =>
                         updateManualAssignment(member.email, event.currentTarget.checked)}
@@ -2529,7 +2363,7 @@
                     <span>{formatMember(member)}</span>
                   </label>
                 {:else}
-                  <p class="px-3 py-4 text-sm text-gray-500">
+                  <p class="px-3 py-4 text-sm text-ink/50">
                     No matching accounts.
                   </p>
                 {/each}
@@ -2537,17 +2371,17 @@
             </div>
           </div>
 
-          <section class="rounded-md border border-black/10 bg-gray-50 p-3" aria-labelledby="manual-project-channels-title">
-            <h4 id="manual-project-channels-title" class="text-sm font-bold">
+          <section class="rounded-control border border-ink/8 bg-canvas/70 p-3" aria-labelledby="manual-project-channels-title">
+            <h4 id="manual-project-channels-title" class="text-sm font-bold text-ink">
               Channels
             </h4>
 
             <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {#each channelOptions as channel}
-                <label class="flex min-h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-semibold transition hover:border-[#0f766e]/30">
+                <label class="flex min-h-10 items-center gap-2 rounded-control border border-ink/10 bg-white px-3 py-2 text-sm font-semibold transition hover:border-accent/30">
                   <input
                     type="checkbox"
-                    class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]"
+                    class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
                     checked={isChannelSelected(manualForm.channel_tags, channel)}
                     onchange={(event) => updateManualChannel(channel, event.currentTarget.checked)}
                   />
@@ -2557,39 +2391,54 @@
             </div>
           </section>
 
-          <label class="text-sm font-bold">
-            Edit notes
+          <Field label="Edit notes" id="manual-project-notes">
             <textarea
-              class="mt-2 min-h-28 w-full rounded-md border border-gray-200 px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              id="manual-project-notes"
+              class="textarea min-h-28"
               bind:value={manualForm.edit_notes}
             ></textarea>
-          </label>
+          </Field>
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-2 border-t border-black/10 bg-white p-4 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          class="inline-flex min-h-11 items-center justify-center rounded-md border border-black/10 px-4 text-sm font-bold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+      <div class="flex flex-col-reverse gap-2 border-t border-ink/8 bg-white p-4 sm:flex-row sm:justify-end">
+        <Button
           onclick={closeManualProjectModal}
           disabled={savingManualProject}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={savingManualProject}
+          variant="primary"
+          icon={FilePlus2}
+          loading={savingManualProject}
         >
-          {#if savingManualProject}
-            <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-            Adding
-          {:else}
-            <FilePlus2 class="h-4 w-4" aria-hidden="true" />
-            Add Project
-          {/if}
-        </button>
+          {savingManualProject ? "Adding" : "Add Project"}
+        </Button>
       </div>
     </form>
   </SlideOver>
+
+  <ConfirmDialog
+    open={Boolean(confirmingSaveProject)}
+    title="Save project changes"
+    message={`Save changes to "${confirmingSaveProject?.title}"? These updates will apply across Workspace, Kanban, Project Calendar, and Publishing Calendar.`}
+    confirmLabel="Save Changes"
+    tone="primary"
+    busy={Boolean(confirmingSaveProject) && savingProjectId === confirmingSaveProject?.id}
+    onConfirm={() => resolveSaveConfirmation(true)}
+    onCancel={() => resolveSaveConfirmation(false)}
+  />
+
+  <ConfirmDialog
+    open={Boolean(confirmingDeleteProject)}
+    title="Delete project"
+    message={`Delete "${confirmingDeleteProject?.title}"? This cannot be undone.`}
+    confirmLabel="Delete"
+    tone="danger"
+    busy={Boolean(deletingProjectId)}
+    onConfirm={() => deleteProject(confirmingDeleteProject)}
+    onCancel={() => (confirmingDeleteProject = null)}
+  />
 {/if}

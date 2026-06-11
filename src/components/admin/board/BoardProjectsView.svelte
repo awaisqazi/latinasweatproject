@@ -1,7 +1,6 @@
 <script>
   import { onMount } from "svelte";
   import {
-    CircleAlert,
     ClipboardList,
     Hourglass,
     LayoutList,
@@ -10,9 +9,14 @@
     SquareKanban,
     Trophy,
   } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import StatCard from "../ui/StatCard.svelte";
+  import Tabs from "../ui/Tabs.svelte";
   import BoardProjectDrawer from "./BoardProjectDrawer.svelte";
 
   export let supabase;
@@ -21,6 +25,16 @@
   export let refreshKey = 0;
 
   const BOARD_STATUSES = ["Planning", "In Progress", "Blocked", "Done"];
+  const STATUS_TONES = {
+    Planning: "neutral",
+    "In Progress": "blue",
+    Blocked: "red",
+    Done: "green",
+  };
+  const VIEW_TABS = [
+    { id: "list", label: "List", icon: LayoutList },
+    { id: "kanban", label: "Kanban", icon: SquareKanban },
+  ];
   const projectColumns =
     "id, title, description, status, owner_id, due_date, created_by, created_at, updated_at";
 
@@ -199,13 +213,6 @@
     return project.due_date < todayKey;
   }
 
-  function getStatusBadgeClass(status) {
-    if (status === "Blocked") return "bg-red-50 text-red-700 border-red-200";
-    if (status === "In Progress") return "bg-blue-50 text-blue-700 border-blue-200";
-    if (status === "Done") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-
   function getOwnerLabel(project) {
     const owner = teamMembers.find((member) => member.id === project.owner_id);
     return owner?.full_name || owner?.email || "Unowned";
@@ -216,97 +223,67 @@
   <h3 id="board-projects-title" class="sr-only">Board Projects</h3>
 
   <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    <SummaryCard label="Planning" value={projectsByStatus["Planning"]?.length || 0} icon={ClipboardList} tone="gold" />
-    <SummaryCard label="In Progress" value={projectsByStatus["In Progress"]?.length || 0} icon={Hourglass} tone="teal" />
-    <SummaryCard label="Blocked" value={projectsByStatus["Blocked"]?.length || 0} icon={OctagonAlert} tone="rose" />
-    <SummaryCard label="Done" value={projectsByStatus["Done"]?.length || 0} icon={Trophy} tone="teal" />
+    <StatCard label="Planning" value={projectsByStatus["Planning"]?.length || 0} icon={ClipboardList} tone="gold" loading={isLoading} />
+    <StatCard label="In Progress" value={projectsByStatus["In Progress"]?.length || 0} icon={Hourglass} tone="teal" loading={isLoading} />
+    <StatCard label="Blocked" value={projectsByStatus["Blocked"]?.length || 0} icon={OctagonAlert} tone="rose" loading={isLoading} />
+    <StatCard label="Done" value={projectsByStatus["Done"]?.length || 0} icon={Trophy} tone="teal" loading={isLoading} />
   </div>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   <Panel title="Board Projects" id="board-projects-panel-title" loading={isLoading}>
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="inline-flex rounded-md border border-black/10 bg-gray-50 p-1" role="group" aria-label="View mode">
-        <button
-          type="button"
-          class="inline-flex min-h-9 items-center gap-1.5 rounded px-3 text-sm font-bold transition {viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-800'}"
-          aria-pressed={viewMode === "list"}
-          onclick={() => (viewMode = "list")}
-        >
-          <LayoutList class="h-4 w-4" aria-hidden="true" />
-          List
-        </button>
-        <button
-          type="button"
-          class="inline-flex min-h-9 items-center gap-1.5 rounded px-3 text-sm font-bold transition {viewMode === 'kanban' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-800'}"
-          aria-pressed={viewMode === "kanban"}
-          onclick={() => (viewMode = "kanban")}
-        >
-          <SquareKanban class="h-4 w-4" aria-hidden="true" />
-          Kanban
-        </button>
-      </div>
+      <Tabs tabs={VIEW_TABS} bind:active={viewMode} variant="segmented" label="View mode" />
 
-      <button
-        type="button"
-        class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
+      <Button
+        variant="primary"
+        icon={Plus}
         onclick={() => (showCreateForm = !showCreateForm)}
       >
-        <Plus class="h-4 w-4" aria-hidden="true" />
         New project
-      </button>
+      </Button>
     </div>
 
     {#if showCreateForm}
-      <form class="mb-4 rounded-md border border-black/10 bg-gray-50 p-4" onsubmit={createProject}>
+      <form class="mb-4 rounded-control border border-ink/8 bg-canvas p-4" onsubmit={createProject}>
         <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
           <input
             type="text"
-            class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             placeholder="Project title"
+            aria-label="Project title"
             bind:value={newTitle}
             disabled={isCreating}
           />
           <input
             type="date"
-            class="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+            class="input"
             aria-label="Due date"
             bind:value={newDueDate}
             disabled={isCreating}
           />
-          <button
+          <Button
+            variant="dark"
             type="submit"
-            class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={!newTitle.trim() || isCreating}
+            loading={isCreating}
+            disabled={!newTitle.trim()}
           >
-            {#if isCreating}
-              <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-              Creating
-            {:else}
-              Create
-            {/if}
-          </button>
+            Create
+          </Button>
         </div>
         {#if createError}
-          <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{createError}</span>
-          </div>
+          <Banner tone="error" message={createError} class="mt-3" />
         {/if}
       </form>
     {/if}
 
     {#if isLoading}
-      <div class="flex min-h-48 items-center justify-center">
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Loading board projects
-        </div>
+      <div class="space-y-2">
+        {#each Array(3) as _, i (i)}
+          <SkeletonCard lines={2} />
+        {/each}
       </div>
     {:else if !boardProjects.length}
       <EmptyState
@@ -318,21 +295,21 @@
         {#each sortedProjects as project (project.id)}
           <button
             type="button"
-            class="flex w-full flex-wrap items-center gap-3 rounded-md border border-black/10 bg-white px-4 py-3 text-left transition hover:border-[#0f766e]/40 hover:shadow-sm"
+            class="flex w-full flex-wrap items-center gap-3 rounded-control border border-ink/8 bg-white px-4 py-3 text-left transition hover:border-accent/40 hover:shadow-card"
             onclick={() => (selectedProject = project)}
           >
             <span class="min-w-0 flex-1">
-              <span class="block font-bold leading-snug {project.status === 'Done' ? 'text-gray-400 line-through' : ''}">
+              <span class="block font-bold leading-snug {project.status === 'Done' ? 'text-ink/40 line-through' : 'text-ink'}">
                 {project.title}
               </span>
-              <span class="mt-1 block text-sm text-gray-600">
+              <span class="mt-1 block text-sm text-ink/60">
                 {getOwnerLabel(project)}
               </span>
             </span>
-            <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusBadgeClass(project.status)}">
+            <Badge tone={STATUS_TONES[project.status] || "neutral"}>
               {project.status}
-            </span>
-            <span class="text-xs font-bold {isOverdue(project) ? 'text-red-600' : 'text-gray-500'}">
+            </Badge>
+            <span class="text-xs font-bold {isOverdue(project) ? 'text-red-600' : 'text-ink/50'}">
               {formatDate(project.due_date)}
               {#if isOverdue(project)}
                 · Overdue
@@ -346,22 +323,22 @@
         <div class="board-kanban-track grid gap-3">
           {#each BOARD_STATUSES as status}
             <div
-              class="snap-start flex min-h-[24rem] flex-col rounded-md border border-black/10 bg-gray-50 p-3 transition {dragOverStatus === status ? 'border-[#0f766e] bg-teal-50 ring-2 ring-[#0f766e]/20' : ''}"
+              class="snap-start flex min-h-[24rem] flex-col rounded-control border border-ink/8 bg-canvas p-3 transition {dragOverStatus === status ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
               role="region"
               aria-label={`${status} projects`}
               ondragover={(event) => handleColumnDragOver(event, status)}
               ondrop={(event) => handleColumnDrop(event, status)}
             >
               <div class="mb-3 flex items-center justify-between gap-2">
-                <h4 class="text-sm font-bold">{status}</h4>
-                <span class="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-gray-600">
+                <h4 class="text-sm font-bold text-ink">{status}</h4>
+                <Badge tone="neutral" size="xs" class="bg-white">
                   {projectsByStatus[status]?.length || 0}
-                </span>
+                </Badge>
               </div>
               <div class="flex-1 space-y-2">
                 {#each projectsByStatus[status] || [] as project (project.id)}
                   <div
-                    class="rounded-md border border-black/10 bg-white shadow-sm transition {movingProjectId === project.id ? 'opacity-60' : ''}"
+                    class="rounded-control border border-ink/8 bg-white shadow-card transition {movingProjectId === project.id ? 'opacity-60' : ''}"
                     draggable="true"
                     role="button"
                     tabindex="0"
@@ -376,8 +353,8 @@
                     }}
                   >
                     <div class="px-3 py-2.5">
-                      <p class="text-sm font-bold leading-snug">{project.title}</p>
-                      <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-500">
+                      <p class="text-sm font-bold leading-snug text-ink">{project.title}</p>
+                      <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-ink/50">
                         <span>{getOwnerLabel(project)}</span>
                         {#if project.due_date}
                           <span class={isOverdue(project) ? "font-bold text-red-600" : ""}>
@@ -388,7 +365,7 @@
                     </div>
                   </div>
                 {:else}
-                  <p class="rounded-md border border-dashed border-gray-300 bg-white px-3 py-4 text-center text-xs text-gray-500">
+                  <p class="rounded-control border border-dashed border-ink/15 bg-white px-3 py-4 text-center text-xs text-ink/50">
                     Empty
                   </p>
                 {/each}

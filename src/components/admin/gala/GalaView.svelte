@@ -2,15 +2,17 @@
   import { onMount } from "svelte";
   import {
     ArrowUpRight,
-    CircleAlert,
     HandCoins,
     PiggyBank,
     UserCheck,
     Users,
   } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import Skeleton from "../ui/Skeleton.svelte";
+  import StatCard from "../ui/StatCard.svelte";
 
   export let supabase;
   export let profile = null;
@@ -96,24 +98,21 @@
   <h3 id="gala-view-title" class="sr-only">Gala</h3>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    <SummaryCard label="Guests" value={guestCount} icon={Users} tone="gold" />
-    <SummaryCard label="Checked in" value={checkedInCount} icon={UserCheck} tone="teal" />
-    <SummaryCard label="Donations" value={donations.length} icon={HandCoins} tone="gold" />
-    <SummaryCard label="Total raised" value={formatCurrency(totalRaised)} icon={PiggyBank} tone="teal" />
+    <StatCard label="Guests" value={guestCount} icon={Users} tone="gold" loading={isLoading} />
+    <StatCard label="Checked in" value={checkedInCount} icon={UserCheck} tone="teal" loading={isLoading} />
+    <StatCard label="Donations" value={donations.length} icon={HandCoins} tone="gold" loading={isLoading} />
+    <StatCard label="Total raised" value={formatCurrency(totalRaised)} icon={PiggyBank} tone="teal" loading={isLoading} />
   </div>
 
   <a
     href={galaToolsUrl}
-    class="group flex flex-wrap items-center gap-4 rounded-lg border border-black/10 bg-[#1E1E1E] p-4 text-white shadow-sm transition hover:border-[#ffbd59]/60 md:p-5"
+    class="group flex flex-wrap items-center gap-4 rounded-card border border-ink/8 bg-ink p-4 text-white shadow-card transition hover:border-brand/60 md:p-5"
   >
-    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#ffbd59] text-[#1E1E1E]">
+    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-brand text-ink">
       <HandCoins class="h-5 w-5" aria-hidden="true" />
     </span>
     <span class="min-w-0 flex-1">
@@ -122,7 +121,7 @@
         Check-in station, paddle manager, donation terminal, and live overview.
       </span>
     </span>
-    <span class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition group-hover:bg-[#f4a833]">
+    <span class="inline-flex min-h-10 items-center gap-2 rounded-control bg-brand px-4 text-sm font-bold text-ink transition group-hover:bg-brand-strong">
       Gala tools
       <ArrowUpRight class="h-4 w-4" aria-hidden="true" />
     </span>
@@ -130,11 +129,16 @@
 
   <Panel title="Recent donations" id="gala-recent-donations-panel" loading={isLoading}>
     {#if isLoading}
-      <div class="flex min-h-40 items-center justify-center">
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Loading gala data
-        </div>
+      <div class="divide-y divide-ink/8">
+        {#each Array(4) as _, i (i)}
+          <div class="flex items-center justify-between gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <Skeleton variant="text" class="w-2/5" />
+              <Skeleton variant="text" class="mt-2 w-1/4" />
+            </div>
+            <Skeleton variant="text" class="w-14" />
+          </div>
+        {/each}
       </div>
     {:else if !recentDonations.length}
       <EmptyState
@@ -144,21 +148,21 @@
           : "Nothing to show. Either no gala data has been entered yet, or your account does not have the gala module. Ask an admin if you expect access."}
       />
     {:else}
-      <ul class="divide-y divide-gray-100">
+      <ul class="divide-y divide-ink/8">
         {#each recentDonations as donation (donation.id)}
           <li class="flex flex-wrap items-center gap-3 py-2.5">
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-bold text-gray-900">
+              <p class="truncate text-sm font-bold text-ink">
                 {donation.donor_name || "Anonymous"}
                 {#if donation.paddle_number}
-                  <span class="ml-1.5 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs font-semibold text-gray-600">
+                  <Badge tone="neutral" size="xs" class="ml-1.5 font-mono align-middle">
                     #{donation.paddle_number}
-                  </span>
+                  </Badge>
                 {/if}
               </p>
-              <p class="mt-0.5 text-xs text-gray-500">{formatDateTime(donation.created_at)}</p>
+              <p class="mt-0.5 text-xs text-ink/50">{formatDateTime(donation.created_at)}</p>
             </div>
-            <span class="text-sm font-bold text-[#0f766e]">{formatCurrency(donation.amount)}</span>
+            <span class="text-sm font-bold text-accent-strong">{formatCurrency(donation.amount)}</span>
           </li>
         {/each}
       </ul>

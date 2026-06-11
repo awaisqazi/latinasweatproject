@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import {
     CalendarClock,
     CheckCircle2,
@@ -8,10 +8,14 @@
     Eye,
     ListCheck,
     RefreshCw,
-    X,
   } from "@lucide/svelte";
-  import EmptyState from "./EmptyState.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import SkeletonCard from "../ui/SkeletonCard.svelte";
   import ProjectTimeline from "./ProjectTimeline.svelte";
+  import SlideOver from "./SlideOver.svelte";
 
   export let supabase;
   export let email;
@@ -20,7 +24,7 @@
 
   let projects = [];
   let selectedProject = null;
-  let detailsDialog;
+  let detailsOpen = false;
   let isLoading = true;
   let completingProjectId = "";
   let errorMessage = "";
@@ -89,21 +93,17 @@
     ]);
   }
 
-  async function openProjectDialog(project) {
+  function openProjectDialog(project) {
     selectedProject = project;
-    await tick();
-    detailsDialog?.showModal();
+    detailsOpen = true;
   }
 
   function closeProjectDialog() {
-    detailsDialog?.close();
-    selectedProject = null;
+    detailsOpen = false;
   }
 
-  function handleDialogClick(event) {
-    if (event.target === detailsDialog) {
-      closeProjectDialog();
-    }
+  function handleDrawerClosed() {
+    selectedProject = null;
   }
 
   async function completeMyAssignment(project) {
@@ -204,25 +204,23 @@
     }).format(new Date(`${value}T00:00:00`));
   }
 
-  function getPriorityClass(priority) {
-    if (priority === "P0") return "bg-red-100 text-red-800 border-red-300";
-    if (priority === "P1") return "bg-amber-100 text-amber-800 border-amber-300";
-    if (priority === "P2") return "bg-teal-100 text-teal-800 border-teal-300";
-    return "bg-gray-50 text-gray-600 border-gray-200";
+  function getPriorityTone(priority) {
+    if (priority === "P0") return "red";
+    if (priority === "P1") return "amber";
+    return "neutral";
   }
 
   function getProjectCardClass(priority) {
-    if (priority === "P0") return "border-red-300 bg-red-50 shadow-red-100/70";
-    if (priority === "P1") return "border-amber-300 bg-amber-50 shadow-amber-100/70";
-    if (priority === "P2") return "border-teal-200 bg-teal-50 shadow-teal-100/70";
-    return "border-black/10 bg-white";
+    if (priority === "P0") return "border-red-300 bg-red-50/70";
+    if (priority === "P1") return "border-amber-300 bg-amber-50/70";
+    return "border-ink/8 bg-white";
   }
 
-  function getStatusClass(status) {
-    if (status === "Stuck") return "bg-red-50 text-red-700 border-red-200";
-    if (status === "In Production") return "bg-blue-50 text-blue-700 border-blue-200";
-    if (status?.startsWith("Ready")) return "bg-amber-50 text-amber-700 border-amber-200";
-    return "bg-gray-50 text-gray-700 border-gray-200";
+  function getStatusTone(status) {
+    if (status === "Stuck") return "red";
+    if (status === "In Production") return "blue";
+    if (status?.startsWith("Ready")) return "amber";
+    return "neutral";
   }
 
   function getProjectLinks(project) {
@@ -239,43 +237,28 @@
 <section class="space-y-5" aria-labelledby="workspace-title">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0f766e]">
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
         Assigned to {email}
       </p>
-      <h3 id="workspace-title" class="mt-1 text-2xl font-bold">Workspace</h3>
+      <h3 id="workspace-title" class="mt-1 text-2xl font-bold text-ink">Workspace</h3>
     </div>
 
-    <button
-      type="button"
-      class="flex min-h-10 w-fit items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-semibold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
+    <Button
+      icon={RefreshCw}
+      class="w-fit"
       onclick={loadWorkspaceProjects}
-      disabled={isLoading}
+      loading={isLoading}
     >
-      <RefreshCw class="h-4 w-4 {isLoading ? 'animate-spin' : ''}" aria-hidden="true" />
       Refresh
-    </button>
+    </Button>
   </div>
 
   {#if errorMessage}
-    <div
-      class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-      role="alert"
-    >
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   {#if isLoading}
-    <div class="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3 text-sm text-gray-600">
-        <span
-          class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin"
-          aria-hidden="true"
-        ></span>
-        Loading assigned projects
-      </div>
-    </div>
+    <SkeletonCard lines={3} />
   {:else}
     {@render WorkspaceSection(
       "Urgent Tasks",
@@ -301,75 +284,53 @@
   {/if}
 </section>
 
-<dialog
-  bind:this={detailsDialog}
-  class="w-[min(92vw,42rem)] rounded-lg border border-black/10 bg-white p-0 text-[#1E1E1E] shadow-2xl backdrop:bg-black/45"
-  onclick={handleDialogClick}
-  onclose={() => (selectedProject = null)}
+<SlideOver
+  open={detailsOpen}
+  title={selectedProject?.title || ""}
+  eyebrow="Project details"
+  closeLabel="Close project details"
+  onClose={closeProjectDialog}
+  onClosed={handleDrawerClosed}
 >
   {#if selectedProject}
-    <div class="border-b border-black/10 bg-[#1E1E1E] px-5 py-5 text-white">
-      <div class="flex items-start justify-between gap-4">
-        <div class="min-w-0">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#ffbd59]">
-            Project details
-          </p>
-          <h3 class="mt-2 text-xl font-bold leading-tight">{selectedProject.title}</h3>
-        </div>
-        <button
-          type="button"
-          class="rounded-md p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
-          aria-label="Close project details"
-          onclick={closeProjectDialog}
-        >
-          <X class="h-5 w-5" aria-hidden="true" />
-        </button>
-      </div>
-    </div>
-
     <div class="space-y-5 px-5 py-5">
       <div class="flex flex-wrap gap-2">
-        <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(selectedProject.status)}">
+        <Badge tone={getStatusTone(selectedProject.status)}>
           {selectedProject.status}
-        </span>
-        <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getPriorityClass(selectedProject.priority)}">
+        </Badge>
+        <Badge tone={getPriorityTone(selectedProject.priority)}>
           {selectedProject.priority || "Priority unset"}
-        </span>
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+        </Badge>
+        <Badge tone="neutral">
           <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
           {formatDate(selectedProject.deadline)}
-        </span>
+        </Badge>
       </div>
 
       {#if isAssignedToCurrentUser(selectedProject)}
-        <button
-          type="button"
-          class="flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#0f766e] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#115e59] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
+          variant="primary"
+          icon={CheckCircle2}
+          class="w-full"
           onclick={() => completeMyAssignment(selectedProject)}
-          disabled={completingProjectId === selectedProject.id}
+          loading={completingProjectId === selectedProject.id}
         >
-          {#if completingProjectId === selectedProject.id}
-            <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-            Confirming
-          {:else}
-            <CheckCircle2 class="h-4 w-4" aria-hidden="true" />
-            Confirm Complete
-          {/if}
-        </button>
+          {completingProjectId === selectedProject.id ? "Confirming" : "Confirm Complete"}
+        </Button>
       {/if}
 
       <ProjectTimeline {supabase} project={selectedProject} />
 
       {#if getProjectLinks(selectedProject).length}
         <section aria-labelledby="external-links-title">
-          <h4 id="external-links-title" class="font-bold">External links</h4>
+          <h4 id="external-links-title" class="font-bold text-ink">External links</h4>
           <div class="mt-3 grid gap-2 sm:grid-cols-3">
             {#each getProjectLinks(selectedProject) as link}
               <a
                 href={link.url}
                 target="_blank"
                 rel="noreferrer"
-                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e]"
+                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-ink/14 px-3 text-sm font-bold text-ink transition hover:border-accent/40 hover:text-accent-strong"
               >
                 <ExternalLink class="h-4 w-4" aria-hidden="true" />
                 {link.label}
@@ -379,16 +340,12 @@
         </section>
       {/if}
 
-      <button
-        type="button"
-        class="flex min-h-11 w-full items-center justify-center rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-        onclick={closeProjectDialog}
-      >
+      <Button variant="primary" class="w-full" onclick={closeProjectDialog}>
         Close
-      </button>
+      </Button>
     </div>
   {/if}
-</dialog>
+</SlideOver>
 
 {#snippet WorkspaceSection(
   title,
@@ -402,66 +359,56 @@
 )}
   {@const Icon = icon}
   <section
-    class="rounded-lg border border-black/10 bg-white p-4 shadow-sm md:p-5"
+    class="rounded-card border border-ink/8 bg-white p-4 shadow-card md:p-5"
     aria-labelledby={title.toLowerCase().replaceAll(" ", "-")}
   >
     <div class="mb-4 flex items-start gap-3">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff3d8] text-[#8a5700]">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-brand-soft text-brand-ink">
         <Icon class="h-5 w-5" aria-hidden="true" />
       </span>
       <div>
-        <h4 id={title.toLowerCase().replaceAll(" ", "-")} class="text-lg font-bold">
+        <h4 id={title.toLowerCase().replaceAll(" ", "-")} class="text-lg font-bold text-ink">
           {title}
         </h4>
-        <p class="mt-1 text-sm leading-6 text-gray-600">{description}</p>
+        <p class="mt-1 text-sm leading-6 text-ink/60">{description}</p>
       </div>
     </div>
 
     {#if projects.length}
       <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {#each projects as project}
-          <article class="flex min-h-44 flex-col justify-between rounded-md border p-4 shadow-sm {getProjectCardClass(project.priority)}">
+          <article class="flex min-h-44 flex-col justify-between rounded-card border p-4 shadow-card {getProjectCardClass(project.priority)}">
             <div>
               <div class="flex items-start justify-between gap-3">
-                <h5 class="line-clamp-2 font-bold leading-snug">{project.title}</h5>
-                <span class="shrink-0 rounded-full border px-2 py-0.5 text-xs font-bold {getPriorityClass(project.priority)}">
+                <h5 class="line-clamp-2 font-bold leading-snug text-ink">{project.title}</h5>
+                <Badge tone={getPriorityTone(project.priority)} size="xs" class="shrink-0">
                   {project.priority || "Unset"}
-                </span>
+                </Badge>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
-                <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(project.status)}">
+                <Badge tone={getStatusTone(project.status)}>
                   {project.status}
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+                </Badge>
+                <Badge tone="neutral">
                   <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
                   {formatDate(project.deadline)}
-                </span>
+                </Badge>
               </div>
             </div>
 
             <div class="mt-4 grid gap-2 sm:grid-cols-2">
-              <button
-                type="button"
-                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-                onclick={() => onView(project)}
-              >
-                <Eye class="h-4 w-4" aria-hidden="true" />
+              <Button icon={Eye} class="w-full" onclick={() => onView(project)}>
                 View Details
-              </button>
-              <button
-                type="button"
-                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#0f766e] px-3 text-sm font-bold text-white transition hover:bg-[#115e59] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              </Button>
+              <Button
+                variant="primary"
+                icon={CheckCircle2}
+                class="w-full"
                 onclick={() => onComplete(project)}
-                disabled={completingProjectId === project.id}
+                loading={completingProjectId === project.id}
               >
-                {#if completingProjectId === project.id}
-                  <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Saving
-                {:else}
-                  <CheckCircle2 class="h-4 w-4" aria-hidden="true" />
-                  Complete
-                {/if}
-              </button>
+                {completingProjectId === project.id ? "Saving" : "Complete"}
+              </Button>
             </div>
           </article>
         {/each}

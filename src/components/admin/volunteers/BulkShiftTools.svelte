@@ -1,12 +1,10 @@
 <script>
-  import {
-    CalendarPlus,
-    CircleAlert,
-    CheckCircle2,
-    Trash2,
-    Upload,
-  } from "@lucide/svelte";
-  import Panel from "../marketing/Panel.svelte";
+  import { CalendarPlus, Trash2, Upload } from "@lucide/svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
   import {
     buildRecurringShiftRows,
     findOperationalOverlaps,
@@ -33,6 +31,7 @@
   let recurringLeadCap = 1;
   let recurringVolCap = 2;
   let isCreatingRecurring = false;
+  let confirmingRecurring = false;
 
   $: recurringRows = buildRecurringShiftRows({
     startDate: recurringStartDate,
@@ -43,6 +42,8 @@
     leadCapacity: recurringLeadCap,
     volunteerCapacity: recurringVolCap,
   });
+
+  $: recurringConfirmMessage = `Create ${recurringRows.length} shift${recurringRows.length === 1 ? "" : "s"} between ${recurringStartDate} and ${recurringEndDate}?`;
 
   // CSV upload state
   let csvRows = [];
@@ -59,6 +60,14 @@
   let deletePreview = null; // { deletable: [], conflicts: [] }
   let isPreviewingDelete = false;
   let isDeleting = false;
+  let confirmingBulkDelete = false;
+
+  $: bulkDeleteMessage = deletePreview
+    ? `Delete ${deletePreview.deletable.length} shift${deletePreview.deletable.length === 1 ? "" : "s"}?` +
+      (deletePreview.conflicts.length
+        ? ` ${deletePreview.conflicts.length} shift${deletePreview.conflicts.length === 1 ? "" : "s"} with registrations will be skipped.`
+        : "")
+    : "";
 
   // Extend schedule state
   let isExtending = false;
@@ -102,16 +111,13 @@
     return true;
   }
 
+  function requestCreateRecurring() {
+    if (!recurringRows.length || isCreatingRecurring) return;
+    confirmingRecurring = true;
+  }
+
   async function createRecurring() {
     if (!recurringRows.length || isCreatingRecurring) return;
-
-    if (
-      !window.confirm(
-        `Create ${recurringRows.length} shift${recurringRows.length === 1 ? "" : "s"} between ${recurringStartDate} and ${recurringEndDate}?`,
-      )
-    ) {
-      return;
-    }
 
     isCreatingRecurring = true;
     setMessages("", "");
@@ -129,6 +135,7 @@
     }
 
     isCreatingRecurring = false;
+    confirmingRecurring = false;
   }
 
   function handleCsvFile(event) {
@@ -247,21 +254,26 @@
     isPreviewingDelete = false;
   }
 
+  function requestBulkDelete() {
+    if (!deletePreview || isDeleting) return;
+
+    if (!deletePreview.deletable.length) {
+      setMessages("No empty shifts match this time slot.", "");
+      return;
+    }
+
+    confirmingBulkDelete = true;
+  }
+
   async function confirmDelete() {
     if (!deletePreview || isDeleting) return;
 
     const { deletable, conflicts } = deletePreview;
     if (!deletable.length) {
       setMessages("No empty shifts match this time slot.", "");
+      confirmingBulkDelete = false;
       return;
     }
-
-    const confirmMsg =
-      `Delete ${deletable.length} shift${deletable.length === 1 ? "" : "s"}?` +
-      (conflicts.length
-        ? ` ${conflicts.length} shift${conflicts.length === 1 ? "" : "s"} with registrations will be skipped.`
-        : "");
-    if (!window.confirm(confirmMsg)) return;
 
     isDeleting = true;
     setMessages("", "");
@@ -284,6 +296,7 @@
     }
 
     isDeleting = false;
+    confirmingBulkDelete = false;
   }
 
   async function extendSchedule() {
@@ -312,61 +325,49 @@
 
 <Panel title="Bulk shift tools" id="volunteers-bulk-tools-title">
   {#if errorMessage}
-    <div class="mb-4 flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} class="mb-4" />
   {/if}
   {#if successMessage}
-    <div class="mb-4 flex gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">
-      <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{successMessage}</span>
-    </div>
+    <Banner tone="success" message={successMessage} class="mb-4" />
   {/if}
 
   <div class="grid gap-4 lg:grid-cols-2">
     <!-- Recurring creation -->
-    <section class="rounded-md border border-black/10 bg-gray-50 p-4">
-      <h4 class="flex items-center gap-2 font-bold">
-        <CalendarPlus class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
+    <section class="rounded-card border border-ink/8 bg-canvas p-4">
+      <h4 class="flex items-center gap-2 font-bold text-ink">
+        <CalendarPlus class="h-4 w-4 text-accent" aria-hidden="true" />
         Create recurring shifts
       </h4>
-      <p class="mt-1 text-sm text-gray-600">
+      <p class="mt-1 text-sm text-ink/60">
         Adds custom shifts on the selected weekdays across a date range.
       </p>
 
       <div class="mt-3 grid grid-cols-2 gap-2">
-        <label class="block text-xs font-bold text-gray-700">
-          Start date
-          <input type="date" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringStartDate} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          End date
-          <input type="date" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringEndDate} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          Start time
-          <input type="time" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringTime} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          Duration (minutes)
-          <input type="number" min="15" step="15" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringDuration} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          Lead spots
-          <input type="number" min="0" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringLeadCap} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          Volunteer spots
-          <input type="number" min="0" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={recurringVolCap} />
-        </label>
+        <Field label="Start date" id="bulk-recurring-start-date">
+          <input id="bulk-recurring-start-date" type="date" class="input" bind:value={recurringStartDate} />
+        </Field>
+        <Field label="End date" id="bulk-recurring-end-date">
+          <input id="bulk-recurring-end-date" type="date" class="input" bind:value={recurringEndDate} />
+        </Field>
+        <Field label="Start time" id="bulk-recurring-time">
+          <input id="bulk-recurring-time" type="time" class="input" bind:value={recurringTime} />
+        </Field>
+        <Field label="Duration (minutes)" id="bulk-recurring-duration">
+          <input id="bulk-recurring-duration" type="number" min="15" step="15" class="input" bind:value={recurringDuration} />
+        </Field>
+        <Field label="Lead spots" id="bulk-recurring-lead-cap">
+          <input id="bulk-recurring-lead-cap" type="number" min="0" class="input" bind:value={recurringLeadCap} />
+        </Field>
+        <Field label="Volunteer spots" id="bulk-recurring-vol-cap">
+          <input id="bulk-recurring-vol-cap" type="number" min="0" class="input" bind:value={recurringVolCap} />
+        </Field>
       </div>
 
       <div class="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Days of week">
         {#each DAY_NAMES as dayName, day}
           <button
             type="button"
-            class="min-h-9 rounded-md border px-2.5 text-xs font-bold transition {recurringDays.includes(day) ? 'border-[#0f766e] bg-teal-50 text-teal-800' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-100'}"
+            class="min-h-9 rounded-control border px-2.5 text-xs font-bold transition {recurringDays.includes(day) ? 'border-accent bg-accent-soft text-accent-strong' : 'border-ink/14 bg-white text-ink/60 hover:bg-ink/[0.04]'}"
             aria-pressed={recurringDays.includes(day)}
             onclick={() => (recurringDays = toggleDay(recurringDays, day))}
           >
@@ -375,28 +376,28 @@
         {/each}
       </div>
 
-      <button
-        type="button"
-        class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60"
-        onclick={createRecurring}
-        disabled={isCreatingRecurring || !recurringRows.length}
+      <Button
+        variant="primary"
+        class="mt-4"
+        loading={isCreatingRecurring}
+        disabled={!recurringRows.length}
+        onclick={requestCreateRecurring}
       >
         {#if isCreatingRecurring}
-          <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
           Creating
         {:else}
           Create {recurringRows.length || ""} shift{recurringRows.length === 1 ? "" : "s"}
         {/if}
-      </button>
+      </Button>
     </section>
 
     <!-- CSV upload -->
-    <section class="rounded-md border border-black/10 bg-gray-50 p-4">
-      <h4 class="flex items-center gap-2 font-bold">
-        <Upload class="h-4 w-4 text-[#0f766e]" aria-hidden="true" />
+    <section class="rounded-card border border-ink/8 bg-canvas p-4">
+      <h4 class="flex items-center gap-2 font-bold text-ink">
+        <Upload class="h-4 w-4 text-accent" aria-hidden="true" />
         CSV bulk upload
       </h4>
-      <p class="mt-1 text-sm text-gray-600">
+      <p class="mt-1 text-sm text-ink/60">
         Columns: Date, StartTime, Duration, LeadCapacity, VolunteerCapacity. Example: 2026-06-26, 18:00, 60, 1, 2
       </p>
 
@@ -404,13 +405,13 @@
         bind:this={csvInput}
         type="file"
         accept=".csv,text/csv"
-        class="mt-3 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-[#1E1E1E] file:px-3 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-black"
+        class="mt-3 block w-full text-sm text-ink/60 file:mr-3 file:rounded-control file:border-0 file:bg-ink file:px-3 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-black"
         aria-label="CSV file"
         onchange={handleCsvFile}
       />
 
       {#if csvFileName}
-        <p class="mt-2 text-sm text-gray-700">
+        <p class="mt-2 text-sm text-ink/70">
           {csvFileName}: {csvRows.length} shift{csvRows.length === 1 ? "" : "s"} ready
           {#if csvErrors.length}
             · {csvErrors.length} line{csvErrors.length === 1 ? "" : "s"} skipped
@@ -425,51 +426,48 @@
         {/if}
       {/if}
 
-      <button
-        type="button"
-        class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] disabled:cursor-not-allowed disabled:opacity-60"
+      <Button
+        variant="primary"
+        class="mt-4"
+        loading={isUploadingCsv}
+        disabled={!csvRows.length}
         onclick={uploadCsv}
-        disabled={isUploadingCsv || !csvRows.length}
       >
         {#if isUploadingCsv}
-          <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
           Uploading
         {:else}
           Upload {csvRows.length || ""} shift{csvRows.length === 1 ? "" : "s"}
         {/if}
-      </button>
+      </Button>
     </section>
 
     <!-- Bulk delete by time slot -->
-    <section class="rounded-md border border-black/10 bg-gray-50 p-4">
-      <h4 class="flex items-center gap-2 font-bold">
+    <section class="rounded-card border border-ink/8 bg-canvas p-4">
+      <h4 class="flex items-center gap-2 font-bold text-ink">
         <Trash2 class="h-4 w-4 text-red-600" aria-hidden="true" />
         Bulk delete by time slot
       </h4>
-      <p class="mt-1 text-sm text-gray-600">
+      <p class="mt-1 text-sm text-ink/60">
         Removes shifts starting at a given time on selected weekdays. Shifts with registrations are skipped.
       </p>
 
       <div class="mt-3 grid grid-cols-2 gap-2">
-        <label class="block text-xs font-bold text-gray-700">
-          From
-          <input type="date" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={deleteStartDate} />
-        </label>
-        <label class="block text-xs font-bold text-gray-700">
-          To
-          <input type="date" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={deleteEndDate} />
-        </label>
-        <label class="col-span-2 block text-xs font-bold text-gray-700">
-          Start time
-          <input type="time" class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20" bind:value={deleteTime} />
-        </label>
+        <Field label="From" id="bulk-delete-start-date">
+          <input id="bulk-delete-start-date" type="date" class="input" bind:value={deleteStartDate} />
+        </Field>
+        <Field label="To" id="bulk-delete-end-date">
+          <input id="bulk-delete-end-date" type="date" class="input" bind:value={deleteEndDate} />
+        </Field>
+        <Field label="Start time" id="bulk-delete-time" class="col-span-2">
+          <input id="bulk-delete-time" type="time" class="input" bind:value={deleteTime} />
+        </Field>
       </div>
 
       <div class="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Days of week to delete">
         {#each DAY_NAMES as dayName, day}
           <button
             type="button"
-            class="min-h-9 rounded-md border px-2.5 text-xs font-bold transition {deleteDays.includes(day) ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-100'}"
+            class="min-h-9 rounded-control border px-2.5 text-xs font-bold transition {deleteDays.includes(day) ? 'border-red-400 bg-red-50 text-red-700' : 'border-ink/14 bg-white text-ink/60 hover:bg-ink/[0.04]'}"
             aria-pressed={deleteDays.includes(day)}
             onclick={() => (deleteDays = toggleDay(deleteDays, day))}
           >
@@ -479,78 +477,88 @@
       </div>
 
       <div class="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
+          variant="secondary"
+          loading={isPreviewingDelete}
           onclick={previewDelete}
-          disabled={isPreviewingDelete}
         >
-          {#if isPreviewingDelete}
-            <span class="h-4 w-4 rounded-full border-2 border-gray-600 border-t-transparent animate-spin" aria-hidden="true"></span>
-            Checking
-          {:else}
-            Preview deletion
-          {/if}
-        </button>
+          {isPreviewingDelete ? "Checking" : "Preview deletion"}
+        </Button>
         {#if deletePreview}
-          <button
-            type="button"
-            class="inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 bg-white px-4 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-            onclick={confirmDelete}
-            disabled={isDeleting || !deletePreview.deletable.length}
+          <Button
+            variant="danger"
+            loading={isDeleting}
+            disabled={!deletePreview.deletable.length}
+            onclick={requestBulkDelete}
           >
             {#if isDeleting}
-              <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
               Deleting
             {:else}
               Delete {deletePreview.deletable.length} shift{deletePreview.deletable.length === 1 ? "" : "s"}
             {/if}
-          </button>
+          </Button>
         {/if}
       </div>
 
       {#if deletePreview}
         <div class="mt-3 space-y-2 text-sm">
-          <p class="font-bold text-gray-800">
+          <p class="font-bold text-ink/80">
             {deletePreview.deletable.length} empty shift{deletePreview.deletable.length === 1 ? "" : "s"} will be deleted.
           </p>
           {#if deletePreview.conflicts.length}
-            <div class="rounded-md border border-amber-200 bg-amber-50 p-3">
-              <p class="font-bold text-amber-800">
+            <Banner tone="warning">
+              <p class="font-bold">
                 {deletePreview.conflicts.length} shift{deletePreview.conflicts.length === 1 ? "" : "s"} with registrations will be skipped:
               </p>
-              <ul class="mt-1 space-y-1 text-amber-800">
+              <ul class="mt-1 space-y-1">
                 {#each deletePreview.conflicts as conflict (conflict.id)}
                   <li>
                     {formatShortDate(conflict.starts_at)} · {formatTimeRange(conflict.starts_at, conflict.ends_at)}: {conflict.volunteerNames.join(", ")}
                   </li>
                 {/each}
               </ul>
-            </div>
+            </Banner>
           {/if}
         </div>
       {/if}
     </section>
 
     <!-- Extend schedule -->
-    <section class="rounded-md border border-black/10 bg-gray-50 p-4">
-      <h4 class="font-bold">Extend the recurring schedule</h4>
-      <p class="mt-1 text-sm text-gray-600">
+    <section class="rounded-card border border-ink/8 bg-canvas p-4">
+      <h4 class="font-bold text-ink">Extend the recurring schedule</h4>
+      <p class="mt-1 text-sm text-ink/60">
         Generates recurring shift instances from the weekly templates through the next 70 days. This also runs automatically every month.
       </p>
-      <button
-        type="button"
-        class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+      <Button
+        variant="dark"
+        class="mt-4"
+        loading={isExtending}
         onclick={extendSchedule}
-        disabled={isExtending}
       >
-        {#if isExtending}
-          <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-          Extending
-        {:else}
-          Extend schedule
-        {/if}
-      </button>
+        {isExtending ? "Extending" : "Extend schedule"}
+      </Button>
     </section>
   </div>
 </Panel>
+
+<ConfirmDialog
+  open={confirmingRecurring}
+  title="Create recurring shifts?"
+  message={recurringConfirmMessage}
+  confirmLabel="Create shifts"
+  tone="primary"
+  busy={isCreatingRecurring}
+  onConfirm={createRecurring}
+  onCancel={() => (confirmingRecurring = false)}
+/>
+
+<ConfirmDialog
+  open={confirmingBulkDelete}
+  title="Delete shifts?"
+  message={bulkDeleteMessage}
+  confirmLabel="Delete shifts"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={confirmDelete}
+  onCancel={() => (confirmingBulkDelete = false)}
+/>

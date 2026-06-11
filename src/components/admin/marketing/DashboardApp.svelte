@@ -24,6 +24,9 @@
     Vote,
     X,
   } from "@lucide/svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Button from "../ui/Button.svelte";
+  import Panel from "../ui/Panel.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
   import {
     getSupabaseClient,
@@ -32,7 +35,6 @@
   import { hasModule, loadModuleGrants } from "../../../lib/dashboard/permissions";
   import { isOperationalAdmin, isSuperuser } from "../../../lib/dashboard/roles";
   import AdminOverview from "./AdminOverview.svelte";
-  import Panel from "./Panel.svelte";
   import ProjectCard from "./ProjectCard.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
   import PublishingCalendarView from "./PublishingCalendarView.svelte";
@@ -1087,32 +1089,30 @@
           {:else if activeView === "kanban"}
             <section aria-labelledby="kanban-title">
               <Panel title="Kanban Board" id="kanban-title" loading={projectsLoading}>
-                <div class="mb-3 flex flex-col gap-3 rounded-md border border-black/10 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-3 flex flex-col gap-3 rounded-card border border-ink/8 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div class="min-w-0">
-                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#0f766e]">
+                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-accent-strong">
                       Swipe or use arrow keys
                     </p>
-                    <p class="mt-1 text-sm font-semibold text-gray-700" aria-live="polite">
+                    <p class="mt-1 text-sm font-semibold text-ink/70" aria-live="polite">
                       {statuses[activeKanbanIndex]} · {activeKanbanIndex + 1} of {statuses.length}
                     </p>
                   </div>
 
                   <div class="flex items-center justify-between gap-3 sm:justify-end">
-                    <button
-                      type="button"
-                      class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/10 bg-white text-[#1E1E1E] shadow-sm transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
-                      aria-label="Show previous Kanban column"
+                    <Button
+                      iconOnly
+                      icon={ChevronLeft}
+                      label="Previous columns"
                       onclick={() => scrollKanbanToIndex(activeKanbanIndex - 1)}
                       disabled={activeKanbanIndex === 0}
-                    >
-                      <ChevronLeft class="h-5 w-5" aria-hidden="true" />
-                    </button>
+                    />
 
                     <div class="flex items-center gap-1.5" aria-label="Kanban column position">
                       {#each statuses as status, index}
                         <button
                           type="button"
-                          class="h-2.5 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 {activeKanbanIndex === index ? 'w-6 bg-[#0f766e]' : 'w-2.5 bg-gray-300 hover:bg-gray-400'}"
+                          class="h-2.5 rounded-full transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 {activeKanbanIndex === index ? 'w-6 bg-accent' : 'w-2.5 bg-ink/20 hover:bg-ink/35'}"
                           aria-label={`Show ${status}`}
                           aria-current={activeKanbanIndex === index ? "true" : undefined}
                           onclick={() => scrollKanbanToIndex(index)}
@@ -1120,21 +1120,19 @@
                       {/each}
                     </div>
 
-                    <button
-                      type="button"
-                      class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/10 bg-white text-[#1E1E1E] shadow-sm transition hover:border-[#0f766e]/40 hover:text-[#0f766e] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
-                      aria-label="Show next Kanban column"
+                    <Button
+                      iconOnly
+                      icon={ChevronRight}
+                      label="Next columns"
                       onclick={() => scrollKanbanToIndex(activeKanbanIndex + 1)}
                       disabled={activeKanbanIndex === statuses.length - 1}
-                    >
-                      <ChevronRight class="h-5 w-5" aria-hidden="true" />
-                    </button>
+                    />
                   </div>
                 </div>
 
                 <div
                   bind:this={kanbanScroller}
-                  class="kanban-scroll -mx-4 overflow-x-auto px-4 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-[#0f766e] focus-visible:ring-offset-2 md:-mx-6 md:px-6"
+                  class="kanban-scroll thin-scroll -mx-4 overflow-x-auto px-4 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 md:-mx-6 md:px-6"
                   tabindex="0"
                   aria-label="Scrollable Kanban columns. Use left and right arrows to move columns, and up and down arrows to scroll the active column."
                   onscroll={handleKanbanScroll}
@@ -1143,7 +1141,7 @@
                   <div class="kanban-track grid gap-3">
                     {#each statuses as status}
                       <div
-                        class="snap-start flex h-[calc(100dvh-17rem)] min-h-[30rem] max-h-[46rem] flex-col rounded-md border border-black/10 bg-gray-50 p-3 transition {dragOverStatus === status ? 'border-[#0f766e] bg-teal-50 ring-2 ring-[#0f766e]/20' : ''} {draggedProjectId && !canDropDraggedProject(status) ? 'opacity-75' : ''}"
+                        class="snap-start flex h-[calc(100dvh-17rem)] min-h-[30rem] max-h-[46rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStatus === status ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''} {draggedProjectId && !canDropDraggedProject(status) ? 'opacity-75' : ''}"
                         data-kanban-column
                         ondragover={(event) => handleColumnDragOver(event, status)}
                         ondragleave={(event) => handleColumnDragLeave(event, status)}
@@ -1151,22 +1149,21 @@
                       >
                         <div class="mb-3 flex min-h-10 shrink-0 items-start justify-between gap-2">
                           <div class="min-w-0">
-                            <h3 class="text-sm font-bold leading-tight">{status}</h3>
+                            <h3 class="text-sm font-bold leading-tight text-ink">{status}</h3>
                             {#if !isAdmin && !memberMovableStatuses.includes(status)}
-                              <span class="mt-1 inline-flex rounded-full bg-white px-2 py-0.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-gray-500">
+                              <Badge tone="gold" size="xs" class="mt-1 uppercase tracking-[0.1em]">
+                                <Lock class="h-3 w-3 shrink-0" aria-hidden="true" />
                                 Admin lane
-                              </span>
+                              </Badge>
                             {/if}
                           </div>
                           <div class="flex items-center gap-2">
                             {#if dragOverStatus === status}
-                              <span class="rounded-full bg-[#0f766e] px-2 py-0.5 text-xs font-bold text-white">
-                                Drop
-                              </span>
+                              <Badge tone="teal" variant="solid" size="xs">Drop</Badge>
                             {/if}
-                            <span class="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-gray-600">
+                            <Badge tone="neutral" size="xs">
                               {statusCounts[status] || 0}
-                            </span>
+                            </Badge>
                           </div>
                         </div>
                         <div
@@ -1185,7 +1182,7 @@
                               onDragEnd={handleProjectDragEnd}
                             />
                           {:else}
-                            <p class="rounded-md border border-dashed border-gray-300 bg-white px-3 py-4 text-center text-xs text-gray-500">
+                            <p class="rounded-card border border-dashed border-ink/15 bg-white px-3 py-4 text-center text-xs text-ink/45">
                               Empty
                             </p>
                           {/each}

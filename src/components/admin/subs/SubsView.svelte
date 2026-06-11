@@ -4,15 +4,21 @@
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
-    CircleAlert,
     Download,
     Hourglass,
     Megaphone,
     Plus,
   } from "@lucide/svelte";
-  import EmptyState from "../marketing/EmptyState.svelte";
-  import Panel from "../marketing/Panel.svelte";
-  import SummaryCard from "../marketing/SummaryCard.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import EmptyState from "../ui/EmptyState.svelte";
+  import Field from "../ui/Field.svelte";
+  import Panel from "../ui/Panel.svelte";
+  import SearchInput from "../ui/SearchInput.svelte";
+  import Skeleton from "../ui/Skeleton.svelte";
+  import StatCard from "../ui/StatCard.svelte";
+  import Tabs from "../ui/Tabs.svelte";
   import SubRequestDrawer from "./SubRequestDrawer.svelte";
 
   export let supabase;
@@ -29,6 +35,7 @@
     { id: "pending", label: "Pending" },
     { id: "approved", label: "Approved" },
   ];
+  const STATUS_TONES = { open: "amber", pending: "blue", approved: "green" };
 
   let requests = [];
   let isLoading = true;
@@ -68,6 +75,11 @@
     pending: requests.filter((request) => request.status === "pending").length,
     approved: requests.filter((request) => request.status === "approved").length,
   };
+
+  $: statusTabs = STATUS_FILTERS.map((filter) => ({
+    ...filter,
+    count: statusCounts[filter.id],
+  }));
 
   $: filteredRequests = requests.filter((request) => {
     if (statusFilter !== "all" && request.status !== statusFilter) return false;
@@ -351,42 +363,10 @@
     }).format(new Date(`${value}T00:00:00`));
   }
 
-  function getStatusBadgeClass(status) {
-    if (status === "approved") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    if (status === "pending") return "bg-blue-50 text-blue-700 border-blue-200";
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-
-  function getStatusChipClass(status) {
-    if (status === "approved") {
-      return "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 hover:bg-emerald-100";
-    }
-    if (status === "pending") {
-      return "border-blue-200 bg-blue-50 text-blue-800 hover:border-blue-300 hover:bg-blue-100";
-    }
-    return "border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-300 hover:bg-amber-100";
-  }
-
-  function getStatusDotClass(status) {
-    if (status === "approved") return "bg-emerald-500";
-    if (status === "pending") return "bg-blue-500";
-    return "bg-amber-500";
-  }
-
   function getStatusLabel(status) {
     if (status === "approved") return "Sub confirmed";
     if (status === "pending") return "Pending approval";
     return "Needs sub";
-  }
-
-  function getFilterChipClass(filterId) {
-    if (statusFilter !== filterId) {
-      return "bg-gray-50 text-gray-600 hover:bg-gray-100";
-    }
-    if (filterId === "open") return "bg-amber-500 text-white";
-    if (filterId === "pending") return "bg-blue-500 text-white";
-    if (filterId === "approved") return "bg-emerald-600 text-white";
-    return "bg-[#1E1E1E] text-white";
   }
 </script>
 
@@ -394,76 +374,60 @@
   <h3 id="subs-view-title" class="sr-only">Sub Requests</h3>
 
   <div class="grid gap-3 sm:grid-cols-3">
-    <SummaryCard label="Open this month" value={statusCounts.open} icon={Megaphone} tone="gold" />
-    <SummaryCard label="Pending approval" value={statusCounts.pending} icon={Hourglass} tone="rose" />
-    <SummaryCard label="Approved this month" value={statusCounts.approved} icon={CheckCircle2} tone="teal" />
+    <StatCard label="Open this month" value={statusCounts.open} icon={Megaphone} tone="gold" />
+    <StatCard label="Pending approval" value={statusCounts.pending} icon={Hourglass} tone="rose" />
+    <StatCard label="Approved this month" value={statusCounts.approved} icon={CheckCircle2} tone="teal" />
   </div>
 
   {#if errorMessage}
-    <div class="flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{errorMessage}</span>
-    </div>
+    <Banner tone="error" message={errorMessage} />
   {/if}
 
   <Panel title="Sub Requests" id="subs-panel-title" loading={isLoading}>
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center justify-center rounded-md border border-black/10 bg-white p-2 shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-          aria-label="Previous month"
+        <Button
+          iconOnly
+          icon={ChevronLeft}
+          label="Previous month"
           onclick={() => setMonth(-1)}
-        >
-          <ChevronLeft class="h-5 w-5" aria-hidden="true" />
-        </button>
+        />
         <span class="min-w-36 text-center text-base font-bold">{monthLabel}</span>
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center justify-center rounded-md border border-black/10 bg-white p-2 shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-          aria-label="Next month"
+        <Button
+          iconOnly
+          icon={ChevronRight}
+          label="Next month"
           onclick={() => setMonth(1)}
-        >
-          <ChevronRight class="h-5 w-5" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          class="min-h-10 rounded-md border border-black/10 bg-white px-3 text-sm font-bold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
-          onclick={goToToday}
-        >
-          Today
-        </button>
+        />
+        <Button onclick={goToToday}>Today</Button>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-bold shadow-sm transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
+        <Button
+          icon={Download}
           onclick={() => {
             showExportForm = !showExportForm;
             if (showExportForm) showCreateForm = false;
           }}
         >
-          <Download class="h-4 w-4" aria-hidden="true" />
           Export CSV
-        </button>
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#ffbd59] px-4 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833]"
+        </Button>
+        <Button
+          variant="primary"
+          icon={Plus}
           onclick={() => {
             showCreateForm = !showCreateForm;
             if (showCreateForm) showExportForm = false;
           }}
         >
-          <Plus class="h-4 w-4" aria-hidden="true" />
           New request
-        </button>
+        </Button>
       </div>
     </div>
 
     {#if showExportForm}
       <form
-        class="mb-4 rounded-md border border-black/10 bg-gray-50 p-4"
+        class="mb-4 rounded-card border border-ink/8 bg-canvas/70 p-4"
         onsubmit={(event) => {
           event.preventDefault();
           exportCSV();
@@ -471,192 +435,162 @@
       >
         <p class="text-sm font-bold">Download a CSV report for any date range</p>
         <div class="mt-3 grid gap-3 sm:grid-cols-[auto_auto_auto]">
-          <label class="block text-sm font-semibold text-gray-700" for="subs-export-start">
-            Start date
+          <Field label="Start date" id="subs-export-start">
             <input
               id="subs-export-start"
               type="date"
-              class="mt-1 block min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={exportStartDate}
               disabled={isExporting}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-export-end">
-            End date
+          </Field>
+          <Field label="End date" id="subs-export-end">
             <input
               id="subs-export-end"
               type="date"
-              class="mt-1 block min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={exportEndDate}
               disabled={isExporting}
             />
-          </label>
+          </Field>
           <div class="flex items-end">
-            <button
-              type="submit"
-              class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={isExporting}
-            >
-              {#if isExporting}
-                <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-                Exporting
-              {:else}
-                Download CSV
-              {/if}
-            </button>
+            <Button type="submit" variant="dark" loading={isExporting}>
+              {#if isExporting}Exporting{:else}Download CSV{/if}
+            </Button>
           </div>
         </div>
         {#if exportError}
-          <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{exportError}</span>
-          </div>
+          <Banner tone="error" message={exportError} class="mt-3" />
         {/if}
       </form>
     {/if}
 
     {#if showCreateForm}
-      <form class="mb-4 rounded-md border border-black/10 bg-gray-50 p-4" onsubmit={createRequest}>
+      <form class="mb-4 rounded-card border border-ink/8 bg-canvas/70 p-4" onsubmit={createRequest}>
         <p class="text-sm font-bold">Create a sub request</p>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-class">
-            Class name *
+          <Field label="Class name" id="subs-new-class" required>
             <input
               id="subs-new-class"
               type="text"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               placeholder="e.g., Yoga Flow, Pilates, HIIT"
               bind:value={newClassName}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-date">
-            Date *
+          </Field>
+          <Field label="Date" id="subs-new-date" required>
             <input
               id="subs-new-date"
               type="date"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={newDate}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-requester-name">
-            Instructor name *
+          </Field>
+          <Field label="Instructor name" id="subs-new-requester-name" required>
             <input
               id="subs-new-requester-name"
               type="text"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               placeholder="Who needs the sub?"
               bind:value={newRequesterName}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-requester-email">
-            Instructor email *
+          </Field>
+          <Field label="Instructor email" id="subs-new-requester-email" required>
             <input
               id="subs-new-requester-email"
               type="email"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               placeholder="instructor@email.com"
               bind:value={newRequesterEmail}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-duration">
-            Duration (minutes)
+          </Field>
+          <Field label="Duration (minutes)" id="subs-new-duration">
             <input
               id="subs-new-duration"
               type="number"
               min="5"
               max="600"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={newDuration}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700" for="subs-new-location">
-            Location
+          </Field>
+          <Field label="Location" id="subs-new-location">
             <input
               id="subs-new-location"
               type="text"
-              class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={newLocation}
               disabled={isCreating}
             />
-          </label>
-          <label class="block text-sm font-semibold text-gray-700 sm:col-span-2" for="subs-new-notes">
-            Notes
+          </Field>
+          <Field label="Notes" id="subs-new-notes" class="sm:col-span-2">
             <textarea
               id="subs-new-notes"
               rows="2"
-              class="mt-1 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="textarea"
               placeholder="Class time, format, anything a sub should know"
               bind:value={newNotes}
               disabled={isCreating}
             ></textarea>
-          </label>
+          </Field>
         </div>
         <div class="mt-3 flex justify-end">
-          <button
+          <Button
             type="submit"
-            class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isCreating ||
-              !newClassName.trim() ||
+            variant="dark"
+            loading={isCreating}
+            disabled={!newClassName.trim() ||
               !newDate ||
               !newRequesterName.trim() ||
               !newRequesterEmail.trim()}
           >
-            {#if isCreating}
-              <span class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
-              Creating
-            {:else}
-              Create request
-            {/if}
-          </button>
+            {#if isCreating}Creating{:else}Create request{/if}
+          </Button>
         </div>
         {#if createError}
-          <div class="mt-3 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{createError}</span>
-          </div>
+          <Banner tone="error" message={createError} class="mt-3" />
         {/if}
       </form>
     {/if}
 
     <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
-      <input
-        type="search"
-        class="min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20 md:max-w-sm"
-        placeholder="Search by class, name, date, location"
-        aria-label="Search sub requests"
+      <SearchInput
         bind:value={searchQuery}
+        placeholder="Search by class, name, date, location"
+        label="Search sub requests"
+        minChars={2}
+        debounce={200}
+        class="w-full md:max-w-sm"
       />
-      <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by status">
-        {#each STATUS_FILTERS as filter (filter.id)}
-          <button
-            type="button"
-            class="min-h-9 rounded-md px-3 text-sm font-bold transition {getFilterChipClass(filter.id)}"
-            aria-pressed={statusFilter === filter.id}
-            onclick={() => (statusFilter = filter.id)}
-          >
-            {filter.label}
-          </button>
-        {/each}
-      </div>
+      <Tabs
+        tabs={statusTabs}
+        bind:active={statusFilter}
+        variant="segmented"
+        label="Filter by status"
+      />
     </div>
 
     {#if isSearching && !isLoading}
-      <p class="mb-3 text-sm text-gray-500">
+      <p class="mb-3 text-sm text-ink/55">
         Found {filteredRequests.length} result{filteredRequests.length === 1 ? "" : "s"} in {monthLabel}.
       </p>
     {/if}
 
     {#if isLoading}
-      <div class="flex min-h-48 items-center justify-center">
-        <div class="flex items-center gap-3 text-sm text-gray-600">
-          <span class="h-4 w-4 rounded-full border-2 border-[#ffbd59] border-t-transparent animate-spin" aria-hidden="true"></span>
-          Loading sub requests
-        </div>
+      <div class="hidden grid-cols-7 gap-2 md:grid">
+        {#each Array(21) as _, index (index)}
+          <Skeleton class="min-h-20" />
+        {/each}
+      </div>
+      <div class="space-y-2 md:hidden">
+        {#each Array(4) as _, index (index)}
+          <Skeleton class="h-20" />
+        {/each}
       </div>
     {:else if !filteredRequests.length}
       <EmptyState
@@ -668,10 +602,10 @@
     {:else}
       <!-- Month grid (desktop and up) -->
       <div class="hidden md:block">
-        <div class="overflow-x-auto rounded-md border border-gray-200">
-          <div class="grid min-w-[48rem] grid-cols-7 border-b border-gray-200 bg-gray-50 text-xs font-bold uppercase tracking-[0.12em] text-gray-500">
+        <div class="overflow-x-auto rounded-card border border-ink/8">
+          <div class="grid min-w-[48rem] grid-cols-7 border-b border-ink/8 bg-canvas text-xs font-bold uppercase tracking-[0.12em] text-ink/55">
             {#each weekdays as weekday}
-              <div class="border-r border-gray-200 px-3 py-2 last:border-r-0">
+              <div class="border-r border-ink/8 px-3 py-2 last:border-r-0">
                 {weekday}
               </div>
             {/each}
@@ -679,28 +613,27 @@
           <div class="grid min-w-[48rem] grid-cols-7">
             {#each calendarDays as day (day.dateKey)}
               <div
-                class="min-h-28 border-r border-t border-gray-200 px-2 py-2 first:border-t-0 last:border-r-0 [&:nth-child(-n+7)]:border-t-0 {day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-400'}"
+                class="min-h-28 border-r border-t border-ink/8 px-2 py-2 first:border-t-0 last:border-r-0 [&:nth-child(-n+7)]:border-t-0 {day.isCurrentMonth ? 'bg-white' : 'bg-canvas/70 text-ink/35'}"
               >
                 <div class="mb-2 flex items-center justify-between gap-2">
-                  <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full text-sm font-bold {day.isToday ? 'bg-[#1E1E1E] text-white' : ''}">
+                  <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full text-sm font-bold {day.isToday ? 'bg-ink text-white ring-2 ring-accent/30' : ''}">
                     {day.dayNumber}
                   </span>
                   {#if day.items.length}
-                    <span class="text-xs font-bold text-gray-500">{day.items.length}</span>
+                    <span class="text-xs font-bold text-ink/45">{day.items.length}</span>
                   {/if}
                 </div>
                 <div class="space-y-1.5">
                   {#each day.items as request (request.id)}
                     <button
                       type="button"
-                      class="w-full rounded-md border px-2 py-1.5 text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-1 {getStatusChipClass(request.status)}"
+                      class="w-full rounded-control border border-ink/8 bg-white px-2 py-1.5 text-left text-xs font-semibold leading-snug shadow-card transition hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
                       onclick={() => (selectedRequest = request)}
                     >
-                      <span class="mb-1 flex items-center gap-1.5">
-                        <span class="h-2 w-2 shrink-0 rounded-full {getStatusDotClass(request.status)}"></span>
-                        <span class="truncate">{getStatusLabel(request.status)}</span>
-                      </span>
-                      <span class="line-clamp-2">{request.class_name}</span>
+                      <Badge tone={STATUS_TONES[request.status] || "amber"} dot size="xs">
+                        {getStatusLabel(request.status)}
+                      </Badge>
+                      <span class="mt-1 line-clamp-2 block">{request.class_name}</span>
                     </button>
                   {/each}
                 </div>
@@ -715,15 +648,15 @@
         {#each filteredRequests as request (request.id)}
           <button
             type="button"
-            class="flex w-full flex-wrap items-center gap-3 rounded-md border border-black/10 bg-white px-4 py-3 text-left transition hover:border-[#0f766e]/40 hover:shadow-sm"
+            class="flex w-full flex-wrap items-center gap-3 rounded-card border border-ink/8 bg-white px-4 py-3 text-left shadow-card transition hover:border-accent/40"
             onclick={() => (selectedRequest = request)}
           >
             <span class="min-w-0 flex-1">
-              <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+              <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
                 {formatDate(request.date)}
               </span>
               <span class="mt-1 block font-bold leading-snug">{request.class_name}</span>
-              <span class="mt-1 block text-sm text-gray-600">
+              <span class="mt-1 block text-sm text-ink/60">
                 Requested by {request.requested_by_name}
                 {#if request.assigned_sub_name}
                   · Sub: {request.assigned_sub_name}
@@ -732,9 +665,9 @@
                 {/if}
               </span>
             </span>
-            <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusBadgeClass(request.status)}">
+            <Badge tone={STATUS_TONES[request.status] || "amber"}>
               {getStatusLabel(request.status)}
-            </span>
+            </Badge>
           </button>
         {/each}
       </div>

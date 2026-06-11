@@ -2,8 +2,6 @@
   import {
     CalendarClock,
     CalendarPlus,
-    CheckCircle2,
-    CircleAlert,
     Mail,
     MapPin,
     Phone,
@@ -13,6 +11,11 @@
   } from "@lucide/svelte";
   import { generateSubCalendarLink } from "../../../lib/subCalendarUtils";
   import SlideOver from "../marketing/SlideOver.svelte";
+  import Badge from "../ui/Badge.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import Field from "../ui/Field.svelte";
 
   export let supabase;
   export let request = null;
@@ -22,11 +25,13 @@
 
   const requestColumns =
     "id, class_name, date, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+  const STATUS_TONES = { open: "amber", pending: "blue", approved: "green" };
 
   let displayedRequest = null;
   let drawerOpen = false;
   let isSaving = false;
   let isDeleting = false;
+  let confirmingDelete = false;
   let errorMessage = "";
   let successMessage = "";
   let assignName = "";
@@ -45,6 +50,7 @@
     assignName = "";
     assignEmail = "";
     assignPhone = "";
+    confirmingDelete = false;
     drawerOpen = true;
   }
 
@@ -180,13 +186,13 @@
     );
   }
 
-  async function deleteRequest() {
+  function deleteRequest() {
     if (!displayedRequest?.id || isDeleting) return;
+    confirmingDelete = true;
+  }
 
-    const shouldDelete = window.confirm(
-      `Delete the sub request for "${displayedRequest.class_name}" on ${formatDate(displayedRequest.date)}? Its volunteer sign-ups will also be removed. This cannot be undone.`,
-    );
-    if (!shouldDelete) return;
+  async function confirmDeleteRequest() {
+    if (!displayedRequest?.id || isDeleting) return;
 
     isDeleting = true;
     errorMessage = "";
@@ -199,11 +205,13 @@
     if (error) {
       errorMessage = error.message;
       isDeleting = false;
+      confirmingDelete = false;
       return;
     }
 
     const deletedId = displayedRequest.id;
     isDeleting = false;
+    confirmingDelete = false;
     onRequestDeleted(deletedId);
     requestClose();
   }
@@ -246,12 +254,6 @@
     }).format(new Date(value));
   }
 
-  function getStatusClass(status) {
-    if (status === "approved") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    if (status === "pending") return "bg-blue-50 text-blue-700 border-blue-200";
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-
   function getStatusLabel(status) {
     if (status === "approved") return "Sub confirmed";
     if (status === "pending") return "Pending approval";
@@ -271,63 +273,57 @@
   {#if displayedRequest}
     <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
-          <span class="rounded-full border px-2.5 py-1 text-xs font-bold {getStatusClass(displayedRequest.status)}">
+          <Badge tone={STATUS_TONES[displayedRequest.status] || "amber"} dot>
             {getStatusLabel(displayedRequest.status)}
-          </span>
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+          </Badge>
+          <Badge tone="neutral">
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             {displayedRequest.duration_minutes || 60} minutes
-          </span>
+          </Badge>
           {#if displayedRequest.location}
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-bold text-gray-700">
+            <Badge tone="neutral">
               <MapPin class="h-3.5 w-3.5" aria-hidden="true" />
               {displayedRequest.location}
-            </span>
+            </Badge>
           {/if}
         </div>
 
         {#if errorMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{errorMessage}</span>
-          </div>
+          <Banner tone="error" message={errorMessage} class="mt-4" />
         {/if}
 
         {#if successMessage}
-          <div class="mt-4 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{successMessage}</span>
-          </div>
+          <Banner tone="success" message={successMessage} class="mt-4" />
         {/if}
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="sub-drawer-details-title">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="sub-drawer-details-title">
           <h4 id="sub-drawer-details-title" class="font-bold">Request details</h4>
           <dl class="mt-3 space-y-2 text-sm">
             <div class="flex justify-between gap-3">
-              <dt class="font-semibold text-gray-500">Requested by</dt>
+              <dt class="font-semibold text-ink/55">Requested by</dt>
               <dd class="text-right font-semibold">{displayedRequest.requested_by_name}</dd>
             </div>
             <div class="flex justify-between gap-3">
-              <dt class="font-semibold text-gray-500">Requester email</dt>
+              <dt class="font-semibold text-ink/55">Requester email</dt>
               <dd class="text-right">
-                <a class="font-semibold text-[#0f766e] hover:underline" href={`mailto:${displayedRequest.requested_by_email}`}>
+                <a class="font-semibold text-accent-strong hover:underline" href={`mailto:${displayedRequest.requested_by_email}`}>
                   {displayedRequest.requested_by_email}
                 </a>
               </dd>
             </div>
             <div class="flex justify-between gap-3">
-              <dt class="font-semibold text-gray-500">Created</dt>
+              <dt class="font-semibold text-ink/55">Created</dt>
               <dd class="text-right">{formatTimestamp(displayedRequest.created_at)}</dd>
             </div>
             {#if displayedRequest.notes}
               <div>
-                <dt class="font-semibold text-gray-500">Notes</dt>
-                <dd class="mt-1 rounded-md bg-gray-50 px-3 py-2 leading-6">{displayedRequest.notes}</dd>
+                <dt class="font-semibold text-ink/55">Notes</dt>
+                <dd class="mt-1 rounded-control bg-canvas px-3 py-2 leading-6">{displayedRequest.notes}</dd>
               </div>
             {/if}
           </dl>
           <a
-            class="mt-3 inline-flex min-h-9 items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-bold text-gray-700 transition hover:border-[#0f766e]/30 hover:text-[#0f766e]"
+            class="mt-3 inline-flex min-h-9 items-center gap-2 rounded-control border border-ink/14 bg-white px-3 text-sm font-semibold text-ink shadow-card transition hover:border-ink/30 hover:bg-ink/[0.03]"
             href={getCalendarLink(displayedRequest)}
             target="_blank"
             rel="noopener noreferrer"
@@ -338,182 +334,183 @@
         </section>
 
         {#if displayedRequest.status === "approved" && displayedRequest.assigned_sub_name}
-          <section class="mt-5 rounded-md border border-emerald-200 bg-emerald-50/60 p-4" aria-labelledby="sub-drawer-assigned-title">
-            <h4 id="sub-drawer-assigned-title" class="font-bold text-emerald-900">Assigned sub</h4>
+          <section class="mt-5 rounded-card border border-green-200 bg-green-50/60 p-4" aria-labelledby="sub-drawer-assigned-title">
+            <h4 id="sub-drawer-assigned-title" class="font-bold text-green-900">Assigned sub</h4>
             <p class="mt-2 font-bold">{displayedRequest.assigned_sub_name}</p>
             <div class="mt-1 space-y-1 text-sm">
               {#if displayedRequest.assigned_sub_email}
                 <p class="flex items-center gap-2">
-                  <Mail class="h-3.5 w-3.5 text-emerald-700" aria-hidden="true" />
-                  <a class="text-[#0f766e] hover:underline" href={`mailto:${displayedRequest.assigned_sub_email}`}>
+                  <Mail class="h-3.5 w-3.5 text-green-700" aria-hidden="true" />
+                  <a class="text-accent-strong hover:underline" href={`mailto:${displayedRequest.assigned_sub_email}`}>
                     {displayedRequest.assigned_sub_email}
                   </a>
                 </p>
               {/if}
               {#if displayedRequest.assigned_sub_phone}
                 <p class="flex items-center gap-2">
-                  <Phone class="h-3.5 w-3.5 text-emerald-700" aria-hidden="true" />
-                  <a class="text-[#0f766e] hover:underline" href={`tel:${displayedRequest.assigned_sub_phone}`}>
+                  <Phone class="h-3.5 w-3.5 text-green-700" aria-hidden="true" />
+                  <a class="text-accent-strong hover:underline" href={`tel:${displayedRequest.assigned_sub_phone}`}>
                     {displayedRequest.assigned_sub_phone}
                   </a>
                 </p>
               {/if}
               {#if displayedRequest.assigned_at}
-                <p class="text-emerald-800">Assigned {formatTimestamp(displayedRequest.assigned_at)}</p>
+                <p class="text-green-800">Assigned {formatTimestamp(displayedRequest.assigned_at)}</p>
               {/if}
             </div>
-            <p class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              Don't forget: please text the substitute to confirm they can still make it.
-            </p>
-            <button
-              type="button"
-              class="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-bold text-gray-700 transition hover:border-[#0f766e]/30 hover:text-[#0f766e] disabled:cursor-not-allowed disabled:opacity-60"
+            <Banner
+              tone="warning"
+              message="Don't forget: please text the substitute to confirm they can still make it."
+              class="mt-3"
+            />
+            <Button
+              class="mt-3"
+              icon={UserX}
               onclick={unassignSub}
               disabled={isSaving}
             >
-              <UserX class="h-4 w-4" aria-hidden="true" />
               Un-assign sub
-            </button>
+            </Button>
           </section>
         {/if}
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="sub-drawer-volunteers-title">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="sub-drawer-volunteers-title">
           <div class="flex items-start justify-between gap-3">
             <h4 id="sub-drawer-volunteers-title" class="font-bold">
               Volunteers ({volunteers.length})
             </h4>
             {#if isSaving}
-              <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
-                Saving
-              </span>
+              <Badge tone="neutral" class="shrink-0">Saving</Badge>
             {/if}
           </div>
 
           {#if volunteers.length}
             <ul class="mt-3 space-y-3">
               {#each volunteers as volunteer (volunteer.id)}
-                <li class="rounded-md border border-black/10 bg-gray-50 p-3">
+                <li class="rounded-card border border-ink/8 bg-canvas/60 p-3">
                   <p class="font-bold">{volunteer.name}</p>
                   <div class="mt-1 space-y-1 text-sm">
                     <p class="flex items-center gap-2">
-                      <Mail class="h-3.5 w-3.5 text-gray-500" aria-hidden="true" />
-                      <a class="text-[#0f766e] hover:underline" href={`mailto:${volunteer.email}`}>
+                      <Mail class="h-3.5 w-3.5 text-ink/45" aria-hidden="true" />
+                      <a class="text-accent-strong hover:underline" href={`mailto:${volunteer.email}`}>
                         {volunteer.email}
                       </a>
                     </p>
                     {#if volunteer.phone}
                       <p class="flex items-center gap-2">
-                        <Phone class="h-3.5 w-3.5 text-gray-500" aria-hidden="true" />
-                        <a class="text-[#0f766e] hover:underline" href={`tel:${volunteer.phone}`}>
+                        <Phone class="h-3.5 w-3.5 text-ink/45" aria-hidden="true" />
+                        <a class="text-accent-strong hover:underline" href={`tel:${volunteer.phone}`}>
                           {volunteer.phone}
                         </a>
                       </p>
                     {/if}
                   </div>
                   <div class="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-[#0f766e] px-3 text-sm font-bold text-white transition hover:bg-[#0c5f59] disabled:cursor-not-allowed disabled:opacity-60"
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={UserCheck}
                       onclick={() => approveVolunteer(volunteer)}
                       disabled={isSaving}
                     >
-                      <UserCheck class="h-4 w-4" aria-hidden="true" />
                       Approve
-                    </button>
-                    <button
-                      type="button"
-                      class="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-red-300 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      icon={UserX}
                       onclick={() => rejectVolunteer(volunteer)}
                       disabled={isSaving}
                     >
-                      <UserX class="h-4 w-4" aria-hidden="true" />
                       Reject
-                    </button>
+                    </Button>
                   </div>
                 </li>
               {/each}
             </ul>
           {:else}
-            <p class="mt-3 rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 py-4 text-center text-sm text-gray-500">
+            <p class="mt-3 rounded-card border border-dashed border-ink/15 bg-canvas/60 px-3 py-4 text-center text-sm text-ink/50">
               No one has volunteered yet.
             </p>
           {/if}
         </section>
 
-        <section class="mt-5 rounded-md border border-black/10 bg-white p-4" aria-labelledby="sub-drawer-assign-title">
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="sub-drawer-assign-title">
           <h4 id="sub-drawer-assign-title" class="font-bold">Assign a sub manually</h4>
-          <p class="mt-1 text-sm text-gray-600">
+          <p class="mt-1 text-sm text-ink/60">
             Found a sub outside the volunteer list? Enter their contact info to confirm them.
           </p>
           <form class="mt-3 space-y-3" onsubmit={assignManually}>
-            <label class="block text-sm font-bold" for={`sub-assign-name-${displayedRequest.id}`}>
-              Name *
+            <Field label="Name" id={`sub-assign-name-${displayedRequest.id}`} required>
               <input
                 id={`sub-assign-name-${displayedRequest.id}`}
                 type="text"
-                class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={assignName}
                 disabled={isSaving}
               />
-            </label>
-            <label class="block text-sm font-bold" for={`sub-assign-email-${displayedRequest.id}`}>
-              Email *
+            </Field>
+            <Field label="Email" id={`sub-assign-email-${displayedRequest.id}`} required>
               <input
                 id={`sub-assign-email-${displayedRequest.id}`}
                 type="email"
-                class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={assignEmail}
                 disabled={isSaving}
               />
-            </label>
-            <label class="block text-sm font-bold" for={`sub-assign-phone-${displayedRequest.id}`}>
-              Phone
+            </Field>
+            <Field label="Phone" id={`sub-assign-phone-${displayedRequest.id}`}>
               <input
                 id={`sub-assign-phone-${displayedRequest.id}`}
                 type="tel"
-                class="mt-1 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={assignPhone}
                 disabled={isSaving}
               />
-            </label>
-            <button
+            </Field>
+            <Button
               type="submit"
-              class="inline-flex min-h-10 items-center gap-2 rounded-md bg-[#1E1E1E] px-4 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+              variant="dark"
+              icon={UserCheck}
               disabled={isSaving || !assignName.trim() || !assignEmail.trim()}
             >
-              <UserCheck class="h-4 w-4" aria-hidden="true" />
               Assign sub
-            </button>
+            </Button>
           </form>
         </section>
 
-        <section class="mt-5 rounded-md border border-red-200 bg-red-50/50 p-4">
+        <section class="mt-5 rounded-card border border-red-200 bg-red-50/50 p-4">
           <h4 class="font-bold text-red-800">Danger zone</h4>
-          <button
-            type="button"
-            class="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+          <Button
+            variant="danger"
+            class="mt-3"
+            icon={Trash2}
             onclick={deleteRequest}
             disabled={isDeleting}
           >
-            {#if isDeleting}
-              <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-              Deleting
-            {:else}
-              <Trash2 class="h-4 w-4" aria-hidden="true" />
-              Delete request
-            {/if}
-          </button>
+            Delete request
+          </Button>
         </section>
       </div>
 
-      <div class="border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 w-full items-center justify-center rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2"
-          onclick={requestClose}
-        >
+      <div class="border-t border-ink/8 p-4">
+        <Button variant="primary" class="min-h-11 w-full" onclick={requestClose}>
           Close
-        </button>
+        </Button>
       </div>
   {/if}
 </SlideOver>
+
+<ConfirmDialog
+  open={confirmingDelete}
+  title="Delete sub request?"
+  message={displayedRequest
+    ? `Delete the sub request for "${displayedRequest.class_name}" on ${formatDate(displayedRequest.date)}? Its volunteer sign-ups will also be removed. This cannot be undone.`
+    : ""}
+  confirmLabel="Delete request"
+  cancelLabel="Cancel"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={confirmDeleteRequest}
+  onCancel={() => (confirmingDelete = false)}
+/>

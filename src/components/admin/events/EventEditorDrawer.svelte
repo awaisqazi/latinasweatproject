@@ -1,6 +1,10 @@
 <script>
-  import { CheckCircle2, CircleAlert, Trash2 } from "@lucide/svelte";
+  import { Trash2 } from "@lucide/svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
+  import Banner from "../ui/Banner.svelte";
+  import Button from "../ui/Button.svelte";
+  import ConfirmDialog from "../ui/ConfirmDialog.svelte";
+  import Field from "../ui/Field.svelte";
 
   export let supabase;
   export let event = null;
@@ -15,6 +19,7 @@
   let drawerOpen = false;
   let isSaving = false;
   let isDeleting = false;
+  let confirmingDelete = false;
   let errorMessage = "";
   let successMessage = "";
   let form = emptyForm();
@@ -140,13 +145,13 @@
     isSaving = false;
   }
 
+  function requestDelete() {
+    if (isNew || !event?.id || isDeleting) return;
+    confirmingDelete = true;
+  }
+
   async function deleteEvent() {
     if (isNew || !event?.id || isDeleting) return;
-
-    const shouldDelete = window.confirm(
-      `Delete "${form.title}" from the public events page? This cannot be undone.`,
-    );
-    if (!shouldDelete) return;
 
     isDeleting = true;
     errorMessage = "";
@@ -156,10 +161,12 @@
     if (error) {
       errorMessage = error.message;
       isDeleting = false;
+      confirmingDelete = false;
       return;
     }
 
     isDeleting = false;
+    confirmingDelete = false;
     onDeleted(event.id);
     requestClose();
   }
@@ -178,226 +185,215 @@
     <form class="flex min-h-full flex-col" onsubmit={saveEvent}>
       <div class="flex-1 px-5 py-5">
         {#if errorMessage}
-          <div class="mb-4 flex gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            <CircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{errorMessage}</span>
-          </div>
+          <Banner tone="error" message={errorMessage} class="mb-4" />
         {/if}
 
         {#if successMessage}
-          <div class="mb-4 flex gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
-            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{successMessage}</span>
-          </div>
+          <Banner tone="success" message={successMessage} class="mb-4" />
         {/if}
 
         <div class="space-y-4">
-          <label class="block text-sm font-bold">
-            Title
+          <Field label="Title" id="event-form-title" required>
             <input
+              id="event-form-title"
               type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={form.title}
               required
             />
-          </label>
+          </Field>
 
-          <label class="block text-sm font-bold">
-            Slug
+          <Field
+            label="Slug"
+            id="event-form-slug"
+            hint="Used as the event's stable ID. Lowercase letters, numbers, dashes."
+          >
             <input
+              id="event-form-slug"
               type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={form.slug}
               placeholder="auto-generated from title"
             />
-            <span class="mt-1 block text-xs font-normal text-gray-500">
-              Used as the event's stable ID. Lowercase letters, numbers, dashes.
-            </span>
-          </label>
+          </Field>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="block text-sm font-bold">
-              Date label
+            <Field label="Date label" id="event-form-date-label">
               <input
+                id="event-form-date-label"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.date_label}
                 placeholder="Sunday, June 14"
               />
-            </label>
-            <label class="block text-sm font-bold">
-              Time label
+            </Field>
+            <Field label="Time label" id="event-form-time-label">
               <input
+                id="event-form-time-label"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.time_label}
                 placeholder="1:00 PM - 4:15 PM"
               />
-            </label>
+            </Field>
           </div>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="block text-sm font-bold">
-              Starts on
+            <Field label="Starts on" id="event-form-starts-on">
               <input
+                id="event-form-starts-on"
                 type="date"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.starts_on}
               />
-            </label>
-            <label class="block text-sm font-bold">
-              Ends on
+            </Field>
+            <Field label="Ends on" id="event-form-ends-on">
               <input
+                id="event-form-ends-on"
                 type="date"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.ends_on}
               />
-            </label>
+            </Field>
           </div>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-ink/50">
             The labels are what visitors see; the dates control ordering and expiry.
           </p>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="block text-sm font-bold">
-              Location
+            <Field label="Location" id="event-form-location">
               <input
+                id="event-form-location"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.location}
                 placeholder="LSP Studio"
               />
-            </label>
-            <label class="block text-sm font-bold">
-              Address
+            </Field>
+            <Field label="Address" id="event-form-address">
               <input
+                id="event-form-address"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.address}
                 placeholder="949 W 16th St, Chicago, IL"
               />
-            </label>
+            </Field>
           </div>
 
-          <label class="block text-sm font-bold">
-            Description
+          <Field label="Description" id="event-form-description">
             <textarea
-              class="mt-2 min-h-28 w-full resize-y rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-normal leading-6 outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              id="event-form-description"
+              class="textarea"
               bind:value={form.description}
             ></textarea>
-          </label>
+          </Field>
 
-          <label class="block text-sm font-bold">
-            Image URL
+          <Field
+            label="Image URL"
+            id="event-form-image"
+            hint="Upload the image to the site's /public/images folder first, or paste a full URL."
+          >
             <input
+              id="event-form-image"
               type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={form.image_src}
               placeholder="/images/my-event.png"
             />
-            <span class="mt-1 block text-xs font-normal text-gray-500">
-              Upload the image to the site's /public/images folder first, or paste a full URL.
-            </span>
-          </label>
+          </Field>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="block text-sm font-bold">
-              Registration link
+            <Field label="Registration link" id="event-form-reg-link">
               <input
+                id="event-form-reg-link"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.registration_link}
                 placeholder="https://www.zeffy.com/..."
               />
-            </label>
-            <label class="block text-sm font-bold">
-              Registration button label
+            </Field>
+            <Field label="Registration button label" id="event-form-reg-label">
               <input
+                id="event-form-reg-label"
                 type="text"
-                class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+                class="input"
                 bind:value={form.registration_label}
                 placeholder="Save Your Spot"
               />
-            </label>
+            </Field>
           </div>
 
-          <label class="block text-sm font-bold">
-            Tags
+          <Field label="Tags" id="event-form-tags" hint="Comma separated.">
             <input
+              id="event-form-tags"
               type="text"
-              class="mt-2 min-h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-normal outline-none transition focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/20"
+              class="input"
               bind:value={form.tags}
               placeholder="Free, Kids, Wellness"
             />
-            <span class="mt-1 block text-xs font-normal text-gray-500">Comma separated.</span>
-          </label>
+          </Field>
 
-          <div class="flex flex-wrap gap-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+          <div class="flex flex-wrap gap-4 rounded-control border border-ink/8 bg-canvas px-4 py-3">
             <label class="flex items-center gap-2 text-sm font-bold">
-              <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" bind:checked={form.published} />
+              <input type="checkbox" class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent" bind:checked={form.published} />
               Published
             </label>
             <label class="flex items-center gap-2 text-sm font-bold">
-              <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" bind:checked={form.featured} />
+              <input type="checkbox" class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent" bind:checked={form.featured} />
               Featured
             </label>
             <label class="flex items-center gap-2 text-sm font-bold">
-              <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" bind:checked={form.recurring} />
+              <input type="checkbox" class="h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent" bind:checked={form.recurring} />
               Recurring
             </label>
             <label class="flex items-center gap-2 text-sm font-bold">
               Sort order
               <input
                 type="number"
-                class="min-h-9 w-20 rounded-md border border-gray-200 bg-white px-2 text-sm font-normal outline-none transition focus:border-[#0f766e]"
+                class="input"
+                style="width: 6rem;"
                 bind:value={form.sort_order}
               />
             </label>
           </div>
 
           {#if !isNew && isAdmin}
-            <section class="rounded-md border border-red-200 bg-red-50/50 p-4">
+            <section class="rounded-control border border-red-200 bg-red-50/50 p-4">
               <h4 class="font-bold text-red-800">Danger zone</h4>
-              <button
-                type="button"
-                class="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 bg-white px-3 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                onclick={deleteEvent}
-                disabled={isDeleting}
+              <Button
+                variant="danger"
+                icon={Trash2}
+                class="mt-3"
+                loading={isDeleting}
+                onclick={requestDelete}
               >
-                {#if isDeleting}
-                  <span class="h-4 w-4 rounded-full border-2 border-red-700 border-t-transparent animate-spin" aria-hidden="true"></span>
-                  Deleting
-                {:else}
-                  <Trash2 class="h-4 w-4" aria-hidden="true" />
-                  Delete event
-                {/if}
-              </button>
+                Delete event
+              </Button>
             </section>
           {/if}
         </div>
       </div>
 
-      <div class="flex gap-2 border-t border-black/10 p-4">
-        <button
-          type="button"
-          class="flex min-h-11 flex-1 items-center justify-center rounded-md border border-black/10 px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
-          onclick={requestClose}
-        >
+      <div class="flex gap-2 border-t border-ink/8 p-4">
+        <Button variant="secondary" class="flex-1" onclick={requestClose}>
           Close
-        </button>
-        <button
-          type="submit"
-          class="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md bg-[#ffbd59] px-4 py-2.5 text-sm font-bold text-[#1E1E1E] transition hover:bg-[#f4a833] focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isSaving}
-        >
-          {#if isSaving}
-            <span class="h-4 w-4 rounded-full border-2 border-[#1E1E1E] border-t-transparent animate-spin" aria-hidden="true"></span>
-            Saving
-          {:else}
-            {isNew ? "Create event" : "Save changes"}
-          {/if}
-        </button>
+        </Button>
+        <Button variant="primary" type="submit" class="flex-1" loading={isSaving}>
+          {isNew ? "Create event" : "Save changes"}
+        </Button>
       </div>
     </form>
   {/if}
 </SlideOver>
+
+<ConfirmDialog
+  open={confirmingDelete}
+  title="Delete this event?"
+  message={`Delete "${form.title}" from the public events page? This cannot be undone.`}
+  confirmLabel="Delete event"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={deleteEvent}
+  onCancel={() => (confirmingDelete = false)}
+/>
