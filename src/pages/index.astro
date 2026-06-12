@@ -5,7 +5,7 @@ import TestimonialCard from "@/components/TestimonialCard.astro";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
-const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party";
+const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2";
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -56,29 +56,30 @@ const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world
     </section>
     {/* END: Hero Section */}
 
-    {/* START: World Cup Watch Party Featured Event */}
-    <section class="relative overflow-hidden bg-gradient-to-br from-[#f2fff0] via-white to-[#e8f6ed] py-16 sm:py-20 lg:py-24">
+    {/* START: Pride in the Park Featured Event */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#fdf2f8] via-white to-[#eff6ff] py-16 sm:py-20 lg:py-24">
       <div
         class="absolute inset-0 opacity-[0.12]"
-        style="background-image: linear-gradient(90deg, rgba(14,102,0,0.22) 1px, transparent 1px), linear-gradient(rgba(14,102,0,0.16) 1px, transparent 1px); background-size: 68px 68px;"
+        style="background-image: linear-gradient(90deg, rgba(147,51,234,0.18) 1px, transparent 1px), linear-gradient(rgba(147,51,234,0.13) 1px, transparent 1px); background-size: 68px 68px;"
       >
       </div>
-      <div class="absolute -top-28 -right-24 h-72 w-72 rounded-full bg-blue-500/20 blur-[110px]"></div>
-      <div class="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-red-500/15 blur-[120px]"></div>
+      <div class="absolute -top-28 -right-24 h-72 w-72 rounded-full bg-pink-500/20 blur-[110px]"></div>
+      <div class="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-sky-500/15 blur-[120px]"></div>
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-amber-400 via-green-500 via-blue-500 to-purple-500"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14">
           <div class="relative lg:col-span-2">
-            <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-[#0e6600]/25 via-accent-gold/20 to-blue-500/20 blur-2xl"></div>
-            <div class="relative overflow-hidden rounded-3xl border border-[#0e6600]/15 bg-white p-3 shadow-2xl shadow-[#0e6600]/15">
-              <div class="absolute top-4 left-4 z-10 flex flex-col items-center justify-center rounded-2xl bg-[#0e6600] px-3 py-2 shadow-lg">
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none">Jun</span>
-                <span class="text-2xl font-extrabold leading-none text-white mt-0.5">11</span>
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none mt-0.5">Start</span>
+            <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-pink-500/25 via-amber-400/20 to-purple-500/20 blur-2xl"></div>
+            <div class="relative overflow-hidden rounded-3xl border border-purple-700/15 bg-white p-3 shadow-2xl shadow-purple-700/15">
+              <div class="absolute top-4 left-4 z-10 flex flex-col items-center justify-center rounded-2xl bg-purple-700 px-3 py-2 shadow-lg">
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none">Sun</span>
+                <span class="text-2xl font-extrabold leading-none text-white mt-0.5">14</span>
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none mt-0.5">Jun</span>
               </div>
               <img
-                src={`${base}images/world-cup-watch-party.png`}
-                alt="LSP World Cup Watch Party event graphic"
+                src={`${base}images/pride-in-the-park.png`}
+                alt="Pride in the Park event flyer: free Pilates and dance fitness at 12th St Beach on June 14"
                 class="w-full rounded-2xl object-contain"
                 loading="lazy"
               />
@@ -86,61 +87,70 @@ const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world
           </div>
 
           <div class="lg:col-span-3 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 rounded-full bg-[#0e6600] px-4 py-2 mb-6 shadow-lg shadow-[#0e6600]/15">
+            <div class="inline-flex items-center gap-2 rounded-full bg-purple-700 px-4 py-2 mb-6 shadow-lg shadow-purple-700/15">
               <span class="relative flex h-2.5 w-2.5">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
                 <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"></span>
               </span>
               <span class="text-xs font-bold uppercase tracking-widest text-accent-gold">
-                June 11 · $10 Admission
+                June 14 · Free Event
               </span>
             </div>
 
-            <p class="text-xs font-bold uppercase tracking-[0.3em] text-[#0e6600] mb-2">
-              Futbol, community, and wellness
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-purple-700 mb-2">
+              Movement, joy, and visibility
             </p>
 
             <h2 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl lg:text-6xl leading-[1.05]">
-              LSP World Cup<br class="hidden sm:block" /> Watch Party
+              Pride in<br class="hidden sm:block" /> the Park
             </h2>
-            <p class="mt-3 text-base font-semibold text-[#0e6600] sm:text-lg">
-              Live DJ, games, soccer-themed fun, and community care.
+            <p class="mt-3 text-base font-semibold text-purple-700 sm:text-lg">
+              A lizlates Pilates class and a Dance Fitness class, outdoors by the lake.
             </p>
 
             <p class="mt-5 text-base text-medium-gray leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Join us for a fun watch party where futbol, community, and
-              wellness come together with soccer-themed face painting, cotton
-              candy, popcorn, aguas frescas, and more.
+              Pride In The Park brings our Latina Sweat Cares community
+              together for movement, joy, and visibility. Join us outdoors for
+              fitness, connection, and support that centers Latina wellness.
             </p>
             <p class="mt-4 text-base text-medium-gray leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Your registration helps LSP keep creating safe, supportive spaces
-              for our community to move, recharge, and grow together.
+              Your registration helps us create a safe, welcoming space to
+              move, care for mental health, and celebrate together. All are
+              welcome. Sign up to save your spot and sweat with pride.
             </p>
 
             <div class="mt-6 flex flex-wrap gap-2.5 justify-center lg:justify-start">
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#0e6600]/10 border border-[#0e6600]/15 px-3.5 py-1.5 text-xs font-bold text-[#0e6600]">
-                June 11
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-700/10 border border-purple-700/15 px-3.5 py-1.5 text-xs font-bold text-purple-700">
+                Sunday, June 14 · 1 to 3 PM
               </span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-600/10 border border-blue-600/15 px-3.5 py-1.5 text-xs font-bold text-blue-800">
-                LSP Studio
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-600/10 border border-sky-600/15 px-3.5 py-1.5 text-xs font-bold text-sky-800">
+                12th St Beach · Near Museum Campus
               </span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-red-600/10 border border-red-600/15 px-3.5 py-1.5 text-xs font-bold text-red-700">
-                General Admission · $10
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-pink-600/10 border border-pink-600/15 px-3.5 py-1.5 text-xs font-bold text-pink-700">
+                Free · BYOM: Bring Your Own Mat
               </span>
+            </div>
+
+            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {["lizlates Pilates", "Dance Fitness", "Free", "Outdoors"].map((item) => (
+                <span class="rounded-full bg-white/70 border border-purple-700/15 px-3 py-1 text-xs font-bold text-purple-800">
+                  {item}
+                </span>
+              ))}
             </div>
 
             <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
               <a
-                href={worldCupRegistrationUrl}
+                href={prideRegistrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-[#0e6600] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#0e6600]/25 transition-all duration-300 hover:scale-105 hover:bg-off-black hover:shadow-xl"
+                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-purple-700 px-8 py-4 text-base font-bold text-white shadow-lg shadow-purple-700/25 transition-all duration-300 hover:scale-105 hover:bg-off-black hover:shadow-xl"
                 data-conversion-event="event_registration_start"
-                data-conversion-context="home_world_cup_watch_party"
+                data-conversion-context="home_pride_in_the_park"
                 data-conversion-provider="zeffy"
-                data-conversion-booking-path="world_cup_ticketing"
+                data-conversion-booking-path="pride_in_the_park_ticketing"
               >
-                Save Your Spot
+                RSVP Free
                 <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                 </svg>
@@ -153,7 +163,7 @@ const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world
         </div>
       </div>
     </section>
-    {/* END: World Cup Watch Party Featured Event */}
+    {/* END: Pride in the Park Featured Event */}
 
     {/* START: WGN9 Spotlight Section */}
     <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
@@ -1594,62 +1604,62 @@ const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
-          {/* World Cup Watch Party event card */}
+          {/* Pride in the Park event card */}
           <a
-            href={worldCupRegistrationUrl}
+            href={prideRegistrationUrl}
             target="_blank"
             rel="noopener noreferrer"
             class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
             data-conversion-event="event_registration_start"
-            data-conversion-context="home_events_world_cup_watch_party"
+            data-conversion-context="home_events_pride_in_the_park"
             data-conversion-provider="zeffy"
-            data-conversion-booking-path="world_cup_ticketing"
+            data-conversion-booking-path="pride_in_the_park_ticketing"
           >
             <div
-              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-[#0e6600]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#0e6600]/20 h-full"
+              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-purple-700/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-700/20 h-full"
             >
-              <div class="relative h-52 overflow-hidden bg-[#0e6600]">
+              <div class="relative h-52 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
                 <img
-                  src={`${base}images/world-cup-watch-party.png`}
-                  alt="LSP World Cup Watch Party event graphic"
+                  src={`${base}images/pride-in-the-park.png`}
+                  alt="Pride in the Park event flyer"
                   class="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-off-black/75 to-transparent"></div>
                 <div class="absolute top-3 left-3 flex gap-2">
-                  <span class="rounded-full bg-[#0e6600] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
-                    Watch Party
+                  <span class="rounded-full bg-purple-700 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                    Free Event
                   </span>
                   <span class="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
-                    June 11
+                    June 14
                   </span>
                 </div>
                 <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white drop-shadow">
-                  <span class="text-xs font-bold uppercase tracking-wider">$10 Admission</span>
-                  <span class="text-xs font-bold">LSP Studio</span>
+                  <span class="text-xs font-bold uppercase tracking-wider">Sunday · 1 to 3 PM</span>
+                  <span class="text-xs font-bold">12th St Beach</span>
                 </div>
               </div>
               <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#0e6600]">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-purple-700">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  World Cup Watch Party
+                  Pride in the Park
                 </div>
-                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-[#0e6600]">
-                  Futbol, DJ, games, and treats
+                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-purple-700">
+                  Pilates and dance by the lake
                 </h3>
                 <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  Watch together with a live DJ, games, face painting, cotton
-                  candy, popcorn, and aguas frescas.
+                  Celebrate Pride with a free lizlates Pilates class and a
+                  Dance Fitness class. All are welcome.
                 </p>
                 <div class="mt-4 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-[#0e6600]/10 px-2.5 py-1 text-[11px] font-bold text-[#0e6600]">Live DJ</span>
-                  <span class="rounded-full bg-[#0e6600]/10 px-2.5 py-1 text-[11px] font-bold text-[#0e6600]">Games</span>
-                  <span class="rounded-full bg-[#0e6600]/10 px-2.5 py-1 text-[11px] font-bold text-[#0e6600]">Aguas frescas</span>
+                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">lizlates Pilates</span>
+                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">Dance Fitness</span>
+                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">BYOM</span>
                 </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#0e6600] transition-all group-hover:gap-2">
-                  Save Your Spot
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-purple-700 transition-all group-hover:gap-2">
+                  RSVP Free
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>

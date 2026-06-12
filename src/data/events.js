@@ -2,23 +2,23 @@
 
 export const allEvents = [
   {
-    slug: "world-cup-watch-party",
-    title: "LSP World Cup Watch Party",
-    imageSrc: "/images/world-cup-watch-party.png",
+    slug: "pride-in-the-park",
+    title: "Pride in the Park",
+    imageSrc: "/images/pride-in-the-park.png",
     imageFrameClass: "aspect-[4/5]",
     imageClass: "h-full w-full object-contain",
-    date: "June 11 - July 4",
-    time: "Starts at 1:00 PM on June 11",
-    location: "LSP Studio",
-    address: "949 W 16th St, Chicago, IL",
-    description: "Join us for a fun watch party where futbol, community, and wellness come together with a live DJ, games, soccer-themed face painting, cotton candy, popcorn, and aguas frescas. Your registration helps us keep creating safe, supportive spaces for our community to move, recharge, and grow together.",
-    registrationLink: "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party",
-    registrationLabel: "Save Your Spot",
+    date: "Sunday, June 14",
+    time: "1:00 to 3:00 PM",
+    location: "12th St Beach",
+    address: "Near Museum Campus, Chicago",
+    description: "Pride In The Park brings our Latina Sweat Cares community together for movement, joy, and visibility. Celebrate with a lizlates Pilates class and a Dance Fitness class outdoors by the lake. Free event, all are welcome. BYOM: bring your own mat.",
+    registrationLink: "https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2",
+    registrationLabel: "RSVP Free",
     conversionEvent: "event_registration_start",
     conversionProvider: "zeffy",
-    conversionBookingPath: "world_cup_ticketing",
+    conversionBookingPath: "pride_in_the_park_ticketing",
     featured: true,
-    tags: ["Watch Party", "$10", "Community"]
+    tags: ["Free", "Outdoors", "Pride"]
   },
   {
     slug: "dia-del-nino-kids-day",

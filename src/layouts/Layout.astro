@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import Footer from "@/components/Footer.astro"; // Import the new Footer
+import PrideTheme from "@/components/PrideTheme.astro"; // TEMPORARY: Pride Month 2026, remove with the component file
 const base = import.meta.env.BASE_URL;
 
 interface Props {
@@ -218,6 +219,7 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     />
   </head>
   <body class="bg-white text-off-black overflow-x-hidden">
+    <PrideTheme />
     <slot />
     <script>
       (function () {

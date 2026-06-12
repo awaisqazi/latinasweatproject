@@ -33,7 +33,7 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: World Cup Watch Party (Light Soccer/Green)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Pride in the Park (Light Pink/Blue + Rainbow Strip)"]
     Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
     Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
     Sec3 --> Sec4["Section 4: Kids Day Event (Dark Youth Variant)"]
@@ -110,13 +110,13 @@ On the standalone events page, the lighter playful sand variant is acceptable be
 </section>
 ```
 
-#### Option D: Soccer / Watch Party Event Theme
-Use this for community watch-party events where the event identity depends on game-day energy but the site still needs LSP's warm, premium look. The first implementation is **LSP World Cup Watch Party** on `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, `src/data/events.js`, and the homepage events carousel.
+#### Option D: Celebration Event Theme (Pride)
+Use this for celebration events where the event identity carries its own palette but the site still needs LSP's warm, premium look. The current implementation is **Pride in the Park** on `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, `src/data/events.js`, and the homepage events carousel. (It replaced the LSP World Cup Watch Party in the same slots after that event passed on June 11, 2026.)
 
-- On the homepage, place the World Cup spotlight immediately after the hero as a **light green/soccer** section so the sequence remains Hero dark overlay -> World Cup light -> WGN dark.
-- On the standalone events page, the richer green field variant is acceptable because it opens after the light events header and before the light Kids Day section.
-- Pair green with white, accent gold, red, and blue so the event does not become a one-note green palette.
-- Use `public/images/world-cup-watch-party.png` as the event graphic. It is the supplied portrait flyer (`watch party.png`) copied into the local public asset directory so the homepage, event cards, links page, and event detail page do not depend on a remote image request.
+- On the homepage, place the Pride spotlight immediately after the hero as a **light pink/blue** section with a 1px rainbow top strip so the sequence remains Hero dark overlay -> Pride light -> WGN dark.
+- On the standalone events page, a richer dark purple (`#4a1d6e`) variant is acceptable because it opens after the light events header and before the light Kids Day section. That section carries `id="pride-in-the-park"` with `scroll-mt-28` so site banners can deep-link to it.
+- Pair purple with white, accent gold, pink, and sky so the event does not become a one-note purple palette; reserve full rainbow gradients for thin accents (top strips, badges).
+- Use `public/images/pride-in-the-park.png` as the event graphic. It is the supplied portrait flyer copied into the local public asset directory so the homepage, event cards, links page, and event detail page do not depend on a remote image request.
 - Portrait event flyers should declare `imageFrameClass: "aspect-[4/5]"` and `imageClass: "h-full w-full object-contain"` in `src/data/events.js` so `/events/[slug]` displays the full flyer instead of cropping it into a landscape frame.
 - On `src/pages/links.astro`, event cards may use an optional `image` / `imageAlt` thumbnail in place of the default icon when a current event has a strong flyer or campaign visual.
 
@@ -127,7 +127,7 @@ Implementation notes:
 - Use Tailwind `lg:order-*` utilities on the two grid children to control desktop placement rather than reordering the markup, so the natural DOM order (media first) is preserved for mobile and assistive tech.
 - Keep the text column readable on the side it lands on by pairing `lg:text-left` / `lg:text-right` and `justify-center lg:justify-start` / `lg:justify-end` as needed.
 - The Kids Day spotlight places its flyer on the **right** (`lg:order-2`) with copy on the **left** (`lg:order-1`) so it contrasts with the media side of the spotlight directly above it.
-- Current desktop media rhythm: World Cup event graphic on the left, WGN9 video on the right, merch tee on the left, Kids Day flyer on the right, 40 Under 40 photo on the left, Monday Miles visual on the right, and Studio / Grand Opening image on the left.
+- Current desktop media rhythm: Pride in the Park flyer on the left, WGN9 video on the right, merch tee on the left, Kids Day flyer on the right, 40 Under 40 photo on the left, Monday Miles visual on the right, and Studio / Grand Opening image on the left.
 
 Event and section change checklist:
 - Whenever an event is added, removed, expired, or promoted, update every affected placement in the same change: `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, carousel cards, and `design.md` when applicable.
@@ -135,13 +135,13 @@ Event and section change checklist:
 - After adding or removing any two-column homepage spotlight, re-audit the desktop media-side zig-zag and update `lg:order-*` classes as needed.
 - When changing the homepage events carousel, keep each event card as a direct child of `#events-carousel` so the generated pagination dots stay in sync with the card count.
 
-World Cup Watch Party functional contract:
-- Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party`
-- Event graphic: `public/images/world-cup-watch-party.png`, the local portrait watch-party flyer.
-- Event window: June 11-July 4, 2026. The Zeffy screenshot shows the event starting June 11 at 1:00 PM; avoid inventing a precise July 4 end time unless Zeffy exposes it clearly.
-- Venue and ticket: LSP Studio, `949 W 16th St`, General Admission, `$10`.
-- Required placements while upcoming: homepage spotlight after the hero, first homepage events carousel card, first `links` card, top featured section on `src/pages/events.astro`, and `src/data/events.js` for `/events/world-cup-watch-party`.
-- Tracking: outbound Zeffy CTAs use `event_registration_start` with `data-conversion-booking-path="world_cup_ticketing"` and `data-conversion-provider="zeffy"`.
+Pride in the Park functional contract:
+- Registration URL: `https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2`
+- Event graphic: `public/images/pride-in-the-park.png`, the local portrait event flyer. The flyer reads "Pride at the Park" but the site, copy, and Zeffy page all use **Pride in the Park**.
+- Event date/time: Sunday, June 14, 2026, 1:00 to 3:00 PM. Free event with a lizlates Pilates class and a Dance Fitness class. BYOM: bring your own mat.
+- Venue: 12th St Beach, near Museum Campus / Northerly Island, Chicago.
+- Required placements while upcoming: homepage spotlight after the hero, first homepage events carousel card, first `links` card, top featured section on `src/pages/events.astro` (with the `pride-in-the-park` anchor id), and `src/data/events.js` for `/events/pride-in-the-park`.
+- Tracking: outbound Zeffy CTAs use `event_registration_start` with `data-conversion-booking-path="pride_in_the_park_ticketing"` and `data-conversion-provider="zeffy"`.
 
 Kids Day functional contract:
 - Registration URL: `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`
@@ -176,7 +176,7 @@ const links = [
       es: "Descripción breve de 1 o 2 oraciones que explique el valor del evento."
     },
     url: `${base}your-target-slug`, // Use base prefix for internal routes, or direct URL for external
-    color: "teal", // Options: "teal" | "blue" | "sky" | "wish" | "green" | "indigo" | "amber" | "vibrant-pink" | "gold"
+    color: "teal", // Options: "teal" | "blue" | "sky" | "wish" | "green" | "indigo" | "amber" | "vibrant-pink" | "gold" | "pride"
     icon: "calendar", // Options: "calendar" | "heart" | "mind" | "globe" | "star" | "health" | "leaf" | "yoga" | "tv"
     badge: {
       en: "New / Date", // Optional: text string displaying on top-right badge
@@ -195,7 +195,7 @@ const links = [
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
 Current active event link:
-- **LSP World Cup Watch Party / Fiesta Mundialista en LSP**: first featured card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party`, green calendar styling, badge `Jun 11 · $10` / `11 Jun · $10`, and `event_registration_start` tracking with booking path `world_cup_ticketing`.
+- **Pride in the Park / Pride en el Parque**: first featured card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2`, pride calendar styling (rainbow badge, fuchsia glow), badge `Free · Jun 14` / `Gratis · 14 Jun`, and `event_registration_start` tracking with booking path `pride_in_the_park_ticketing`.
 - **Kids Day at LSP / DÍA DEL NIÑO EN LSP**: second featured active event card in `links`, direct Zeffy registration at `https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day`, amber calendar styling, badge `Free · Jun 14` / `Gratis · 14 Jun`, and `class_booking_start` tracking with booking path `kids_day_ticketing`.
 
 ### Advanced Highlights & Interactive Systems
@@ -814,7 +814,7 @@ The layout exposes `window.trackConversion(eventName, params)` and delegates GA4
 Tracked website intent events:
 
 - `class_booking_start`: class booking intent from schedule CTAs, Mariana Tek fallback schedule links, in-page schedule widget jumps, Southside Social Zeffy registration CTAs, and Kids Day Zeffy registration CTAs.
-- `event_registration_start`: outbound event registration intent for non-class ticketed events such as the World Cup Watch Party.
+- `event_registration_start`: outbound event registration intent for non-class ticketed events such as Pride in the Park.
 - `feedback_start`: internal click intent into the post-class feedback survey, including the featured `/links` feedback card.
 - `contact_form_submit`: successful Xplor contact form submission only after the embedded Xplor API renders its success alert for form `8189caeb-de28-43fc-8cf7-858529bcf767`.
 - `membership_purchase_start`: pricing/buy intent from the Mariana Tek external buy fallback on `/pricing`.

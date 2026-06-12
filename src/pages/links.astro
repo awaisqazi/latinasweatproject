@@ -2,27 +2,27 @@
 import Layout from "@/layouts/Layout.astro";
 const base = import.meta.env.BASE_URL;
 const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
-const worldCupRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-world-cup-watch-party";
+const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2";
 
 // Define links data with English and Spanish translations
 const links = [
   {
     title: {
-      en: "⚽ LSP World Cup Watch Party",
-      es: "⚽ Fiesta Mundialista en LSP"
+      en: "🏳️‍🌈 Pride in the Park",
+      es: "🏳️‍🌈 Pride en el Parque"
     },
     description: {
-      en: "Join us for futbol, community, and wellness with a live DJ, games, face painting, cotton candy, popcorn, and aguas frescas.",
-      es: "Acompáñanos con futbol, comunidad y bienestar: DJ en vivo, juegos, pintacaritas, algodón de azúcar, palomitas y aguas frescas."
+      en: "Celebrate Pride with us at 12th St Beach: a free lizlates Pilates class and a Dance Fitness class outdoors. All are welcome, bring your own mat.",
+      es: "Celebra Pride con nosotras en 12th St Beach: una clase gratis de Pilates lizlates y una de Dance Fitness al aire libre. Todos son bienvenidos, trae tu tapete."
     },
-    url: worldCupRegistrationUrl,
-    color: "green",
+    url: prideRegistrationUrl,
+    color: "pride",
     icon: "calendar",
-    image: `${base}images/world-cup-watch-party.png`,
-    imageAlt: "LSP World Cup Watch Party flyer",
+    image: `${base}images/pride-in-the-park.png`,
+    imageAlt: "Pride in the Park flyer",
     badge: {
-      en: "June 11 · $10",
-      es: "11 Jun · $10"
+      en: "Free · Jun 14",
+      es: "Gratis · 14 Jun"
     },
     featured: true,
   },
@@ -219,7 +219,7 @@ const socials = [
 ];
 
 const getLinkConversionEvent = (url = "") => {
-  if (url.includes("lsp-world-cup-watch-party")) return "event_registration_start";
+  if (url.includes("pride-in-the-park")) return "event_registration_start";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "class_booking_start";
   if (url.includes("/feedback")) return "feedback_start";
   if (url.includes("/schedule")) return "class_booking_start";
@@ -228,7 +228,7 @@ const getLinkConversionEvent = (url = "") => {
 };
 
 const getLinkBookingPath = (url = "") => {
-  if (url.includes("lsp-world-cup-watch-party")) return "world_cup_ticketing";
+  if (url.includes("pride-in-the-park")) return "pride_in_the_park_ticketing";
   if (url.includes("lsp-dia-del-nino-kids-day")) return "kids_day_ticketing";
   if (url.includes("/feedback")) return "post_class_feedback";
   if (url.includes("/schedule")) return "schedule_page";
@@ -610,6 +610,7 @@ const getLinkConversionProvider = (url = "") => {
                       link.color === "amber" && "bg-[#ffbd59] text-[#1E1E1E]",
                       link.color === "vibrant-pink" && "bg-[#b5a18d] text-white",
                       link.color === "gold" && "bg-[#ffbd59] text-[#1E1E1E]",
+                      link.color === "pride" && "bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 text-[#1E1E1E]",
                     ]}
                   >
                     <span class="relative flex h-1.5 w-1.5">
@@ -656,6 +657,8 @@ const getLinkConversionProvider = (url = "") => {
                         "bg-indigo-500/30 text-indigo-300 group-hover:bg-indigo-500/50",
                       link.color === "amber" &&
                         "bg-[#ffbd59]/30 text-[#ffbd59] group-hover:bg-[#ffbd59]/50",
+                      link.color === "pride" &&
+                        "bg-fuchsia-500/30 text-fuchsia-300 group-hover:bg-fuchsia-500/50",
                     ]}
                   >
                     {link.icon === "calendar" && (
@@ -1073,6 +1076,10 @@ const getLinkConversionProvider = (url = "") => {
   .link-card--vibrant-pink:hover {
     box-shadow: 0 10px 30px -8px rgba(181, 161, 141, 0.4);
     border-color: rgba(181, 161, 141, 0.4);
+  }
+  .link-card--pride:hover {
+    box-shadow: 0 10px 30px -8px rgba(217, 70, 239, 0.45);
+    border-color: rgba(217, 70, 239, 0.45);
   }
 
   /* Shimmer text effect on App download label */
