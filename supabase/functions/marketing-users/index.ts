@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
       const payload = await readJson(req);
 
       if (payload.action === "invite") {
-        return await inviteUser(req, adminClient, payload, authContext.userId);
+        return await inviteUser(adminClient, payload, authContext.userId);
       }
 
       return jsonResponse({ error: "Unsupported action" }, 400);
@@ -259,7 +259,6 @@ function getAccountStatus(user: AuthUser): "active" | "invited" | "pending" {
 }
 
 async function inviteUser(
-  req: Request,
   adminClient: ReturnType<typeof createClient>,
   payload: Record<string, unknown>,
   currentUserId: string,
@@ -273,8 +272,8 @@ async function inviteUser(
     return jsonResponse({ error: "Email is required" }, 400);
   }
 
-  const origin = req.headers.get("origin") || "https://latinasweatproject.com";
-  const redirectTo = `${origin}/admin/marketing/reset-password`;
+  const siteUrl = (Deno.env.get("SITE_URL") || "https://latinasweatproject.com").replace(/\/+$/, "");
+  const redirectTo = `${siteUrl}/admin/marketing/reset-password`;
 
   const { data: inviteData, error: inviteError } =
     await adminClient.auth.admin.inviteUserByEmail(email, {
