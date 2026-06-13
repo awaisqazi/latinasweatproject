@@ -49,6 +49,10 @@
     }
 
     function formatTime(date, duration) {
+        if (!request?.hasStartTime) {
+            return `${duration || 60} minutes`;
+        }
+
         const start = date.toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",

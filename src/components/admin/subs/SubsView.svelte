@@ -27,7 +27,7 @@
 
   const DEFAULT_LOCATION = "949 W 16th St, Chicago, IL 60608";
   const requestColumns =
-    "id, class_name, date, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const STATUS_FILTERS = [
     { id: "all", label: "All" },
@@ -52,6 +52,7 @@
   let createError = "";
   let newClassName = "";
   let newDate = "";
+  let newStartTime = "";
   let newDuration = 60;
   let newLocation = DEFAULT_LOCATION;
   let newNotes = "";
@@ -216,6 +217,7 @@
       .insert({
         class_name: className,
         date: newDate,
+        start_time: newStartTime || null,
         duration_minutes: Number(newDuration) || null,
         location: newLocation.trim() || null,
         notes: newNotes.trim() || null,
@@ -241,6 +243,7 @@
 
       newClassName = "";
       newDate = "";
+      newStartTime = "";
       newDuration = 60;
       newLocation = DEFAULT_LOCATION;
       newNotes = "";
@@ -286,6 +289,7 @@
       [
         "Class Name",
         "Date",
+        "Start Time",
         "Duration (minutes)",
         "Location",
         "Status",
@@ -302,6 +306,7 @@
       rows.push([
         request.class_name,
         request.date,
+        request.start_time ? formatStartTime(request.start_time) : "",
         request.duration_minutes ?? "",
         request.location ?? "",
         request.status,
@@ -361,6 +366,19 @@
       day: "numeric",
       year: "numeric",
     }).format(new Date(`${value}T00:00:00`));
+  }
+
+  function formatStartTime(value) {
+    if (!value) return "";
+
+    const [hours, minutes] = value.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
   }
 
   function getStatusLabel(status) {
@@ -485,6 +503,15 @@
               type="date"
               class="input"
               bind:value={newDate}
+              disabled={isCreating}
+            />
+          </Field>
+          <Field label="Class time" id="subs-new-start-time">
+            <input
+              id="subs-new-start-time"
+              type="time"
+              class="input"
+              bind:value={newStartTime}
               disabled={isCreating}
             />
           </Field>
@@ -634,7 +661,9 @@
                       <Badge tone={STATUS_TONES[request.status] || "amber"} dot size="xs">
                         {getStatusLabel(request.status)}
                       </Badge>
-                      <span class="mt-1 line-clamp-2 block">{request.class_name}</span>
+                      <span class="mt-1 line-clamp-2 block">
+                        {#if request.start_time}{formatStartTime(request.start_time)} · {/if}{request.class_name}
+                      </span>
                     </button>
                   {/each}
                 </div>
@@ -654,7 +683,7 @@
           >
             <span class="min-w-0 flex-1">
               <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
-                {formatDate(request.date)}
+                {formatDate(request.date)}{#if request.start_time}&nbsp;· {formatStartTime(request.start_time)}{/if}
               </span>
               <span class="mt-1 block font-bold leading-snug">{request.class_name}</span>
               <span class="mt-1 block text-sm text-ink/60">

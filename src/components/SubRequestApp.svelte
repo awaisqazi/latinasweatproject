@@ -73,10 +73,17 @@
     // Map a sub_requests_public row to the shape the cards and modals expect
     function mapPublicRequest(row) {
         const [y, m, d] = row.date.split("-").map(Number);
+        const date = new Date(y, m - 1, d);
+        const hasStartTime = /^\d{2}:\d{2}/.test(row.start_time || "");
+        if (hasStartTime) {
+            const [hours, minutes] = row.start_time.split(":").map(Number);
+            date.setHours(hours, minutes);
+        }
         return {
             id: row.id,
             className: row.class_name,
-            date: new Date(y, m - 1, d),
+            date,
+            hasStartTime,
             duration: row.duration_minutes || 60,
             location: row.location || "",
             notes: row.notes || "",
@@ -103,7 +110,7 @@
             const { data, error: loadError } = await supabase
                 .from("sub_requests_public")
                 .select(
-                    "id, class_name, date, duration_minutes, location, notes, requested_by_name, status, assigned_sub_name, created_at, volunteer_count",
+                    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, status, assigned_sub_name, created_at, volunteer_count",
                 )
                 .gte("date", cutoffKey)
                 .order("date", { ascending: true });
@@ -261,17 +268,6 @@
             "Please double-check the form. A valid email address is required.",
     };
 
-    function formatTimeLabel(time) {
-        if (!/^\d{2}:\d{2}$/.test(time || "")) return "";
-        const [h, min] = time.split(":").map(Number);
-        const tempDate = new Date();
-        tempDate.setHours(h, min);
-        return tempDate.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-        });
-    }
-
     async function handleCreateRequest(event) {
         isCreatingRequest = true;
         const {
@@ -286,23 +282,15 @@
         } = event.detail;
 
         try {
-            // The class time is no longer a separate field, so keep it in the notes
-            const timeLabel = formatTimeLabel(time);
-            const mergedNotes = [
-                timeLabel ? `Class time: ${timeLabel}` : "",
-                notes || "",
-            ]
-                .filter(Boolean)
-                .join(" · ");
-
             const { data, error: rpcError } = await supabase.rpc(
                 "create_sub_request",
                 {
                     p_class_name: className,
                     p_date: date,
+                    p_start_time: /^\d{2}:\d{2}$/.test(time || "") ? time : null,
                     p_duration_minutes: Number(duration) || null,
                     p_location: location,
-                    p_notes: mergedNotes,
+                    p_notes: notes || "",
                     p_requested_by_name: instructorName,
                     p_requested_by_email: instructorEmail,
                 },
@@ -474,25 +462,29 @@
                                         },
                                     )}
                                 </p>
-                                <p class="flex items-center gap-2">
-                                    <svg
-                                        class="w-4 h-4 text-accent-gold"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        ></path>
-                                    </svg>
-                                    {new Date(request.date).toLocaleTimeString(
-                                        "en-US",
-                                        { hour: "numeric", minute: "2-digit" },
-                                    )}
-                                </p>
+                                {#if request.hasStartTime}
+                                    <p class="flex items-center gap-2">
+                                        <svg
+                                            class="w-4 h-4 text-accent-gold"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            ></path>
+                                        </svg>
+                                        {new Date(
+                                            request.date,
+                                        ).toLocaleTimeString("en-US", {
+                                            hour: "numeric",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                {/if}
                                 <p class="flex items-center gap-2">
                                     <svg
                                         class="w-4 h-4 text-accent-gold"

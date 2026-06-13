@@ -98,8 +98,8 @@
                     {formatDate(request.date)}
                 </p>
                 <p class="text-gray-500">
-                    {formatTime(request.date)} •
-                    {request.duration || 60} mins
+                    {#if request.hasStartTime}{formatTime(request.date)} •
+                    {/if}{request.duration || 60} mins
                 </p>
             </div>
         </div>

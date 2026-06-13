@@ -2,6 +2,7 @@
   import {
     CalendarClock,
     CalendarPlus,
+    Clock,
     Mail,
     MapPin,
     Phone,
@@ -24,7 +25,7 @@
   export let onRequestDeleted = () => {};
 
   const requestColumns =
-    "id, class_name, date, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
   const STATUS_TONES = { open: "amber", pending: "blue", approved: "green" };
 
   let displayedRequest = null;
@@ -220,15 +221,35 @@
     if (!item?.date) return "#";
 
     const [year, month, day] = item.date.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    if (item.start_time) {
+      const [hours, minutes] = item.start_time.split(":").map(Number);
+      date.setHours(hours, minutes, 0, 0);
+    }
+
     return generateSubCalendarLink({
       id: item.id,
       className: item.class_name,
-      date: new Date(year, month - 1, day),
+      date,
       duration: item.duration_minutes || 60,
       location: item.location,
       notes: item.notes,
       requestedBy: { name: item.requested_by_name },
     });
+  }
+
+  function formatStartTime(value) {
+    if (!value) return "";
+
+    const [hours, minutes] = value.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
   }
 
   function formatDate(value) {
@@ -276,6 +297,12 @@
           <Badge tone={STATUS_TONES[displayedRequest.status] || "amber"} dot>
             {getStatusLabel(displayedRequest.status)}
           </Badge>
+          {#if displayedRequest.start_time}
+            <Badge tone="neutral">
+              <Clock class="h-3.5 w-3.5" aria-hidden="true" />
+              {formatStartTime(displayedRequest.start_time)}
+            </Badge>
+          {/if}
           <Badge tone="neutral">
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             {displayedRequest.duration_minutes || 60} minutes
@@ -309,6 +336,14 @@
                 <a class="font-semibold text-accent-strong hover:underline" href={`mailto:${displayedRequest.requested_by_email}`}>
                   {displayedRequest.requested_by_email}
                 </a>
+              </dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="font-semibold text-ink/55">Class time</dt>
+              <dd class="text-right font-semibold">
+                {displayedRequest.start_time
+                  ? formatStartTime(displayedRequest.start_time)
+                  : "Not provided"}
               </dd>
             </div>
             <div class="flex justify-between gap-3">
