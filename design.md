@@ -133,7 +133,7 @@ Use this warm-light variant of Option B for community-celebration classes that a
 Beyond alternating section backgrounds, two-column event spotlights on `src/pages/index.astro` should also alternate which side the graphic/flyer sits on as the user scrolls. Consecutive spotlights must not stack their media on the same edge, because a repeated image-left, image-left rhythm reads as a rigid template and flattens the page. Letting the photo swing left, then right, then left creates a zig-zag reading path that keeps the eye moving and feels more intentionally designed.
 
 Implementation notes:
-- Use Tailwind `lg:order-*` utilities on the two grid children to control desktop placement rather than reordering the markup, so the natural DOM order (media first) is preserved for mobile and assistive tech.
+- Control desktop placement with utility classes rather than reordering the markup, so the natural DOM order is preserved for mobile and assistive tech. Grid spotlights use `lg:order-*` on the two children; flex spotlights use `md:flex-row-reverse` (this is how 40 Under 40 is flipped to media-right).
 - Keep the text column readable on the side it lands on by pairing `lg:text-left` / `lg:text-right` and `justify-center lg:justify-start` / `lg:justify-end` as needed.
 - The Father's Day spotlight places its flyer on the **left** (copy on the right) so it zig-zags with the WGN9 video on the right directly below it.
 - Current desktop media rhythm (left/right/left/right/left/right): Father's Day flyer on the left, WGN9 video on the right, merch tee on the left, 40 Under 40 photo on the right, Studio / Grand Opening image on the left, and Monday Miles visual on the right. (The Free Classes promo sits between 40 Under 40 and Grand Opening but is a two-card grid, not a media spotlight, so it does not affect the zig-zag.)
@@ -141,12 +141,12 @@ Implementation notes:
 Event and section change checklist:
 - Whenever an event is added, removed, expired, or promoted, update every affected placement in the same change: `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, carousel cards, and `design.md` when applicable.
 - After adding or removing any homepage section, re-audit the section background cadence so adjacent full-width sections do not accidentally share the same light or dark treatment unless the exception is intentional and documented here.
-- After adding or removing any two-column homepage spotlight, re-audit the desktop media-side zig-zag and update `lg:order-*` classes as needed.
+- After adding or removing any two-column homepage spotlight, re-audit the desktop media-side zig-zag and update the placement classes as needed (`lg:order-*` for grid spotlights, `md:flex-row-reverse` for flex spotlights).
 - When changing the homepage events carousel, keep each event card as a direct child of `#events-carousel` so the generated pagination dots stay in sync with the card count.
 
 Father's Day at LSP functional contract:
 - Booking: this is a studio class, not a Zeffy event. CTAs route to `${base}schedule` and to the LSP Studio app (iOS `https://apps.apple.com/us/app/lsp-studio/id6755971141`, Android `https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US`). There is no ticketing URL.
-- Event graphic: `public/images/fathers-day-lsp.png`, the supplied portrait flyer copied into the local public asset directory. (Add this file; the placements reference it and it is not committed yet.)
+- Event graphic: `public/images/fathers-day-lsp.png`, the supplied portrait sunset flyer (father and child silhouette) copied into the local public asset directory so no placement depends on a remote request.
 - Event date/time: Sunday, June 21, 2026, 10:30 AM. The class is **Father's Day Strength Training & Flow**. All levels welcome.
 - Venue: LSP Studio, 949 W 16th St, Chicago.
 - Required placements while upcoming: homepage spotlight after the hero (lead event, warm sunset light, flyer left), first homepage events carousel card, first `links` card, and the top featured section on `src/pages/events.astro` (with the `fathers-day-lsp` anchor id). It is a one-time class, so it is **not** added to `src/data/events.js` (that file backs evergreen `/events/[slug]` pages only).
