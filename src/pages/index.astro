@@ -4,8 +4,6 @@ import Header from "@/components/Header.astro";
 import TestimonialCard from "@/components/TestimonialCard.astro";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
-const kidsDayRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/lsp-dia-del-nino-kids-day";
-const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the-park-2";
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -56,30 +54,30 @@ const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Pride in the Park Featured Event */}
-    <section class="relative overflow-hidden bg-gradient-to-br from-[#fdf2f8] via-white to-[#eff6ff] py-16 sm:py-20 lg:py-24">
+    {/* START: Father's Day at LSP Featured Event */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#fdf3e7] via-white to-[#fbe7d2] py-16 sm:py-20 lg:py-24">
       <div
-        class="absolute inset-0 opacity-[0.12]"
-        style="background-image: linear-gradient(90deg, rgba(147,51,234,0.18) 1px, transparent 1px), linear-gradient(rgba(147,51,234,0.13) 1px, transparent 1px); background-size: 68px 68px;"
+        class="absolute inset-0 opacity-[0.1]"
+        style="background-image: linear-gradient(90deg, rgba(199,96,45,0.16) 1px, transparent 1px), linear-gradient(rgba(255,189,89,0.16) 1px, transparent 1px); background-size: 68px 68px;"
       >
       </div>
-      <div class="absolute -top-28 -right-24 h-72 w-72 rounded-full bg-pink-500/20 blur-[110px]"></div>
-      <div class="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-sky-500/15 blur-[120px]"></div>
-      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-amber-400 via-green-500 via-blue-500 to-purple-500"></div>
+      <div class="absolute -top-28 -right-24 h-72 w-72 rounded-full bg-accent-gold/25 blur-[110px]"></div>
+      <div class="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-orange-400/20 blur-[120px]"></div>
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 via-accent-gold to-orange-400"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14">
           <div class="relative lg:col-span-2">
-            <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-pink-500/25 via-amber-400/20 to-purple-500/20 blur-2xl"></div>
-            <div class="relative overflow-hidden rounded-3xl border border-purple-700/15 bg-white p-3 shadow-2xl shadow-purple-700/15">
-              <div class="absolute top-4 left-4 z-10 flex flex-col items-center justify-center rounded-2xl bg-purple-700 px-3 py-2 shadow-lg">
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none">Sun</span>
-                <span class="text-2xl font-extrabold leading-none text-white mt-0.5">14</span>
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none mt-0.5">Jun</span>
+            <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-accent-gold/30 via-orange-300/20 to-amber-200/20 blur-2xl"></div>
+            <div class="relative overflow-hidden rounded-3xl border border-accent-gold/20 bg-white p-3 shadow-2xl shadow-amber-900/10">
+              <div class="absolute top-4 left-4 z-10 flex flex-col items-center justify-center rounded-2xl bg-off-black px-3 py-2 shadow-lg">
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-accent-gold leading-none">Sun</span>
+                <span class="text-2xl font-extrabold leading-none text-white mt-0.5">21</span>
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-accent-gold leading-none mt-0.5">Jun</span>
               </div>
               <img
-                src={`${base}images/pride-in-the-park.png`}
-                alt="Pride in the Park event flyer: free Pilates and dance fitness at 12th St Beach on June 14"
+                src={`${base}images/fathers-day-lsp.png`}
+                alt="Father's Day at LSP flyer: Father's Day Strength Training and Flow on June 21 at 10:30 AM"
                 class="w-full rounded-2xl object-contain"
                 loading="lazy"
               />
@@ -87,83 +85,97 @@ const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the
           </div>
 
           <div class="lg:col-span-3 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 rounded-full bg-purple-700 px-4 py-2 mb-6 shadow-lg shadow-purple-700/15">
+            <div class="inline-flex items-center gap-2 rounded-full bg-off-black px-4 py-2 mb-6 shadow-lg shadow-off-black/15">
               <span class="relative flex h-2.5 w-2.5">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
                 <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"></span>
               </span>
               <span class="text-xs font-bold uppercase tracking-widest text-accent-gold">
-                June 14 · Free Event
+                June 21 · Father's Day
               </span>
             </div>
 
-            <p class="text-xs font-bold uppercase tracking-[0.3em] text-purple-700 mb-2">
-              Movement, joy, and visibility
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-[#c7602d] mb-2">
+              Celebrating the fathers in our community
             </p>
 
             <h2 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl lg:text-6xl leading-[1.05]">
-              Pride in<br class="hidden sm:block" /> the Park
+              Father's Day<br class="hidden sm:block" /> at LSP
             </h2>
-            <p class="mt-3 text-base font-semibold text-purple-700 sm:text-lg">
-              A lizlates Pilates class and a Dance Fitness class, outdoors by the lake.
+            <p class="mt-3 text-base font-semibold text-[#c7602d] sm:text-lg">
+              Father's Day Strength Training & Flow
             </p>
 
             <p class="mt-5 text-base text-medium-gray leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Pride In The Park brings our Latina Sweat Cares community
-              together for movement, joy, and visibility. Join us outdoors for
-              fitness, connection, and support that centers Latina wellness.
+              Bring the dads, the father figures, and the whole community
+              together to move. Build strength, find your flow, and breathe in a
+              class made to honor the men who show up for us.
             </p>
             <p class="mt-4 text-base text-medium-gray leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Your registration helps us create a safe, welcoming space to
-              move, care for mental health, and celebrate together. All are
-              welcome. Sign up to save your spot and sweat with pride.
+              All levels welcome. Save your spot on the schedule page or right
+              inside the LSP Studio app, then meet us on the mat.
             </p>
 
             <div class="mt-6 flex flex-wrap gap-2.5 justify-center lg:justify-start">
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-700/10 border border-purple-700/15 px-3.5 py-1.5 text-xs font-bold text-purple-700">
-                Sunday, June 14 · 1 to 3 PM
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-off-black/[0.06] border border-off-black/10 px-3.5 py-1.5 text-xs font-bold text-off-black">
+                Sunday, June 21 · 10:30 AM
               </span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-600/10 border border-sky-600/15 px-3.5 py-1.5 text-xs font-bold text-sky-800">
-                12th St Beach · Near Museum Campus
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-accent-gold/15 border border-accent-gold/30 px-3.5 py-1.5 text-xs font-bold text-[#9a5a23]">
+                LSP Studio · 949 W 16th St
               </span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-pink-600/10 border border-pink-600/15 px-3.5 py-1.5 text-xs font-bold text-pink-700">
-                Free · BYOM: Bring Your Own Mat
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-off-black/[0.06] border border-off-black/10 px-3.5 py-1.5 text-xs font-bold text-off-black">
+                Strength Training & Flow
               </span>
             </div>
 
-            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
-              {["lizlates Pilates", "Dance Fitness", "Free", "Outdoors"].map((item) => (
-                <span class="rounded-full bg-white/70 border border-purple-700/15 px-3 py-1 text-xs font-bold text-purple-800">
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
               <a
-                href={prideRegistrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-purple-700 px-8 py-4 text-base font-bold text-white shadow-lg shadow-purple-700/25 transition-all duration-300 hover:scale-105 hover:bg-off-black hover:shadow-xl"
-                data-conversion-event="event_registration_start"
-                data-conversion-context="home_pride_in_the_park"
-                data-conversion-provider="zeffy"
-                data-conversion-booking-path="pride_in_the_park_ticketing"
+                href={`${base}schedule`}
+                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-off-black px-8 py-4 text-base font-bold text-white shadow-lg shadow-off-black/25 transition-all duration-300 hover:scale-105 hover:bg-[#c7602d] hover:shadow-xl"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="home_fathers_day"
+                data-conversion-booking-path="schedule_page"
               >
-                RSVP Free
+                Book Your Spot
                 <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
-              <span class="text-xs text-medium-gray font-medium">
-                Supports Latina Sweat Cares
-              </span>
+              <div class="flex items-center gap-2">
+                <a
+                  href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-3 text-sm font-bold text-off-black shadow-sm transition-all duration-300 hover:scale-[1.03] hover:border-off-black/30"
+                  data-conversion-event="app_download_click"
+                  data-conversion-context="home_fathers_day"
+                  data-conversion-platform="ios"
+                >
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"></path></svg>
+                  iOS
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-3 text-sm font-bold text-off-black shadow-sm transition-all duration-300 hover:scale-[1.03] hover:border-off-black/30"
+                  data-conversion-event="app_download_click"
+                  data-conversion-context="home_fathers_day"
+                  data-conversion-platform="android"
+                >
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"></path></svg>
+                  Android
+                </a>
+              </div>
             </div>
+            <p class="mt-3 text-xs text-medium-gray font-medium text-center lg:text-left">
+              Book on the schedule page or in the LSP Studio app
+            </p>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Pride in the Park Featured Event */}
+    {/* END: Father's Day at LSP Featured Event */}
 
     {/* START: WGN9 Spotlight Section */}
     <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
@@ -635,211 +647,6 @@ const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the
       </div>
     </section>
     {/* END: Merch Drop — Monday Miles Tee Section */}
-
-    {/* START: Kids Day at LSP Featured Event */}
-    <section
-      class="relative overflow-hidden bg-off-black py-16 sm:py-20 lg:py-24"
-    >
-      <div
-        class="absolute inset-0 opacity-[0.06]"
-        style="background-image: linear-gradient(rgba(255,255,255,0.75) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.75) 2px, transparent 2px); background-size: 58px 58px;"
-      >
-      </div>
-      <div
-        class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff7a59] via-accent-gold to-cyan-400"
-      >
-      </div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-center mb-8">
-          <div
-            class="inline-flex items-center gap-2 rounded-full bg-[#c7602d] px-4 py-2 shadow-lg shadow-[#c7602d]/25"
-          >
-            <span class="relative flex h-2.5 w-2.5">
-              <span
-                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"
-              ></span>
-              <span
-                class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"
-              ></span>
-            </span>
-            <span class="text-xs font-bold uppercase tracking-widest text-white">
-              June 14 · Free Kids Event
-            </span>
-          </div>
-        </div>
-
-        <div
-          class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14"
-        >
-          <div class="relative lg:order-2 lg:col-span-3">
-            <div
-              class="relative overflow-hidden rounded-3xl border border-[#c7602d]/20 bg-white/75 shadow-2xl shadow-[#c7602d]/10 ring-1 ring-white/60"
-            >
-              <div
-                class="absolute top-4 left-4 z-10 flex flex-col items-center justify-center rounded-2xl bg-[#c7602d] px-3 py-2 shadow-lg"
-              >
-                <span
-                  class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none"
-                  >Sun</span
-                >
-                <span
-                  class="text-2xl font-extrabold leading-none text-white mt-0.5"
-                  >14</span
-                >
-                <span
-                  class="text-[9px] font-extrabold uppercase tracking-wider text-white/80 leading-none mt-0.5"
-                  >Jun</span
-                >
-              </div>
-              <img
-                src={`${base}images/dia-del-nino-kids-day-en.png`}
-                alt="Kids Day at LSP flyer with class times for ages 3 to 18"
-                class="w-full h-auto object-contain"
-                loading="lazy"
-              />
-            </div>
-          </div>
-
-          <div class="lg:order-1 lg:col-span-2 text-center lg:text-left">
-            <p
-              class="text-xs font-bold uppercase tracking-[0.3em] text-accent-gold mb-2"
-            >
-              Día del Niño en LSP
-            </p>
-
-            <h2
-              class="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.05]"
-            >
-              Kids Day at LSP
-            </h2>
-            <p class="mt-3 text-base font-semibold text-white/80">
-              Four age-group yoga classes full of movement, play, and wellness.
-            </p>
-
-            <p
-              class="mt-5 text-base text-white/65 leading-relaxed max-w-xl mx-auto lg:mx-0"
-            >
-              Bring the kids for a free class and goody bag. Each session is
-              grouped by age so young movers and teens can practice with their
-              peers.
-            </p>
-
-            <div class="mt-6 flex flex-wrap gap-2.5 justify-center lg:justify-start">
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm"
-              >
-                <svg
-                  class="w-3.5 h-3.5 text-[#c7602d]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                1:00 to 4:15 PM
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm"
-              >
-                <svg
-                  class="w-3.5 h-3.5 text-[#c7602d]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  ></path>
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                LSP Studio
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-cyan-400/15 border border-cyan-300/40 px-3.5 py-1.5 text-xs font-bold text-cyan-200 shadow-sm"
-              >
-                Free registration
-              </span>
-            </div>
-
-            <div class="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
-              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">
-                  Ages 3-5
-                </p>
-                <p class="mt-1 text-sm font-bold text-white tabular-nums">
-                  1:00-1:30 PM
-                </p>
-              </div>
-              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">
-                  Ages 6-9
-                </p>
-                <p class="mt-1 text-sm font-bold text-white tabular-nums">
-                  1:50-2:20 PM
-                </p>
-              </div>
-              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">
-                  Ages 10-13
-                </p>
-                <p class="mt-1 text-sm font-bold text-white tabular-nums">
-                  2:40-3:10 PM
-                </p>
-              </div>
-              <div class="rounded-xl bg-white/10 border border-white/15 px-4 py-3">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold">
-                  Ages 14-18
-                </p>
-                <p class="mt-1 text-sm font-bold text-white tabular-nums">
-                  3:30-4:15 PM
-                </p>
-              </div>
-            </div>
-
-            <div
-              class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
-            >
-              <a
-                href={kidsDayRegistrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-[#c7602d] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#c7602d]/25 transition-all duration-300 hover:scale-105 hover:bg-accent-gold hover:text-off-black hover:shadow-xl hover:shadow-accent-gold/30"
-              >
-                Register on Zeffy
-                <svg
-                  class="h-5 w-5 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  ></path>
-                </svg>
-              </a>
-              <span class="text-xs text-white/45 font-medium">
-                Free class & goody bag
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Kids Day at LSP Featured Event */}
 
     {/* START: Free Day Promo */}
     <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#e8f6ed] py-12 sm:py-16">
@@ -1604,168 +1411,61 @@ const prideRegistrationUrl = "https://www.zeffy.com/en-US/ticketing/pride-in-the
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
-          {/* Pride in the Park event card */}
+          {/* Father's Day at LSP event card */}
           <a
-            href={prideRegistrationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`${base}schedule`}
             class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="event_registration_start"
-            data-conversion-context="home_events_pride_in_the_park"
-            data-conversion-provider="zeffy"
-            data-conversion-booking-path="pride_in_the_park_ticketing"
+            data-conversion-event="class_booking_start"
+            data-conversion-context="home_events_fathers_day"
+            data-conversion-booking-path="schedule_page"
           >
             <div
-              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-purple-700/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-700/20 h-full"
+              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-accent-gold/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20 h-full"
             >
-              <div class="relative h-52 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
+              <div class="relative h-52 overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100">
                 <img
-                  src={`${base}images/pride-in-the-park.png`}
-                  alt="Pride in the Park event flyer"
+                  src={`${base}images/fathers-day-lsp.png`}
+                  alt="Father's Day at LSP flyer"
                   class="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-off-black/75 to-transparent"></div>
                 <div class="absolute top-3 left-3 flex gap-2">
-                  <span class="rounded-full bg-purple-700 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
-                    Free Event
+                  <span class="rounded-full bg-[#c7602d] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                    Father's Day
                   </span>
                   <span class="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
-                    June 14
+                    June 21
                   </span>
                 </div>
                 <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white drop-shadow">
-                  <span class="text-xs font-bold uppercase tracking-wider">Sunday · 1 to 3 PM</span>
-                  <span class="text-xs font-bold">12th St Beach</span>
+                  <span class="text-xs font-bold uppercase tracking-wider">Sunday · 10:30 AM</span>
+                  <span class="text-xs font-bold">LSP Studio</span>
                 </div>
               </div>
               <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-purple-700">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#c7602d]">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  Pride in the Park
+                  Father's Day at LSP
                 </div>
-                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-purple-700">
-                  Pilates and dance by the lake
+                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-[#c7602d]">
+                  Strength Training & Flow
                 </h3>
                 <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  Celebrate Pride with a free lizlates Pilates class and a
-                  Dance Fitness class. All are welcome.
+                  Celebrate the dads and father figures in our community with a
+                  class built to honor the men who show up for us.
                 </p>
                 <div class="mt-4 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">lizlates Pilates</span>
-                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">Dance Fitness</span>
-                  <span class="rounded-full bg-purple-700/10 px-2.5 py-1 text-[11px] font-bold text-purple-700">BYOM</span>
+                  <span class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]">Strength</span>
+                  <span class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]">Flow</span>
+                  <span class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]">All Levels</span>
                 </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-purple-700 transition-all group-hover:gap-2">
-                  RSVP Free
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#c7602d] transition-all group-hover:gap-2">
+                  Book Your Spot
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Kids Day at LSP event card */}
-          <a
-            href={kidsDayRegistrationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-          >
-            <div
-              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-[#c7602d]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#c7602d]/20 h-full"
-            >
-              <div class="relative h-52 overflow-hidden bg-[#fbf3ea]">
-                <img
-                  src={`${base}images/dia-del-nino-kids-day-en.png`}
-                  alt="Kids Day at LSP flyer"
-                  class="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-off-black/70 to-transparent"
-                >
-                </div>
-                <div class="absolute top-3 left-3 flex gap-2">
-                  <span
-                    class="rounded-full bg-[#c7602d] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md"
-                    >Free Event</span
-                  >
-                  <span
-                    class="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
-                    >June 14</span
-                  >
-                </div>
-                <div
-                  class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white drop-shadow"
-                >
-                  <span class="text-xs font-bold uppercase tracking-wider">Sunday</span>
-                  <span class="text-xs font-bold tabular-nums">1:00 to 4:15 PM</span>
-                </div>
-              </div>
-              <div class="p-5">
-                <div
-                  class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#c7602d]"
-                >
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  Kids Day at LSP
-                </div>
-                <h3
-                  class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-[#c7602d]"
-                >
-                  Día del Niño Classes
-                </h3>
-                <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  Four free movement, play, and wellness classes for ages 3-18.
-                  Each registration includes a yoga class and goody bag.
-                </p>
-                <div class="mt-4 flex flex-wrap gap-1.5">
-                  <span
-                    class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]"
-                    >Ages 3-5</span
-                  >
-                  <span
-                    class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]"
-                    >6-9</span
-                  >
-                  <span
-                    class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]"
-                    >10-13</span
-                  >
-                  <span
-                    class="rounded-full bg-[#c7602d]/10 px-2.5 py-1 text-[11px] font-bold text-[#c7602d]"
-                    >14-18</span
-                  >
-                </div>
-                <div
-                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#c7602d] transition-all group-hover:gap-2"
-                >
-                  Register Free
-                  <svg
-                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>
                 </div>
               </div>
