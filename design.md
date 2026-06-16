@@ -36,17 +36,17 @@ graph TD
     Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Father's Day at LSP (Warm Sunset Light)"]
     Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
     Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
-    Sec3 --> Sec4["Section 4: Free Classes Promo (Light Green/Sand)"]
-    Sec4 --> Sec5["Section 5: 40 Under 40 (bg-off-black)"]
-    Sec5 --> Sec6["Section 6: Monday Miles (Light Sand)"]
-    Sec6 --> Sec7["Section 7: Studio / Grand Opening (bg-off-black)"]
-    Sec7 --> Sec8["Section 8: Events Carousel (Light Sand)"]
-    Sec8 --> Sec9["Section 9: Instagram (bg-off-black)"]
+    Sec3 --> Sec4["Section 4: 40 Under 40 (bg-off-black)"]
+    Sec4 --> Sec5["Section 5: Free Classes Promo (Light Green/Sand)"]
+    Sec5 --> Sec6["Section 6: Studio / Grand Opening (bg-off-black)"]
+    Sec6 --> Sec7["Section 7: Monday Miles (Light Sand)"]
+    Sec7 --> Sec8["Section 8: Instagram (bg-off-black)"]
+    Sec8 --> Sec9["Section 9: Events Carousel (Light Sand)"]
     Sec9 --> Sec10["Section 10: Press (Light)"]
 ```
 
 > [!NOTE]
-> **Known cadence exception (June 2026).** Pride in the Park (Jun 14) and Kids Day (Jun 14) were removed once they passed, and Father's Day at LSP (Jun 21) was added as the lead spotlight in Pride's old slot. Removing the dark Kids Day section that previously separated the Merch Drop (light) and Free Classes Promo (light) now leaves those two warm-light sections adjacent. This is an accepted temporary exception: both read as distinct framed blocks and the next dark section (40 Under 40) resumes alternation. When the next dark spotlight is added, restore strict alternation through the Merch -> Free Classes junction. The same removal also left the Merch (media-left) and 40 Under 40 (media-left) spotlights adjacent in the media-side rhythm; fold that back into the zig-zag when the section list next changes.
+> **June 2026 reorder.** Pride in the Park (Jun 14) and Kids Day (Jun 14) were removed once they passed, and Father's Day at LSP (Jun 21) was added as the lead spotlight after the hero. Removing the two events (one light, one dark) left a count of 6 light vs 4 dark full-width sections after the dark hero, so the lower page was reordered to keep strict light/dark alternation and the media-side zig-zag intact: WGN9, 40 Under 40, Grand Opening, and Instagram (all dark) now interleave the light sections, and 40 Under 40's flyer was flipped to the right (`md:flex-row-reverse`) to keep the L/R/L/R/L/R spotlight rhythm. With a dark hero plus 6 light / 4 dark sections, one same-theme adjacency is mathematically unavoidable; it is parked at the very bottom (Events Carousel light -> In The Press light), the least prominent junction. Resolve it for free whenever the next dark section is added near the bottom.
 
 ### Purpose & Rationale
 1. **Visual Cadence**: Breaking up large pages into clear chapters prevents visual fatigue and facilitates scrolling.
@@ -136,7 +136,7 @@ Implementation notes:
 - Use Tailwind `lg:order-*` utilities on the two grid children to control desktop placement rather than reordering the markup, so the natural DOM order (media first) is preserved for mobile and assistive tech.
 - Keep the text column readable on the side it lands on by pairing `lg:text-left` / `lg:text-right` and `justify-center lg:justify-start` / `lg:justify-end` as needed.
 - The Father's Day spotlight places its flyer on the **left** (copy on the right) so it zig-zags with the WGN9 video on the right directly below it.
-- Current desktop media rhythm: Father's Day flyer on the left, WGN9 video on the right, merch tee on the left, 40 Under 40 photo on the left (see the cadence-exception note above), Monday Miles visual on the right, and Studio / Grand Opening image on the left.
+- Current desktop media rhythm (left/right/left/right/left/right): Father's Day flyer on the left, WGN9 video on the right, merch tee on the left, 40 Under 40 photo on the right, Studio / Grand Opening image on the left, and Monday Miles visual on the right. (The Free Classes promo sits between 40 Under 40 and Grand Opening but is a two-card grid, not a media spotlight, so it does not affect the zig-zag.)
 
 Event and section change checklist:
 - Whenever an event is added, removed, expired, or promoted, update every affected placement in the same change: `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, carousel cards, and `design.md` when applicable.
@@ -151,7 +151,7 @@ Father's Day at LSP functional contract:
 - Venue: LSP Studio, 949 W 16th St, Chicago.
 - Required placements while upcoming: homepage spotlight after the hero (lead event, warm sunset light, flyer left), first homepage events carousel card, first `links` card, and the top featured section on `src/pages/events.astro` (with the `fathers-day-lsp` anchor id). It is a one-time class, so it is **not** added to `src/data/events.js` (that file backs evergreen `/events/[slug]` pages only).
 - Tracking: the schedule CTA uses `class_booking_start` with `data-conversion-booking-path="schedule_page"`; the app buttons use `app_download_click` with `data-conversion-platform="ios"` / `"android"`. Context is `home_fathers_day` / `events_fathers_day`.
-- The homepage should preserve the lower-page contrast sequence: Studio / Grand Opening dark, Events carousel light, Instagram dark, Press light.
+- The homepage should preserve the lower-page contrast sequence: Grand Opening dark, Monday Miles light, Instagram dark, Events carousel light, Press light (the carousel -> Press pair is the parked light/light junction noted above).
 
 ---
 
