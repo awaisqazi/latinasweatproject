@@ -1,12 +1,17 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import EventCard from "@/components/EventCard.astro";
 import EventsList from "@/components/EventsList.svelte";
+import GalaCountdown from "@/components/GalaCountdown.astro";
+import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
+import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
 const base = import.meta.env.BASE_URL;
+const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
+const galaPageUrl = withBase(galaTeaser.pagePath);
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice.
 const featuredSlugs = [
+  "noche-inolvidable-gala",
   "fathers-day-lsp",
   "monday-miles",
 ];
@@ -30,6 +35,86 @@ const featuredSlugs = [
       </div>
     </section>
     {/* END: Page Header Section */}
+
+    {/* START: Noche Inolvidable Gala Featured Section */}
+    <section
+      id="noche-inolvidable-gala"
+      class="relative overflow-hidden bg-off-black py-16 text-white md:py-20 scroll-mt-28"
+    >
+      <div class="absolute inset-0 opacity-[0.08]" style="background-image: linear-gradient(rgba(255,189,89,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.3) 1px, transparent 1px); background-size: 56px 56px;"></div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+      <div class="gala-ambient absolute -left-20 top-0 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
+      <div class="gala-ambient absolute -right-20 bottom-0 h-72 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
+          <div class="reveal group relative lg:col-span-2">
+            <div class="gala-ambient absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-xl"></div>
+            <GalaPhotoFrame slot={galaPhotos.atrium} variant="event" corners />
+          </div>
+
+          <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
+            <p class="flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold lg:justify-start">
+              <span class="h-px w-8 bg-accent-gold/70"></span>
+              Featured · Signature Fundraising Gala
+            </p>
+            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]">
+              <span class="gala-foil">{galaTeaser.shortTitle}</span>
+              <span class="text-white/90"> Gala</span>
+            </h2>
+            <p class="mt-4 text-lg font-semibold text-accent-gold">
+              {galaTeaser.dateLabel} · {galaTeaser.timeLabel}
+            </p>
+            <p class="mt-2 text-base font-semibold text-white/80">
+              {galaTeaser.venueLine}
+            </p>
+
+            <p class="mt-5 max-w-2xl text-base leading-relaxed text-white/65 mx-auto lg:mx-0">
+              {galaTeaser.homepageDescription} {galaTeaser.statusLabel}.
+            </p>
+            <p class="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-white/75 mx-auto lg:mx-0">
+              Our signature fundraising evening: every seat expands free and
+              discounted access across Chicago.
+            </p>
+
+            <div class="mt-7 max-w-2xl mx-auto lg:mx-0">
+              <GalaCountdown variant="card" />
+            </div>
+
+            <div class="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {[galaTeaser.attire, "Downtown Chicago", "MCA Chicago"].map((item) => (
+                <span class="rounded-full border border-accent-gold/25 bg-accent-gold/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+              <a
+                href={galaPageUrl}
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                Explore the Gala
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={galaTeaser.interestFormUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-3 rounded-full border border-accent-gold/45 bg-white/[0.04] px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
+                data-conversion-event="gala_interest_start"
+                data-conversion-context="events_featured_gala"
+              >
+                {galaTeaser.interestLabel}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Noche Inolvidable Gala Featured Section */}
 
     {/* START: Father's Day at LSP Featured Section */}
     <section id="fathers-day-lsp" class="relative overflow-hidden bg-gradient-to-br from-[#fdf3e7] via-[#fff8ef] to-[#fbe7d2] py-16 md:py-20 scroll-mt-28">

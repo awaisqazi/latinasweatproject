@@ -159,6 +159,8 @@ Father's Day at LSP functional contract:
 
 The Links page is a crucial portal, housed directly in LSP's social media bios (e.g., Instagram). It is designed to act as an immersive, mobile-first "Linktree" that drives immediate actions like class booking, event signups, and newsletters.
 
+**Page section order (lead with links):** profile header, language toggle, Highlight Stories bar, then the main Quick Links list. Because this is an Instagram-bio landing page, it leads with the tappable links. The larger feature blocks (the Gala feature card and the Free Classes two-locations promo) sit BELOW the links list, followed by the newsletter and app-download sections.
+
 ### Bilingual Integration & Content Architecture
 All content (titles, descriptions, and badges) inside both the main `links` list and the `highlights` array supports nested `{ en, es }` localization objects.
 
@@ -395,6 +397,42 @@ For fundraisers and gala events, LSP utilizes an immersive, high-contrast live v
     - **Pink Particles (`.particle-pink`)**: Drift diagonally across the canvas using a secondary coordinate path (`@keyframes float-diagonal`).
   - **Performance Optimization**: Particles are isolated using `pointer-events-none z-0` and are programmatically hidden on narrow mobile devices (`hidden lg:block`) to prevent CPU bottlenecks on mobile viewports.
   - **Soft Ambient Pulsing**: Slow-moving radial gradients (`ambient-glow`) slowly pulse in scale and opacity in the background over 8 seconds (`@keyframes ambient-pulse`) to create a warm, alive backdrop without distracting from the text.
+
+---
+
+## 🥂 8B. Gala Teaser Page & Signature "Black-Tie Luxe" System (`src/pages/gala.astro`)
+
+The public `/gala` teaser is LSP's **signature fundraising event** page, so it carries a more elevated, cinematic treatment than any other page while staying inside the core palette (gold `#ffbd59`, mauve `#b5a18d`, off-black `#1E1E1E`). It is a teaser, not a sponsor pitch: tickets and sponsorships are "coming soon."
+
+### Section order (narrative)
+**Hero (`#save-the-date`) → Impact band (`#impact`) → Evening with purpose (MCA venue) → Last year recap (light intermission) → Closing invitation (`#gala-interest`).** The impact band sits high so the fundraising case lands before the venue and recap.
+
+### Shared luxe utilities (defined in `src/styles/global.css`, reusable site-wide)
+- **Display serif**: `--font-display` (`Playfair Display`, loaded in `Layout.astro`) generates a Tailwind `font-display` utility. Used **only** for gala display headings, the hero title, the impact numbers, and the `GalaCountdown` numerals. Body copy stays Rubik.
+- **`.gala-foil` / `.gala-foil-rule`**: a warm gold gradient clipped to text (foil) or used as a hairline divider (rule). A slow shimmer sweep (`@keyframes gala-shimmer`) runs only under `prefers-reduced-motion: no-preference`; otherwise the gold is static.
+- **`.gala-ambient`**: slow scale/opacity glow (`@keyframes gala-ambient-pulse`) for backdrop blobs.
+- **`.gala-sheen`**: a periodic light sweep across a solid element (used on the links card "Save the Date" bar). Content sits above the sweep via `z-[1]`.
+- **`.reveal` / `.is-visible`**: scroll-reveal. A single `IntersectionObserver` in `Layout.astro` adds `.is-visible`. The hidden initial state is gated behind a `.js` class (set synchronously in `<head>`) so content is never stuck hidden without JS, and `prefers-reduced-motion: reduce` shows everything immediately. The hero uses a separate CSS-only `.hero-rise` staggered load-in (no JS dependency, so it never blocks the LCP heading).
+
+### Impact data + `GalaImpactStats.astro`
+- Data lives in `src/data/galaTeaser.js` as `galaImpact` (stat objects) and `galaImpactIntro` (eyebrow/heading/body). **Numbers are exact, from the community announcement, and must stay honest**: 7x check-in growth, ~28,000 class visits, 5,000+ free or discounted classes, ~500 neighbors served via 20 partnerships. Dollars-raised is intentionally NOT shown (we lead with reach, not how much we hold), and the timeframe/source citations are intentionally omitted to keep the band clean.
+- `GalaImpactStats.astro` has two variants: `feature` (large serif gold 4-up grid with count-up, used on `/gala`) and `strip` (condensed gold pills, used in the homepage gala band).
+- **Count-up contract**: final values are server-rendered and stay in place at rest; the count-up only resets to 0 and animates **as each stat scrolls into view** (so real figures show at rest, on no-JS, and if the observer never fires). Reduced-motion skips the animation entirely. Mirrors the `GalaCountdown` inline-script pattern.
+
+### Interest list (live Zeffy form)
+- The interest list is live at `galaTeaser.interestFormUrl` (Zeffy). Every "Join the Interest List" CTA (gala closing card, homepage band, events featured) links out to it in a new tab with `data-conversion-event="gala_interest_start"` tracking. The on-page `#gala-interest` anchor is only used by the hero "Save the Date" button to scroll down to the closing invitation. `statusLabel` still reads "Tickets and sponsorships coming soon" (only the interest list is open).
+- Photo frames use a subtle `ring-1 ring-inset ring-white/10` + `translateZ(0)` on the image clip layer so the rounded corners read clearly even where the bottom gradient is dark (fixes a "boxy bottom" perception) and stay clipped during the hover zoom.
+
+### Reusable component touch-ups (backward compatible)
+- `GalaPhotoFrame.astro` gained an optional `corners` boolean that draws gold corner brackets (default off; all existing usages unchanged).
+- `GalaCountdown.astro` numerals use `font-display` and are `inline-block`; on each value change a soft WAAPI slide/fade "tick" plays (mainly the seconds). Motion-safe, variant API unchanged.
+
+### Hero motion (gala page)
+- **Floating gold particles**: a `pointer-events-none` layer of ~16 gold dots generated from a `heroParticles` frontmatter array, drifting up via `@keyframes gala-float-up`. Desktop only (`hidden lg:block`), invisible/static under reduced motion.
+- **Hero photo parallax**: a `[data-gala-parallax]` wrapper around the hero `GalaPhotoFrame` (and its "Black tie" badge) gets a small rAF-throttled `translate3d` on scroll (clamped to 50px) for depth. Skipped entirely under reduced motion.
+
+### Cross-site touchpoints (kept consistent)
+The gala presence is elevated the same way everywhere: **homepage** gala band (foil serif title + `GalaImpactStats` strip + reveal), **`events.astro`** featured section (foil title, corner-framed photo, one-line impact statement; `excludeSlugs` logic untouched), and **`links.astro`** gala card (foil bilingual title, corner-framed photo, sheening "Save the Date" bar; EN/ES spans and `links-slide-up` preserved).
 
 ---
 

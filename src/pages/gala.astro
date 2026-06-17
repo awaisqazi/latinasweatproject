@@ -1,351 +1,639 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import JuniorBoardCarousel from '../components/JuniorBoardCarousel.svelte';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GalaCountdown from "@/components/GalaCountdown.astro";
+import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
+import GalaImpactStats from "@/components/GalaImpactStats.astro";
+import {
+  galaDetails,
+  galaImpactIntro,
+  galaPhotos,
+  galaTeaser,
+  mcaPhotoSlots,
+} from "@/data/galaTeaser";
+
 const base = import.meta.env.BASE_URL;
+const flickrGalleryUrl =
+  "https://www.flickr.com/photos/88623248@N07/albums/72177720330894284";
 
-const sponsors = [
-  { name: 'Chicago Community Loan Fund', logo: `${base}images/galalogos/Chicago Community Loan Fund.png`, url: 'https://cclfchicago.org/', tier: 'raiz' },
-  { name: 'AON', logo: `${base}images/galalogos/AON Logo.png`, url: 'https://www.aon.com/', tier: 'raiz' },
-  { name: 'Antique Taco', logo: `${base}images/galalogos/antiquetaco.png`, url: '#', tier: 'raiz' },
-  { name: 'Barbi', logo: `${base}images/galalogos/barbi.png`, url: '#', tier: 'raiz' },
-  { name: 'Cruz de Fuego Mezcal', logo: `${base}images/galalogos/cruzdefuegomexcal.png`, url: '#', tier: 'raiz' },
-  { name: 'DJ Vestus', logo: `${base}images/galalogos/djvestus.png`, url: '#', tier: 'raiz' },
-  { name: 'Don Churro', logo: `${base}images/galalogos/donchurro.png`, url: '#', tier: 'raiz' },
-  { name: 'Fleet Feet', logo: `${base}images/galalogos/fleetfeet.png`, url: '#', tier: 'raiz' },
-  { name: 'Los Valores', logo: `${base}images/galalogos/losvalores.png`, url: '#', tier: 'raiz' },
-  { name: 'Oh Snap', logo: `${base}images/galalogos/ohsnap.png`, url: '#', tier: 'raiz' },
-  { name: 'Omni', logo: `${base}images/galalogos/omni.png`, url: '#', tier: 'raiz' },
-  { name: 'Ponce', logo: `${base}images/galalogos/ponce.png`, url: '#', tier: 'raiz' },
-  { name: 'Sacred Agave', logo: `${base}images/galalogos/sacredagave.png`, url: '#', tier: 'raiz' },
-  { name: 'Sox', logo: `${base}images/galalogos/sox.png`, url: '#', tier: 'raiz' },
-  { name: 'Studio E', logo: `${base}images/galalogos/studioe.png`, url: '#', tier: 'raiz' },
-  { name: 'Vestus', logo: `${base}images/galalogos/vestus.png`, url: '#', tier: 'raiz' },
-  { name: 'Vida Mia', logo: `${base}images/galalogos/vidamia.png`, url: '#', tier: 'raiz' },
-  { name: 'Whisky Prieto', logo: `${base}images/galalogos/whiskyprieto.png`, url: '#', tier: 'raiz' },
-  { name: 'Wintrust', logo: `${base}images/galalogos/wintrust.png`, url: '#', tier: 'raiz' },
-];
-
-const solSponsors = sponsors.filter(s => s.tier === 'sol');
-const lunaSponsors = sponsors.filter(s => s.tier === 'luna');
-const estrellaSponsors = sponsors.filter(s => s.tier === 'estrella');
-const raizSponsors = sponsors.filter(s => s.tier === 'raiz');
+// Floating gold particles drifting up through the hero (desktop only, motion-safe).
+const heroParticles = Array.from({ length: 16 }, (_, i) => ({
+  left: (i * 61 + 7) % 100,
+  size: 3 + (i % 4),
+  duration: 11 + (i % 6) * 2.5,
+  delay: (i % 8) * 1.7,
+  drift: (i % 2 === 0 ? 1 : -1) * (12 + (i % 3) * 10),
+  opacity: 0.25 + (i % 3) * 0.12,
+}));
 ---
 
-<Layout title="Thank You | Noche Inolvidable Gala | The Latina Sweat Project">
+<Layout
+  title={`${galaTeaser.title} | The Latina Sweat Project`}
+  description={`${galaTeaser.title} is coming to ${galaTeaser.venueName} on ${galaTeaser.dateTimeLabel}. A black-tie evening for art, movement, and community, and our signature fundraising event.`}
+>
   <Header />
-  <main>
-    {/* START: Hero Section - Thank You */}
-    <section class="relative bg-off-black py-20 text-white sm:py-24 lg:py-32 overflow-hidden">
-      {/* Background Image */}
-      <div class="absolute inset-0">
-        <img src={`${base}images/gala.png`} alt="Noche Inolvidable Gala" class="h-full w-full object-cover object-center opacity-30" />
-        <div class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/80 to-transparent"></div>
+  <main class="bg-off-black text-white">
+    {/* ============================ HERO ============================ */}
+    <section
+      id="save-the-date"
+      class="relative isolate overflow-hidden border-b border-accent-gold/25 py-16 sm:py-20 lg:py-28"
+    >
+      <div
+        class="absolute inset-0 opacity-[0.10]"
+        style="background-image: linear-gradient(rgba(255,189,89,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.2) 1px, transparent 1px); background-size: 64px 64px;"
+      >
       </div>
-      
-      {/* Art Deco Pattern Overlay */}
-      <div class="absolute inset-0 opacity-5 gala-pattern"></div>
-      
-      {/* Decorative Corner Elements */}
-      <div class="absolute top-4 left-4 w-24 h-24 border-l-2 border-t-2 border-accent-gold/40 hidden lg:block"></div>
-      <div class="absolute top-4 right-4 w-24 h-24 border-r-2 border-t-2 border-accent-gold/40 hidden lg:block"></div>
-      <div class="absolute bottom-4 left-4 w-24 h-24 border-l-2 border-b-2 border-accent-gold/40 hidden lg:block"></div>
-      <div class="absolute bottom-4 right-4 w-24 h-24 border-r-2 border-b-2 border-accent-gold/40 hidden lg:block"></div>
-
-      <div class="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-sm sm:text-base font-semibold uppercase tracking-[0.3em] text-accent-gold">✨ December 11, 2025 ✨</p>
-        <h1 class="mt-4 font-sans text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight" style="font-family: 'Playfair Display', Georgia, serif;">
-          ¡Gracias!
-        </h1>
-        <p class="mt-4 font-body text-2xl sm:text-3xl text-accent-gold/90 italic">
-          Thank You for Attending Our Inaugural Gala
-        </p>
-        
-        <div class="mt-8 max-w-3xl mx-auto space-y-4 font-body text-lg sm:text-xl text-light-gray/90">
-          <p>
-            What an unforgettable evening of community, celebration, and impact! We are deeply grateful to everyone who joined us for <span class="text-accent-gold font-semibold">Noche Inolvidable</span> — truly an unforgettable night.
-          </p>
-          <p>
-            Your presence and generosity helped us celebrate our first graduating class of yoga teachers while supporting our mission to bring wellness to underrepresented communities in Chicago.
-          </p>
-        </div>
-
-        {/* Heart Emoji Decoration */}
-        <div class="mt-10 flex justify-center gap-4 text-4xl animate-pulse-slow">
-          <span>💛</span>
-          <span>🙏</span>
-          <span>💛</span>
-        </div>
+      <div
+        class="pointer-events-none absolute inset-0"
+        style="background: radial-gradient(125% 85% at 50% -10%, transparent 38%, rgba(0,0,0,0.6) 100%);"
+      >
       </div>
-    </section>
-    {/* END: Hero Section */}
+      <div
+        class="gala-ambient pointer-events-none absolute -left-10 top-10 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"
+      >
+      </div>
+      <div
+        class="gala-ambient pointer-events-none absolute bottom-0 right-0 h-80 w-2/3 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl"
+        style="animation-delay: 2.5s;"
+      >
+      </div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
 
-    {/* START: Fundraising Results Section - Static */}
-    <section class="bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e] py-12 sm:py-16 lg:py-20 text-white">
-      <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-          <p class="font-sans text-base font-semibold uppercase tracking-wider text-accent-gold">🎉 Fundraising Results 🎉</p>
-          <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight sm:text-4xl">Together, We Made an Impact</h2>
-          <p class="mt-4 font-body text-lg text-light-gray/80 max-w-2xl mx-auto">
-            Thanks to your incredible generosity, we raised funds to support affordable yoga programs, teacher training scholarships, and community wellness initiatives.
-          </p>
-        </div>
+      <div
+        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
+        aria-hidden="true"
+      >
+        {
+          heroParticles.map((p) => (
+            <span
+              class="gala-particle absolute bottom-0 rounded-full bg-accent-gold"
+              style={`left: ${p.left}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
+            />
+          ))
+        }
+      </div>
 
-        {/* Static Thermometer/Progress Bar */}
-        <div class="mb-12">
-          <div class="relative bg-off-black/50 rounded-full h-16 sm:h-20 overflow-hidden border-2 border-accent-gold/30 shadow-lg">
-            {/* Progress Fill - 69.7% of $75k */}
-            <div 
-              class="absolute inset-y-0 left-0 bg-gradient-to-r from-accent-gold via-[#e6c55a] to-accent-gold rounded-full transition-all duration-1000"
-              style="width: 69.7%;"
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <p
+              class="hero-rise flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-white/55"
             >
-              {/* Shimmer effect */}
-              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+              <span class="h-px w-8 bg-accent-gold/70"></span>
+              The Latina Sweat Project presents
+            </p>
+            <h1
+              class="hero-rise mt-5 max-w-4xl font-display text-5xl font-bold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl"
+              style="animation-delay: 0.06s;"
+            >
+              <span class="gala-foil">{galaTeaser.shortTitle}</span>
+              <span class="block text-white/90">Gala</span>
+            </h1>
+            <p
+              class="hero-rise mt-4 text-sm font-bold uppercase tracking-[0.32em] text-accent-gold"
+              style="animation-delay: 0.12s;"
+            >
+              Signature Fundraising Gala
+            </p>
+
+            <div
+              class="hero-rise mt-7 flex items-center gap-3"
+              style="animation-delay: 0.18s;"
+            >
+              <span class="h-px w-14 gala-foil-rule"></span>
+              <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+              <span class="h-px w-full max-w-[12rem] gala-foil-rule"></span>
             </div>
-            {/* Amount Display */}
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-2xl sm:text-4xl font-extrabold text-white drop-shadow-lg" style="text-shadow: 0 2px 8px rgba(0,0,0,0.8);">
-                $52,260
-              </span>
+
+            <div
+              class="hero-rise mt-7 space-y-4 text-lg font-semibold text-white/90"
+              style="animation-delay: 0.24s;"
+            >
+              <p class="flex items-start gap-3">
+                <svg
+                  class="mt-1 h-5 w-5 flex-shrink-0 text-accent-gold"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                <span>{galaTeaser.dateTimeLabel}</span>
+              </p>
+              <p class="flex items-start gap-3">
+                <svg
+                  class="mt-1 h-5 w-5 flex-shrink-0 text-accent-gold"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 21s7-4.8 7-11a7 7 0 1 0-14 0c0 6.2 7 11 7 11z"
+                  />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <span>{galaTeaser.venueName}</span>
+              </p>
             </div>
-            {/* Goal Display */}
-            <div class="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:block">
-              <span class="text-sm font-semibold text-light-gray/80">$75k Goal</span>
+
+            <p
+              class="hero-rise mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl"
+              style="animation-delay: 0.3s;"
+            >
+              {galaTeaser.homepageDescription}
+            </p>
+            <p
+              class="hero-rise mt-3 text-base font-semibold text-accent-gold"
+              style="animation-delay: 0.34s;"
+            >
+              {galaTeaser.statusLabel}.
+            </p>
+
+            <div
+              class="hero-rise mt-8 flex flex-col gap-3 sm:flex-row"
+              style="animation-delay: 0.4s;"
+            >
+              <a
+                href="#gala-interest"
+                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-accent-gold px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+              >
+                Save the Date
+                <svg
+                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </a>
+              <a
+                href="#impact"
+                class="group inline-flex items-center justify-center gap-3 rounded-full border border-accent-gold/60 bg-white/[0.03] px-7 py-4 text-base font-extrabold text-white transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
+              >
+                See Our Impact
+                <svg
+                  class="h-4 w-4 text-accent-gold transition-transform group-hover:translate-y-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </a>
             </div>
           </div>
-          {/* Mobile goal display */}
-          <p class="text-center mt-3 text-light-gray/70 text-sm sm:hidden">Goal: $75,000</p>
-        </div>
 
-        {/* Static Top Donors Leaderboard */}
-        <div class="max-w-2xl mx-auto">
-          <h3 class="text-xl font-bold text-accent-gold mb-4 text-center uppercase tracking-wider">Our Generous Donors</h3>
-          <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-accent-gold/20">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="text-xl">🏆</span>
-              <span class="font-bold uppercase tracking-wider text-light-gray text-sm">Leaderboard</span>
-            </div>
-            
-            <div class="space-y-3">
-              {/* #1 - Gold */}
-              <div class="flex items-center justify-between bg-gradient-to-r from-accent-gold/30 to-transparent rounded-lg p-3 border-l-4 border-accent-gold">
-                <div class="flex items-center gap-3">
-                  <span class="text-xl">🥇</span>
-                  <span class="font-bold text-accent-gold text-lg">Hyacinth M</span>
-                </div>
-                <span class="font-extrabold text-accent-gold text-xl">$5,000</span>
-              </div>
-              
-              {/* #2 - Silver */}
-              <div class="flex items-center justify-between bg-gradient-to-r from-gray-400/20 to-transparent rounded-lg p-3 border-l-4 border-gray-400">
-                <div class="flex items-center gap-3">
-                  <span class="text-xl">🥈</span>
-                  <span class="font-bold text-gray-300 text-lg">Lalo Q</span>
-                </div>
-                <span class="font-extrabold text-gray-300 text-xl">$5,000</span>
-              </div>
-              
-              {/* #3 - Bronze */}
-              <div class="flex items-center justify-between bg-gradient-to-r from-orange-600/20 to-transparent rounded-lg p-3 border-l-4 border-orange-500">
-                <div class="flex items-center gap-3">
-                  <span class="text-xl">🥉</span>
-                  <span class="font-bold text-orange-400 text-lg">Chris Apostal</span>
-                </div>
-                <span class="font-extrabold text-orange-400 text-xl">$3,150</span>
-              </div>
-              
-              {/* #4 */}
-              <div class="flex items-center justify-between rounded-lg p-3 border-l-4 border-light-gray/30">
-                <div class="flex items-center gap-3">
-                  <span class="text-light-gray/60 font-bold w-7 text-center">#4</span>
-                  <span class="font-semibold text-light-gray text-lg">Joey Diaz</span>
-                </div>
-                <span class="font-bold text-light-gray text-lg">$2,000</span>
-              </div>
-              
-              {/* #5 */}
-              <div class="flex items-center justify-between rounded-lg p-3 border-l-4 border-light-gray/30">
-                <div class="flex items-center gap-3">
-                  <span class="text-light-gray/60 font-bold w-7 text-center">#5</span>
-                  <span class="font-semibold text-light-gray text-lg">Vanessa Jaimes</span>
-                </div>
-                <span class="font-bold text-light-gray text-lg">$1,500</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Fundraising Results Section */}
-
-    {/* START: Professional Photo Gallery Section */}
-    <section class="py-12 sm:py-16 lg:py-20 bg-light-gray">
-      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">📸 Professional Photography</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">Noche Inolvidable Gallery</h2>
-        <p class="mt-4 font-body text-lg text-medium-gray max-w-2xl mx-auto">
-          Relive the magic of our unforgettable evening! Browse through the professional photos from our inaugural gala.
-        </p>
-
-        {/* Flickr Embedded Album */}
-        <div class="mt-10 flickr-embed-container">
-          <a data-flickr-embed="true" href="https://www.flickr.com/photos/88623248@N07/albums/72177720330894284" title="LSP - Noche Inolvidable 2025">
-            <img src="https://live.staticflickr.com/65535/54979938835_01cb8db4af_h.jpg" width="1600" height="1200" alt="LSP - Noche Inolvidable 2025" class="w-full rounded-xl shadow-2xl" />
-          </a>
-          <script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
-        </div>
-
-        {/* Tip for viewing */}
-        <div class="mt-8 inline-flex items-center gap-2 bg-gradient-to-r from-vibrant-pink/10 to-accent-gold/10 rounded-xl px-6 py-3 border border-accent-gold/20">
-          <span class="text-accent-gold text-xl">💡</span>
-          <p class="text-medium-gray font-body text-sm sm:text-base">
-            <span class="text-vibrant-pink font-semibold">Tip:</span> Click or tap any photo to view the full album on Flickr!
-          </p>
-        </div>
-      </div>
-    </section>
-    {/* END: Professional Photo Gallery Section */}
-
-    {/* START: Awards Celebration Section */}
-    <section class="bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e] py-12 sm:py-16 lg:py-20 text-white">
-      <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="font-sans text-base font-semibold uppercase tracking-wider text-accent-gold">🏆 2025 Inaugural Gala Awards 🏆</p>
-        <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight sm:text-4xl">Celebrating Our Honorees</h2>
-        <p class="mt-4 font-body text-lg text-light-gray/90">
-          Congratulations to our 2025 award recipients who inspire us all through their dedication and service to our community.
-        </p>
-        <div class="mt-10 grid grid-cols-1 gap-8 text-left md:grid-cols-2">
-          <div class="rounded-xl border border-accent-gold/30 bg-white/5 backdrop-blur-sm p-6">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="text-3xl">🌟</span>
-              <h3 class="font-sans text-xl font-bold text-accent-gold">Changemaker Award</h3>
-            </div>
-            <p class="font-body text-light-gray/80">Recognizing someone driving meaningful change through advocacy and community impact.</p>
-            <p class="mt-3 font-body text-sm text-vibrant-pink font-semibold">Congratulations to our honoree!</p>
-          </div>
-          <div class="rounded-xl border border-accent-gold/30 bg-white/5 backdrop-blur-sm p-6">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="text-3xl">👑</span>
-              <h3 class="font-sans text-xl font-bold text-accent-gold">Community Icon Award</h3>
-            </div>
-            <p class="font-body text-light-gray/80">Honoring an individual whose ongoing dedication, service, and leadership inspire others and strengthen our communities.</p>
-            <p class="mt-3 font-body text-sm text-vibrant-pink font-semibold">Congratulations to our honoree!</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Awards Celebration Section */}
-
-    {/* START: Meet Our New Junior Board Section */}
-    <section class="bg-gradient-to-br from-off-black via-[#1a1a2e] to-[#16213e] py-12 sm:py-16 lg:py-20 text-white">
-      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-          <p class="font-sans text-base font-semibold uppercase tracking-wider text-accent-gold">🎉 Congratulations 🎉</p>
-          <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight sm:text-4xl">Meet Our New Junior Board</h2>
-          <p class="mt-4 font-body text-lg text-light-gray/80 max-w-2xl mx-auto">
-            We are thrilled to introduce the elected leaders who will help guide the Latina Sweat Project into its next chapter.
-          </p>
-        </div>
-
-        <JuniorBoardCarousel client:visible baseUrl={base} />
-
-        <div class="mt-8 text-center">
-          <a 
-            href="/elections" 
-            class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-vibrant-pink to-accent-gold px-6 py-3 font-sans font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+          <div
+            class="hero-rise group relative"
+            style="animation-delay: 0.24s;"
           >
-            Meet the Full Board
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            <div
+              class="gala-ambient absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-2xl"
+            >
+            </div>
+            <div
+              data-gala-parallax
+              class="relative"
+              style="will-change: transform;"
+            >
+              <GalaPhotoFrame
+                slot={galaPhotos.atrium}
+                variant="hero"
+                loading="eager"
+                corners
+              />
+              <div
+                class="absolute right-5 top-5 rounded-full border border-accent-gold/40 bg-off-black/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-accent-gold shadow-lg backdrop-blur-md"
+              >
+                Black tie
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="reveal mt-12 rounded-3xl border border-accent-gold/25 bg-black/25 p-4 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-5 lg:p-6"
+        >
+          <div class="grid items-center gap-5 lg:grid-cols-[0.9fr_1.6fr_0.9fr]">
+            <div class="text-center lg:text-left">
+              <p
+                class="text-[11px] font-bold uppercase tracking-[0.22em] text-white/55"
+              >
+                Countdown to
+              </p>
+              <p class="mt-1 font-display text-xl font-bold text-accent-gold">
+                {galaTeaser.shortTitle}
+              </p>
+            </div>
+            <GalaCountdown variant="compact" />
+            <p
+              class="text-center text-sm font-semibold text-white/70 lg:text-right"
+            >
+              A night to move our future, together.
+            </p>
+          </div>
+        </div>
+
+        <div class="reveal mt-12 flex justify-center">
+          <a
+            href="#impact"
+            class="group inline-flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 transition-colors duration-300 hover:text-accent-gold"
+          >
+            Scroll to explore
+            <svg
+              class="h-5 w-5 text-accent-gold/70 motion-safe:animate-bounce"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 14l-7 7m0 0l-7-7"
+              />
             </svg>
           </a>
         </div>
       </div>
     </section>
-    {/* END: Meet Our New Junior Board Section */}
 
-    {/* START: Special Thanks to Sponsors Section */}
-    <section class="bg-light-gray py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-3xl text-center">
-          <p class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink">💛 With Gratitude 💛</p>
-          <h2 class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl">A Special Thanks to Our Sponsors</h2>
-          <p class="mt-4 font-body text-lg text-medium-gray">
-            Our inaugural gala would not have been possible without the incredible generosity of our sponsors. Your support directly funds free yoga programs, teacher training scholarships, and community wellness initiatives across Chicago. Thank you for believing in our mission and investing in our community's wellness future.
+    {/* ============================ IMPACT ============================ */}
+    <section
+      id="impact"
+      class="relative overflow-hidden border-b border-white/10 py-16 scroll-mt-24 sm:py-20 lg:py-24"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-off-black via-[#161616] to-off-black"
+      >
+      </div>
+      <div
+        class="absolute inset-0 opacity-[0.07]"
+        style="background-image: radial-gradient(circle at 50% 0%, #ffbd59 0, transparent 45%);"
+      >
+      </div>
+      <div
+        class="absolute inset-x-0 top-0 mx-auto h-px max-w-3xl gala-foil-rule opacity-60"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal mx-auto max-w-3xl text-center">
+          <p
+            class="text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
+          >
+            {galaImpactIntro.eyebrow}
+          </p>
+          <h2
+            class="mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
+          >
+            {galaImpactIntro.heading}
+          </h2>
+          <p class="mt-5 text-lg leading-relaxed text-white/70">
+            {galaImpactIntro.body}
           </p>
         </div>
-        
-        {sponsors.length > 0 ? (
-          <div class="mt-12 space-y-12">
-            <!-- Sol Sponsors -->
-            {solSponsors.length > 0 && (
-              <div class="text-center">
-                <h3 class="font-sans text-2xl font-bold text-accent-gold">Sol Sponsors</h3>
-                <div class="mt-8 flex flex-wrap justify-center gap-8">
-                  {solSponsors.map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-48 w-full max-w-xs items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
-                      <img class="max-h-32 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-            <!-- Luna Sponsors -->
-            {lunaSponsors.length > 0 && (
-              <div class="text-center">
-                <h3 class="font-sans text-2xl font-bold text-accent-gold">Luna Sponsors</h3>
-                <div class="mt-8 flex flex-wrap justify-center gap-8">
-                  {lunaSponsors.map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-40 w-full max-w-[250px] items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
-                      <img class="max-h-24 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-            <!-- Estrella & Raiz Sponsors -->
-            {(estrellaSponsors.length > 0 || raizSponsors.length > 0) && (
-              <div class="text-center">
-                <h3 class="font-sans text-2xl font-bold text-accent-gold">Estrella & Raiz Sponsors</h3>
-                <div class="mt-8 flex flex-wrap justify-center gap-6">
-                  {[...estrellaSponsors, ...raizSponsors].map(sponsor => (
-                    <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex h-32 w-full max-w-[200px] items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,#b5a18d,#ffbd59)] p-4 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-[radial-gradient(circle_at_center,#c4b3a1,#ffdb8f)] hover:shadow-2xl">
-                      <img class="max-h-20 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110" src={sponsor.logo} alt={sponsor.name} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div class="mt-10 rounded-lg border-2 border-dashed border-medium-gray bg-white p-12 text-center">
-            <p class="font-body text-lg text-medium-gray">Sponsor logos will be displayed here.</p>
-          </div>
-        )}
+
+        <div class="mt-14">
+          <GalaImpactStats variant="feature" />
+        </div>
       </div>
     </section>
-    {/* END: Special Thanks to Sponsors Section */}
 
+    {/* ====================== EVENING WITH PURPOSE ====================== */}
+    <section
+      class="relative overflow-hidden border-b border-white/10 py-16 sm:py-20 lg:py-24"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-off-black via-[#171717] to-off-black"
+      >
+      </div>
+      <div
+        class="absolute inset-0 opacity-[0.08]"
+        style="background-image: radial-gradient(circle at 20% 20%, #ffbd59 0, transparent 28%), radial-gradient(circle at 80% 70%, #b5a18d 0, transparent 24%);"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div class="reveal">
+            <p
+              class="text-xs font-extrabold uppercase tracking-[0.28em] text-accent-gold"
+            >
+              At the Museum of Contemporary Art Chicago
+            </p>
+            <h2
+              class="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
+            >
+              An evening with purpose.
+            </h2>
+            <p class="mt-5 max-w-2xl text-lg leading-relaxed text-white/70">
+              {galaTeaser.pageDescription}
+            </p>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-white/60">
+              MCA's event spaces include the Atrium, Terrace, and Sculpture
+              Garden, with downtown access and a striking contemporary backdrop.
+              It is the right stage for a bigger, bolder chapter of community
+              celebration.
+            </p>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            {
+              mcaPhotoSlots.slice(1).map((slot, index) => (
+                <div
+                  class:list={[
+                    "reveal group",
+                    slot.id === "facade" ? "sm:col-span-2" : "",
+                  ]}
+                  style={`transition-delay: ${index * 110}ms;`}
+                >
+                  <GalaPhotoFrame
+                    slot={slot}
+                    variant={slot.id === "facade" ? "panorama" : "venue"}
+                    corners={slot.id === "facade"}
+                  />
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="mt-12 grid gap-4 md:grid-cols-4">
+          {
+            galaDetails.map((detail, index) => (
+              <div
+                class="reveal group rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-5 transition-colors duration-300 hover:border-accent-gold/45"
+                style={`transition-delay: ${index * 80}ms;`}
+              >
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
+                  {detail.label}
+                </p>
+                <p class="mt-3 text-base font-bold leading-snug text-white/90">
+                  {detail.value}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ======================= LAST YEAR RECAP ======================= */}
+    <section class="bg-[#fdf2f2] py-16 text-off-black sm:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <div class="reveal">
+            <p
+              class="text-xs font-extrabold uppercase tracking-[0.28em] text-vibrant-pink"
+            >
+              Last year's Gala
+            </p>
+            <h2
+              class="mt-4 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl"
+            >
+              Relive Noche Inolvidable while we prepare for what comes next.
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-medium-gray">
+              Our 2025 inaugural gala brought together movement, wellness, and
+              community care. This gallery stays here as a recap while the next
+              gala takes shape.
+            </p>
+            <a
+              href={flickrGalleryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-7 inline-flex items-center gap-3 rounded-full border border-off-black/15 bg-off-black px-7 py-4 text-base font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-vibrant-pink"
+            >
+              View Last Year's Gallery
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <a
+            href={flickrGalleryUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="reveal group relative block overflow-hidden rounded-3xl border border-accent-gold/40 bg-off-black p-3 shadow-2xl shadow-off-black/20"
+          >
+            <img
+              src={`${base}images/galalogos/galagallery.jpg`}
+              alt="Guests gathered at last year's Noche Inolvidable Gala"
+              class="aspect-[16/10] w-full rounded-2xl object-cover ring-1 ring-inset ring-white/10 transition-transform duration-700 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+            <div
+              class="absolute inset-x-3 bottom-3 rounded-b-2xl bg-gradient-to-t from-off-black/90 to-transparent px-5 pb-5 pt-20"
+            >
+              <p
+                class="text-sm font-bold uppercase tracking-[0.2em] text-accent-gold"
+              >
+                2025 recap gallery
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ======================= CLOSING INVITATION ======================= */}
+    <section
+      id="gala-interest"
+      class="relative overflow-hidden py-16 scroll-mt-24 sm:py-20"
+    >
+      <div
+        class="absolute inset-0 opacity-[0.08]"
+        style="background-image: linear-gradient(135deg, #ffbd59 0 1px, transparent 1px); background-size: 42px 42px;"
+      >
+      </div>
+      <div
+        class="gala-ambient pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-gradient-to-b from-accent-gold/15 to-transparent blur-3xl"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="reveal relative overflow-hidden rounded-[2rem] border border-accent-gold/40 bg-gradient-to-b from-white/[0.06] to-white/[0.02] px-6 py-12 text-center shadow-2xl shadow-black/30 sm:px-10 lg:px-16"
+        >
+          <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+
+          <div class="flex items-center justify-center gap-3">
+            <span class="h-px w-12 gala-foil-rule"></span>
+            <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+            <span class="h-px w-12 gala-foil-rule"></span>
+          </div>
+
+          <p
+            class="mt-6 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
+          >
+            You're invited
+          </p>
+          <h2
+            class="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl"
+          >
+            Be part of a night that moves our future.
+          </h2>
+          <p
+            class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg"
+          >
+            Your seat helps us reach more people: more free and discounted
+            classes, more nonprofit partnerships, and more of our comunidad
+            leading together. Stay connected for ticket, sponsorship, and
+            behind-the-scenes updates.
+          </p>
+
+          <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a
+              href={galaTeaser.interestFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="gala-sheen group inline-flex items-center justify-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-extrabold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+              data-conversion-event="gala_interest_start"
+              data-conversion-context="gala_page_closing"
+            >
+              <span class="relative z-[1]">{galaTeaser.interestLabel}</span>
+              <svg
+                class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <p
+            class="mt-6 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40"
+          >
+            {galaTeaser.statusLabel}
+          </p>
+        </div>
+      </div>
+    </section>
   </main>
 </Layout>
 
 <style>
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
+  /* Cinematic hero load-in. The LCP heading and siblings rise gently into
+     place; suppressed entirely for reduced-motion users. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-rise {
+      opacity: 0;
+      animation: hero-rise 0.85s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
   }
-  .animate-pulse-slow {
-    animation: pulse-slow 2s ease-in-out infinite;
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+
+  /* Floating gold particles drifting up through the hero. Static (invisible)
+     unless motion is allowed. */
+  .gala-particle {
+    opacity: 0;
+    box-shadow: 0 0 6px rgba(255, 189, 89, 0.5);
   }
-  .animate-shimmer {
-    animation: shimmer 3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-particle {
+      animation-name: gala-float-up;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
   }
-  .gala-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='none' stroke='%23D4AF37' stroke-width='1'/%3E%3C/svg%3E");
-    background-size: 60px 60px;
+
+  @keyframes gala-float-up {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+    12% {
+      opacity: var(--peak, 0.4);
+    }
+    88% {
+      opacity: var(--peak, 0.4);
+    }
+    100% {
+      transform: translate(var(--drift, 0px), -92vh);
+      opacity: 0;
+    }
   }
 </style>
+
+<script>
+  // Subtle hero photo parallax: the framed image lags slightly behind the
+  // scroll for a sense of depth. rAF-throttled and motion-safe.
+  (() => {
+    const el = document.querySelector<HTMLElement>("[data-gala-parallax]");
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Desktop only: on stacked mobile layouts the drift would crowd the
+    // countdown below it, so keep the framed photo static there.
+    const lg = window.matchMedia("(min-width: 1024px)");
+
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      if (!lg.matches) {
+        el.style.transform = "";
+        return;
+      }
+      const offset = Math.min(window.scrollY * 0.1, 50);
+      el.style.transform = `translate3d(0, ${offset}px, 0)`;
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    lg.addEventListener("change", apply);
+  })();
+</script>

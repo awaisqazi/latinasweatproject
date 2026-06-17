@@ -39,6 +39,11 @@ const GOOGLE_ADS_ID = "AW-17990206229";
 <html lang="en" class="overflow-x-hidden">
   <head>
     <meta charset="UTF-8" />
+    <script is:inline>
+      // Marks JS as available so scroll-reveal elements only start hidden when
+      // we can actually reveal them. Runs before paint to avoid a flash.
+      document.documentElement.classList.add("js");
+    </script>
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.ico`} />
@@ -204,7 +209,7 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Rubik:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -221,6 +226,45 @@ const GOOGLE_ADS_ID = "AW-17990206229";
   <body class="bg-white text-off-black overflow-x-hidden">
     <PrideTheme />
     <slot />
+    <script>
+      // Scroll-reveal: reveals any element with the `.reveal` class as it
+      // enters the viewport. Opt-in only, so it is safe to run site-wide.
+      (() => {
+        const reveal = () => {
+          const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+          if (!els.length) return;
+
+          const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+          ).matches;
+
+          if (reduceMotion || !("IntersectionObserver" in window)) {
+            els.forEach((el) => el.classList.add("is-visible"));
+            return;
+          }
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { rootMargin: "0px 0px -10% 0px", threshold: 0.1 },
+          );
+
+          els.forEach((el) => observer.observe(el));
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", reveal);
+        } else {
+          reveal();
+        }
+      })();
+    </script>
     <script>
       (function () {
         // Set tenant name here

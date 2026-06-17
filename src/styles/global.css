@@ -28,6 +28,9 @@
 
   --font-sans: "Rubik", sans-serif;
   --font-body: "Rubik", sans-serif;
+  /* Display serif used only for the Gala (signature event) headings and big
+     impact numbers. Body copy stays Rubik. Generates a `font-display` utility. */
+  --font-display: "Playfair Display", "Rubik", serif;
 }
 
 @layer components {
@@ -197,6 +200,144 @@
     }
     50% {
       background-position: 100% 50%;
+    }
+  }
+
+  /* ============================================================
+     Gala (signature event) luxe utilities
+     ============================================================ */
+
+  /* Gold-foil text: a warm gold gradient clipped to the text. Static by
+     default; the shimmer sweep only runs when motion is allowed. */
+  .gala-foil {
+    background-image: linear-gradient(
+      100deg,
+      #f4a833 0%,
+      #ffbd59 22%,
+      #fff3d8 42%,
+      #ffbd59 62%,
+      #f4a833 100%
+    );
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Thin gold-foil divider line (for hairline accents). */
+  .gala-foil-rule {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      #f4a833 18%,
+      #fff3d8 50%,
+      #f4a833 82%,
+      transparent 100%
+    );
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-foil {
+      animation: gala-shimmer 6s ease-in-out infinite;
+    }
+    .gala-foil-rule {
+      animation: gala-shimmer 7s ease-in-out infinite;
+    }
+  }
+
+  @keyframes gala-shimmer {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Slow ambient glow used behind gala hero / impact backdrops. */
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-ambient {
+      animation: gala-ambient-pulse 9s ease-in-out infinite;
+    }
+  }
+
+  @keyframes gala-ambient-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.08);
+    }
+  }
+
+  /* Periodic light sweep across a solid element (e.g. the gala "Save the Date"
+     bar). Content should sit above via a higher z-index. */
+  .gala-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gala-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.35) 50%,
+      transparent 65%
+    );
+    transform: translateX(-130%);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-sheen::after {
+      animation: gala-sheen-sweep 4.5s ease-in-out infinite;
+    }
+  }
+
+  @keyframes gala-sheen-sweep {
+    0% {
+      transform: translateX(-130%);
+    }
+    55%,
+    100% {
+      transform: translateX(130%);
+    }
+  }
+
+  /* Scroll-reveal: opted-in elements fade/rise into view. Driven by a tiny
+     IntersectionObserver in Layout.astro that adds `.is-visible`. The hidden
+     initial state is gated behind `.js` so that, without JavaScript, content
+     stays fully visible instead of being stuck hidden. */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.25, 0.8, 0.25, 1),
+      transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+    will-change: opacity, transform;
+  }
+
+  .js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 }

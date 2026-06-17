@@ -1,0 +1,117 @@
+---
+import { galaTeaser } from "@/data/galaTeaser";
+
+interface Props {
+  target?: string;
+  variant?: "hero" | "compact" | "card";
+  className?: string;
+}
+
+const {
+  target = galaTeaser.startsAtISO,
+  variant = "hero",
+  className = "",
+} = Astro.props;
+
+const items = [
+  { key: "days", label: "Days" },
+  { key: "hours", label: "Hours" },
+  { key: "minutes", label: "Minutes" },
+  { key: "seconds", label: "Seconds" },
+];
+
+const wrapperClass =
+  variant === "compact"
+    ? "grid grid-cols-4 gap-2 sm:gap-3"
+    : variant === "card"
+      ? "grid grid-cols-2 gap-2 sm:grid-cols-4"
+      : "grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4";
+
+const itemClass =
+  variant === "compact"
+    ? "rounded-xl border border-accent-gold/35 bg-off-black/70 px-2.5 py-3 text-center shadow-inner shadow-black/30"
+    : variant === "card"
+      ? "rounded-xl border border-accent-gold/25 bg-white/[0.06] px-3 py-3 text-center"
+      : "rounded-2xl border border-accent-gold/35 bg-black/30 px-4 py-4 text-center shadow-lg shadow-black/20 backdrop-blur-sm";
+
+const numberClass =
+  variant === "compact"
+    ? "font-display inline-block text-3xl font-bold leading-none text-white tabular-nums sm:text-4xl"
+    : "font-display inline-block text-4xl font-bold leading-none text-white tabular-nums sm:text-5xl";
+---
+
+<div
+  class:list={["gala-countdown", wrapperClass, className]}
+  data-gala-countdown
+  data-target={target}
+  aria-label={`Countdown to ${galaTeaser.title}`}
+>
+  {
+    items.map((item) => (
+      <div class={itemClass}>
+        <span class={numberClass} data-countdown-value={item.key}>--</span>
+        <span class="mt-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-accent-gold/90 sm:text-xs">
+          {item.label}
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  (() => {
+    const countdowns = Array.from(
+      document.querySelectorAll("[data-gala-countdown]"),
+    );
+    if (!countdowns.length) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const pad = (value) => String(Math.max(0, value)).padStart(2, "0");
+
+    // Soft tick: gently slide the digit into place whenever it changes.
+    const tick = (element) => {
+      if (reduceMotion || typeof element.animate !== "function") return;
+      element.animate(
+        [
+          { transform: "translateY(-32%)", opacity: 0.4 },
+          { transform: "translateY(0)", opacity: 1 },
+        ],
+        { duration: 360, easing: "cubic-bezier(0.2, 0.7, 0.2, 1)" },
+      );
+    };
+
+    const update = () => {
+      const now = Date.now();
+      countdowns.forEach((countdown) => {
+        const target = new Date(countdown.dataset.target || "").getTime();
+        if (!Number.isFinite(target)) return;
+
+        const distance = Math.max(0, target - now);
+        const totalSeconds = Math.floor(distance / 1000);
+        const values = {
+          days: Math.floor(totalSeconds / 86400),
+          hours: Math.floor((totalSeconds % 86400) / 3600),
+          minutes: Math.floor((totalSeconds % 3600) / 60),
+          seconds: totalSeconds % 60,
+        };
+
+        Object.entries(values).forEach(([key, value]) => {
+          const element = countdown.querySelector(
+            `[data-countdown-value="${key}"]`,
+          );
+          if (!element) return;
+          const next = key === "days" ? String(value) : pad(value);
+          if (element.textContent === next) return;
+          element.textContent = next;
+          tick(element);
+        });
+      });
+    };
+
+    update();
+    window.setInterval(update, reduceMotion ? 60000 : 1000);
+  })();
+</script>
