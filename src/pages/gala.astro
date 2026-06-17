@@ -17,14 +17,75 @@ const flickrGalleryUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720330894284";
 
 // Floating gold particles drifting up through the hero (desktop only, motion-safe).
-const heroParticles = Array.from({ length: 16 }, (_, i) => ({
-  left: (i * 61 + 7) % 100,
-  size: 3 + (i % 4),
+// A mix of fine motes and a few larger "bokeh" gold dots for depth variation.
+const heroParticles = Array.from({ length: 22 }, (_, i) => ({
+  left: (i * 53 + 7) % 100,
+  size: i % 5 === 0 ? 6 + (i % 3) : 3 + (i % 4),
   duration: 11 + (i % 6) * 2.5,
   delay: (i % 8) * 1.7,
   drift: (i % 2 === 0 ? 1 : -1) * (12 + (i % 3) * 10),
-  opacity: 0.25 + (i % 3) * 0.12,
+  opacity: 0.22 + (i % 3) * 0.12,
+  bokeh: i % 5 === 0,
 }));
+
+// Themed SVG path markup for each galaDetails card (When / Where / Dress /
+// Details), in array order so they line up with galaDetails index-for-index.
+const detailIcons = [
+  // When — calendar
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />',
+  // Where — map pin
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.8 7-11a7 7 0 1 0-14 0c0 6.2 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" />',
+  // Dress — bow tie
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 12l-5-3.5a1.5 1.5 0 0 0-2.3 1.26v4.48A1.5 1.5 0 0 0 7 15.5l5-3.5 5 3.5a1.5 1.5 0 0 0 2.3-1.26V9.76A1.5 1.5 0 0 0 17 8.5L12 12z" /><circle cx="12" cy="12" r="1.4" />',
+  // Details — star/ticket
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.09 4.26L19 8.27l-3.5 3.4.83 4.83L12 14.77l-4.33 2.73.83-4.83L5 8.27l4.91-1.01L12 3z" />',
+];
+
+// A lighter particle field carried down the page for energy continuity.
+const ambientParticles = Array.from({ length: 10 }, (_, i) => ({
+  left: (i * 89 + 13) % 100,
+  size: 3 + (i % 3),
+  duration: 14 + (i % 5) * 2,
+  delay: (i % 7) * 2.1,
+  drift: (i % 2 === 0 ? 1 : -1) * (8 + (i % 3) * 8),
+  opacity: 0.18 + (i % 3) * 0.1,
+}));
+
+// Denser particle field for the closing invitation so the page bookends visually.
+const closingParticles = Array.from({ length: 16 }, (_, i) => ({
+  left: (i * 67 + 5) % 100,
+  size: i % 4 === 0 ? 6 : 3 + (i % 4),
+  duration: 12 + (i % 6) * 2,
+  delay: (i % 8) * 1.5,
+  drift: (i % 2 === 0 ? 1 : -1) * (10 + (i % 3) * 10),
+  opacity: 0.2 + (i % 3) * 0.12,
+  bokeh: i % 4 === 0,
+}));
+
+// 2025 sponsors shown as a gratitude marquee (last year's partners, from
+// /public/images/galalogos/). Excludes the recap photo + QR. Duplicated by the
+// marquee track for a seamless infinite scroll.
+const sponsorLogos2025 = [
+  "AON Logo",
+  "Chicago Community Loan Fund",
+  "antiquetaco",
+  "barbi",
+  "cruzdefuegomexcal",
+  "djvestus",
+  "donchurro",
+  "fleetfeet",
+  "losvalores",
+  "ohsnap",
+  "omni",
+  "ponce",
+  "sacredagave",
+  "sox",
+  "studioe",
+  "vestus",
+  "vidamia",
+  "whiskyprieto",
+  "wintrust",
+];
 ---
 
 <Layout
@@ -38,6 +99,9 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       id="save-the-date"
       class="relative isolate overflow-hidden border-b border-accent-gold/25 py-16 sm:py-20 lg:py-28"
     >
+      {/* Aurora: slow-drifting layered radial glow (gold + mauve). */}
+      <div class="gala-aurora pointer-events-none absolute inset-0" aria-hidden="true">
+      </div>
       <div
         class="absolute inset-0 opacity-[0.10]"
         style="background-image: linear-gradient(rgba(255,189,89,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.2) 1px, transparent 1px); background-size: 64px 64px;"
@@ -59,6 +123,10 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       </div>
       <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
 
+      {/* One-time theater light sweep across the hero on load. */}
+      <div class="gala-theater-sweep pointer-events-none absolute inset-0" aria-hidden="true">
+      </div>
+
       <div
         class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
         aria-hidden="true"
@@ -66,7 +134,7 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
         {
           heroParticles.map((p) => (
             <span
-              class="gala-particle absolute bottom-0 rounded-full bg-accent-gold"
+              class:list={["gala-particle absolute bottom-0 rounded-full bg-accent-gold", p.bokeh && "gala-particle--bokeh"]}
               style={`left: ${p.left}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
             />
           ))
@@ -89,25 +157,25 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
               <span class="gala-foil">{galaTeaser.shortTitle}</span>
               <span class="block text-white/90">Gala</span>
             </h1>
-            <p
-              class="hero-rise mt-4 text-sm font-bold uppercase tracking-[0.32em] text-accent-gold"
+            {/* Gold rule that draws in beneath the title. */}
+            <div
+              class="gala-rule-draw hero-rise mt-5 flex items-center gap-3"
               style="animation-delay: 0.12s;"
+            >
+              <span class="h-px w-14 gala-foil-rule"></span>
+              <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+              <span class="h-px w-full max-w-[14rem] gala-foil-rule"></span>
+            </div>
+            <p
+              class="hero-rise mt-5 text-sm font-bold uppercase tracking-[0.32em] text-accent-gold"
+              style="animation-delay: 0.16s;"
             >
               Signature Fundraising Gala
             </p>
 
             <div
-              class="hero-rise mt-7 flex items-center gap-3"
-              style="animation-delay: 0.18s;"
-            >
-              <span class="h-px w-14 gala-foil-rule"></span>
-              <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
-              <span class="h-px w-full max-w-[12rem] gala-foil-rule"></span>
-            </div>
-
-            <div
               class="hero-rise mt-7 space-y-4 text-lg font-semibold text-white/90"
-              style="animation-delay: 0.24s;"
+              style="animation-delay: 0.22s;"
             >
               <p class="flex items-start gap-3">
                 <svg
@@ -146,28 +214,30 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
 
             <p
               class="hero-rise mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl"
-              style="animation-delay: 0.3s;"
+              style="animation-delay: 0.28s;"
             >
               {galaTeaser.homepageDescription}
             </p>
             <p
               class="hero-rise mt-3 text-base font-semibold text-accent-gold"
-              style="animation-delay: 0.34s;"
+              style="animation-delay: 0.32s;"
             >
               {galaTeaser.statusLabel}.
             </p>
 
             <div
               class="hero-rise mt-8 flex flex-col gap-3 sm:flex-row"
-              style="animation-delay: 0.4s;"
+              style="animation-delay: 0.38s;"
             >
               <a
                 href="#gala-interest"
-                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-accent-gold px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                class="gala-sheen group inline-flex items-center justify-center gap-3 rounded-full bg-accent-gold px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                data-conversion-event="gala_interest_start"
+                data-conversion-context="gala_page_hero"
               >
-                Save the Date
+                <span class="relative z-[1]">Save the Date</span>
                 <svg
-                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -206,12 +276,19 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
             class="hero-rise group relative"
             style="animation-delay: 0.24s;"
           >
+            {/* Soft spotlight breathing behind the framed photo. */}
+            <div
+              class="gala-spotlight pointer-events-none absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_50%_40%,rgba(255,189,89,0.32),transparent_60%)] blur-2xl"
+              aria-hidden="true"
+            >
+            </div>
             <div
               class="gala-ambient absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-2xl"
             >
             </div>
             <div
               data-gala-parallax
+              data-gala-speed="0.1"
               class="relative"
               style="will-change: transform;"
             >
@@ -230,8 +307,9 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
           </div>
         </div>
 
+        {/* Glowing glass countdown panel — the live focal point. */}
         <div
-          class="reveal mt-12 rounded-3xl border border-accent-gold/25 bg-black/25 p-4 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-5 lg:p-6"
+          class="gala-countdown-panel reveal mt-12 rounded-3xl border border-accent-gold/40 bg-black/30 p-4 shadow-xl shadow-black/30 backdrop-blur-md sm:p-5 lg:p-6"
         >
           <div class="grid items-center gap-5 lg:grid-cols-[0.9fr_1.6fr_0.9fr]">
             <div class="text-center lg:text-left">
@@ -277,6 +355,15 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       </div>
     </section>
 
+    {/* Gold ribbon divider */}
+    <div class="gala-ribbon relative -mt-px h-8 bg-off-black" aria-hidden="true">
+      <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
+        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
+        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
+      </div>
+    </div>
+
     {/* ============================ IMPACT ============================ */}
     <section
       id="impact"
@@ -286,9 +373,11 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
         class="absolute inset-0 bg-gradient-to-b from-off-black via-[#161616] to-off-black"
       >
       </div>
+      {/* Faint aurora drift so the section feels continuous with the hero. */}
+      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true">
+      </div>
       <div
-        class="absolute inset-0 opacity-[0.07]"
-        style="background-image: radial-gradient(circle at 50% 0%, #ffbd59 0, transparent 45%);"
+        class="gala-ambient pointer-events-none absolute left-1/2 top-10 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,189,89,0.16),transparent_65%)] blur-2xl"
       >
       </div>
       <div
@@ -297,27 +386,40 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       </div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal mx-auto max-w-3xl text-center">
+        <div class="mx-auto max-w-3xl text-center">
           <p
-            class="text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
+            class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
           >
             {galaImpactIntro.eyebrow}
           </p>
           <h2
-            class="mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
+            class="reveal mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
+            style="transition-delay: 90ms;"
           >
             {galaImpactIntro.heading}
           </h2>
-          <p class="mt-5 text-lg leading-relaxed text-white/70">
+          <p
+            class="reveal mt-5 text-lg leading-relaxed text-white/70"
+            style="transition-delay: 180ms;"
+          >
             {galaImpactIntro.body}
           </p>
         </div>
 
-        <div class="mt-14">
+        <div class="reveal mt-14">
           <GalaImpactStats variant="feature" />
         </div>
       </div>
     </section>
+
+    {/* Gold ribbon divider */}
+    <div class="gala-ribbon relative h-8 bg-off-black" aria-hidden="true">
+      <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
+        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
+        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
+      </div>
+    </div>
 
     {/* ====================== EVENING WITH PURPOSE ====================== */}
     <section
@@ -331,6 +433,21 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
         class="absolute inset-0 opacity-[0.08]"
         style="background-image: radial-gradient(circle at 20% 20%, #ffbd59 0, transparent 28%), radial-gradient(circle at 80% 70%, #b5a18d 0, transparent 24%);"
       >
+      </div>
+
+      {/* Ambient particles carrying the hero's energy down the page. */}
+      <div
+        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
+        aria-hidden="true"
+      >
+        {
+          ambientParticles.map((p) => (
+            <span
+              class="gala-particle absolute bottom-0 rounded-full bg-accent-gold"
+              style={`left: ${p.left}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
+            />
+          ))
+        }
       </div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -367,11 +484,13 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
                   ]}
                   style={`transition-delay: ${index * 110}ms;`}
                 >
-                  <GalaPhotoFrame
-                    slot={slot}
-                    variant={slot.id === "facade" ? "panorama" : "venue"}
-                    corners={slot.id === "facade"}
-                  />
+                  <div class="gala-frame-lift" data-gala-parallax={slot.id === "facade" ? undefined : ""} data-gala-speed="0.04">
+                    <GalaPhotoFrame
+                      slot={slot}
+                      variant={slot.id === "facade" ? "panorama" : "venue"}
+                      corners
+                    />
+                  </div>
                 </div>
               ))
             }
@@ -380,19 +499,44 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
 
         <div class="mt-12 grid gap-4 md:grid-cols-4">
           {
-            galaDetails.map((detail, index) => (
-              <div
-                class="reveal group rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-5 transition-colors duration-300 hover:border-accent-gold/45"
-                style={`transition-delay: ${index * 80}ms;`}
-              >
-                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
-                  {detail.label}
-                </p>
-                <p class="mt-3 text-base font-bold leading-snug text-white/90">
-                  {detail.value}
-                </p>
-              </div>
-            ))
+            galaDetails.map((detail, index) => {
+              const icon = detailIcons[index];
+              return (
+                <div
+                  class="gala-detail-card reveal group relative overflow-hidden rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-accent-gold/45 hover:shadow-lg hover:shadow-accent-gold/10"
+                  style={`transition-delay: ${index * 90}ms;`}
+                >
+                  {/* Top gold hairline that brightens on hover. */}
+                  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/50 to-transparent transition-opacity duration-300 group-hover:via-accent-gold" />
+                  {/* Gold corner brackets (black-tie trim, matches photo frames). */}
+                  <span class="pointer-events-none absolute left-2 top-2 h-4 w-4 rounded-tl border-l-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
+                  <span class="pointer-events-none absolute right-2 top-2 h-4 w-4 rounded-tr border-r-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
+                  <span class="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl border-b-2 border-l-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
+                  <span class="pointer-events-none absolute bottom-2 right-2 h-4 w-4 rounded-br border-b-2 border-r-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
+
+                  <div class="relative">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/25 bg-accent-gold/10 text-accent-gold transition-all duration-300 group-hover:bg-accent-gold/20 group-hover:shadow-[0_0_18px_-4px] group-hover:shadow-accent-gold/50">
+                      <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        set:html={icon}
+                      />
+                    </span>
+                    <p class="mt-4 text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
+                      {detail.label}
+                    </p>
+                    {/* Short foil-rule divider that draws across on hover. */}
+                    <div class="gala-detail-rule mt-3 h-px w-10 gala-foil-rule" />
+                    <p class="mt-3 text-base font-bold leading-snug text-white/90">
+                      {detail.value}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
           }
         </div>
       </div>
@@ -422,11 +566,11 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
               href={flickrGalleryUrl}
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-7 inline-flex items-center gap-3 rounded-full border border-off-black/15 bg-off-black px-7 py-4 text-base font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-vibrant-pink"
+              class="group mt-7 inline-flex items-center gap-3 rounded-full border border-off-black/15 bg-off-black px-7 py-4 text-base font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-vibrant-pink"
             >
               View Last Year's Gallery
               <svg
-                class="h-4 w-4"
+                class="h-4 w-4 transition-transform group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -445,7 +589,7 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
             href={flickrGalleryUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="reveal group relative block overflow-hidden rounded-3xl border border-accent-gold/40 bg-off-black p-3 shadow-2xl shadow-off-black/20"
+            class="reveal group relative block overflow-hidden rounded-3xl border border-accent-gold/40 bg-off-black p-3 shadow-2xl shadow-off-black/20 transition-transform duration-300 hover:-translate-y-1"
           >
             <img
               src={`${base}images/galalogos/galagallery.jpg`}
@@ -464,6 +608,53 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
             </div>
           </a>
         </div>
+
+        {/* --- 2025 sponsor gratitude marquee --- */}
+        <div class="reveal mt-14 border-t border-off-black/10 pt-10">
+          <p class="text-center text-xs font-extrabold uppercase tracking-[0.3em] text-vibrant-pink">
+            With gratitude to our 2025 sponsors
+          </p>
+
+          <div class="gala-marquee mt-7">
+            <div class="gala-marquee__track gala-marquee__track--left">
+              {
+                [...sponsorLogos2025, ...sponsorLogos2025].map((name, i) => (
+                  <span
+                    class:list={[
+                      "gala-sponsor-logo",
+                      i >= sponsorLogos2025.length &&
+                        "gala-sponsor-logo--duplicate",
+                    ]}
+                    aria-hidden={i >= sponsorLogos2025.length ? "true" : undefined}
+                  >
+                    <img
+                      src={`${base}images/galalogos/${name}.png`}
+                      alt={i < sponsorLogos2025.length ? name : ""}
+                      loading="eager"
+                      decoding="async"
+                      fetchpriority="low"
+                      class="h-12 w-auto object-contain"
+                    />
+                  </span>
+                ))
+              }
+            </div>
+          </div>
+
+          <p class="mt-7 text-center text-sm font-medium text-medium-gray">
+            Interested in 2026 sponsorship opportunities?
+            <a
+              href={galaTeaser.interestFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-underline ml-1 font-extrabold text-off-black"
+              data-conversion-event="gala_interest_start"
+              data-conversion-context="gala_page_sponsor_tease"
+            >
+              Join the interest list &rarr;
+            </a>
+          </p>
+        </div>
       </div>
     </section>
 
@@ -480,6 +671,28 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       <div
         class="gala-ambient pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-gradient-to-b from-accent-gold/15 to-transparent blur-3xl"
       >
+      </div>
+
+      {/* Denser particle field so the page bookends visually. */}
+      <div
+        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
+        aria-hidden="true"
+      >
+        {
+          closingParticles.map((p) => (
+            <span
+              class:list={["gala-particle absolute bottom-0 rounded-full bg-accent-gold", p.bokeh && "gala-particle--bokeh"]}
+              style={`left: ${p.left}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
+            />
+          ))
+        }
+      </div>
+
+      {/* Gold ribbon above the invitation. */}
+      <div class="relative mb-10 flex items-center justify-center gap-4" aria-hidden="true">
+        <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
+        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+        <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
       </div>
 
       <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -547,6 +760,50 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
         </div>
       </div>
     </section>
+
+    {/* ======================= STICKY CONVERSION BAR ======================= */}
+    <div
+      id="gala-sticky-bar"
+      class="gala-sticky-bar fixed inset-x-0 bottom-0 z-40 transition-all duration-500"
+      aria-hidden="true"
+    >
+      <div class="mx-auto max-w-7xl px-3 pb-3 sm:px-6">
+        <div class="gala-sheen flex items-center justify-between gap-3 rounded-2xl border border-accent-gold/40 bg-off-black/90 px-4 py-3 shadow-2xl shadow-black/50 backdrop-blur-md sm:px-5">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="hidden h-2 w-2 rotate-45 bg-accent-gold sm:block"></span>
+            <div class="min-w-0">
+              <p class="truncate font-display text-sm font-bold text-white">
+                {galaTeaser.shortTitle}
+              </p>
+              <p class="truncate text-[11px] font-semibold text-accent-gold">
+                {galaTeaser.shortDateTimeLabel}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              href={galaTeaser.interestFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="relative z-[1] inline-flex items-center gap-2 rounded-full bg-accent-gold px-4 py-2 text-xs font-extrabold text-off-black shadow-md transition-transform duration-300 hover:scale-[1.03] sm:px-5 sm:text-sm"
+              data-conversion-event="gala_interest_start"
+              data-conversion-context="gala_page_sticky"
+            >
+              Join the Interest List
+            </a>
+            <button
+              type="button"
+              class="gala-sticky-close inline-flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Dismiss"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </Layout>
 
@@ -571,11 +828,14 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
     }
   }
 
-  /* Floating gold particles drifting up through the hero. Static (invisible)
-     unless motion is allowed. */
+  /* Floating gold particles drifting up. Static (invisible) unless motion is
+     allowed. Fine motes get a tight glow; bokeh motes get a larger soft halo. */
   .gala-particle {
     opacity: 0;
     box-shadow: 0 0 6px rgba(255, 189, 89, 0.5);
+  }
+  .gala-particle--bokeh {
+    box-shadow: 0 0 14px 3px rgba(255, 189, 89, 0.35);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -602,29 +862,205 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
       opacity: 0;
     }
   }
+
+  /* Aurora: slow-drifting layered radial glow behind the hero (and a softer
+     variant for the impact band). Motion-safe only. */
+  .gala-aurora {
+    background:
+      radial-gradient(40% 50% at 18% 25%, rgba(255, 189, 89, 0.16), transparent 70%),
+      radial-gradient(38% 48% at 82% 30%, rgba(181, 161, 141, 0.14), transparent 70%),
+      radial-gradient(45% 55% at 50% 80%, rgba(255, 189, 89, 0.1), transparent 72%);
+    background-repeat: no-repeat;
+  }
+  .gala-aurora--soft {
+    opacity: 0.55;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-aurora {
+      animation: gala-aurora-drift 18s ease-in-out infinite;
+    }
+  }
+  @keyframes gala-aurora-drift {
+    0%, 100% {
+      background-position: 0% 0%, 0% 0%, 0% 0%;
+      transform: scale(1);
+    }
+    50% {
+      background-position: 6% 4%, -5% -3%, 3% -4%;
+      transform: scale(1.05);
+    }
+  }
+
+  /* One-time theater light sweep across the hero on load. */
+  .gala-theater-sweep::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 243, 216, 0.14) 48%,
+      transparent 66%
+    );
+    transform: translateX(-130%);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-theater-sweep::after {
+      animation: gala-sweep-once 1.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s 1
+        forwards;
+    }
+  }
+  @keyframes gala-sweep-once {
+    0% {
+      transform: translateX(-130%);
+    }
+    100% {
+      transform: translateX(130%);
+    }
+  }
+
+  /* Soft spotlight breathing behind the framed hero photo. */
+  .gala-spotlight {
+    opacity: 0.7;
+  }
+
+  /* Glowing countdown panel: a subtle continuous border glow so it reads as
+     the live focal point. Motion-safe only. */
+  @media (prefers-reduced-motion: no-preference) {
+    .gala-countdown-panel {
+      animation: gala-panel-glow 4.5s ease-in-out infinite;
+    }
+  }
+  @keyframes gala-panel-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 1px rgba(255, 189, 89, 0.08), 0 20px 50px -20px rgba(0, 0, 0, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 1px rgba(255, 189, 89, 0.22), 0 20px 60px -18px rgba(255, 189, 89, 0.18);
+    }
+  }
+
+  /* Venue frame hover-lift wrapper (pairs with GalaPhotoFrame's own zoom). */
+  .gala-frame-lift {
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 100%;
+  }
+  .gala-frame-lift:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Infinite sponsor marquee: grayscale by default, gold/color on hover, pause
+     on row hover. Two identical halves make the loop seamless. */
+  .gala-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+  .gala-marquee__track {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    width: max-content;
+  }
+  .gala-marquee__track--left {
+    animation: gala-marquee-left 40s linear infinite;
+  }
+  .gala-marquee:hover .gala-marquee__track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gala-marquee__track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+  }
+  @keyframes gala-marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .gala-sponsor-logo {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    height: 3rem;
+    filter: grayscale(1) opacity(0.65);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+  .gala-sponsor-logo:hover {
+    filter: grayscale(0) opacity(1);
+    transform: scale(1.06);
+  }
+
+  /* Detail cards: the foil-rule divider draws across on hover, the gold
+     brackets + top hairline brighten (handled inline above). */
+  .gala-detail-rule {
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .gala-detail-card:hover .gala-detail-rule {
+    width: 3.5rem;
+  }
+
+  /* Sticky conversion bar: hidden by default, shown via JS adding the
+     --visible class. Both states use transform + opacity so they never
+     conflict with Tailwind's `translate` utility. */
+  .gala-sticky-bar {
+    transform: translateY(140%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .gala-sticky-bar.gala-sticky--visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
 </style>
 
 <script>
-  // Subtle hero photo parallax: the framed image lags slightly behind the
-  // scroll for a sense of depth. rAF-throttled and motion-safe.
+  // Subtle parallax: elements with [data-gala-parallax] lag slightly behind
+  // scroll for a sense of depth. Each may carry an optional data-gala-speed
+  // (default 0.1). rAF-throttled, desktop-only (>=1024px), motion-safe.
   (() => {
-    const el = document.querySelector<HTMLElement>("[data-gala-parallax]");
-    if (!el) return;
+    const els = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-gala-parallax]"),
+    );
+    if (els.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Desktop only: on stacked mobile layouts the drift would crowd the
-    // countdown below it, so keep the framed photo static there.
     const lg = window.matchMedia("(min-width: 1024px)");
-
     let ticking = false;
+
     const apply = () => {
       ticking = false;
       if (!lg.matches) {
-        el.style.transform = "";
+        for (const el of els) el.style.transform = "";
         return;
       }
-      const offset = Math.min(window.scrollY * 0.1, 50);
-      el.style.transform = `translate3d(0, ${offset}px, 0)`;
+      for (const el of els) {
+        const speed = parseFloat(el.dataset.galaSpeed || "0.1");
+        // Clamp the drift proportionally to the speed so subtle layers barely move.
+        const max = Math.min(50, 50 * speed);
+        const offset = Math.min(window.scrollY * speed, max);
+        el.style.transform = `translate3d(0, ${offset}px, 0)`;
+      }
     };
     const onScroll = () => {
       if (ticking) return;
@@ -635,5 +1071,51 @@ const heroParticles = Array.from({ length: 16 }, (_, i) => ({
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
     lg.addEventListener("change", apply);
+  })();
+
+  // Sticky interest-list conversion bar: fades in once the hero has scrolled
+  // away and hides again once the closing invitation reaches view (so it never
+  // doubles the final CTA). Dismissible for the session.
+  (() => {
+    const bar = document.getElementById("gala-sticky-bar");
+    const hero = document.getElementById("save-the-date");
+    const closing = document.getElementById("gala-interest");
+    if (!bar || !hero) return;
+
+    let dismissed = false;
+    const closeBtn = bar.querySelector<HTMLButtonElement>(".gala-sticky-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        dismissed = true;
+        bar.classList.remove("gala-sticky--visible");
+      });
+    }
+
+    const evaluate = () => {
+      if (dismissed) return;
+      // Show only between the hero (scrolled past) and the closing invite
+      // (not yet in view). Both checks must pass.
+      const heroBottom = hero.getBoundingClientRect().bottom;
+      const heroGone = heroBottom < 0;
+      const closingInView =
+        !!closing &&
+        closing.getBoundingClientRect().top < window.innerHeight * 0.85;
+      const shouldShow = heroGone && !closingInView;
+      bar.classList.toggle("gala-sticky--visible", shouldShow);
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        ticking = false;
+        evaluate();
+      });
+    };
+
+    evaluate();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
   })();
 </script>
