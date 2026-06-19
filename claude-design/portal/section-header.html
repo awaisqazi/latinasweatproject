@@ -1,0 +1,48 @@
+<!-- @dsCard group="Portal UI kit" name="Section header" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Section header</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--accent:#0f766e;
+    --radius-control:.5rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:20px 22px}
+  .demo + .demo{margin-top:14px}
+  .sh{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px}
+  .eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);margin:0}
+  .h{margin:2px 0 0;font-size:18px;font-weight:700;line-height:1.2}
+  .sub{margin:4px 0 0;max-width:48ch;font-size:14px;color:rgb(30 30 30/.6)}
+  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-control);font-weight:600;font-size:13px;border:1px solid transparent;cursor:pointer;min-height:36px;padding:0 12px;font-family:inherit}
+  .btn-primary{background:var(--brand);color:var(--ink)} .btn-secondary{background:#fff;color:var(--ink);border-color:rgb(30 30 30/.14)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Section header</h1>
+  <p class="ds-desc">The standard heading block for a view or a panel group: optional teal eyebrow, title, optional description, and a right-aligned actions slot that wraps gracefully.</p>
+
+  <div class="demo">
+    <div class="sh">
+      <div><p class="eyebrow">This week</p><h2 class="h">Volunteer roster</h2><p class="sub">Assign coverage for every shift before Saturday.</p></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-secondary">Export</button><button class="btn btn-primary">Add shift</button></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="sh">
+      <div><h2 class="h">Donations</h2><p class="sub">Title-only variant, no eyebrow or actions.</p></div>
+    </div>
+  </div>
+</body>
+</html>

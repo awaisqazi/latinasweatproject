@@ -1,0 +1,52 @@
+<!-- @dsCard group="Brand patterns" name="Event card" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Event card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--off-black:#1e1e1e;--accent-gold:#ffbd59;--vibrant-pink:#b5a18d;--medium-gray:#555;--accent:#0f766e;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);background:linear-gradient(135deg,#f5ede3,#e8d8c2);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased;color:#1e1e1e}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .card{position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:.75rem;background:#fff;box-shadow:0 4px 6px -1px rgb(0 0 0/.1);max-width:360px;transition:transform .3s,box-shadow .3s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 20px 30px -12px rgb(181 161 141/.4)}
+  .media{position:relative;height:200px;overflow:hidden}
+  .media .img{height:100%;width:100%;background:linear-gradient(135deg,#b5a18d,#8a5a35);transition:transform .5s}
+  .card:hover .media .img{transform:scale(1.08)}
+  .date{position:absolute;left:14px;top:14px;background:rgb(255 255 255/.9);backdrop-filter:blur(4px);padding:5px 12px;border-radius:8px;box-shadow:0 1px 2px rgb(0 0 0/.1)}
+  .date p{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--vibrant-pink)}
+  .body{padding:22px;display:flex;flex-direction:column;flex:1}
+  .body h3{margin:0;font-size:20px;font-weight:700;line-height:1.2;color:var(--off-black);transition:color .2s}
+  .card:hover .body h3{color:var(--vibrant-pink)}
+  .body p{margin:12px 0 0;font-size:15px;line-height:1.55;color:var(--medium-gray)}
+  .more{margin-top:22px;display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--vibrant-pink);text-decoration:none;transition:color .2s}
+  .more:hover{color:var(--accent-gold)}
+  .more svg{width:16px;height:16px;transition:transform .3s}
+  .more:hover svg{transform:translateX(4px)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Brand patterns</p>
+  <h1 class="ds-title">Event card</h1>
+  <p class="ds-desc">The repeatable event tile: cover image with a frosted date pill, title that shifts to the brand accent on hover, a lift-and-shadow hover, and a "Learn More" link that warms from taupe to gold.</p>
+
+  <article class="card">
+    <div class="media"><div class="img"></div><div class="date"><p>Sat · Jun 21</p></div></div>
+    <div class="body">
+      <h3>Father's Day at LSP</h3>
+      <p>Bring the family for a morning sweat, then stay for cafecito and community on the patio.</p>
+      <a class="more" href="#">Learn More
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l7 7-7 7M21 12H3"/></svg>
+      </a>
+    </div>
+  </article>
+</body>
+</html>

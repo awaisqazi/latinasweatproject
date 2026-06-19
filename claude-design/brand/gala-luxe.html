@@ -1,0 +1,56 @@
+<!-- @dsCard group="Brand patterns" name="Gala · black-tie luxe" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Gala luxe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--accent-gold:#ffbd59;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-display:"Playfair Display","Rubik",Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);-webkit-font-smoothing:antialiased}
+  .gala{position:relative;overflow:hidden;background:radial-gradient(120% 80% at 50% -10%,#241a0d 0%,#0c0a09 55%,#000 100%);color:#fff;padding:52px 40px 44px;text-align:center}
+  .ambient{position:absolute;left:50%;top:-120px;transform:translateX(-50%);width:520px;height:360px;border-radius:50%;background:rgb(255 189 89/.18);filter:blur(120px);animation:pulse 9s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:.9;transform:translateX(-50%) scale(1.08)}}
+  .label{position:absolute;top:14px;left:18px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgb(255 255 255/.4)}
+  .inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+  .eyebrow{margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:rgb(255 255 255/.6)}
+  .foil{font-family:var(--font-display);font-weight:800;font-size:54px;line-height:1.04;margin:0;
+    background-image:linear-gradient(100deg,#f4a833 0%,#ffbd59 22%,#fff3d8 42%,#ffbd59 62%,#f4a833 100%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:foil 6s ease-in-out infinite}
+  @keyframes foil{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .rule{height:2px;width:200px;margin:22px auto;border-radius:2px;background-image:linear-gradient(90deg,transparent,#f4a833 18%,#fff3d8 50%,#f4a833 82%,transparent);background-size:220% 100%;animation:foil 7s ease-in-out infinite}
+  .sub{margin:0 auto;max-width:46ch;font-size:16px;line-height:1.6;color:rgb(255 255 255/.72)}
+  .stats{margin:34px auto 0;display:flex;gap:36px;justify-content:center;flex-wrap:wrap}
+  .stat .n{font-family:var(--font-display);font-weight:800;font-size:40px;line-height:1;color:var(--accent-gold)}
+  .stat .l{margin-top:8px;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgb(255 255 255/.55)}
+  .std{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:10px;margin-top:36px;background:#1a1206;border:1px solid rgb(255 189 89/.4);color:var(--accent-gold);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;padding:14px 26px;border-radius:999px}
+  .std::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgb(255 255 255/.35) 50%,transparent 65%);transform:translateX(-130%);animation:sheen 4.5s ease-in-out infinite}
+  @keyframes sheen{0%{transform:translateX(-130%)}55%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion:reduce){.ambient,.foil,.rule,.std::after{animation:none}}
+</style>
+</head>
+<body>
+  <section class="gala">
+    <span class="label">Brand patterns · Gala luxe</span>
+    <span class="ambient"></span>
+    <div class="inner">
+      <p class="eyebrow">An Evening with The Latina Sweat Project</p>
+      <h1 class="foil">Noche Inolvidable</h1>
+      <div class="rule"></div>
+      <p class="sub">The signature black-tie gala. Playfair Display headings, gold-foil text, and a slow ambient glow set the one night a year LSP goes full luxe.</p>
+      <div class="stats">
+        <div class="stat"><div class="n">$250K</div><div class="l">Raised to date</div></div>
+        <div class="stat"><div class="n">1,200</div><div class="l">Lives reached</div></div>
+        <div class="stat"><div class="n">18</div><div class="l">Community partners</div></div>
+      </div>
+      <div class="std">Save the Date · Oct 2026</div>
+    </div>
+  </section>
+</body>
+</html>

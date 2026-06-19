@@ -1,0 +1,44 @@
+<!-- @dsCard group="Portal UI kit" name="Banners / alerts" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Banners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--radius-control:.5rem;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .stack{display:flex;flex-direction:column;gap:12px;max-width:560px}
+  .banner{display:flex;align-items:flex-start;gap:10px;border:1px solid;border-radius:var(--radius-control);padding:12px 14px;font-size:14px}
+  .ico{width:16px;height:16px;flex:0 0 auto;margin-top:2px}
+  .banner .body{flex:1 1 auto;line-height:1.45}
+  .banner .link{font-weight:600;text-decoration:underline;text-underline-offset:2px;margin-left:6px;cursor:pointer}
+  .x{margin:-6px -6px 0 0;width:24px;height:24px;display:grid;place-items:center;border:0;background:transparent;opacity:.6;cursor:pointer;border-radius:6px;color:inherit}
+  .x:hover{opacity:1}
+  .error{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+  .success{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+  .warning{border-color:#fde68a;background:#fffbeb;color:#92400e}
+  .info{border-color:#bfdbfe;background:#eff6ff;color:#1e40af}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Banners / alerts</h1>
+  <p class="ds-desc">One component for the ~20 hand-rolled alert blocks across the portal. Four tones, each with an icon, optional retry action, and optional dismiss. Error and warning carry <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">role="alert"</code>; success and info use <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">role="status"</code>.</p>
+
+  <div class="stack">
+    <div class="banner error" role="alert"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div class="body">Could not save changes. <span class="link">Try again</span></div><button class="x" aria-label="Dismiss"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l10 10M12 2L2 12"/></svg></button></div>
+    <div class="banner success" role="status"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><div class="body">Event published to the public calendar.</div><button class="x" aria-label="Dismiss"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l10 10M12 2L2 12"/></svg></button></div>
+    <div class="banner warning" role="alert"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><div class="body">3 shifts still need a volunteer for Saturday.</div></div>
+    <div class="banner info" role="status"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><div class="body">Sync runs every 15 minutes from the source sheet.</div></div>
+  </div>
+</body>
+</html>

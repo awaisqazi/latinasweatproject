@@ -1,0 +1,44 @@
+<!-- @dsCard group="Brand patterns" name="Testimonial card" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Testimonial card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--off-black:#1e1e1e;--vibrant-pink:#b5a18d;--medium-gray:#555;--accent:#0f766e;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);background:#f7f7f4;padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased;color:#1e1e1e}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:680px}
+  figure{margin:0;display:flex;flex-direction:column;height:100%;border-radius:.5rem;background:#fff;padding:24px;box-shadow:0 10px 15px -3px rgb(0 0 0/.1)}
+  .avatar{margin:0 auto;width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#b5a18d,#8a5a35)}
+  blockquote{margin:22px 0 0;text-align:center;color:var(--medium-gray);flex:1;font-size:15px;line-height:1.6}
+  figcaption{margin-top:16px;text-align:center;font-size:14px;font-weight:700;color:var(--off-black)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Brand patterns</p>
+  <h1 class="ds-title">Testimonial card</h1>
+  <p class="ds-desc">Equal-height quote card: a circular avatar, a centered quote in medium-gray, and a bold attribution. Designed to sit in a responsive grid.</p>
+
+  <div class="grid">
+    <figure>
+      <div class="avatar"></div>
+      <blockquote>"LSP is the first place I felt like fitness was actually for me. I came for one class and never left."</blockquote>
+      <figcaption>Maria R.</figcaption>
+    </figure>
+    <figure>
+      <div class="avatar"></div>
+      <blockquote>"The community shows up for each other on and off the mat. It changed how I see movement."</blockquote>
+      <figcaption>Jasmine O.</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

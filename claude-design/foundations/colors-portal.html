@@ -1,0 +1,65 @@
+<!-- @dsCard group="Foundations" name="Portal palette · studio ledger" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Portal palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-strong:#f4a833;--brand-soft:#fff3d8;--brand-ink:#8a5700;
+    --accent:#0f766e;--accent-strong:#115e59;--accent-soft:#f0fdfa;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-head{margin:0 0 22px}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 0;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-desc code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px;font-size:12.5px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:26px 0 12px}
+  .ds-note{margin-top:24px;font-size:12.5px;color:rgb(30 30 30/.6);border-top:1px solid rgb(30 30 30/.1);padding-top:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:12px}
+  .sw{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow-card)}
+  .sw .chip{height:64px}
+  .sw .meta{padding:9px 11px}
+  .sw .meta b{display:block;font-size:12.5px;font-weight:700}
+  .sw .meta span{display:block;font-size:11.5px;color:rgb(30 30 30/.55);font-variant-numeric:tabular-nums;margin-top:2px}
+</style>
+</head>
+<body>
+  <header class="ds-head">
+    <p class="ds-eyebrow">Foundations</p>
+    <h1 class="ds-title">Portal palette · studio ledger</h1>
+    <p class="ds-desc">The admin portal language: ink on warm paper, gold as a foil surface (never text on light), teal as the interactive hue. Scoped under <code>.lsp-portal</code> so the public site is untouched.</p>
+  </header>
+
+  <p class="ds-section-label">Ink &amp; canvas</p>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#1e1e1e"></div><div class="meta"><b>ink</b><span>#1e1e1e</span></div></div>
+    <div class="sw"><div class="chip" style="background:#f7f7f4;border-bottom:1px solid rgb(30 30 30/.08)"></div><div class="meta"><b>canvas</b><span>#f7f7f4</span></div></div>
+  </div>
+
+  <p class="ds-section-label">Brand · gold foil (surface, not text on light)</p>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#ffbd59"></div><div class="meta"><b>brand</b><span>#ffbd59</span></div></div>
+    <div class="sw"><div class="chip" style="background:#f4a833"></div><div class="meta"><b>brand-strong</b><span>#f4a833</span></div></div>
+    <div class="sw"><div class="chip" style="background:#fff3d8;border-bottom:1px solid rgb(30 30 30/.08)"></div><div class="meta"><b>brand-soft</b><span>#fff3d8</span></div></div>
+    <div class="sw"><div class="chip" style="background:#8a5700"></div><div class="meta"><b>brand-ink</b><span>#8a5700</span></div></div>
+  </div>
+
+  <p class="ds-section-label">Accent · teal (interactivity, focus, links)</p>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#0f766e"></div><div class="meta"><b>accent</b><span>#0f766e</span></div></div>
+    <div class="sw"><div class="chip" style="background:#115e59"></div><div class="meta"><b>accent-strong</b><span>#115e59</span></div></div>
+    <div class="sw"><div class="chip" style="background:#f0fdfa;border-bottom:1px solid rgb(30 30 30/.08)"></div><div class="meta"><b>accent-soft</b><span>#f0fdfa</span></div></div>
+  </div>
+
+  <p class="ds-note"><b>Pairing rule:</b> gold is a fill behind ink text (<code>bg-brand text-ink</code>); for gold-colored text on light, use <code>brand-ink</code>. Teal carries every interactive state.</p>
+</body>
+</html>

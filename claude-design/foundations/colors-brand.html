@@ -1,0 +1,66 @@
+<!-- @dsCard group="Foundations" name="Brand color palette" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Brand color palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vibrant-pink:#b5a18d;--accent-gold:#ffbd59;--off-black:#1e1e1e;--medium-gray:#555;--light-gray:#fdf2f2;
+    --ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-strong:#f4a833;--brand-soft:#fff3d8;--brand-ink:#8a5700;
+    --accent:#0f766e;--accent-strong:#115e59;--accent-soft:#f0fdfa;--kids-clay:#c7602d;
+    --radius-card:.75rem;--radius-control:.5rem;
+    --shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-display:"Playfair Display","Rubik",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-head{margin:0 0 22px}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 0;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-desc code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px;font-size:12.5px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:26px 0 12px}
+  .ds-note{margin-top:24px;font-size:12.5px;color:rgb(30 30 30/.6);border-top:1px solid rgb(30 30 30/.1);padding-top:12px}
+  .ds-note code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:14px}
+  .sw{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow-card)}
+  .sw .chip{height:76px}
+  .sw .meta{padding:10px 12px}
+  .sw .meta b{display:block;font-size:13px;font-weight:700}
+  .sw .meta span{display:block;font-size:12px;color:rgb(30 30 30/.55);font-variant-numeric:tabular-nums;margin-top:2px}
+  .sw .meta em{display:block;font-style:normal;font-size:11px;color:rgb(30 30 30/.45);margin-top:4px}
+</style>
+</head>
+<body>
+  <header class="ds-head">
+    <p class="ds-eyebrow">Foundations</p>
+    <h1 class="ds-title">Brand color palette</h1>
+    <p class="ds-desc">The public marketing identity: warm, organic tones for culture, wellness, and movement. Configured tokens live in <code>tailwind.config.mjs</code> and the <code>@theme</code> block of <code>global.css</code>.</p>
+  </header>
+
+  <p class="ds-section-label">Configured tokens</p>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#b5a18d"></div><div class="meta"><b>vibrant-pink</b><span>#b5a18d</span><em>warm taupe · brand accent</em></div></div>
+    <div class="sw"><div class="chip" style="background:#ffbd59"></div><div class="meta"><b>accent-gold</b><span>#ffbd59</span><em>highlights · badges</em></div></div>
+    <div class="sw"><div class="chip" style="background:#1e1e1e"></div><div class="meta"><b>off-black</b><span>#1E1E1E</span><em>text · dark sections</em></div></div>
+    <div class="sw"><div class="chip" style="background:#555"></div><div class="meta"><b>medium-gray</b><span>#555555</span><em>body copy</em></div></div>
+    <div class="sw"><div class="chip" style="background:#fdf2f2;border-bottom:1px solid rgb(30 30 30/.08)"></div><div class="meta"><b>light-gray</b><span>#FDF2F2</span><em>soft hover fills (pale pink)</em></div></div>
+  </div>
+
+  <p class="ds-section-label">Documented extended palette (referenced in design.md, not tokenized)</p>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#c7602d"></div><div class="meta"><b>Kids Clay</b><span>#c7602d</span><em>youth / family events</em></div></div>
+    <div class="sw"><div class="chip" style="background:#0d9488"></div><div class="meta"><b>Teal</b><span>teal-600</span><em>health · community safety</em></div></div>
+    <div class="sw"><div class="chip" style="background:#0ea5e9"></div><div class="meta"><b>Sky</b><span>sky-500 / 400</span><em>giving · spring events</em></div></div>
+    <div class="sw"><div class="chip" style="background:linear-gradient(135deg,#f5ede3,#e8d8c2)"></div><div class="meta"><b>Natural Sand</b><span>#f5ede3 → #e8d8c2</span><em>light section gradients</em></div></div>
+  </div>
+
+  <p class="ds-note"><b>Note:</b> <code>vibrant-pink</code> (#b5a18d) reads as a warm taupe, not pink; the token name predates a palette shift. The extended colors are inline hex or stock Tailwind classes, not <code>@theme</code> tokens yet.</p>
+</body>
+</html>

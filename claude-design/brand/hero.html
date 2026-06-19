@@ -1,0 +1,48 @@
+<!-- @dsCard group="Brand patterns" name="Hero (dark overlay)" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--off-black:#1e1e1e;--accent-gold:#ffbd59;--vibrant-pink:#b5a18d;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);-webkit-font-smoothing:antialiased}
+  .hero{position:relative;min-height:460px;display:flex;align-items:center;overflow:hidden;
+    background:linear-gradient(120deg,#3a2b22,#6b4a2f 45%,#8a5a35);}
+  .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.68))}
+  .glow{position:absolute;width:420px;height:420px;border-radius:50%;filter:blur(120px);pointer-events:none}
+  .g1{top:-120px;left:-80px;background:rgb(181 161 141/.4)}
+  .g2{bottom:-160px;right:-60px;background:rgb(255 189 89/.3)}
+  .label{position:absolute;top:14px;left:18px;z-index:3;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgb(255 255 255/.55)}
+  .inner{position:relative;z-index:2;padding:48px;max-width:680px;color:#fff}
+  .eyebrow{margin:0 0 14px;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-gold)}
+  h1{margin:0;font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.02em}
+  .sub{margin:18px 0 0;font-size:17px;line-height:1.5;color:rgb(255 255 255/.82);max-width:46ch}
+  .ctas{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:.6rem;font-weight:700;font-size:15px;padding:13px 22px;cursor:pointer;border:1px solid transparent;text-decoration:none}
+  .btn-primary{background:var(--accent-gold);color:var(--off-black)}
+  .btn-ghost{background:rgb(255 255 255/.08);color:#fff;border-color:rgb(255 255 255/.4);backdrop-filter:blur(4px)}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <span class="label">Brand patterns · Hero</span>
+    <span class="glow g1"></span><span class="glow g2"></span>
+    <div class="inner">
+      <p class="eyebrow">The Latina Sweat Project</p>
+      <h1>Sweat. Connect. Belong.</h1>
+      <p class="sub">A movement built on community, wellness, and showing up for each other. Find a class, join a run, or come to your first event this week.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#">Find a class</a>
+        <a class="btn btn-ghost" href="#">See upcoming events</a>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

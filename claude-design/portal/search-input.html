@@ -1,0 +1,60 @@
+<!-- @dsCard group="Portal UI kit" name="Search input" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Search input</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--radius-control:.5rem;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:20px 0 10px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:20px;max-width:440px}
+  .search{position:relative}
+  .search + .search{margin-top:14px}
+  .input{min-height:40px;width:100%;border-radius:var(--radius-control);border:1px solid rgb(30 30 30/.14);background:#fff;padding:0 12px 0 36px;font-size:14px;color:var(--ink);font-family:inherit}
+  .input.pr{padding-right:36px}
+  .mag{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:rgb(30 30 30/.4);pointer-events:none}
+  .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;display:grid;place-items:center;border:0;background:transparent;color:rgb(30 30 30/.4);cursor:pointer;border-radius:6px}
+  .clear:hover{color:var(--ink)}
+  .spin{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;border:2px solid var(--accent);border-top-color:transparent;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Search input</h1>
+  <p class="ds-desc">Debounced search built on the <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">.input</code> recipe. Leading magnifier, a clear button once there is a value, and a spinner while results load.</p>
+
+  <div class="demo">
+    <p class="ds-section-label">Empty</p>
+    <div class="search">
+      <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="input" placeholder="Search volunteers" />
+    </div>
+
+    <p class="ds-section-label">With value (clearable)</p>
+    <div class="search">
+      <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="input pr" value="Maria" />
+      <button class="clear" aria-label="Clear search"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+    </div>
+
+    <p class="ds-section-label">Loading</p>
+    <div class="search">
+      <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="input pr" value="Saturday roster" />
+      <span class="spin"></span>
+    </div>
+  </div>
+</body>
+</html>

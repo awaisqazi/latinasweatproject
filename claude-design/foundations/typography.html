@@ -1,0 +1,66 @@
+<!-- @dsCard group="Foundations" name="Typography" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Typography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--brand-ink:#8a5700;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-display:"Playfair Display","Rubik",Georgia,serif;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-head{margin:0 0 22px}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 0;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:26px 0 12px}
+  .card{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:22px 24px}
+  .row{display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid rgb(30 30 30/.06)}
+  .row:last-child{border-bottom:0}
+  .tag{flex:0 0 132px;font-size:11px;color:rgb(30 30 30/.5);font-variant-numeric:tabular-nums}
+  .display{font-family:var(--font-display);font-weight:800;font-size:40px;line-height:1.05}
+  .h1{font-weight:800;font-size:30px;letter-spacing:-.02em}
+  .h2{font-weight:700;font-size:22px}
+  .h3{font-weight:700;font-size:18px}
+  .body{font-weight:400;font-size:15px;color:rgb(30 30 30/.8)}
+  .small{font-weight:400;font-size:13px;color:rgb(30 30 30/.6)}
+  .label{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgb(30 30 30/.55)}
+  .ds-note{margin-top:22px;font-size:12.5px;color:rgb(30 30 30/.6);border-top:1px solid rgb(30 30 30/.1);padding-top:12px}
+  .ds-note code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+  <header class="ds-head">
+    <p class="ds-eyebrow">Foundations</p>
+    <h1 class="ds-title">Typography</h1>
+    <p class="ds-desc">Rubik carries everything (sans and body). Playfair Display is reserved for the Gala signature event: headings and big impact numbers only.</p>
+  </header>
+
+  <p class="ds-section-label">Rubik · primary typeface</p>
+  <div class="card">
+    <div class="row"><span class="tag">Display / Rubik 800</span><span class="display" style="font-family:var(--font-sans)">Move with us.</span></div>
+    <div class="row"><span class="tag">H1 · 800</span><span class="h1">The Latina Sweat Project</span></div>
+    <div class="row"><span class="tag">H2 · 700</span><span class="h2">Community, wellness, movement</span></div>
+    <div class="row"><span class="tag">H3 · 700</span><span class="h3">Monday Miles run club</span></div>
+    <div class="row"><span class="tag">Body · 400</span><span class="body">Body copy stays Rubik at a comfortable reading size, kept legible on warm and dark backgrounds alike.</span></div>
+    <div class="row"><span class="tag">Small · 400</span><span class="small">Supporting detail, captions, and metadata.</span></div>
+    <div class="row"><span class="tag">Label · 700 caps</span><span class="label">Eyebrow · section label</span></div>
+  </div>
+
+  <p class="ds-section-label">Playfair Display · Gala signature only</p>
+  <div class="card">
+    <div class="row"><span class="tag">Display · 800</span><span class="display">Noche Inolvidable</span></div>
+    <div class="row"><span class="tag">Impact number</span><span class="display" style="color:var(--brand-ink)">$250K</span></div>
+  </div>
+
+  <p class="ds-note">Tokens: <code>--font-sans</code> / <code>--font-body</code> = Rubik · <code>--font-display</code> = "Playfair Display", "Rubik", serif (generates the <code>font-display</code> utility).</p>
+</body>
+</html>

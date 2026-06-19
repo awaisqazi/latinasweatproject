@@ -1,0 +1,52 @@
+<!-- @dsCard group="Portal UI kit" name="Form fields & inputs" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Form fields</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--radius-control:.5rem;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:22px;max-width:520px}
+  .field{margin-bottom:18px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:14px;font-weight:600;color:var(--ink)}
+  .req{color:#dc2626;margin-left:2px}
+  .control{margin-top:6px}
+  .input,.select,.textarea{min-height:40px;width:100%;border-radius:var(--radius-control);border:1px solid rgb(30 30 30/.14);background:#fff;padding:0 12px;font-size:14px;color:var(--ink);font-family:inherit;transition:border-color .15s,box-shadow .15s}
+  .textarea{min-height:96px;padding:8px 12px;line-height:1.5;resize:vertical}
+  .select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23999' stroke-width='2'><path d='M4 6l4 4 4-4'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+  .input:hover,.select:hover,.textarea:hover{border-color:rgb(30 30 30/.26)}
+  .input.is-focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb(15 118 110/.15)}
+  .input.is-error{border-color:#dc2626;box-shadow:0 0 0 3px rgb(220 38 38/.12)}
+  .input:disabled{opacity:.55;cursor:not-allowed;background:rgb(30 30 30/.02)}
+  .hint{margin:6px 0 0;font-size:12px;color:rgb(30 30 30/.5)}
+  .error{margin:6px 0 0;font-size:12px;font-weight:500;color:#b91c1c}
+  ::placeholder{color:rgb(30 30 30/.38)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Form fields &amp; inputs</h1>
+  <p class="ds-desc">The Field wrapper supplies label, hint, error, and the required marker; the control keeps the shared <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">.input</code> / <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">.select</code> / <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">.textarea</code> recipe so bindings stay simple. Focus is a 3px teal ring.</p>
+
+  <div class="demo">
+    <div class="field"><label>Event name<span class="req" aria-hidden="true">*</span></label><div class="control"><input class="input" value="Monday Miles · June" /></div><p class="hint">Shown on the public calendar.</p></div>
+    <div class="field"><label>Location</label><div class="control"><input class="input is-focus" placeholder="Search studios" /></div><p class="hint">Focus state: teal ring.</p></div>
+    <div class="field"><label>Channel</label><div class="control"><select class="select"><option>Instagram</option><option>Email</option><option>Website</option></select></div></div>
+    <div class="field"><label>Notes</label><div class="control"><textarea class="textarea" placeholder="Add context for the team"></textarea></div></div>
+    <div class="field"><label>Capacity<span class="req" aria-hidden="true">*</span></label><div class="control"><input class="input is-error" value="-4" /></div><p class="error" role="alert">Capacity must be a positive number.</p></div>
+    <div class="field"><label>Source sheet ID</label><div class="control"><input class="input" value="locked-by-system" disabled /></div><p class="hint">Disabled state.</p></div>
+  </div>
+</body>
+</html>

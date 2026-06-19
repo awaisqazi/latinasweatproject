@@ -1,0 +1,60 @@
+<!-- @dsCard group="Portal UI kit" name="Data table" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Data table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--accent-soft:#f0fdfa;--accent-strong:#115e59;
+    --brand-soft:#fff3d8;--brand-ink:#8a5700;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .wrap{border-radius:var(--radius-card);border:1px solid rgb(30 30 30/.08);background:#fff;box-shadow:var(--shadow-card);overflow:hidden}
+  table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}
+  thead tr{background:rgb(247 247 244/.7);border-bottom:1px solid rgb(30 30 30/.1)}
+  th{padding:12px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgb(30 30 30/.65)}
+  th .sort{display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--ink)}
+  th .sort .car{font-size:10px}
+  tbody tr{border-bottom:1px solid rgb(30 30 30/.06);cursor:pointer;transition:background .12s}
+  tbody tr:last-child{border-bottom:0}
+  tbody tr:hover{background:rgb(240 253 250/.5)}
+  td{padding:12px 16px;color:rgb(30 30 30/.8);vertical-align:middle}
+  .name{font-weight:600;color:var(--ink)}
+  .b{display:inline-flex;align-items:center;gap:6px;border-radius:999px;font-weight:600;font-size:12px;padding:3px 9px}
+  .b-teal{background:var(--accent-soft);color:var(--accent-strong)} .b-amber{background:#fffbeb;color:#92400e} .b-green{background:#f0fdf4;color:#166534}
+  .ds-note{margin-top:18px;font-size:12.5px;color:rgb(30 30 30/.6)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Data table</h1>
+  <p class="ds-desc">A real table at md and up, with header-click sorting and row click-through; it collapses to stacked cards on mobile, shows skeleton rows while loading, and an empty state when there is nothing to show.</p>
+
+  <div class="wrap">
+    <table>
+      <thead><tr>
+        <th><span class="sort">Volunteer <span class="car">&#9650;</span></span></th>
+        <th>Role</th>
+        <th>Shift</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="name">Maria Reyes</td><td>Check-in lead</td><td>Sat 8:00a</td><td><span class="b b-green">Confirmed</span></td></tr>
+        <tr><td class="name">Jasmine Ortiz</td><td>Setup crew</td><td>Sat 7:00a</td><td><span class="b b-teal">Assigned</span></td></tr>
+        <tr><td class="name">Carla Núñez</td><td>Hydration</td><td>Sat 9:30a</td><td><span class="b b-amber">Pending</span></td></tr>
+        <tr><td class="name">Daniela Cruz</td><td>Photography</td><td>Sat 8:00a</td><td><span class="b b-green">Confirmed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="ds-note">Columns can hide below lg / xl, opt into sorting, and define custom cell renderers via a slot.</p>
+</body>
+</html>

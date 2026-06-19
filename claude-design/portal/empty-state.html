@@ -1,0 +1,45 @@
+<!-- @dsCard group="Portal UI kit" name="Empty state" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Empty state</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--accent:#0f766e;
+    --radius-card:.75rem;--radius-control:.5rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .empty{border:1px dashed rgb(30 30 30/.15);background:rgb(247 247 244/.6);border-radius:var(--radius-card);padding:40px 16px;text-align:center;max-width:520px}
+  .badge{margin:0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:var(--shadow-card)}
+  .badge svg{width:20px;height:20px;color:rgb(30 30 30/.4)}
+  .empty h4{margin:14px 0 0;font-size:16px;font-weight:700}
+  .empty p{margin:6px auto 0;max-width:42ch;font-size:14px;color:rgb(30 30 30/.65)}
+  .actions{margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-control);font-weight:600;font-size:14px;border:1px solid transparent;cursor:pointer;min-height:40px;padding:0 16px;font-family:inherit}
+  .btn-primary{background:var(--brand);color:var(--ink);box-shadow:var(--shadow-card)} .btn-secondary{background:#fff;color:var(--ink);border-color:rgb(30 30 30/.14);box-shadow:var(--shadow-card)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Empty state</h1>
+  <p class="ds-desc">Dashed container on faint canvas, a floated icon chip, a title, optional message, and an actions slot. The default for tables and lists with no rows.</p>
+
+  <div class="empty">
+    <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.5L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.5A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.5z"/></svg></span>
+    <h4>No events scheduled</h4>
+    <p>Once you publish an event it will show up here with its coverage and check-in status.</p>
+    <div class="actions">
+      <button class="btn btn-primary">Create event</button>
+      <button class="btn btn-secondary">Import from sheet</button>
+    </div>
+  </div>
+</body>
+</html>

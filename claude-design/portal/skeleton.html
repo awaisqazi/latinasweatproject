@@ -1,0 +1,57 @@
+<!-- @dsCard group="Portal UI kit" name="Skeleton loaders" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Skeleton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:20px 0 10px}
+  .row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end}
+  .skeleton{position:relative;overflow:hidden;background:rgb(30 30 30/.07);border-radius:6px}
+  .skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,rgb(255 255 255/.65) 50%,transparent 80%);transform:translateX(-100%);animation:shimmer 1.6s ease-in-out infinite}
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  .v-block{width:120px;height:80px;border-radius:8px}
+  .v-text{width:200px;height:16px}
+  .v-circle{width:56px;height:56px;border-radius:50%}
+  .card{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:16px;max-width:360px}
+  .card .line{height:14px;margin-bottom:10px}
+  .cap{font-size:11px;color:rgb(30 30 30/.45);margin:8px 0 0}
+  @media (prefers-reduced-motion:reduce){.skeleton::after{animation:none}}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Skeleton loaders</h1>
+  <p class="ds-desc">A single shimmer primitive in three shapes, composed into rows and cards. The shimmer halts under <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">prefers-reduced-motion</code>.</p>
+
+  <p class="ds-section-label">Primitive shapes</p>
+  <div class="row">
+    <div><div class="skeleton v-block"></div><p class="cap">block</p></div>
+    <div><div class="skeleton v-text"></div><div class="skeleton v-text" style="width:140px;margin-top:8px"></div><p class="cap">text</p></div>
+    <div><div class="skeleton v-circle"></div><p class="cap">circle</p></div>
+  </div>
+
+  <p class="ds-section-label">Composed · skeleton card</p>
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+      <div class="skeleton v-circle" style="width:40px;height:40px"></div>
+      <div style="flex:1"><div class="skeleton line" style="width:60%"></div><div class="skeleton line" style="width:40%;margin-bottom:0"></div></div>
+    </div>
+    <div class="skeleton line"></div>
+    <div class="skeleton line" style="width:85%"></div>
+    <div class="skeleton line" style="width:70%;margin-bottom:0"></div>
+  </div>
+</body>
+</html>

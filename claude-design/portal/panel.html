@@ -1,0 +1,55 @@
+<!-- @dsCard group="Portal UI kit" name="Panel (card surface)" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-strong:#f4a833;--accent:#0f766e;
+    --radius-card:.75rem;--radius-control:.5rem;
+    --shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .panel{position:relative;border-radius:var(--radius-card);border:1px solid rgb(30 30 30/.08);background:#fff;box-shadow:var(--shadow-card);padding:18px 20px;overflow:hidden}
+  .phead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .ptitle{font-size:18px;font-weight:700;margin:0}
+  .pbody{font-size:14px;color:rgb(30 30 30/.7)}
+  .pfoot{margin-top:16px;border-top:1px solid rgb(30 30 30/.08);padding-top:12px;font-size:13px;color:rgb(30 30 30/.55)}
+  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-control);font-weight:600;font-size:13px;border:1px solid transparent;cursor:pointer;min-height:36px;padding:0 12px;font-family:inherit}
+  .btn-primary{background:var(--brand);color:var(--ink)} .btn-secondary{background:#fff;color:var(--ink);border-color:rgb(30 30 30/.14)}
+  .refresh{font-size:12px;font-weight:600;color:rgb(30 30 30/.45)}
+  .loadbar{position:absolute;inset:0 0 auto 0;height:2px;overflow:hidden}
+  .loadbar::after{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,var(--brand-strong),transparent);animation:slide 1.3s ease-in-out infinite}
+  @keyframes slide{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Panel (card surface)</h1>
+  <p class="ds-desc">The base content surface: <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">rounded-card</code>, hairline <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">border-ink/8</code>, <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">shadow-card</code>. Optional title, actions slot, footer slot, and a loading bar.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="phead"><h3 class="ptitle">Upcoming events</h3><button class="btn btn-secondary">Manage</button></div>
+      <div class="pbody">Three events scheduled in the next 14 days. Two still need volunteer coverage.</div>
+      <div class="pfoot">Last synced 4 minutes ago</div>
+    </section>
+
+    <section class="panel">
+      <span class="loadbar" aria-hidden="true"></span>
+      <div class="phead"><h3 class="ptitle">Donations</h3><span class="refresh" role="status">Refreshing</span></div>
+      <div class="pbody">Loading variant: a thin shimmer bar pinned to the top edge while data refreshes.</div>
+      <div class="pfoot"><button class="btn btn-primary">Add donation</button></div>
+    </section>
+  </div>
+</body>
+</html>

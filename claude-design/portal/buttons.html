@@ -1,0 +1,74 @@
+<!-- @dsCard group="Portal UI kit" name="Buttons" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Buttons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-strong:#f4a833;--accent:#0f766e;
+    --radius-control:.5rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-desc code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px;font-size:12.5px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:24px 0 12px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:20px}
+  .cluster{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--radius-control);font-weight:600;font-size:14px;border:1px solid transparent;cursor:pointer;transition:all .15s;min-height:40px;padding:0 16px;font-family:inherit}
+  .btn.sm{min-height:36px;padding:0 12px;gap:6px;font-size:13px}
+  .btn.icon{width:40px;height:40px;padding:0}
+  .btn-primary{background:var(--brand);color:var(--ink);box-shadow:var(--shadow-card)}
+  .btn-primary:hover{background:var(--brand-strong)}
+  .btn-dark{background:var(--ink);color:#fff;box-shadow:var(--shadow-card)}
+  .btn-dark:hover{background:#000}
+  .btn-secondary{background:#fff;color:var(--ink);border-color:rgb(30 30 30/.14);box-shadow:var(--shadow-card)}
+  .btn-secondary:hover{border-color:rgb(30 30 30/.3);background:rgb(30 30 30/.03)}
+  .btn-ghost{background:transparent;color:rgb(30 30 30/.7)}
+  .btn-ghost:hover{background:rgb(30 30 30/.06);color:var(--ink)}
+  .btn-danger{background:#fff;color:#b91c1c;border-color:#fecaca;box-shadow:var(--shadow-card)}
+  .btn-danger:hover{border-color:#f87171;background:#fef2f2}
+  .btn.is-disabled{opacity:.55;cursor:not-allowed}
+  .ico{width:16px;height:16px;flex:0 0 auto}
+  .spinner{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .cap{font-size:11px;color:rgb(30 30 30/.45);width:100%;margin:0 0 -2px}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Buttons</h1>
+  <p class="ds-desc">Five variants in two sizes. Gold is a surface here, so primary text is always ink. <code>rounded-control</code>, <code>font-semibold</code>, 150ms color transition.</p>
+
+  <p class="ds-section-label">Variants · md</p>
+  <div class="demo"><div class="cluster">
+    <button class="btn btn-primary">Primary</button>
+    <button class="btn btn-dark">Dark</button>
+    <button class="btn btn-secondary">Secondary</button>
+    <button class="btn btn-ghost">Ghost</button>
+    <button class="btn btn-danger">Danger</button>
+  </div></div>
+
+  <p class="ds-section-label">Sizes · with leading icon</p>
+  <div class="demo"><div class="cluster">
+    <button class="btn btn-primary"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>md · 40px</button>
+    <button class="btn btn-primary sm"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>sm · 36px</button>
+    <button class="btn btn-secondary icon" aria-label="Add"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="btn btn-secondary icon sm" aria-label="Add"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div></div>
+
+  <p class="ds-section-label">States</p>
+  <div class="demo"><div class="cluster">
+    <button class="btn btn-primary"><span class="spinner"></span>Saving</button>
+    <button class="btn btn-secondary"><span class="spinner"></span>Loading</button>
+    <button class="btn btn-primary is-disabled" disabled>Disabled</button>
+    <button class="btn btn-dark is-disabled" disabled>Disabled</button>
+  </div></div>
+</body>
+</html>

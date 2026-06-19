@@ -32,6 +32,14 @@ firebase-debug.log
 # jetbrains setting folder
 .idea/
 
+# local tooling checkouts
+ffmpeg/
+remotion-video/
+.codex/skills/remotion-ffmpeg/
+
+# Noche Inolvidable gala teaser assets (testing locally, not ready for site)
+public/videos/noche-inolvidable*
+
 # Firebase -> Supabase migration artifacts (keys + exported PII, never commit)
 scripts/migration/keys/
 scripts/migration/exports/

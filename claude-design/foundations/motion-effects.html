@@ -1,0 +1,83 @@
+<!-- @dsCard group="Foundations" name="Gradients & motion" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Gradients & motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1e1e1e;--canvas:#f7f7f4;--accent:#0f766e;--accent-gold:#ffbd59;--vibrant-pink:#b5a18d;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-display:"Playfair Display","Rubik",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-head{margin:0 0 22px}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 0;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:24px 0 12px}
+  .specimens{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .spec{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 18px 16px}
+  .spec.dark{background:#111;border-color:#000}
+  .spec h3{margin:0 0 12px;font-size:12.5px;font-weight:700;color:rgb(30 30 30/.6)}
+  .spec.dark h3{color:rgb(255 255 255/.55)}
+  .spec p{margin:12px 0 0;font-size:11.5px;color:rgb(30 30 30/.5)}
+  .spec.dark p{color:rgb(255 255 255/.45)}
+
+  /* gala-foil */
+  .gala-foil{font-family:var(--font-display);font-weight:800;font-size:30px;
+    background-image:linear-gradient(100deg,#f4a833 0%,#ffbd59 22%,#fff3d8 42%,#ffbd59 62%,#f4a833 100%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    animation:foil 6s ease-in-out infinite}
+  .gala-foil-rule{height:2px;margin-top:14px;border-radius:2px;
+    background-image:linear-gradient(90deg,transparent,#f4a833 18%,#fff3d8 50%,#f4a833 82%,transparent);
+    background-size:220% 100%;animation:foil 7s ease-in-out infinite}
+  @keyframes foil{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+  /* animated brand gradient bar */
+  .grad-bar{height:40px;border-radius:8px;background:linear-gradient(90deg,#ff7a59,var(--accent-gold),#22d3ee,var(--accent-gold),#ff7a59);background-size:300% 100%;animation:gx 3s ease infinite}
+  @keyframes gx{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+  /* link underline */
+  .lu{position:relative;display:inline-block;font-weight:600;color:var(--ink);text-decoration:none;padding-bottom:4px}
+  .lu::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--vibrant-pink);transform:scaleX(.0);transform-origin:left;animation:lu 3.4s ease-in-out infinite}
+  @keyframes lu{0%,100%{transform:scaleX(0)}45%,70%{transform:scaleX(1)}}
+
+  /* sheen sweep */
+  .sheen{position:relative;overflow:hidden;height:48px;border-radius:8px;background:#1e1e1e;color:var(--accent-gold);display:grid;place-items:center;font-weight:700;letter-spacing:.04em}
+  .sheen::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgb(255 255 255/.35) 50%,transparent 65%);transform:translateX(-130%);animation:sheen 4.5s ease-in-out infinite}
+  @keyframes sheen{0%{transform:translateX(-130%)}55%,100%{transform:translateX(130%)}}
+
+  /* reveal */
+  .reveal{opacity:1;transform:none;animation:reveal 3.6s ease-in-out infinite}
+  @keyframes reveal{0%,15%{opacity:0;transform:translateY(18px)}45%,80%{opacity:1;transform:none}100%{opacity:0;transform:translateY(18px)}}
+
+  .ds-note{margin-top:24px;font-size:12.5px;color:rgb(30 30 30/.6);border-top:1px solid rgb(30 30 30/.1);padding-top:12px}
+  .ds-note code{background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px}
+  @media (prefers-reduced-motion:reduce){.gala-foil,.gala-foil-rule,.grad-bar,.lu::after,.sheen::after,.reveal{animation:none}.reveal{opacity:1;transform:none}.lu::after{transform:scaleX(1)}}
+</style>
+</head>
+<body>
+  <header class="ds-head">
+    <p class="ds-eyebrow">Foundations</p>
+    <h1 class="ds-title">Gradients &amp; motion</h1>
+    <p class="ds-desc">The signature effects layer. Every showy animation is gated behind <code>prefers-reduced-motion</code> and (for scroll reveals) a <code>.js</code> class so content never gets stuck hidden.</p>
+  </header>
+
+  <div class="specimens">
+    <div class="spec dark"><h3>.gala-foil + .gala-foil-rule</h3><div class="gala-foil">Noche Inolvidable</div><div class="gala-foil-rule"></div><p>Gold-foil text clip · shimmer sweep</p></div>
+    <div class="spec"><h3>.animate-gradient-x</h3><div class="grad-bar"></div><p>App promo / event top strips</p></div>
+    <div class="spec dark"><h3>.gala-sheen</h3><div class="sheen">SAVE THE DATE</div><p>Periodic light sweep on solid bars</p></div>
+    <div class="spec"><h3>.link-underline</h3><div style="padding:8px 0"><a class="lu" href="#">Animated underline link</a></div><p>currentColor wipe on hover</p></div>
+    <div class="spec"><h3>.reveal</h3><div class="reveal" style="font-weight:700">Fades and rises into view</div><p>IntersectionObserver · JS-gated</p></div>
+  </div>
+
+  <p class="ds-note">Also in the system: <code>.flipper</code> (countdown flip cards) and <code>.gala-ambient</code> (slow background glow). All defined in <code>global.css</code>; reduced-motion collapses them to static.</p>
+</body>
+</html>

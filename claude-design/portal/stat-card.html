@@ -1,0 +1,48 @@
+<!-- @dsCard group="Portal UI kit" name="Stat card" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Stat card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-soft:#fff3d8;--brand-ink:#8a5700;
+    --accent:#0f766e;--accent-soft:#f0fdfa;--accent-strong:#115e59;
+    --radius-card:.75rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(216px,1fr));gap:14px}
+  .stat{position:relative;overflow:hidden;border-radius:var(--radius-card);border:1px solid rgb(30 30 30/.08);background:#fff;padding:16px;box-shadow:var(--shadow-card)}
+  .bar{position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 999px 999px 0}
+  .inner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-left:8px}
+  .label{margin:0;font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.02em;color:rgb(30 30 30/.65)}
+  .value{margin:6px 0 0;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+  .hint{margin:4px 0 0;font-size:12px;color:rgb(30 30 30/.65)}
+  .icon{width:44px;height:44px;border-radius:var(--radius-card);display:grid;place-items:center;flex:0 0 auto}
+  .icon svg{width:20px;height:20px}
+  .t-gold .bar{background:var(--brand)} .t-gold .icon{background:var(--brand-soft);color:var(--brand-ink)}
+  .t-teal .bar{background:var(--accent)} .t-teal .icon{background:var(--accent-soft);color:var(--accent-strong)}
+  .t-rose .bar{background:#f87171} .t-rose .icon{background:#fef2f2;color:#b91c1c}
+  .t-neutral .bar{background:rgb(30 30 30/.2)} .t-neutral .icon{background:rgb(30 30 30/.06);color:rgb(30 30 30/.7)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Stat card</h1>
+  <p class="ds-desc">Headline metric with a tinted left rule and icon chip. Four tones (gold, teal, rose, neutral); value is bold and <code style="background:rgb(30 30 30/.06);padding:1px 5px;border-radius:5px">tabular-nums</code>. Loading swaps the value for a skeleton.</p>
+
+  <div class="grid">
+    <article class="stat t-gold"><span class="bar"></span><div class="inner"><div><p class="label">Funds raised</p><p class="value">$48,250</p><p class="hint">68% to goal</p></div><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span></div></article>
+    <article class="stat t-teal"><span class="bar"></span><div class="inner"><div><p class="label">Check-ins</p><p class="value">312</p><p class="hint">tonight</p></div><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></span></div></article>
+    <article class="stat t-rose"><span class="bar"></span><div class="inner"><div><p class="label">Open shifts</p><p class="value">7</p><p class="hint">need coverage</p></div><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></span></div></article>
+    <article class="stat t-neutral"><span class="bar"></span><div class="inner"><div><p class="label">Volunteers</p><p class="value">126</p><p class="hint">active this month</p></div><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13A4 4 0 0116 11"/></svg></span></div></article>
+  </div>
+</body>
+</html>

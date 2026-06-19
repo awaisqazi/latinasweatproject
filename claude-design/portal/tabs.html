@@ -1,0 +1,66 @@
+<!-- @dsCard group="Portal UI kit" name="Tabs" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Tabs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand-soft:#fff3d8;--brand-ink:#8a5700;--brand-strong:#f4a833;--accent:#0f766e;
+    --radius-control:.5rem;--shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:22px 0 12px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:18px 20px}
+  .tab{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;border:0;background:transparent;font-family:inherit;color:rgb(30 30 30/.55)}
+  .count{border-radius:999px;padding:1px 7px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:rgb(30 30 30/.07);color:rgb(30 30 30/.65)}
+  /* underline */
+  .underline{display:flex;gap:4px;border-bottom:1px solid rgb(30 30 30/.1)}
+  .underline .tab{border-bottom:2px solid transparent;margin-bottom:-1px}
+  .underline .tab.active{color:var(--ink);border-bottom-color:var(--brand-strong)}
+  .underline .tab.active .count{background:var(--brand-soft);color:var(--brand-ink)}
+  /* segmented */
+  .segmented{display:inline-flex;gap:4px;border:1px solid rgb(30 30 30/.1);background:rgb(30 30 30/.04);padding:4px;border-radius:var(--radius-control)}
+  .segmented .tab{min-height:32px;border-radius:6px}
+  .segmented .tab.active{background:#fff;color:var(--ink);box-shadow:var(--shadow-card)}
+  /* pills */
+  .pills{display:flex;gap:6px}
+  .pills .tab{min-height:34px;border-radius:999px;border:1px solid rgb(30 30 30/.12);background:#fff;color:rgb(30 30 30/.65)}
+  .pills .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Tabs</h1>
+  <p class="ds-desc">Full tablist keyboard pattern (arrow / home / end), with three looks. Routing and content stay the parent's job.</p>
+
+  <p class="ds-section-label">Underline · gold-foil indicator (default)</p>
+  <div class="demo"><div class="underline" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" aria-selected="false">Events <span class="count">12</span></button>
+    <button class="tab" role="tab" aria-selected="false">Volunteers <span class="count">126</span></button>
+    <button class="tab" role="tab" aria-selected="false">Donations</button>
+  </div></div>
+
+  <p class="ds-section-label">Segmented</p>
+  <div class="demo"><div class="segmented" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true">Day</button>
+    <button class="tab" role="tab" aria-selected="false">Week</button>
+    <button class="tab" role="tab" aria-selected="false">Month</button>
+  </div></div>
+
+  <p class="ds-section-label">Pills</p>
+  <div class="demo"><div class="pills" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true">All</button>
+    <button class="tab" role="tab" aria-selected="false">Published</button>
+    <button class="tab" role="tab" aria-selected="false">Draft <span class="count">4</span></button>
+  </div></div>
+</body>
+</html>

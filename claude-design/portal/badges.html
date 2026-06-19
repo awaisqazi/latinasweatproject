@@ -1,0 +1,60 @@
+<!-- @dsCard group="Portal UI kit" name="Badges" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSP · Badges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1e1e1e;--canvas:#f7f7f4;--brand:#ffbd59;--brand-strong:#f4a833;--brand-soft:#fff3d8;--brand-ink:#8a5700;
+    --accent:#0f766e;--accent-strong:#115e59;--accent-soft:#f0fdfa;
+    --font-sans:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow-card:0 1px 2px rgb(30 30 30/.05),0 1px 1px rgb(30 30 30/.04);}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--canvas);padding:28px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .ds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .ds-title{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .ds-desc{margin:8px 0 22px;max-width:62ch;color:rgb(30 30 30/.6);font-size:14px}
+  .ds-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgb(30 30 30/.45);margin:22px 0 12px}
+  .demo{background:#fff;border:1px solid rgb(30 30 30/.08);border-radius:.75rem;box-shadow:var(--shadow-card);padding:18px}
+  table{border-collapse:collapse;width:100%}
+  td,th{padding:9px 10px;text-align:left;vertical-align:middle}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:rgb(30 30 30/.45);font-weight:700;border-bottom:1px solid rgb(30 30 30/.08)}
+  td:first-child{font-size:12.5px;font-weight:600;color:rgb(30 30 30/.6);width:90px}
+  .b{display:inline-flex;align-items:center;gap:6px;border-radius:999px;font-weight:600;font-size:12px;padding:4px 10px;white-space:nowrap}
+  .dot{width:6px;height:6px;border-radius:50%}
+  /* soft */
+  .neutral-soft{background:rgb(30 30 30/.06);color:rgb(30 30 30/.8)} .neutral-solid{background:var(--ink);color:#fff} .neutral-out{border:1px solid rgb(30 30 30/.2);color:rgb(30 30 30/.8)}
+  .gold-soft{background:var(--brand-soft);color:var(--brand-ink)} .gold-solid{background:var(--brand);color:var(--ink)} .gold-out{border:1px solid rgb(244 168 51/.5);color:var(--brand-ink)}
+  .teal-soft{background:var(--accent-soft);color:var(--accent-strong)} .teal-solid{background:var(--accent);color:#fff} .teal-out{border:1px solid rgb(15 118 110/.4);color:var(--accent-strong)}
+  .green-soft{background:#f0fdf4;color:#166534} .green-solid{background:#15803d;color:#fff} .green-out{border:1px solid #86efac;color:#166534}
+  .blue-soft{background:#eff6ff;color:#1e40af} .blue-solid{background:#1d4ed8;color:#fff} .blue-out{border:1px solid #93c5fd;color:#1e40af}
+  .amber-soft{background:#fffbeb;color:#92400e} .amber-solid{background:#f59e0b;color:var(--ink)} .amber-out{border:1px solid #fcd34d;color:#92400e}
+  .red-soft{background:#fef2f2;color:#991b1b} .red-solid{background:#b91c1c;color:#fff} .red-out{border:1px solid #fca5a5;color:#991b1b}
+  .ds-note{margin-top:22px;font-size:12.5px;color:rgb(30 30 30/.6);border-top:1px solid rgb(30 30 30/.1);padding-top:12px}
+</style>
+</head>
+<body>
+  <p class="ds-eyebrow">Portal UI kit</p>
+  <h1 class="ds-title">Badges</h1>
+  <p class="ds-desc">One tone map for the whole portal: 7 tones x soft / solid / outline. Soft is the default ledger-stamp; solid is reserved for high-signal moments. Optional leading dot.</p>
+
+  <div class="demo">
+  <table>
+    <tr><th>Tone</th><th>Soft (default)</th><th>Solid</th><th>Outline</th><th>With dot</th></tr>
+    <tr><td>neutral</td><td><span class="b neutral-soft">Draft</span></td><td><span class="b neutral-solid">Draft</span></td><td><span class="b neutral-out">Draft</span></td><td><span class="b neutral-soft"><span class="dot" style="background:rgb(30 30 30/.5)"></span>Draft</span></td></tr>
+    <tr><td>gold</td><td><span class="b gold-soft">Featured</span></td><td><span class="b gold-solid">Featured</span></td><td><span class="b gold-out">Featured</span></td><td><span class="b gold-soft"><span class="dot" style="background:var(--brand-strong)"></span>Featured</span></td></tr>
+    <tr><td>teal</td><td><span class="b teal-soft">Active</span></td><td><span class="b teal-solid">Active</span></td><td><span class="b teal-out">Active</span></td><td><span class="b teal-soft"><span class="dot" style="background:var(--accent)"></span>Active</span></td></tr>
+    <tr><td>green</td><td><span class="b green-soft">Paid</span></td><td><span class="b green-solid">Paid</span></td><td><span class="b green-out">Paid</span></td><td><span class="b green-soft"><span class="dot" style="background:#16a34a"></span>Paid</span></td></tr>
+    <tr><td>blue</td><td><span class="b blue-soft">Scheduled</span></td><td><span class="b blue-solid">Scheduled</span></td><td><span class="b blue-out">Scheduled</span></td><td><span class="b blue-soft"><span class="dot" style="background:#2563eb"></span>Scheduled</span></td></tr>
+    <tr><td>amber</td><td><span class="b amber-soft">Pending</span></td><td><span class="b amber-solid">Pending</span></td><td><span class="b amber-out">Pending</span></td><td><span class="b amber-soft"><span class="dot" style="background:#f59e0b"></span>Pending</span></td></tr>
+    <tr><td>red</td><td><span class="b red-soft">Overdue</span></td><td><span class="b red-solid">Overdue</span></td><td><span class="b red-out">Overdue</span></td><td><span class="b red-soft"><span class="dot" style="background:#dc2626"></span>Overdue</span></td></tr>
+  </table>
+  </div>
+
+  <p class="ds-note">Sizes: <b>sm</b> (px-2.5 / text-xs) and <b>xs</b> (px-2 / 11px). Pill radius, weight 600, never wraps.</p>
+</body>
+</html>
