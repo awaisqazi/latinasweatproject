@@ -60,6 +60,96 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
     </section>
     {/* END: Hero Section */}
 
+    {/* START: Honoring Juneteenth (lead light spotlight) */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#fdf6ee] via-white to-[#f3ece1] py-16 sm:py-20 lg:py-24">
+      {/* Pan-African themed top strip */}
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#e4392b] via-accent-gold to-[#1e9e5a]"></div>
+      {/* Subtle grid texture */}
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: linear-gradient(rgba(30,30,30,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.5) 1px, transparent 1px); background-size: 60px 60px;"
+      >
+      </div>
+      {/* Ambient glows in the freedom palette */}
+      <div class="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-[#e4392b]/15 blur-[120px]"></div>
+      <div class="absolute -bottom-24 -right-20 h-80 w-80 rounded-full bg-[#1e9e5a]/15 blur-[120px]"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-off-black">
+        <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-14">
+          <div>
+            <div class="inline-flex items-center gap-2.5 rounded-full bg-off-black px-4 py-2 shadow-lg shadow-off-black/15">
+              <span class="text-base leading-none">✊🏿</span>
+              <span class="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">June 19 · Juneteenth</span>
+            </div>
+            <h2 class="mt-5 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl lg:text-6xl leading-[1.05]">
+              Honoring
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#e4392b] via-[#c7602d] to-[#1e9e5a]">Juneteenth</span>
+            </h2>
+            <p class="mt-5 max-w-2xl text-base text-medium-gray leading-relaxed sm:text-lg">
+              Today we honor the freedom fighters who paved the way, and the
+              long, powerful struggle for Black liberation that grounds every
+              movement for justice we're part of. That includes us, and our work.
+            </p>
+            <p class="mt-3 max-w-2xl text-base text-medium-gray leading-relaxed">
+              Let's celebrate this weekend in the true spirit of Juneteenth:
+              together, in our bodies, in our communities, with intention and joy.
+            </p>
+            <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={withBase("juneteenth")}
+                class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-off-black px-8 py-4 text-base font-bold text-white shadow-lg shadow-off-black/25 transition-all duration-300 hover:scale-105 hover:bg-[#c7602d] hover:shadow-xl"
+              >
+                Ways to show up this weekend
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+            <p class="mt-4 text-xs text-medium-gray">
+              Event listings courtesy of{" "}
+              <a
+                href="https://blockclubchicago.org/2026/06/18/28-things-to-do-in-chicago-this-weekend-pride-fest-juneteenth-and-obama-center-open-house/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-off-black/70 underline decoration-off-black/20 underline-offset-2 transition-colors hover:text-[#c7602d]"
+              >
+                Block Club Chicago
+              </a>.
+            </p>
+          </div>
+
+          {/* This-weekend preview list */}
+          <div class="rounded-2xl border border-off-black/10 bg-white/80 p-5 shadow-xl shadow-off-black/5 backdrop-blur-sm sm:p-6">
+            <p class="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#c7602d]">
+              This weekend in Chicago
+            </p>
+            <ul class="mt-4 space-y-3.5">
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 inline-flex flex-shrink-0 rounded-full bg-[#e4392b] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">Fri</span>
+                <span class="text-sm leading-snug text-off-black/75"><span class="font-bold text-off-black">Mike Weary: "The Will to Escape"</span> · Gallery Guichard, Bronzeville</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 inline-flex flex-shrink-0 rounded-full bg-[#e4392b] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">Fri</span>
+                <span class="text-sm leading-snug text-off-black/75"><span class="font-bold text-off-black">Juneteenth Blues Celebration</span> · Old Town School, Lincoln Square</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 inline-flex flex-shrink-0 rounded-full bg-[#1e9e5a] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">Sat</span>
+                <span class="text-sm leading-snug text-off-black/75"><span class="font-bold text-off-black">Hyde Park Community Cleanup</span> · Elm Park, Hyde Park</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 inline-flex flex-shrink-0 rounded-full bg-[#1e9e5a] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">Sat</span>
+                <span class="text-sm leading-snug text-off-black/75"><span class="font-bold text-off-black">6th Annual Bronzeville Juneteenth</span> · Absolutely Anything Essential</span>
+              </li>
+            </ul>
+            <p class="mt-4 border-t border-off-black/10 pt-3 text-[11px] font-semibold uppercase tracking-wider text-medium-gray">
+              Each one is free · Full details on the Juneteenth page
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Honoring Juneteenth (lead light spotlight) */}
+
     {/* START: Gala Countdown Announcement */}
     <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
       <div

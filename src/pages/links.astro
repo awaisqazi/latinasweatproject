@@ -9,6 +9,25 @@ const galaPageUrl = `${base}${galaTeaser.pagePath.replace(/^\//, "")}`;
 const links = [
   {
     title: {
+      en: "✊🏿 Honoring Juneteenth",
+      es: "✊🏿 Honrando Juneteenth"
+    },
+    description: {
+      en: "Today we honor Juneteenth and the struggle for Black liberation. Explore beautiful ways to show up for Chicago this weekend: four free events across the city.",
+      es: "Hoy honramos Juneteenth y la lucha por la liberación negra. Descubre formas hermosas de presentarte por Chicago este fin de semana: cuatro eventos gratuitos por la ciudad."
+    },
+    url: `${base}juneteenth`,
+    target: "_self",
+    color: "juneteenth",
+    icon: "star",
+    badge: {
+      en: "This Weekend",
+      es: "Este Finde"
+    },
+    featured: true,
+  },
+  {
+    title: {
       en: "👟 Father's Day at LSP",
       es: "👟 Día del Padre en LSP"
     },
@@ -407,6 +426,7 @@ const getLinkConversionProvider = (url = "") => {
                       link.color === "amber" && "bg-[#ffbd59] text-[#1E1E1E]",
                       link.color === "vibrant-pink" && "bg-[#b5a18d] text-white",
                       link.color === "gold" && "bg-[#ffbd59] text-[#1E1E1E]",
+                      link.color === "juneteenth" && "bg-[#e4392b] text-white",
                       link.color === "pride" && "bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 text-[#1E1E1E]",
                     ]}
                   >
@@ -454,6 +474,8 @@ const getLinkConversionProvider = (url = "") => {
                         "bg-indigo-500/30 text-indigo-300 group-hover:bg-indigo-500/50",
                       link.color === "amber" &&
                         "bg-[#ffbd59]/30 text-[#ffbd59] group-hover:bg-[#ffbd59]/50",
+                      link.color === "juneteenth" &&
+                        "bg-[#e4392b]/30 text-[#ff8a7d] group-hover:bg-[#e4392b]/50",
                       link.color === "pride" &&
                         "bg-fuchsia-500/30 text-fuchsia-300 group-hover:bg-fuchsia-500/50",
                     ]}
@@ -1140,6 +1162,10 @@ const getLinkConversionProvider = (url = "") => {
   .link-card--vibrant-pink:hover {
     box-shadow: 0 10px 30px -8px rgba(181, 161, 141, 0.4);
     border-color: rgba(181, 161, 141, 0.4);
+  }
+  .link-card--juneteenth:hover {
+    box-shadow: 0 10px 30px -8px rgba(228, 57, 43, 0.45);
+    border-color: rgba(228, 57, 43, 0.45);
   }
   .link-card--pride:hover {
     box-shadow: 0 10px 30px -8px rgba(217, 70, 239, 0.45);
