@@ -33,20 +33,25 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Father's Day at LSP (Warm Sunset Light)"]
-    Sec1 --> Sec2["Section 2: WGN9 Spotlight (bg-off-black)"]
-    Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
-    Sec3 --> Sec4["Section 4: 40 Under 40 (bg-off-black)"]
-    Sec4 --> Sec5["Section 5: Free Classes Promo (Light Green/Sand)"]
-    Sec5 --> Sec6["Section 6: Studio / Grand Opening (bg-off-black)"]
-    Sec6 --> Sec7["Section 7: Monday Miles (Light Sand)"]
-    Sec7 --> Sec8["Section 8: Instagram (bg-off-black)"]
-    Sec8 --> Sec9["Section 9: Events Carousel (Light Sand)"]
-    Sec9 --> Sec10["Section 10: Press (Light)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Honoring Juneteenth (Lead Light Spotlight)"]
+    Sec1 --> Sec2["Section 2: Noche Inolvidable Gala (bg-off-black)"]
+    Sec2 --> Sec3["Section 3: Father's Day at LSP (Warm Sunset Light)"]
+    Sec3 --> Sec4["Section 4: WGN9 Spotlight (bg-off-black)"]
+    Sec4 --> Sec5["Section 5: Merch Drop (Warm Amber)"]
+    Sec5 --> Sec6["Section 6: 40 Under 40 (bg-off-black)"]
+    Sec6 --> Sec7["Section 7: Free Classes Promo (Light Green/Sand)"]
+    Sec7 --> Sec8["Section 8: Studio / Grand Opening (bg-off-black)"]
+    Sec8 --> Sec9["Section 9: Monday Miles (Light Sand)"]
+    Sec9 --> Sec10["Section 10: Instagram (bg-off-black)"]
+    Sec10 --> Sec11["Section 11: Events Carousel (Light Sand)"]
+    Sec11 --> Sec12["Section 12: Press (Light)"]
 ```
 
 > [!NOTE]
 > **June 2026 reorder.** Pride in the Park (Jun 14) and Kids Day (Jun 14) were removed once they passed, and Father's Day at LSP (Jun 21) was added as the lead spotlight after the hero. Removing the two events (one light, one dark) left a count of 6 light vs 4 dark full-width sections after the dark hero, so the lower page was reordered to keep strict light/dark alternation and the media-side zig-zag intact: WGN9, 40 Under 40, Grand Opening, and Instagram (all dark) now interleave the light sections, and 40 Under 40's flyer was flipped to the right (`md:flex-row-reverse`) to keep the L/R/L/R/L/R spotlight rhythm. With a dark hero plus 6 light / 4 dark sections, one same-theme adjacency is mathematically unavoidable; it is parked at the very bottom (Events Carousel light -> In The Press light), the least prominent junction. Resolve it for free whenever the next dark section is added near the bottom.
+
+> [!NOTE]
+> **Juneteenth (Jun 19, 2026).** Honoring Juneteenth was added as the new lead light spotlight immediately after the hero, pushing the Noche Inolvidable Gala (dark) and Father's Day (light) each down one slot. The cadence stays strict from the top: Hero dark -> Juneteenth light -> Gala dark -> Father's Day light -> WGN9 dark, and on down. Counting the Gala countdown band (which predates this diagram and was previously undocumented), the page now runs **7 light / 5 dark** sections after the dark hero; the single unavoidable same-theme adjacency stays parked at the bottom (Events Carousel light -> Press light). The Juneteenth spotlight is weekend-timely: remove it and its links-page card once the holiday passes, then re-audit the cadence. Its right column is a "this weekend" text list, not a media graphic, so it sits outside the media-side zig-zag and does not affect it.
 
 ### Purpose & Rationale
 1. **Visual Cadence**: Breaking up large pages into clear chapters prevents visual fatigue and facilitates scrolling.
@@ -112,15 +117,23 @@ On the standalone events page, the lighter playful sand variant is acceptable be
 </section>
 ```
 
-#### Option D: Celebration Event Theme (Pride)
-Use this for celebration events where the event identity carries its own palette but the site still needs LSP's warm, premium look. This pattern was last carried by **Pride in the Park** (passed June 14, 2026, now removed from all placements; it had replaced the LSP World Cup Watch Party in the same slots). Keep it on hand for the next event that ships its own palette.
+#### Option D: Celebration / Cultural Observance Theme (Pride, Juneteenth)
+Use this for celebration events or cultural observances where the moment carries its own palette but the site still needs LSP's warm, premium look. It is **currently carried by Honoring Juneteenth** (lead light spotlight + standalone `/juneteenth` page, June 2026). It was previously carried by **Pride in the Park** (passed June 14, 2026, removed from its placements; it had replaced the LSP World Cup Watch Party in the same slots). Keep it on hand for the next moment that ships its own palette.
 
-- On the homepage, place the celebration spotlight immediately after the hero as a **light** section with a 1px themed top strip so the sequence stays Hero dark overlay -> event light -> WGN dark.
-- On the standalone events page, a richer dark variant of the event palette is acceptable because it opens after the light events header and before later sections. Give that section an `id` slug with `scroll-mt-28` so site banners can deep-link to it.
-- Pair the lead palette color with white, accent gold, and supporting tones so the event does not become one-note; reserve full multi-color gradients for thin accents (top strips, badges).
-- Copy the supplied portrait flyer into `public/images/` (e.g. `public/images/<event-slug>.png`) so the homepage, event cards, links page, and event detail page do not depend on a remote image request.
+- On the homepage, place the celebration spotlight immediately after the hero as a **light** section with a 1px themed top strip so the sequence stays Hero dark overlay -> observance light -> next dark.
+- On a standalone page (events page or a dedicated route), a richer dark variant of the palette is acceptable because it opens after a light header and before later sections. Give the key section an `id` slug with `scroll-mt-28` so site banners can deep-link to it.
+- Pair the lead palette color with white, accent gold, and supporting tones so the moment does not become one-note; reserve full multi-color gradients for thin accents (top strips, badges, day chips).
+- Copy any supplied portrait flyer into `public/images/` (e.g. `public/images/<event-slug>.png`) so the homepage, event cards, links page, and event detail page do not depend on a remote image request.
 - Portrait event flyers should declare `imageFrameClass: "aspect-[4/5]"` and `imageClass: "h-full w-full object-contain"` in `src/data/events.js` so `/events/[slug]` displays the full flyer instead of cropping it into a landscape frame.
 - On `src/pages/links.astro`, event cards may use an optional `image` / `imageAlt` thumbnail in place of the default icon when a current event has a strong flyer or campaign visual.
+
+**Honoring Juneteenth live implementation (June 2026):**
+- **Palette:** Pan-African red (`#e4392b`) + green (`#1e9e5a`), grounded with off-black and accent gold. Thin red -> gold -> green top strips, and red (Friday) / green (Saturday) day chips. On light backgrounds the heading gradient runs red -> Kids Clay (`#c7602d`) -> green instead of through gold, which is too low-contrast for text on cream.
+- **Homepage spotlight** (`src/pages/index.astro`): lead light section right after the hero on the warm `from-[#fdf6ee] via-white to-[#f3ece1]` gradient, off-black text, a dark CTA to `${base}juneteenth` that hovers to Kids Clay, a Block Club Chicago source credit, and a right-hand "This weekend in Chicago" text card (not a media graphic, so outside the zig-zag).
+- **Standalone page** (`src/pages/juneteenth.astro`): the richer **dark** variant of the palette (`bg-off-black`, white text). Hero with the honoring statement, then the four weekend events as cards with a direct "learn more" button each (Eventbrite / Old Town School), Friday=red / Saturday=green accents, a `#ways-to-show-up` anchor with `scroll-mt-28`, the Block Club Chicago source citation, and a light closing tie-in to the LSP schedule. Sourced from Block Club Chicago's weekend roundup.
+- **Event photos** (`public/images/juneteenth/*.webp`): each event card leads with its own local image (`weary`, `oldtownschool`, `cleanup`, `bronzeville`). Two are text-heavy promo flyers and two are photos, so the image frame is `aspect-[3/2]` with `object-contain` on a subtle `bg-black/30` panel: this shows flyers in full (no text cropped) and lets the photos fill the frame, lazy-loaded with descriptive alt text. Assets are stored as `.webp` (correct extension; they were originally supplied as WebP bytes with a `.png` name). Use `object-contain` whenever event assets mix flyers and photos so flyer text is never cropped.
+- **Links page** (`src/pages/links.astro`): first featured card, `color: "juneteenth"` (red treatment), `icon: "star"`, badge `This Weekend` / `Este Finde`, internal `target: "_self"` link to `${base}juneteenth`.
+- **Dual-cause site banner:** during overlapping observances, `src/components/PrideTheme.astro` runs the banner as **two cross-fading slides** (Pride rainbow + Juneteenth Pan-African) so neither cause is subordinated. Each slide is its own `<a>`, but **both link to the standalone `/juneteenth` page** so the click target is consistent no matter which slide is showing (the Pride slide keeps its Pride message and an "Honoring Juneteenth" CTA). Both are date-gated and self-cleaning: the Juneteenth slide removes itself after its weekend window (end of Sun Jun 21 Chicago), reverting to the Pride-only banner, and the whole theme is gated behind the Pride end date. Keep observance banners self-removing rather than relying on a manual takedown.
 
 #### Option E: Warm Sunset Event Theme (Father's Day)
 Use this warm-light variant of Option B for community-celebration classes that are booked through the studio scheduler (not Zeffy). The current implementation is **Father's Day at LSP** on `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/links.astro`, and the homepage events carousel.
@@ -180,7 +193,7 @@ const links = [
       es: "Descripción breve de 1 o 2 oraciones que explique el valor del evento."
     },
     url: `${base}your-target-slug`, // Use base prefix for internal routes, or direct URL for external
-    color: "teal", // Options: "teal" | "blue" | "sky" | "wish" | "green" | "indigo" | "amber" | "vibrant-pink" | "gold" | "pride"
+    color: "teal", // Options: "teal" | "blue" | "sky" | "wish" | "green" | "indigo" | "amber" | "vibrant-pink" | "gold" | "juneteenth" | "pride"
     icon: "calendar", // Options: "calendar" | "heart" | "mind" | "globe" | "star" | "health" | "leaf" | "yoga" | "tv"
     badge: {
       en: "New / Date", // Optional: text string displaying on top-right badge
@@ -198,8 +211,9 @@ const links = [
 > 2. **Recurring, Constant, or Undated Links** (e.g., Class Schedule, Main Website, App Downloads) come SECOND.
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
-Current active event link:
-- **Father's Day at LSP / Día del Padre en LSP**: first featured card in `links`, pointing to the schedule page (`${base}schedule`) rather than a Zeffy ticketing URL, amber calendar styling with the `fathers-day-lsp.png` flyer thumbnail, badge `Jun 21 · 10:30 AM` / `21 Jun · 10:30 AM`. Tracking resolves automatically from the `/schedule` URL via the link helpers: `class_booking_start` with booking path `schedule_page` and provider `lsp_website`.
+Current active event links (chronological):
+- **Honoring Juneteenth / Honrando Juneteenth**: first featured card in `links`, internal link to `${base}juneteenth` (`target: "_self"`), `color: "juneteenth"` (red) with the `star` icon, badge `This Weekend` / `Este Finde`. No conversion event (content/nav link). Remove once the holiday weekend passes.
+- **Father's Day at LSP / Día del Padre en LSP**: second featured card, pointing to the schedule page (`${base}schedule`) rather than a Zeffy ticketing URL, amber calendar styling with the `fathers-day-lsp.png` flyer thumbnail, badge `Jun 21 · 10:30 AM` / `21 Jun · 10:30 AM`. Tracking resolves automatically from the `/schedule` URL via the link helpers: `class_booking_start` with booking path `schedule_page` and provider `lsp_website`.
 
 ### Advanced Highlights & Interactive Systems
 - **Liquid Glass Language Switcher**: A premium `EN | ES` toggle shifts a liquid glass background indicator dynamically. The toggle manages parent class bindings (`.lang-active-en` / `.lang-active-es`) that swap visible translations in CSS instantly with zero layout shift, and stores preferences in `localStorage`.

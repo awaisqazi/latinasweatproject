@@ -29,6 +29,9 @@ const events = [
     note: "Free · Reserve a spot",
     cta: "Reserve a spot",
     url: "https://www.eventbrite.com/e/the-solo-exhibition-of-mike-weary-the-will-to-escape-tickets-1990631220567",
+    image: "images/juneteenth/weary.webp",
+    imageAlt:
+      "Flyer for Mike Weary's solo exhibition The Will to Escape at Gallery Guichard, Friday June 19, 6 to 9 p.m.",
   },
   {
     day: "Friday",
@@ -43,6 +46,9 @@ const events = [
     note: "Free · Suggested donation",
     cta: "Reserve tickets",
     url: "https://www.oldtownschool.org/events/event.php?event_id=9674",
+    image: "images/juneteenth/oldtownschool.webp",
+    imageAlt:
+      "The Old Town School of Folk Music building at dusk, banners glowing in the windows.",
   },
   {
     day: "Saturday",
@@ -57,6 +63,9 @@ const events = [
     note: "Free · Registration required",
     cta: "Learn more and register",
     url: "https://www.eventbrite.com/e/trash-people-of-hyde-park-community-clean-up-tickets-1989835077281",
+    image: "images/juneteenth/cleanup.webp",
+    imageAlt:
+      "Trash People of Hyde Park community cleanup: a volunteer picking up litter along a curb.",
   },
   {
     day: "Saturday",
@@ -71,6 +80,9 @@ const events = [
     note: "Free · All welcome",
     cta: "Learn more",
     url: "https://www.eventbrite.com/e/bronzevilles-6th-annual-juneteenth-celebration-the-largest-in-bronzeville-tickets-1984692966088",
+    image: "images/juneteenth/bronzeville.webp",
+    imageAlt:
+      "Flyer for Bronzeville's 6th Annual Juneteenth Marketplace, honoring fathers and father figures.",
   },
 ];
 ---
@@ -189,66 +201,78 @@ const events = [
               const a = dayAccent[event.day];
               return (
                 <article
-                  class="reveal group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 sm:p-7"
+                  class="reveal group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
                 >
                   {/* Top freedom rule */}
-                  <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#e4392b] via-accent-gold to-[#1e9e5a]"></div>
+                  <div class="absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-[#e4392b] via-accent-gold to-[#1e9e5a]"></div>
 
-                  {/* Day + time + tag */}
-                  <div class="flex flex-wrap items-center gap-2.5">
-                    <span
-                      class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-white"
-                      style={`background:${a.hex}`}
-                    >
-                      {event.day}
-                    </span>
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/75">
-                      {event.time}
-                    </span>
-                    <span class="ml-auto text-[11px] font-bold uppercase tracking-[0.2em] text-accent-gold/90">
-                      {event.tag}
-                    </span>
+                  {/* Event flyer / photo */}
+                  <div class="relative aspect-[3/2] w-full overflow-hidden border-b border-white/10 bg-black/30">
+                    <img
+                      src={withBase(event.image)}
+                      alt={event.imageAlt}
+                      loading="lazy"
+                      class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
                   </div>
 
-                  <h3 class="mt-5 font-sans text-xl font-extrabold leading-snug tracking-tight text-white sm:text-2xl">
-                    {event.title}
-                  </h3>
+                  <div class="flex flex-1 flex-col p-6 sm:p-7">
+                    {/* Day + time + tag */}
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <span
+                        class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-white"
+                        style={`background:${a.hex}`}
+                      >
+                        {event.day}
+                      </span>
+                      <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/75">
+                        {event.time}
+                      </span>
+                      <span class="ml-auto text-[11px] font-bold uppercase tracking-[0.2em] text-accent-gold/90">
+                        {event.tag}
+                      </span>
+                    </div>
 
-                  {/* Venue line */}
-                  <div class="mt-3 flex items-start gap-2 text-sm text-white/65">
-                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0" style={`color:${a.hex}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>
-                      <span class="font-bold text-white/85">{event.venue}</span>
-                      <span class="text-white/55"> · {event.address} · {event.neighborhood}</span>
-                    </span>
-                  </div>
+                    <h3 class="mt-5 font-sans text-xl font-extrabold leading-snug tracking-tight text-white sm:text-2xl">
+                      {event.title}
+                    </h3>
 
-                  <p class="mt-4 font-body text-[15px] leading-relaxed text-white/70">
-                    {event.description}
-                  </p>
-
-                  <div class="mt-6 flex flex-wrap items-center justify-between gap-3 pt-1">
-                    <span
-                      class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/80"
-                      style={`background:${a.soft}; border:1px solid ${a.line}`}
-                    >
-                      {event.note}
-                    </span>
-                    <a
-                      href={event.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="group/cta inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.03]"
-                      style={`background:${a.hex}; box-shadow:0 10px 24px -10px ${a.hex}`}
-                    >
-                      {event.cta}
-                      <svg class="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    {/* Venue line */}
+                    <div class="mt-3 flex items-start gap-2 text-sm text-white/65">
+                      <svg class="mt-0.5 h-4 w-4 flex-shrink-0" style={`color:${a.hex}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                    </a>
+                      <span>
+                        <span class="font-bold text-white/85">{event.venue}</span>
+                        <span class="text-white/55"> · {event.address} · {event.neighborhood}</span>
+                      </span>
+                    </div>
+
+                    <p class="mt-4 font-body text-[15px] leading-relaxed text-white/70">
+                      {event.description}
+                    </p>
+
+                    <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
+                      <span
+                        class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/80"
+                        style={`background:${a.soft}; border:1px solid ${a.line}`}
+                      >
+                        {event.note}
+                      </span>
+                      <a
+                        href={event.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group/cta inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.03]"
+                        style={`background:${a.hex}; box-shadow:0 10px 24px -10px ${a.hex}`}
+                      >
+                        {event.cta}
+                        <svg class="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                      </a>
+                    </div>
                   </div>
                 </article>
               );
