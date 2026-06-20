@@ -1,5 +1,5 @@
 <script>
-  import { CalendarClock, Trash2 } from "@lucide/svelte";
+  import { CalendarClock, Trash2, UserPlus } from "@lucide/svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
   import BoardTaskList from "./BoardTaskList.svelte";
   import ProjectTimeline from "../marketing/ProjectTimeline.svelte";
@@ -17,6 +17,7 @@
   export let onClose = () => {};
   export let onProjectUpdated = () => {};
   export let onProjectDeleted = () => {};
+  export let onAssignTask = () => {};
 
   const BOARD_STATUSES = ["Planning", "In Progress", "Blocked", "Done"];
   const STATUS_TONES = {
@@ -31,6 +32,7 @@
   let displayedProject = null;
   let drawerOpen = false;
   let isSaving = false;
+  let saveChain = Promise.resolve();
   let isDeleting = false;
   let confirmingDelete = false;
   let errorMessage = "";
@@ -41,6 +43,8 @@
   $: isAdmin = isOperationalAdmin(currentUserRole);
   $: if (project?.id && project.id !== displayedProject?.id) {
     openDrawer(project);
+  } else if (!project && drawerOpen) {
+    drawerOpen = false;
   }
 
   function openDrawer(nextProject) {
@@ -62,8 +66,16 @@
     onClose();
   }
 
-  async function saveUpdates(updates, successText) {
-    if (!displayedProject?.id || isSaving) return;
+  // Serialize saves so a second change (e.g. description-on-blur fired during a
+  // status save) is queued and applied, never silently dropped.
+  function saveUpdates(updates, successText) {
+    if (!displayedProject?.id) return saveChain;
+    saveChain = saveChain.then(() => runSave(updates, successText));
+    return saveChain;
+  }
+
+  async function runSave(updates, successText) {
+    if (!displayedProject?.id) return;
 
     isSaving = true;
     errorMessage = "";
@@ -162,6 +174,22 @@
             {formatDate(displayedProject.due_date)}
           </Badge>
           <Badge tone="neutral">Owner: {getOwnerLabel(displayedProject)}</Badge>
+        </div>
+
+        <div class="mt-4">
+          <Button
+            size="sm"
+            icon={UserPlus}
+            onclick={() =>
+              onAssignTask({
+                sourceModule: "board_projects",
+                sourceLabel: `Board: ${displayedProject.title}`,
+                sourceLink: "#board",
+                title: `Follow up: ${displayedProject.title}`,
+              })}
+          >
+            Assign a task about this
+          </Button>
         </div>
 
         {#if errorMessage}

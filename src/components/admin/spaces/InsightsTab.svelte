@@ -200,7 +200,16 @@
       return;
     }
 
-    const { rows, errors } = parseHistoryCsvRows(parseCSV(text));
+    // parseCSV silently drops lines whose column count != the header's, so count
+    // those too — otherwise the "lines skipped" total under-reports them.
+    const parsed = parseCSV(text);
+    const dataLineCount = Math.max(
+      0,
+      text.split(/\r?\n/).filter((line) => line.trim()).length - 1,
+    );
+    const droppedByParser = Math.max(0, dataLineCount - parsed.length);
+    const { rows, errors } = parseHistoryCsvRows(parsed);
+    const skippedCount = droppedByParser + errors.length;
 
     if (!rows.length) {
       importError =
@@ -224,7 +233,7 @@
       imported += batch.length;
     }
 
-    importSuccess = `Imported ${imported} session${imported === 1 ? "" : "s"} (${errors.length} unreadable line${errors.length === 1 ? "" : "s"} skipped). Duplicate sessions are ignored automatically.`;
+    importSuccess = `Imported ${imported} session${imported === 1 ? "" : "s"} (${skippedCount} unreadable line${skippedCount === 1 ? "" : "s"} skipped). Duplicate sessions are ignored automatically.`;
     importBusy = false;
     loadAll();
   }

@@ -24,6 +24,7 @@
   export let supabase;
   export let profile = null;
   export let refreshKey = 0;
+  export let onAssignTask = () => {};
 
   const DEFAULT_LOCATION = "949 W 16th St, Chicago, IL 60608";
   const requestColumns =
@@ -711,4 +712,5 @@
   onClose={() => (selectedRequest = null)}
   onRequestUpdated={handleRequestUpdated}
   onRequestDeleted={handleRequestDeleted}
+  {onAssignTask}
 />

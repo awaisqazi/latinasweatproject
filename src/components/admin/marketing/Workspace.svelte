@@ -8,6 +8,7 @@
     Eye,
     ListCheck,
     RefreshCw,
+    UserRound,
   } from "@lucide/svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
@@ -16,42 +17,58 @@
   import SkeletonCard from "../ui/SkeletonCard.svelte";
   import ProjectTimeline from "./ProjectTimeline.svelte";
   import SlideOver from "./SlideOver.svelte";
+  import { loadMyOpenTasks, completeTask } from "../../../lib/dashboard/workspaceTasks";
 
   export let supabase;
   export let email;
+  export let profileId = "";
+  export let teamMembers = [];
   export let refreshKey = 0;
   export let onProjectUpdated = () => {};
+  export let onTasksChanged = () => {};
 
   let projects = [];
+  let tasks = [];
   let selectedProject = null;
   let detailsOpen = false;
   let isLoading = true;
-  let completingProjectId = "";
+  let completingId = "";
   let errorMessage = "";
   let lastRefreshKey = refreshKey;
 
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-  $: urgentProjects = projects.filter(isUrgentProject);
-  $: pipelineProjects = projects.filter((project) => !isUrgentProject(project));
+  // Merge marketing projects + assigned tasks into one feed, soonest first.
+  $: items = [
+    ...tasks.map(toTaskItem),
+    ...projects.map(toProjectItem),
+  ].sort(byDueThenPriority);
+  $: urgentItems = items.filter(isUrgentItem);
+  $: pipelineItems = items.filter((item) => !isUrgentItem(item));
+
   $: if (refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
-    loadWorkspaceProjects();
+    loadWorkspace();
   }
 
   onMount(() => {
-    loadWorkspaceProjects();
+    loadWorkspace();
   });
+
+  async function loadWorkspace() {
+    isLoading = true;
+    errorMessage = "";
+
+    await Promise.all([loadWorkspaceProjects(), loadWorkspaceTasks()]);
+
+    isLoading = false;
+  }
 
   async function loadWorkspaceProjects() {
     if (!supabase || !email) {
-      isLoading = false;
-      errorMessage = "Your profile email is missing, so assigned projects cannot load.";
+      projects = [];
       return;
     }
-
-    isLoading = true;
-    errorMessage = "";
 
     try {
       const { data, error } = await withTimeout(
@@ -76,26 +93,116 @@
       errorMessage =
         error?.message ||
         "Assigned projects took too long to load. Please refresh and try again.";
-    } finally {
-      isLoading = false;
     }
   }
 
-  function withTimeout(request, timeoutMs = 15000) {
-    return Promise.race([
-      request,
-      new Promise((_, reject) => {
-        window.setTimeout(
-          () => reject(new Error("Assigned projects took too long to load.")),
-          timeoutMs,
-        );
-      }),
-    ]);
+  async function loadWorkspaceTasks() {
+    if (!profileId) {
+      tasks = [];
+      return;
+    }
+
+    const { tasks: loaded, error } = await loadMyOpenTasks(supabase, profileId);
+
+    if (error) {
+      errorMessage = errorMessage || error.message;
+      return;
+    }
+
+    tasks = loaded;
   }
 
-  function openProjectDialog(project) {
-    selectedProject = project;
-    detailsOpen = true;
+  function withTimeout(request, timeoutMs = 15000) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = window.setTimeout(
+        () => reject(new Error("Assigned projects took too long to load.")),
+        timeoutMs,
+      );
+    });
+    // clearTimeout so a resolved request doesn't leave the timer running.
+    return Promise.race([request, timeout]).finally(() => window.clearTimeout(timer));
+  }
+
+  // ── Normalizers ───────────────────────────────────────────────
+  function toProjectItem(project) {
+    return {
+      kind: "project",
+      id: project.id,
+      title: project.title,
+      priority: project.priority,
+      due: project.deadline,
+      status: project.status,
+      raw: project,
+    };
+  }
+
+  function toTaskItem(task) {
+    return {
+      kind: "task",
+      id: task.id,
+      title: task.title,
+      priority: task.priority,
+      due: task.due_date,
+      status: task.status,
+      note: task.note,
+      sourceLabel: task.source_label,
+      sourceLink: task.source_link,
+      assignerName: resolveAssigner(task.assigned_by),
+      raw: task,
+    };
+  }
+
+  function resolveAssigner(id) {
+    if (!id) return "A teammate";
+    const member = (teamMembers || []).find((person) => person.id === id);
+    return member?.full_name || member?.email || "A teammate";
+  }
+
+  function byDueThenPriority(a, b) {
+    if (a.due && b.due) return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+    if (a.due) return -1;
+    if (b.due) return 1;
+    return 0;
+  }
+
+  function isUrgentItem(item) {
+    return item.priority === "P0" || isDeadlineWithinSevenDays(item.due);
+  }
+
+  // ── Actions ───────────────────────────────────────────────────
+  function openItem(item) {
+    if (item.kind === "project") {
+      selectedProject = item.raw;
+      detailsOpen = true;
+    }
+  }
+
+  async function completeItem(item) {
+    if (item.kind === "task") {
+      await completeTaskItem(item.raw);
+    } else {
+      await completeMyAssignment(item.raw);
+    }
+  }
+
+  async function completeTaskItem(task) {
+    if (!task?.id || completingId) return;
+
+    completingId = task.id;
+    errorMessage = "";
+
+    const { error } = await completeTask(supabase, task.id);
+
+    if (error) {
+      errorMessage = error.message;
+      completingId = "";
+      return;
+    }
+
+    tasks = tasks.filter((item) => item.id !== task.id);
+    onTasksChanged();
+    completingId = "";
   }
 
   function closeProjectDialog() {
@@ -107,11 +214,11 @@
   }
 
   async function completeMyAssignment(project) {
-    if (!project?.id || !isAssignedToCurrentUser(project) || completingProjectId) {
+    if (!project?.id || !isAssignedToCurrentUser(project) || completingId) {
       return;
     }
 
-    completingProjectId = project.id;
+    completingId = project.id;
     errorMessage = "";
 
     const nextAssignedTo = getAssignedEmails(project).filter(
@@ -129,7 +236,7 @@
 
     if (error) {
       errorMessage = error.message;
-      completingProjectId = "";
+      completingId = "";
       return;
     }
 
@@ -142,16 +249,13 @@
       closeProjectDialog();
     }
 
-    completingProjectId = "";
+    completingId = "";
   }
 
   async function addTimelineLog(projectId, body) {
     const { error } = await supabase
       .from("project_comments")
-      .insert({
-        project_id: projectId,
-        body,
-      });
+      .insert({ project_id: projectId, body });
 
     if (error) {
       errorMessage = `Assignment completed, but the timeline could not be updated: ${error.message}`;
@@ -178,10 +282,6 @@
     return String(value || "").trim().toLowerCase();
   }
 
-  function isUrgentProject(project) {
-    return project.priority === "P0" || isDeadlineWithinSevenDays(project.deadline);
-  }
-
   function isDeadlineWithinSevenDays(deadline) {
     if (!deadline) return false;
 
@@ -195,7 +295,7 @@
   }
 
   function formatDate(value) {
-    if (!value) return "No deadline";
+    if (!value) return "No due date";
 
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -210,7 +310,7 @@
     return "neutral";
   }
 
-  function getProjectCardClass(priority) {
+  function getItemCardClass(priority) {
     if (priority === "P0") return "border-red-300 bg-red-50/70";
     if (priority === "P1") return "border-amber-300 bg-amber-50/70";
     return "border-ink/8 bg-white";
@@ -243,12 +343,7 @@
       <h3 id="workspace-title" class="mt-1 text-2xl font-bold text-ink">Workspace</h3>
     </div>
 
-    <Button
-      icon={RefreshCw}
-      class="w-fit"
-      onclick={loadWorkspaceProjects}
-      loading={isLoading}
-    >
+    <Button icon={RefreshCw} class="w-fit" onclick={loadWorkspace} loading={isLoading}>
       Refresh
     </Button>
   </div>
@@ -262,24 +357,20 @@
   {:else}
     {@render WorkspaceSection(
       "Urgent Tasks",
-      "P0 projects and anything due in the next 7 days.",
+      "P0 work and anything due in the next 7 days.",
       CircleAlert,
-      urgentProjects,
+      urgentItems,
       "No urgent tasks",
-      "Assigned P0 projects and near-deadline work will collect here.",
-      openProjectDialog,
-      completeMyAssignment,
+      "Assigned P0 work and near-deadline items will collect here.",
     )}
 
     {@render WorkspaceSection(
-      "My Pipeline",
-      "Reviewed active projects assigned to you.",
+      "My Priorities",
+      "Everything assigned to you across the organization.",
       ListCheck,
-      pipelineProjects,
-      "Pipeline is clear",
-      "Assigned reviewed projects that are not urgent will appear here.",
-      openProjectDialog,
-      completeMyAssignment,
+      pipelineItems,
+      "You're all caught up",
+      "Tasks and projects assigned to you will appear here.",
     )}
   {/if}
 </section>
@@ -313,9 +404,9 @@
           icon={CheckCircle2}
           class="w-full"
           onclick={() => completeMyAssignment(selectedProject)}
-          loading={completingProjectId === selectedProject.id}
+          loading={completingId === selectedProject.id}
         >
-          {completingProjectId === selectedProject.id ? "Confirming" : "Confirm Complete"}
+          {completingId === selectedProject.id ? "Confirming" : "Confirm Complete"}
         </Button>
       {/if}
 
@@ -347,16 +438,7 @@
   {/if}
 </SlideOver>
 
-{#snippet WorkspaceSection(
-  title,
-  description,
-  icon,
-  projects,
-  emptyTitle,
-  emptyMessage,
-  onView,
-  onComplete,
-)}
+{#snippet WorkspaceSection(title, description, icon, sectionItems, emptyTitle, emptyMessage)}
   {@const Icon = icon}
   <section
     class="rounded-card border border-ink/8 bg-white p-4 shadow-card md:p-5"
@@ -374,40 +456,64 @@
       </div>
     </div>
 
-    {#if projects.length}
+    {#if sectionItems.length}
       <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {#each projects as project}
-          <article class="flex min-h-44 flex-col justify-between rounded-card border p-4 shadow-card {getProjectCardClass(project.priority)}">
+        {#each sectionItems as item (item.kind + item.id)}
+          <article class="flex min-h-44 flex-col justify-between rounded-card border p-4 shadow-card {getItemCardClass(item.priority)}">
             <div>
               <div class="flex items-start justify-between gap-3">
-                <h5 class="line-clamp-2 font-bold leading-snug text-ink">{project.title}</h5>
-                <Badge tone={getPriorityTone(project.priority)} size="xs" class="shrink-0">
-                  {project.priority || "Unset"}
+                <h5 class="line-clamp-2 font-bold leading-snug text-ink">{item.title}</h5>
+                <Badge tone={getPriorityTone(item.priority)} size="xs" class="shrink-0">
+                  {item.priority || "Unset"}
                 </Badge>
               </div>
+
               <div class="mt-3 flex flex-wrap gap-2">
-                <Badge tone={getStatusTone(project.status)}>
-                  {project.status}
-                </Badge>
+                {#if item.kind === "task"}
+                  <Badge tone="neutral">Task</Badge>
+                {:else}
+                  <Badge tone={getStatusTone(item.status)}>{item.status}</Badge>
+                {/if}
                 <Badge tone="neutral">
                   <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
-                  {formatDate(project.deadline)}
+                  {formatDate(item.due)}
                 </Badge>
               </div>
+
+              {#if item.kind === "task"}
+                <p class="mt-3 flex items-center gap-1.5 text-xs text-ink/55">
+                  <UserRound class="h-3.5 w-3.5" aria-hidden="true" />
+                  Assigned by {item.assignerName}
+                </p>
+                {#if item.note}
+                  <p class="mt-2 line-clamp-3 text-sm leading-6 text-ink/70">{item.note}</p>
+                {/if}
+                {#if item.sourceLink}
+                  <a
+                    href={item.sourceLink}
+                    class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-accent-strong hover:underline"
+                  >
+                    <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+                    {item.sourceLabel || "Open linked item"}
+                  </a>
+                {/if}
+              {/if}
             </div>
 
-            <div class="mt-4 grid gap-2 sm:grid-cols-2">
-              <Button icon={Eye} class="w-full" onclick={() => onView(project)}>
-                View Details
-              </Button>
+            <div class="mt-4 grid gap-2 {item.kind === 'project' ? 'sm:grid-cols-2' : ''}">
+              {#if item.kind === "project"}
+                <Button icon={Eye} class="w-full" onclick={() => openItem(item)}>
+                  View Details
+                </Button>
+              {/if}
               <Button
                 variant="primary"
                 icon={CheckCircle2}
                 class="w-full"
-                onclick={() => onComplete(project)}
-                loading={completingProjectId === project.id}
+                onclick={() => completeItem(item)}
+                loading={completingId === item.id}
               >
-                {completingProjectId === project.id ? "Saving" : "Complete"}
+                {completingId === item.id ? "Saving" : "Complete"}
               </Button>
             </div>
           </article>

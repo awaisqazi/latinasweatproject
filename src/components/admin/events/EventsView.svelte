@@ -14,6 +14,7 @@
   export let supabase;
   export let profile = null;
   export let refreshKey = 0;
+  export let onAssignTask = () => {};
 
   const eventColumns =
     "id, slug, title, image_src, image_frame_class, image_class, date_label, time_label, starts_on, ends_on, location, address, description, registration_link, registration_label, featured, recurring, tags, published, sort_order, created_at, updated_at";
@@ -212,4 +213,5 @@
   onClose={() => (selectedEvent = null)}
   onSaved={handleSaved}
   onDeleted={handleDeleted}
+  {onAssignTask}
 />

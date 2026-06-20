@@ -28,6 +28,7 @@
   let displayedShift = null;
   let drawerOpen = false;
   let isSaving = false;
+  let saveChain = Promise.resolve();
   let isDeleting = false;
   let errorMessage = "";
   let successMessage = "";
@@ -117,8 +118,15 @@
     onClose();
   }
 
-  async function saveUpdates(updates, successText) {
-    if (!displayedShift?.id || isSaving) return;
+  // Serialize saves so blur-fired detail/capacity saves never drop each other.
+  function saveUpdates(updates, successText) {
+    if (!displayedShift?.id) return saveChain;
+    saveChain = saveChain.then(() => runSave(updates, successText));
+    return saveChain;
+  }
+
+  async function runSave(updates, successText) {
+    if (!displayedShift?.id) return;
 
     isSaving = true;
     errorMessage = "";

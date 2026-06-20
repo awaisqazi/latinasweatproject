@@ -1,7 +1,12 @@
 <script>
   import { onMount } from "svelte";
-  import { MailPlus, RefreshCw, Save, ShieldCheck } from "@lucide/svelte";
+  import { MailPlus, MessageSquare, RefreshCw, Save, ShieldCheck } from "@lucide/svelte";
   import { MODULES, getModuleLabel } from "../../../lib/dashboard/modules";
+  import {
+    getSetting,
+    setSetting,
+    FEEDBACK_RECIPIENT_KEY,
+  } from "../../../lib/dashboard/appSettings";
   import {
     ROLE_ADMIN,
     ROLE_MEMBER,
@@ -61,6 +66,11 @@
   let successMessage = "";
   let lastRefreshKey = refreshKey;
 
+  let feedbackRecipientId = "";
+  let savingFeedbackRecipient = false;
+  let feedbackRecipientError = "";
+  let feedbackRecipientSaved = false;
+
   $: canManageUsers = isSuperuser(profile);
   $: if (canManageUsers && refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
@@ -73,10 +83,36 @@
   onMount(() => {
     if (canManageUsers) {
       loadUsers();
+      loadFeedbackRecipient();
     } else {
       isLoading = false;
     }
   });
+
+  async function loadFeedbackRecipient() {
+    const { value } = await getSetting(supabase, FEEDBACK_RECIPIENT_KEY);
+    feedbackRecipientId = typeof value === "string" ? value : "";
+  }
+
+  async function saveFeedbackRecipient(nextId) {
+    if (!nextId || nextId === feedbackRecipientId) return;
+
+    savingFeedbackRecipient = true;
+    feedbackRecipientError = "";
+    feedbackRecipientSaved = false;
+
+    const { error } = await setSetting(supabase, FEEDBACK_RECIPIENT_KEY, nextId);
+
+    if (error) {
+      feedbackRecipientError = error.message || "Could not update the feedback recipient.";
+    } else {
+      feedbackRecipientId = nextId;
+      feedbackRecipientSaved = true;
+      setTimeout(() => (feedbackRecipientSaved = false), 3000);
+    }
+
+    savingFeedbackRecipient = false;
+  }
 
   async function loadUsers() {
     if (!supabase || !canManageUsers) {
@@ -369,6 +405,40 @@
       <StatCard label="Invited" value={invitedCount} tone="neutral" loading={isLoading} />
     </div>
 
+    <div class="rounded-card border border-ink/8 bg-canvas/60 p-4">
+      <div class="flex items-center gap-2">
+        <MessageSquare class="h-5 w-5 text-accent" aria-hidden="true" />
+        <h4 class="font-bold text-ink">Feedback delivery</h4>
+      </div>
+      <p class="mt-1 text-sm text-ink/60">
+        The dashboard's <span class="font-semibold">Feedback</span> button delivers each submission to this person's Workspace.
+      </p>
+      <div class="mt-3 max-w-md">
+        <Field label="Feedback recipient" id="feedback-recipient-setting">
+          <select
+            id="feedback-recipient-setting"
+            class="select"
+            value={feedbackRecipientId}
+            disabled={savingFeedbackRecipient || isLoading}
+            onchange={(event) => saveFeedbackRecipient(event.currentTarget.value)}
+          >
+            {#if !feedbackRecipientId}
+              <option value="" disabled>Select a recipient</option>
+            {/if}
+            {#each users as account (account.id)}
+              <option value={account.id}>{account.full_name || account.email}</option>
+            {/each}
+          </select>
+        </Field>
+      </div>
+      {#if feedbackRecipientError}
+        <Banner tone="error" message={feedbackRecipientError} class="mt-2" />
+      {/if}
+      {#if feedbackRecipientSaved}
+        <Banner tone="success" message="Feedback recipient updated." class="mt-2" />
+      {/if}
+    </div>
+
     <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
       <Panel title="Team Accounts" id="user-access-accounts" loading={isRefreshing}>
         <DataTable
@@ -394,9 +464,20 @@
             {:else if column.key === "role"}
               <Badge tone={getRoleTone(row.role)}>{getRoleLabel(row.role)}</Badge>
             {:else if column.key === "access"}
-              <p class="max-w-xs truncate text-xs font-semibold text-ink/70" title={getAccessLabel(row)}>
-                {getAccessLabel(row)}
-              </p>
+              {#if row.role === ROLE_SUPERUSER}
+                <span class="text-xs font-semibold text-ink/70">All modules</span>
+              {:else}
+                {@const accessModules = normalizeModules(row.modules || [])}
+                {#if accessModules.length}
+                  <div class="flex flex-wrap gap-1">
+                    {#each accessModules as moduleKey}
+                      <Badge tone="neutral" size="xs">{getModuleLabel(moduleKey)}</Badge>
+                    {/each}
+                  </div>
+                {:else}
+                  <span class="text-xs font-semibold text-ink/50">No access</span>
+                {/if}
+              {/if}
             {:else if column.key === "last_sign_in"}
               {formatShortDateTime(row.last_sign_in_at)}
             {:else if column.key === "actions"}

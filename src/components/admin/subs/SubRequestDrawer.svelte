@@ -8,6 +8,7 @@
     Phone,
     Trash2,
     UserCheck,
+    UserPlus,
     UserX,
   } from "@lucide/svelte";
   import { generateSubCalendarLink } from "../../../lib/subCalendarUtils";
@@ -23,6 +24,7 @@
   export let onClose = () => {};
   export let onRequestUpdated = () => {};
   export let onRequestDeleted = () => {};
+  export let onAssignTask = () => {};
 
   const requestColumns =
     "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
@@ -126,10 +128,32 @@
     const remaining = volunteers.filter((entry) => entry.id !== volunteer.id);
     let updated = { ...displayedRequest, sub_volunteers: remaining };
 
-    if (!remaining.length && displayedRequest.status === "pending") {
+    // If the volunteer we just removed was the approved/assigned sub, clear the
+    // assignment and reopen the request (otherwise it would still show them as
+    // confirmed). Otherwise, only reopen a pending request that's now empty.
+    const wasAssignedSub =
+      displayedRequest.status === "approved" &&
+      displayedRequest.assigned_sub_email &&
+      volunteer.email &&
+      displayedRequest.assigned_sub_email.toLowerCase() === volunteer.email.toLowerCase();
+
+    let requestUpdates = null;
+    if (wasAssignedSub) {
+      requestUpdates = {
+        status: remaining.length ? "pending" : "open",
+        assigned_sub_name: null,
+        assigned_sub_email: null,
+        assigned_sub_phone: null,
+        assigned_at: null,
+      };
+    } else if (!remaining.length && displayedRequest.status === "pending") {
+      requestUpdates = { status: "open" };
+    }
+
+    if (requestUpdates) {
       const { data, error: statusError } = await supabase
         .from("sub_requests")
-        .update({ status: "open" })
+        .update(requestUpdates)
         .eq("id", displayedRequest.id)
         .select(requestColumns)
         .single();
@@ -143,7 +167,9 @@
 
     displayedRequest = updated;
     onRequestUpdated(updated);
-    successMessage = `${volunteer.name} removed from this request. Consider texting them to thank them for offering to help.`;
+    successMessage = wasAssignedSub
+      ? `${volunteer.name} removed and unassigned. The request is ${remaining.length ? "back to pending approval" : "open again"}.`
+      : `${volunteer.name} removed from this request. Consider texting them to thank them for offering to help.`;
     isSaving = false;
   }
 
@@ -322,6 +348,22 @@
         {#if successMessage}
           <Banner tone="success" message={successMessage} class="mt-4" />
         {/if}
+
+        <div class="mt-4">
+          <Button
+            size="sm"
+            icon={UserPlus}
+            onclick={() =>
+              onAssignTask({
+                sourceModule: "subs",
+                sourceLabel: `Sub: ${displayedRequest.class_name} · ${formatDate(displayedRequest.date)}`,
+                sourceLink: "#subs",
+                title: `Cover sub: ${displayedRequest.class_name}`,
+              })}
+          >
+            Assign a task about this
+          </Button>
+        </div>
 
         <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="sub-drawer-details-title">
           <h4 id="sub-drawer-details-title" class="font-bold">Request details</h4>

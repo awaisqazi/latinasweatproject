@@ -14,6 +14,7 @@
     Lock,
     LogOut,
     Menu,
+    MessageSquare,
     PanelLeftClose,
     PanelLeftOpen,
     PartyPopper,
@@ -21,6 +22,7 @@
     Search,
     ShieldCheck,
     Ticket,
+    UserPlus,
     Users,
     Vote,
     X,
@@ -36,7 +38,11 @@
   } from "../../../lib/supabaseClient";
   import { hasModule, loadModuleGrants } from "../../../lib/dashboard/permissions";
   import { isOperationalAdmin, isSuperuser } from "../../../lib/dashboard/roles";
+  import { countMyOpenTasks } from "../../../lib/dashboard/workspaceTasks";
+  import { getSetting, FEEDBACK_RECIPIENT_KEY } from "../../../lib/dashboard/appSettings";
   import AdminOverview from "./AdminOverview.svelte";
+  import AssignTaskDialog from "./AssignTaskDialog.svelte";
+  import FeedbackDialog from "./FeedbackDialog.svelte";
   import ProjectCard from "./ProjectCard.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
   import PublishingCalendarView from "./PublishingCalendarView.svelte";
@@ -76,9 +82,10 @@
     "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
 
   const navItems = [
-    { id: "workspace", label: "Workspace", icon: Home, section: "Marketing", modules: ["marketing"] },
+    { id: "workspace", label: "Workspace", icon: Home, section: "Home" },
     { id: "kanban", label: "Kanban", icon: Kanban, section: "Marketing", modules: ["marketing"] },
     { id: "publishing", label: "Publishing Calendar", icon: CalendarDays, section: "Marketing", modules: ["marketing"] },
+    { id: "admin", label: "Marketing Admin", icon: ShieldCheck, section: "Marketing", modules: ["marketing"], adminOnly: true },
     { id: "calendar", label: "Project Calendar", icon: CalendarDays, section: "Planning", modules: ["marketing", "board_projects"] },
     { id: "board", label: "Board Projects", icon: ClipboardList, section: "Planning", modules: ["board_projects"] },
     { id: "volunteers", label: "Volunteers", icon: HeartHandshake, section: "Operations", modules: ["volunteers"] },
@@ -88,7 +95,6 @@
     { id: "gala", label: "Gala", icon: PartyPopper, section: "Operations", modules: ["gala"] },
     { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
-    { id: "admin", label: "Admin Overview", icon: ShieldCheck, section: "Admin", modules: ["marketing"], adminOnly: true },
   ];
 
   let activeView = "workspace";
@@ -98,6 +104,13 @@
   let user = null;
   let profile = null;
   let moduleGrants = [];
+  let grantsError = "";
+  let grantsLoading = false;
+  let assignTaskOpen = false;
+  let assignTaskPrefill = null;
+  let workspaceTaskCount = 0;
+  let feedbackOpen = false;
+  let feedbackRecipientId = "";
   let dashboardPath = DASHBOARD_PATH;
   let projects = [];
   let projectUpdatesById = {};
@@ -136,6 +149,8 @@
   let projectError = "";
 
   $: isAdmin = isOperationalAdmin(profile);
+  $: feedbackRecipient = teamMembers.find((member) => member.id === feedbackRecipientId);
+  $: feedbackRecipientName = feedbackRecipient?.full_name || feedbackRecipient?.email || "";
   $: visibleNavItems = navItems.filter((item) => canSeeNavItem(item, profile, moduleGrants));
   $: navSections = visibleNavItems.reduce((sections, item) => {
     const lastSection = sections[sections.length - 1];
@@ -218,6 +233,8 @@
       loadGrants(),
       loadProjects(),
       loadTeamMembers(),
+      loadWorkspaceTaskCount(),
+      loadFeedbackRecipient(),
     ]);
 
     // If the default view isn't granted (and the user didn't deep-link it),
@@ -234,7 +251,44 @@
   }
 
   async function loadGrants() {
-    moduleGrants = await loadModuleGrants(supabase, user.id);
+    grantsLoading = true;
+    const { grants, error } = await loadModuleGrants(supabase, user.id);
+    moduleGrants = grants;
+    grantsError = error
+      ? "We couldn't load your module access. Some sections may be hidden until you retry."
+      : "";
+    grantsLoading = false;
+  }
+
+  async function loadWorkspaceTaskCount() {
+    if (!user?.id) return;
+    workspaceTaskCount = await countMyOpenTasks(supabase, user.id);
+  }
+
+  async function loadFeedbackRecipient() {
+    // Who the dashboard "Feedback" button delivers to (set in User Access).
+    const { value } = await getSetting(supabase, FEEDBACK_RECIPIENT_KEY);
+    feedbackRecipientId = typeof value === "string" ? value : "";
+  }
+
+  function handleFeedbackSent() {
+    // If feedback was sent to me, surface it in my badge right away.
+    if (feedbackRecipientId === user?.id) {
+      loadWorkspaceTaskCount();
+      workspaceRefreshKey += 1;
+    }
+  }
+
+  function handleTaskAssigned() {
+    // Refresh the badge (covers self-assignment) and re-pull the Workspace
+    // feed if the user is looking at it.
+    loadWorkspaceTaskCount();
+    workspaceRefreshKey += 1;
+  }
+
+  function openAssignTask(prefill = null) {
+    assignTaskPrefill = prefill;
+    assignTaskOpen = true;
   }
 
   function canSeeNavItem(item, currentProfile, grants) {
@@ -347,6 +401,10 @@
 
     activeView = nextView;
     sidebarOpen = false;
+    // Close any open kanban drawer / publish dialog when changing views so
+    // they don't linger over the new section.
+    selectedKanbanProject = null;
+    publishScheduleProject = null;
   }
 
   function setActiveView(view, updateHash = true) {
@@ -964,6 +1022,17 @@
                       {/if}
                       <Icon class="h-4 w-4 shrink-0 {isActive ? 'text-brand' : ''}" aria-hidden="true" />
                       <span class="{sidebarCollapsed ? 'lg:hidden' : ''}">{item.label}</span>
+                      {#if item.id === "workspace" && workspaceTaskCount > 0}
+                        <span
+                          class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-brand-ink {sidebarCollapsed ? 'lg:hidden' : ''}"
+                          aria-label={`${workspaceTaskCount} open tasks`}
+                        >
+                          {workspaceTaskCount}
+                        </span>
+                        {#if sidebarCollapsed}
+                          <span class="absolute right-1.5 top-1.5 hidden h-2 w-2 rounded-full bg-brand lg:block" aria-hidden="true"></span>
+                        {/if}
+                      {/if}
                     </a>
                   {/each}
                 </div>
@@ -1030,6 +1099,22 @@
             </div>
 
             <div class="flex shrink-0 items-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={UserPlus}
+                onclick={() => openAssignTask()}
+              >
+                Assign
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={MessageSquare}
+                onclick={() => (feedbackOpen = true)}
+              >
+                Feedback
+              </Button>
               <button
                 type="button"
                 class="hidden min-h-10 items-center gap-2 rounded-control border border-ink/12 bg-white px-3 text-sm text-ink/45 shadow-card transition hover:border-ink/25 hover:text-ink/70 md:flex"
@@ -1122,6 +1207,17 @@
             <Banner tone="error" message={statusMoveError} class="mb-4" />
           {/if}
 
+          {#if grantsError}
+            <Banner tone="error" class="mb-4">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <p>{grantsError}</p>
+                <Button size="sm" loading={grantsLoading} onclick={loadGrants}>
+                  Retry
+                </Button>
+              </div>
+            </Banner>
+          {/if}
+
           {#if !canViewActive}
             <Panel title="No access" id="no-access-title">
               <div class="flex items-start gap-3 text-ink/75">
@@ -1143,8 +1239,11 @@
             <Workspace
               {supabase}
               email={profile?.email || user?.email}
+              profileId={user?.id}
+              {teamMembers}
               refreshKey={workspaceRefreshKey}
               onProjectUpdated={handleProjectUpdated}
+              onTasksChanged={loadWorkspaceTaskCount}
             />
           {:else if activeView === "kanban"}
             <section aria-labelledby="kanban-title">
@@ -1285,12 +1384,14 @@
               {profile}
               {teamMembers}
               refreshKey={boardRefreshKey}
+              onAssignTask={openAssignTask}
             />
           {:else if activeView === "events"}
             <EventsView
               {supabase}
               {profile}
               refreshKey={eventsRefreshKey}
+              onAssignTask={openAssignTask}
             />
           {:else if activeView === "volunteers"}
             <VolunteersView
@@ -1303,6 +1404,7 @@
               {supabase}
               {profile}
               refreshKey={subsRefreshKey}
+              onAssignTask={openAssignTask}
             />
           {:else if activeView === "elections"}
             <ElectionsView
@@ -1362,6 +1464,7 @@
       eyebrow="Kanban project"
       onClose={() => (selectedKanbanProject = null)}
       onProjectUpdated={handleProjectUpdated}
+      onAssignTask={openAssignTask}
     />
 
     <PublishScheduleDialog
@@ -1373,6 +1476,27 @@
       errorMessage={publishScheduleError}
       onCancel={closePublishScheduler}
       onConfirm={confirmPublishSchedule}
+    />
+
+    <AssignTaskDialog
+      {supabase}
+      open={assignTaskOpen}
+      {teamMembers}
+      currentProfileId={user?.id}
+      prefill={assignTaskPrefill}
+      onClose={() => (assignTaskOpen = false)}
+      onCreated={handleTaskAssigned}
+    />
+
+    <FeedbackDialog
+      {supabase}
+      open={feedbackOpen}
+      currentProfileId={user?.id}
+      currentUserName={profile?.full_name || profile?.email || user?.email}
+      recipientId={feedbackRecipientId}
+      recipientName={feedbackRecipientName}
+      onClose={() => (feedbackOpen = false)}
+      onSent={handleFeedbackSent}
     />
   {/if}
 </main>

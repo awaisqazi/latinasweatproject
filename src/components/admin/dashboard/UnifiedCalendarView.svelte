@@ -156,15 +156,15 @@
   }
 
   function withTimeout(request, timeoutMs = 15000) {
-    return Promise.race([
-      request,
-      new Promise((_, reject) => {
-        window.setTimeout(
-          () => reject(new Error("Calendar request took too long.")),
-          timeoutMs,
-        );
-      }),
-    ]);
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = window.setTimeout(
+        () => reject(new Error("Calendar request took too long.")),
+        timeoutMs,
+      );
+    });
+    // clearTimeout so a resolved request doesn't leave the timer running.
+    return Promise.race([request, timeout]).finally(() => window.clearTimeout(timer));
   }
 
   function buildCalendarDays(month, sourceItems) {

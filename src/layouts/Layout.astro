@@ -267,6 +267,11 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     </script>
     <script>
       (function () {
+        // MarianaTek booking widgets are only used on public pages. Skip the
+        // loader on the admin dashboard, where there's no booking element and
+        // its script throws "Cannot read properties of null (reading 'url')".
+        if (window.location.pathname.includes("/admin")) return;
+
         // Set tenant name here
         var TENANT_NAME = "latinasweatproject";
 

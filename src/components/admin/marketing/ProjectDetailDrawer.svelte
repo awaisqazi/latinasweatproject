@@ -24,6 +24,7 @@
   export let eyebrow = "Project details";
   export let onClose = () => {};
   export let onProjectUpdated = () => {};
+  export let onAssignTask = () => {};
 
   let displayedProject = null;
   let drawerOpen = false;
@@ -65,6 +66,9 @@
 
   $: if (project?.id && project.id !== displayedProject?.id) {
     openDrawer(project);
+  } else if (!project && drawerOpen) {
+    // Parent cleared the selection (e.g. changed views) — close the drawer.
+    drawerOpen = false;
   }
   $: assignedEmails = getAssignedEmails(displayedProject);
   $: filteredTeamMembers = getFilteredTeamMembers(assignmentSearch);
@@ -482,6 +486,22 @@
             <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
             {getDateLabel(displayedProject)}
           </Badge>
+        </div>
+
+        <div class="mt-4">
+          <Button
+            size="sm"
+            icon={UserPlus}
+            onclick={() =>
+              onAssignTask({
+                sourceModule: "marketing",
+                sourceLabel: `Marketing: ${displayedProject.title}`,
+                sourceLink: "#kanban",
+                title: `Follow up: ${displayedProject.title}`,
+              })}
+          >
+            Assign a task about this
+          </Button>
         </div>
 
         <dl class="mt-5 grid gap-3 text-sm">

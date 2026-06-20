@@ -23,6 +23,7 @@
   export let profile = null;
   export let teamMembers = [];
   export let refreshKey = 0;
+  export let onAssignTask = () => {};
 
   const BOARD_STATUSES = ["Planning", "In Progress", "Blocked", "Done"];
   const STATUS_TONES = {
@@ -386,6 +387,7 @@
   onClose={() => (selectedProject = null)}
   onProjectUpdated={handleProjectUpdated}
   onProjectDeleted={handleProjectDeleted}
+  {onAssignTask}
 />
 
 <style>

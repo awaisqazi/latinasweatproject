@@ -1,5 +1,5 @@
 <script>
-  import { Trash2 } from "@lucide/svelte";
+  import { Trash2, UserPlus } from "@lucide/svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
@@ -12,6 +12,7 @@
   export let onClose = () => {};
   export let onSaved = () => {};
   export let onDeleted = () => {};
+  export let onAssignTask = () => {};
 
   const eventColumns =
     "id, slug, title, image_src, image_frame_class, image_class, date_label, time_label, starts_on, ends_on, location, address, description, registration_link, registration_label, featured, recurring, tags, published, sort_order, created_at, updated_at";
@@ -97,6 +98,11 @@
       return;
     }
 
+    if (form.starts_on && form.ends_on && form.ends_on < form.starts_on) {
+      errorMessage = "The end date can't be before the start date.";
+      return;
+    }
+
     isSaving = true;
     errorMessage = "";
     successMessage = "";
@@ -124,9 +130,11 @@
       sort_order: Number(form.sort_order) || 0,
     };
 
+    // Use displayedEventId, not the parent `event` prop: after a create the prop
+    // still has no id, so subsequent saves must target the row we just created.
     const query = isNew
       ? supabase.from("events").insert(payload)
-      : supabase.from("events").update(payload).eq("id", event.id);
+      : supabase.from("events").update(payload).eq("id", displayedEventId);
 
     const { data, error } = await query.select(eventColumns).single();
 
@@ -146,17 +154,17 @@
   }
 
   function requestDelete() {
-    if (isNew || !event?.id || isDeleting) return;
+    if (!displayedEventId || displayedEventId === "new" || isDeleting) return;
     confirmingDelete = true;
   }
 
   async function deleteEvent() {
-    if (isNew || !event?.id || isDeleting) return;
+    if (!displayedEventId || displayedEventId === "new" || isDeleting) return;
 
     isDeleting = true;
     errorMessage = "";
 
-    const { error } = await supabase.from("events").delete().eq("id", event.id);
+    const { error } = await supabase.from("events").delete().eq("id", displayedEventId);
 
     if (error) {
       errorMessage = error.message;
@@ -167,7 +175,7 @@
 
     isDeleting = false;
     confirmingDelete = false;
-    onDeleted(event.id);
+    onDeleted(displayedEventId);
     requestClose();
   }
 </script>
@@ -190,6 +198,24 @@
 
         {#if successMessage}
           <Banner tone="success" message={successMessage} class="mb-4" />
+        {/if}
+
+        {#if !isNew}
+          <div class="mb-4">
+            <Button
+              size="sm"
+              icon={UserPlus}
+              onclick={() =>
+                onAssignTask({
+                  sourceModule: "events",
+                  sourceLabel: `Event: ${form.title}`,
+                  sourceLink: "#events",
+                  title: `Follow up: ${form.title}`,
+                })}
+            >
+              Assign a task about this
+            </Button>
+          </div>
         {/if}
 
         <div class="space-y-4">

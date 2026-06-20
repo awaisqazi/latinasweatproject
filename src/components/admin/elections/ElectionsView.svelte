@@ -203,6 +203,14 @@
     event?.preventDefault();
     if (!supabase || !election || isSavingSchedule) return;
 
+    const opensIso = fromLocalInput(opensAtInput);
+    const closesIso = fromLocalInput(closesAtInput);
+
+    if (opensIso && closesIso && new Date(closesIso) <= new Date(opensIso)) {
+      errorMessage = "The close time must be after the open time.";
+      return;
+    }
+
     isSavingSchedule = true;
     scheduleSaved = false;
     errorMessage = "";
@@ -210,8 +218,8 @@
     const { data, error } = await supabase
       .from("elections")
       .update({
-        opens_at: fromLocalInput(opensAtInput),
-        closes_at: fromLocalInput(closesAtInput),
+        opens_at: opensIso,
+        closes_at: closesIso,
       })
       .eq("id", election.id)
       .select("*")
@@ -234,13 +242,20 @@
     deletingId = voteId;
     deleteError = "";
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("election_votes")
       .delete()
-      .eq("id", voteId);
+      .eq("id", voteId)
+      .select("id");
 
     if (error) {
       deleteError = error.message;
+    } else if (!data || data.length === 0) {
+      // No error but no row returned means RLS filtered the delete out (the
+      // ballot is still in the DB). Surface a clear error instead of
+      // optimistically removing a row that is still there.
+      deleteError =
+        "That ballot could not be removed. It may have already been deleted, or you may not have permission to remove ballots for this election.";
     } else {
       votes = votes.filter((vote) => vote.id !== voteId);
     }

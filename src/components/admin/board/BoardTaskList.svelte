@@ -16,7 +16,7 @@
   let errorMessage = "";
   let newTaskTitle = "";
   let isAdding = false;
-  let savingTaskId = "";
+  let savingTaskIds = new Set();
   let deletingTaskId = "";
   let confirmingTask = null;
   let loadedProjectId = "";
@@ -83,9 +83,10 @@
   }
 
   async function updateTask(task, updates) {
-    if (!task?.id || savingTaskId) return;
+    // Per-task guard (a Set) so saving one task never blocks edits to another.
+    if (!task?.id || savingTaskIds.has(task.id)) return;
 
-    savingTaskId = task.id;
+    savingTaskIds = new Set(savingTaskIds).add(task.id);
     errorMessage = "";
 
     const { data, error } = await supabase
@@ -102,7 +103,9 @@
       onTasksChanged(tasks);
     }
 
-    savingTaskId = "";
+    const next = new Set(savingTaskIds);
+    next.delete(task.id);
+    savingTaskIds = next;
   }
 
   function toggleDone(task, checked) {
@@ -202,7 +205,7 @@
               class="mt-1 h-4 w-4 rounded border-ink/20 text-accent focus:ring-accent"
               checked={task.done}
               aria-label={`Mark "${task.title}" ${task.done ? "not done" : "done"}`}
-              disabled={savingTaskId === task.id}
+              disabled={savingTaskIds.has(task.id)}
               onchange={(event) => toggleDone(task, event.currentTarget.checked)}
             />
             <div class="min-w-0 flex-1">
@@ -214,7 +217,7 @@
                   class="min-h-8 rounded-control border border-ink/14 bg-white px-2 text-xs font-semibold text-ink/70 outline-none transition focus:border-accent"
                   value={task.assignee_id || ""}
                   aria-label={`Assignee for "${task.title}"`}
-                  disabled={savingTaskId === task.id}
+                  disabled={savingTaskIds.has(task.id)}
                   onchange={(event) =>
                     updateTask(task, { assignee_id: event.currentTarget.value || null })}
                 >
@@ -228,7 +231,7 @@
                   class="min-h-8 rounded-control border border-ink/14 bg-white px-2 text-xs font-semibold text-ink/70 outline-none transition focus:border-accent"
                   value={task.due_date || ""}
                   aria-label={`Due date for "${task.title}"`}
-                  disabled={savingTaskId === task.id}
+                  disabled={savingTaskIds.has(task.id)}
                   onchange={(event) =>
                     updateTask(task, { due_date: event.currentTarget.value || null })}
                 />
