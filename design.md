@@ -823,6 +823,31 @@ Contact information: entry.1082735490
 
 ---
 
+## 🧾 11B. Reimbursement Request Launch Page (`src/pages/reimbursement.astro`)
+
+The `/reimbursement` page lets instructors, staff, and volunteers submit receipts for tax-compliant, audit-ready reimbursement of money they spent on LSP's behalf. Unlike the feedback page, it does **not** recreate the form or embed it in an iframe: it is a branded **launch page that opens the live Google Form in a new tab**.
+
+### Why link out instead of embedding (important pattern)
+The reimbursement Google Form **requires the respondent to sign in to Google** because it has a file-upload question (receipts) and collects verified emails. Google **blocks its sign-in flow inside a cross-origin iframe** whenever third-party cookies are restricted (now the browser default), producing the "Can't access your Google Account" error. The feedback page's hidden-`formResponse` POST trick also cannot help here, because that technique cannot carry file uploads. So the rule is:
+
+> **Any Google Form that requires sign-in (file uploads or verified/collected email) must be linked out in a new tab, never iframe-embedded and never hidden-POSTed.** Only sign-in-free forms are eligible for the `feedback.astro` custom-form treatment.
+
+### The Google Form backend
+- Owned by the shared **`collab@latinasweatproject.com`** Workspace account (the "Hi, LSP!" account, browser authuser `u/1`), not a personal account. Public id `1FAIpQLScaDNlKHL4yQWRl5KvZZW-2JtQwb6Sm98cGAyJv4oVDzL4r6w`; editor id `1-hjb-uMZLK11M-UVR1UK4uu18mW8gYhotTADRUjsSiE`.
+- Published with **"Anyone with the link"** responder access; auto-collects respondent email.
+- Captures submitter + role, purchase date, vendor, amount, **expense category**, **business purpose** (the audit/tax justification), program, payment method, and reimbursement preference. A required **file-upload** question (up to 10 files / 100 MB) sends receipts to the collab account's private Drive, and a required **certification/attestation** checkbox confirms the expense is accurate, LSP-related, and not reimbursed elsewhere.
+- Themed in brand mauve (`#b5a18d`) with the "The Latina Sweat Project" banner header. Google Forms header images need a minimum of 800x200px (the square `logo.png` is rejected; the wider `logo - LSP` banner asset works).
+
+### Visual structure (mirrors the feedback page)
+- Standard `<Layout />` + `<Header />`, a `bg-off-black` dark intro band with an `text-accent-gold` uppercase eyebrow and Rubik hero headline, then a warm `#f5ede3` body.
+- Main white card holds the copy, an amber sign-in heads-up note, a prominent `bg-off-black` "Start your reimbursement request" CTA that opens the form in a new tab (`target="_blank" rel="noopener"`), and a numbered "How it works" list, instead of form controls.
+- Sticky dark "Before you submit" sidebar with accent-gold left borders, plus the contact line (`fez@latinasweatproject.com`).
+
+### Navigation exposure
+Intentionally **not** linked from the header, footer, links page, or `nav.js`: this page is shared manually with the people who need it. It is still represented in the `404.astro` redirect engine (`reimburse` -> `/reimbursement`) so mixed-case links like `/Reimbursement` resolve.
+
+---
+
 ## 🔗 12. Silent Case-Insensitive Redirections Engine (`404.astro`)
 
 Because physical flyers and social bios are susceptible to casing discrepancies (e.g. `/LSPgala` vs `/lspgala`), the 404 page acts as an intelligent redirect engine.
@@ -833,6 +858,7 @@ graph TD
     Astro404 --> JSNormalize["Normalize: pathname.toLowerCase()"]
     JSNormalize -- Includes 'lspgala' --> RedirectZeffyGala["Redirect to: Zeffy Fundraising Page"]
     JSNormalize -- Includes 'silentauction' --> RedirectZeffyAuction["Redirect to: Zeffy Auction Page"]
+    JSNormalize -- Includes 'reimburse' --> RedirectReimburse["Redirect to: /reimbursement"]
     JSNormalize -- Includes 'forms' --> RedirectLocal["Redirect to: /forms"]
     JSNormalize -- Includes 'feedback' --> RedirectFeedback["Redirect to: /feedback"]
 ```
@@ -856,6 +882,8 @@ The engine is written in standard vanilla JavaScript inside a client-side `<scri
         window.location.href = "https://sites.google.com/gosuperdope.com/brandhq/home";
     } else if (path.includes("intake")) {
         window.location.href = "https://docs.google.com/forms/d/e/.../viewform";
+    } else if (path.includes("reimburse")) {
+        window.location.href = "/reimbursement"; // Internal route redirect
     } else if (path.includes("forms")) {
         window.location.href = "/forms"; // Internal route redirect
     } else if (path.includes("feedback")) {
