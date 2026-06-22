@@ -7,6 +7,7 @@
     ExternalLink,
     Eye,
     ListCheck,
+    Plus,
     RefreshCw,
     UserRound,
   } from "@lucide/svelte";
@@ -26,6 +27,7 @@
   export let refreshKey = 0;
   export let onProjectUpdated = () => {};
   export let onTasksChanged = () => {};
+  export let onCreateProject = () => {};
 
   let projects = [];
   let tasks = [];
@@ -343,9 +345,14 @@
       <h3 id="workspace-title" class="mt-1 text-2xl font-bold text-ink">Workspace</h3>
     </div>
 
-    <Button icon={RefreshCw} class="w-fit" onclick={loadWorkspace} loading={isLoading}>
-      Refresh
-    </Button>
+    <div class="flex w-fit items-center gap-2">
+      <Button variant="primary" icon={Plus} onclick={onCreateProject}>
+        New project
+      </Button>
+      <Button icon={RefreshCw} onclick={loadWorkspace} loading={isLoading}>
+        Refresh
+      </Button>
+    </div>
   </div>
 
   {#if errorMessage}

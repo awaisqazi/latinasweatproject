@@ -18,6 +18,7 @@
     PanelLeftClose,
     PanelLeftOpen,
     PartyPopper,
+    Plus,
     RefreshCw,
     Search,
     ShieldCheck,
@@ -45,6 +46,7 @@
   import FeedbackDialog from "./FeedbackDialog.svelte";
   import ProjectCard from "./ProjectCard.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
+  import ProjectCreateDrawer from "./ProjectCreateDrawer.svelte";
   import PublishingCalendarView from "./PublishingCalendarView.svelte";
   import PublishScheduleDialog from "./PublishScheduleDialog.svelte";
   import UserAccessView from "./UserAccessView.svelte";
@@ -133,6 +135,7 @@
   let galaRefreshKey = 0;
   let spacesRefreshKey = 0;
   let selectedKanbanProject = null;
+  let createDrawerOpen = false;
   let publishScheduleProject = null;
   let publishScheduleStatus = "";
   let publishScheduleSaving = false;
@@ -337,7 +340,7 @@
     const { data, error } = await supabase
       .from("projects")
       .select(
-        "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at",
+        "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at",
       )
       .order("deadline", { ascending: true });
 
@@ -732,6 +735,17 @@
     handleProjectUpdated(data);
     movingProjectId = "";
     return { data };
+  }
+
+  function openCreateDrawer() {
+    createDrawerOpen = true;
+  }
+
+  function handleProjectCreated(project) {
+    createDrawerOpen = false;
+    if (!project?.id) return;
+    handleProjectUpdated(project);
+    selectedKanbanProject = getLatestProject(project);
   }
 
   function openKanbanProjectDetails(project) {
@@ -1244,11 +1258,15 @@
               refreshKey={workspaceRefreshKey}
               onProjectUpdated={handleProjectUpdated}
               onTasksChanged={loadWorkspaceTaskCount}
+              onCreateProject={openCreateDrawer}
             />
           {:else if activeView === "kanban"}
             <section aria-labelledby="kanban-title">
               <Panel title="Kanban Board" id="kanban-title" loading={projectsLoading}>
                 <div class="mb-3 flex flex-col gap-3 rounded-card border border-ink/8 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Button variant="primary" size="sm" icon={Plus} class="w-fit" onclick={openCreateDrawer}>
+                    New project
+                  </Button>
                   <div class="min-w-0">
                     <p class="text-xs font-bold uppercase tracking-[0.12em] text-accent-strong">
                       Swipe or use arrow keys
@@ -1465,6 +1483,15 @@
       onClose={() => (selectedKanbanProject = null)}
       onProjectUpdated={handleProjectUpdated}
       onAssignTask={openAssignTask}
+    />
+
+    <ProjectCreateDrawer
+      {supabase}
+      open={createDrawerOpen}
+      {teamMembers}
+      currentUserEmail={profile?.email || user?.email}
+      onClose={() => (createDrawerOpen = false)}
+      onCreated={handleProjectCreated}
     />
 
     <PublishScheduleDialog

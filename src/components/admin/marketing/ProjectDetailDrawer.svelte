@@ -2,6 +2,7 @@
   import {
     CalendarClock,
     ExternalLink,
+    FileText,
     Search,
     UserPlus,
   } from "@lucide/svelte";
@@ -42,6 +43,10 @@
   let publishScheduleSaving = false;
   let publishScheduleError = "";
   let timelineRefreshKey = 0;
+  let briefDocSaving = false;
+  let briefDocError = "";
+  let briefDocSuccess = "";
+  let briefPollActive = false;
 
   const defaultStatuses = [
     "Ready for Production",
@@ -62,7 +67,7 @@
   ];
   const priorityOptions = ["P0", "P1", "P2"];
   const projectSelectColumns =
-    "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
+    "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
 
   $: if (project?.id && project.id !== displayedProject?.id) {
     openDrawer(project);
@@ -81,6 +86,15 @@
     (email) =>
       !teamMembers.some((member) => normalizeEmail(member.email) === normalizeEmail(email)),
   );
+  $: if (
+    drawerOpen &&
+    displayedProject?.brief_doc_status === "pending" &&
+    !isLikelyUrl(displayedProject?.details_url) &&
+    !briefPollActive
+  ) {
+    briefPollActive = true;
+    pollBriefDoc(8);
+  }
 
   function openDrawer(nextProject) {
     displayedProject = nextProject;
@@ -166,8 +180,9 @@
   function getProjectLinks(item) {
     if (!item) return [];
 
+    // details_url is surfaced as "Open brief doc" in the Project brief section,
+    // so it's intentionally omitted here to avoid a duplicate link.
     return [
-      { label: "Details", url: item.details_url },
       { label: "Files", url: item.files_url },
       { label: "Deliverables", url: item.deliverables_url },
     ].filter((link) => isLikelyUrl(link.url));
@@ -180,6 +195,79 @@
       { label: "Files", value: item.files_url },
       { label: "Deliverables", value: item.deliverables_url },
     ].filter((reference) => reference.value && !isLikelyUrl(reference.value));
+  }
+
+  async function reloadProject() {
+    if (!displayedProject?.id) return;
+    const { data, error } = await supabase
+      .from("projects")
+      .select(projectSelectColumns)
+      .eq("id", displayedProject.id)
+      .single();
+    if (!error && data) {
+      displayedProject = data;
+      onProjectUpdated(data);
+    }
+  }
+
+  // While a brief is generating server-side (status 'pending', no link yet),
+  // poll a few times so the link appears without a manual refresh.
+  async function pollBriefDoc(tries) {
+    if (
+      !drawerOpen ||
+      tries <= 0 ||
+      !displayedProject?.id ||
+      isLikelyUrl(displayedProject?.details_url) ||
+      displayedProject?.brief_doc_status !== "pending"
+    ) {
+      briefPollActive = false;
+      return;
+    }
+    await reloadProject();
+    if (
+      drawerOpen &&
+      !isLikelyUrl(displayedProject?.details_url) &&
+      displayedProject?.brief_doc_status === "pending"
+    ) {
+      setTimeout(() => pollBriefDoc(tries - 1), 2500);
+    } else {
+      briefPollActive = false;
+    }
+  }
+
+  async function generateBriefDoc(force = false) {
+    if (!displayedProject || briefDocSaving) return;
+    briefDocSaving = true;
+    briefDocError = "";
+    briefDocSuccess = "";
+
+    const { data, error } = await supabase.functions.invoke("project-brief-doc", {
+      body: { project_id: displayedProject.id, force },
+    });
+
+    if (error || (data && data.error)) {
+      briefDocError =
+        (data && data.error) || error?.message || "Could not generate the brief doc.";
+      briefDocSaving = false;
+      return;
+    }
+
+    // Re-fetch so the new details_url link shows immediately.
+    const { data: refreshed, error: reloadError } = await supabase
+      .from("projects")
+      .select(projectSelectColumns)
+      .eq("id", displayedProject.id)
+      .single();
+
+    if (!reloadError && refreshed) {
+      displayedProject = refreshed;
+      onProjectUpdated(refreshed);
+    }
+
+    briefDocSuccess = data?.skipped
+      ? "A brief doc is already linked for this project."
+      : "Brief doc created and linked under Details.";
+    briefDocSaving = false;
   }
 
   function getAllStatuses() {
@@ -673,6 +761,63 @@
         <div class="mt-5">
           <ProjectTimeline {supabase} project={displayedProject} refreshKey={timelineRefreshKey} />
         </div>
+
+        <section class="mt-5" aria-labelledby="drawer-brief-title">
+          <h4 id="drawer-brief-title" class="font-bold text-ink">Project brief</h4>
+          {#if isLikelyUrl(displayedProject?.details_url)}
+            <a
+              href={displayedProject.details_url}
+              target="_blank"
+              rel="noreferrer"
+              class="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control border border-ink/14 px-3 text-sm font-bold text-ink transition hover:border-accent/40 hover:text-accent-strong"
+            >
+              <FileText class="h-4 w-4" aria-hidden="true" />
+              Open brief doc
+            </a>
+          {:else if displayedProject?.brief_doc_status === "pending"}
+            <p class="mt-1 text-sm text-ink/60">
+              Generating the brief doc… this usually takes a few seconds.
+            </p>
+            <div class="mt-3">
+              <Button variant="secondary" class="w-full" loading disabled>
+                Generating brief doc…
+              </Button>
+            </div>
+            <button
+              type="button"
+              class="mt-2 text-sm font-semibold text-accent-strong hover:underline"
+              onclick={reloadProject}
+            >
+              Check now
+            </button>
+          {:else}
+            <p class="mt-1 text-sm text-ink/60">
+              Copies the LSP brief template into the team Drive folder and links it under Details.
+            </p>
+            <div class="mt-3">
+              <Button
+                variant="secondary"
+                class="w-full"
+                icon={FileText}
+                loading={briefDocSaving}
+                disabled={briefDocSaving}
+                onclick={() => generateBriefDoc(false)}
+              >
+                {briefDocSaving
+                  ? "Generating…"
+                  : displayedProject?.brief_doc_status === "error"
+                    ? "Retry brief doc"
+                    : "Generate brief doc"}
+              </Button>
+            </div>
+          {/if}
+          {#if briefDocError}
+            <p class="mt-2 text-sm font-semibold text-red-600">{briefDocError}</p>
+          {/if}
+          {#if briefDocSuccess}
+            <p class="mt-2 text-sm font-semibold text-emerald-600">{briefDocSuccess}</p>
+          {/if}
+        </section>
 
         {#if getProjectLinks(displayedProject).length}
           <section class="mt-5" aria-labelledby="drawer-links-title">
