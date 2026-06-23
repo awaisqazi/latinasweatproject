@@ -33,6 +33,8 @@
   import Button from "../ui/Button.svelte";
   import Panel from "../ui/Panel.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
+  import Tabs from "../ui/Tabs.svelte";
+  import { LayoutList, SquareKanban } from "@lucide/svelte";
   import {
     getSupabaseClient,
     SUPABASE_CONFIG_ERROR,
@@ -143,6 +145,17 @@
   let kanbanScroller;
   let activeKanbanIndex = 0;
   let kanbanScrollRaf = 0;
+  let kanbanViewMode = "kanban"; // "kanban" | "list"
+  let kanbanSearch = "";
+  let kanbanStatusFilter = "all";
+  let kanbanPriorityFilter = "all";
+  let kanbanAssigneeFilter = "all";
+  let kanbanChannelFilter = "all";
+  let kanbanCopyFilter = "all";
+  const KANBAN_VIEW_TABS = [
+    { id: "kanban", label: "Kanban", icon: SquareKanban },
+    { id: "list", label: "List", icon: LayoutList },
+  ];
   let draggedProjectId = "";
   let dragOverStatus = "";
   let movingProjectId = "";
@@ -179,6 +192,120 @@
     counts[status] = projectsByStatus[status]?.length || 0;
     return counts;
   }, {});
+
+  // ── Kanban search + filters (apply to both Kanban and List views) ──
+  $: kanbanAssigneeOptions = Array.from(
+    new Set(latestProjects.flatMap((project) => project.assigned_to || []).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b));
+  $: kanbanChannelOptions = Array.from(
+    new Set(latestProjects.flatMap((project) => project.channel_tags || []).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b));
+  $: hasKanbanFilters =
+    Boolean(kanbanSearch.trim()) ||
+    kanbanStatusFilter !== "all" ||
+    kanbanPriorityFilter !== "all" ||
+    kanbanAssigneeFilter !== "all" ||
+    kanbanChannelFilter !== "all" ||
+    kanbanCopyFilter !== "all";
+  // Pass every filter as an argument so the reactive block tracks them all.
+  $: filteredKanbanProjects = filterKanbanProjects(
+    latestProjects,
+    kanbanSearch,
+    kanbanStatusFilter,
+    kanbanPriorityFilter,
+    kanbanAssigneeFilter,
+    kanbanChannelFilter,
+    kanbanCopyFilter,
+  );
+  $: filteredByStatus = statuses.reduce((groups, status) => {
+    groups[status] = filteredKanbanProjects.filter((project) => project.status === status);
+    return groups;
+  }, {});
+  $: filteredKanbanList = [...filteredKanbanProjects].sort((a, b) => {
+    const sa = statuses.indexOf(a.status);
+    const sb = statuses.indexOf(b.status);
+    const ra = sa === -1 ? 99 : sa;
+    const rb = sb === -1 ? 99 : sb;
+    if (ra !== rb) return ra - rb;
+    return (a.deadline || "9999").localeCompare(b.deadline || "9999");
+  });
+
+  function filterKanbanProjects(list, search, statusF, priorityF, assigneeF, channelF, copyF) {
+    const query = search.trim().toLowerCase();
+    const assignee = assigneeF.toLowerCase();
+    const channel = channelF.toLowerCase();
+
+    return list.filter((project) => {
+      if (query) {
+        const haystack = [
+          project.title,
+          project.status,
+          project.priority,
+          project.edit_notes,
+          ...(project.assigned_to || []),
+          ...(project.channel_tags || []),
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
+      if (statusF !== "all" && project.status !== statusF) return false;
+      if (priorityF !== "all" && (project.priority || "unset") !== priorityF) return false;
+      if (
+        assigneeF !== "all" &&
+        !(project.assigned_to || []).some((email) => (email || "").toLowerCase() === assignee)
+      ) {
+        return false;
+      }
+      if (
+        channelF !== "all" &&
+        !(project.channel_tags || []).some((tag) => (tag || "").toLowerCase() === channel)
+      ) {
+        return false;
+      }
+      if (copyF === "approved" && !project.copy_approved) return false;
+      if (copyF === "pending" && project.copy_approved) return false;
+      return true;
+    });
+  }
+
+  function clearKanbanFilters() {
+    kanbanSearch = "";
+    kanbanStatusFilter = "all";
+    kanbanPriorityFilter = "all";
+    kanbanAssigneeFilter = "all";
+    kanbanChannelFilter = "all";
+    kanbanCopyFilter = "all";
+  }
+
+  function kanbanPriorityTone(priority) {
+    if (priority === "P0") return "red";
+    if (priority === "P1") return "amber";
+    return "neutral";
+  }
+
+  function kanbanStatusTone(status) {
+    if (status === "Stuck") return "red";
+    if (status === "In Production") return "blue";
+    if (status === "Published") return "green";
+    if (status && status.startsWith("Ready")) return "amber";
+    return "neutral";
+  }
+
+  function kanbanAssignedBrief(project) {
+    const assigned = (project.assigned_to || []).filter(Boolean);
+    if (!assigned.length) return "Unassigned";
+    if (assigned.length === 1) return assigned[0];
+    return `${assigned[0]} +${assigned.length - 1}`;
+  }
+
+  function formatKanbanDate(project) {
+    const value = project.publish_date || project.deadline;
+    if (!value) return "No date";
+    return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+      new Date(`${value}T00:00:00`),
+    );
+  }
 
   onMount(() => {
     if (SUPABASE_CONFIG_ERROR) {
@@ -564,20 +691,12 @@
   }
 
   function canMoveProjectToStatus(project, targetStatus) {
-    if (!project?.id || !targetStatus || project.status === targetStatus) return false;
-    if (isAdmin) return true;
-
-    return (
-      memberMovableStatuses.includes(project.status) &&
-      memberMovableStatuses.includes(targetStatus)
-    );
+    // Everyone can move a project to any column.
+    return Boolean(project?.id) && Boolean(targetStatus) && project.status !== targetStatus;
   }
 
   function canStartProjectDrag(project) {
-    if (!project?.id || movingProjectId === project.id) return false;
-    if (isAdmin) return true;
-
-    return memberMovableStatuses.includes(project.status);
+    return Boolean(project?.id) && movingProjectId !== project.id;
   }
 
   function canDropDraggedProject(targetStatus) {
@@ -642,12 +761,7 @@
 
     if (!project || project.status === status) return;
 
-    if (!canMoveProjectToStatus(project, status)) {
-      statusMoveError = isAdmin
-        ? "This project cannot be moved right now."
-        : "Members can move projects among production, copy, review, and stuck. Admin-only lanes stay protected.";
-      return;
-    }
+    if (!canMoveProjectToStatus(project, status)) return;
 
     if (shouldPromptForPublishSchedule(project, status)) {
       openPublishScheduler(project, status);
@@ -658,11 +772,7 @@
   }
 
   function shouldPromptForPublishSchedule(project, targetStatus) {
-    return (
-      isAdmin &&
-      targetStatus === "Ready to Publish" &&
-      project?.status !== targetStatus
-    );
+    return targetStatus === "Ready to Publish" && project?.status !== targetStatus;
   }
 
   function openPublishScheduler(project, targetStatus) {
@@ -1262,117 +1372,208 @@
             />
           {:else if activeView === "kanban"}
             <section aria-labelledby="kanban-title">
-              <Panel title="Kanban Board" id="kanban-title" loading={projectsLoading}>
-                <div class="mb-3 flex flex-col gap-3 rounded-card border border-ink/8 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <Panel title="Marketing Projects" id="kanban-title" loading={projectsLoading}>
+                <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Tabs
+                    tabs={KANBAN_VIEW_TABS}
+                    bind:active={kanbanViewMode}
+                    variant="segmented"
+                    label="Project view mode"
+                    hasPanels={false}
+                  />
                   <Button variant="primary" size="sm" icon={Plus} class="w-fit" onclick={openCreateDrawer}>
                     New project
                   </Button>
-                  <div class="min-w-0">
-                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-accent-strong">
-                      Swipe or use arrow keys
-                    </p>
-                    <p class="mt-1 text-sm font-semibold text-ink/70" aria-live="polite">
-                      {statuses[activeKanbanIndex]} · {activeKanbanIndex + 1} of {statuses.length}
-                    </p>
-                  </div>
+                </div>
 
-                  <div class="flex items-center justify-between gap-3 sm:justify-end">
-                    <Button
-                      iconOnly
-                      icon={ChevronLeft}
-                      label="Previous columns"
-                      onclick={() => scrollKanbanToIndex(activeKanbanIndex - 1)}
-                      disabled={activeKanbanIndex === 0}
-                    />
+                <div class="mb-3 grid gap-3 rounded-card border border-ink/8 bg-canvas/70 p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50 sm:col-span-2 xl:col-span-1">
+                    Search
+                    <span class="relative mt-2 block">
+                      <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" aria-hidden="true" />
+                      <input
+                        type="search"
+                        class="input pl-9"
+                        placeholder="Title, assignee, channel, notes"
+                        aria-label="Search projects"
+                        bind:value={kanbanSearch}
+                      />
+                    </span>
+                  </label>
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+                    Status
+                    <select class="select mt-2" bind:value={kanbanStatusFilter}>
+                      <option value="all">All</option>
+                      {#each statuses as status}<option value={status}>{status}</option>{/each}
+                    </select>
+                  </label>
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+                    Priority
+                    <select class="select mt-2" bind:value={kanbanPriorityFilter}>
+                      <option value="all">All</option>
+                      <option value="unset">Unset</option>
+                      {#each ["P0", "P1", "P2"] as priority}<option value={priority}>{priority}</option>{/each}
+                    </select>
+                  </label>
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+                    Assignee
+                    <select class="select mt-2" bind:value={kanbanAssigneeFilter}>
+                      <option value="all">All</option>
+                      {#each kanbanAssigneeOptions as email}<option value={email}>{email}</option>{/each}
+                    </select>
+                  </label>
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+                    Channel
+                    <select class="select mt-2" bind:value={kanbanChannelFilter}>
+                      <option value="all">All</option>
+                      {#each kanbanChannelOptions as channel}<option value={channel}>{channel}</option>{/each}
+                    </select>
+                  </label>
+                  <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+                    Copy
+                    <select class="select mt-2" bind:value={kanbanCopyFilter}>
+                      <option value="all">All</option>
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                  </label>
+                </div>
 
-                    <div class="flex items-center gap-0.5" aria-label="Kanban column position">
-                      {#each statuses as status, index}
+                <div class="mb-4 flex items-center justify-between gap-3">
+                  <p class="text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
+                    {filteredKanbanProjects.length} of {latestProjects.length} project{latestProjects.length === 1 ? "" : "s"}
+                  </p>
+                  {#if hasKanbanFilters}
+                    <Button size="sm" variant="ghost" onclick={clearKanbanFilters}>Clear filters</Button>
+                  {/if}
+                </div>
+
+                {#if kanbanViewMode === "list"}
+                  {#if filteredKanbanList.length}
+                    <div class="space-y-2">
+                      {#each filteredKanbanList as project (project.id)}
                         <button
                           type="button"
-                          class="group flex h-6 min-w-6 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
-                          aria-label={`Show ${status}`}
-                          aria-current={activeKanbanIndex === index ? "true" : undefined}
-                          onclick={() => scrollKanbanToIndex(index)}
+                          class="flex w-full flex-wrap items-center gap-3 rounded-control border border-ink/8 bg-white px-4 py-3 text-left transition hover:border-accent/40 hover:shadow-card"
+                          onclick={() => openKanbanProjectDetails(project)}
                         >
-                          <span
-                            class="h-2.5 rounded-full transition {activeKanbanIndex === index ? 'w-6 bg-accent' : 'w-2.5 bg-ink/20 group-hover:bg-ink/35'}"
-                            aria-hidden="true"
-                          ></span>
+                          <span class="min-w-0 flex-1">
+                            <span class="block truncate font-bold leading-snug text-ink">{project.title}</span>
+                            <span class="mt-1 block text-sm text-ink/55">{kanbanAssignedBrief(project)}</span>
+                          </span>
+                          {#if project.channel_tags?.length}
+                            <span class="hidden flex-wrap gap-1 md:flex">
+                              {#each project.channel_tags.slice(0, 3) as tag}
+                                <Badge tone="neutral" size="xs">{tag}</Badge>
+                              {/each}
+                            </span>
+                          {/if}
+                          <Badge tone={kanbanPriorityTone(project.priority)} size="xs">
+                            {project.priority || "Unset"}
+                          </Badge>
+                          <Badge tone={kanbanStatusTone(project.status)}>{project.status}</Badge>
+                          <span class="w-16 shrink-0 text-right text-xs font-bold text-ink/50">
+                            {formatKanbanDate(project)}
+                          </span>
                         </button>
                       {/each}
                     </div>
-
-                    <Button
-                      iconOnly
-                      icon={ChevronRight}
-                      label="Next columns"
-                      onclick={() => scrollKanbanToIndex(activeKanbanIndex + 1)}
-                      disabled={activeKanbanIndex === statuses.length - 1}
-                    />
-                  </div>
-                </div>
-
-                <div
-                  bind:this={kanbanScroller}
-                  class="kanban-scroll thin-scroll -mx-4 overflow-x-auto px-4 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 md:-mx-6 md:px-6"
-                  tabindex="0"
-                  aria-label="Scrollable Kanban columns. Use left and right arrows to move columns, and up and down arrows to scroll the active column."
-                  onscroll={handleKanbanScroll}
-                  onkeydown={handleKanbanKeydown}
-                >
-                  <div class="kanban-track grid gap-3">
-                    {#each statuses as status}
-                      <div
-                        class="snap-start flex h-[calc(100dvh-17rem)] min-h-[30rem] max-h-[46rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStatus === status ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''} {draggedProjectId && !canDropDraggedProject(status) ? 'opacity-75' : ''}"
-                        data-kanban-column
-                        ondragover={(event) => handleColumnDragOver(event, status)}
-                        ondragleave={(event) => handleColumnDragLeave(event, status)}
-                        ondrop={(event) => handleColumnDrop(event, status)}
-                      >
-                        <div class="mb-3 flex min-h-10 shrink-0 items-start justify-between gap-2">
-                          <div class="min-w-0">
-                            <h3 class="text-sm font-bold leading-tight text-ink">{status}</h3>
-                            {#if !isAdmin && !memberMovableStatuses.includes(status)}
-                              <Badge tone="gold" size="xs" class="mt-1 uppercase tracking-[0.1em]">
-                                <Lock class="h-3 w-3 shrink-0" aria-hidden="true" />
-                                Admin lane
-                              </Badge>
-                            {/if}
-                          </div>
-                          <div class="flex items-center gap-2">
-                            {#if dragOverStatus === status}
-                              <Badge tone="teal" variant="solid" size="xs">Drop</Badge>
-                            {/if}
-                            <Badge tone="neutral" size="xs">
-                              {statusCounts[status] || 0}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div
-                          class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1"
-                          aria-label={`${status} projects`}
-                          data-kanban-column-list
-                        >
-                          {#each projectsByStatus[status] || [] as project}
-                            <ProjectCard
-                              {project}
-                              compact={true}
-                              draggable={canStartProjectDrag(project)}
-                              isMoving={movingProjectId === project.id}
-                              onSelect={openKanbanProjectDetails}
-                              onDragStart={handleProjectDragStart}
-                              onDragEnd={handleProjectDragEnd}
-                            />
-                          {:else}
-                            <p class="rounded-card border border-dashed border-ink/15 bg-white px-3 py-4 text-center text-xs text-ink/45">
-                              Empty
-                            </p>
-                          {/each}
-                        </div>
+                  {:else}
+                    <p class="rounded-card border border-dashed border-ink/15 bg-white px-4 py-10 text-center text-sm text-ink/55">
+                      No projects match the current filters.
+                    </p>
+                  {/if}
+                {:else}
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="min-w-0 truncate text-sm font-semibold text-ink/70" aria-live="polite">
+                      {statuses[activeKanbanIndex]} · {activeKanbanIndex + 1} of {statuses.length}
+                    </p>
+                    <div class="flex shrink-0 items-center gap-3">
+                      <Button
+                        iconOnly
+                        icon={ChevronLeft}
+                        label="Previous columns"
+                        onclick={() => scrollKanbanToIndex(activeKanbanIndex - 1)}
+                        disabled={activeKanbanIndex === 0}
+                      />
+                      <div class="flex items-center gap-0.5" aria-label="Kanban column position">
+                        {#each statuses as status, index}
+                          <button
+                            type="button"
+                            class="group flex h-6 min-w-6 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                            aria-label={`Show ${status}`}
+                            aria-current={activeKanbanIndex === index ? "true" : undefined}
+                            onclick={() => scrollKanbanToIndex(index)}
+                          >
+                            <span
+                              class="h-2.5 rounded-full transition {activeKanbanIndex === index ? 'w-6 bg-accent' : 'w-2.5 bg-ink/20 group-hover:bg-ink/35'}"
+                              aria-hidden="true"
+                            ></span>
+                          </button>
+                        {/each}
                       </div>
-                    {/each}
+                      <Button
+                        iconOnly
+                        icon={ChevronRight}
+                        label="Next columns"
+                        onclick={() => scrollKanbanToIndex(activeKanbanIndex + 1)}
+                        disabled={activeKanbanIndex === statuses.length - 1}
+                      />
+                    </div>
                   </div>
-                </div>
+
+                  <div
+                    bind:this={kanbanScroller}
+                    class="kanban-scroll thin-scroll -mx-4 overflow-x-auto px-4 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 md:-mx-6 md:px-6"
+                    tabindex="0"
+                    aria-label="Scrollable Kanban columns. Use left and right arrows to move columns, and up and down arrows to scroll the active column."
+                    onscroll={handleKanbanScroll}
+                    onkeydown={handleKanbanKeydown}
+                  >
+                    <div class="kanban-track grid gap-3">
+                      {#each statuses as status}
+                        <div
+                          class="snap-start flex h-[calc(100dvh-22rem)] min-h-[28rem] max-h-[46rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStatus === status ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
+                          data-kanban-column
+                          ondragover={(event) => handleColumnDragOver(event, status)}
+                          ondragleave={(event) => handleColumnDragLeave(event, status)}
+                          ondrop={(event) => handleColumnDrop(event, status)}
+                        >
+                          <div class="mb-3 flex min-h-10 shrink-0 items-start justify-between gap-2">
+                            <h3 class="text-sm font-bold leading-tight text-ink">{status}</h3>
+                            <div class="flex items-center gap-2">
+                              {#if dragOverStatus === status}
+                                <Badge tone="teal" variant="solid" size="xs">Drop</Badge>
+                              {/if}
+                              <Badge tone="neutral" size="xs">{filteredByStatus[status]?.length || 0}</Badge>
+                            </div>
+                          </div>
+                          <div
+                            class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1"
+                            aria-label={`${status} projects`}
+                            data-kanban-column-list
+                          >
+                            {#each filteredByStatus[status] || [] as project (project.id)}
+                              <ProjectCard
+                                {project}
+                                compact={true}
+                                draggable={canStartProjectDrag(project)}
+                                isMoving={movingProjectId === project.id}
+                                onSelect={openKanbanProjectDetails}
+                                onDragStart={handleProjectDragStart}
+                                onDragEnd={handleProjectDragEnd}
+                              />
+                            {:else}
+                              <p class="rounded-card border border-dashed border-ink/15 bg-white px-3 py-4 text-center text-xs text-ink/45">
+                                {hasKanbanFilters ? "No matches" : "Empty"}
+                              </p>
+                            {/each}
+                          </div>
+                        </div>
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
               </Panel>
             </section>
           {:else if activeView === "calendar"}

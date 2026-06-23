@@ -58,13 +58,6 @@
     "Published",
     "Archived",
   ];
-  const memberMovableStatuses = [
-    "Ready for Production",
-    "In Production",
-    "Ready for Copy",
-    "Ready for Review",
-    "Stuck",
-  ];
   const priorityOptions = ["P0", "P1", "P2"];
   const projectSelectColumns =
     "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
@@ -81,7 +74,7 @@
     (email) => normalizeEmail(email) === normalizeEmail(currentUserEmail),
   );
   $: isCurrentUserAdmin = isOperationalAdmin(currentUserRole);
-  $: statusOptions = getStatusOptions(displayedProject?.status);
+  $: statusOptions = getStatusOptions();
   $: unlistedAssignedEmails = assignedEmails.filter(
     (email) =>
       !teamMembers.some((member) => normalizeEmail(member.email) === normalizeEmail(email)),
@@ -274,32 +267,15 @@
     return availableStatuses.length ? availableStatuses : defaultStatuses;
   }
 
-  function getStatusOptions(currentStatus) {
-    if (isCurrentUserAdmin) return getAllStatuses();
-    if (memberMovableStatuses.includes(currentStatus)) return memberMovableStatuses;
-    return currentStatus ? [currentStatus] : [];
-  }
-
-  function canMoveToStatus(targetStatus) {
-    if (!displayedProject?.id || targetStatus === displayedProject.status) return false;
-    if (isCurrentUserAdmin) return true;
-
-    return (
-      memberMovableStatuses.includes(displayedProject.status) &&
-      memberMovableStatuses.includes(targetStatus)
-    );
+  function getStatusOptions() {
+    // Everyone can move a project to any status now.
+    return getAllStatuses();
   }
 
   async function updateProjectStatus(targetStatus) {
     if (!displayedProject || statusSaving || targetStatus === displayedProject.status) return;
 
-    if (!canMoveToStatus(targetStatus)) {
-      statusError =
-        "Members can move projects among production, copy, review, and stuck. Admin-only lanes stay protected.";
-      return;
-    }
-
-    if (targetStatus === "Ready to Publish" && isCurrentUserAdmin) {
+    if (targetStatus === "Ready to Publish") {
       openPublishScheduler();
       return;
     }

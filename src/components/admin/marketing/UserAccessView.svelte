@@ -80,6 +80,19 @@
   $: adminCount = users.filter((user) => user.role === ROLE_ADMIN).length;
   $: invitedCount = users.filter((user) => user.account_status === "invited").length;
 
+  // Reactive view of the open drawer's draft + whether it differs from the saved
+  // user. These reference userDrafts/selectedUser directly so the Save button
+  // and form controls re-evaluate the moment a field (e.g. role) changes.
+  $: selectedDraft =
+    selectedUser && userDrafts[selectedUser.id]
+      ? userDrafts[selectedUser.id]
+      : { full_name: "", role: ROLE_MEMBER, modules: [] };
+  $: selectedDirty =
+    Boolean(selectedUser) &&
+    ((selectedDraft.full_name || "") !== (selectedUser?.full_name || "") ||
+      (selectedDraft.role || ROLE_MEMBER) !== (selectedUser?.role || ROLE_MEMBER) ||
+      !sameModules(selectedDraft.modules, selectedUser?.modules || []));
+
   onMount(() => {
     if (canManageUsers) {
       loadUsers();
@@ -302,7 +315,7 @@
   }
 
   async function saveSelectedUser() {
-    if (!selectedUser || !isDraftDirty(selectedUser)) return;
+    if (!selectedUser || !selectedDirty) return;
 
     const draft = getDraft(selectedUser.id);
 
@@ -586,7 +599,7 @@
     onClosed={handleDrawerClose}
   >
     {#if selectedUser}
-      {@const draft = getDraft(selectedUser.id)}
+      {@const draft = selectedDraft}
       <div class="space-y-4 px-5 py-5">
         <div class="rounded-control border border-ink/8 bg-canvas/60 px-4 py-3 text-sm">
           <p class="font-bold text-ink">{selectedUser.email}</p>
@@ -649,7 +662,7 @@
           class="flex-1"
           icon={Save}
           loading={savingUserId === selectedUser.id}
-          disabled={!isDraftDirty(selectedUser) || savingUserId === selectedUser.id}
+          disabled={!selectedDirty || savingUserId === selectedUser.id}
           onclick={saveSelectedUser}
         >
           {savingUserId === selectedUser.id ? "Saving" : "Save"}
