@@ -1,7 +1,10 @@
 export const galaTeaser = {
   slug: "noche-inolvidable-gala",
-  title: "Noche Inolvidable Gala",
-  shortTitle: "Noche Inolvidable",
+  // This year's gala has not been named yet; refer to it as the "Annual Gala"
+  // for now. `shortTitle` is the gold-foil-highlighted word shown before "Gala"
+  // in headings, so swap in the real name here once it's chosen.
+  title: "Annual Gala",
+  shortTitle: "Annual",
   startsAtISO: "2026-09-25T18:00:00-05:00",
   dateLabel: "Friday, September 25, 2026",
   shortDateLabel: "Sep 25",
