@@ -25,15 +25,15 @@ const isHome = pathname === base || pathname === `${base}/`;
                         class="h-8 w-8 md:h-10 md:w-10 transition-transform duration-300 group-hover:scale-110"
                     />
                     <span
-                        class="text-lg md:text-xl font-bold text-off-black tracking-tight group-hover:text-vibrant-pink transition-colors duration-300"
+                        class="text-lg 2xl:text-xl font-bold text-off-black tracking-tight whitespace-nowrap group-hover:text-vibrant-pink transition-colors duration-300"
                         >The Latina Sweat Project</span
                     >
                 </a>
             </div>
 
             {/* Desktop Navigation */}
-            <div class="hidden xl:flex items-center gap-8">
-                <nav class="flex items-center gap-6">
+            <div class="hidden xl:flex items-center gap-5 2xl:gap-8">
+                <nav class="flex items-center gap-4 2xl:gap-6 whitespace-nowrap">
                     <a
                         href={base}
                         class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
@@ -57,6 +57,14 @@ const isHome = pathname === base || pathname === `${base}/`;
                         class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Events
+                    </a>
+                    <a
+                        href={`${base}pride`}
+                        class="pride-nav-link relative z-10 flex items-center gap-1.5 py-2 text-base font-extrabold"
+                        aria-label="Celebrate Pride"
+                    >
+                        <span class="pride-nav-text">Pride</span>
+                        <span aria-hidden="true" class="text-sm leading-none">🏳️‍🌈</span>
                     </a>
                     <a
                         href={`${base}impact`}
@@ -165,7 +173,7 @@ const isHome = pathname === base || pathname === `${base}/`;
 
                 {/* CTAs */}
                 <div
-                    class="flex items-center gap-4 pl-4 border-l border-gray-200"
+                    class="flex items-center gap-3 2xl:gap-4 pl-3 2xl:pl-4 border-l border-gray-200 whitespace-nowrap"
                 >
                     <a
                         href={`${base}account`}
@@ -243,6 +251,23 @@ const isHome = pathname === base || pathname === `${base}/`;
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
             Home
+        </a>
+        <a
+            href={`${base}pride`}
+            class="mobile-link pride-mobile-card group my-1 flex items-center justify-center gap-3 rounded-xl px-4 py-3.5 shadow-lg"
+        >
+            <span class="text-2xl leading-none" aria-hidden="true">🏳️‍🌈</span>
+            <span class="flex flex-col text-left leading-tight">
+                <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
+                    Pride Month at LSP
+                </span>
+                <span class="text-xl font-extrabold text-white drop-shadow-sm">
+                    Celebrate Pride
+                </span>
+            </span>
+            <svg class="ml-1 h-4 w-4 text-white/90 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+            </svg>
         </a>
         <a
             href={`${base}about`}
@@ -594,3 +619,68 @@ const isHome = pathname === base || pathname === `${base}/`;
         }
     });
 </script>
+
+<style>
+    /* Pride nav items are revealed only while the Pride theme is active
+       (PrideTheme.astro adds html.pride-2026 before June 30, then removes it),
+       so the rainbow link self-hides after Pride Month with no manual takedown. */
+    .pride-nav-link,
+    .pride-mobile-card {
+        display: none;
+    }
+    :global(html.pride-2026) .pride-nav-link {
+        display: inline-flex;
+    }
+    :global(html.pride-2026) .pride-mobile-card {
+        display: flex;
+    }
+
+    /* Rainbow brand treatment for the desktop "Pride" word. */
+    .pride-nav-text {
+        /* Stops darkened so every glyph clears WCAG AA (4.5:1) on the white
+           header, even where the gradient lands on the warm/green band. */
+        background: linear-gradient(
+            90deg,
+            #e40303,
+            #b45309,
+            #15803d,
+            #2563eb,
+            #7c3aed
+        );
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        transition: background-position 0.5s ease;
+    }
+    .pride-nav-link:hover .pride-nav-text {
+        background-position: right center;
+    }
+
+    /* Filled rainbow card in the mobile menu. Uses the deeper, saturated
+       rainbow (no pale yellow/orange) so the white card text clears WCAG AA
+       on every stop. */
+    .pride-mobile-card {
+        background: linear-gradient(
+            90deg,
+            #be123c,
+            #c2410c,
+            #15803d,
+            #1d4ed8,
+            #7c3aed
+        );
+        background-size: 220% auto;
+        transition: background-position 0.5s ease;
+    }
+    .pride-mobile-card:hover {
+        background-position: right center;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pride-nav-text,
+        .pride-mobile-card {
+            transition: none;
+        }
+    }
+</style>

@@ -340,4 +340,51 @@
       transition: none;
     }
   }
+
+  /* ---- Shared Pride accents (homepage + events Pride sections) ----
+     Seasonal helpers kept here so the homepage and events placements share one
+     source of truth. Remove alongside the Pride sections after Pride Month. */
+  .lsp-pride-bar {
+    background: linear-gradient(
+      90deg,
+      #e40303,
+      #ff8c00,
+      #ffd000,
+      #008026,
+      #24408e,
+      #732982
+    );
+  }
+  /* Bright rainbow for text on DARK backgrounds (e.g. an off-black pill). */
+  .lsp-pride-text-bright {
+    background: linear-gradient(
+      90deg,
+      #ff5a5a,
+      #ff9e3d,
+      #ffe14d,
+      #4ade80,
+      #38bdf8,
+      #a78bfa
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  /* Deeper, saturated rainbow for text on LIGHT (cream) backgrounds, where pale
+     stops like yellow would be illegible. */
+  .lsp-pride-text-deep {
+    background: linear-gradient(
+      90deg,
+      #be123c,
+      #c2410c,
+      #15803d,
+      #1d4ed8,
+      #7c3aed
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
 }
