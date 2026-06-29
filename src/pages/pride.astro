@@ -148,6 +148,70 @@ const spotlights = [
     ],
   },
 ];
+
+// Pride history timeline. `node` is the saturated flag color for the dot on the
+// rainbow spine; `accent` is a brightened version used for legible text on the
+// dark page.
+const prideHistory = [
+  {
+    era: "Before Pride",
+    node: "#e40303",
+    accent: "#ff6b6b",
+    date: "The 1950s & '60s",
+    headline: "Raids, then resistance",
+    body: [
+      "Police raids on bars and the safe havens of queer life were common across the United States.",
+      "Through the 1950s and '60s, early LGBTQ+ activists began to unite and advocate for the simple right to exist, laying the foundation for everything that followed.",
+    ],
+  },
+  {
+    era: "Queer Liberation",
+    node: "#1f9e3a",
+    accent: "#4ade80",
+    date: "June 28, 1969",
+    headline: "The Stonewall Uprising",
+    body: [
+      "Demonstrations had begun as early as the 1950s, when activists gathered at Independence Hall to remind the country that queer citizens were denied basic civil rights.",
+      "Then, on June 28, 1969, queer folks resisted a police raid at the Stonewall Inn in New York City. The uprising sparked days of protest and became one of the most documented turning points in the movement.",
+      "On its first anniversary, activists organized the Christopher Street Liberation Day March in New York, with sister marches in Los Angeles, Chicago, and San Francisco.",
+    ],
+  },
+  {
+    era: "Chicago Pride History",
+    node: "#732982",
+    accent: "#c4a5f5",
+    date: "June 27, 1970",
+    headline: "Chicago marches",
+    body: [
+      "Chicago held its first Pride march, one of the first U.S. cities to commemorate the anniversary of Stonewall.",
+      "It began at Washington Square Park and traveled to the Water Tower, the start of a tradition our city still carries today.",
+    ],
+  },
+];
+
+// Movement elders honored in the tribute. Bios drawn from the cited sources;
+// both were trans women of color central to Stonewall and co-founders of STAR.
+const activists = [
+  {
+    initials: "MJ",
+    name: "Marsha P. Johnson",
+    years: "1945 to 1992",
+    role: "Stonewall vanguard · Co-founder of STAR",
+    quote: "Pay it no mind.",
+    quoteNote: "her answer when asked what the “P” stood for",
+    bio: "A Black trans woman, performer, and self-described drag queen, Marsha was a central figure in the 1969 Stonewall Uprising and, with Sylvia Rivera, co-founded STAR (Street Transvestite Action Revolutionaries) to shelter homeless queer and trans youth. Known as the “Saint of Christopher Street,” she later poured herself into AIDS activism, helping lay the foundation for the modern trans and queer liberation movements.",
+  },
+  {
+    initials: "SR",
+    name: "Sylvia Rivera",
+    years: "1951 to 2002",
+    role: "Gay Liberation Front · Co-founder of STAR",
+    quote:
+      "If it wasn't for the drag queen, there would be no gay liberation movement. We're the front-liners.",
+    quoteNote: "Christopher Street Liberation Day rally, 1973",
+    bio: "Of Puerto Rican and Venezuelan heritage, Sylvia was a Latina trans activist and a key figure at Stonewall who co-founded both the Gay Liberation Front and STAR. She fought fiercely so that trans people and queer people of color would never be left out of the movement. The Sylvia Rivera Law Project carries her name, and she became the first trans activist honored in the National Portrait Gallery.",
+  },
+];
 ---
 
 <Layout
@@ -158,6 +222,7 @@ const spotlights = [
   <main class="bg-off-black text-white">
     {/* ===================== HERO ===================== */}
     <section class="relative overflow-hidden py-20 sm:py-28">
+      <div class="pride-aurora" aria-hidden="true"></div>
       <div class="pride-bar absolute inset-x-0 top-0 h-1.5"></div>
 
       {/* Sparkle texture (echoes the spotlight cards) */}
@@ -183,7 +248,7 @@ const spotlights = [
 
         <h1 class="mt-6 font-display text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
           Celebrating
-          <span class="mt-1 block pride-text">Pride in Chicago</span>
+          <span class="mt-1 block pride-text pride-flow">Pride in Chicago</span>
         </h1>
 
         <p class="mx-auto mt-7 max-w-2xl font-body text-lg leading-relaxed text-white/75 sm:text-xl">
@@ -216,6 +281,145 @@ const spotlights = [
       </div>
 
       <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+    </section>
+
+    {/* ===================== ROOTS OF PRIDE (history timeline) ===================== */}
+    <section id="roots" class="relative scroll-mt-28 overflow-hidden py-16 sm:py-20">
+      <div class="absolute -left-24 top-1/4 h-72 w-1/2 rounded-full bg-[#e40303]/10 blur-[130px]"></div>
+      <div class="absolute -right-24 bottom-1/4 h-72 w-1/2 rounded-full bg-[#732982]/12 blur-[130px]"></div>
+
+      <div class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal text-center">
+          <p class="text-xs font-extrabold uppercase tracking-[0.25em] pride-text">Why we march</p>
+          <h2 class="mt-3 font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+            Pride is more than a celebration
+          </h2>
+          <p class="mx-auto mt-5 max-w-2xl font-body text-lg leading-relaxed text-white/75">
+            It's a reminder of how far our community came to make sure that we,
+            queer people today, have the guidance and strength to keep fighting
+            for the right to exist.
+          </p>
+        </div>
+
+        <ol class="pride-timeline relative mt-12 sm:mt-16">
+          {
+            prideHistory.map((item) => (
+              <li class="reveal pride-timeline-item relative">
+                <span class="pride-timeline-node" style={`--node:${item.node}`} aria-hidden="true" />
+                <div class="flex flex-wrap items-center gap-2.5">
+                  <p class="text-[11px] font-extrabold uppercase tracking-[0.25em]" style={`color:${item.accent}`}>
+                    {item.era}
+                  </p>
+                  <span
+                    class="inline-flex items-center rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+                    style={`color:${item.accent}; background:${item.node}1f; border:1px solid ${item.node}55`}
+                  >
+                    {item.date}
+                  </span>
+                </div>
+                <h3 class="mt-2 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  {item.headline}
+                </h3>
+                <div class="mt-3 space-y-3">
+                  {item.body.map((para) => (
+                    <p class="font-body text-[15px] leading-relaxed text-white/70">{para}</p>
+                  ))}
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    {/* ===================== ACTIVISTS WHO LIT THE WAY ===================== */}
+    <section class="relative overflow-hidden py-16 sm:py-20">
+      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+      <div class="absolute left-1/2 top-1/3 h-64 w-2/3 -translate-x-1/2 rounded-full bg-[#5BCEFA]/[0.08] blur-[130px]"></div>
+
+      <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal mb-10 text-center sm:mb-12">
+          <p class="text-xs font-extrabold uppercase tracking-[0.25em] pride-text">Honoring our elders</p>
+          <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            The activists who lit the way
+          </h2>
+          <p class="mx-auto mt-4 max-w-2xl font-body text-base text-white/60 sm:text-lg">
+            Again and again, the movement was led by trans women of color. Two of
+            them lit the way for everyone who came after.
+          </p>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+          {
+            activists.map((a) => (
+              <article class="reveal relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-7 shadow-xl shadow-black/20 sm:p-8">
+                <div class="trans-rule absolute inset-x-0 top-0 h-1" />
+                <div class="flex items-center gap-4">
+                  <div class="activist-emblem">
+                    <span aria-hidden="true">{a.initials}</span>
+                  </div>
+                  <div>
+                    <h3 class="font-display text-2xl font-bold leading-tight tracking-tight text-white sm:text-[1.7rem]">
+                      {a.name}
+                    </h3>
+                    <p class="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">{a.years}</p>
+                    <p class="mt-1 text-[11px] font-bold uppercase tracking-wider text-[#f5a9b8]">{a.role}</p>
+                  </div>
+                </div>
+
+                <figure class="mt-6 border-l-2 border-[#F5A9B8] pl-4">
+                  <blockquote class="font-display text-lg italic leading-snug text-white/90 sm:text-xl">
+                    &ldquo;{a.quote}&rdquo;
+                  </blockquote>
+                  <figcaption class="mt-2 text-[11px] uppercase tracking-wider text-white/40">{a.quoteNote}</figcaption>
+                </figure>
+
+                <p class="mt-5 font-body text-[15px] leading-relaxed text-white/70">{a.bio}</p>
+              </article>
+            ))
+          }
+        </div>
+
+        <p class="reveal mt-8 text-center text-xs text-white/40">
+          Histories drawn from{" "}
+          <a href="https://en.wikipedia.org/wiki/Marsha_P._Johnson" target="_blank" rel="noopener noreferrer" class="font-semibold text-white/60 underline decoration-white/20 underline-offset-2 transition-colors hover:text-white">Wikipedia</a>,
+          the{" "}
+          <a href="https://www.womenshistory.org/education-resources/biographies/sylvia-rivera" target="_blank" rel="noopener noreferrer" class="font-semibold text-white/60 underline decoration-white/20 underline-offset-2 transition-colors hover:text-white">National Women's History Museum</a>, and{" "}
+          <a href="https://www.biography.com/activists/marsha-p-johnson" target="_blank" rel="noopener noreferrer" class="font-semibold text-white/60 underline decoration-white/20 underline-offset-2 transition-colors hover:text-white">Biography</a>.
+        </p>
+      </div>
+    </section>
+
+    {/* ===================== HAUS OF LSP (mission) ===================== */}
+    <section class="relative overflow-hidden py-16 sm:py-20">
+      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+      <div class="absolute -right-24 top-0 h-72 w-1/2 rounded-full bg-[#732982]/12 blur-[130px]"></div>
+      <div class="absolute -left-24 bottom-0 h-72 w-1/2 rounded-full bg-[#e40303]/[0.08] blur-[130px]"></div>
+
+      <div class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/30 sm:p-10">
+          <div class="pride-bar-v absolute inset-y-0 left-0 w-1.5"></div>
+          <p class="text-xs font-extrabold uppercase tracking-[0.25em] pride-text">Latina Sweat's Pride mission</p>
+          <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">Haus of LSP</h2>
+
+          <p class="mt-5 font-body text-base leading-relaxed text-white/75 sm:text-lg">
+            At the Latina Sweat Project, we honor the powerful queer leaders who
+            came before us and uplift the queer leaders standing with us today. We
+            believe it is imperative to acknowledge the social and political moment
+            we are in, to question what gets normalized, and to remember that it is
+            our right as humans to unite and resist what is harmful and unjust.
+          </p>
+          <p class="mt-4 font-body text-base leading-relaxed text-white/75 sm:text-lg">
+            Haus of LSP has become our symbol of a safe haven for the queer
+            community across the Southwest Side of Chicago. Here, we are devoted to
+            amplifying queer presence, representation, and liberation.
+          </p>
+
+          <blockquote class="mt-7 font-display text-2xl font-bold italic leading-snug sm:text-3xl">
+            <span class="pride-text pride-flow">The liberation of our community, our people, ourselves.</span>
+          </blockquote>
+        </div>
+      </div>
     </section>
 
     {/* ===================== HONORING STATEMENT ===================== */}
@@ -568,6 +772,49 @@ const spotlights = [
     color: transparent;
   }
 
+  /* ---- Dynamic Pride motion (all disabled under reduced motion) ---- */
+
+  /* Flowing rainbow on the hero title + mission pull-quote. The gradient
+     repeats its first color so the stream loops seamlessly. */
+  .pride-flow {
+    animation: pride-hue 11s linear infinite;
+  }
+  /* Cycles the hue of the full rainbow gradient, so the text always reads as a
+     complete rainbow while gently shifting through the spectrum. */
+  @keyframes pride-hue {
+    to {
+      filter: hue-rotate(360deg);
+    }
+  }
+
+  /* Slow-rotating, heavily blurred rainbow aurora behind the hero. Sits behind
+     the (relatively positioned) hero content; the hero clips it via overflow. */
+  .pride-aurora {
+    position: absolute;
+    inset: -35%;
+    pointer-events: none;
+    border-radius: 9999px;
+    background: conic-gradient(
+      from 0deg,
+      #e40303,
+      #ff8c00,
+      #ffd000,
+      #008026,
+      #24408e,
+      #732982,
+      #e40303
+    );
+    filter: blur(110px);
+    opacity: 0.22;
+    animation: pride-aurora-spin 32s linear infinite;
+    will-change: transform;
+  }
+  @keyframes pride-aurora-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
   /* ---- Swipeable spotlight deck ---- */
   .spotlight-deck {
     --deck-accent: #9333ea;
@@ -692,6 +939,114 @@ const spotlights = [
     .deck-track {
       scroll-behavior: auto;
     }
+    .pride-aurora,
+    .pride-timeline-node,
+    .pride-flow {
+      animation: none;
+    }
+  }
+
+  /* ---- Pride history timeline ---- */
+  .pride-timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(
+      180deg,
+      #e40303,
+      #ff8c00,
+      #ffd000,
+      #008026,
+      #24408e,
+      #732982
+    );
+    opacity: 0.5;
+  }
+  .pride-timeline-item {
+    padding-left: 3rem;
+    padding-bottom: 2.75rem;
+  }
+  .pride-timeline-item:last-child {
+    padding-bottom: 0;
+  }
+  .pride-timeline-node {
+    position: absolute;
+    left: 1px;
+    top: 0.35rem;
+    height: 14px;
+    width: 14px;
+    border-radius: 9999px;
+    background: var(--node);
+    /* Ring matches the page bg so the node reads as a bead on the spine. */
+    box-shadow:
+      0 0 0 4px #1e1e1e,
+      0 0 16px 1px var(--node);
+    animation: pride-node-pulse 3.6s ease-in-out infinite;
+  }
+  @keyframes pride-node-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 4px #1e1e1e,
+        0 0 9px 0 var(--node);
+    }
+    50% {
+      box-shadow:
+        0 0 0 4px #1e1e1e,
+        0 0 22px 3px var(--node);
+    }
+  }
+  @media (min-width: 640px) {
+    .pride-timeline-item {
+      padding-left: 3.5rem;
+    }
+  }
+
+  /* ---- Activist tribute (trans-flag accents) ---- */
+  .trans-rule {
+    background: linear-gradient(
+      90deg,
+      #5bcefa,
+      #f5a9b8,
+      #ffffff,
+      #f5a9b8,
+      #5bcefa
+    );
+  }
+  .activist-emblem {
+    height: 84px;
+    width: 84px;
+    flex: none;
+    border-radius: 9999px;
+    padding: 3px;
+    background: conic-gradient(
+      from 210deg,
+      #5bcefa,
+      #f5a9b8,
+      #ffffff,
+      #5bcefa,
+      #f5a9b8,
+      #5bcefa
+    );
+    box-shadow: 0 0 26px -8px rgba(91, 206, 250, 0.55);
+  }
+  .activist-emblem > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    background: #171717;
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
   }
 </style>
 
