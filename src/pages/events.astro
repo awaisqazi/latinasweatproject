@@ -4,10 +4,14 @@ import Header from "@/components/Header.astro";
 import EventsList from "@/components/EventsList.svelte";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
-import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
+import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
+// Lowest live ticket price, for the early-bird note near the gala CTAs.
+const galaFromPrice = Math.min(
+  ...galaTickets.tiers.map((tier) => tier.earlyBird),
+);
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice.
 const featuredSlugs = [
@@ -90,25 +94,32 @@ const featuredSlugs = [
 
             <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
               <a
-                href={galaPageUrl}
+                href={galaTeaser.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                data-conversion-event="gala_ticket_click"
+                data-conversion-context="events_featured_gala"
               >
-                Explore the Gala
+                {galaTeaser.ticketsLabel}
                 <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
               <a
-                href={galaTeaser.interestFormUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={galaPageUrl}
                 class="inline-flex items-center gap-3 rounded-full border border-accent-gold/45 bg-white/[0.04] px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
-                data-conversion-event="gala_interest_start"
-                data-conversion-context="events_featured_gala"
               >
-                {galaTeaser.interestLabel}
+                Explore the Gala
               </a>
             </div>
+            <p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-accent-gold/90 lg:justify-start">
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/30 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                On sale now
+              </span>
+              {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
+            </p>
           </div>
         </div>
       </div>

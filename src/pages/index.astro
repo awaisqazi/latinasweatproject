@@ -5,11 +5,15 @@ import TestimonialCard from "@/components/TestimonialCard.astro";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import GalaImpactStats from "@/components/GalaImpactStats.astro";
-import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
+import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
+// Lowest live ticket price, for the early-bird note near the gala CTAs.
+const galaFromPrice = Math.min(
+  ...galaTickets.tiers.map((tier) => tier.earlyBird),
+);
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -174,25 +178,32 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
               </div>
               <div class="mt-7 flex flex-col gap-3 sm:flex-row">
                 <a
-                  href={galaPageUrl}
+                  href={galaTeaser.ticketsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   class="btn group inline-flex items-center justify-center gap-3 rounded-full bg-accent-gold px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-[1.02]"
+                  data-conversion-event="gala_ticket_click"
+                  data-conversion-context="home_gala_band"
                 >
-                  Explore the Gala
+                  {galaTeaser.ticketsLabel}
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>
                 </a>
                 <a
-                  href={galaTeaser.interestFormUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={galaPageUrl}
                   class="inline-flex items-center justify-center rounded-full border border-accent-gold/50 px-7 py-4 text-base font-extrabold text-white transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
-                  data-conversion-event="gala_interest_start"
-                  data-conversion-context="home_gala_band"
                 >
-                  {galaTeaser.interestLabel}
+                  Explore the Gala
                 </a>
               </div>
+              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/30 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                  On sale now
+                </span>
+                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
+              </p>
             </div>
 
             <div class="group space-y-4">
@@ -1589,6 +1600,8 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
           <a
             href={galaPageUrl}
             class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+            data-conversion-event="gala_ticket_click"
+            data-conversion-context="home_events_carousel_gala"
           >
             <div
               class="relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent-gold/35 bg-off-black text-white shadow-xl shadow-off-black/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent-gold/20"
@@ -1599,12 +1612,16 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
                   variant="carousel"
                   label={false}
                 />
-                <div class="absolute top-3 left-3 flex gap-2">
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
                   <span class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
                     Gala
                   </span>
                   <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
                     Black tie
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/50 bg-off-black/70 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold backdrop-blur-sm shadow-md">
+                    <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                    On Sale Now
                   </span>
                 </div>
               </div>
@@ -1622,11 +1639,11 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
                   {galaTeaser.venueName}
                 </p>
                 <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
-                  {galaTeaser.statusLabel}. Save the date for a black-tie night
-                  of art, movement, and community.
+                  {galaTeaser.statusLabel}. Claim your seat for a black-tie
+                  night of art, movement, and community.
                 </p>
                 <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
-                  Save the Date
+                  Get Tickets
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>

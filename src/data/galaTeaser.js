@@ -15,11 +15,16 @@ export const galaTeaser = {
   venueAddress: "220 E Chicago Ave, Chicago, IL",
   venueLine: "Museum of Contemporary Art Chicago · 220 E Chicago Ave",
   attire: "Black tie",
-  statusLabel: "Tickets and sponsorships coming soon",
+  statusLabel: "Tickets and sponsorships are on sale now",
   pagePath: "/gala",
   saveDatePath: "/gala#save-the-date",
-  // On-page anchor used by the hero "Save the Date" button to scroll to the
-  // closing invitation. The closing CTA links out to the live Zeffy form.
+  // Live Zeffy ticketing form (tickets AND sponsorships). CTAs across the site
+  // should point here now that sales are open.
+  ticketsUrl:
+    "https://www.zeffy.com/en-US/ticketing/lsp-museum-of-contemporary-art-chicago-2026-gala",
+  ticketsLabel: "Get Tickets",
+  // Legacy pre-sales interest list, kept for reference; no live CTA should
+  // point here anymore.
   interestUrl: "#gala-interest",
   interestFormUrl:
     "https://www.zeffy.com/en-US/ticketing/noche-inolvidable-gala-interest-list",
@@ -33,6 +38,96 @@ export const galaTeaser = {
   missionDescription:
     "The gala supports Latina leadership, wellness access, and culturally rooted care across Chicago.",
 };
+
+// Ticket + sponsorship pricing for the live 2026 sale. Facts match the Zeffy
+// form and the printed two-pager: early bird July 1-31, regular from August 1,
+// Benefactor and all sponsorships close September 15, Supporter sells through
+// event day. Keep these exact; they appear on printed material too.
+export const galaTickets = {
+  ticketsUrl: galaTeaser.ticketsUrl,
+  earlyBirdLabel: "Early-bird pricing through July 31",
+  regularLabel: "Regular pricing from August 1",
+  tiers: [
+    {
+      id: "benefactor",
+      eyebrow: "Benefactor",
+      name: "The Full Evening",
+      earlyBird: 325,
+      regular: 375,
+      accessLabel: "From 6 PM",
+      description:
+        "Cocktail hour with the all-female Mariachi Sirena, a three-course seated dinner with a live violinist, live bidding, museum garden access, then the full late-night celebration.",
+      closesLabel: "Ticket sales close September 15, 2026",
+    },
+    {
+      id: "supporter",
+      eyebrow: "Supporter",
+      name: "Late Night Access",
+      earlyBird: 200,
+      regular: 225,
+      accessLabel: "From 9 PM",
+      description:
+        "Step in as the night comes alive: full gallery access, open bar, the awards presentation, the fourth-floor fashion show, and dancing with DJ Barbie until midnight.",
+      closesLabel: "On sale through event day, September 25, 2026",
+    },
+  ],
+  sponsorships: [
+    {
+      name: "Presenting Sponsor",
+      amount: 10000,
+      seats: "Table of 20",
+      note: "Limited to two partners",
+    },
+    { name: "Gold Sponsor", amount: 5000, seats: "Table of 10" },
+    { name: "Community Sponsor", amount: 2500, seats: "5 tickets" },
+  ],
+  sponsorshipsCloseLabel: "Sponsorships close September 15, 2026",
+};
+
+// The evening, hour by hour, mirroring the printed two-pager's timeline.
+// `at` is the stop's position along the 6 PM → midnight track (0..1, i.e.
+// hours-after-6pm / 6). `tiers` lists which ticket tiers are in the room.
+// Facts match the Zeffy form and the printed flyer; keep them exact.
+export const galaEvening = [
+  {
+    time: "6 PM",
+    title: "Cocktail hour",
+    detail:
+      "The all-female Mariachi Sirena performs. Museum garden open until 9 PM.",
+    at: 0,
+    tiers: ["benefactor"],
+  },
+  {
+    time: "7 PM",
+    title: "Seated dinner",
+    detail:
+      "Three courses with a live violinist, then live bidding to support the mission.",
+    at: 1 / 6,
+    tiers: ["benefactor"],
+  },
+  {
+    time: "9 PM",
+    title: "Museum after dark",
+    detail:
+      "Full gallery access and open bar until midnight. Awards presentation.",
+    at: 3 / 6,
+    tiers: ["benefactor", "supporter"],
+  },
+  {
+    time: "10 PM",
+    title: "Fashion show",
+    detail: "Fourth floor, 10 to 11 PM, then dancing with DJ Barbie.",
+    at: 4 / 6,
+    tiers: ["benefactor", "supporter"],
+  },
+  {
+    time: "12 AM",
+    title: "Last dance",
+    detail: "The night ends at midnight.",
+    at: 1,
+    tiers: ["benefactor", "supporter"],
+  },
+];
 
 export const galaDetails = [
   {

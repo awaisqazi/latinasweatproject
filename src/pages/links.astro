@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
-import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
+import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 const base = import.meta.env.BASE_URL;
 const galaPageUrl = `${base}${galaTeaser.pagePath.replace(/^\//, "")}`;
 
@@ -353,6 +353,122 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
+      {/* Gala Featured Card */}
+      <div
+        id="gala-card"
+        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;"
+      >
+        <div
+          class="absolute inset-0 opacity-[0.12]"
+          style="background-image: linear-gradient(rgba(255,189,89,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.35) 1px, transparent 1px); background-size: 34px 34px;"
+        >
+        </div>
+        <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
+          <a href={galaPageUrl} class="block">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#1E1E1E] text-[11px] font-extrabold tracking-tight text-[#ffbd59] shadow-lg shadow-[#ffbd59]/10">
+                  LSP
+                </span>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
+                      <span class="lang-en">Featured</span>
+                      <span class="lang-es hidden">Destacado</span>
+                    </p>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-[#ffbd59] px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
+                      <span class="relative flex h-1 w-1">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1E1E1E] opacity-60" />
+                        <span class="relative inline-flex h-1 w-1 rounded-full bg-[#1E1E1E]" />
+                      </span>
+                      <span class="lang-en">On Sale Now</span>
+                      <span class="lang-es hidden">A la Venta</span>
+                    </span>
+                  </div>
+                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+                    <span class="lang-en">{galaTeaser.shortDateTimeLabel}</span>
+                    <span class="lang-es hidden">25 Sep · 6 PM CT</span>
+                  </p>
+                </div>
+              </div>
+              <span class="rounded-full bg-[#ffbd59] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
+                <span class="lang-en">{galaTeaser.attire}</span>
+                <span class="lang-es hidden">Etiqueta formal</span>
+              </span>
+            </div>
+
+            <div class="grid gap-4">
+              <div>
+                <h2 class="font-display text-3xl font-bold leading-[1.0] tracking-tight text-white">
+                  <span class="lang-en"
+                    ><span class="gala-foil">{galaTeaser.shortTitle}</span> Gala</span
+                  >
+                  <span class="lang-es hidden"
+                    >Gala <span class="gala-foil">Anual</span></span
+                  >
+                </h2>
+                <p class="mt-3 text-[13px] font-semibold leading-relaxed text-white/65">
+                  <span class="lang-en">
+                    Black-tie evening for art, movement, and community at {galaTeaser.venueName}.
+                  </span>
+                  <span class="lang-es hidden">
+                    Una noche de gala formal para arte, movimiento y comunidad en el Museo de Arte Contemporáneo de Chicago.
+                  </span>
+                </p>
+              </div>
+
+              <GalaPhotoFrame slot={galaPhotos.facade} variant="links" corners />
+            </div>
+          </a>
+
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            {
+              galaTickets.tiers.map((tier) => (
+                <div class="rounded-lg border border-[#ffbd59]/25 bg-black/40 px-3 py-2">
+                  <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/70">
+                    <span class="lang-en">{tier.id === "benefactor" ? "Full Evening" : "Late Night"}</span>
+                    <span class="lang-es hidden">{tier.id === "benefactor" ? "Velada completa" : "Acceso nocturno"}</span>
+                  </p>
+                  <p class="mt-0.5 text-sm font-extrabold text-[#ffbd59]">
+                    ${tier.earlyBird}
+                    <span class="text-[10px] font-bold uppercase tracking-wide text-white/70">
+                      <span class="lang-en">early bird</span>
+                      <span class="lang-es hidden">early bird</span>
+                    </span>
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+          <p class="mt-2 text-center text-[10px] font-semibold text-white/70">
+            <span class="lang-en">{galaTickets.earlyBirdLabel}</span>
+            <span class="lang-es hidden">Precio early bird hasta el 31 de julio</span>
+          </p>
+
+          <a
+            href={galaTeaser.ticketsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-conversion-event="gala_ticket_click"
+            data-conversion-context="links_gala_card"
+            class="gala-sheen mt-4 flex items-center justify-between rounded-xl bg-[#ffbd59] px-4 py-3 text-[#1E1E1E]"
+          >
+            <span class="relative z-[1] text-sm font-extrabold">
+              <span class="lang-en">Get Tickets</span>
+              <span class="lang-es hidden">Compra Boletos</span>
+            </span>
+            <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+            <span class="lang-en">{galaTeaser.statusLabel}</span>
+            <span class="lang-es hidden">Boletos y patrocinios a la venta</span>
+          </p>
+        </div>
+      </div>
+
       {/* Quick Links Section Divider */}
       <div class="flex items-center gap-3 mb-6" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 130ms;">
         <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/15"></div>
@@ -561,82 +677,8 @@ const getLinkConversionProvider = (url = "") => {
         }
       </div>
 
-      {/* Gala Featured Card */}
-      <a
-        href={galaPageUrl}
-        id="gala-card"
-        class="group relative mb-8 block scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 92ms;"
-      >
-        <div
-          class="absolute inset-0 opacity-[0.12]"
-          style="background-image: linear-gradient(rgba(255,189,89,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.35) 1px, transparent 1px); background-size: 34px 34px;"
-        >
-        </div>
-        <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
-          <div class="mb-4 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#1E1E1E] text-[11px] font-extrabold tracking-tight text-[#ffbd59] shadow-lg shadow-[#ffbd59]/10">
-                LSP
-              </span>
-              <div>
-                <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
-                  <span class="lang-en">Featured</span>
-                  <span class="lang-es hidden">Destacado</span>
-                </p>
-                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-                  <span class="lang-en">{galaTeaser.shortDateTimeLabel}</span>
-                  <span class="lang-es hidden">25 Sep · 6 PM CT</span>
-                </p>
-              </div>
-            </div>
-            <span class="rounded-full bg-[#ffbd59] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
-              <span class="lang-en">{galaTeaser.attire}</span>
-              <span class="lang-es hidden">Etiqueta formal</span>
-            </span>
-          </div>
-
-          <div class="grid gap-4">
-            <div>
-              <h2 class="font-display text-3xl font-bold leading-[1.0] tracking-tight text-white">
-                <span class="lang-en"
-                  ><span class="gala-foil">{galaTeaser.shortTitle}</span> Gala</span
-                >
-                <span class="lang-es hidden"
-                  >Gala <span class="gala-foil">Anual</span></span
-                >
-              </h2>
-              <p class="mt-3 text-[13px] font-semibold leading-relaxed text-white/65">
-                <span class="lang-en">
-                  Black-tie evening for art, movement, and community at {galaTeaser.venueName}.
-                </span>
-                <span class="lang-es hidden">
-                  Una noche de gala formal para arte, movimiento y comunidad en el Museo de Arte Contemporáneo de Chicago.
-                </span>
-              </p>
-            </div>
-
-            <GalaPhotoFrame slot={galaPhotos.facade} variant="links" corners />
-          </div>
-
-          <div class="gala-sheen mt-4 flex items-center justify-between rounded-xl bg-[#ffbd59] px-4 py-3 text-[#1E1E1E]">
-            <span class="relative z-[1] text-sm font-extrabold">
-              <span class="lang-en">Save the Date</span>
-              <span class="lang-es hidden">Reserva la Fecha</span>
-            </span>
-            <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </div>
-          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
-            <span class="lang-en">{galaTeaser.statusLabel}</span>
-            <span class="lang-es hidden">Boletos y patrocinios próximamente</span>
-          </p>
-        </div>
-      </a>
-
       {/* Free Classes · Two Locations Promo · MAIN CTA */}
-      <div class="free-hero relative mb-8 scroll-mt-24" id="free-classes" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;">
+      <div class="free-hero relative mb-8 scroll-mt-24" id="free-classes" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 540ms;">
         {/* Outer glow ring */}
         <div class="free-hero-glow absolute -inset-2 rounded-3xl opacity-70 blur-xl pointer-events-none"></div>
 
