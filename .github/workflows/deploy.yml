@@ -51,22 +51,38 @@ jobs:
         with:
           path: ./dist
 
-      # deploy-pages clamps its timeout input to 10 minutes, but GitHub's
-      # Pages queue sometimes runs slower than that (2026-07-02 backlog had
-      # 10-25 minute waits), which aborts the step and cancels the deployment.
-      # Each retry submits a fresh deployment with its own 10-minute window.
       - name: Deploy to GitHub Pages
         id: deployment
         continue-on-error: true
         uses: actions/deploy-pages@v4
 
-      - name: Deploy to GitHub Pages (retry 1)
-        id: deployment_retry_1
+      # deploy-pages hard-caps its wait at 10 minutes, then cancels its own
+      # deployment — but GitHub's Pages queue sometimes runs slower than that
+      # and the cancel often loses the race, so the deployment still lands
+      # minutes after the step "failed" (observed repeatedly 2026-07-02).
+      # Same-SHA retries are useless (they instantly read the cancelled
+      # state), so instead keep polling the deployment status and let the run
+      # go green if the deployment makes it out of the queue.
+      - name: Wait out slow Pages queue
         if: steps.deployment.outcome == 'failure'
-        continue-on-error: true
-        uses: actions/deploy-pages@v4
-
-      - name: Deploy to GitHub Pages (retry 2)
-        id: deployment_retry_2
-        if: steps.deployment.outcome == 'failure' && steps.deployment_retry_1.outcome == 'failure'
-        uses: actions/deploy-pages@v4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "deploy-pages gave up; polling the deployment for up to 20 more minutes"
+          for i in $(seq 1 80); do
+            STATUS=$(gh api "repos/${GITHUB_REPOSITORY}/pages/deployments/${GITHUB_SHA}" --jq .status 2>/dev/null || echo unknown)
+            echo "$(date -u +%H:%M:%S) status: ${STATUS:-unknown}"
+            case "$STATUS" in
+              succeed)
+                echo "Deployment landed despite the timeout."
+                exit 0
+                ;;
+              deployment_failed|deployment_content_failed|deployment_attempt_error)
+                echo "Deployment failed server-side."
+                exit 1
+                ;;
+            esac
+            sleep 15
+          done
+          echo "Deployment never left the queue. Re-run this workflow (a fresh commit works best; same-SHA re-runs may read the cancelled state)."
+          exit 1
