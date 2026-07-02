@@ -303,7 +303,7 @@
       <div class="prospect-kanban-track grid gap-3">
         {#each PROSPECT_STAGES as stage}
           <div
-            class="snap-start flex min-h-[24rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStage === stage ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
+            class="snap-start flex h-[calc(100dvh-13rem)] min-h-[24rem] max-h-[44rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStage === stage ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
             role="region"
             aria-label={`${stage} prospects`}
             ondragover={(event) => handleStageDragOver(event, stage)}
@@ -322,7 +322,7 @@
               </div>
             </div>
 
-            <div class="flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
+            <div class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
               {#each prospectsByStage[stage] || [] as prospect (prospect.id)}
                 <div
                   class="rounded-control border border-ink/8 bg-white shadow-card transition {movingIds.has(prospect.id) ? 'opacity-60' : ''} {draggedProspectId === prospect.id ? 'opacity-50' : ''}"
