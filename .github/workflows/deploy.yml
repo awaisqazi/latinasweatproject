@@ -54,3 +54,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # Pages deployments occasionally sit in GitHub's queue longer than
+          # the 10-minute default, which aborts the run and cancels the
+          # deployment (2026-07-02 backlog). Poll for up to 30 minutes.
+          timeout: 1800000
