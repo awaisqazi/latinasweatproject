@@ -41,6 +41,7 @@
   } from "../../../lib/supabaseClient";
   import { hasModule, loadModuleGrants } from "../../../lib/dashboard/permissions";
   import { isOperationalAdmin, isSuperuser } from "../../../lib/dashboard/roles";
+  import { subscribeDashboardRealtime } from "../../../lib/dashboard/realtime";
   import { countMyOpenTasks } from "../../../lib/dashboard/workspaceTasks";
   import { getSetting, FEEDBACK_RECIPIENT_KEY } from "../../../lib/dashboard/appSettings";
   import AdminOverview from "./AdminOverview.svelte";
@@ -83,12 +84,12 @@
     "Stuck",
   ];
   const projectSelectColumns =
-    "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
+    "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,updated_at";
 
   const navItems = [
     { id: "workspace", label: "Workspace", icon: Home, section: "Home" },
     { id: "kanban", label: "Kanban", icon: Kanban, section: "Marketing", modules: ["marketing"] },
-    { id: "publishing", label: "Publishing Calendar", icon: CalendarDays, section: "Marketing", modules: ["marketing"] },
+    { id: "publishing", label: "Marketing Calendar", icon: CalendarDays, section: "Marketing", modules: ["marketing"] },
     { id: "admin", label: "Marketing Admin", icon: ShieldCheck, section: "Marketing", modules: ["marketing"], adminOnly: true },
     { id: "calendar", label: "Project Calendar", icon: CalendarDays, section: "Planning", modules: ["marketing", "board_projects"] },
     { id: "board", label: "Board Projects", icon: ClipboardList, section: "Planning", modules: ["board_projects"] },
@@ -337,8 +338,77 @@
       window.removeEventListener("hashchange", syncViewFromHash);
       desktopQuery.removeEventListener("change", handleViewportChange);
       data.subscription.unsubscribe();
+      realtimeUnsubscribe?.();
+      window.clearTimeout(projectKeysRealtimeTimer);
+      window.clearTimeout(boardRealtimeTimer);
+      window.clearTimeout(workspaceRealtimeTimer);
     };
   });
+
+  // ── Live updates ──────────────────────────────────────────────
+  // One channel for the four collaborative tables. Merges are applied
+  // immediately (the kanban derives from `projects`, so teammates' moves show
+  // up in place); the heavier view refetches are debounced so a burst of
+  // changes triggers one reload.
+  let realtimeUnsubscribe = null;
+  let projectKeysRealtimeTimer = 0;
+  let boardRealtimeTimer = 0;
+  let workspaceRealtimeTimer = 0;
+
+  function startRealtime() {
+    realtimeUnsubscribe?.();
+    realtimeUnsubscribe = subscribeDashboardRealtime(supabase, {
+      onProjects: handleProjectsRealtime,
+      onBoard: scheduleBoardRealtimeRefresh,
+      onWorkspace: scheduleWorkspaceRealtimeRefresh,
+    });
+  }
+
+  function handleProjectsRealtime(payload) {
+    if (payload.eventType === "DELETE") {
+      const deletedId = payload.old?.id;
+      if (!deletedId) return;
+
+      projects = projects.filter((project) => project.id !== deletedId);
+      const { [deletedId]: _removed, ...remainingUpdates } = projectUpdatesById;
+      projectUpdatesById = remainingUpdates;
+      if (selectedKanbanProject?.id === deletedId) selectedKanbanProject = null;
+      if (publishScheduleProject?.id === deletedId) closePublishScheduler();
+      scheduleProjectKeysRefresh();
+      return;
+    }
+
+    if (payload.new?.id) {
+      handleProjectUpdated(payload.new, { bumpKeys: false });
+      scheduleProjectKeysRefresh();
+    }
+  }
+
+  function scheduleProjectKeysRefresh() {
+    window.clearTimeout(projectKeysRealtimeTimer);
+    projectKeysRealtimeTimer = window.setTimeout(() => {
+      workspaceRefreshKey += 1;
+      calendarRefreshKey += 1;
+      publishingRefreshKey += 1;
+      adminRefreshKey += 1;
+    }, 500);
+  }
+
+  function scheduleBoardRealtimeRefresh() {
+    window.clearTimeout(boardRealtimeTimer);
+    boardRealtimeTimer = window.setTimeout(() => {
+      boardRefreshKey += 1;
+      calendarRefreshKey += 1;
+    }, 500);
+  }
+
+  function scheduleWorkspaceRealtimeRefresh() {
+    window.clearTimeout(workspaceRealtimeTimer);
+    workspaceRealtimeTimer = window.setTimeout(() => {
+      loadWorkspaceTaskCount();
+      workspaceRefreshKey += 1;
+    }, 500);
+  }
 
   async function initializeDashboard() {
     isLoading = true;
@@ -377,6 +447,7 @@
       activeView = visibleNavItems[0]?.id || "workspace";
     }
 
+    startRealtime();
     isLoading = false;
   }
 
@@ -467,7 +538,7 @@
     const { data, error } = await supabase
       .from("projects")
       .select(
-        "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at",
+        "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,updated_at",
       )
       .order("deadline", { ascending: true });
 
@@ -809,6 +880,12 @@
       return;
     }
 
+    if (result?.conflict) {
+      publishScheduleError =
+        "Someone else just updated this project. Close this dialog and try again with their latest version.";
+      return;
+    }
+
     closePublishScheduler();
   }
 
@@ -828,12 +905,17 @@
     statusMoveError = "";
     handleProjectUpdated(optimisticProject);
 
-    const { data, error } = await supabase
+    // Optimistic lock: only apply the move if nobody else changed the row
+    // since we loaded it. Zero rows back means someone got there first.
+    let query = supabase
       .from("projects")
       .update(updatePayload)
-      .eq("id", project.id)
-      .select(projectSelectColumns)
-      .single();
+      .eq("id", project.id);
+    if (previousProject.updated_at) {
+      query = query.eq("updated_at", previousProject.updated_at);
+    }
+
+    const { data, error } = await query.select(projectSelectColumns).maybeSingle();
 
     if (error) {
       statusMoveError = error.message;
@@ -842,9 +924,36 @@
       return { error };
     }
 
+    if (!data) {
+      handleProjectUpdated(previousProject);
+      statusMoveError = `Someone else just updated "${previousProject.title}" — the board has been refreshed with their change. Try again in a moment.`;
+      await refreshProjectRow(project.id);
+      movingProjectId = "";
+      return { conflict: true };
+    }
+
     handleProjectUpdated(data);
     movingProjectId = "";
     return { data };
+  }
+
+  // Pull one project's current row after a conflict so the board reflects the
+  // other person's change (realtime usually beats this, but don't rely on it).
+  async function refreshProjectRow(projectId) {
+    const { data, error } = await supabase
+      .from("projects")
+      .select(projectSelectColumns)
+      .eq("id", projectId)
+      .maybeSingle();
+
+    if (error) return;
+
+    if (data) {
+      handleProjectUpdated(data);
+    } else {
+      projects = projects.filter((project) => project.id !== projectId);
+      if (selectedKanbanProject?.id === projectId) selectedKanbanProject = null;
+    }
   }
 
   function openCreateDrawer() {
@@ -864,7 +973,7 @@
     selectedKanbanProject = getLatestProject(project);
   }
 
-  function handleProjectUpdated(updatedProject) {
+  function handleProjectUpdated(updatedProject, { bumpKeys = true } = {}) {
     if (!updatedProject?.id) return;
 
     const existingProject =
@@ -901,10 +1010,12 @@
       };
     }
 
-    workspaceRefreshKey += 1;
-    calendarRefreshKey += 1;
-    publishingRefreshKey += 1;
-    adminRefreshKey += 1;
+    if (bumpKeys) {
+      workspaceRefreshKey += 1;
+      calendarRefreshKey += 1;
+      publishingRefreshKey += 1;
+      adminRefreshKey += 1;
+    }
   }
 
   function getLatestProject(project) {
@@ -1365,6 +1476,8 @@
               email={profile?.email || user?.email}
               profileId={user?.id}
               {teamMembers}
+              isFeedbackRecipient={Boolean(feedbackRecipientId) && feedbackRecipientId === user?.id}
+              hasBoardAccess={canSeeNavItem({ modules: ["board_projects"] }, profile, moduleGrants)}
               refreshKey={workspaceRefreshKey}
               onProjectUpdated={handleProjectUpdated}
               onTasksChanged={loadWorkspaceTaskCount}
@@ -1604,6 +1717,7 @@
               {teamMembers}
               refreshKey={boardRefreshKey}
               onAssignTask={openAssignTask}
+              onWorkspaceChanged={handleTaskAssigned}
             />
           {:else if activeView === "events"}
             <EventsView
@@ -1653,6 +1767,7 @@
               availableStatuses={statuses}
               scheduleProjects={latestProjects}
               onProjectUpdated={handleProjectUpdated}
+              onAssignTask={openAssignTask}
             />
           {:else if activeView === "admin"}
             <AdminOverview

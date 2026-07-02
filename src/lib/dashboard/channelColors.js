@@ -1,7 +1,8 @@
-// Shared channel tone maps for the dashboard calendars. The publishing
-// calendar's palette is canonical: newsletter is teal and unmatched channels
-// fall back to amber, because emerald is reserved for the Published state
-// (callers apply their own Published/board overrides before these lookups).
+// Shared channel tone maps for the dashboard calendars. The marketing
+// calendar's palette is canonical: every named channel gets its own hue so a
+// multi-channel post can render as a split chip (one segment per channel).
+// Emerald is reserved for the Published state and sky/violet for project
+// stages, so channels avoid those hues.
 
 function normalizeTags(tags) {
   if (!Array.isArray(tags)) return [];
@@ -10,6 +11,55 @@ function normalizeTags(tags) {
     .flatMap((tag) => String(tag).split(","))
     .map((tag) => tag.trim().toLowerCase())
     .filter(Boolean);
+}
+
+// Order matters: segments render in this order so split chips are stable.
+const CHANNEL_PALETTE = [
+  { key: "instagram", label: "Instagram", aliases: ["instagram", "ig"], seg: "bg-fuchsia-200", dot: "bg-fuchsia-500" },
+  { key: "tiktok", label: "TikTok", aliases: ["tiktok"], seg: "bg-cyan-200", dot: "bg-cyan-500" },
+  { key: "linkedin", label: "LinkedIn", aliases: ["linkedin"], seg: "bg-blue-200", dot: "bg-blue-500" },
+  { key: "facebook", label: "Facebook", aliases: ["facebook", "fb"], seg: "bg-indigo-200", dot: "bg-indigo-500" },
+  { key: "youtube", label: "YouTube", aliases: ["youtube", "yt"], seg: "bg-red-200", dot: "bg-red-500" },
+  { key: "newsletter", label: "Newsletter", aliases: ["newsletter", "email"], seg: "bg-teal-200", dot: "bg-teal-500" },
+  { key: "website", label: "Website", aliases: ["website", "web", "blog"], seg: "bg-slate-200", dot: "bg-slate-500" },
+];
+
+export const OTHER_CHANNEL = {
+  key: "other",
+  label: "Other",
+  seg: "bg-amber-200",
+  dot: "bg-amber-500",
+};
+
+function matchChannel(tag) {
+  return CHANNEL_PALETTE.find((channel) =>
+    channel.aliases.some(
+      (alias) => tag === alias || (alias.length > 3 && tag.includes(alias)),
+    ),
+  );
+}
+
+// One segment per distinct channel, in palette order, so "IG + TikTok" always
+// splits fuchsia | cyan. Unknown or missing channels collapse into one
+// "Other" segment.
+export function getChannelSegments(tags) {
+  const normalized = normalizeTags(tags);
+  const matchedKeys = new Set();
+  let hasOther = normalized.length === 0;
+
+  for (const tag of normalized) {
+    const channel = matchChannel(tag);
+    if (channel) {
+      matchedKeys.add(channel.key);
+    } else {
+      hasOther = true;
+    }
+  }
+
+  const segments = CHANNEL_PALETTE.filter((channel) => matchedKeys.has(channel.key));
+  if (hasOther) segments.push(OTHER_CHANNEL);
+
+  return segments;
 }
 
 export function getChannelChipClass(tags) {

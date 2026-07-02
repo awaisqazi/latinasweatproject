@@ -1,7 +1,6 @@
 <script>
   import { CalendarClock, Trash2, UserPlus } from "@lucide/svelte";
   import { isOperationalAdmin } from "../../../lib/dashboard/roles";
-  import BoardTaskList from "./BoardTaskList.svelte";
   import ProjectTimeline from "../marketing/ProjectTimeline.svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
   import Badge from "../ui/Badge.svelte";
@@ -39,6 +38,14 @@
   let successMessage = "";
   let descriptionDraft = "";
   let timelineRefreshKey = 0;
+  let drawerTasks = [];
+
+  const TASK_STATUS_TONES = {
+    "To Do": "neutral",
+    "In Progress": "blue",
+    Blocked: "red",
+    Done: "green",
+  };
 
   $: isAdmin = isOperationalAdmin(currentUserRole);
   $: if (project?.id && project.id !== displayedProject?.id) {
@@ -46,6 +53,7 @@
   } else if (!project && drawerOpen) {
     drawerOpen = false;
   }
+  $: drawerDoneCount = drawerTasks.filter((task) => task.status === "Done").length;
 
   function openDrawer(nextProject) {
     displayedProject = nextProject;
@@ -53,6 +61,24 @@
     errorMessage = "";
     successMessage = "";
     drawerOpen = true;
+    loadDrawerTasks(nextProject.id);
+  }
+
+  // Read-only task snapshot; tasks are managed on the project's task board in
+  // Board Projects.
+  async function loadDrawerTasks(projectId) {
+    drawerTasks = [];
+
+    const { data, error } = await supabase
+      .from("board_project_tasks")
+      .select("id, title, status, sort_order, created_at")
+      .eq("project_id", projectId)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+
+    if (!error && displayedProject?.id === projectId) {
+      drawerTasks = data || [];
+    }
   }
 
   function requestClose() {
@@ -81,15 +107,23 @@
     errorMessage = "";
     successMessage = "";
 
-    const { data, error } = await supabase
+    // Optimistic lock: zero rows back means someone else saved first.
+    let query = supabase
       .from("board_projects")
       .update(updates)
-      .eq("id", displayedProject.id)
-      .select(projectColumns)
-      .single();
+      .eq("id", displayedProject.id);
+    if (displayedProject.updated_at) {
+      query = query.eq("updated_at", displayedProject.updated_at);
+    }
+
+    const { data, error } = await query.select(projectColumns).maybeSingle();
 
     if (error) {
       errorMessage = error.message;
+    } else if (!data) {
+      errorMessage =
+        "Someone else just updated this project — their latest version has been loaded. Please re-apply your change.";
+      await reloadDisplayedProject();
     } else {
       displayedProject = data;
       onProjectUpdated(data);
@@ -97,6 +131,22 @@
     }
 
     isSaving = false;
+  }
+
+  async function reloadDisplayedProject() {
+    if (!displayedProject?.id) return;
+
+    const { data } = await supabase
+      .from("board_projects")
+      .select(projectColumns)
+      .eq("id", displayedProject.id)
+      .maybeSingle();
+
+    if (data) {
+      displayedProject = data;
+      descriptionDraft = data.description || "";
+      onProjectUpdated(data);
+    }
   }
 
   function saveDescription() {
@@ -263,13 +313,32 @@
           </Field>
         </section>
 
-        <section class="mt-5 rounded-control border border-ink/8 bg-white p-4">
-          <BoardTaskList
-            {supabase}
-            projectId={displayedProject.id}
-            {teamMembers}
-          />
-        </section>
+        {#if drawerTasks.length}
+          <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="board-drawer-tasks-title">
+            <div class="flex items-center justify-between gap-3">
+              <h4 id="board-drawer-tasks-title" class="font-bold text-ink">Tasks</h4>
+              <Badge tone={drawerDoneCount === drawerTasks.length ? "green" : "neutral"} size="xs">
+                {drawerDoneCount}/{drawerTasks.length} done
+              </Badge>
+            </div>
+            <ul class="mt-3 space-y-2">
+              {#each drawerTasks as task (task.id)}
+                <li class="flex items-center justify-between gap-3 rounded-control border border-ink/8 px-3 py-2">
+                  <span class="min-w-0 truncate text-sm font-semibold {task.status === 'Done' ? 'text-ink/45 line-through' : 'text-ink'}">
+                    {task.title}
+                  </span>
+                  <Badge tone={TASK_STATUS_TONES[task.status] || "neutral"} size="xs" class="shrink-0">
+                    {task.status}
+                  </Badge>
+                </li>
+              {/each}
+            </ul>
+            <p class="mt-3 text-xs leading-5 text-ink/50">
+              Manage these on the project's task board: open Board Projects and
+              click the project.
+            </p>
+          </section>
+        {/if}
 
         <div class="mt-5">
           <ProjectTimeline

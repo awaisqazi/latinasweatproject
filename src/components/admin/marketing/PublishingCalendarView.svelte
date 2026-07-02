@@ -1,15 +1,20 @@
 <script>
   import { onMount } from "svelte";
-  import { ChevronLeft, ChevronRight, RefreshCw } from "@lucide/svelte";
   import {
-    getChannelChipClass,
-    getChannelDotClass,
-  } from "../../../lib/dashboard/channelColors";
+    CalendarClock,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Clock3,
+    RefreshCw,
+  } from "@lucide/svelte";
+  import { getChannelSegments } from "../../../lib/dashboard/channelColors";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
   import EmptyState from "../ui/EmptyState.svelte";
   import Skeleton from "../ui/Skeleton.svelte";
+  import Tabs from "../ui/Tabs.svelte";
   import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
 
   export let supabase;
@@ -20,6 +25,7 @@
   export let availableStatuses = [];
   export let scheduleProjects = [];
   export let onProjectUpdated = () => {};
+  export let onAssignTask = () => {};
 
   let projects = [];
   let selectedProject = null;
@@ -27,44 +33,70 @@
   let errorMessage = "";
   let currentMonth = getMonthStart(new Date());
   let lastRefreshKey = refreshKey;
+  let filterMode = "all";
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const publishingStatuses = ["Ready to Publish", "Published"];
+  // Everything that is being worked on shows on its deadline; posts show on
+  // their publish date. "Ready for Review" gets its own color so reviewers can
+  // scan for it.
+  const WORK_STATUSES = ["Ready for Production", "In Production", "Ready for Copy", "Stuck"];
+  const REVIEW_STATUS = "Ready for Review";
+  const POST_STATUSES = ["Ready to Publish", "Published"];
+  const FILTER_TABS = [
+    { id: "all", label: "Everything" },
+    { id: "work", label: "Projects" },
+    { id: "posts", label: "Posts" },
+  ];
 
-  $: calendarProjects = projects
-    .map((project) => ({
-      ...project,
-      calendar_date: project.publish_date,
-      calendar_date_type: project.status === "Published" ? "Posted" : "Planned",
-    }))
-    .filter((project) => Boolean(project.calendar_date));
-
-  $: calendarDays = buildCalendarDays(currentMonth, calendarProjects);
-  $: visibleMonthProjects = calendarProjects
-    .filter((project) => isSameMonth(project.calendar_date, currentMonth))
+  $: calendarEntries = projects.flatMap(toCalendarEntries);
+  $: visibleEntries =
+    filterMode === "all"
+      ? calendarEntries
+      : calendarEntries.filter((entry) =>
+          filterMode === "posts" ? entry.kind === "post" : entry.kind !== "post",
+        );
+  $: calendarDays = buildCalendarDays(currentMonth, visibleEntries);
+  $: monthEntries = visibleEntries
+    .filter((entry) => isSameMonth(entry.date, currentMonth))
     .slice()
-    .sort((a, b) => a.calendar_date.localeCompare(b.calendar_date));
+    .sort(
+      (a, b) => a.date.localeCompare(b.date) || kindRank(a) - kindRank(b),
+    );
   $: monthLabel = new Intl.DateTimeFormat("en-US", {
     month: "long",
     year: "numeric",
   }).format(currentMonth);
-  $: plannedCount = visibleMonthProjects.filter(
-    (project) => project.status === "Ready to Publish",
+  $: allMonthEntries = calendarEntries.filter((entry) =>
+    isSameMonth(entry.date, currentMonth),
+  );
+  $: workCount = allMonthEntries.filter((entry) => entry.kind === "work").length;
+  $: reviewCount = allMonthEntries.filter((entry) => entry.kind === "review").length;
+  $: scheduledCount = allMonthEntries.filter(
+    (entry) => entry.kind === "post" && !entry.published,
   ).length;
-  $: postedCount = visibleMonthProjects.filter(
-    (project) => project.status === "Published",
+  $: postedCount = allMonthEntries.filter(
+    (entry) => entry.kind === "post" && entry.published,
   ).length;
+  $: monthChannels = Array.from(
+    new Map(
+      allMonthEntries
+        .filter((entry) => entry.kind === "post")
+        .flatMap((entry) => entry.segments)
+        .map((segment) => [segment.key, segment]),
+    ).values(),
+  );
+  $: undatedCount = projects.filter((project) => !toCalendarEntries(project).length).length;
 
   $: if (refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
-    loadPublishingProjects();
+    loadCalendarProjects();
   }
 
   onMount(() => {
-    loadPublishingProjects();
+    loadCalendarProjects();
   });
 
-  async function loadPublishingProjects() {
+  async function loadCalendarProjects() {
     if (!supabase) {
       isLoading = false;
       errorMessage = "The Supabase client is not available yet.";
@@ -79,12 +111,11 @@
         supabase
           .from("projects")
           .select(
-            "id,title,status,priority,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed",
+            "id,title,status,priority,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,updated_at",
           )
           .eq("intake_reviewed", true)
-          .in("status", publishingStatuses)
-          .not("publish_date", "is", null)
-          .order("publish_date", { ascending: true }),
+          .neq("status", "Archived")
+          .order("deadline", { ascending: true }),
       );
 
       if (error) {
@@ -95,25 +126,60 @@
     } catch (error) {
       errorMessage =
         error?.message ||
-        "Publishing calendar took too long to load. Please refresh and try again.";
+        "The marketing calendar took too long to load. Please refresh and try again.";
     } finally {
       isLoading = false;
     }
   }
 
   function withTimeout(request, timeoutMs = 15000) {
-    return Promise.race([
-      request,
-      new Promise((_, reject) => {
-        window.setTimeout(
-          () => reject(new Error("Publishing calendar took too long to load.")),
-          timeoutMs,
-        );
-      }),
-    ]);
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = window.setTimeout(
+        () => reject(new Error("The marketing calendar took too long to load.")),
+        timeoutMs,
+      );
+    });
+    return Promise.race([request, timeout]).finally(() => window.clearTimeout(timer));
   }
 
-  function buildCalendarDays(month, sourceProjects) {
+  // A project can appear twice: as production work on its deadline AND as a
+  // post on its publish date (posts only once it is Ready to Publish or
+  // Published).
+  function toCalendarEntries(project) {
+    const entries = [];
+
+    if (
+      (WORK_STATUSES.includes(project.status) || project.status === REVIEW_STATUS) &&
+      project.deadline
+    ) {
+      entries.push({
+        kind: project.status === REVIEW_STATUS ? "review" : "work",
+        date: project.deadline,
+        project,
+      });
+    }
+
+    if (POST_STATUSES.includes(project.status) && project.publish_date) {
+      entries.push({
+        kind: "post",
+        date: project.publish_date,
+        published: project.status === "Published",
+        segments: getChannelSegments(project.channel_tags),
+        project,
+      });
+    }
+
+    return entries;
+  }
+
+  function kindRank(entry) {
+    if (entry.kind === "post") return 0;
+    if (entry.kind === "review") return 1;
+    return 2;
+  }
+
+  function buildCalendarDays(month, entries) {
     const firstDay = getMonthStart(month);
     const gridStart = new Date(firstDay);
     gridStart.setDate(firstDay.getDate() - firstDay.getDay());
@@ -131,7 +197,9 @@
         isCurrentMonth:
           date.getMonth() === month.getMonth() &&
           date.getFullYear() === month.getFullYear(),
-        projects: sourceProjects.filter((project) => project.calendar_date === dateKey),
+        entries: entries
+          .filter((entry) => entry.date === dateKey)
+          .sort((a, b) => kindRank(a) - kindRank(b)),
       };
     });
   }
@@ -176,18 +244,17 @@
     }).format(new Date(`${value}T00:00:00`));
   }
 
-  function getEventClass(project) {
-    if (project.status === "Published") {
-      return "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 hover:bg-emerald-100";
-    }
-
-    return getChannelChipClass(project.channel_tags);
+  function entryTypeLabel(entry) {
+    if (entry.kind === "post") return entry.published ? "Posted" : "Scheduled";
+    if (entry.kind === "review") return "Ready for review";
+    return entry.project.status === "Stuck" ? "Stuck" : "In progress";
   }
 
-  function getEventDotClass(project) {
-    if (project.status === "Published") return "bg-emerald-500";
-
-    return getChannelDotClass(project.channel_tags);
+  function projectChipClass(entry) {
+    if (entry.kind === "review") {
+      return "border-violet-200 bg-violet-100 text-violet-900 hover:border-violet-300";
+    }
+    return "border-sky-200 bg-sky-100 text-sky-900 hover:border-sky-300";
   }
 
   function openProjectDetails(project) {
@@ -200,9 +267,7 @@
     onProjectUpdated(updatedProject);
 
     const shouldKeepProject =
-      updatedProject.intake_reviewed === true &&
-      publishingStatuses.includes(updatedProject.status) &&
-      Boolean(updatedProject.publish_date);
+      updatedProject.intake_reviewed !== false && updatedProject.status !== "Archived";
     const existingProject = projects.find((project) => project.id === updatedProject.id);
 
     if (shouldKeepProject && existingProject) {
@@ -221,14 +286,14 @@
   }
 </script>
 
-<section class="space-y-4" aria-labelledby="publishing-calendar-title">
+<section class="space-y-4" aria-labelledby="marketing-calendar-title">
   <div class="flex flex-col gap-3 rounded-card border border-ink/8 bg-white p-4 shadow-card md:flex-row md:items-center md:justify-between md:p-5">
     <div>
       <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
-        Posted and planned campaigns
+        Production work and publishing in one view
       </p>
-      <h3 id="publishing-calendar-title" class="mt-1 text-2xl font-bold">
-        Publishing Calendar
+      <h3 id="marketing-calendar-title" class="mt-1 text-2xl font-bold">
+        Marketing Calendar
       </h3>
     </div>
 
@@ -236,7 +301,7 @@
       <Button iconOnly icon={ChevronLeft} label="Previous month" onclick={() => setMonth(-1)} />
       <Button onclick={goToToday}>Today</Button>
       <Button iconOnly icon={ChevronRight} label="Next month" onclick={() => setMonth(1)} />
-      <Button icon={RefreshCw} loading={isLoading} onclick={loadPublishingProjects}>
+      <Button icon={RefreshCw} loading={isLoading} onclick={loadCalendarProjects}>
         Refresh
       </Button>
     </div>
@@ -247,28 +312,54 @@
   {/if}
 
   <div class="rounded-card border border-ink/8 bg-white shadow-card">
-    <div class="flex flex-col gap-2 border-b border-ink/8 px-4 py-4 md:flex-row md:items-end md:justify-between md:px-5">
-      <div>
-        <h4 class="text-xl font-bold">{monthLabel}</h4>
-        <p class="mt-1 text-sm text-ink/60">
-          {plannedCount} planned, {postedCount} posted
-        </p>
+    <div class="flex flex-col gap-3 border-b border-ink/8 px-4 py-4 md:px-5">
+      <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h4 class="text-xl font-bold">{monthLabel}</h4>
+          <p class="mt-1 text-sm text-ink/60">
+            {workCount} in progress · {reviewCount} in review · {scheduledCount} scheduled · {postedCount} posted
+          </p>
+        </div>
+        <Tabs
+          tabs={FILTER_TABS}
+          bind:active={filterMode}
+          variant="segmented"
+          label="Calendar filter"
+          hasPanels={false}
+        />
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <Badge tone="amber" dot>Planned</Badge>
-        <Badge tone="green" dot>Posted</Badge>
+      <div class="flex flex-wrap items-center gap-2" aria-label="Color legend">
         <Badge tone="neutral">
-          <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-500" aria-hidden="true"></span>
-          IG/TikTok
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400" aria-hidden="true"></span>
+          In progress
         </Badge>
-        <Badge tone="blue" dot>LinkedIn</Badge>
+        <Badge tone="neutral">
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-violet-400" aria-hidden="true"></span>
+          Ready for review
+        </Badge>
+        {#each monthChannels as channel (channel.key)}
+          <Badge tone="neutral">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full {channel.dot}" aria-hidden="true"></span>
+            {channel.label}
+          </Badge>
+        {/each}
+        <span class="text-xs font-semibold text-ink/50">
+          Dashed border = scheduled, solid + check = posted. Split colors = posting to multiple channels.
+        </span>
       </div>
+
+      {#if undatedCount}
+        <p class="text-xs font-semibold text-ink/45">
+          {undatedCount} project{undatedCount === 1 ? " has" : "s have"} no deadline or publish
+          date yet, so {undatedCount === 1 ? "it doesn't" : "they don't"} appear on the calendar.
+        </p>
+      {/if}
     </div>
 
     {#if isLoading}
       <div class="p-4 md:p-5" role="status">
-        <span class="sr-only">Loading publishing calendar</span>
+        <span class="sr-only">Loading marketing calendar</span>
         <div class="grid grid-cols-7 gap-2">
           {#each weekdays as weekday (weekday)}
             <Skeleton variant="text" class="h-3 w-8" />
@@ -278,7 +369,7 @@
           {/each}
         </div>
       </div>
-    {:else if calendarProjects.length}
+    {:else if visibleEntries.length}
       <div class="overflow-x-auto">
         <div class="grid min-w-[56rem] grid-cols-7 border-b border-ink/8 text-xs font-bold uppercase tracking-[0.12em] text-ink/45">
           {#each weekdays as weekday}
@@ -299,24 +390,53 @@
                 >
                   {day.dayNumber}
                 </span>
-                {#if day.projects.length}
-                  <span class="text-xs font-bold text-ink/45">{day.projects.length}</span>
+                {#if day.entries.length}
+                  <span class="text-xs font-bold text-ink/45">{day.entries.length}</span>
                 {/if}
               </div>
 
               <div class="space-y-1.5">
-                {#each day.projects as project}
-                  <button
-                    type="button"
-                    class="group w-full rounded-md border px-2 py-1.5 text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 {getEventClass(project)}"
-                    onclick={() => openProjectDetails(project)}
-                  >
-                    <span class="mb-1 flex items-center gap-1.5">
-                      <span class="h-2 w-2 shrink-0 rounded-full {getEventDotClass(project)}"></span>
-                      <span class="truncate">{project.calendar_date_type}</span>
-                    </span>
-                    <span class="line-clamp-2">{project.title}</span>
-                  </button>
+                {#each day.entries as entry (entry.kind + entry.project.id)}
+                  {#if entry.kind === "post"}
+                    <button
+                      type="button"
+                      class="relative w-full overflow-hidden rounded-md border text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 {entry.published ? 'border-ink/15 hover:border-ink/30' : 'border-dashed border-ink/30 hover:border-ink/50'}"
+                      onclick={() => openProjectDetails(entry.project)}
+                    >
+                      <span class="absolute inset-0 flex" aria-hidden="true">
+                        {#each entry.segments as segment (segment.key)}
+                          <span class="h-full flex-1 {segment.seg}"></span>
+                        {/each}
+                      </span>
+                      <span class="relative block px-2 py-1.5 text-ink/85">
+                        <span class="sr-only">{formatDate(entry.date)}:</span>
+                        <span class="mb-1 flex items-center gap-1.5">
+                          {#if entry.published}
+                            <CheckCircle2 class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                          {:else}
+                            <Clock3 class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                          {/if}
+                          <span class="truncate">
+                            {entryTypeLabel(entry)} · {entry.segments.map((segment) => segment.label).join(" + ")}
+                          </span>
+                        </span>
+                        <span class="line-clamp-2">{entry.project.title}</span>
+                      </span>
+                    </button>
+                  {:else}
+                    <button
+                      type="button"
+                      class="w-full rounded-md border px-2 py-1.5 text-left text-xs font-semibold leading-snug transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 {projectChipClass(entry)}"
+                      onclick={() => openProjectDetails(entry.project)}
+                    >
+                      <span class="sr-only">{formatDate(entry.date)}:</span>
+                      <span class="mb-1 flex items-center gap-1.5">
+                        <CalendarClock class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span class="truncate">{entryTypeLabel(entry)} · Due</span>
+                      </span>
+                      <span class="line-clamp-2">{entry.project.title}</span>
+                    </button>
+                  {/if}
                 {/each}
               </div>
             </div>
@@ -326,33 +446,50 @@
     {:else}
       <div class="p-4 md:p-5">
         <EmptyState
-          title="No published or planned posts"
-          message="Ready to Publish and Published projects with publish dates will appear here."
+          title="Nothing on the calendar"
+          message="Projects with deadlines, plus posts with publish dates, will appear here."
         />
       </div>
     {/if}
   </div>
 
-  {#if !isLoading && visibleMonthProjects.length}
+  {#if !isLoading && monthEntries.length}
     <section
       class="rounded-card border border-ink/8 bg-white p-4 shadow-card md:hidden"
-      aria-labelledby="publishing-agenda-title"
+      aria-labelledby="marketing-agenda-title"
     >
-      <h4 id="publishing-agenda-title" class="font-bold">This month</h4>
+      <h4 id="marketing-agenda-title" class="font-bold">This month</h4>
       <div class="mt-3 space-y-2">
-        {#each visibleMonthProjects as project}
+        {#each monthEntries as entry (entry.kind + entry.project.id)}
           <button
             type="button"
             class="flex w-full items-start gap-3 rounded-control border border-ink/8 px-3 py-3 text-left transition hover:border-accent/30"
-            onclick={() => openProjectDetails(project)}
+            onclick={() => openProjectDetails(entry.project)}
           >
-            <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full {getEventDotClass(project)}"></span>
+            {#if entry.kind === "post"}
+              <span class="mt-1 flex h-2.5 w-8 shrink-0 overflow-hidden rounded-full" aria-hidden="true">
+                {#each entry.segments as segment (segment.key)}
+                  <span class="h-full flex-1 {segment.dot}"></span>
+                {/each}
+              </span>
+            {:else}
+              <span
+                class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full {entry.kind === 'review' ? 'bg-violet-400' : 'bg-sky-400'}"
+                aria-hidden="true"
+              ></span>
+            {/if}
             <span class="min-w-0">
               <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
-                {formatDate(project.calendar_date)}
+                {formatDate(entry.date)} · {entryTypeLabel(entry)}
               </span>
-              <span class="mt-1 block font-bold leading-snug">{project.title}</span>
-              <span class="mt-1 block text-sm text-ink/60">{project.status}</span>
+              <span class="mt-1 block font-bold leading-snug">{entry.project.title}</span>
+              {#if entry.kind === "post"}
+                <span class="mt-1 block text-sm text-ink/60">
+                  {entry.segments.map((segment) => segment.label).join(" + ")}
+                </span>
+              {:else}
+                <span class="mt-1 block text-sm text-ink/60">{entry.project.status}</span>
+              {/if}
             </span>
           </button>
         {/each}
@@ -369,7 +506,8 @@
   {currentUserRole}
   {availableStatuses}
   scheduleProjects={scheduleProjects.length ? scheduleProjects : projects}
-  eyebrow="Publishing calendar"
+  eyebrow="Marketing calendar"
   onClose={() => (selectedProject = null)}
   onProjectUpdated={handleDrawerProjectUpdated}
+  {onAssignTask}
 />

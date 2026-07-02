@@ -60,7 +60,39 @@
   ];
   const priorityOptions = ["P0", "P1", "P2"];
   const projectSelectColumns =
-    "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at";
+    "id,title,priority,status,deadline,publish_date,details_url,brief_doc_status,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,updated_at";
+  const CONFLICT_MESSAGE =
+    "Someone else just updated this project — their latest version has been loaded. Please re-apply your change.";
+
+  // Optimistic-locked project update: applies only if nobody changed the row
+  // since it was loaded. On conflict, pulls the other person's version into
+  // the drawer and returns { conflict: true } so the caller can say so.
+  async function guardedProjectUpdate(payload) {
+    let query = supabase.from("projects").update(payload).eq("id", displayedProject.id);
+    if (displayedProject.updated_at) {
+      query = query.eq("updated_at", displayedProject.updated_at);
+    }
+
+    const { data, error } = await query.select(projectSelectColumns).maybeSingle();
+
+    if (error) return { error };
+
+    if (!data) {
+      const { data: fresh } = await supabase
+        .from("projects")
+        .select(projectSelectColumns)
+        .eq("id", displayedProject.id)
+        .maybeSingle();
+
+      if (fresh) {
+        displayedProject = fresh;
+        onProjectUpdated(fresh);
+      }
+      return { conflict: true };
+    }
+
+    return { data };
+  }
 
   $: if (project?.id && project.id !== displayedProject?.id) {
     openDrawer(project);
@@ -285,15 +317,10 @@
     statusError = "";
     statusSuccess = "";
 
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ status: targetStatus })
-      .eq("id", displayedProject.id)
-      .select(projectSelectColumns)
-      .single();
+    const { data, error, conflict } = await guardedProjectUpdate({ status: targetStatus });
 
-    if (error) {
-      statusError = error.message;
+    if (error || conflict) {
+      statusError = conflict ? CONFLICT_MESSAGE : error.message;
       statusSaving = false;
       return;
     }
@@ -329,16 +356,15 @@
     statusError = "";
     statusSuccess = "";
 
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ status: "Ready to Publish", publish_date: date })
-      .eq("id", displayedProject.id)
-      .select(projectSelectColumns)
-      .single();
+    const { data, error, conflict } = await guardedProjectUpdate({
+      status: "Ready to Publish",
+      publish_date: date,
+    });
 
-    if (error) {
-      publishScheduleError = error.message;
-      statusError = error.message;
+    if (error || conflict) {
+      const message = conflict ? CONFLICT_MESSAGE : error.message;
+      publishScheduleError = message;
+      statusError = message;
       publishScheduleSaving = false;
       statusSaving = false;
       return;
@@ -369,15 +395,10 @@
     priorityError = "";
     prioritySuccess = "";
 
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ priority: nextPriority })
-      .eq("id", displayedProject.id)
-      .select(projectSelectColumns)
-      .single();
+    const { data, error, conflict } = await guardedProjectUpdate({ priority: nextPriority });
 
-    if (error) {
-      priorityError = error.message;
+    if (error || conflict) {
+      priorityError = conflict ? CONFLICT_MESSAGE : error.message;
       prioritySaving = false;
       return;
     }
@@ -433,15 +454,12 @@
     assignmentError = "";
     assignmentSuccess = "";
 
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ assigned_to: normalizeAssignedEmails(nextAssignedTo) })
-      .eq("id", displayedProject.id)
-      .select(projectSelectColumns)
-      .single();
+    const { data, error, conflict } = await guardedProjectUpdate({
+      assigned_to: normalizeAssignedEmails(nextAssignedTo),
+    });
 
-    if (error) {
-      assignmentError = error.message;
+    if (error || conflict) {
+      assignmentError = conflict ? CONFLICT_MESSAGE : error.message;
       assignmentSaving = false;
       return;
     }

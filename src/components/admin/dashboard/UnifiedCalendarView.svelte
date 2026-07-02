@@ -112,7 +112,7 @@
         supabase
           .from("projects")
           .select(
-            "id,title,status,priority,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed",
+            "id,title,status,priority,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,updated_at",
           )
           .eq("intake_reviewed", true)
           .neq("status", activeExcludedStatuses[0])

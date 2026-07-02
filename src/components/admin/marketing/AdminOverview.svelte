@@ -2438,7 +2438,7 @@
   <ConfirmDialog
     open={Boolean(confirmingSaveProject)}
     title="Save project changes"
-    message={`Save changes to "${confirmingSaveProject?.title}"? These updates will apply across Workspace, Kanban, Project Calendar, and Publishing Calendar.`}
+    message={`Save changes to "${confirmingSaveProject?.title}"? These updates will apply across Workspace, Kanban, Project Calendar, and Marketing Calendar.`}
     confirmLabel="Save Changes"
     tone="primary"
     busy={Boolean(confirmingSaveProject) && savingProjectId === confirmingSaveProject?.id}

@@ -173,8 +173,13 @@
       return;
     }
 
-    if (previousActive instanceof HTMLElement) {
+    // The opener may have been unmounted while the drawer was open (e.g. the
+    // card it belonged to was completed); focusing a detached node is a no-op
+    // that strands keyboard focus on <body>, so fall back to the main region.
+    if (previousActive instanceof HTMLElement && previousActive.isConnected) {
       previousActive.focus({ preventScroll: true });
+    } else {
+      document.querySelector("main")?.focus?.({ preventScroll: true });
     }
 
     onClosed();
