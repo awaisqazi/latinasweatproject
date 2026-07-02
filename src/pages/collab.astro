@@ -1,0 +1,1407 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const googleFormAction =
+  "https://docs.google.com/forms/d/e/1FAIpQLScpWJ-UtkCv4BOXn-Z4LKbuYUcLc-rFKwojXNUwqxFSIePlhw/formResponse";
+const googleFormView =
+  "https://docs.google.com/forms/d/e/1FAIpQLScpWJ-UtkCv4BOXn-Z4LKbuYUcLc-rFKwojXNUwqxFSIePlhw/viewform";
+
+const purposeOptions = [
+  {
+    value: "Partnership Opportunity",
+    label: "Partnership",
+    hint: "Ongoing relationship between our organizations",
+  },
+  {
+    value: "Sponsorship",
+    label: "Sponsorship",
+    hint: "Sponsor a class series, event, or program",
+  },
+  {
+    value: "Collaboration / Event",
+    label: "Collaboration / Event",
+    hint: "Co-host a class, pop-up, or one-time event",
+  },
+  {
+    value: "Media / Press",
+    label: "Media / Press",
+    hint: "Interviews, features, and press coverage",
+  },
+  {
+    value: "In-Kind Donations (e.g. space, product, services)",
+    label: "In-Kind Donation",
+    hint: "Space, product, or services",
+  },
+  {
+    value: "Volunteer Support",
+    label: "Volunteer Support",
+    hint: "Lend your time and skills",
+  },
+];
+
+const steps = [
+  { id: "about", label: "About you" },
+  { id: "inquiry", label: "Your inquiry" },
+  { id: "vision", label: "The vision" },
+  { id: "wrapup", label: "Wrap up" },
+];
+---
+
+<Layout
+  title="Collaborate With Us | The Latina Sweat Project"
+  description="Partner, sponsor, or collaborate with the Latina Sweat Project. Tell us about your idea and our community team will reach out to schedule a meeting."
+>
+  <Header />
+
+  <main class="min-h-screen bg-[#f5ede3]">
+    <section class="bg-off-black px-4 py-12 text-white sm:px-6 sm:py-16 lg:px-8">
+      <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent-gold">
+            Collaboration Inquiry
+          </p>
+          <h1 class="mt-4 font-sans text-4xl font-extrabold leading-tight text-white sm:text-5xl">
+            Let's build something together.
+          </h1>
+        </div>
+
+        <p class="font-body text-lg leading-8 text-white/75">
+          Thank you for thinking of the Latina Sweat Project. Tell us a little
+          about you and your idea, and one of our team members will connect
+          with you shortly to schedule a meeting.
+        </p>
+      </div>
+    </section>
+
+    <section class="px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <div class="mx-auto max-w-3xl">
+        <!-- Progress tracker -->
+        <nav id="collab-progress" aria-label="Form progress" class="mb-8">
+          <ol class="collab-steps">
+            {
+              steps.map((step, index) => (
+                <li
+                  class="collab-step"
+                  data-step-marker={index}
+                  aria-current={index === 0 ? "step" : undefined}
+                >
+                  <span class="collab-step-dot">
+                    <span class="collab-step-num">{index + 1}</span>
+                    <svg
+                      class="collab-step-check"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M3.5 8.5l3 3 6-7"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span class="collab-step-label">{step.label}</span>
+                </li>
+              ))
+            }
+          </ol>
+          <div class="collab-progress-rail" aria-hidden="true">
+            <div id="collab-progress-fill" class="collab-progress-fill"></div>
+          </div>
+          <p id="collab-progress-text" class="mt-3 text-center font-body text-sm font-bold text-medium-gray">
+            Step 1 of 4 · About you
+          </p>
+        </nav>
+
+        <form
+          id="collab-form"
+          action={googleFormAction}
+          method="POST"
+          target="collab-submission-frame"
+          novalidate
+          class="collab-card"
+        >
+          <input type="hidden" name="fvv" value="1" />
+          <input type="hidden" name="pageHistory" value="0" />
+          <input type="hidden" name="entry.1149031448_sentinel" value="" />
+          <input type="hidden" name="entry.198368159_sentinel" value="" />
+          <input type="hidden" name="entry.2001564743_sentinel" value="" />
+
+          <!-- Step 1: About you -->
+          <section class="collab-panel" data-step="0">
+            <h2 class="collab-panel-title">First, a little about you</h2>
+            <p class="collab-panel-sub">
+              So we know who we're talking with and how to reach you.
+            </p>
+
+            <div class="mt-6 grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="collab-name" class="collab-label">Name</label>
+                <input
+                  id="collab-name"
+                  name="entry.1375013305"
+                  type="text"
+                  autocomplete="name"
+                  required
+                  placeholder="Your full name"
+                  class="collab-field"
+                />
+                <p class="collab-error">Please share your name.</p>
+              </div>
+
+              <div>
+                <label for="collab-org" class="collab-label">
+                  Organization or company <span class="collab-optional">optional</span>
+                </label>
+                <input
+                  id="collab-org"
+                  name="entry.1175680386"
+                  type="text"
+                  autocomplete="organization"
+                  placeholder="Who are you reaching out on behalf of?"
+                  class="collab-field"
+                />
+              </div>
+
+              <div>
+                <label for="collab-email" class="collab-label">Email</label>
+                <input
+                  id="collab-email"
+                  name="entry.1634671954"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  placeholder="you@example.com"
+                  class="collab-field"
+                />
+                <p class="collab-error">Please enter a valid email address.</p>
+              </div>
+
+              <div>
+                <label for="collab-phone" class="collab-label">Phone number</label>
+                <input
+                  id="collab-phone"
+                  name="entry.901547634"
+                  type="tel"
+                  autocomplete="tel"
+                  required
+                  placeholder="(312) 555-0123"
+                  class="collab-field"
+                />
+                <p class="collab-error">Please share a phone number.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 2: Your inquiry -->
+          <section class="collab-panel" data-step="1" hidden>
+            <h2 class="collab-panel-title">What brings you to LSP?</h2>
+            <p class="collab-panel-sub">
+              Pick the option closest to your idea. There are no wrong answers.
+            </p>
+
+            <fieldset class="mt-6">
+              <legend class="sr-only">What is the purpose of your inquiry?</legend>
+              <div class="grid gap-3 sm:grid-cols-2">
+                {
+                  purposeOptions.map((option) => (
+                    <label class="collab-choice-card">
+                      <input
+                        class="peer sr-only"
+                        type="radio"
+                        name="entry.1149031448"
+                        value={option.value}
+                        required
+                      />
+                      <span class="collab-choice-card-body">
+                        <span class="collab-choice-card-title">{option.label}</span>
+                        <span class="collab-choice-card-hint">{option.hint}</span>
+                      </span>
+                    </label>
+                  ))
+                }
+                <label class="collab-choice-card">
+                  <input
+                    class="peer sr-only"
+                    type="radio"
+                    name="entry.1149031448"
+                    value="__other_option__"
+                    required
+                  />
+                  <span class="collab-choice-card-body">
+                    <span class="collab-choice-card-title">Something else</span>
+                    <span class="collab-choice-card-hint">Tell us in your own words</span>
+                  </span>
+                </label>
+              </div>
+              <p class="collab-error">Please choose the purpose of your inquiry.</p>
+            </fieldset>
+
+            <div id="collab-purpose-other" class="collab-reveal" hidden>
+              <label for="collab-purpose-other-input" class="collab-label">
+                What kind of inquiry is it?
+              </label>
+              <input
+                id="collab-purpose-other-input"
+                name="entry.1149031448.other_option_response"
+                type="text"
+                placeholder="A few words is perfect"
+                class="collab-field"
+              />
+              <p class="collab-error">Please describe your inquiry.</p>
+            </div>
+
+            <div id="collab-budget" class="collab-reveal" hidden>
+              <fieldset>
+                <legend class="collab-label">
+                  Do you have an estimated budget for this collaboration or event?
+                </legend>
+                <div class="mt-3 grid gap-3">
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.198368159"
+                      value="Budget is flexible / Open to discuss"
+                    />
+                    <span>Budget is flexible / open to discuss</span>
+                  </label>
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.198368159"
+                      value="Not budget at this time"
+                    />
+                    <span>No budget at this time</span>
+                  </label>
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.198368159"
+                      value="__other_option__"
+                    />
+                    <span>A specific amount</span>
+                  </label>
+                </div>
+              </fieldset>
+              <div id="collab-budget-other" class="collab-reveal" hidden>
+                <label for="collab-budget-other-input" class="collab-label">
+                  Roughly how much?
+                </label>
+                <input
+                  id="collab-budget-other-input"
+                  name="entry.198368159.other_option_response"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="e.g. $500"
+                  class="collab-field"
+                />
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <label for="collab-details" class="collab-label">
+                Tell us more about your request <span class="collab-optional">optional</span>
+              </label>
+              <textarea
+                id="collab-details"
+                name="entry.645111309"
+                rows="4"
+                placeholder="Share the idea, the audience, the moment you're imagining."
+                class="collab-field resize-y"></textarea>
+            </div>
+          </section>
+
+          <!-- Step 3: The vision -->
+          <section class="collab-panel" data-step="2" hidden>
+            <h2 class="collab-panel-title">Paint us the picture</h2>
+            <p class="collab-panel-sub">
+              These help our team come to the first conversation prepared.
+              Short answers are welcome.
+            </p>
+
+            <div class="mt-6 grid gap-5">
+              <div>
+                <label for="collab-mission" class="collab-label">
+                  How does your organization's mission align with ours?
+                </label>
+                <textarea
+                  id="collab-mission"
+                  name="entry.1335244483"
+                  rows="4"
+                  required
+                  placeholder="Community, wellness, culture, access. Where do we overlap?"
+                  class="collab-field resize-y"></textarea>
+                <p class="collab-error">
+                  This one helps us the most. A sentence or two is plenty.
+                </p>
+              </div>
+
+              <div>
+                <label for="collab-inspired" class="collab-label">
+                  What inspired your interest in collaborating with LSP?
+                  <span class="collab-optional">optional</span>
+                </label>
+                <textarea
+                  id="collab-inspired"
+                  name="entry.1544976695"
+                  rows="3"
+                  placeholder="A class you took, a story you heard, a person who told you about us..."
+                  class="collab-field resize-y"></textarea>
+              </div>
+
+              <div>
+                <label for="collab-support" class="collab-label">
+                  What level of support or resources are you considering?
+                  <span class="collab-optional">optional</span>
+                </label>
+                <textarea
+                  id="collab-support"
+                  name="entry.1444178779"
+                  rows="3"
+                  placeholder="Funding, space, staffing, promotion, products, time..."
+                  class="collab-field resize-y"></textarea>
+              </div>
+
+              <div>
+                <label for="collab-success" class="collab-label">
+                  What does a successful partnership look like to you?
+                  <span class="collab-optional">optional</span>
+                </label>
+                <textarea
+                  id="collab-success"
+                  name="entry.46837621"
+                  rows="3"
+                  placeholder="Dream a little. What would make this a win for both of us?"
+                  class="collab-field resize-y"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 4: Wrap up -->
+          <section class="collab-panel" data-step="3" hidden>
+            <h2 class="collab-panel-title">Last step, logistics</h2>
+            <p class="collab-panel-sub">
+              How and when should we reach you?
+            </p>
+
+            <div class="mt-6 grid gap-5">
+              <fieldset>
+                <legend class="collab-label">Preferred contact method</legend>
+                <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.2001564743"
+                      value="Email"
+                      required
+                    />
+                    <span>Email</span>
+                  </label>
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.2001564743"
+                      value="Phone"
+                      required
+                    />
+                    <span>Phone</span>
+                  </label>
+                  <label class="collab-pill">
+                    <input
+                      class="peer sr-only"
+                      type="radio"
+                      name="entry.2001564743"
+                      value="Either"
+                      required
+                    />
+                    <span>Either works</span>
+                  </label>
+                </div>
+                <p class="collab-error">Please pick a contact method.</p>
+              </fieldset>
+
+              <div>
+                <label for="collab-times" class="collab-label">
+                  Preferred days or times for a meeting
+                  <span class="collab-optional">optional</span>
+                </label>
+                <input
+                  id="collab-times"
+                  name="entry.751664402"
+                  type="text"
+                  placeholder="e.g. Weekday evenings, Tuesday mornings"
+                  class="collab-field"
+                />
+              </div>
+
+              <div>
+                <label for="collab-timeline" class="collab-label">
+                  Do you have a specific timeline or event in mind?
+                  <span class="collab-optional">optional</span>
+                </label>
+                <textarea
+                  id="collab-timeline"
+                  name="entry.868542248"
+                  rows="3"
+                  placeholder="A date, a season, or 'still exploring' are all great answers."
+                  class="collab-field resize-y"></textarea>
+              </div>
+
+              <div>
+                <label for="collab-anything" class="collab-label">
+                  Anything else you'd like to share?
+                  <span class="collab-optional">optional</span>
+                </label>
+                <textarea
+                  id="collab-anything"
+                  name="entry.1967426489"
+                  rows="3"
+                  placeholder="Links, socials, questions, anything at all."
+                  class="collab-field resize-y"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <div
+            id="collab-status"
+            class="mt-6 hidden rounded-md border px-4 py-3 text-sm font-bold"
+            aria-live="polite"
+          >
+          </div>
+
+          <div class="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <button id="collab-back" type="button" class="collab-btn-ghost" hidden>
+              Back
+            </button>
+            <p class="hidden text-sm leading-6 text-medium-gray sm:block sm:flex-1 sm:px-4">
+              <span id="collab-draft-note" hidden>Your answers are saved on this device as you go.</span>
+            </p>
+            <button id="collab-next" type="button" class="collab-btn-primary">
+              Continue
+            </button>
+            <button id="collab-submit" type="submit" class="collab-btn-primary" hidden>
+              <span id="collab-submit-text">Send inquiry</span>
+            </button>
+          </div>
+
+          <noscript>
+            <p class="mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              JavaScript is needed for this custom page. You can also open the
+              <a class="underline decoration-2 underline-offset-4" href={googleFormView}>
+                original Google collaboration form
+              </a>
+              directly.
+            </p>
+          </noscript>
+        </form>
+
+        <!-- Success panel -->
+        <div id="collab-success" class="collab-card collab-success" hidden>
+          <span class="collab-success-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="3" />
+              <path
+                d="M15 24.5l6.5 6.5L33 18"
+                stroke="currentColor"
+                stroke-width="3.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <h2 class="font-sans text-3xl font-extrabold text-off-black">
+            ¡Gracias! We got your inquiry.
+          </h2>
+          <p class="mt-3 font-body text-lg leading-8 text-medium-gray">
+            One of our team members will reach out shortly to schedule a
+            meeting. We're excited to learn more about your idea.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a href="/" class="collab-btn-primary">Back to home</a>
+            <button id="collab-again" type="button" class="collab-btn-ghost">
+              Send another inquiry
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <iframe name="collab-submission-frame" title="Collaboration submission" class="hidden"
+  ></iframe>
+</Layout>
+
+<script>
+  const form = document.getElementById("collab-form") as HTMLFormElement | null;
+  const panels = Array.from(
+    document.querySelectorAll<HTMLElement>("#collab-form [data-step]"),
+  );
+  const markers = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-step-marker]"),
+  );
+  const progressFill = document.getElementById("collab-progress-fill");
+  const progressText = document.getElementById("collab-progress-text");
+  const progressNav = document.getElementById("collab-progress");
+  const backButton = document.getElementById("collab-back");
+  const nextButton = document.getElementById("collab-next");
+  const submitButton = document.getElementById("collab-submit");
+  const submitText = document.getElementById("collab-submit-text");
+  const statusBox = document.getElementById("collab-status");
+  const successPanel = document.getElementById("collab-success");
+  const againButton = document.getElementById("collab-again");
+  const draftNote = document.getElementById("collab-draft-note");
+  const iframe = document.querySelector('iframe[name="collab-submission-frame"]');
+
+  const purposeOther = document.getElementById("collab-purpose-other");
+  const purposeOtherInput = document.getElementById(
+    "collab-purpose-other-input",
+  ) as HTMLInputElement | null;
+  const budgetBlock = document.getElementById("collab-budget");
+  const budgetOther = document.getElementById("collab-budget-other");
+
+  const stepLabels = ["About you", "Your inquiry", "The vision", "Wrap up"];
+  const DRAFT_KEY = "lsp-collab-draft-v1";
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  let currentStep = 0;
+  let submitted = false;
+
+  function fieldsIn(panel: HTMLElement) {
+    return Array.from(
+      panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        "input, textarea",
+      ),
+    );
+  }
+
+  function isConditionallyHidden(el: HTMLElement) {
+    return Boolean(el.closest(".collab-reveal[hidden]"));
+  }
+
+  function showStatus(message: string, tone: "success" | "warning") {
+    if (!statusBox) return;
+    statusBox.textContent = message;
+    statusBox.className =
+      tone === "success"
+        ? "mt-6 rounded-md border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800"
+        : "mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800";
+  }
+
+  function hideStatus() {
+    if (!statusBox) return;
+    statusBox.className = "mt-6 hidden rounded-md border px-4 py-3 text-sm font-bold";
+    statusBox.textContent = "";
+  }
+
+  function setInvalid(el: HTMLElement, invalid: boolean) {
+    const holder = el.closest("fieldset") ?? el.closest("div") ?? el;
+    holder.classList.toggle("collab-invalid", invalid);
+  }
+
+  function validateStep(index: number) {
+    const panel = panels[index];
+    if (!panel) return true;
+    let firstBad: HTMLElement | null = null;
+
+    const radioGroups = new Map<string, HTMLInputElement[]>();
+
+    for (const field of fieldsIn(panel)) {
+      if (isConditionallyHidden(field)) {
+        setInvalid(field, false);
+        continue;
+      }
+
+      if (field instanceof HTMLInputElement && field.type === "radio") {
+        const group = radioGroups.get(field.name) ?? [];
+        group.push(field);
+        radioGroups.set(field.name, group);
+        continue;
+      }
+
+      let bad = false;
+      if (field.required && !field.value.trim()) bad = true;
+      if (
+        field instanceof HTMLInputElement &&
+        field.type === "email" &&
+        field.value.trim() &&
+        !field.checkValidity()
+      ) {
+        bad = true;
+      }
+      // "Other" text becomes required once its radio is chosen.
+      if (
+        field === purposeOtherInput &&
+        isOtherPurposeChosen() &&
+        !field.value.trim()
+      ) {
+        bad = true;
+      }
+
+      setInvalid(field, bad);
+      if (bad && !firstBad) firstBad = field;
+    }
+
+    for (const [, group] of radioGroups) {
+      const required = group.some((radio) => radio.required);
+      const chosen = group.some((radio) => radio.checked);
+      const bad = required && !chosen;
+      setInvalid(group[0], bad);
+      if (bad && !firstBad) firstBad = group[0];
+    }
+
+    if (firstBad) {
+      const holder =
+        firstBad.closest("fieldset") ?? firstBad.closest("div") ?? firstBad;
+      holder.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      if (!(firstBad instanceof HTMLInputElement && firstBad.type === "radio")) {
+        firstBad.focus({ preventScroll: true });
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function isOtherPurposeChosen() {
+    const chosen = document.querySelector<HTMLInputElement>(
+      'input[name="entry.1149031448"]:checked',
+    );
+    return chosen?.value === "__other_option__";
+  }
+
+  function renderProgress() {
+    markers.forEach((marker, index) => {
+      marker.classList.toggle("is-active", index === currentStep);
+      marker.classList.toggle("is-done", index < currentStep);
+      if (index === currentStep) {
+        marker.setAttribute("aria-current", "step");
+      } else {
+        marker.removeAttribute("aria-current");
+      }
+    });
+
+    if (progressFill) {
+      progressFill.style.width = `${(currentStep / (panels.length - 1)) * 100}%`;
+    }
+    if (progressText) {
+      progressText.textContent = `Step ${currentStep + 1} of ${panels.length} · ${stepLabels[currentStep]}`;
+    }
+  }
+
+  function goToStep(index: number, direction: 1 | -1) {
+    const from = panels[currentStep];
+    const to = panels[index];
+    if (!to || index === currentStep) return;
+
+    hideStatus();
+    currentStep = index;
+    renderProgress();
+
+    if (from) from.hidden = true;
+    to.hidden = false;
+    if (!reducedMotion) {
+      to.classList.remove("collab-panel-enter-left", "collab-panel-enter-right");
+      void to.offsetWidth;
+      to.classList.add(
+        direction === 1 ? "collab-panel-enter-right" : "collab-panel-enter-left",
+      );
+    }
+
+    if (backButton) backButton.hidden = currentStep === 0;
+    const isLast = currentStep === panels.length - 1;
+    if (nextButton) nextButton.hidden = isLast;
+    if (submitButton) submitButton.hidden = !isLast;
+
+    progressNav?.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
+  function toggleReveal(el: HTMLElement | null, show: boolean) {
+    if (!el) return;
+    if (show === !el.hidden) return;
+    el.hidden = !show;
+    if (show && !reducedMotion) {
+      el.classList.remove("collab-reveal-enter");
+      void el.offsetWidth;
+      el.classList.add("collab-reveal-enter");
+    }
+    if (!show) {
+      // Clear values inside hidden conditional blocks so they are not submitted.
+      for (const field of el.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        "input, textarea",
+      )) {
+        if (field instanceof HTMLInputElement && field.type === "radio") {
+          field.checked = false;
+        } else {
+          field.value = "";
+        }
+        setInvalid(field, false);
+      }
+      // A hidden block may itself contain another reveal block.
+      for (const nested of el.querySelectorAll<HTMLElement>(".collab-reveal")) {
+        nested.hidden = true;
+      }
+    }
+  }
+
+  function syncConditionals() {
+    const purpose = document.querySelector<HTMLInputElement>(
+      'input[name="entry.1149031448"]:checked',
+    );
+    toggleReveal(purposeOther, purpose?.value === "__other_option__");
+    toggleReveal(budgetBlock, purpose?.value === "Collaboration / Event");
+
+    const budget = document.querySelector<HTMLInputElement>(
+      'input[name="entry.198368159"]:checked',
+    );
+    toggleReveal(budgetOther, budget?.value === "__other_option__");
+  }
+
+  // --- Draft autosave -------------------------------------------------------
+
+  function saveDraft() {
+    if (!form) return;
+    try {
+      const draft: Record<string, string> = {};
+      for (const field of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        "input[name^='entry'], textarea[name^='entry']",
+      )) {
+        if (field instanceof HTMLInputElement && field.type === "hidden") continue;
+        if (field instanceof HTMLInputElement && field.type === "radio") {
+          if (field.checked) draft[field.name] = field.value;
+        } else if (field.value) {
+          draft[field.name] = field.value;
+        }
+      }
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      if (draftNote) draftNote.hidden = false;
+    } catch {
+      /* storage unavailable: silently skip autosave */
+    }
+  }
+
+  function restoreDraft() {
+    if (!form) return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as Record<string, string>;
+      let restored = false;
+      for (const [name, value] of Object.entries(draft)) {
+        const radios = form.querySelectorAll<HTMLInputElement>(
+          `input[type="radio"][name="${CSS.escape(name)}"]`,
+        );
+        if (radios.length) {
+          for (const radio of radios) {
+            if (radio.value === value) {
+              radio.checked = true;
+              restored = true;
+            }
+          }
+          continue;
+        }
+        const field = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          `input[name="${CSS.escape(name)}"]:not([type="hidden"]), textarea[name="${CSS.escape(name)}"]`,
+        );
+        if (field) {
+          field.value = value;
+          restored = true;
+        }
+      }
+      if (restored && draftNote) draftNote.hidden = false;
+    } catch {
+      /* corrupt draft: ignore */
+    }
+  }
+
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // --- Wire-up --------------------------------------------------------------
+
+  form?.addEventListener("input", (event) => {
+    const target = event.target;
+    if (target instanceof HTMLElement) setInvalid(target, false);
+    saveDraft();
+  });
+
+  form?.addEventListener("change", (event) => {
+    syncConditionals();
+    const target = event.target;
+    if (target instanceof HTMLElement) setInvalid(target, false);
+    saveDraft();
+  });
+
+  nextButton?.addEventListener("click", () => {
+    if (!validateStep(currentStep)) return;
+    goToStep(currentStep + 1, 1);
+  });
+
+  backButton?.addEventListener("click", () => {
+    goToStep(currentStep - 1, -1);
+  });
+
+  form?.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Enter" &&
+      event.target instanceof HTMLInputElement &&
+      currentStep < panels.length - 1
+    ) {
+      event.preventDefault();
+      nextButton?.click();
+    }
+  });
+
+  form?.addEventListener("submit", (event) => {
+    for (let index = 0; index <= currentStep; index += 1) {
+      if (!validateStep(index)) {
+        event.preventDefault();
+        if (index !== currentStep) goToStep(index, -1);
+        showStatus("Please fill in the highlighted answers before sending.", "warning");
+        return;
+      }
+    }
+
+    submitted = true;
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-70");
+    }
+    if (submitText) submitText.textContent = "Sending...";
+    showStatus("Sending your inquiry...", "warning");
+  });
+
+  iframe?.addEventListener("load", () => {
+    if (!submitted) return;
+    submitted = false;
+    clearDraft();
+
+    if (form) form.hidden = true;
+    if (progressNav) progressNav.hidden = true;
+    if (successPanel) {
+      successPanel.hidden = false;
+      if (!reducedMotion) successPanel.classList.add("collab-success-enter");
+      successPanel.scrollIntoView({ behavior: "auto", block: "center" });
+    }
+  });
+
+  againButton?.addEventListener("click", () => {
+    if (!form) return;
+    form.reset();
+    syncConditionals();
+    hideStatus();
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = false;
+      submitButton.classList.remove("opacity-70");
+    }
+    if (submitText) submitText.textContent = "Send inquiry";
+    if (successPanel) successPanel.hidden = true;
+    if (progressNav) progressNav.hidden = false;
+    form.hidden = false;
+    panels.forEach((panel, index) => {
+      panel.hidden = index !== 0;
+    });
+    currentStep = 0;
+    renderProgress();
+    if (backButton) backButton.hidden = true;
+    if (nextButton) nextButton.hidden = false;
+    if (submitButton) submitButton.hidden = true;
+    progressNav?.scrollIntoView({ behavior: "auto", block: "start" });
+  });
+
+  restoreDraft();
+  syncConditionals();
+  renderProgress();
+</script>
+
+<style>
+  .collab-card {
+    border-radius: 0.75rem;
+    border: 1px solid #d9c8b3;
+    background-color: #ffffff;
+    padding: 1.5rem;
+    box-shadow:
+      0 1px 2px rgb(30 30 30 / 0.05),
+      0 12px 32px -20px rgb(30 30 30 / 0.25);
+  }
+
+  @media (min-width: 640px) {
+    .collab-card {
+      padding: 2.5rem;
+    }
+  }
+
+  /* --- Progress tracker --- */
+
+  .collab-steps {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .collab-step {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .collab-step-dot {
+    position: relative;
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 2px solid #cdbda8;
+    background-color: #fffdf9;
+    color: var(--color-off-black);
+    font-family: var(--font-sans);
+    font-weight: 800;
+    transition:
+      background-color 240ms ease,
+      border-color 240ms ease,
+      color 240ms ease,
+      transform 240ms ease;
+  }
+
+  .collab-step-check {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: 1rem;
+    width: 1rem;
+    opacity: 0;
+    transform: scale(0.4);
+    transition:
+      opacity 240ms ease,
+      transform 240ms ease;
+  }
+
+  .collab-step.is-active .collab-step-dot {
+    border-color: var(--color-off-black);
+    background-color: var(--color-off-black);
+    color: #ffffff;
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgb(30 30 30 / 0.2);
+  }
+
+  .collab-step.is-done .collab-step-dot {
+    border-color: var(--color-accent-gold);
+    background-color: var(--color-accent-gold);
+    color: var(--color-off-black);
+  }
+
+  .collab-step.is-done .collab-step-num {
+    opacity: 0;
+  }
+
+  .collab-step.is-done .collab-step-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .collab-step-num {
+    transition: opacity 160ms ease;
+  }
+
+  .collab-step-label {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-medium-gray);
+    transition: color 240ms ease;
+  }
+
+  .collab-step.is-active .collab-step-label {
+    color: var(--color-off-black);
+  }
+
+  @media (max-width: 480px) {
+    .collab-step-label {
+      display: none;
+    }
+  }
+
+  .collab-progress-rail {
+    margin-top: 0.875rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: #e6d9c7;
+    overflow: hidden;
+  }
+
+  .collab-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-accent-gold), #f4a833);
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* --- Panels + transitions --- */
+
+  .collab-panel-title {
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-off-black);
+  }
+
+  .collab-panel-sub {
+    margin-top: 0.375rem;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-medium-gray);
+  }
+
+  @keyframes collab-slide-right {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes collab-slide-left {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .collab-panel-enter-right {
+    animation: collab-slide-right 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .collab-panel-enter-left {
+    animation: collab-slide-left 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .collab-reveal {
+    margin-top: 1.5rem;
+  }
+
+  @keyframes collab-reveal-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .collab-reveal-enter {
+    animation: collab-reveal-in 280ms ease both;
+  }
+
+  /* --- Fields --- */
+
+  .collab-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-off-black);
+  }
+
+  .collab-optional {
+    margin-left: 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9a8f82;
+  }
+
+  .collab-field {
+    margin-top: 0.5rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #cdbda8;
+    background-color: #fffdf9;
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-off-black);
+    outline: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .collab-field::placeholder {
+    color: #8a8178;
+  }
+
+  .collab-field:focus {
+    border-color: var(--color-vibrant-pink);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.25);
+  }
+
+  /* --- Choice cards (purpose) --- */
+
+  .collab-choice-card {
+    cursor: pointer;
+  }
+
+  .collab-choice-card-body {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-radius: 0.625rem;
+    border: 1px solid #cdbda8;
+    background-color: #fffdf9;
+    padding: 0.875rem 1rem;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .collab-choice-card:hover .collab-choice-card-body {
+    border-color: var(--color-off-black);
+    transform: translateY(-2px);
+  }
+
+  .collab-choice-card-title {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 0.9375rem;
+    color: var(--color-off-black);
+  }
+
+  .collab-choice-card-hint {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-medium-gray);
+  }
+
+  .collab-choice-card input:checked + .collab-choice-card-body {
+    border-color: var(--color-off-black);
+    background-color: var(--color-off-black);
+    box-shadow: 0 10px 24px rgb(30 30 30 / 0.18);
+  }
+
+  .collab-choice-card input:checked + .collab-choice-card-body .collab-choice-card-title {
+    color: var(--color-accent-gold);
+  }
+
+  .collab-choice-card input:checked + .collab-choice-card-body .collab-choice-card-hint {
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  .collab-choice-card input:focus-visible + .collab-choice-card-body {
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.4);
+  }
+
+  /* --- Pills (short radios) --- */
+
+  .collab-pill {
+    cursor: pointer;
+  }
+
+  .collab-pill span {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    border: 1px solid #cdbda8;
+    background-color: #fffdf9;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--color-off-black);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .collab-pill:hover span {
+    border-color: var(--color-off-black);
+  }
+
+  .collab-pill input:checked + span {
+    border-color: var(--color-off-black);
+    background-color: var(--color-off-black);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgb(30 30 30 / 0.16);
+  }
+
+  .collab-pill input:focus-visible + span {
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.35);
+  }
+
+  /* --- Validation --- */
+
+  .collab-error {
+    display: none;
+    margin-top: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #b3402a;
+  }
+
+  .collab-invalid .collab-error {
+    display: block;
+  }
+
+  .collab-invalid .collab-field,
+  .collab-invalid .collab-pill span,
+  .collab-invalid .collab-choice-card-body {
+    border-color: #b3402a;
+  }
+
+  @keyframes collab-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .collab-invalid {
+      animation: collab-shake 240ms ease;
+    }
+  }
+
+  /* --- Buttons --- */
+
+  .collab-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--color-off-black);
+    padding: 0.75rem 2rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgb(30 30 30 / 0.2);
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+    cursor: pointer;
+  }
+
+  .collab-btn-primary:hover {
+    background-color: var(--color-vibrant-pink);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgb(30 30 30 / 0.24);
+  }
+
+  .collab-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(181 161 141 / 0.5);
+  }
+
+  .collab-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid #cdbda8;
+    background-color: transparent;
+    padding: 0.75rem 2rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-off-black);
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
+    cursor: pointer;
+  }
+
+  .collab-btn-ghost:hover {
+    border-color: var(--color-off-black);
+    background-color: #fffdf9;
+  }
+
+  /* --- Success --- */
+
+  .collab-success {
+    text-align: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .collab-success-mark {
+    display: inline-flex;
+    height: 4.5rem;
+    width: 4.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-accent-gold);
+  }
+
+  .collab-success-mark svg {
+    height: 100%;
+    width: 100%;
+  }
+
+  @keyframes collab-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.92) translateY(12px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .collab-success-enter {
+    animation: collab-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+</style>

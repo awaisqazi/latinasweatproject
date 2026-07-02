@@ -33,7 +33,8 @@
         const url = generateSubICSFile(request);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `sub-${request.className.replace(/\s+/g, "-")}.ics`;
+        const fileLabel = request.className || "coordinator-shift";
+        a.download = `sub-${fileLabel.replace(/\s+/g, "-")}.ics`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -57,7 +58,18 @@
             hour: "numeric",
             minute: "2-digit",
         });
-        const endDate = new Date(date.getTime() + (duration || 60) * 60000);
+        // Coordinator shifts carry an explicit end_time; prefer it over duration.
+        let endDate;
+        if (
+            request?.kind === "coordinator" &&
+            /^\d{2}:\d{2}/.test(request?.endTime || "")
+        ) {
+            const [h, m] = request.endTime.split(":").map(Number);
+            endDate = new Date(date);
+            endDate.setHours(h, m, 0, 0);
+        } else {
+            endDate = new Date(date.getTime() + (duration || 60) * 60000);
+        }
         const end = endDate.toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
@@ -95,7 +107,9 @@
                         You're Signed Up!
                     </h2>
                     <p class="text-white/90">
-                        Thanks for volunteering to sub, {name.split(" ")[0]}!
+                        {request.kind === "coordinator"
+                            ? `Thanks for volunteering to cover this coordinator shift, ${name.split(" ")[0]}!`
+                            : `Thanks for volunteering to sub, ${name.split(" ")[0]}!`}
                     </p>
                     <p class="text-white/80 text-sm mt-2">
                         You'll be notified once your request is approved.
@@ -112,10 +126,14 @@
                                 <p
                                     class="text-xs font-bold text-gray-500 uppercase tracking-wide"
                                 >
-                                    Class
+                                    {request.kind === "coordinator"
+                                        ? "Shift"
+                                        : "Class"}
                                 </p>
                                 <p class="font-medium text-gray-900">
-                                    {request.className}
+                                    {request.kind === "coordinator"
+                                        ? "Coordinator Shift"
+                                        : request.className}
                                 </p>
                             </div>
                         </div>
@@ -221,10 +239,14 @@
                 <!-- Header -->
                 <div class="bg-vibrant-pink p-6 text-white">
                     <h2 class="text-2xl font-bold font-rubik">
-                        Volunteer to Sub
+                        {request.kind === "coordinator"
+                            ? "Volunteer to Cover"
+                            : "Volunteer to Sub"}
                     </h2>
                     <p class="text-white/90 mt-1">
-                        {request.className} •
+                        {request.kind === "coordinator"
+                            ? "Coordinator Shift"
+                            : request.className} •
                         {request.date.toLocaleDateString()}
                     </p>
                 </div>
@@ -235,10 +257,18 @@
                         <div
                             class="bg-amber-50 rounded-lg p-3 border border-amber-100 text-sm text-amber-800"
                         >
-                            <p>
-                                <strong>Note:</strong> Your request will need admin
-                                approval before confirmation.
-                            </p>
+                            {#if request.kind === "coordinator"}
+                                <p>
+                                    You're volunteering to cover this coordinator
+                                    shift. <strong>Note:</strong> Your request will
+                                    need admin approval before confirmation.
+                                </p>
+                            {:else}
+                                <p>
+                                    <strong>Note:</strong> Your request will need admin
+                                    approval before confirmation.
+                                </p>
+                            {/if}
                         </div>
 
                         <div>

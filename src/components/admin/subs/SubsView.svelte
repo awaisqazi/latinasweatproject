@@ -28,7 +28,7 @@
 
   const DEFAULT_LOCATION = "949 W 16th St, Chicago, IL 60608";
   const requestColumns =
-    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+    "id, kind, class_name, date, start_time, end_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const STATUS_FILTERS = [
     { id: "all", label: "All" },
@@ -51,9 +51,11 @@
   let showCreateForm = false;
   let isCreating = false;
   let createError = "";
+  let newKind = "class";
   let newClassName = "";
   let newDate = "";
   let newStartTime = "";
+  let newEndTime = "";
   let newDuration = 60;
   let newLocation = DEFAULT_LOCATION;
   let newNotes = "";
@@ -89,7 +91,7 @@
     if (searchQuery.trim().length >= 2) {
       const query = searchQuery.trim().toLowerCase();
       return (
-        request.class_name?.toLowerCase().includes(query) ||
+        getRequestTitle(request).toLowerCase().includes(query) ||
         request.requested_by_name?.toLowerCase().includes(query) ||
         request.assigned_sub_name?.toLowerCase().includes(query) ||
         request.location?.toLowerCase().includes(query) ||
@@ -203,19 +205,43 @@
   async function createRequest(event) {
     event?.preventDefault();
 
+    const isCoordinator = newKind === "coordinator";
     const className = newClassName.trim();
     const requesterName = newRequesterName.trim();
     const requesterEmail = newRequesterEmail.trim();
-    if (!className || !newDate || !requesterName || !requesterEmail || isCreating) {
+
+    if (!newDate || !requesterName || !requesterEmail || isCreating) {
       return;
     }
 
-    isCreating = true;
-    createError = "";
-
-    const { data, error } = await supabase
-      .from("sub_requests")
-      .insert({
+    let insertRow;
+    if (isCoordinator) {
+      if (!newStartTime || !newEndTime) {
+        createError = "Coordinator shifts need a start time and an end time.";
+        return;
+      }
+      const startMinutes = timeToMinutes(newStartTime);
+      const endMinutes = timeToMinutes(newEndTime);
+      if (endMinutes <= startMinutes) {
+        createError = "The end time must be after the start time.";
+        return;
+      }
+      insertRow = {
+        kind: "coordinator",
+        class_name: null,
+        date: newDate,
+        start_time: newStartTime,
+        end_time: newEndTime,
+        duration_minutes: endMinutes - startMinutes,
+        location: newLocation.trim() || null,
+        notes: newNotes.trim() || null,
+        requested_by_name: requesterName,
+        requested_by_email: requesterEmail.toLowerCase(),
+      };
+    } else {
+      if (!className) return;
+      insertRow = {
+        kind: "class",
         class_name: className,
         date: newDate,
         start_time: newStartTime || null,
@@ -224,7 +250,15 @@
         notes: newNotes.trim() || null,
         requested_by_name: requesterName,
         requested_by_email: requesterEmail.toLowerCase(),
-      })
+      };
+    }
+
+    isCreating = true;
+    createError = "";
+
+    const { data, error } = await supabase
+      .from("sub_requests")
+      .insert(insertRow)
       .select(requestColumns)
       .single();
 
@@ -242,9 +276,11 @@
         );
       }
 
+      newKind = "class";
       newClassName = "";
       newDate = "";
       newStartTime = "";
+      newEndTime = "";
       newDuration = 60;
       newLocation = DEFAULT_LOCATION;
       newNotes = "";
@@ -288,9 +324,11 @@
     const escapeCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
     const rows = [
       [
-        "Class Name",
+        "Type",
+        "Title",
         "Date",
         "Start Time",
+        "End Time",
         "Duration (minutes)",
         "Location",
         "Status",
@@ -305,9 +343,11 @@
 
     (data || []).forEach((request) => {
       rows.push([
-        request.class_name,
+        request.kind === "coordinator" ? "coordinator" : "class",
+        getRequestTitle(request),
         request.date,
         request.start_time ? formatStartTime(request.start_time) : "",
+        request.end_time ? formatStartTime(request.end_time) : "",
         request.duration_minutes ?? "",
         request.location ?? "",
         request.status,
@@ -382,10 +422,39 @@
     }).format(date);
   }
 
-  function getStatusLabel(status) {
+  function getStatusLabel(status, kind) {
+    if (kind === "coordinator") {
+      if (status === "approved") return "Coverage confirmed";
+      if (status === "pending") return "Pending approval";
+      return "Needs coverage";
+    }
     if (status === "approved") return "Sub confirmed";
     if (status === "pending") return "Pending approval";
     return "Needs sub";
+  }
+
+  function getRequestTitle(request) {
+    if (request?.kind === "coordinator") return "Coordinator Shift";
+    return request?.class_name || "Class";
+  }
+
+  function formatTimeRange(startTime, endTime) {
+    if (!startTime) return "";
+    if (!endTime) return formatStartTime(startTime);
+    return `${formatStartTime(startTime)} to ${formatStartTime(endTime)}`;
+  }
+
+  function getRequestTimeDisplay(request) {
+    if (request?.kind === "coordinator") {
+      return formatTimeRange(request.start_time, request.end_time);
+    }
+    return request?.start_time ? formatStartTime(request.start_time) : "";
+  }
+
+  function timeToMinutes(value) {
+    if (!value) return null;
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours * 60 + minutes;
   }
 </script>
 
@@ -486,18 +555,51 @@
 
     {#if showCreateForm}
       <form class="mb-4 rounded-card border border-ink/8 bg-canvas/70 p-4" onsubmit={createRequest}>
-        <p class="text-sm font-bold">Create a sub request</p>
-        <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <Field label="Class name" id="subs-new-class" required>
-            <input
-              id="subs-new-class"
-              type="text"
-              class="input"
-              placeholder="e.g., Yoga Flow, Pilates, HIIT"
-              bind:value={newClassName}
+        <p class="text-sm font-bold">
+          {newKind === "coordinator" ? "Create a coordinator coverage request" : "Create a sub request"}
+        </p>
+        <div class="mt-3">
+          <span class="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-ink/55">Request type</span>
+          <div class="inline-flex gap-1 rounded-control border border-ink/10 bg-ink/[0.04] p-1" role="group" aria-label="Request type">
+            <button
+              type="button"
+              aria-pressed={newKind === "class"}
+              class="min-h-9 rounded-[6px] px-3.5 text-sm font-semibold transition-colors duration-150 {newKind === 'class' ? 'bg-white text-ink shadow-card' : 'text-ink/55 hover:text-ink'}"
+              onclick={() => {
+                newKind = "class";
+                createError = "";
+              }}
               disabled={isCreating}
-            />
-          </Field>
+            >
+              Class
+            </button>
+            <button
+              type="button"
+              aria-pressed={newKind === "coordinator"}
+              class="min-h-9 rounded-[6px] px-3.5 text-sm font-semibold transition-colors duration-150 {newKind === 'coordinator' ? 'bg-white text-ink shadow-card' : 'text-ink/55 hover:text-ink'}"
+              onclick={() => {
+                newKind = "coordinator";
+                createError = "";
+              }}
+              disabled={isCreating}
+            >
+              Coordinator shift
+            </button>
+          </div>
+        </div>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          {#if newKind === "class"}
+            <Field label="Class name" id="subs-new-class" required>
+              <input
+                id="subs-new-class"
+                type="text"
+                class="input"
+                placeholder="e.g., Yoga Flow, Pilates, HIIT"
+                bind:value={newClassName}
+                disabled={isCreating}
+              />
+            </Field>
+          {/if}
           <Field label="Date" id="subs-new-date" required>
             <input
               id="subs-new-date"
@@ -507,46 +609,77 @@
               disabled={isCreating}
             />
           </Field>
-          <Field label="Class time" id="subs-new-start-time">
-            <input
-              id="subs-new-start-time"
-              type="time"
-              class="input"
-              bind:value={newStartTime}
-              disabled={isCreating}
-            />
-          </Field>
-          <Field label="Instructor name" id="subs-new-requester-name" required>
+          {#if newKind === "coordinator"}
+            <Field label="Start time" id="subs-new-start-time" required>
+              <input
+                id="subs-new-start-time"
+                type="time"
+                class="input"
+                bind:value={newStartTime}
+                disabled={isCreating}
+              />
+            </Field>
+            <Field label="End time" id="subs-new-end-time" required>
+              <input
+                id="subs-new-end-time"
+                type="time"
+                class="input"
+                bind:value={newEndTime}
+                disabled={isCreating}
+              />
+            </Field>
+          {:else}
+            <Field label="Class time" id="subs-new-start-time">
+              <input
+                id="subs-new-start-time"
+                type="time"
+                class="input"
+                bind:value={newStartTime}
+                disabled={isCreating}
+              />
+            </Field>
+          {/if}
+          <Field
+            label={newKind === "coordinator" ? "Coordinator name" : "Instructor name"}
+            id="subs-new-requester-name"
+            required
+          >
             <input
               id="subs-new-requester-name"
               type="text"
               class="input"
-              placeholder="Who needs the sub?"
+              placeholder={newKind === "coordinator" ? "Who needs coverage?" : "Who needs the sub?"}
               bind:value={newRequesterName}
               disabled={isCreating}
             />
           </Field>
-          <Field label="Instructor email" id="subs-new-requester-email" required>
+          <Field
+            label={newKind === "coordinator" ? "Coordinator email" : "Instructor email"}
+            id="subs-new-requester-email"
+            required
+          >
             <input
               id="subs-new-requester-email"
               type="email"
               class="input"
-              placeholder="instructor@email.com"
+              placeholder={newKind === "coordinator" ? "coordinator@email.com" : "instructor@email.com"}
               bind:value={newRequesterEmail}
               disabled={isCreating}
             />
           </Field>
-          <Field label="Duration (minutes)" id="subs-new-duration">
-            <input
-              id="subs-new-duration"
-              type="number"
-              min="5"
-              max="600"
-              class="input"
-              bind:value={newDuration}
-              disabled={isCreating}
-            />
-          </Field>
+          {#if newKind === "class"}
+            <Field label="Duration (minutes)" id="subs-new-duration">
+              <input
+                id="subs-new-duration"
+                type="number"
+                min="5"
+                max="600"
+                class="input"
+                bind:value={newDuration}
+                disabled={isCreating}
+              />
+            </Field>
+          {/if}
           <Field label="Location" id="subs-new-location">
             <input
               id="subs-new-location"
@@ -561,7 +694,9 @@
               id="subs-new-notes"
               rows="2"
               class="textarea"
-              placeholder="Class time, format, anything a sub should know"
+              placeholder={newKind === "coordinator"
+                ? "Shift details, anything the person covering should know"
+                : "Class time, format, anything a sub should know"}
               bind:value={newNotes}
               disabled={isCreating}
             ></textarea>
@@ -572,7 +707,8 @@
             type="submit"
             variant="dark"
             loading={isCreating}
-            disabled={!newClassName.trim() ||
+            disabled={(newKind === "class" && !newClassName.trim()) ||
+              (newKind === "coordinator" && (!newStartTime || !newEndTime)) ||
               !newDate ||
               !newRequesterName.trim() ||
               !newRequesterEmail.trim()}
@@ -589,7 +725,7 @@
     <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
       <SearchInput
         bind:value={searchQuery}
-        placeholder="Search by class, name, date, location"
+        placeholder="Search by class, coordinator, name, date, location"
         label="Search sub requests"
         minChars={2}
         debounce={200}
@@ -659,11 +795,16 @@
                       class="w-full rounded-control border border-ink/8 bg-white px-2 py-1.5 text-left text-xs font-semibold leading-snug shadow-card transition hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
                       onclick={() => (selectedRequest = request)}
                     >
-                      <Badge tone={STATUS_TONES[request.status] || "amber"} dot size="xs">
-                        {getStatusLabel(request.status)}
-                      </Badge>
+                      <div class="flex flex-wrap items-center gap-1">
+                        <Badge tone={STATUS_TONES[request.status] || "amber"} dot size="xs">
+                          {getStatusLabel(request.status, request.kind)}
+                        </Badge>
+                        {#if request.kind === "coordinator"}
+                          <Badge tone="neutral" size="xs">Coordinator</Badge>
+                        {/if}
+                      </div>
                       <span class="mt-1 line-clamp-2 block">
-                        {#if request.start_time}{formatStartTime(request.start_time)} · {/if}{request.class_name}
+                        {#if getRequestTimeDisplay(request)}{getRequestTimeDisplay(request)} · {/if}{getRequestTitle(request)}
                       </span>
                     </button>
                   {/each}
@@ -684,20 +825,25 @@
           >
             <span class="min-w-0 flex-1">
               <span class="block text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
-                {formatDate(request.date)}{#if request.start_time}&nbsp;· {formatStartTime(request.start_time)}{/if}
+                {formatDate(request.date)}{#if getRequestTimeDisplay(request)}&nbsp;· {getRequestTimeDisplay(request)}{/if}
               </span>
-              <span class="mt-1 block font-bold leading-snug">{request.class_name}</span>
+              <span class="mt-1 flex flex-wrap items-center gap-2">
+                <span class="font-bold leading-snug">{getRequestTitle(request)}</span>
+                {#if request.kind === "coordinator"}
+                  <Badge tone="neutral" size="xs">Coordinator</Badge>
+                {/if}
+              </span>
               <span class="mt-1 block text-sm text-ink/60">
                 Requested by {request.requested_by_name}
                 {#if request.assigned_sub_name}
-                  · Sub: {request.assigned_sub_name}
+                  · {request.kind === "coordinator" ? "Covering" : "Sub"}: {request.assigned_sub_name}
                 {:else if request.sub_volunteers.length}
                   · {request.sub_volunteers.length} volunteer{request.sub_volunteers.length === 1 ? "" : "s"} waiting
                 {/if}
               </span>
             </span>
             <Badge tone={STATUS_TONES[request.status] || "amber"}>
-              {getStatusLabel(request.status)}
+              {getStatusLabel(request.status, request.kind)}
             </Badge>
           </button>
         {/each}

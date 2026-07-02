@@ -14,7 +14,8 @@
         const url = generateSubICSFile(request);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `sub-${request.className.replace(/\s+/g, "-")}.ics`;
+        const fileLabel = request.className || "coordinator-shift";
+        a.download = `sub-${fileLabel.replace(/\s+/g, "-")}.ics`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -36,6 +37,18 @@
         });
     }
 
+    // Format the end of a coordinator shift from its end_time ("HH:MM").
+    function formatEndTime(endTime) {
+        if (!/^\d{2}:\d{2}/.test(endTime || "")) return "";
+        const [h, m] = endTime.split(":").map(Number);
+        const tempDate = new Date();
+        tempDate.setHours(h, m);
+        return tempDate.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+        });
+    }
+
     function getStatusColor(status) {
         switch (status) {
             case "open":
@@ -49,14 +62,15 @@
         }
     }
 
-    function getStatusLabel(status) {
+    function getStatusLabel(status, kind) {
+        const isCoordinator = kind === "coordinator";
         switch (status) {
             case "open":
-                return "Needs Sub";
+                return isCoordinator ? "Needs Coverage" : "Needs Sub";
             case "pending":
                 return "Pending Approval";
             case "approved":
-                return "Sub Confirmed";
+                return isCoordinator ? "Coverage Confirmed" : "Sub Confirmed";
             default:
                 return status;
         }
@@ -70,9 +84,20 @@
     <div class="p-4 border-b border-gray-100">
         <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
-                <h3 class="font-bold text-gray-900 text-lg truncate">
-                    {request.className}
-                </h3>
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-gray-900 text-lg truncate">
+                        {request.kind === "coordinator"
+                            ? "Coordinator Shift"
+                            : request.className}
+                    </h3>
+                    {#if request.kind === "coordinator"}
+                        <span
+                            class="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-purple-100 text-purple-700 border border-purple-200"
+                        >
+                            Coordinator
+                        </span>
+                    {/if}
+                </div>
                 <p class="text-sm text-gray-500 mt-1">
                     Requested by <span class="font-medium text-gray-700"
                         >{request.requestedBy?.name || "Unknown"}</span
@@ -84,7 +109,7 @@
                     request.status,
                 )}"
             >
-                {getStatusLabel(request.status)}
+                {getStatusLabel(request.status, request.kind)}
             </span>
         </div>
     </div>
@@ -98,8 +123,13 @@
                     {formatDate(request.date)}
                 </p>
                 <p class="text-gray-500">
-                    {#if request.hasStartTime}{formatTime(request.date)} •
-                    {/if}{request.duration || 60} mins
+                    {#if request.kind === "coordinator" && request.hasStartTime && request.endTime}
+                        {formatTime(request.date)} to {formatEndTime(
+                            request.endTime,
+                        )}
+                    {:else if request.hasStartTime}{formatTime(request.date)} •
+                        {request.duration || 60} mins{:else}{request.duration ||
+                            60} mins{/if}
                 </p>
             </div>
         </div>
@@ -201,7 +231,9 @@
                     on:click={() => dispatch("volunteer", request)}
                     class="w-full px-4 py-3 bg-vibrant-pink text-white rounded-lg font-bold hover:bg-accent-gold transition-colors cursor-pointer"
                 >
-                    Volunteer to Sub
+                    {request.kind === "coordinator"
+                        ? "Volunteer to Cover"
+                        : "Volunteer to Sub"}
                 </button>
             {:else if request.status === "pending"}
                 <p class="text-center text-blue-600 font-medium text-sm">
@@ -210,7 +242,9 @@
             {:else if request.status === "approved"}
                 <div class="space-y-3">
                     <p class="text-center text-green-600 font-medium text-sm">
-                        ✅ Sub Confirmed
+                        ✅ {request.kind === "coordinator"
+                            ? "Coverage Confirmed"
+                            : "Sub Confirmed"}
                     </p>
                     <!-- Calendar Buttons -->
                     <div class="flex gap-2">

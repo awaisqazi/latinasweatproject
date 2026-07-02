@@ -18,11 +18,13 @@
             navigator.maxTouchPoints > 0;
     });
 
+    let kind = "class"; // "class" | "coordinator"
     let className = "";
     let instructorName = "";
     let instructorEmail = "";
     let dateInput = ""; // User-entered date (flexible format)
-    let timeInput = ""; // User-entered time (flexible format)
+    let timeInput = ""; // User-entered start time (flexible format)
+    let endTimeInput = ""; // User-entered end time (coordinator only)
     let duration = 60;
     let location = "949 W 16th St, Chicago, IL 60608";
     let notes = "";
@@ -35,12 +37,14 @@
         dispatch("close");
     }
 
-    // Helper to check if form is valid
+    // Helper to check if form is valid (kind-aware)
     $: isFormValid =
-        className.trim() !== "" &&
         instructorName.trim() !== "" &&
         dateInput.trim() !== "" &&
-        timeInput.trim() !== "";
+        timeInput.trim() !== "" &&
+        (kind === "coordinator"
+            ? endTimeInput.trim() !== ""
+            : className.trim() !== "");
 
     // Parse user-entered date to YYYY-MM-DD format
     function parseDateInput(input) {
@@ -79,6 +83,19 @@
         return cleaned; // Fallback
     }
 
+    // Inline validation for the coordinator end time. Only surfaces once both
+    // a start and end have been entered and the end is not after the start.
+    $: endTimeError = (() => {
+        if (kind !== "coordinator") return "";
+        if (timeInput.trim() === "" || endTimeInput.trim() === "") return "";
+        const start = parseTimeInput(timeInput);
+        const end = parseTimeInput(endTimeInput);
+        if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end))
+            return "";
+        if (end <= start) return "End time must be after the start time.";
+        return "";
+    })();
+
     // Parse user-entered time to HH:MM format
     function parseTimeInput(input) {
         if (!input) return "";
@@ -109,10 +126,31 @@
     function goToConfirmation() {
         if (!isFormValid) {
             alert(
-                "Please fill in required fields (Class Name, Your Name, Date, Time).",
+                kind === "coordinator"
+                    ? "Please fill in required fields (Your Name, Date, Start Time, End Time)."
+                    : "Please fill in required fields (Class Name, Your Name, Date, Time).",
             );
             return;
         }
+
+        // For coordinator shifts, validate the end time is after the start time.
+        if (kind === "coordinator") {
+            const start = parseTimeInput(timeInput);
+            const end = parseTimeInput(endTimeInput);
+            if (!/^\d{2}:\d{2}$/.test(end)) {
+                alert("Please enter a valid end time (e.g. 12:30 PM or 12:30).");
+                return;
+            }
+            if (
+                /^\d{2}:\d{2}$/.test(start) &&
+                /^\d{2}:\d{2}$/.test(end) &&
+                end <= start
+            ) {
+                alert("The end time must be after the start time.");
+                return;
+            }
+        }
+
         showConfirmation = true;
     }
 
@@ -123,6 +161,7 @@
     function confirmSubmit() {
         const date = parseDateInput(dateInput);
         const time = parseTimeInput(timeInput);
+        const endTime = parseTimeInput(endTimeInput);
 
         // Final validation check for valid formats
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -135,13 +174,25 @@
             alert("Please enter a valid time (e.g. 9:00 AM or 14:30).");
             return;
         }
+        if (kind === "coordinator") {
+            if (!/^\d{2}:\d{2}$/.test(endTime)) {
+                alert("Please enter a valid end time (e.g. 12:30 PM or 12:30).");
+                return;
+            }
+            if (endTime <= time) {
+                alert("The end time must be after the start time.");
+                return;
+            }
+        }
 
         dispatch("submit", {
+            kind,
             className,
             instructorName,
             instructorEmail,
             date,
             time,
+            endTime: kind === "coordinator" ? endTime : null,
             duration,
             location,
             notes,
@@ -149,11 +200,13 @@
     }
 
     function resetForm() {
+        kind = "class";
         className = "";
         instructorName = "";
         instructorEmail = "";
         dateInput = "";
         timeInput = "";
+        endTimeInput = "";
         duration = 60;
         location = "949 W 16th St, Chicago, IL 60608";
         notes = "";
@@ -238,7 +291,9 @@
                                 Request Submitted!
                             </h2>
                             <p class="text-white/90 mt-1">
-                                Your substitute request has been created
+                                {kind === "coordinator"
+                                    ? "Your coverage request has been created"
+                                    : "Your substitute request has been created"}
                             </p>
                         </div>
                     </div>
@@ -252,14 +307,40 @@
                             <span class="text-2xl">✅</span>
                             <div>
                                 <p class="font-bold text-green-800">Success!</p>
-                                <p class="text-green-700 text-sm mt-1">
-                                    Your request for <strong>{className}</strong
-                                    > has been posted. Instructors will be able to
-                                    see it and volunteer to cover the class.
-                                </p>
+                                {#if kind === "coordinator"}
+                                    <p class="text-green-700 text-sm mt-1">
+                                        Your coordinator shift has been posted.
+                                        Anyone who can cover it will be able to
+                                        see it and pick it up.
+                                    </p>
+                                {:else}
+                                    <p class="text-green-700 text-sm mt-1">
+                                        Your request for <strong>{className}</strong
+                                        > has been posted. Instructors will be able
+                                        to see it and volunteer to cover the class.
+                                    </p>
+                                {/if}
                             </div>
                         </div>
                     </div>
+
+                    {#if kind === "coordinator"}
+                        <div
+                            class="bg-amber-50 rounded-lg p-4 border border-amber-200"
+                        >
+                            <div class="flex items-start gap-3">
+                                <span class="text-xl">🙌</span>
+                                <div>
+                                    <p class="text-amber-800 text-sm">
+                                        Your request is posted, but please also
+                                        reach out to other coordinators directly.
+                                        Anyone who can cover it can pick up your
+                                        shift right on this page.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
 
                     <div
                         class="bg-blue-50 rounded-lg p-4 border border-blue-200"
@@ -269,8 +350,8 @@
                             <div>
                                 <p class="text-blue-800 text-sm">
                                     <strong>What's next?</strong> You'll be notified
-                                    when someone volunteers. Check back on the substitute
-                                    requests page to see updates.
+                                    when someone volunteers. Check back on this page
+                                    to see updates.
                                 </p>
                             </div>
                         </div>
@@ -291,33 +372,70 @@
                 <!-- Header -->
                 <div class="bg-vibrant-pink p-6 text-white">
                     <h2 class="text-2xl font-bold font-rubik">
-                        Request a Substitute
+                        Request Coverage
                     </h2>
                     <p class="text-white/90 mt-1">
-                        Fill out the details for the class you need covered
+                        {kind === "coordinator"
+                            ? "Fill out the details for the coordinator shift you need covered"
+                            : "Fill out the details for the class you need covered"}
                     </p>
                 </div>
 
                 <!-- Form -->
                 <form on:submit|preventDefault={goToConfirmation}>
                     <div class="p-6 space-y-4">
-                        <div class="grid gap-4 sm:grid-cols-2">
-                            <div class="sm:col-span-2">
-                                <label
-                                    for="className"
-                                    class="block text-sm font-medium text-gray-700 mb-1"
+                        <!-- Kind Selector -->
+                        <div>
+                            <span
+                                class="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                What needs coverage? *
+                            </span>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    aria-pressed={kind === "class"}
+                                    on:click={() => (kind = "class")}
+                                    class="px-4 py-3 rounded-lg border-2 font-bold text-sm transition-all cursor-pointer {kind ===
+                                    'class'
+                                        ? 'bg-vibrant-pink text-white border-vibrant-pink shadow-lg'
+                                        : 'bg-white text-gray-700 border-gray-300 hover:border-vibrant-pink'}"
                                 >
-                                    Class Name *
-                                </label>
-                                <input
-                                    id="className"
-                                    type="text"
-                                    bind:value={className}
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
-                                    placeholder="e.g., Yoga Flow, Pilates, HIIT"
-                                    required
-                                />
+                                    A class I teach
+                                </button>
+                                <button
+                                    type="button"
+                                    aria-pressed={kind === "coordinator"}
+                                    on:click={() => (kind = "coordinator")}
+                                    class="px-4 py-3 rounded-lg border-2 font-bold text-sm transition-all cursor-pointer {kind ===
+                                    'coordinator'
+                                        ? 'bg-vibrant-pink text-white border-vibrant-pink shadow-lg'
+                                        : 'bg-white text-gray-700 border-gray-300 hover:border-vibrant-pink'}"
+                                >
+                                    My coordinator shift
+                                </button>
                             </div>
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            {#if kind !== "coordinator"}
+                                <div class="sm:col-span-2">
+                                    <label
+                                        for="className"
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Class Name *
+                                    </label>
+                                    <input
+                                        id="className"
+                                        type="text"
+                                        bind:value={className}
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                                        placeholder="e.g., Yoga Flow, Pilates, HIIT"
+                                        required
+                                    />
+                                </div>
+                            {/if}
 
                             <div>
                                 <label
@@ -331,7 +449,9 @@
                                     type="text"
                                     bind:value={instructorName}
                                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
-                                    placeholder="Who needs the sub?"
+                                    placeholder={kind === "coordinator"
+                                        ? "Who needs coverage?"
+                                        : "Who needs the sub?"}
                                     required
                                 />
                             </div>
@@ -386,7 +506,9 @@
                                     for="time"
                                     class="block text-sm font-medium text-gray-700 mb-1"
                                 >
-                                    Time *
+                                    {kind === "coordinator"
+                                        ? "Start Time *"
+                                        : "Time *"}
                                 </label>
                                 {#if isMobile}
                                     <input
@@ -410,22 +532,61 @@
                                 {/if}
                             </div>
 
-                            <div>
-                                <label
-                                    for="duration"
-                                    class="block text-sm font-medium text-gray-700 mb-1"
-                                >
-                                    Duration (minutes)
-                                </label>
-                                <input
-                                    id="duration"
-                                    type="number"
-                                    bind:value={duration}
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
-                                    min="15"
-                                    max="180"
-                                />
-                            </div>
+                            {#if kind === "coordinator"}
+                                <div>
+                                    <label
+                                        for="endTime"
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        End Time *
+                                    </label>
+                                    {#if isMobile}
+                                        <input
+                                            id="endTime"
+                                            type="time"
+                                            value={endTimeInput}
+                                            on:change={(e) =>
+                                                (endTimeInput =
+                                                    e.currentTarget.value)}
+                                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                                            required
+                                        />
+                                    {:else}
+                                        <input
+                                            id="endTime"
+                                            type="text"
+                                            bind:value={endTimeInput}
+                                            placeholder="e.g. 12:30 PM"
+                                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                                            required
+                                        />
+                                    {/if}
+                                    {#if endTimeError}
+                                        <p
+                                            class="text-red-600 text-xs mt-1 font-medium"
+                                        >
+                                            {endTimeError}
+                                        </p>
+                                    {/if}
+                                </div>
+                            {:else}
+                                <div>
+                                    <label
+                                        for="duration"
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Duration (minutes)
+                                    </label>
+                                    <input
+                                        id="duration"
+                                        type="number"
+                                        bind:value={duration}
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-vibrant-pink focus:border-vibrant-pink outline-none"
+                                        min="15"
+                                        max="180"
+                                    />
+                                </div>
+                            {/if}
 
                             <div>
                                 <label
@@ -512,9 +673,15 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Class Name</p>
+                                <p class="text-sm text-gray-500">
+                                    {kind === "coordinator"
+                                        ? "Coverage Type"
+                                        : "Class Name"}
+                                </p>
                                 <p class="font-bold text-gray-900">
-                                    {className}
+                                    {kind === "coordinator"
+                                        ? "Coordinator Shift"
+                                        : className}
                                 </p>
                             </div>
                         </div>
@@ -576,7 +743,13 @@
                                     {formatDisplayDate(dateInput)}
                                 </p>
                                 <p class="text-sm text-gray-600">
-                                    {formatDisplayTime(timeInput)} • {duration} minutes
+                                    {#if kind === "coordinator"}
+                                        {formatDisplayTime(timeInput)} to {formatDisplayTime(
+                                            endTimeInput,
+                                        )}
+                                    {:else}
+                                        {formatDisplayTime(timeInput)} • {duration} minutes
+                                    {/if}
                                 </p>
                             </div>
                         </div>
@@ -648,9 +821,9 @@
                             <span class="text-xl">ℹ️</span>
                             <div>
                                 <p class="text-blue-800 text-sm">
-                                    Once submitted, instructors will be able to
-                                    see this request and volunteer to cover the
-                                    class.
+                                    {kind === "coordinator"
+                                        ? "Once submitted, this request will be visible so anyone who can cover it can pick up your shift."
+                                        : "Once submitted, instructors will be able to see this request and volunteer to cover the class."}
                                 </p>
                             </div>
                         </div>

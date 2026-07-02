@@ -82,6 +82,8 @@
         return {
             id: row.id,
             className: row.class_name,
+            kind: row.kind || "class",
+            endTime: row.end_time || null,
             date,
             hasStartTime,
             duration: row.duration_minutes || 60,
@@ -110,7 +112,7 @@
             const { data, error: loadError } = await supabase
                 .from("sub_requests_public")
                 .select(
-                    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, status, assigned_sub_name, created_at, volunteer_count",
+                    "id, class_name, kind, date, start_time, end_time, duration_minutes, location, notes, requested_by_name, status, assigned_sub_name, created_at, volunteer_count",
                 )
                 .gte("date", cutoffKey)
                 .order("date", { ascending: true });
@@ -201,13 +203,33 @@
     }
 
     const VOLUNTEER_ERROR_MESSAGES = {
-        duplicate: "You have already volunteered for this class!",
-        already_filled: "This class already has a confirmed sub. Thank you for offering!",
-        past: "This class date has already passed.",
-        not_found: "This request no longer exists. Please refresh the page.",
-        invalid_input:
-            "Please double-check your name, email, and phone number.",
+        class: {
+            duplicate: "You have already volunteered for this class!",
+            already_filled:
+                "This class already has a confirmed sub. Thank you for offering!",
+            past: "This class date has already passed.",
+            not_found:
+                "This request no longer exists. Please refresh the page.",
+            invalid_input:
+                "Please double-check your name, email, and phone number.",
+        },
+        coordinator: {
+            duplicate: "You have already volunteered for this shift!",
+            already_filled:
+                "This shift already has confirmed coverage. Thank you for offering!",
+            past: "This shift date has already passed.",
+            not_found:
+                "This request no longer exists. Please refresh the page.",
+            invalid_input:
+                "Please double-check your name, email, and phone number.",
+        },
     };
+
+    function volunteerErrorMessage(kind, reason) {
+        const table =
+            VOLUNTEER_ERROR_MESSAGES[kind] || VOLUNTEER_ERROR_MESSAGES.class;
+        return table[reason];
+    }
 
     async function handleVolunteer(event) {
         isSubmitting = true;
@@ -227,7 +249,7 @@
             if (rpcError) throw new Error(rpcError.message);
             if (!data?.ok) {
                 throw new Error(
-                    VOLUNTEER_ERROR_MESSAGES[data?.reason] ||
+                    volunteerErrorMessage(request?.kind, data?.reason) ||
                         "Something went wrong. Please try again.",
                 );
             }
@@ -264,6 +286,8 @@
 
     const CREATE_ERROR_MESSAGES = {
         invalid_date: "Please choose a date that hasn't passed.",
+        invalid_time_range:
+            "Please enter a valid time range. The end time must be after the start time.",
         invalid_input:
             "Please double-check the form. A valid email address is required.",
     };
@@ -271,28 +295,39 @@
     async function handleCreateRequest(event) {
         isCreatingRequest = true;
         const {
+            kind,
             className,
             instructorName,
             instructorEmail,
             date,
             time,
+            endTime,
             duration,
             location,
             notes,
         } = event.detail;
 
+        const isCoordinator = kind === "coordinator";
+
         try {
             const { data, error: rpcError } = await supabase.rpc(
                 "create_sub_request",
                 {
-                    p_class_name: className,
+                    p_class_name: isCoordinator ? null : className,
                     p_date: date,
                     p_start_time: /^\d{2}:\d{2}$/.test(time || "") ? time : null,
-                    p_duration_minutes: Number(duration) || null,
+                    p_duration_minutes: isCoordinator
+                        ? null
+                        : Number(duration) || null,
                     p_location: location,
                     p_notes: notes || "",
                     p_requested_by_name: instructorName,
                     p_requested_by_email: instructorEmail,
+                    p_kind: isCoordinator ? "coordinator" : "class",
+                    p_end_time:
+                        isCoordinator && /^\d{2}:\d{2}$/.test(endTime || "")
+                            ? endTime
+                            : null,
                 },
             );
 
@@ -330,14 +365,14 @@
                     Substitute Requests
                 </h1>
                 <p class="opacity-90 text-sm">
-                    Help cover classes when instructors need a sub. Click a date
-                    to view requests.
+                    Help cover classes and coordinator shifts when teammates
+                    need a sub. Click a date to view requests.
                 </p>
                 <button
                     on:click={() => (isCreateModalOpen = true)}
                     class="mt-4 w-full px-4 py-2 bg-white text-vibrant-pink rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg cursor-pointer text-sm"
                 >
-                    + Request a Sub
+                    + Request Coverage
                 </button>
             </div>
 
@@ -377,8 +412,9 @@
             >
                 <p class="font-bold mb-1">ℹ️ How it works</p>
                 <p>
-                    Volunteer to sub for a class, then wait for admin approval.
-                    Once approved, you'll see calendar buttons.
+                    Volunteer to cover a class or coordinator shift, then wait
+                    for admin approval. Once approved, you'll see calendar
+                    buttons.
                 </p>
             </div>
         </div>
@@ -425,7 +461,9 @@
                         >
                             <div class="flex justify-between items-start mb-2">
                                 <span class="text-white font-bold text-lg"
-                                    >{request.className}</span
+                                    >{request.kind === "coordinator"
+                                        ? "Coordinator Shift"
+                                        : request.className}</span
                                 >
                                 <span
                                     class="text-xs font-medium px-2 py-1 rounded-full {request.status ===

@@ -27,7 +27,7 @@
   export let onAssignTask = () => {};
 
   const requestColumns =
-    "id, class_name, date, start_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+    "id, kind, class_name, date, start_time, end_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
   const STATUS_TONES = { open: "amber", pending: "blue", approved: "green" };
 
   let displayedRequest = null;
@@ -95,6 +95,8 @@
   }
 
   function approveVolunteer(volunteer) {
+    const roleText =
+      displayedRequest?.kind === "coordinator" ? "to cover this shift" : "as the sub";
     saveUpdates(
       {
         status: "approved",
@@ -103,7 +105,7 @@
         assigned_sub_phone: volunteer.phone || null,
         assigned_at: new Date().toISOString(),
       },
-      `${volunteer.name} approved as the sub. Please text them to confirm they can still make it.`,
+      `${volunteer.name} approved ${roleText}. Please text them to confirm they can still make it.`,
     );
   }
 
@@ -180,6 +182,8 @@
     const email = assignEmail.trim();
     if (!name || !email) return;
 
+    const roleText =
+      displayedRequest?.kind === "coordinator" ? "to cover this shift" : "as the sub";
     await saveUpdates(
       {
         status: "approved",
@@ -188,7 +192,7 @@
         assigned_sub_phone: assignPhone.trim() || null,
         assigned_at: new Date().toISOString(),
       },
-      `${name} assigned as the sub. Please text them to confirm.`,
+      `${name} assigned ${roleText}. Please text them to confirm.`,
     );
 
     if (!errorMessage) {
@@ -200,6 +204,8 @@
 
   function unassignSub() {
     const nextStatus = volunteers.length ? "pending" : "open";
+    const subjectText =
+      displayedRequest?.kind === "coordinator" ? "Coverage unassigned" : "Sub unassigned";
 
     saveUpdates(
       {
@@ -209,7 +215,7 @@
         assigned_sub_phone: null,
         assigned_at: null,
       },
-      `Sub unassigned. The request is ${nextStatus === "pending" ? "back to pending approval" : "open again"}.`,
+      `${subjectText}. The request is ${nextStatus === "pending" ? "back to pending approval" : "open again"}.`,
     );
   }
 
@@ -256,7 +262,7 @@
 
     return generateSubCalendarLink({
       id: item.id,
-      className: item.class_name,
+      className: getRequestTitle(item),
       date,
       duration: item.duration_minutes || 60,
       location: item.location,
@@ -301,17 +307,35 @@
     }).format(new Date(value));
   }
 
-  function getStatusLabel(status) {
+  function getStatusLabel(status, kind) {
+    if (kind === "coordinator") {
+      if (status === "approved") return "Coverage confirmed";
+      if (status === "pending") return "Pending approval";
+      return "Needs coverage";
+    }
     if (status === "approved") return "Sub confirmed";
     if (status === "pending") return "Pending approval";
     return "Needs sub";
+  }
+
+  function getRequestTitle(item) {
+    if (item?.kind === "coordinator") return "Coordinator Shift";
+    return item?.class_name || "Class";
+  }
+
+  function formatTimeRange(startTime, endTime) {
+    if (!startTime) return "";
+    if (!endTime) return formatStartTime(startTime);
+    return `${formatStartTime(startTime)} to ${formatStartTime(endTime)}`;
   }
 </script>
 
 <SlideOver
   open={drawerOpen}
-  title={displayedRequest?.class_name || ""}
-  eyebrow={displayedRequest ? `Sub request · ${formatDate(displayedRequest.date)}` : "Sub request"}
+  title={displayedRequest ? getRequestTitle(displayedRequest) : ""}
+  eyebrow={displayedRequest
+    ? `${displayedRequest.kind === "coordinator" ? "Coverage request" : "Sub request"} · ${formatDate(displayedRequest.date)}`
+    : "Sub request"}
   closeLabel="Close sub request details"
   closeDisabled={isSaving || isDeleting}
   onClose={requestClose}
@@ -321,9 +345,19 @@
     <div class="px-5 py-5">
         <div class="flex flex-wrap gap-2">
           <Badge tone={STATUS_TONES[displayedRequest.status] || "amber"} dot>
-            {getStatusLabel(displayedRequest.status)}
+            {getStatusLabel(displayedRequest.status, displayedRequest.kind)}
           </Badge>
-          {#if displayedRequest.start_time}
+          {#if displayedRequest.kind === "coordinator"}
+            <Badge tone="neutral">Coordinator</Badge>
+          {/if}
+          {#if displayedRequest.kind === "coordinator"}
+            {#if displayedRequest.start_time}
+              <Badge tone="neutral">
+                <Clock class="h-3.5 w-3.5" aria-hidden="true" />
+                {formatTimeRange(displayedRequest.start_time, displayedRequest.end_time)}
+              </Badge>
+            {/if}
+          {:else if displayedRequest.start_time}
             <Badge tone="neutral">
               <Clock class="h-3.5 w-3.5" aria-hidden="true" />
               {formatStartTime(displayedRequest.start_time)}
@@ -356,9 +390,9 @@
             onclick={() =>
               onAssignTask({
                 sourceModule: "subs",
-                sourceLabel: `Sub: ${displayedRequest.class_name} · ${formatDate(displayedRequest.date)}`,
+                sourceLabel: `${displayedRequest.kind === "coordinator" ? "Coverage" : "Sub"}: ${getRequestTitle(displayedRequest)} · ${formatDate(displayedRequest.date)}`,
                 sourceLink: "#subs",
-                title: `Cover sub: ${displayedRequest.class_name}`,
+                title: `Cover ${displayedRequest.kind === "coordinator" ? "coordinator shift" : "sub"}: ${getRequestTitle(displayedRequest)}`,
               })}
           >
             Assign a task about this
@@ -381,11 +415,19 @@
               </dd>
             </div>
             <div class="flex justify-between gap-3">
-              <dt class="font-semibold text-ink/55">Class time</dt>
+              <dt class="font-semibold text-ink/55">
+                {displayedRequest.kind === "coordinator" ? "Shift time" : "Class time"}
+              </dt>
               <dd class="text-right font-semibold">
-                {displayedRequest.start_time
-                  ? formatStartTime(displayedRequest.start_time)
-                  : "Not provided"}
+                {#if displayedRequest.kind === "coordinator"}
+                  {displayedRequest.start_time
+                    ? formatTimeRange(displayedRequest.start_time, displayedRequest.end_time)
+                    : "Not provided"}
+                {:else}
+                  {displayedRequest.start_time
+                    ? formatStartTime(displayedRequest.start_time)
+                    : "Not provided"}
+                {/if}
               </dd>
             </div>
             <div class="flex justify-between gap-3">
@@ -412,7 +454,9 @@
 
         {#if displayedRequest.status === "approved" && displayedRequest.assigned_sub_name}
           <section class="mt-5 rounded-card border border-green-200 bg-green-50/60 p-4" aria-labelledby="sub-drawer-assigned-title">
-            <h4 id="sub-drawer-assigned-title" class="font-bold text-green-900">Assigned sub</h4>
+            <h4 id="sub-drawer-assigned-title" class="font-bold text-green-900">
+              {displayedRequest.kind === "coordinator" ? "Assigned coverage" : "Assigned sub"}
+            </h4>
             <p class="mt-2 font-bold">{displayedRequest.assigned_sub_name}</p>
             <div class="mt-1 space-y-1 text-sm">
               {#if displayedRequest.assigned_sub_email}
@@ -437,7 +481,9 @@
             </div>
             <Banner
               tone="warning"
-              message="Don't forget: please text the substitute to confirm they can still make it."
+              message={displayedRequest.kind === "coordinator"
+                ? "Don't forget: please text the person covering to confirm they can still make it."
+                : "Don't forget: please text the substitute to confirm they can still make it."}
               class="mt-3"
             />
             <Button
@@ -446,7 +492,7 @@
               onclick={unassignSub}
               disabled={isSaving}
             >
-              Un-assign sub
+              {displayedRequest.kind === "coordinator" ? "Un-assign coverage" : "Un-assign sub"}
             </Button>
           </section>
         {/if}
@@ -513,9 +559,13 @@
         </section>
 
         <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="sub-drawer-assign-title">
-          <h4 id="sub-drawer-assign-title" class="font-bold">Assign a sub manually</h4>
+          <h4 id="sub-drawer-assign-title" class="font-bold">
+            {displayedRequest.kind === "coordinator" ? "Assign coverage manually" : "Assign a sub manually"}
+          </h4>
           <p class="mt-1 text-sm text-ink/60">
-            Found a sub outside the volunteer list? Enter their contact info to confirm them.
+            {displayedRequest.kind === "coordinator"
+              ? "Found someone outside the volunteer list to cover this shift? Enter their contact info to confirm them."
+              : "Found a sub outside the volunteer list? Enter their contact info to confirm them."}
           </p>
           <form class="mt-3 space-y-3" onsubmit={assignManually}>
             <Field label="Name" id={`sub-assign-name-${displayedRequest.id}`} required>
@@ -580,9 +630,9 @@
 
 <ConfirmDialog
   open={confirmingDelete}
-  title="Delete sub request?"
+  title={displayedRequest?.kind === "coordinator" ? "Delete coverage request?" : "Delete sub request?"}
   message={displayedRequest
-    ? `Delete the sub request for "${displayedRequest.class_name}" on ${formatDate(displayedRequest.date)}? Its volunteer sign-ups will also be removed. This cannot be undone.`
+    ? `Delete the ${displayedRequest.kind === "coordinator" ? "coverage request for the coordinator shift" : `sub request for "${getRequestTitle(displayedRequest)}"`} on ${formatDate(displayedRequest.date)}? Its volunteer sign-ups will also be removed. This cannot be undone.`
     : ""}
   confirmLabel="Delete request"
   cancelLabel="Cancel"

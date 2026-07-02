@@ -20,8 +20,25 @@ function formatUtc(date) {
   return date.toISOString().replace(/[-:]|\.\d+/g, "");
 }
 
+// Compute the event end Date. Coordinator requests carry an explicit end_time
+// (e.g. "12:30:00"); prefer it, falling back to the duration-based end.
+function computeEndDate(request) {
+  const endTime = request.endTime || request.end_time;
+  if (request.kind === "coordinator" && /^\d{2}:\d{2}/.test(endTime || "")) {
+    const [h, m] = endTime.split(":").map(Number);
+    const end = new Date(request.date);
+    end.setHours(h, m, 0, 0);
+    return end;
+  }
+  return new Date(request.date.getTime() + (request.duration || 60) * 60000);
+}
+
 export function generateSubCalendarLink(request) {
-  const title = encodeURIComponent(`Sub: ${request.className} - Latina Sweat Project`);
+  const summaryText =
+    request.kind === "coordinator"
+      ? "Coordinator Shift Coverage - Latina Sweat Project"
+      : `Sub: ${request.className} - Latina Sweat Project`;
+  const title = encodeURIComponent(summaryText);
   const details = encodeURIComponent(
     `Substituting for ${request.requestedBy?.name || "Instructor"}. ${request.notes || ""}`,
   );
@@ -30,7 +47,7 @@ export function generateSubCalendarLink(request) {
   );
 
   const start = formatFloating(request.date);
-  const endDate = new Date(request.date.getTime() + (request.duration || 60) * 60000);
+  const endDate = computeEndDate(request);
   const end = formatFloating(endDate);
 
   return (
@@ -41,12 +58,15 @@ export function generateSubCalendarLink(request) {
 }
 
 export function generateSubICSFile(request) {
-  const title = `Sub: ${request.className} - Latina Sweat Project`;
+  const title =
+    request.kind === "coordinator"
+      ? "Coordinator Shift Coverage - Latina Sweat Project"
+      : `Sub: ${request.className} - Latina Sweat Project`;
   const description = `Substituting for ${request.requestedBy?.name || "Instructor"}. ${request.notes || ""}`;
   const location = request.location || "949 W 16th St, Chicago, IL 60608";
 
   const start = formatFloating(request.date);
-  const endDate = new Date(request.date.getTime() + (request.duration || 60) * 60000);
+  const endDate = computeEndDate(request);
   const end = formatFloating(endDate);
   const now = formatUtc(new Date());
 
