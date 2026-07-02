@@ -56,7 +56,7 @@ export const galaTickets = {
       regular: 375,
       accessLabel: "From 6 PM",
       description:
-        "Cocktail hour with the all-female Mariachi Sirena, a three-course seated dinner with a live violinist, live bidding, museum garden access, then the full late-night celebration.",
+        "Cocktail hour with live music, a three-course seated dinner with a live violinist, live bidding, museum garden access, then the full late-night celebration.",
       closesLabel: "Ticket sales close September 15, 2026",
     },
     {
@@ -67,7 +67,7 @@ export const galaTickets = {
       regular: 225,
       accessLabel: "From 9 PM",
       description:
-        "Step in as the night comes alive: full gallery access, open bar, the awards presentation, the fourth-floor fashion show, and dancing with DJ Barbie until midnight.",
+        "Step in as the night comes alive: full gallery access, open bar, the awards presentation, the fourth-floor fashion show, and dancing with a live DJ until midnight.",
       closesLabel: "On sale through event day, September 25, 2026",
     },
   ],
@@ -93,7 +93,7 @@ export const galaEvening = [
     time: "6 PM",
     title: "Cocktail hour",
     detail:
-      "The all-female Mariachi Sirena performs. Museum garden open until 9 PM.",
+      "Live music as the evening opens. Museum garden open until 9 PM.",
     at: 0,
     tiers: ["benefactor"],
   },
@@ -116,7 +116,7 @@ export const galaEvening = [
   {
     time: "10 PM",
     title: "Fashion show",
-    detail: "Fourth floor, 10 to 11 PM, then dancing with DJ Barbie.",
+    detail: "Fourth floor, 10 to 11 PM, then dancing with a live DJ.",
     at: 4 / 6,
     tiers: ["benefactor", "supporter"],
   },
