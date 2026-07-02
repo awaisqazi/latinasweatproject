@@ -51,11 +51,22 @@ jobs:
         with:
           path: ./dist
 
+      # deploy-pages clamps its timeout input to 10 minutes, but GitHub's
+      # Pages queue sometimes runs slower than that (2026-07-02 backlog had
+      # 10-25 minute waits), which aborts the step and cancels the deployment.
+      # Each retry submits a fresh deployment with its own 10-minute window.
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
-        with:
-          # Pages deployments occasionally sit in GitHub's queue longer than
-          # the 10-minute default, which aborts the run and cancels the
-          # deployment (2026-07-02 backlog). Poll for up to 30 minutes.
-          timeout: 1800000
+
+      - name: Deploy to GitHub Pages (retry 1)
+        id: deployment_retry_1
+        if: steps.deployment.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Deploy to GitHub Pages (retry 2)
+        id: deployment_retry_2
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry_1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
