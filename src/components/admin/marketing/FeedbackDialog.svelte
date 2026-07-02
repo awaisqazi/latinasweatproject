@@ -1,5 +1,5 @@
 <script>
-  import { Send } from "@lucide/svelte";
+  import { Bug, HelpCircle, Lightbulb, MessageSquare, Send } from "@lucide/svelte";
   import SlideOver from "./SlideOver.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
@@ -15,7 +15,12 @@
   export let onClose = () => {};
   export let onSent = () => {};
 
-  const CATEGORIES = ["Idea", "Bug", "Question", "Other"];
+  const CATEGORIES = [
+    { value: "Idea", icon: Lightbulb },
+    { value: "Bug", icon: Bug },
+    { value: "Question", icon: HelpCircle },
+    { value: "Other", icon: MessageSquare },
+  ];
   let category = "Idea";
   let message = "";
   let saving = false;
@@ -92,13 +97,24 @@
       <Banner tone="error" message={errorMessage} />
     {/if}
 
-    <Field label="Type" id="feedback-category">
-      <select id="feedback-category" class="select" bind:value={category}>
+    <fieldset>
+      <legend class="block text-sm font-semibold text-ink">Type</legend>
+      <div class="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {#each CATEGORIES as option}
-          <option value={option}>{option}</option>
+          <button
+            type="button"
+            class="flex min-h-11 items-center justify-center gap-1.5 rounded-control border px-2 text-sm font-semibold transition-colors {category === option.value
+              ? 'border-transparent bg-ink text-white shadow-card'
+              : 'border-ink/14 bg-white text-ink/70 hover:border-ink/30 hover:text-ink'}"
+            aria-pressed={category === option.value}
+            onclick={() => (category = option.value)}
+          >
+            <svelte:component this={option.icon} class="h-4 w-4 shrink-0" aria-hidden="true" />
+            {option.value}
+          </button>
         {/each}
-      </select>
-    </Field>
+      </div>
+    </fieldset>
 
     <Field label="Your feedback" id="feedback-message" required>
       <textarea

@@ -137,6 +137,17 @@
 
   $: isAdmin = isOperationalAdmin(profile);
   $: assignableTeamMembers = getAssignableTeamMembers(teamMembers, accountUsers);
+  // Svelte's legacy reactivity only tracks variables referenced directly in a
+  // template expression or `$:` statement — reads buried inside helper calls
+  // (getProjectDraft/isProjectDraftDirty) never re-run. The drawer's draft and
+  // dirty flag must flow through these deriveds, which name projectDrafts and
+  // editingProject explicitly.
+  $: editingDraft = editingProject
+    ? projectDrafts[editingProject.id] || null
+    : null;
+  $: editingDraftDirty = Boolean(
+    editingProject && editingDraft && isProjectDraftDirty(editingProject),
+  );
   $: copyPendingCount = allProjects.filter((project) => !project.copy_approved).length;
   $: filteredProjects = getFilteredProjects(
     allProjects,
@@ -160,7 +171,10 @@
   $: projectPageStart = (currentProjectPage - 1) * projectPageSize;
   $: projectPageEnd = Math.min(projectPageStart + projectPageSize, sortedProjects.length);
   $: visibleProjects = sortedProjects.slice(projectPageStart, projectPageEnd);
-  $: assigneeFilterOptions = getAssigneeFilterOptions();
+  $: assigneeFilterOptions = getAssigneeFilterOptions(
+    assignableTeamMembers,
+    allProjects,
+  );
   $: if (isAdmin && refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
     loadAdminData();
@@ -260,6 +274,10 @@
     const nextDrafts = { ...projectDrafts };
 
     for (const project of projects) {
+      // A realtime event or Refresh mid-edit must not clobber the draft the
+      // user has open in the drawer; it re-seeds on open anyway.
+      if (isProjectDrawerEditing && editingProject?.id === project.id) continue;
+
       nextDrafts[project.id] = projectToDraft(project);
     }
 
@@ -419,6 +437,7 @@
     editingProject = project;
     isProjectDrawerEditing = editing;
     editProjectAssignmentSearch = "";
+    errorMessage = "";
     resetProjectDraft(project);
     projectDrawerVisible = true;
   }
@@ -798,14 +817,14 @@
     currentProjectPage = 1;
   }
 
-  function getAssigneeFilterOptions() {
+  function getAssigneeFilterOptions(members, projects) {
     const emailMap = new Map();
 
-    for (const member of assignableTeamMembers) {
+    for (const member of members) {
       if (member.email) emailMap.set(normalizeEmail(member.email), member.email);
     }
 
-    for (const project of allProjects) {
+    for (const project of projects) {
       for (const email of project.assigned_to || []) {
         if (email) emailMap.set(normalizeEmail(email), email);
       }
@@ -1011,6 +1030,7 @@
   async function openManualProjectModal() {
     manualForm = getEmptyManualForm();
     manualTeamSearch = "";
+    errorMessage = "";
     manualDrawerVisible = true;
   }
 
@@ -1354,7 +1374,7 @@
       {:else if intakeProjects.length}
         <div class="grid gap-4 xl:grid-cols-2">
           {#each intakeProjects as project}
-            {@const draft = getDraft(project.id)}
+            {@const draft = intakeDrafts[project.id] || getDraft(project.id)}
             {@const payloadEntries = getPayloadEntries(project.intake_payload)}
             {@const searchValue = assignmentSearches[project.id] || ""}
 
@@ -1823,7 +1843,7 @@
     onClosed={handleProjectDrawerClose}
   >
     {#if editingProject}
-      {@const draft = getProjectDraft(editingProject.id)}
+      {@const draft = editingDraft || getProjectDraft(editingProject.id)}
       {@const detailLinks = getProjectLinks(editingProject)}
       {@const detailReferences = getProjectReferences(editingProject)}
       {@const payloadEntries = getPayloadEntries(editingProject.intake_payload)}
@@ -1865,6 +1885,12 @@
           <form class="contents" onsubmit={submitEditProject}>
             <div class="flex-1 overflow-y-auto px-5 py-5">
               <div class="grid gap-4">
+                {#if errorMessage}
+                  <!-- The page-level banner sits behind this modal drawer, so
+                       save/validation errors must also surface in here. -->
+                  <Banner tone="error" message={errorMessage} />
+                {/if}
+
                 <Field label="Project title" id="edit-project-title" required>
                   <input
                     id="edit-project-title"
@@ -2126,7 +2152,7 @@
                 variant="primary"
                 icon={Save}
                 loading={savingProjectId === editingProject.id}
-                disabled={!isProjectDraftDirty(editingProject) || savingProjectId === editingProject.id}
+                disabled={!editingDraftDirty || savingProjectId === editingProject.id}
               >
                 {savingProjectId === editingProject.id ? "Saving" : "Save Changes"}
               </Button>
@@ -2263,6 +2289,10 @@
 
       <div class="flex-1 overflow-y-auto px-5 py-5">
         <div class="grid gap-4">
+          {#if errorMessage}
+            <Banner tone="error" message={errorMessage} />
+          {/if}
+
           <Field label="Project title" id="manual-project-title" required>
             <input
               id="manual-project-title"

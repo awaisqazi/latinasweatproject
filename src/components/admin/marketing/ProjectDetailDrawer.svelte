@@ -531,18 +531,21 @@
     return email;
   }
 
-  function isAssigned(email) {
-    return assignedEmails.some(
+  // `emails` is threaded through as a parameter so template call sites can
+  // name assignedEmails directly — legacy reactivity doesn't track reads that
+  // happen inside the function body.
+  function isAssigned(email, emails = assignedEmails) {
+    return emails.some(
       (assignedEmail) => normalizeEmail(assignedEmail) === normalizeEmail(email),
     );
   }
 
-  function canUnassignWithCheckbox(email) {
-    return isCurrentUserAdmin && isAssigned(email);
+  function canUnassignWithCheckbox(email, emails = assignedEmails) {
+    return isCurrentUserAdmin && isAssigned(email, emails);
   }
 
-  function canToggleAssignment(email) {
-    return !isAssigned(email) || canUnassignWithCheckbox(email);
+  function canToggleAssignment(email, emails = assignedEmails) {
+    return !isAssigned(email, emails) || canUnassignWithCheckbox(email, emails);
   }
 </script>
 
@@ -719,8 +722,8 @@
 
             <div class="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
               {#each filteredTeamMembers as member}
-                {@const memberIsAssigned = isAssigned(member.email)}
-                {@const memberCanToggle = canToggleAssignment(member.email)}
+                {@const memberIsAssigned = isAssigned(member.email, assignedEmails)}
+                {@const memberCanToggle = canToggleAssignment(member.email, assignedEmails)}
                 <label class="flex items-start gap-3 rounded-control border border-ink/8 bg-canvas px-3 py-2 text-sm transition {memberCanToggle ? 'cursor-pointer hover:border-accent/30 hover:bg-white' : 'cursor-not-allowed opacity-65'}">
                   <input
                     type="checkbox"
