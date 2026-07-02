@@ -43,6 +43,11 @@ jobs:
           PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL || secrets.PUBLIC_SUPABASE_URL || 'https://jcseaxtvsozylsbmykka.supabase.co' }}
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ByKQH4QqhYhrT7K-gqEhsw_zqdEvkB_' }}
 
+      # Lets anything (including the rescue step below) check exactly which
+      # commit the live site is serving: https://latinasweatproject.com/version.txt
+      - name: Stamp build version
+        run: echo "${GITHUB_SHA}" > dist/version.txt
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -57,32 +62,22 @@ jobs:
         uses: actions/deploy-pages@v4
 
       # deploy-pages hard-caps its wait at 10 minutes, then cancels its own
-      # deployment — but GitHub's Pages queue sometimes runs slower than that
-      # and the cancel often loses the race, so the deployment still lands
-      # minutes after the step "failed" (observed repeatedly 2026-07-02).
-      # Same-SHA retries are useless (they instantly read the cancelled
-      # state), so instead keep polling the deployment status and let the run
-      # go green if the deployment makes it out of the queue.
+      # deployment — but during Pages queue backlogs (2026-07-02: 20-75 min)
+      # the deployment usually still lands afterwards, and once the cancel is
+      # issued the status API stops reporting it. The live site is the only
+      # trustworthy oracle: watch version.txt until this commit is serving.
       - name: Wait out slow Pages queue
         if: steps.deployment.outcome == 'failure'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "deploy-pages gave up; polling the deployment for up to 20 more minutes"
-          for i in $(seq 1 80); do
-            STATUS=$(gh api "repos/${GITHUB_REPOSITORY}/pages/deployments/${GITHUB_SHA}" --jq .status 2>/dev/null || echo unknown)
-            echo "$(date -u +%H:%M:%S) status: ${STATUS:-unknown}"
-            case "$STATUS" in
-              succeed)
-                echo "Deployment landed despite the timeout."
-                exit 0
-                ;;
-              deployment_failed|deployment_content_failed|deployment_attempt_error)
-                echo "Deployment failed server-side."
-                exit 1
-                ;;
-            esac
+          echo "deploy-pages gave up; watching the live site for this commit (up to 25 minutes)"
+          for i in $(seq 1 100); do
+            LIVE=$(curl -sf --max-time 10 "https://latinasweatproject.com/version.txt?rescue=${GITHUB_RUN_ID}-${i}" || echo unknown)
+            echo "$(date -u +%H:%M:%S) live: ${LIVE:0:12} (want ${GITHUB_SHA:0:12})"
+            if [ "$LIVE" = "$GITHUB_SHA" ]; then
+              echo "Deployment landed despite the timeout."
+              exit 0
+            fi
             sleep 15
           done
-          echo "Deployment never left the queue. Re-run this workflow (a fresh commit works best; same-SHA re-runs may read the cancelled state)."
+          echo "This commit never went live. Retrigger with a fresh commit (same-SHA re-runs can read a cancelled state)."
           exit 1
