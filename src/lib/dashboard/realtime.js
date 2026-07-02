@@ -9,7 +9,7 @@
 
 export function subscribeDashboardRealtime(
   supabase,
-  { onProjects, onBoard, onWorkspace } = {},
+  { onProjects, onBoard, onWorkspace, onFundraising } = {},
 ) {
   if (!supabase) return () => {};
 
@@ -34,6 +34,16 @@ export function subscribeDashboardRealtime(
       "postgres_changes",
       { event: "*", schema: "public", table: "workspace_tasks" },
       (payload) => onWorkspace?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_prospects" },
+      (payload) => onFundraising?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_interactions" },
+      (payload) => onFundraising?.(payload),
     )
     .subscribe();
 

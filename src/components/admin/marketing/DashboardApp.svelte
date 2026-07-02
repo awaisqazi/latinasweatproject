@@ -8,6 +8,7 @@
     ChevronRight,
     ClipboardList,
     DoorOpen,
+    HandCoins,
     HeartHandshake,
     Home,
     Kanban,
@@ -57,6 +58,7 @@
   import UnifiedCalendarView from "../dashboard/UnifiedCalendarView.svelte";
   import BoardProjectsView from "../board/BoardProjectsView.svelte";
   import EventsView from "../events/EventsView.svelte";
+  import FundraisingView from "../fundraising/FundraisingView.svelte";
   import VolunteersView from "../volunteers/VolunteersView.svelte";
   import SubsView from "../subs/SubsView.svelte";
   import ElectionsView from "../elections/ElectionsView.svelte";
@@ -98,6 +100,7 @@
     { id: "events", label: "Events", icon: Ticket, section: "Operations", modules: ["events"] },
     { id: "elections", label: "Elections", icon: Vote, section: "Operations", modules: ["elections"] },
     { id: "gala", label: "Gala", icon: PartyPopper, section: "Operations", modules: ["gala"] },
+    { id: "fundraising", label: "Fundraising", icon: HandCoins, section: "Operations", modules: ["fundraising"] },
     { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
   ];
@@ -136,6 +139,7 @@
   let subsRefreshKey = 0;
   let electionsRefreshKey = 0;
   let galaRefreshKey = 0;
+  let fundraisingRefreshKey = 0;
   let spacesRefreshKey = 0;
   let selectedKanbanProject = null;
   let createDrawerOpen = false;
@@ -342,6 +346,7 @@
       window.clearTimeout(projectKeysRealtimeTimer);
       window.clearTimeout(boardRealtimeTimer);
       window.clearTimeout(workspaceRealtimeTimer);
+      window.clearTimeout(fundraisingRealtimeTimer);
     };
   });
 
@@ -354,6 +359,7 @@
   let projectKeysRealtimeTimer = 0;
   let boardRealtimeTimer = 0;
   let workspaceRealtimeTimer = 0;
+  let fundraisingRealtimeTimer = 0;
 
   function startRealtime() {
     realtimeUnsubscribe?.();
@@ -361,6 +367,7 @@
       onProjects: handleProjectsRealtime,
       onBoard: scheduleBoardRealtimeRefresh,
       onWorkspace: scheduleWorkspaceRealtimeRefresh,
+      onFundraising: scheduleFundraisingRealtimeRefresh,
     });
   }
 
@@ -407,6 +414,13 @@
     workspaceRealtimeTimer = window.setTimeout(() => {
       loadWorkspaceTaskCount();
       workspaceRefreshKey += 1;
+    }, 500);
+  }
+
+  function scheduleFundraisingRealtimeRefresh() {
+    window.clearTimeout(fundraisingRealtimeTimer);
+    fundraisingRealtimeTimer = window.setTimeout(() => {
+      fundraisingRefreshKey += 1;
     }, 500);
   }
 
@@ -628,6 +642,7 @@
       subs: () => (subsRefreshKey += 1),
       elections: () => (electionsRefreshKey += 1),
       gala: () => (galaRefreshKey += 1),
+      fundraising: () => (fundraisingRefreshKey += 1),
       spaces: () => (spacesRefreshKey += 1),
       "user-access": () => (userAccessRefreshKey += 1),
       admin: () => {
@@ -1750,6 +1765,15 @@
               {supabase}
               {profile}
               refreshKey={galaRefreshKey}
+            />
+          {:else if activeView === "fundraising"}
+            <FundraisingView
+              {supabase}
+              {profile}
+              {teamMembers}
+              refreshKey={fundraisingRefreshKey}
+              onAssignTask={openAssignTask}
+              onWorkspaceChanged={handleTaskAssigned}
             />
           {:else if activeView === "spaces"}
             <SpacesView

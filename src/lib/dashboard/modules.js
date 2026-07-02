@@ -42,6 +42,11 @@ export const MODULES = [
     label: "Studio Spaces",
     description: "Class schedule planning, space bookings, and utilization insights.",
   },
+  {
+    key: "fundraising",
+    label: "Fundraising",
+    description: "Donation history, donor relationships, and the grant/major-donor pipeline.",
+  },
 ];
 
 export const MODULE_KEYS = MODULES.map((module) => module.key);

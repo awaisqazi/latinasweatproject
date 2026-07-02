@@ -19,6 +19,7 @@
     "canvas-confetti": "^1.9.4",
     "svelte": "^5.43.14",
     "tailwindcss": "^4.1.12",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
