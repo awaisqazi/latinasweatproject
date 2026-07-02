@@ -575,14 +575,17 @@
                                 </span>
                             </div>
 
-                            <!-- Stepper row -->
-                            <div class="flex items-center justify-center gap-3">
+                            <!-- Stepper row. touch-manipulation stops iOS from
+                                 firing double-tap-to-zoom when the +/- buttons
+                                 are tapped in quick succession, while keeping
+                                 pinch-zoom available. -->
+                            <div class="flex items-center justify-center gap-3 touch-manipulation">
                                 <button
                                     type="button"
                                     aria-label={`Decrease ${item.name}`}
                                     on:click={() => decrement(item)}
                                     disabled={item.count <= 0}
-                                    class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-off-black text-2xl font-bold hover:bg-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-off-black text-2xl font-bold hover:bg-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer touch-manipulation select-none"
                                 >
                                     &minus;
                                 </button>
@@ -599,7 +602,7 @@
                                     type="button"
                                     aria-label={`Increase ${item.name}`}
                                     on:click={() => increment(item)}
-                                    class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-vibrant-pink text-white text-2xl font-bold hover:bg-accent-gold transition-colors cursor-pointer"
+                                    class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-vibrant-pink text-white text-2xl font-bold hover:bg-accent-gold transition-colors cursor-pointer touch-manipulation select-none"
                                 >
                                     +
                                 </button>
