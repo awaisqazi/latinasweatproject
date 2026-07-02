@@ -56,7 +56,7 @@ export const galaTickets = {
       regular: 375,
       accessLabel: "From 6 PM",
       description:
-        "Cocktail hour with live music, a three-course seated dinner with a live violinist, live bidding, museum garden access, then the full late-night celebration.",
+        "Cocktail hour with live music, a three-course seated dinner, live bidding, museum garden access, then the full late-night celebration.",
       closesLabel: "Ticket sales close September 15, 2026",
     },
     {
@@ -101,7 +101,7 @@ export const galaEvening = [
     time: "7 PM",
     title: "Seated dinner",
     detail:
-      "Three courses with a live violinist, then live bidding to support the mission.",
+      "Three courses, then live bidding to support the mission.",
     at: 1 / 6,
     tiers: ["benefactor"],
   },
