@@ -3,6 +3,7 @@
     CalendarClock,
     ExternalLink,
     FileText,
+    Pencil,
     Search,
     UserPlus,
   } from "@lucide/svelte";
@@ -47,6 +48,12 @@
   let briefDocError = "";
   let briefDocSuccess = "";
   let briefPollActive = false;
+  let linksEditing = false;
+  let linksFilesInput = "";
+  let linksDeliverablesInput = "";
+  let linksSaving = false;
+  let linksError = "";
+  let linksSuccess = "";
 
   const defaultStatuses = [
     "Ready for Production",
@@ -132,11 +139,20 @@
     prioritySuccess = "";
     publishScheduleOpen = false;
     publishScheduleError = "";
+    linksEditing = false;
+    linksError = "";
+    linksSuccess = "";
     drawerOpen = true;
   }
 
   function requestClose() {
-    if (assignmentSaving || statusSaving || prioritySaving || publishScheduleSaving) {
+    if (
+      assignmentSaving ||
+      statusSaving ||
+      prioritySaving ||
+      publishScheduleSaving ||
+      linksSaving
+    ) {
       return;
     }
 
@@ -475,6 +491,76 @@
     assignmentSaving = false;
   }
 
+  function startLinksEdit() {
+    linksFilesInput = displayedProject?.files_url || "";
+    linksDeliverablesInput = displayedProject?.deliverables_url || "";
+    linksError = "";
+    linksSuccess = "";
+    linksEditing = true;
+  }
+
+  function cancelLinksEdit() {
+    if (linksSaving) return;
+    linksEditing = false;
+    linksError = "";
+  }
+
+  // People paste Drive links without a scheme ("drive.google.com/...");
+  // give those https:// so they stay clickable links, not asset references.
+  function normalizeLinkInput(value) {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (/^[\w-]+(\.[\w-]+)+([/?#]|$)/.test(trimmed)) return `https://${trimmed}`;
+    return trimmed;
+  }
+
+  async function saveLinks(event) {
+    event.preventDefault();
+    if (!displayedProject || linksSaving) return;
+
+    const nextFiles = normalizeLinkInput(linksFilesInput);
+    const nextDeliverables = normalizeLinkInput(linksDeliverablesInput);
+
+    if (
+      nextFiles === (displayedProject.files_url || null) &&
+      nextDeliverables === (displayedProject.deliverables_url || null)
+    ) {
+      linksEditing = false;
+      return;
+    }
+
+    linksSaving = true;
+    linksError = "";
+    linksSuccess = "";
+
+    const changed = [];
+    if (nextFiles !== (displayedProject.files_url || null)) {
+      changed.push(`the Files link${nextFiles ? "" : " (removed)"}`);
+    }
+    if (nextDeliverables !== (displayedProject.deliverables_url || null)) {
+      changed.push(`the Deliverables link${nextDeliverables ? "" : " (removed)"}`);
+    }
+
+    const { data, error, conflict } = await guardedProjectUpdate({
+      files_url: nextFiles,
+      deliverables_url: nextDeliverables,
+    });
+
+    if (error || conflict) {
+      linksError = conflict ? CONFLICT_MESSAGE : error.message;
+      linksSaving = false;
+      return;
+    }
+
+    displayedProject = data;
+    onProjectUpdated(data);
+    await addTimelineLog(data.id, `Updated ${changed.join(" and ")}.`);
+    linksSuccess = "Links saved.";
+    linksSaving = false;
+    linksEditing = false;
+  }
+
   async function addTimelineLog(projectId, body) {
     const { error } = await supabase
       .from("project_comments")
@@ -554,7 +640,7 @@
   title={displayedProject?.title || ""}
   {eyebrow}
   closeLabel="Close project details"
-  closeDisabled={assignmentSaving || statusSaving || prioritySaving || publishScheduleSaving}
+  closeDisabled={assignmentSaving || statusSaving || prioritySaving || publishScheduleSaving || linksSaving}
   onClose={requestClose}
   onClosed={handleClose}
 >
@@ -816,9 +902,69 @@
           {/if}
         </section>
 
-        {#if getProjectLinks(displayedProject).length}
-          <section class="mt-5" aria-labelledby="drawer-links-title">
+        <section class="mt-5" aria-labelledby="drawer-links-title">
+          <div class="flex items-center justify-between gap-2">
             <h4 id="drawer-links-title" class="font-bold text-ink">External links</h4>
+            {#if !linksEditing}
+              <Button size="sm" icon={Pencil} onclick={startLinksEdit}>
+                Edit links
+              </Button>
+            {/if}
+          </div>
+
+          {#if linksError}
+            <p class="mt-2 text-sm font-semibold text-red-600">{linksError}</p>
+          {/if}
+          {#if linksSuccess && !linksEditing}
+            <p class="mt-2 text-sm font-semibold text-emerald-600">{linksSuccess}</p>
+          {/if}
+
+          {#if linksEditing}
+            <form class="mt-3 grid gap-3" onsubmit={saveLinks}>
+              <Field
+                label="Files link"
+                id="drawer-links-files"
+                hint="Drive folder with source assets (raw footage, photos, working files)."
+              >
+                <input
+                  id="drawer-links-files"
+                  type="text"
+                  class="input"
+                  placeholder="https://drive.google.com/…"
+                  bind:value={linksFilesInput}
+                />
+              </Field>
+
+              <Field
+                label="Deliverables link"
+                id="drawer-links-deliverables"
+                hint="Drive folder with finished work ready for review or publishing."
+              >
+                <input
+                  id="drawer-links-deliverables"
+                  type="text"
+                  class="input"
+                  placeholder="https://drive.google.com/…"
+                  bind:value={linksDeliverablesInput}
+                />
+              </Field>
+
+              <div class="flex gap-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  class="flex-1"
+                  loading={linksSaving}
+                  disabled={linksSaving}
+                >
+                  {linksSaving ? "Saving" : "Save Links"}
+                </Button>
+                <Button class="flex-1" onclick={cancelLinksEdit} disabled={linksSaving}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          {:else if getProjectLinks(displayedProject).length}
             <div class="mt-3 grid gap-2">
               {#each getProjectLinks(displayedProject) as link}
                 <a
@@ -832,8 +978,13 @@
                 </a>
               {/each}
             </div>
-          </section>
-        {/if}
+          {:else}
+            <p class="mt-1 text-sm text-ink/60">
+              No files or deliverables links yet. Add a Drive folder link so
+              teammates can find this project's assets.
+            </p>
+          {/if}
+        </section>
 
         {#if getProjectReferences(displayedProject).length}
           <section class="mt-5" aria-labelledby="drawer-references-title">
