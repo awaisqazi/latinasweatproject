@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import InventoryLogApp from "../components/InventoryLogApp.svelte";
+---
+
+<Layout
+    title="End-of-Shift Inventory | The Latina Sweat Project"
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <div class="bg-off-black text-white py-16 px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold font-rubik mb-4">
+                    End-of-Shift Inventory
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Count what's left of each supply at the end of your shift.
+                </p>
+            </div>
+        </div>
+
+        <!-- App Container -->
+        <InventoryLogApp client:load />
+    </main>
+</Layout>

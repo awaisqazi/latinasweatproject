@@ -16,6 +16,7 @@
     LogOut,
     Menu,
     MessageSquare,
+    Package,
     PanelLeftClose,
     PanelLeftOpen,
     PartyPopper,
@@ -64,6 +65,7 @@
   import ElectionsView from "../elections/ElectionsView.svelte";
   import GalaView from "../gala/GalaView.svelte";
   import SpacesView from "../spaces/SpacesView.svelte";
+  import InventoryView from "../inventory/InventoryView.svelte";
 
   const LOGIN_PATH = "/admin/marketing/login";
   const DASHBOARD_PATH = "/admin/marketing";
@@ -102,6 +104,7 @@
     { id: "gala", label: "Gala", icon: PartyPopper, section: "Operations", modules: ["gala"] },
     { id: "fundraising", label: "Fundraising", icon: HandCoins, section: "Operations", modules: ["fundraising"] },
     { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
+    { id: "inventory", label: "Inventory", icon: Package, section: "Operations", modules: ["inventory"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
   ];
 
@@ -141,6 +144,7 @@
   let galaRefreshKey = 0;
   let fundraisingRefreshKey = 0;
   let spacesRefreshKey = 0;
+  let inventoryRefreshKey = 0;
   let selectedKanbanProject = null;
   let createDrawerOpen = false;
   let publishScheduleProject = null;
@@ -644,6 +648,7 @@
       gala: () => (galaRefreshKey += 1),
       fundraising: () => (fundraisingRefreshKey += 1),
       spaces: () => (spacesRefreshKey += 1),
+      inventory: () => (inventoryRefreshKey += 1),
       "user-access": () => (userAccessRefreshKey += 1),
       admin: () => {
         adminRefreshKey += 1;
@@ -1780,6 +1785,12 @@
               {supabase}
               {profile}
               refreshKey={spacesRefreshKey}
+            />
+          {:else if activeView === "inventory"}
+            <InventoryView
+              {supabase}
+              {profile}
+              refreshKey={inventoryRefreshKey}
             />
           {:else if activeView === "publishing"}
             <PublishingCalendarView

@@ -47,6 +47,11 @@ export const MODULES = [
     label: "Fundraising",
     description: "Donation history, donor relationships, and the grant/major-donor pipeline.",
   },
+  {
+    key: "inventory",
+    label: "Inventory",
+    description: "Studio supply levels, end-of-shift logs, and consumption trends.",
+  },
 ];
 
 export const MODULE_KEYS = MODULES.map((module) => module.key);
