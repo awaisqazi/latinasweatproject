@@ -5,13 +5,24 @@
 export const statusBanner = {
   active: true,
   message:
-    "Our booking system is temporarily down, but we're open and classes are running as scheduled.",
-  linkLabel: "Today's schedule & updates",
+    "Our booking app has been in and out the past few days. We're open as usual, and today's schedule is here in case the app isn't working for you.",
+  linkLabel: "Schedule & updates",
   href: "/status",
+};
+
+// Official status page from our booking provider (MarianaTek).
+export const providerStatus = {
+  label: "MarianaTek status page",
+  href: "https://status.marianatek.com/",
 };
 
 // Newest first. Add new entries to the top of this array.
 export const statusUpdates = [
+  {
+    date: "July 3, 2026",
+    time: "midday",
+    body: "The booking system is back up for now, but service has been intermittent over the past few days. We're sharing today's schedule below in case the app isn't working for you, and we'll keep this page updated. For real-time updates straight from our booking provider, see the MarianaTek status page.",
+  },
   {
     date: "July 3, 2026",
     time: "morning",

@@ -1,13 +1,80 @@
 ---
 // src/components/Header.astro
+import { statusBanner } from "@/data/studioStatus.js";
+
 const base = import.meta.env.BASE_URL;
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
+
+const bannerHref = statusBanner.href.startsWith("/")
+  ? base.replace(/\/$/, "") + statusBanner.href
+  : statusBanner.href;
 ---
 
-{/* Fixed container for banner + header */}
+{/* Fixed container for banner + header. The status banner lives INSIDE this
+    fixed wrapper so it can never overlap the header: they stack in normal
+    flow and move as one unit. A script at the end of this component keeps
+    #header-spacer's height synced to the wrapper's total height. */}
 <div id="header-wrapper" class="fixed top-0 left-0 right-0 z-50">
+
+    {
+      statusBanner.active && (
+        <div
+          id="status-banner"
+          role="region"
+          aria-label="Studio status announcement"
+          class="bg-accent-gold text-off-black shadow-sm"
+        >
+          <div class="mx-auto flex max-w-7xl items-center gap-2.5 px-4 py-2 sm:px-6 lg:px-8">
+            <svg
+              class="h-4 w-4 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.2"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p class="min-w-0 flex-1 text-xs font-semibold leading-snug sm:text-sm">
+              <span>{statusBanner.message}</span>{" "}
+              <a
+                href={bannerHref}
+                class="whitespace-nowrap font-bold underline underline-offset-2 hover:text-off-black/70"
+              >
+                {statusBanner.linkLabel}
+              </a>
+            </p>
+            <button
+              type="button"
+              id="status-banner-dismiss"
+              aria-label="Dismiss announcement"
+              class="hidden flex-shrink-0 rounded-full p-1 text-off-black/70 transition-colors hover:bg-off-black/10 hover:text-off-black"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )
+    }
 
     <header
         id="main-header"
@@ -239,6 +306,56 @@ const isHome = pathname === base || pathname === `${base}/`;
 
 {/* Spacer for fixed header to prevent overlap */}
 <div id="header-spacer" class="h-28"></div>
+
+<script is:inline>
+  // Status-banner plumbing. The banner sits inside the fixed #header-wrapper,
+  // so overlap with the header is impossible by construction; this script only
+  // (a) keeps #header-spacer as tall as the whole fixed wrapper (banner + nav,
+  // at any wrap width), and (b) handles session dismissal. Runs where it sits
+  // in the DOM, i.e. after the elements above exist. Without JS the spacer
+  // stays at its h-28 fallback and the banner is simply always visible.
+  (function () {
+    var wrapper = document.getElementById("header-wrapper");
+    var spacer = document.getElementById("header-spacer");
+    var banner = document.getElementById("status-banner");
+    if (!wrapper || !spacer) return;
+
+    function syncSpacer() {
+      spacer.style.height = wrapper.offsetHeight + "px";
+    }
+
+    if (banner) {
+      var KEY = "lsp-status-banner-dismissed";
+      var dismissBtn = document.getElementById("status-banner-dismiss");
+
+      var dismissed = false;
+      try {
+        dismissed = sessionStorage.getItem(KEY) === "1";
+      } catch (e) {}
+
+      if (dismissed) {
+        banner.style.display = "none";
+      } else if (dismissBtn) {
+        // Only reveal the dismiss button when JS can persist the dismissal.
+        dismissBtn.classList.remove("hidden");
+        dismissBtn.addEventListener("click", function () {
+          try {
+            sessionStorage.setItem(KEY, "1");
+          } catch (e) {}
+          banner.style.display = "none";
+          syncSpacer();
+        });
+      }
+    }
+
+    syncSpacer();
+    if (window.ResizeObserver) {
+      new ResizeObserver(syncSpacer).observe(wrapper);
+    } else {
+      window.addEventListener("resize", syncSpacer, { passive: true });
+    }
+  })();
+</script>
 
 {/* Mobile Menu Overlay */}
 <div

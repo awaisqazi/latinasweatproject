@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import { statusBanner, statusUpdates, todaySchedule } from "@/data/studioStatus.js";
+import { statusBanner, statusUpdates, todaySchedule, providerStatus } from "@/data/studioStatus.js";
 const base = import.meta.env.BASE_URL;
 
 const lastUpdated = statusUpdates[0];
@@ -36,7 +36,21 @@ const lastUpdated = statusUpdates[0];
           >
         </h1>
         <p class="mt-6 font-body text-lg text-slate-300 max-w-2xl mx-auto">
-          {statusBanner.message}
+          Our booking app (MarianaTek) has been in and out over the past few
+          days. We're open and classes are running as scheduled. We're sharing
+          today's schedule here in case the app isn't working for you, and we'll
+          keep this page updated for transparency.
+        </p>
+        <p class="mt-6">
+          <a
+            href={providerStatus.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-5 py-2 font-body text-sm font-semibold text-white transition-colors hover:border-accent-gold hover:text-accent-gold"
+          >
+            Check MarianaTek's status page
+            <span aria-hidden="true">&rarr;</span>
+          </a>
         </p>
         {
           lastUpdated && (
