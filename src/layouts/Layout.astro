@@ -2,7 +2,11 @@
 import "@/styles/global.css";
 import Footer from "@/components/Footer.astro"; // Import the new Footer
 import PrideTheme from "@/components/PrideTheme.astro"; // TEMPORARY: Pride Month 2026, remove with the component file
+import { statusBanner } from "@/data/studioStatus.js";
 const base = import.meta.env.BASE_URL;
+const bannerHref = statusBanner.href.startsWith("/")
+  ? base.replace(/\/$/, "") + statusBanner.href
+  : statusBanner.href;
 
 interface Props {
   title: string;
@@ -224,6 +228,112 @@ const GOOGLE_ADS_ID = "AW-17990206229";
     />
   </head>
   <body class="bg-white text-off-black overflow-x-hidden">
+    {
+      statusBanner.active && (
+        <div
+          id="status-banner"
+          role="region"
+          aria-label="Studio status announcement"
+          class="fixed top-0 left-0 right-0 z-[60] bg-accent-gold text-off-black shadow-sm"
+        >
+          <div class="mx-auto flex max-w-7xl items-center gap-2.5 px-4 py-2 sm:px-6 lg:px-8">
+            <svg
+              class="h-4 w-4 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.2"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p class="min-w-0 flex-1 text-xs font-semibold leading-snug sm:text-sm">
+              <span>{statusBanner.message}</span>{" "}
+              <a
+                href={bannerHref}
+                class="whitespace-nowrap font-bold underline underline-offset-2 hover:text-off-black/70"
+              >
+                {statusBanner.linkLabel}
+              </a>
+            </p>
+            <button
+              type="button"
+              id="status-banner-dismiss"
+              aria-label="Dismiss announcement"
+              class="hidden flex-shrink-0 rounded-full p-1 text-off-black/70 transition-colors hover:bg-off-black/10 hover:text-off-black"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <script is:inline>
+          (function () {
+            var banner = document.getElementById("status-banner");
+            if (!banner) return;
+
+            var KEY = "lsp-status-banner-dismissed";
+            var dismissBtn = document.getElementById("status-banner-dismiss");
+            // No-JS users never reach here, so the dismiss button starts hidden
+            // and is only shown once JS can actually persist the dismissal.
+            if (dismissBtn) dismissBtn.classList.remove("hidden");
+
+            // Offsets the fixed header + its spacer by the banner height so the
+            // announcement never overlaps the sticky header on any page.
+            function applyOffset() {
+              var wrapper = document.getElementById("header-wrapper");
+              var spacer = document.getElementById("header-spacer");
+              var h = banner.offsetHeight || 0;
+              if (wrapper) wrapper.style.top = h + "px";
+              if (spacer) spacer.style.paddingTop = h + "px";
+            }
+
+            function hideBanner() {
+              banner.style.display = "none";
+              var wrapper = document.getElementById("header-wrapper");
+              var spacer = document.getElementById("header-spacer");
+              if (wrapper) wrapper.style.top = "";
+              if (spacer) spacer.style.paddingTop = "";
+            }
+
+            try {
+              if (sessionStorage.getItem(KEY) === "1") {
+                hideBanner();
+                return;
+              }
+            } catch (e) {}
+
+            applyOffset();
+            window.addEventListener("resize", applyOffset, { passive: true });
+
+            if (dismissBtn) {
+              dismissBtn.addEventListener("click", function () {
+                try {
+                  sessionStorage.setItem(KEY, "1");
+                } catch (e) {}
+                hideBanner();
+              });
+            }
+          })();
+        </script>
+      )
+    }
     <PrideTheme />
     <slot />
     <script>

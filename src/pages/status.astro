@@ -1,0 +1,164 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import { statusBanner, statusUpdates, todaySchedule } from "@/data/studioStatus.js";
+const base = import.meta.env.BASE_URL;
+
+const lastUpdated = statusUpdates[0];
+---
+
+<Layout title="Studio Status | The Latina Sweat Project">
+  <Header />
+  <main>
+    {/* Hero */}
+    <section class="relative bg-off-black py-20 sm:py-24 overflow-hidden">
+      <div
+        class="absolute inset-0 opacity-[0.04]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
+      </div>
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-80"
+      >
+      </div>
+      <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <p
+          class="text-accent-gold text-sm font-bold uppercase tracking-[0.25em]"
+        >
+          Studio Status
+        </p>
+        <h1
+          class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+        >
+          We're still <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-vibrant-pink"
+            >open.</span
+          >
+        </h1>
+        <p class="mt-6 font-body text-lg text-slate-300 max-w-2xl mx-auto">
+          {statusBanner.message}
+        </p>
+        {
+          lastUpdated && (
+            <p class="mt-6 inline-flex items-center gap-2 rounded-full border border-accent-gold/40 bg-accent-gold/10 px-4 py-1.5 font-body text-sm font-semibold text-accent-gold">
+              <span
+                class="inline-block h-2 w-2 rounded-full bg-accent-gold"
+                aria-hidden="true"
+              />
+              Last updated: {lastUpdated.date}, {lastUpdated.time}
+            </p>
+          )
+        }
+      </div>
+    </section>
+
+    {/* Today's schedule */}
+    <section class="bg-light-gray py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <p
+            class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            Running as scheduled
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+          >
+            Today's schedule
+          </h2>
+          <p class="mt-3 font-body text-lg font-bold text-off-black">
+            {todaySchedule.dateLabel}
+          </p>
+          <p class="mt-2 font-body text-base text-medium-gray max-w-2xl mx-auto">
+            {todaySchedule.note}
+          </p>
+        </div>
+        <div class="grid gap-5 md:grid-cols-2">
+          {
+            todaySchedule.rooms.map((room) => (
+              <div class="rounded-2xl bg-white border border-off-black/10 p-6 shadow-sm">
+                <h3 class="flex items-center gap-2 font-sans text-xl font-extrabold text-off-black">
+                  <span
+                    class="inline-block h-2.5 w-2.5 rounded-full bg-vibrant-pink"
+                    aria-hidden="true"
+                  />
+                  {room.room}
+                </h3>
+                <ul class="mt-4 divide-y divide-off-black/10">
+                  {room.classes.map((cls) => (
+                    <li class="flex items-baseline gap-4 py-3">
+                      <span class="w-20 flex-shrink-0 font-sans text-base font-bold text-vibrant-pink tabular-nums">
+                        {cls.time}
+                      </span>
+                      <span class="min-w-0">
+                        <span class="block font-sans text-base font-bold text-off-black">
+                          {cls.name}
+                        </span>
+                        <span class="block font-body text-sm text-medium-gray">
+                          with {cls.teacher}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* Status updates */}
+    <section class="py-16 sm:py-20">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <p
+            class="text-accent-gold text-xs font-bold uppercase tracking-[0.25em]"
+          >
+            Latest news
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
+          >
+            Status updates
+          </h2>
+          <p class="mt-3 font-body text-base text-medium-gray">
+            The most recent update is listed first.
+          </p>
+        </div>
+        <ol class="space-y-5">
+          {
+            statusUpdates.map((update) => (
+              <li class="rounded-2xl bg-white border border-off-black/10 border-l-4 border-l-accent-gold p-6 shadow-sm">
+                <p class="font-sans text-sm font-bold uppercase tracking-[0.12em] text-off-black">
+                  <time>{update.date}</time>
+                  <span class="text-medium-gray font-semibold normal-case tracking-normal">
+                    {" · "}
+                    {update.time}
+                  </span>
+                </p>
+                <p class="mt-3 font-body text-base text-off-black/80 leading-relaxed">
+                  {update.body}
+                </p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    {/* Questions */}
+    <section class="bg-light-gray py-14 sm:py-16">
+      <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="font-body text-lg text-medium-gray">
+          Questions? Reach us on our{" "}
+          <a
+            href={`${base}contact`}
+            class="font-bold text-vibrant-pink underline hover:text-accent-gold transition-colors"
+            >contact page</a
+          > and we'll help however we can.
+        </p>
+      </div>
+    </section>
+  </main>
+</Layout>
