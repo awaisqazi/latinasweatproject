@@ -17,7 +17,7 @@
 
   let dialog;
 
-  $: if (dialog) {
+  $: if (dialog?.isConnected) {
     if (open && !dialog.open) {
       dialog.showModal();
     } else if (!open && dialog.open && !busy) {
@@ -25,10 +25,17 @@
     }
   }
 
-  async function syncOnMountOpen(node) {
+  function syncOnMountOpen(node) {
     dialog = node;
-    await tick();
-    if (open && !node.open) node.showModal();
+    tick().then(() => {
+      if (open && node.isConnected && !node.open) node.showModal();
+    });
+
+    return {
+      destroy() {
+        if (dialog === node) dialog = null;
+      },
+    };
   }
 
   function handleCancelEvent(event) {
