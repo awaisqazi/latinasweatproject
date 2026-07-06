@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import { statusBanner, statusUpdates, todaySchedule, providerStatus } from "@/data/studioStatus.js";
+import { statusUpdates, providerStatus } from "@/data/studioStatus.js";
 const base = import.meta.env.BASE_URL;
 
 const lastUpdated = statusUpdates[0];
@@ -30,16 +30,15 @@ const lastUpdated = statusUpdates[0];
         <h1
           class="mt-4 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
         >
-          We're still <span
+          All systems <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-vibrant-pink"
-            >open.</span
+            >go.</span
           >
         </h1>
         <p class="mt-6 font-body text-lg text-slate-300 max-w-2xl mx-auto">
-          Our booking app (MarianaTek) has been in and out over the past few
-          days. We're open and classes are running as scheduled. We're sharing
-          today's schedule here in case the app isn't working for you, and we'll
-          keep this page updated for transparency.
+          Our booking app (MarianaTek) is working normally. If you ever run into
+          trouble booking or checking in, this page and our provider's status
+          page below are the fastest way to see what's going on.
         </p>
         <p class="mt-6">
           <a
@@ -63,62 +62,6 @@ const lastUpdated = statusUpdates[0];
             </p>
           )
         }
-      </div>
-    </section>
-
-    {/* Today's schedule */}
-    <section class="bg-light-gray py-16 sm:py-20">
-      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-          <p
-            class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
-          >
-            Running as scheduled
-          </p>
-          <h2
-            class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-off-black"
-          >
-            Today's schedule
-          </h2>
-          <p class="mt-3 font-body text-lg font-bold text-off-black">
-            {todaySchedule.dateLabel}
-          </p>
-          <p class="mt-2 font-body text-base text-medium-gray max-w-2xl mx-auto">
-            {todaySchedule.note}
-          </p>
-        </div>
-        <div class="grid gap-5 md:grid-cols-2">
-          {
-            todaySchedule.rooms.map((room) => (
-              <div class="rounded-2xl bg-white border border-off-black/10 p-6 shadow-sm">
-                <h3 class="flex items-center gap-2 font-sans text-xl font-extrabold text-off-black">
-                  <span
-                    class="inline-block h-2.5 w-2.5 rounded-full bg-vibrant-pink"
-                    aria-hidden="true"
-                  />
-                  {room.room}
-                </h3>
-                <ul class="mt-4 divide-y divide-off-black/10">
-                  {room.classes.map((cls) => (
-                    <li class="flex items-baseline gap-4 py-3">
-                      <span class="w-20 flex-shrink-0 font-sans text-base font-bold text-vibrant-pink tabular-nums">
-                        {cls.time}
-                      </span>
-                      <span class="min-w-0">
-                        <span class="block font-sans text-base font-bold text-off-black">
-                          {cls.name}
-                        </span>
-                        <span class="block font-body text-sm text-medium-gray">
-                          with {cls.teacher}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
-        </div>
       </div>
     </section>
 
