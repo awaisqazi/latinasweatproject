@@ -1,0 +1,417 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+const base = import.meta.env.BASE_URL;
+
+// Single source for the donation link so every CTA stays in sync.
+const donateUrl =
+  "https://www.zeffy.com/en-US/donation-form/support-the-latina-sweat-project";
+
+// Verified numbers from our MarianaTek + Zeffy dashboard, Sep 2025 – May 2026.
+const impactStats = [
+  { number: "27,707", label: "Class Visits Delivered" },
+  { number: "5,324", label: "Free Class Registrations" },
+  { number: "2,406", label: "Classes Held" },
+  { number: "7×", label: "Monthly Growth Since Launch" },
+];
+
+// Tangible, illustrative ways a gift shows up in the community.
+const givingTiers = [
+  {
+    amount: "$25",
+    title: "A seat on the mat",
+    description:
+      "Helps cover a free community class for someone who could not otherwise afford one.",
+  },
+  {
+    amount: "$60",
+    title: "A week of movement",
+    description:
+      "Keeps our doors open for a full week of donation-based classes on the Southwest Side.",
+  },
+  {
+    amount: "$150",
+    title: "Care beyond class",
+    description:
+      "Fuels our mutual aid: warm meals, back-to-school items, and clothing for local families.",
+  },
+  {
+    amount: "$500",
+    title: "A future teacher",
+    description:
+      "Sponsors a scholarship seat in our Yoga Alliance approved teacher training for a BIPOC leader.",
+  },
+];
+
+const reasons = [
+  {
+    icon: "🤎",
+    title: "Movement should be free",
+    description:
+      "Wellness has always been priced out of our neighborhoods. We keep classes free and donation-based so cost is never the reason someone stays on the sidelines.",
+  },
+  {
+    icon: "🏠",
+    title: "Built in Pilsen, for Pilsen",
+    description:
+      "We opened the first yoga nonprofit studio in Pilsen, at 16th and Morgan. This is a home for the Southwest Side, run by the community it serves.",
+  },
+  {
+    icon: "💪",
+    title: "We invest in our own",
+    description:
+      "We employ, train, and amplify BIPOC instructors, turning students into certified teachers who lead the next generation.",
+  },
+];
+---
+
+<Layout
+  title="Support Our Mission | The Latina Sweat Project"
+  description="The app is free for everyone, nationwide. It is built and given away by The Latina Sweat Project, a nonprofit studio in Chicago. Your donation keeps the app free and helps us grow. Give today."
+>
+  <Header />
+  <main>
+    {/* ── HERO + TOP CTA ── */}
+    <section
+      class="relative overflow-hidden bg-off-black py-24 sm:py-32 lg:py-40"
+    >
+      <div
+        class="pointer-events-none absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-vibrant-pink/20 blur-[140px]"
+      >
+      </div>
+      <div
+        class="pointer-events-none absolute -bottom-24 right-1/4 h-[420px] w-[420px] rounded-full bg-accent-gold/15 blur-[120px]"
+      >
+      </div>
+
+      <div
+        class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8"
+      >
+        <p
+          class="font-sans text-sm font-bold uppercase tracking-[0.25em] text-accent-gold animate-hero-fade"
+        >
+          Welcome to the movement 🤎
+        </p>
+        <h1
+          class="mt-5 font-sans text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05] animate-hero-up"
+        >
+          The app is free.<br />
+          The <span class="text-accent-gold">mission</span> is worth funding.
+        </h1>
+        <p
+          class="mx-auto mt-6 max-w-2xl font-body text-lg sm:text-xl text-white/75 animate-hero-up-delay"
+        >
+          Work out and flow anywhere in the country, on us. This app is built
+          and given away free by The Latina Sweat Project, a nonprofit studio in
+          Chicago making movement, culture, and community accessible to all.
+          Donations are what keep the app free and let us grow our studio, so
+          the next person can find their way in too.
+        </p>
+
+        <div
+          class="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-6 animate-hero-up-delay"
+        >
+          <a
+            href={donateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn inline-flex items-center justify-center rounded-full bg-vibrant-pink px-9 py-4 text-lg font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-vibrant-pink/30"
+            data-conversion-event="donation_click"
+            data-conversion-context="learnmore_hero"
+            data-conversion-provider="zeffy"
+          >
+            Donate now
+          </a>
+          <a
+            href="#where-it-goes"
+            class="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-9 py-4 text-lg font-bold text-white transition-all hover:border-accent-gold hover:text-accent-gold hover:scale-105"
+          >
+            See where it goes
+          </a>
+        </div>
+        <p class="mt-5 font-body text-sm text-white/50">
+          100% of your donation reaches us. Secure checkout, powered by Zeffy.
+        </p>
+      </div>
+    </section>
+
+    {/* ── IMPACT STATS ── */}
+    <section
+      class="relative bg-gradient-to-r from-off-black via-[#2a2520] to-off-black py-16 sm:py-20"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <p
+          class="text-center font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+        >
+          The impact you're part of
+        </p>
+        <p class="mx-auto mt-3 max-w-xl text-center font-body text-sm text-white/50">
+          Verified from our booking and donation platforms, September 2025
+          through May 2026. In nine months, monthly class visits grew from 463
+          to 3,420.
+        </p>
+        <div class="mt-10 grid grid-cols-2 gap-8 md:grid-cols-4">
+          {
+            impactStats.map((stat) => (
+              <div class="text-center" data-reveal>
+                <p class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold text-accent-gold">
+                  {stat.number}
+                </p>
+                <p class="mt-2 font-body text-sm sm:text-base font-medium uppercase tracking-wider text-white/70">
+                  {stat.label}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+        <p class="mt-10 text-center">
+          <a
+            href={`${base}impact`}
+            class="font-body text-sm font-semibold text-white/60 underline underline-offset-4 transition-colors hover:text-accent-gold"
+          >
+            See the full impact report &rarr;
+          </a>
+        </p>
+      </div>
+    </section>
+
+    {/* ── WHY WE EXIST ── */}
+    <section class="bg-white py-20 sm:py-28">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <p
+            class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+          >
+            Why we exist
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-off-black"
+          >
+            A studio the community owns
+          </h2>
+          <p class="mt-5 font-body text-lg text-medium-gray">
+            We are not a gym with a mission statement. We are a nonprofit whose
+            only bottom line is the people who walk through our doors.
+          </p>
+        </div>
+
+        <div class="mt-14 grid gap-6 md:grid-cols-3">
+          {
+            reasons.map((r) => (
+              <div
+                class="rounded-2xl border border-off-black/10 bg-light-gray p-8 shadow-sm transition-all hover:shadow-md"
+                data-reveal
+              >
+                <span class="text-4xl">{r.icon}</span>
+                <h3 class="mt-5 font-sans text-xl font-extrabold text-off-black">
+                  {r.title}
+                </h3>
+                <p class="mt-3 font-body text-base text-medium-gray leading-relaxed">
+                  {r.description}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ── WHERE YOUR MONEY GOES ── */}
+    <section id="where-it-goes" class="bg-light-gray py-20 sm:py-28">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <p
+            class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-vibrant-pink"
+          >
+            Where your gift goes
+          </p>
+          <h2
+            class="mt-3 font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-off-black"
+          >
+            Every dollar becomes something real
+          </h2>
+          <p class="mt-5 font-body text-lg text-medium-gray">
+            No overhead you cannot see. Give what feels right, and here is the
+            kind of impact it creates.
+          </p>
+        </div>
+
+        <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            givingTiers.map((tier) => (
+              <div
+                class="group flex flex-col rounded-2xl border border-off-black/10 bg-white p-7 shadow-sm transition-all hover:border-vibrant-pink/40 hover:shadow-lg"
+                data-reveal
+              >
+                <p class="font-sans text-4xl font-extrabold text-vibrant-pink">
+                  {tier.amount}
+                </p>
+                <h3 class="mt-3 font-sans text-lg font-extrabold text-off-black">
+                  {tier.title}
+                </h3>
+                <p class="mt-2 flex-1 font-body text-sm text-medium-gray leading-relaxed">
+                  {tier.description}
+                </p>
+                <a
+                  href={donateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-7 inline-flex items-center justify-center rounded-full bg-off-black px-7 py-3.5 text-sm font-bold tracking-wide text-white transition-all group-hover:bg-vibrant-pink"
+                  data-conversion-event="donation_click"
+                  data-conversion-context="learnmore_tier"
+                  data-conversion-provider="zeffy"
+                >
+                  Give {tier.amount}
+                </a>
+              </div>
+            ))
+          }
+        </div>
+
+        <p class="mx-auto mt-10 max-w-2xl text-center font-body text-base text-medium-gray">
+          Prefer to give monthly? A recurring gift is the single most powerful
+          way to keep classes free all year. You can set it up in seconds on the
+          donation form.
+        </p>
+      </div>
+    </section>
+
+    {/* ── 100% PROMISE ── */}
+    <section class="bg-off-black py-20 sm:py-24">
+      <div
+        class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8"
+        data-reveal
+      >
+        <p
+          class="font-sans text-sm font-bold uppercase tracking-[0.2em] text-accent-gold"
+        >
+          The 100% promise
+        </p>
+        <h2
+          class="mt-3 font-sans text-3xl sm:text-4xl font-extrabold tracking-tight text-white"
+        >
+          Your full donation reaches the community
+        </h2>
+        <p class="mx-auto mt-5 max-w-2xl font-body text-lg text-white/70">
+          We use Zeffy, a platform that is free for nonprofits, so there are no
+          processing fees taken out of your gift. When you give $50, we receive
+          $50. Not a cent is skimmed off the top before it reaches the mat.
+        </p>
+      </div>
+    </section>
+
+    {/* ── BOTTOM CTA ── */}
+    <section
+      class="relative overflow-hidden bg-gradient-to-br from-[#2a2520] via-off-black to-off-black py-20 sm:py-28"
+    >
+      <div
+        class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[520px] w-[520px] rounded-full bg-vibrant-pink/15 blur-[140px]"
+      >
+      </div>
+      <div
+        class="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8"
+      >
+        <h2
+          class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white"
+        >
+          Keep it free. Help us <span class="text-accent-gold">grow</span>.
+        </h2>
+        <p class="mx-auto mt-6 max-w-xl font-body text-lg text-white/75">
+          If this app has helped you move, pay it forward. Your gift keeps it
+          free for everyone and helps us expand the studio that makes it all
+          possible. Give whatever you can today.
+        </p>
+        <div class="mt-10 flex justify-center">
+          <a
+            href={donateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn inline-flex items-center justify-center rounded-full bg-accent-gold px-10 py-4 text-lg font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-accent-gold/30"
+            data-conversion-event="donation_click"
+            data-conversion-context="learnmore_footer"
+            data-conversion-provider="zeffy"
+          >
+            Donate to The Latina Sweat Project
+          </a>
+        </div>
+        <p class="mt-5 font-body text-sm text-white/50">
+          Secure checkout, powered by Zeffy · 100% goes to our mission
+        </p>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .animate-hero-fade {
+    animation: heroFade 0.8s ease-out both;
+  }
+  .animate-hero-up {
+    animation: heroUp 0.8s ease-out 0.2s both;
+  }
+  .animate-hero-up-delay {
+    animation: heroUp 0.8s ease-out 0.4s both;
+  }
+
+  @keyframes heroFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes heroUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scroll reveal */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
+  }
+  [data-reveal].revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const els = document.querySelectorAll("[data-reveal]");
+    if (!("IntersectionObserver" in window)) {
+      els.forEach((el) => el.classList.add("revealed"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
+    );
+    els.forEach((el) => observer.observe(el));
+  });
+</script>
