@@ -213,7 +213,7 @@ export const mcaSourceLinks = [
 export const galaImpactIntro = {
   eyebrow: "Why we gather",
   heading: "The movement your seat fuels",
-  body: "What began as a mission to normalize yoga in underserved communities has become a movement. Every ticket, sponsorship, and gift expands free and discounted access, so we can reach even more of our comunidad.",
+  body: "What began as a mission to normalize yoga in underserved communities has become a movement. Every ticket, sponsorship, and gift expands accessible wellness across Chicago, so we can reach even more of our comunidad.",
 };
 
 export const galaImpact = [
