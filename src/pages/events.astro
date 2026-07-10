@@ -5,6 +5,13 @@ import EventsList from "@/components/EventsList.svelte";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
+import {
+  sweatFest,
+  sweatFestDay,
+  sweatFestTickets,
+  sweatFestArt,
+  sweatFestColors,
+} from "@/data/sweatFest";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
@@ -12,10 +19,26 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
 const galaFromPrice = Math.min(
   ...galaTickets.tiers.map((tier) => tier.earlyBird),
 );
+// Sweat Fest "sunrise to last set" gradient (gold -> ember -> magenta).
+const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
+// Deepened warm stops so the gradient wordmark stays legible on this
+// light band (the signature stops are tuned for dark surfaces).
+const sweatFestWordmarkStyle =
+  "background-image: linear-gradient(90deg, #d47500, #e8452a, #c81e63); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;";
+// Same idea for the day-arc accents on the light mini-cards.
+const sweatFestDeepAccents = {
+  sunrise: "#b56400",
+  ember: "#d63d22",
+  dusk: "#c81e63",
+};
+const sweatFestFromPrice = Math.min(
+  ...sweatFestTickets.tiers.map((tier) => tier.price),
+);
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice.
 const featuredSlugs = [
   "noche-inolvidable-gala",
+  "sweat-fest",
   "monday-miles",
 ];
 ---
@@ -38,6 +61,119 @@ const featuredSlugs = [
       </div>
     </section>
     {/* END: Page Header Section */}
+
+    {/* START: Sweat Fest Featured Section (bright daylight festival theme;
+        light, sits directly after the light page header per design.md
+        Option C precedent, and leads because it is the soonest event) */}
+    <section
+      id="sweat-fest"
+      class="relative overflow-hidden bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] py-16 md:py-20 scroll-mt-28"
+    >
+      {/* Sunrise-to-last-set top strip */}
+      <div class="absolute inset-x-0 top-0 h-1" style={`background-image: ${sweatFestGradient};`}></div>
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: linear-gradient(rgba(30,30,30,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.5) 1px, transparent 1px); background-size: 58px 58px;"
+      >
+      </div>
+      <div class="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-[#ffbd59]/25 blur-[110px]"></div>
+      <div class="absolute -bottom-24 -right-20 h-80 w-80 rounded-full bg-[#e94f8a]/15 blur-[120px]"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
+          {/* Media (left): poster art with warm glow, white sticker frame */}
+          <div class="reveal group relative lg:col-span-2">
+            <div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-[#ffbd59]/35 via-[#ff6b52]/25 to-[#e94f8a]/25 blur-xl"></div>
+            <div class="relative overflow-hidden rounded-2xl bg-white p-1.5 shadow-2xl shadow-[#ff6b52]/15 ring-1 ring-off-black/5 transition-transform duration-300 group-hover:-translate-y-1">
+              <img
+                src={withBase(sweatFestArt.poster.src)}
+                alt={sweatFestArt.poster.alt}
+                class="aspect-[4/5] w-full rounded-xl object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
+            <p class="flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-[#d63d22] lg:justify-start">
+              <span class="h-px w-8 bg-[#d63d22]/70"></span>
+              New · Summer Festival
+            </p>
+            <h2 class="mt-3 font-sans text-4xl font-extrabold uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.95]">
+              <span style={sweatFestWordmarkStyle}>Sweat Fest</span>
+            </h2>
+            <p class="mt-4 text-lg font-bold text-off-black">
+              {sweatFest.dateLabel} · {sweatFest.timeLabel}
+            </p>
+            <p class="mt-1 text-base font-semibold text-medium-gray">
+              {sweatFest.venueLine}
+            </p>
+            <p class="mt-3 text-sm font-extrabold uppercase tracking-[0.22em] text-off-black/80">
+              {sweatFest.tagline}
+            </p>
+
+            <p class="mt-5 max-w-2xl text-base leading-relaxed text-off-black/70 mx-auto lg:mx-0">
+              {sweatFest.pageDescription}
+            </p>
+
+            {/* The arc of the day: Run / Sweat / Party (sticker chips) */}
+            <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3 max-w-2xl mx-auto lg:mx-0">
+              {sweatFestDay.map((phase) => (
+                <div class="rounded-2xl bg-white border border-off-black/10 shadow-sm px-4 py-3 text-left">
+                  <p class="text-[10px] font-bold uppercase tracking-widest" style={`color: ${sweatFestDeepAccents[phase.accent]};`}>
+                    {phase.time}
+                  </p>
+                  <p class="mt-1 text-sm font-extrabold uppercase tracking-wide text-off-black">
+                    {phase.title}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Ticket tiers (not on sale yet), sticker-style pills */}
+            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {sweatFestTickets.tiers.map((tier) => (
+                <span class="rounded-full border border-[#ff6b52]/30 bg-white shadow-sm px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black/75">
+                  {tier.name} · ${tier.price}
+                </span>
+              ))}
+            </div>
+
+            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+              <a
+                href={withBase("sweatfest")}
+                class="btn group inline-flex items-center gap-3 rounded-full px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#ff6b52]/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style={`background-image: ${sweatFestGradient};`}
+                data-conversion-event="sweatfest_explore_click"
+                data-conversion-context="events_sweatfest_feature"
+              >
+                Explore Sweat Fest
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={`${withBase("sweatfest")}#sponsors`}
+                class="inline-flex items-center gap-3 rounded-full border border-off-black/15 bg-white px-8 py-4 text-base font-bold text-off-black shadow-sm transition-all duration-300 hover:border-[#ff6b52]/60 hover:bg-[#ff6b52]/5"
+              >
+                Become a sponsor
+              </a>
+            </div>
+            <p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-off-black/70 lg:justify-start">
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-[#ff6b52]/30 bg-[#ff6b52]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#d63d22]">
+                <span class="relative flex h-1.5 w-1.5">
+                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d63d22] opacity-75"></span>
+                  <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#d63d22]"></span>
+                </span>
+                {sweatFestTickets.statusLabel}
+              </span>
+              Tickets from ${sweatFestFromPrice}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Sweat Fest Featured Section */}
 
     {/* START: Annual Gala Featured Section */}
     <section
@@ -126,124 +262,27 @@ const featuredSlugs = [
     </section>
     {/* END: Annual Gala Featured Section */}
 
-    {/* START: Celebrating Pride Featured Section */}
-    <section id="pride-at-lsp" class="relative overflow-hidden bg-gradient-to-br from-white via-[#fbf3ef] to-[#f1ecf6] py-16 md:py-20 scroll-mt-28">
-      <div
-        class="absolute inset-0 opacity-[0.05]"
-        style="background-image: linear-gradient(rgba(30,30,30,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.5) 1px, transparent 1px); background-size: 58px 58px;"
-      >
-      </div>
-      <div class="absolute -top-28 -left-20 h-72 w-72 rounded-full bg-[#9333ea]/12 blur-[110px]"></div>
-      <div class="absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-[#0ea5e9]/12 blur-[120px]"></div>
-      <div class="lsp-pride-bar absolute inset-x-0 top-0 h-1"></div>
+    {/* START: Dashboard-managed events (Supabase). Placed here (between
+        the dark gala and dark Monday Miles sections) so the light-themed
+        island keeps the alternation rhythm intact now that Pride's two
+        light slots are retired. */}
+    <EventsList client:load excludeSlugs={featuredSlugs} />
+    {/* END: Dashboard-managed events */}
 
-      <div class="relative mx-auto max-w-7xl px-4">
-        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
-          {/* Media (left): teacher spotlight covers */}
-          <div class="lg:col-span-2">
-            <a
-              href={`${withBase("pride")}#spotlight`}
-              class="group block"
-              aria-label="Meet our Pride teacher spotlights, Luz Rodriguez and lizlates"
-            >
-              <div class="grid grid-cols-2 gap-4">
-                <div class="overflow-hidden rounded-2xl bg-white p-1.5 shadow-2xl shadow-[#9333ea]/10 ring-1 ring-off-black/5 transition-transform duration-300 group-hover:-translate-y-1">
-                  <img
-                    src={`${base}images/pridespotlight/1.jpg`}
-                    alt="Teacher Spotlight: Luz Rodriguez, she/her/ella"
-                    class="aspect-[4/5] w-full rounded-xl object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <div class="mt-0 sm:mt-6 overflow-hidden rounded-2xl bg-white p-1.5 shadow-2xl shadow-[#0ea5e9]/10 ring-1 ring-off-black/5 transition-transform duration-300 group-hover:-translate-y-1">
-                  <img
-                    src={`${base}images/pridespotlight/6.jpg`}
-                    alt="Teacher Spotlight: lizlates, she/her"
-                    class="aspect-[4/5] w-full rounded-xl object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="lg:col-span-3 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 rounded-full bg-off-black px-4 py-2 mb-5 shadow-lg shadow-off-black/10">
-              <span class="text-base leading-none">🏳️‍🌈</span>
-              <span class="lsp-pride-text-bright text-xs font-extrabold uppercase tracking-widest">
-                June · Pride Month
-              </span>
-            </div>
-
-            <h2 class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl lg:text-6xl leading-tight">
-              Celebrating <span class="lsp-pride-text-deep">Pride</span>
-            </h2>
-
-            <p class="mt-5 text-base text-off-black/70 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              This month, we honor the LGBTQIA+ community and the generations who
-              fought so that everyone could live and love freely. Let's close out
-              Pride together, in our communities, with intention and joy.
-            </p>
-
-            <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-2xl mx-auto lg:mx-0">
-              <div class="rounded-xl bg-white/80 border border-off-black/10 px-4 py-3 text-left">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-[#c81e2b]">Sat · Jun 27</p>
-                <p class="mt-1 text-sm font-bold text-off-black">Proud to Run 5K & 10K</p>
-                <p class="text-xs text-off-black/55">Montrose Harbor</p>
-              </div>
-              <div class="rounded-xl bg-white/80 border border-off-black/10 px-4 py-3 text-left">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-[#d6249f]">Sat · Jun 27</p>
-                <p class="mt-1 text-sm font-bold text-off-black">Pride Pilates Party</p>
-                <p class="text-xs text-off-black/55">Center on Halsted</p>
-              </div>
-              <div class="rounded-xl bg-white/80 border border-off-black/10 px-4 py-3 text-left">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-[#3b6fe0]">Sun · Jun 28</p>
-                <p class="mt-1 text-sm font-bold text-off-black">Chicago Pride Parade</p>
-                <p class="text-xs text-off-black/55">Northalsted</p>
-              </div>
-              <div class="rounded-xl bg-white/80 border border-off-black/10 px-4 py-3 text-left">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-[#7c3aed]">Sat & Sun</p>
-                <p class="mt-1 text-sm font-bold text-off-black">Back Lot Bash</p>
-                <p class="text-xs text-off-black/55">Uptown</p>
-              </div>
-            </div>
-
-            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
-              <a
-                href={withBase("pride")}
-                class="btn group inline-flex items-center gap-3 rounded-full bg-off-black px-8 py-4 text-base font-bold text-white shadow-lg shadow-off-black/25 transition-all duration-300 hover:scale-105 hover:bg-[#7c3aed] hover:shadow-xl"
-              >
-                Explore Pride at LSP
-                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-              <a
-                href={`${withBase("schedule")}`}
-                class="inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-6 py-4 text-sm font-bold text-off-black shadow-sm transition-all duration-300 hover:scale-[1.03] hover:border-off-black/30"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="events_pride"
-                data-conversion-booking-path="schedule_page"
-              >
-                Book a class
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Celebrating Pride Featured Section */}
-
-    {/* START: Monday Miles Featured Section (Dark) */}
-    <section class="relative overflow-hidden bg-off-black py-16 md:py-20">
+    {/* START: Monday Miles Featured Section (light sand; restyled from dark so
+        the page cadence never depends on the Supabase island above rendering) */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#fff7e8] py-16 md:py-20">
       {/* Subtle track lines background */}
-      <div class="absolute inset-0 opacity-[0.04]">
+      <div class="absolute inset-0 opacity-[0.05]">
         <div
           class="absolute inset-0"
-          style="background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, white 60px, white 61px);"
+          style="background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, #1E1E1E 60px, #1E1E1E 61px);"
         >
         </div>
       </div>
+      {/* Warm sunrise glow blobs matching the light Sweat Fest cadence */}
+      <div class="pointer-events-none absolute -top-24 -left-20 h-72 w-72 rounded-full bg-accent-gold/25 blur-[110px]"></div>
+      <div class="pointer-events-none absolute -bottom-24 -right-20 h-80 w-80 rounded-full bg-vibrant-pink/15 blur-[120px]"></div>
 
       <div class="relative mx-auto max-w-7xl px-4">
         <div
@@ -256,7 +295,7 @@ const featuredSlugs = [
             >
             </div>
             <div
-              class="relative overflow-hidden rounded-2xl border border-white/10"
+              class="relative overflow-hidden rounded-2xl border border-off-black/10 shadow-xl shadow-off-black/10"
             >
               <img
                 src={`${base}images/monday-miles-runner.png`}
@@ -289,7 +328,7 @@ const featuredSlugs = [
           {/* Right: Content (3 cols) */}
           <div class="lg:col-span-3 text-center lg:text-left">
             <div
-              class="inline-flex items-center gap-2 rounded-full bg-accent-gold/15 px-4 py-2 mb-5"
+              class="inline-flex items-center gap-2 rounded-full bg-off-black px-4 py-2 mb-5 shadow-lg shadow-off-black/10"
             >
               <span class="relative flex h-2.5 w-2.5">
                 <span
@@ -306,16 +345,16 @@ const featuredSlugs = [
             </div>
 
             <h2
-              class="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
+              class="font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
             >
               Monday Miles
             </h2>
-            <p class="mt-2 text-xl font-semibold text-accent-gold">
+            <p class="mt-2 text-xl font-semibold text-[#b56400]">
               Weekly Walk & Run Group
             </p>
 
             <p
-              class="mt-5 text-lg text-white/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
+              class="mt-5 text-lg text-off-black/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
             >
               Mondays just got better. Meet in the cafe, warm up together, and
               head out. Walk 1 mile or jog/run 2. You set the pace. Because
@@ -327,10 +366,10 @@ const featuredSlugs = [
               class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0"
             >
               <div
-                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                class="flex items-center gap-3 rounded-xl bg-white border border-off-black/10 shadow-sm px-4 py-3"
               >
                 <svg
-                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  class="h-5 w-5 text-[#b56400] flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -343,17 +382,17 @@ const featuredSlugs = [
                   ></path>
                 </svg>
                 <div>
-                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                  <p class="text-xs text-medium-gray uppercase tracking-wider">
                     When
                   </p>
-                  <p class="text-sm font-bold text-white">Every Monday</p>
+                  <p class="text-sm font-bold text-off-black">Every Monday</p>
                 </div>
               </div>
               <div
-                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                class="flex items-center gap-3 rounded-xl bg-white border border-off-black/10 shadow-sm px-4 py-3"
               >
                 <svg
-                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  class="h-5 w-5 text-[#b56400] flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -365,17 +404,17 @@ const featuredSlugs = [
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div>
-                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                  <p class="text-xs text-medium-gray uppercase tracking-wider">
                     Time
                   </p>
-                  <p class="text-sm font-bold text-white">6:30 PM</p>
+                  <p class="text-sm font-bold text-off-black">6:30 PM</p>
                 </div>
               </div>
               <div
-                class="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                class="flex items-center gap-3 rounded-xl bg-white border border-off-black/10 shadow-sm px-4 py-3"
               >
                 <svg
-                  class="h-5 w-5 text-accent-gold flex-shrink-0"
+                  class="h-5 w-5 text-[#b56400] flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -392,10 +431,10 @@ const featuredSlugs = [
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 <div>
-                  <p class="text-xs text-white/50 uppercase tracking-wider">
+                  <p class="text-xs text-medium-gray uppercase tracking-wider">
                     Where
                   </p>
-                  <p class="text-sm font-bold text-white">LSP Cafe</p>
+                  <p class="text-sm font-bold text-off-black">LSP Cafe</p>
                 </div>
               </div>
             </div>
@@ -420,14 +459,14 @@ const featuredSlugs = [
                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg
                   >
                 </span>
-                <span class="text-sm text-white/70"
-                  >Walk <span class="font-bold text-vibrant-pink">1 mile</span
+                <span class="text-sm text-off-black/70"
+                  >Walk <span class="font-bold text-off-black">1 mile</span
                   ></span
                 >
               </div>
               <div class="flex items-center gap-2">
                 <span
-                  class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-gold/20 text-accent-gold"
+                  class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-gold/25 text-[#b56400]"
                 >
                   <svg
                     class="h-4 w-4"
@@ -441,8 +480,8 @@ const featuredSlugs = [
                       d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg
                   >
                 </span>
-                <span class="text-sm text-white/70"
-                  >Jog / Run <span class="font-bold text-accent-gold"
+                <span class="text-sm text-off-black/70"
+                  >Jog / Run <span class="font-bold text-off-black"
                     >2 miles</span
                   ></span
                 >
@@ -475,10 +514,6 @@ const featuredSlugs = [
       </div>
     </section>
     {/* END: Monday Miles Featured Section */}
-
-    {/* START: Dashboard-managed events (Supabase) */}
-    <EventsList client:load excludeSlugs={featuredSlugs} />
-    {/* END: Dashboard-managed events */}
 
     {/* START: Stay Connected Section */}
     <section class="py-16 md:py-24">

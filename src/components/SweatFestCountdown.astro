@@ -1,0 +1,133 @@
+---
+// Sweat Fest countdown: the bright, daylight counterpart to GalaCountdown.
+// Same ticking / inline-script / reduced-motion contract (soft digit slide on
+// change, 1s interval motion-safe, 60s under reduced motion), but re-skinned
+// for light backgrounds: white cards with warm sand borders, Rubik (font-sans)
+// extrabold numerals, and deep gold/ember labels legible on cream. The label
+// is correctly "Countdown to Sweat Fest" (GalaCountdown hardwires the gala's).
+import { sweatFest } from "@/data/sweatFest";
+
+interface Props {
+  target?: string;
+  variant?: "hero" | "compact" | "card";
+  className?: string;
+}
+
+const {
+  target = sweatFest.startsAtISO,
+  variant = "hero",
+  className = "",
+} = Astro.props;
+
+const items = [
+  { key: "days", label: "Days" },
+  { key: "hours", label: "Hours" },
+  { key: "minutes", label: "Minutes" },
+  { key: "seconds", label: "Seconds" },
+];
+
+const wrapperClass =
+  variant === "compact"
+    ? "grid grid-cols-4 gap-2 sm:gap-3"
+    : variant === "card"
+      ? "grid grid-cols-2 gap-2 sm:grid-cols-4"
+      : "grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4";
+
+const itemClass =
+  variant === "compact"
+    ? "rounded-xl border border-[#f0d9c0] bg-white px-2.5 py-3 text-center shadow-sm"
+    : variant === "card"
+      ? "rounded-xl border border-[#f0d9c0] bg-white px-3 py-3 text-center shadow-sm"
+      : "relative overflow-hidden rounded-2xl border border-[#f2ddc6] bg-white px-4 py-4 text-center shadow-[0_10px_30px_-16px_rgba(255,107,82,0.4)]";
+
+const numberClass =
+  variant === "compact"
+    ? "font-sans inline-block text-3xl font-extrabold leading-none text-off-black tabular-nums sm:text-4xl"
+    : "font-sans inline-block text-4xl font-extrabold leading-none text-off-black tabular-nums sm:text-5xl";
+---
+
+<div
+  class:list={["sf-countdown", wrapperClass, className]}
+  data-sf-countdown
+  data-target={target}
+  aria-label="Countdown to Sweat Fest"
+>
+  {
+    items.map((item) => (
+      <div class={itemClass}>
+        {variant === "hero" && (
+          <span
+            class="pointer-events-none absolute inset-x-0 top-0 h-1"
+            style="background-image: linear-gradient(90deg, #ffbd59, #ff6b52, #e94f8a);"
+            aria-hidden="true"
+          />
+        )}
+        <span class={numberClass} data-sf-countdown-value={item.key}>--</span>
+        <span
+          class="mt-1 block text-[10px] font-extrabold uppercase tracking-[0.16em] sm:text-xs"
+          style="color: #b56400;"
+        >
+          {item.label}
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  (() => {
+    const countdowns = Array.from(
+      document.querySelectorAll("[data-sf-countdown]"),
+    );
+    if (!countdowns.length) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const pad = (value) => String(Math.max(0, value)).padStart(2, "0");
+
+    // Soft tick: gently slide the digit into place whenever it changes.
+    const tick = (element) => {
+      if (reduceMotion || typeof element.animate !== "function") return;
+      element.animate(
+        [
+          { transform: "translateY(-32%)", opacity: 0.4 },
+          { transform: "translateY(0)", opacity: 1 },
+        ],
+        { duration: 360, easing: "cubic-bezier(0.2, 0.7, 0.2, 1)" },
+      );
+    };
+
+    const update = () => {
+      const now = Date.now();
+      countdowns.forEach((countdown) => {
+        const target = new Date(countdown.dataset.target || "").getTime();
+        if (!Number.isFinite(target)) return;
+
+        const distance = Math.max(0, target - now);
+        const totalSeconds = Math.floor(distance / 1000);
+        const values = {
+          days: Math.floor(totalSeconds / 86400),
+          hours: Math.floor((totalSeconds % 86400) / 3600),
+          minutes: Math.floor((totalSeconds % 3600) / 60),
+          seconds: totalSeconds % 60,
+        };
+
+        Object.entries(values).forEach(([key, value]) => {
+          const element = countdown.querySelector(
+            `[data-sf-countdown-value="${key}"]`,
+          );
+          if (!element) return;
+          const next = key === "days" ? String(value) : pad(value);
+          if (element.textContent === next) return;
+          element.textContent = next;
+          tick(element);
+        });
+      });
+    };
+
+    update();
+    window.setInterval(update, reduceMotion ? 60000 : 1000);
+  })();
+</script>

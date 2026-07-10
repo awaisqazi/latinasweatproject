@@ -126,14 +126,6 @@ const bannerHref = statusBanner.href.startsWith("/")
                         Events
                     </a>
                     <a
-                        href={`${base}pride`}
-                        class="pride-nav-link relative z-10 flex items-center gap-1.5 py-2 text-base font-extrabold"
-                        aria-label="Celebrate Pride"
-                    >
-                        <span class="pride-nav-text">Pride</span>
-                        <span aria-hidden="true" class="text-sm leading-none">🏳️‍🌈</span>
-                    </a>
-                    <a
                         href={`${base}impact`}
                         class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
@@ -144,6 +136,12 @@ const bannerHref = statusBanner.href.startsWith("/")
                         class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
                     >
                         Gala
+                    </a>
+                    <a
+                        href={`${base}sweatfest`}
+                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
+                    >
+                        Sweat Fest
                     </a>
 
                     {/* More Dropdown */}
@@ -370,23 +368,6 @@ const bannerHref = statusBanner.href.startsWith("/")
             Home
         </a>
         <a
-            href={`${base}pride`}
-            class="mobile-link pride-mobile-card group my-1 flex items-center justify-center gap-3 rounded-xl px-4 py-3.5 shadow-lg"
-        >
-            <span class="text-2xl leading-none" aria-hidden="true">🏳️‍🌈</span>
-            <span class="flex flex-col text-left leading-tight">
-                <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
-                    Pride Month at LSP
-                </span>
-                <span class="text-xl font-extrabold text-white drop-shadow-sm">
-                    Celebrate Pride
-                </span>
-            </span>
-            <svg class="ml-1 h-4 w-4 text-white/90 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-            </svg>
-        </a>
-        <a
             href={`${base}about`}
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
@@ -442,6 +423,12 @@ const bannerHref = statusBanner.href.startsWith("/")
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
             Gala
+        </a>
+        <a
+            href={`${base}sweatfest`}
+            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+        >
+            Sweat Fest
         </a>
         <a
             href={`${base}corporate-collaborations`}
@@ -736,68 +723,3 @@ const bannerHref = statusBanner.href.startsWith("/")
         }
     });
 </script>
-
-<style>
-    /* Pride nav items are revealed only while the Pride theme is active
-       (PrideTheme.astro adds html.pride-2026 before June 30, then removes it),
-       so the rainbow link self-hides after Pride Month with no manual takedown. */
-    .pride-nav-link,
-    .pride-mobile-card {
-        display: none;
-    }
-    :global(html.pride-2026) .pride-nav-link {
-        display: inline-flex;
-    }
-    :global(html.pride-2026) .pride-mobile-card {
-        display: flex;
-    }
-
-    /* Rainbow brand treatment for the desktop "Pride" word. */
-    .pride-nav-text {
-        /* Stops darkened so every glyph clears WCAG AA (4.5:1) on the white
-           header, even where the gradient lands on the warm/green band. */
-        background: linear-gradient(
-            90deg,
-            #e40303,
-            #b45309,
-            #15803d,
-            #2563eb,
-            #7c3aed
-        );
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-        transition: background-position 0.5s ease;
-    }
-    .pride-nav-link:hover .pride-nav-text {
-        background-position: right center;
-    }
-
-    /* Filled rainbow card in the mobile menu. Uses the deeper, saturated
-       rainbow (no pale yellow/orange) so the white card text clears WCAG AA
-       on every stop. */
-    .pride-mobile-card {
-        background: linear-gradient(
-            90deg,
-            #be123c,
-            #c2410c,
-            #15803d,
-            #1d4ed8,
-            #7c3aed
-        );
-        background-size: 220% auto;
-        transition: background-position 0.5s ease;
-    }
-    .pride-mobile-card:hover {
-        background-position: right center;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .pride-nav-text,
-        .pride-mobile-card {
-            transition: none;
-        }
-    }
-</style>

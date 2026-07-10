@@ -33,18 +33,17 @@ To create a dynamic visual rhythm and keep users engaged, pages like `src/pages/
 
 ```mermaid
 graph TD
-    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Celebrating Pride (Lead Light Spotlight)"]
+    Hero["Hero Video / Image (Dark Overlay)"] --> Sec1["Section 1: Sweat Fest (Lead Light Spotlight, Option F)"]
     Sec1 --> Sec2["Section 2: Noche Inolvidable Gala (bg-off-black)"]
-    Sec2 --> Sec3["Section 3: Pride Teacher Spotlight (Light)"]
+    Sec2 --> Sec3["Section 3: Merch Drop (Warm Amber)"]
     Sec3 --> Sec4["Section 4: WGN9 Spotlight (bg-off-black)"]
-    Sec4 --> Sec5["Section 5: Merch Drop (Warm Amber)"]
+    Sec4 --> Sec5["Section 5: Free Classes Promo (Light Green/Sand)"]
     Sec5 --> Sec6["Section 6: 40 Under 40 (bg-off-black)"]
-    Sec6 --> Sec7["Section 7: Free Classes Promo (Light Green/Sand)"]
+    Sec6 --> Sec7["Section 7: Monday Miles (Light Sand)"]
     Sec7 --> Sec8["Section 8: Studio / Grand Opening (bg-off-black)"]
-    Sec8 --> Sec9["Section 9: Monday Miles (Light Sand)"]
+    Sec8 --> Sec9["Section 9: Events Carousel (Light Sand)"]
     Sec9 --> Sec10["Section 10: Instagram (bg-off-black)"]
-    Sec10 --> Sec11["Section 11: Events Carousel (Light Sand)"]
-    Sec11 --> Sec12["Section 12: Press (Light)"]
+    Sec10 --> Sec11["Section 11: Press (Light)"]
 ```
 
 > [!NOTE]
@@ -55,6 +54,11 @@ graph TD
 
 > [!NOTE]
 > **Pride final-weekend refresh (Jun 27, 2026).** Once Juneteenth (Jun 19-21) and Father's Day (Jun 21) had passed, both were retired in one change and the two now-empty light slots were filled by Pride content, so the cadence and the media-side zig-zag were preserved with **zero reordering**: the lead Juneteenth slot became **Celebrating Pride** (lead light spotlight, copy left + a "this weekend in Chicago" text list right, outside the zig-zag), and the Father's Day slot became the **Pride Teacher Spotlight** (light, the two teacher cover cards on the **left** so it still zig-zags with the WGN9 video on the right below). Both keep their slot's light theme, so the strict sequence still reads Hero dark -> Pride light -> Gala dark -> Pride Teacher Spotlight light -> WGN9 dark, and the parked light/light adjacency stays at the bottom (Events Carousel -> Press). The Father's Day carousel card was swapped for a "Celebrate Pride with LSP" card (rainbow header, links to `/pride`). When Pride passes, retire both Pride sections + the carousel card and re-audit the cadence. Lesson: when a passed event leaves a light slot, refilling it with another **same-theme** section is far lower risk than reordering the page.
+
+> [!NOTE]
+> **July 2026: Pride retired, Sweat Fest added.** Pride Month ended June 30, so both homepage Pride sections (the lead spotlight and the Pride Teacher Spotlight) were retired, and the homepage events carousel's Pride card was replaced with a Sweat Fest card. Sweat Fest (tickets not yet on sale; see Option F below for the full identity) becomes the new lead light spotlight immediately after the hero, since it is the next chronologically upcoming event. The homepage was reordered and now runs **perfect strict alternation with zero same-theme adjacencies** (the long-parked Events Carousel -> Press light/light junction is resolved): Hero dark -> Sweat Fest light (lead) -> Gala dark -> Merch Drop light -> WGN9 dark -> Free Day Promo light -> 40 Under 40 dark -> Monday Miles light -> Grand Opening dark -> Events Carousel light -> Instagram dark -> Press light. (Correction to earlier notes: Monday Miles Community Runs is a LIGHT sand section, not dark; with 6 dark including the hero and 6 light, perfect alternation is achievable.) The mermaid diagram above reflects this order. Desktop media zig-zag after the reorder: Sweat Fest poster left -> Gala right -> Merch tee left -> WGN9 right -> 40 Under 40 left (flipped back from `md:flex-row-reverse` to `md:flex-row`) -> Monday Miles right -> Grand Opening left; Free Day, the Events carousel, and Instagram sit outside the zig-zag. The `/pride` page itself persists (not deleted); only its homepage/events/links/carousel placements were retired. The Header nav Pride items (`.pride-nav-text`, mobile "Celebrate Pride" card) are untouched by this change: they already self-hide via the date-gated `html.pride-2026` class in `PrideTheme.astro`.
+>
+> On the standalone events page (`src/pages/events.astro`), the **Celebrating Pride** featured section was deleted outright (it had no "next observance" successor the way Father's Day -> Pride did). To keep the rhythm intact after removing that light section, the **Sweat Fest** featured section was moved to lead the page (light, directly after the light page header, sanctioned by the Option C precedent below), and the Supabase-driven `<EventsList />` island (light) was moved from after Monday Miles to between the Gala (dark) and Monday Miles (dark) sections, so two adjacent dark sections don't collide. Final order: Page Header (light) -> Sweat Fest (light) -> Gala (dark) -> EventsList (light) -> Monday Miles (dark) -> Stay Connected (light).
 
 ### Purpose & Rationale
 1. **Visual Cadence**: Breaking up large pages into clear chapters prevents visual fatigue and facilitates scrolling.
@@ -154,6 +158,19 @@ Use this warm-light variant of Option B for community-celebration classes that a
 - On the standalone events page, the same warm gradient opens after the light page header and before the dark Monday Miles section; the section carries `id="fathers-day-lsp"` with `scroll-mt-28`.
 - CTAs route to the booking surfaces, not a ticketing page: a primary **Book Your Spot** button to `${base}schedule` plus secondary App Store / Google Play buttons.
 
+#### Option F: Bright Daylight Festival Theme (Sweat Fest)
+Use this **light-first** palette for Sweat Fest (Sat Aug 22, 2026) and any future all-day, high-energy community festival that needs to read as the opposite of the gala's dark luxe. First implemented July 2026 replacing Pride's placements; see the "July 2026: Pride retired, Sweat Fest added" note above for the reorder details on the homepage and events page.
+
+**Identity.** Sweat Fest is deliberately the opposite of the gala's dark luxe: light-first everywhere except one closing exception (see below), warm and playful rather than moody.
+- **Backgrounds:** light warm cream/sand, `bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2]` family, white cards, off-black body text.
+- **Sunrise arc gradient (thin accents only):** gold `#ffbd59` (sunrise/run) -> ember `#ff6b52` (midday/sweat) -> magenta `#e94f8a` (dusk/party). Use it only for `h-1` top strips, chips, badges, and buttons; never as a large fill or a dominant band, and never mix it with `.gala-foil` or the gala's Playfair/`font-display` serif.
+- **Gradient text on light surfaces:** the signature sunrise stops are too pale to read as text on cream, so headings/wordmarks clip a **deepened** stop set instead: `#d47500 -> #e8452a -> #c81e63`. The day-arc mini-cards use matching solid deep colors keyed by phase: Run = deep gold `#b56400`, Sweat = deep ember `#d63d22`, Party = deep magenta `#c81e63`.
+- **Motifs:** a soft sun-disc glow (blurred gold/magenta blobs), dotted/grid route lines at low opacity, rounded sticker-style chips (white or cream fill, colored border, `shadow-sm`) for tiers/day-phases/badges, and Rubik `font-extrabold uppercase` wordmarks.
+- **Forbidden on Sweat Fest surfaces:** `.gala-foil`, `font-display`/Playfair, and dominant off-black bands (the gala's signature moves must stay exclusive to gala surfaces so the two identities read as opposites at a glance).
+- **The one dusk exception:** the standalone `/sweatfest` page itself is permitted to close with a **dusk-toned** section (the Party phase, magenta-leaning) once the reader has already been carried through the light sunrise-to-midday arc, mirroring the day's own sunrise-to-night structure. Every other surface (homepage, events page, links card, carousel) stays light-only; there is no dusk variant anywhere except that closing section.
+- **Tailwind v4 gotcha:** `shadow-[var(--x)]/NN` opacity-modifier syntax silently fails to apply. Use a literal hex value instead, e.g. `shadow-[#ff6b52]/25`, not `shadow-[var(--sweatfest-ember)]/25`.
+- **Single source of truth:** `src/data/sweatFest.js` drives every surface (homepage teaser, events featured section, links card, `/sweatfest` page, graphics). Venue and the Zeffy ticketing URL are still **TBD** (`venueName: null`, `ticketsUrl: null`, `ticketsOnSale: false`). When the Zeffy form goes live, set `ticketsUrl` and flip `ticketsOnSale` to `true` in that one file; every CTA and status badge across the site updates automatically. Prices, times, and the day-arc copy come from the planning doc and should stay exact.
+
 ### Alternating Media Sides on the Homepage
 Beyond alternating section backgrounds, two-column event spotlights on `src/pages/index.astro` should also alternate which side the graphic/flyer sits on as the user scrolls. Consecutive spotlights must not stack their media on the same edge, because a repeated image-left, image-left rhythm reads as a rigid template and flattens the page. Letting the photo swing left, then right, then left creates a zig-zag reading path that keeps the eye moving and feels more intentionally designed.
 
@@ -184,7 +201,9 @@ Father's Day at LSP functional contract:
 
 The Links page is a crucial portal, housed directly in LSP's social media bios (e.g., Instagram). It is designed to act as an immersive, mobile-first "Linktree" that drives immediate actions like class booking, event signups, and newsletters.
 
-**Page section order (gala leads while tickets are on sale):** profile header, language toggle, Highlight Stories bar, then the **Gala feature card** (promoted above the links list in July 2026 when tickets went on sale; it carries an "On Sale Now" / "A la Venta" badge, an EN/ES two-tile price spotlight from `galaTickets.tiers`, and a gold "Get Tickets" CTA straight to the live Zeffy form with `gala_ticket_click` tracking), then the main Quick Links list, then the Free Classes two-locations promo, newsletter, and app-download sections. After the gala (or if sales pause), the card can move back below the links list to restore the lead-with-links default.
+**Page section order (gala leads while tickets are on sale):** profile header, language toggle, Highlight Stories bar, then the **Gala feature card** (promoted above the links list in July 2026 when tickets went on sale; it carries an "On Sale Now" / "A la Venta" badge, an EN/ES two-tile price spotlight from `galaTickets.tiers`, and a gold "Get Tickets" CTA straight to the live Zeffy form with `gala_ticket_click` tracking), then the **Sweat Fest feature card** (`#sweatfest-card`, directly below the gala card while gala sales run), then the main Quick Links list, then the Free Classes two-locations promo, newsletter, and app-download sections. After the gala (or if sales pause), the gala card can move back below the links list to restore the lead-with-links default.
+
+**Sweat Fest feature card (bright treatment, July 2026):** restyled from its original dark-luxe treatment to the Option F bright daylight-festival identity so it visually contrasts the dark gala card directly above it: a cream gradient background (`from-[#fff8ef] via-white to-[#ffefe2]`) with a sunrise -> ember -> magenta `h-1` top strip, off-black text, the deep-stop gradient wordmark, sticker-style white ticket-tier tiles, the square art (`sweatFestArt.square.src`) in a soft warm frame, and a sunrise-gradient "Explore Sweat Fest" CTA with a hex-value drop shadow (`shadow-[#ff6b52]/25`, not `shadow-[var()]/NN`, which silently fails under Tailwind v4). Kept exactly as before: the card's id (`sweatfest-card`), `scroll-mt-24`, position after the gala card and before the Quick Links divider, its `sweatfest_explore_click` conversion attrs, and every one of its 14 EN/14 ES `lang-en`/`lang-es` span pairs (styling changed only; no copy was restructured). The Highlight Stories bar's "Sweat Fest" bubble still anchors to `#sweatfest-card`.
 
 ### Bilingual Integration & Content Architecture
 All content (titles, descriptions, and badges) inside both the main `links` list and the `highlights` array supports nested `{ en, es }` localization objects.
@@ -223,8 +242,7 @@ const links = [
 > 2. **Recurring, Constant, or Undated Links** (e.g., Class Schedule, Main Website, App Downloads) come SECOND.
 > 3. **Past Events** must be removed or moved to the bottom of the list.
 
-Current active event links (chronological):
-- **Celebrating Pride / Celebrando el Orgullo**: first featured card in `links`, internal link to `${base}pride` (`target: "_self"`), `color: "pride"` (rainbow badge) with the `heart` icon, badge `This Weekend` / `Este Finde`. No conversion event (content/nav link). Remove once Pride Month passes. Replaced the retired Honoring Juneteenth and Father's Day cards.
+Current active event links (chronological): none at present in the `links` array itself (the **Celebrating Pride / Celebrando el Orgullo** card was removed in July 2026 once Pride Month passed). The gala and Sweat Fest cards are not entries in this array; they are the two standalone feature cards documented above, rendered ahead of the Quick Links divider.
 
 ### Advanced Highlights & Interactive Systems
 - **Liquid Glass Language Switcher**: A premium `EN | ES` toggle shifts a liquid glass background indicator dynamically. The toggle manages parent class bindings (`.lang-active-en` / `.lang-active-es`) that swap visible translations in CSS instantly with zero layout shift, and stores preferences in `localStorage`.
