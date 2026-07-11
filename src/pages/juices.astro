@@ -1,0 +1,132 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const base = import.meta.env.BASE_URL;
+
+// Replace this with the dedicated Zeffy checkout URL when payment is ready.
+const zeffyPrepayUrl = "";
+
+const juices = [
+  {
+    number: "01",
+    spanish: "Zanahoria, piña y limón",
+    english: "Carrot, pineapple & lemon",
+    note: "Sweet, sunny, and citrusy - a bright post-class reset.",
+    accent: "#c7602d",
+  },
+  {
+    number: "02",
+    spanish: "Pepino, apio, espinaca, limón y piña",
+    english: "Cucumber, celery, spinach, lemon & pineapple",
+    note: "A crisp green blend with a little tropical lift.",
+    accent: "#0f766e",
+  },
+  {
+    number: "03",
+    spanish: "Fresa, apio, mango y limón",
+    english: "Strawberry, celery, mango & lemon",
+    note: "Fruit-forward, tangy, and full of color.",
+    accent: "#c7602d",
+  },
+  {
+    number: "04",
+    spanish: "Mango, piña y limón",
+    english: "Mango, pineapple & lemon",
+    note: "A smooth, tropical citrus blend made for a sunny finish.",
+    accent: "#ffbd59",
+  },
+];
+---
+
+<Layout
+  title="Jugos Naturales Toñita | The Latina Sweat Project"
+  description="Explore the fresh juice menu at Jugos Naturales Toñita, inside The Latina Sweat Project."
+>
+  <Header />
+  <main class="overflow-hidden bg-[#f5ede3]">
+    <section class="relative isolate overflow-hidden bg-off-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8">
+      <div class="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-vibrant-pink/30 blur-3xl"></div>
+      <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-accent-gold/20 blur-3xl"></div>
+      <div class="pointer-events-none absolute bottom-10 right-[13%] h-28 w-28 rounded-full border-2 border-accent-gold/20"></div>
+      <div class="pointer-events-none absolute bottom-20 right-[18%] h-3 w-3 rotate-45 bg-accent-gold/70"></div>
+
+      <div class="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_250px]">
+        <div>
+          <p class="text-sm font-extrabold uppercase tracking-[0.28em] text-accent-gold">Inside Latina Sweat Project</p>
+          <h1 class="mt-4 font-sans text-5xl font-extrabold leading-[0.9] tracking-tight text-white sm:text-7xl">
+            Jugos Naturales<br />
+            <span class="relative inline-block text-accent-gold">
+              Toñita
+              <span class="absolute -bottom-2 left-1 h-2 w-full bg-vibrant-pink"></span>
+            </span>
+          </h1>
+          <p class="mt-7 max-w-xl font-body text-lg leading-relaxed text-white/75 sm:text-xl">
+            Fresh fruit blends made to meet you after movement. Choose your favorite, then come back here for prices and prepay when checkout launches.
+          </p>
+          <div class="mt-9 flex flex-wrap gap-3 text-sm font-bold uppercase tracking-[0.12em]">
+            <a href="#menu" class="rounded-full bg-accent-gold px-5 py-3 text-off-black transition-transform hover:scale-105">See the menu</a>
+            <a href="#prepay" class="rounded-full border border-white/30 px-5 py-3 text-white transition-colors hover:border-accent-gold hover:text-accent-gold">Prepay coming soon</a>
+          </div>
+        </div>
+
+        <div class="mx-auto w-52 rounded-full border-[10px] border-accent-gold bg-[#f5ede3] p-3 shadow-2xl shadow-black/30 sm:w-60">
+          <img src={`${base}logo.png`} alt="The Latina Sweat Project logo" class="h-auto w-full" />
+        </div>
+      </div>
+    </section>
+
+    <section id="menu" class="relative px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div class="pointer-events-none absolute -left-12 top-16 h-48 w-48 rounded-full border-[18px] border-vibrant-pink/10"></div>
+      <div class="pointer-events-none absolute right-0 top-64 h-72 w-72 rounded-full border-[22px] border-accent-gold/10"></div>
+      <div class="relative mx-auto max-w-6xl">
+        <div class="max-w-2xl">
+          <p class="text-sm font-extrabold uppercase tracking-[0.24em] text-[#c7602d]">Menu / Menú</p>
+          <h2 class="mt-3 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl">Four blends, made simple.</h2>
+          <p class="mt-4 font-body text-lg leading-relaxed text-medium-gray">Spanish first, with English ingredients below. Ask the team about availability when you arrive.</p>
+        </div>
+
+        <div class="mt-10 grid gap-5 lg:grid-cols-2">
+          {juices.map((juice) => (
+            <article class="group relative overflow-hidden rounded-3xl border border-off-black/10 bg-white/80 p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg sm:p-8">
+              <div class="absolute inset-y-0 left-0 w-2" style={`background:${juice.accent}`}></div>
+              <div class="flex items-start gap-5">
+                <span class="font-sans text-4xl font-extrabold leading-none" style={`color:${juice.accent}`}>{juice.number}</span>
+                <div>
+                  <h3 class="font-sans text-2xl font-extrabold tracking-tight text-off-black sm:text-3xl">{juice.spanish}</h3>
+                  <p class="mt-2 font-body text-base font-bold text-[#6b625a]">{juice.english}</p>
+                  <p class="mt-5 font-body leading-relaxed text-medium-gray">{juice.note}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="prepay" class="bg-vibrant-pink px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div class="mx-auto max-w-4xl text-center">
+        <p class="text-sm font-extrabold uppercase tracking-[0.24em] text-white/80">The next step</p>
+        <h2 class="mt-3 font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Prepay is coming soon.</h2>
+        <p class="mx-auto mt-5 max-w-2xl font-body text-lg leading-relaxed text-white/85">We’re setting up a secure Zeffy checkout so you can pay while you’re in line. Prices and payment will be added here once the checkout is live.</p>
+        {
+          zeffyPrepayUrl ? (
+            <a
+              href={zeffyPrepayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-8 inline-flex rounded-full bg-accent-gold px-7 py-4 font-sans text-base font-extrabold text-off-black shadow-lg shadow-black/15 transition-transform hover:scale-105"
+              data-conversion-event="juice_prepay_click"
+              data-conversion-context="juices_page"
+              data-conversion-provider="zeffy"
+            >
+              Prepay for your juice
+            </a>
+          ) : (
+            <span class="mt-8 inline-flex rounded-full border-2 border-white/50 px-7 py-4 font-sans text-base font-extrabold text-white/80">Zeffy checkout coming soon</span>
+          )
+        }
+      </div>
+    </section>
+  </main>
+</Layout>
