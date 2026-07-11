@@ -25,15 +25,16 @@ export const sweatFest = {
   taglineSub: "A celebration of wellness, cultura, and connection.",
   motto: "Move Together. Celebrate Culture. Build Community.",
   homepageDescription:
-    "One full day of movement: a sunrise 5K, classes until sundown, and a party to close the night.",
+    "Start with a sunrise 5K, move through classes and wellbeing experiences, then close the night at the Pachanga.",
   pageDescription:
-    "Join us for a full day of sweat opportunities, wellbeing practices, local vendors, and food and drink. Come for one session or stay from the first mile to the last set.",
+    "Chicago, this is our first-ever all-day movement festival: a sunrise 5K, sweat sessions, wellbeing experiences, local vendors, food, and a closing Pachanga.",
   pagePath: "/sweatfest",
+  calendarPath: "/sweat-fest-2026.ics",
   ticketsOnSale: false,
   ticketsUrl: null, // TBD: Zeffy ticketing form
   ticketsLabel: "Get Tickets",
   statusLabel: "Tickets on sale soon",
-  contactEmail: "collab@latinasweatproject.com",
+  contactEmail: "rut@latinasweatproject.com",
 };
 
 // What to expect on the ground. Kept general on purpose: the run, classes,
@@ -61,8 +62,8 @@ export const sweatFestExpect = [
     detail: "Fuel up and refuel throughout the day.",
   },
   {
-    title: "The party",
-    detail: "Celebrate with your comunidad until the final set.",
+    title: "The Pachanga",
+    detail: "Dance, connect, and celebrate with your comunidad until the final set.",
   },
 ];
 
@@ -89,24 +90,26 @@ export const sweatFestDay = [
     id: "party",
     accent: "dusk",
     time: "6:00 to 9:00 PM",
-    title: "Party",
+    title: "Pachanga",
     detail:
-      "The fun begins at 6:00 PM. Celebrate the day with your comunidad; the final set ends at 9:00 PM.",
+      "The Pachanga begins at 6:00 PM. Dance and celebrate with your comunidad; the final set ends at 9:00 PM.",
   },
 ];
 
 export const sweatFestTickets = {
-  onSale: false,
-  url: null, // TBD: Zeffy ticketing form
-  statusLabel: "Tickets on sale soon",
+  // Derive launch state from the top-level event record so one future edit
+  // activates every ticket surface consistently.
+  onSale: sweatFest.ticketsOnSale,
+  url: sweatFest.ticketsUrl,
+  statusLabel: sweatFest.statusLabel,
   tiers: [
     {
       id: "all-day",
       name: "All Day",
       price: 60,
-      includes: "Run, Sweat, and Party",
+      includes: "Run, Sweat, and Pachanga",
       description:
-        "The full arc: the sunrise 5K, classes all day, and the party at night.",
+        "The full arc: the sunrise 5K, classes all day, and the Pachanga at night.",
       featured: true,
     },
     {
@@ -119,15 +122,15 @@ export const sweatFestTickets = {
     },
     {
       id: "sweat-party",
-      name: "Sweat & Party",
+      name: "Sweat & Pachanga",
       price: 50,
-      includes: "Classes and the party",
+      includes: "Classes and the Pachanga",
       description: "Every class from 9:00 AM on, plus the night celebration.",
       featured: false,
     },
     {
       id: "party",
-      name: "Party",
+      name: "Pachanga",
       price: 30,
       includes: "The night celebration",
       description: "Join us from 6:00 PM for the closing celebration.",
@@ -250,17 +253,28 @@ export const sweatFestImpact = [
 export const sweatFestColors = {
   sunrise: "#ffbd59", // brand gold: the 7 AM run
   ember: "#ff6b52", // midday heat: the classes
-  dusk: "#e94f8a", // sunset into night: the party
+  dusk: "#e94f8a", // sunset into night: the Pachanga
 };
 
-// Artwork rendered via the lsp-event-graphics pipeline.
+// Campaign artwork contains no generated lettering or logo. The exact LSP
+// mark and all event copy are layered in HTML by SweatFestArtwork.astro.
 export const sweatFestArt = {
+  hero: {
+    src: "/images/sweatfest/sweatfest-hero-v2.webp", // 16:9 landscape
+    width: 1600,
+    height: 900,
+    alt: "Editorial illustration of a multigenerational Chicago community running, stretching, and dancing together at Sweat Fest",
+  },
   poster: {
-    src: "/images/sweatfest/sweatfest-poster.png", // 4:5 portrait
-    alt: "Sweat Fest poster: a full day fitness festival by Latina Sweat Project on August 22, 2026",
+    src: "/images/sweatfest/sweatfest-poster-v2.webp", // 4:5 portrait
+    width: 1080,
+    height: 1350,
+    alt: "Editorial illustration of a joyful, inclusive Chicago movement festival with runners, fitness, and yoga",
   },
   square: {
-    src: "/images/sweatfest/sweatfest-card-square.png", // 1:1
-    alt: "Sweat Fest, presented by Latina Sweat Project, Saturday August 22, 2026",
+    src: "/images/sweatfest/sweatfest-card-v2.webp", // 1:1
+    width: 1080,
+    height: 1080,
+    alt: "Editorial illustration of a joyful, inclusive Chicago movement festival from sunrise to celebration",
   },
 };

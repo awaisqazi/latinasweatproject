@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import SweatFestCountdown from "@/components/SweatFestCountdown.astro";
+import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import {
   sweatFest,
   sweatFestExpect,
@@ -15,13 +16,39 @@ import {
 
 // Sweat Fest: the "Daylight Festival". The page follows the arc of the day
 // because the event does: sunrise 5K (gold) → all-day classes (ember) →
-// night party (magenta). It reads BRIGHT: warm cream and white throughout,
+// night Pachanga (magenta). It reads BRIGHT: warm cream and white throughout,
 // with the full sunrise gradient reserved for thin accents, and the single
-// dark payoff held back for the closing "party at dusk" band. Every fact
+// dark payoff held back for the closing "Pachanga at dusk" band. Every fact
 // renders from src/data/sweatFest.js so TBDs (venue, Zeffy URL) flip
 // automatically when the data updates.
 
 const instagramUrl = "https://www.instagram.com/latinasweatproject/";
+const base = import.meta.env.BASE_URL;
+const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
+const calendarHref = withBase(sweatFest.calendarPath);
+const calendarDescription = [
+  "Movement Is Ours — Latina Sweat Project's first-ever all-day movement festival in Chicago.",
+  "",
+  "RUN OF SHOW",
+  ...sweatFestDay.map(
+    (phase) => `${phase.time} — ${phase.title}: ${phase.detail}`,
+  ),
+  "",
+  "Plus wellbeing experiences, local vendors, food, and community connection throughout the day.",
+  "",
+  `${sweatFest.statusLabel}. Get updates and plan your day at https://latinasweatproject.com/sweatfest`,
+  `Partnership inquiries: ${sweatFest.contactEmail}`,
+].join("\n");
+const googleCalendarHref = `https://calendar.google.com/calendar/render?${new URLSearchParams(
+  {
+    action: "TEMPLATE",
+    text: "Sweat Fest 2026 — Movement Is Ours",
+    dates: "20260822T070000/20260822T210000",
+    ctz: "America/Chicago",
+    location: "Chicago, IL · Location announced soon",
+    details: calendarDescription,
+  },
+).toString()}`;
 const sponsorMailto = `mailto:${sweatFestSponsorship.contactEmail}?subject=${encodeURIComponent(
   "Sweat Fest 2026 Sponsorship",
 )}`;
@@ -30,10 +57,9 @@ const sponsorMailto = `mailto:${sweatFestSponsorship.contactEmail}?subject=${enc
 // which map 1:1 onto sweatFestColors.
 const accentOf = (key) => sweatFestColors[key] ?? sweatFestColors.sunrise;
 
-// Deepened accent for TEXT on light backgrounds (raw gold/coral are too pale
-// for body-size copy on white). color-mix degrades gracefully: unsupported
-// browsers ignore the inline style and fall back to the off-black class.
-const deep = (hex) => `color-mix(in oklab, ${hex} 62%, #1e1e1e)`;
+// Deepened accent for text on light backgrounds. The stronger off-black mix
+// keeps even small gold labels readable on white and warm cream.
+const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #1e1e1e)`;
 
 // The motto splits into its three arc-colored lines.
 // "Move Together. Celebrate Culture. Build Community."
@@ -56,12 +82,12 @@ const expectIcons = [
   '<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />',
   // Food + drink: cup
   '<path stroke-linecap="round" stroke-linejoin="round" d="M17 9h1a3 3 0 010 6h-1M4 9h13v3.5a5.5 5.5 0 01-5.5 5.5h-2A5.5 5.5 0 014 12.5V9zM8 3v2m4-2v2" />',
-  // The party: music note
+  // The Pachanga: music note
   '<path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm12-3a3 3 0 11-6 0 3 3 0 016 0z" />',
 ];
 // Accent key per expect card, spread evenly across the arc so no color
 // dominates: sweat=ember, 5K=sunrise, wellbeing=dusk, market=sunrise,
-// food=ember, party=dusk.
+// food=ember, Pachanga=dusk.
 const expectAccents = ["ember", "sunrise", "dusk", "sunrise", "ember", "dusk"];
 
 // Sun/moon marker icons for the day-arc phases, keyed by phase id.
@@ -79,6 +105,8 @@ const arrowRight =
   '<path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />';
 const arrowDown =
   '<path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />';
+const calendarGlyph =
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M8 3v3m8-3v3M4.5 9.5h15M6 5h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z" />';
 const instagramGlyph =
   '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />';
 
@@ -96,7 +124,8 @@ const closingMotes = Array.from({ length: 14 }, (_, i) => ({
   ],
 }));
 
-const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFest.homepageDescription} ${sweatFest.dateLabel} in Chicago. ${sweatFest.statusLabel}.`;
+const metaDescription =
+  "Join Latina Sweat Project's first Sweat Fest in Chicago on August 22, 2026: a sunrise 5K, all-day classes, local vendors, food, and a sunset Pachanga.";
 ---
 
 <Layout title="Sweat Fest | The Latina Sweat Project" description={metaDescription}>
@@ -115,20 +144,18 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
           soft rays fanning out. Bright gold core, ember halo, magenta edge, all
           on cream so the sunrise READS. Clipped by the section. */}
       <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {/* Soft rays behind the disc (conic spokes, faded at the rim). */}
+        {/* One shared positioning wrapper keeps every celestial layer on the
+            same center while the children rotate or breathe independently. */}
         <div
-          class="sf-rays absolute left-1/2 top-[38%] h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 sm:h-[58rem] sm:w-[58rem] lg:h-[70rem] lg:w-[70rem]"
+          class="absolute left-1/2 top-[38%] h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 sm:h-[58rem] sm:w-[58rem] lg:h-[70rem] lg:w-[70rem]"
         >
-        </div>
-        {/* Warm glow halo. */}
-        <div
-          class="sf-sun absolute left-1/2 top-[38%] h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-[40rem] sm:w-[40rem] lg:h-[48rem] lg:w-[48rem]"
-        >
-        </div>
-        {/* The bright sun disc itself. */}
-        <div
-          class="sf-sun-core absolute left-1/2 top-[38%] h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-64 sm:w-64 lg:h-72 lg:w-72"
-        >
+          <div class="sf-rays absolute inset-0"></div>
+          <div class="absolute inset-0 grid place-items-center">
+            <div class="sf-sun h-[30rem] w-[30rem] rounded-full sm:h-[40rem] sm:w-[40rem] lg:h-[48rem] lg:w-[48rem]"></div>
+          </div>
+          <div class="absolute inset-0 grid place-items-center">
+            <div class="sf-sun-core h-52 w-52 rounded-full sm:h-64 sm:w-64 lg:h-72 lg:w-72"></div>
+          </div>
         </div>
       </div>
 
@@ -194,50 +221,72 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
           </span>
         </div>
 
-        {/* Countdown to the kickoff 5K. */}
-        <div class="sf-rise mx-auto mt-10 max-w-2xl" style="animation-delay: 0.36s;">
-          <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.26em] text-medium-gray">
-            Countdown to the kickoff 5K
-          </p>
-          <SweatFestCountdown target={sweatFest.startsAtISO} variant="hero" />
-        </div>
-
+        {/* Give attendees useful, platform-specific calendar actions before
+            tickets go live. */}
         <div
-          class="sf-rise mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-          style="animation-delay: 0.44s;"
+          class="sf-rise mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          style="animation-delay: 0.36s;"
         >
           <a
-            href="#the-day"
-            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+            href={calendarHref}
+            download
+            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+            data-conversion-event="sweatfest_save_date_click"
+            data-conversion-context="sweatfest_page_hero_apple"
           >
-            See the day
+            Apple Calendar
             <svg
-              class="h-4 w-4 transition-transform group-hover:translate-y-0.5"
+              class="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               stroke-width="2.5"
               aria-hidden="true"
-              set:html={arrowDown}
+              set:html={calendarGlyph}
             />
           </a>
           <a
-            href="#sponsors"
-            class="group inline-flex items-center justify-center gap-3 rounded-full border border-off-black/15 bg-white px-8 py-4 text-base font-extrabold text-off-black shadow-sm transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/[0.06]"
+            href={googleCalendarHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group inline-flex items-center justify-center gap-3 rounded-full border border-off-black/15 bg-white px-8 py-4 text-base font-extrabold text-off-black shadow-sm transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
+            data-conversion-event="sweatfest_save_date_click"
+            data-conversion-context="sweatfest_page_hero_google"
           >
-            Become a sponsor
+            Google Calendar
             <svg
-              class="h-4 w-4 transition-transform group-hover:translate-x-1"
+              class="h-4 w-4"
               style={`color: ${deep(sweatFestColors.dusk)};`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               stroke-width="2.5"
               aria-hidden="true"
-              set:html={arrowRight}
+              set:html={calendarGlyph}
             />
           </a>
         </div>
+
+        <a
+          href="#the-day"
+          class="sf-rise mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+          style="animation-delay: 0.4s;"
+        >
+          Explore the full run of show
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" set:html={arrowDown} />
+        </a>
+
+        {/* Countdown to the kickoff 5K. */}
+        <div class="sf-rise mx-auto mt-9 max-w-2xl" style="animation-delay: 0.44s;">
+          <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.26em] text-medium-gray">
+            Countdown to the kickoff 5K
+          </p>
+          <SweatFestCountdown target={sweatFest.startsAtISO} variant="hero" />
+        </div>
+
+        <p class="sf-rise mt-6 text-sm font-semibold text-medium-gray" style="animation-delay: 0.5s;">
+          Interested in partnering? <a href="#sponsors" class="font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
+        </p>
       </div>
 
       {/* Warm horizon hairline into the daylight below. */}
@@ -254,31 +303,39 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
       >
       </div>
 
-      <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
-          First light
-        </p>
-        <h2 class="mt-5 font-sans text-4xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-          {
-            mottoLines.map((line, i) => (
-              <span
-                class="reveal block"
-                style={`color: ${deep(accentOf(arcOrder[i % 3]))}; transition-delay: ${i * 120}ms;`}
-              >
-                {line}
-              </span>
-            ))
-          }
-        </h2>
-        <div class="reveal mt-6 flex justify-center" style="transition-delay: 300ms;">
-          <span class="sf-track h-1 w-24 rounded-full" aria-hidden="true"></span>
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-9 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
+          <SweatFestArtwork
+            variant="landscape"
+            className="reveal rounded-[2rem] shadow-2xl shadow-[#ff6b52]/20 ring-1 ring-off-black/10"
+          />
+          <div class="text-center lg:text-left">
+            <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
+              First light · First festival
+            </p>
+            <h2 class="mt-5 font-sans text-4xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-5xl">
+              {
+                mottoLines.map((line, i) => (
+                  <span
+                    class="reveal block"
+                    style={`color: ${deep(accentOf(arcOrder[i % 3]))}; transition-delay: ${i * 120}ms;`}
+                  >
+                    {line}
+                  </span>
+                ))
+              }
+            </h2>
+            <div class="reveal mt-6 flex justify-center lg:justify-start" style="transition-delay: 300ms;">
+              <span class="sf-track h-1 w-24 rounded-full" aria-hidden="true"></span>
+            </div>
+            <p
+              class="reveal mt-7 text-lg leading-relaxed text-medium-gray"
+              style="transition-delay: 360ms;"
+            >
+              {sweatFest.pageDescription}
+            </p>
+          </div>
         </div>
-        <p
-          class="reveal mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-medium-gray sm:text-xl"
-          style="transition-delay: 360ms;"
-        >
-          {sweatFest.pageDescription}
-        </p>
       </div>
     </section>
 
@@ -492,7 +549,7 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
             class="reveal mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl"
             style="transition-delay: 90ms;"
           >
-            Choose your day
+            Choose your experience
           </h2>
           <div class="reveal mt-6 flex justify-center" style="transition-delay: 150ms;">
             <span
@@ -560,7 +617,7 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
                         href={sweatFestTickets.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                        class="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
                         data-conversion-event="sweatfest_ticket_click"
                         data-conversion-context={`sweatfest_page_tickets_${tier.id}`}
                       >
@@ -600,7 +657,7 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group mt-5 inline-flex items-center justify-center gap-3 rounded-full bg-off-black px-7 py-3.5 text-sm font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[var(--sf-dusk)]"
+                class="group mt-5 inline-flex items-center justify-center gap-3 rounded-full bg-off-black px-7 py-3.5 text-sm font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
                 data-conversion-event="sweatfest_follow_click"
                 data-conversion-context="sweatfest_page_tickets"
               >
@@ -831,11 +888,11 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
             <div class="mt-8 flex flex-col items-center justify-center gap-4">
               <a
                 href={sponsorMailto}
-                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                class="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-5 py-4 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto sm:px-8 sm:text-base"
                 data-conversion-event="sweatfest_sponsor_lead"
                 data-conversion-context="sweatfest_page_sponsors"
               >
-                Email {sweatFestSponsorship.contactEmail}
+                Start a sponsorship conversation
                 <svg
                   class="h-4 w-4 transition-transform group-hover:translate-x-1"
                   fill="none"
@@ -845,6 +902,12 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
                   aria-hidden="true"
                   set:html={arrowRight}
                 />
+              </a>
+              <a
+                href={sponsorMailto}
+                class="break-all text-sm font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+              >
+                {sweatFestSponsorship.contactEmail}
               </a>
               <p class="text-xs font-extrabold uppercase tracking-[0.2em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
                 {sweatFestSponsorship.closesLabel}
@@ -916,13 +979,13 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
         >
           <a
             href="#tickets"
-            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
           >
-            See tickets
+            Explore passes
           </a>
           <a
             href="#sponsors"
-            class="inline-flex items-center justify-center gap-3 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10"
+            class="inline-flex items-center justify-center gap-3 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
           >
             Become a sponsor
           </a>
@@ -930,7 +993,7 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center justify-center gap-2.5 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10"
+            class="group inline-flex items-center justify-center gap-2.5 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
             data-conversion-event="sweatfest_follow_click"
             data-conversion-context="sweatfest_page_closing"
           >
@@ -940,7 +1003,7 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
         </div>
 
         <p
-          class="reveal mt-8 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40"
+          class="reveal mt-8 text-[11px] font-bold uppercase tracking-[0.22em] text-white/65"
           style="transition-delay: 560ms;"
         >
           {sweatFest.statusLabel}
@@ -1116,16 +1179,28 @@ const metaDescription = `${sweatFest.tagline}: ${sweatFest.taglineSub} ${sweatFe
     0%,
     100% {
       opacity: 0.9;
-      transform: translate(-50%, -50%) scale(1);
+      transform: scale(1);
     }
     50% {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1.05);
+      transform: scale(1.05);
     }
   }
   @keyframes sf-rays-spin {
+    from {
+      transform: rotate(0deg);
+    }
     to {
-      transform: translate(-50%, -50%) rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .sf-foil,
+    .sf-foil-light {
+      background: none;
+      color: CanvasText;
+      -webkit-text-fill-color: CanvasText;
     }
   }
 

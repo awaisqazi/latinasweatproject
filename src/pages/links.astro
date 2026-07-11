@@ -1,17 +1,24 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
+import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestTickets,
-  sweatFestArt,
   sweatFestColors,
 } from "@/data/sweatFest";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
 const sweatFestPageUrl = withBase(sweatFest.pagePath);
+const sweatFestPrimaryUrl =
+  sweatFestTickets.onSale && sweatFestTickets.url
+    ? sweatFestTickets.url
+    : sweatFestPageUrl;
+const sweatFestPrimaryLabel = sweatFestTickets.onSale
+  ? sweatFest.ticketsLabel
+  : "Explore passes + plan your day";
 // Sweat Fest "sunrise to last set" gradient (gold -> ember -> magenta),
 // used for the badges, top strip, and the card CTA.
 const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
@@ -23,12 +30,12 @@ const sweatFestWordmarkStyle =
 // Bilingual labels for the 2x2 ticket-tier grid, keyed by tier id.
 const sweatFestTierCopy = {
   "all-day": {
-    en: "All Day · Run, Sweat & Party",
-    es: "Todo el día · Carrera, Sweat y Fiesta",
+    en: "All Day",
+    es: "Todo el día",
   },
-  run: { en: "Run · Sunrise 5K", es: "Carrera · 5K al amanecer" },
-  "sweat-party": { en: "Sweat & Party", es: "Sweat y Fiesta" },
-  party: { en: "Party · From 6 PM", es: "Fiesta · Desde las 6 PM" },
+  run: { en: "Sunrise 5K", es: "5K al amanecer" },
+  "sweat-party": { en: "Sweat + Pachanga", es: "Sweat + Pachanga" },
+  party: { en: "Pachanga · From 6 PM", es: "Pachanga · Desde las 6 PM" },
 };
 
 // Define links data with English and Spanish translations
@@ -501,67 +508,69 @@ const getLinkConversionProvider = (url = "") => {
           style="background-image: linear-gradient(rgba(30,30,30,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.6) 1px, transparent 1px); background-size: 34px 34px;"
         >
         </div>
-        <div class="relative px-5 py-5">
-          <a href={sweatFestPageUrl} class="block">
-            <div class="mb-4 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ff6b52]/30 bg-white text-[11px] font-extrabold tracking-tight text-[#d63d22] shadow-sm">
-                  LSP
+        <div class="relative p-3 sm:p-4">
+          <a
+            href={sweatFestPageUrl}
+            class="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c81e63] focus-visible:ring-offset-4"
+            data-conversion-event="sweatfest_explore_click"
+            data-conversion-context="links_sweatfest_card_body"
+          >
+            <SweatFestArtwork
+              variant="landscape"
+              className="rounded-xl shadow-xl shadow-[#ff6b52]/15 ring-1 ring-off-black/10"
+            />
+
+            <div class="px-1 pt-4 sm:px-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#9b2c18]">
+                  <span class="lang-en">Featured · First-ever festival</span>
+                  <span class="lang-es hidden">Destacado · Primer festival</span>
                 </span>
-                <div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#d63d22]">
-                      <span class="lang-en">Featured</span>
-                      <span class="lang-es hidden">Destacado</span>
-                    </p>
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-white shadow-sm" style={`background-image: ${sweatFestGradient};`}>
-                      <span class="relative flex h-1 w-1">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
-                        <span class="relative inline-flex h-1 w-1 rounded-full bg-white" />
-                      </span>
-                      <span class="lang-en">Tickets soon</span>
-                      <span class="lang-es hidden">Boletos muy pronto</span>
-                    </span>
-                  </div>
-                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-off-black/50">
-                    <span class="lang-en">{sweatFest.dateLabel} · {sweatFest.timeLabel}</span>
-                    <span class="lang-es hidden">Sábado 22 de agosto de 2026 · 7:00 AM a 9:00 PM</span>
+                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-widest text-off-black shadow-sm" style={`background-image: ${sweatFestGradient};`}>
+                  <span class="h-1.5 w-1.5 rounded-full bg-off-black" aria-hidden="true"></span>
+                  <span class="lang-en">{sweatFestTickets.onSale ? "Tickets live" : "Tickets soon"}</span>
+                  <span class="lang-es hidden">{sweatFestTickets.onSale ? "Boletos disponibles" : "Boletos muy pronto"}</span>
+                </span>
+              </div>
+
+              <h2 class="mt-3 font-sans text-3xl font-extrabold uppercase leading-none tracking-tight sm:text-4xl">
+                <span style={sweatFestWordmarkStyle}>Sweat Fest</span>
+              </h2>
+              <p class="mt-2 text-sm font-extrabold leading-relaxed text-off-black/85">
+                <span class="lang-en">Movement Is Ours: wellness, cultura, and connection from sunrise to last set.</span>
+                <span class="lang-es hidden">El movimiento es nuestro: bienestar, cultura y conexión desde el amanecer hasta el último set.</span>
+              </p>
+
+              <div class="mt-4 grid grid-cols-2 gap-2 text-left">
+                <div class="rounded-xl border border-off-black/10 bg-white/80 px-3 py-2.5">
+                  <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-off-black/50">
+                    <span class="lang-en">When</span><span class="lang-es hidden">Cuándo</span>
                   </p>
-                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-off-black/50">
-                    <span class="lang-en">{sweatFest.venueLine}</span>
-                    <span class="lang-es hidden">Lugar por anunciar · Chicago</span>
+                  <p class="mt-1 text-[11px] font-extrabold text-off-black">
+                    <span class="lang-en">Sat · Aug 22</span><span class="lang-es hidden">Sáb · 22 Ago</span>
+                  </p>
+                </div>
+                <div class="rounded-xl border border-off-black/10 bg-white/80 px-3 py-2.5">
+                  <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-off-black/50">
+                    <span class="lang-en">Hours</span><span class="lang-es hidden">Horario</span>
+                  </p>
+                  <p class="mt-1 text-[11px] font-extrabold text-off-black">7 AM · 9 PM</p>
+                </div>
+                <div class="col-span-2 rounded-xl border border-off-black/10 bg-white/80 px-3 py-2.5">
+                  <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-off-black/50">
+                    <span class="lang-en">Where</span><span class="lang-es hidden">Dónde</span>
+                  </p>
+                  <p class="mt-1 text-[11px] font-extrabold text-off-black">
+                    <span class="lang-en">Chicago · Location announced soon</span>
+                    <span class="lang-es hidden">Chicago · Lugar por anunciar</span>
                   </p>
                 </div>
               </div>
-              <span class="rounded-full border border-[#ffbd59]/50 bg-[#ffbd59]/15 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#b56400] shadow-sm">
-                <span class="lang-en">{sweatFest.shortDateLabel}</span>
-                <span class="lang-es hidden">22 Ago</span>
-              </span>
-            </div>
 
-            <div class="grid gap-4">
-              <div>
-                <h2 class="font-sans text-3xl font-extrabold uppercase leading-[1.0] tracking-tight">
-                  <span style={sweatFestWordmarkStyle}>Sweat Fest</span>
-                </h2>
-                <p class="mt-2 text-xs font-bold leading-relaxed text-off-black/80">
-                  <span class="lang-en">Movement Is Ours: a celebration of wellness, cultura, and connection.</span>
-                  <span class="lang-es hidden">El movimiento es nuestro: una celebración de bienestar, cultura y conexión.</span>
-                </p>
-                <p class="mt-3 text-[13px] font-semibold leading-relaxed text-off-black/60">
-                  <span class="lang-en">A full day of movement from Latina Sweat Project: a sunrise 5K, classes until 5 PM, wellbeing practices, local vendors, food and drink, and a party to close the night.</span>
-                  <span class="lang-es hidden">Un día completo de movimiento con Latina Sweat Project: un 5K al amanecer, clases hasta las 5 PM, prácticas de bienestar, vendedores locales, comida y bebida, y una fiesta para cerrar la noche.</span>
-                </p>
-              </div>
-
-              <div class="overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-[#ff6b52]/10 ring-1 ring-off-black/5">
-                <img
-                  src={withBase(sweatFestArt.square.src)}
-                  alt={sweatFestArt.square.alt}
-                  class="aspect-square w-full rounded-lg object-cover"
-                  loading="lazy"
-                />
-              </div>
+              <p class="mt-4 text-[13px] font-semibold leading-relaxed text-off-black/65">
+                <span class="lang-en">Start with an all-paces sunrise 5K, move through sweat and wellbeing experiences, then close together at the Pachanga.</span>
+                <span class="lang-es hidden">Comienza con un 5K al amanecer para todos los ritmos, sigue con sweat y bienestar, y cierra en comunidad en la Pachanga.</span>
+              </p>
             </div>
           </a>
 
@@ -570,46 +579,48 @@ const getLinkConversionProvider = (url = "") => {
               sweatFestTickets.tiers.map((tier) => (
                 <div
                   class:list={[
-                    "rounded-lg border bg-white px-3 py-2 shadow-sm",
-                    tier.featured ? "border-[#ffbd59]/60" : "border-off-black/10",
+                    "flex min-w-0 items-center justify-between gap-2 rounded-xl border bg-white px-3 py-2.5 shadow-sm",
+                    tier.featured ? "border-[#ffbd59]" : "border-off-black/10",
                   ]}
                 >
-                  <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-off-black/55">
-                    <span class="lang-en">{sweatFestTierCopy[tier.id].en}</span>
-                    <span class="lang-es hidden">{sweatFestTierCopy[tier.id].es}</span>
-                  </p>
-                  <p class="mt-0.5 text-sm font-extrabold text-[#d63d22]">
-                    ${tier.price}
+                  <div class="min-w-0">
                     {tier.featured && (
-                      <span class="ml-1 rounded-full bg-[#ffbd59]/20 px-1.5 py-[2px] text-[8px] font-extrabold uppercase tracking-widest text-[#b56400]">
+                      <p class="mb-0.5 text-[7px] font-extrabold uppercase tracking-[0.14em] text-[#7a4c00]">
                         <span class="lang-en">Best value</span>
                         <span class="lang-es hidden">Mejor precio</span>
-                      </span>
+                      </p>
                     )}
-                  </p>
+                    <p class="truncate text-[9px] font-extrabold uppercase tracking-[0.1em] text-off-black/65">
+                      <span class="lang-en">{sweatFestTierCopy[tier.id].en}</span>
+                      <span class="lang-es hidden">{sweatFestTierCopy[tier.id].es}</span>
+                    </p>
+                  </div>
+                  <p class="flex-shrink-0 text-lg font-extrabold text-[#9b2c18]">${tier.price}</p>
                 </div>
               ))
             }
           </div>
 
           <a
-            href={sweatFestPageUrl}
-            data-conversion-event="sweatfest_explore_click"
+            href={sweatFestPrimaryUrl}
+            target={sweatFestTickets.onSale ? "_blank" : undefined}
+            rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
+            data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
             data-conversion-context="links_sweatfest_card"
-            class="gala-sheen mt-4 flex items-center justify-between rounded-xl px-4 py-3 text-white shadow-lg shadow-[#ff6b52]/25"
+            class="gala-sheen mt-4 flex items-center justify-between rounded-xl px-4 py-3 text-off-black shadow-lg shadow-[#ff6b52]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
             style={`background-image: ${sweatFestGradient};`}
           >
             <span class="relative z-[1] text-sm font-extrabold">
-              <span class="lang-en">Explore Sweat Fest</span>
-              <span class="lang-es hidden">Descubre Sweat Fest</span>
+              <span class="lang-en">{sweatFestPrimaryLabel}</span>
+              <span class="lang-es hidden">{sweatFestTickets.onSale ? "Compra boletos" : "Explora pases y planea tu día"}</span>
             </span>
             <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
           </a>
-          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-off-black/45">
-            <span class="lang-en">Tickets on sale soon · Follow for updates</span>
-            <span class="lang-es hidden">Boletos a la venta muy pronto · Síguenos para novedades</span>
+          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-off-black/65">
+            <span class="lang-en">{sweatFestTickets.onSale ? "Tickets are live · Claim your experience" : "Tickets on sale soon · Follow for updates"}</span>
+            <span class="lang-es hidden">{sweatFestTickets.onSale ? "Boletos disponibles · Elige tu experiencia" : "Boletos a la venta muy pronto · Síguenos para novedades"}</span>
           </p>
         </div>
       </div>

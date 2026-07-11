@@ -1,0 +1,48 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Latina Sweat Project//Sweat Fest 2026//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Sweat Fest 2026
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VEVENT
+UID:sweat-fest-2026@latinasweatproject.com
+DTSTAMP:20260711T160000Z
+CREATED:20260711T160000Z
+LAST-MODIFIED:20260711T160000Z
+DTSTART:20260822T120000Z
+DTEND:20260823T020000Z
+SUMMARY:Sweat Fest 2026 - Movement Is Ours
+DESCRIPTION:Latina Sweat Project's first-ever all-day movement festival in
+ Chicago. A celebration of wellness\, cultura\, and connection.\n\nRUN OF
+ SHOW\n7:00 to 8:30 AM - RUN: Kickoff 5K with all paces welcome. Walk it\,
+ jog it\, or chase a PR.\n9:00 AM to 5:00 PM - SWEAT: 45-minute classes
+ throughout the day with LSP instructors.\n6:00 to 9:00 PM - PACHANGA:
+ Dance\, connect\, and celebrate with your comunidad until the final
+ set.\n\nThroughout the day: wellbeing experiences\, local
+ vendors\, food and drink\,
+ and community connection. All levels are welcome.\n\nTickets are on sale
+ soon. Plan your day and get updates at
+ https://latinasweatproject.com/sweatfest\nPartnership inquiries:
+ rut@latinasweatproject.com
+LOCATION:Chicago\, IL (location announced soon)
+URL:https://latinasweatproject.com/sweatfest
+ORGANIZER;CN=The Latina Sweat Project:mailto:rut@latinasweatproject.com
+CONTACT:rut@latinasweatproject.com
+CATEGORIES:Community,Fitness,Wellness,Culture,Festival
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+COLOR:#E94F8A
+IMAGE;VALUE=URI;DISPLAY=BADGE;FMTTYPE=image/jpeg:
+ https://latinasweatproject.com/images/sweatfest/
+ sweatfest-calendar-v2.jpg
+ATTACH;FMTTYPE=image/jpeg;VALUE=URI:
+ https://latinasweatproject.com/images/sweatfest/
+ sweatfest-calendar-v2.jpg
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Sweat Fest starts tomorrow at 7:00 AM.
+END:VALARM
+END:VEVENT
+END:VCALENDAR

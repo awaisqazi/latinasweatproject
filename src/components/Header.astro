@@ -1,11 +1,14 @@
 ---
 // src/components/Header.astro
 import { statusBanner } from "@/data/studioStatus.js";
+import { sweatFest, sweatFestColors } from "@/data/sweatFest";
 
 const base = import.meta.env.BASE_URL;
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
+const isSweatFest = pathname.replace(/\/$/, "").endsWith("/sweatfest");
+const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
 
 const bannerHref = statusBanner.href.startsWith("/")
   ? base.replace(/\/$/, "") + statusBanner.href
@@ -137,19 +140,14 @@ const bannerHref = statusBanner.href.startsWith("/")
                     >
                         Gala
                     </a>
-                    <a
-                        href={`${base}sweatfest`}
-                        class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
-                    >
-                        Sweat Fest
-                    </a>
-
                     {/* More Dropdown */}
                     <div id="more-dropdown-container" class="relative group">
                         <button
                             id="more-dropdown-button"
-                            class="link-underline flex items-center gap-1 py-2 text-base font-medium text-medium-gray focus:outline-none"
+                            type="button"
+                            class="link-underline flex items-center gap-1 rounded-sm py-2 text-base font-medium text-medium-gray focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c81e63] focus-visible:ring-offset-2"
                             aria-expanded="false"
+                            aria-controls="more-dropdown-menu"
                         >
                             More
                             <svg
@@ -168,11 +166,27 @@ const bannerHref = statusBanner.href.startsWith("/")
 
                         <div
                             id="more-dropdown-menu"
-                            class="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50"
+                            class="absolute right-0 top-full pt-4 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 transform origin-top-right z-50"
                         >
                             <div
                                 class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                             >
+                                <a
+                                    href={`${base}sweatfest`}
+                                    aria-current={isSweatFest ? "page" : undefined}
+                                    class="relative mb-1 block overflow-hidden rounded-lg border border-[#ff6b52]/35 bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] px-4 pb-3 pt-4 text-off-black shadow-sm transition hover:border-[#ff6b52]/70 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c81e63]"
+                                    data-conversion-event="sweatfest_explore_click"
+                                    data-conversion-context="desktop_header_more"
+                                >
+                                    <span class="absolute inset-x-0 top-0 h-1" style={`background: ${sweatFestGradient};`} aria-hidden="true"></span>
+                                    <span class="flex items-center justify-between gap-2">
+                                        <span class="font-extrabold">Sweat Fest</span>
+                                        <span class="rounded-full bg-[#ffbd59]/25 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#7a4c00]">
+                                            {sweatFest.shortDateLabel}
+                                        </span>
+                                    </span>
+                                    <span class="mt-1 block text-xs text-medium-gray">Run · Sweat · Pachanga</span>
+                                </a>
                                 <a
                                     href={`${base}feedback`}
                                     class="mb-1 block rounded-lg border border-accent-gold/40 bg-accent-gold/15 px-4 py-3 text-sm text-off-black transition-all hover:border-accent-gold hover:bg-accent-gold/25"
@@ -284,6 +298,8 @@ const bannerHref = statusBanner.href.startsWith("/")
                     id="mobile-menu-toggle"
                     class="relative z-50 p-2 text-off-black focus:outline-none group"
                     aria-label="Toggle Menu"
+                    aria-expanded="false"
+                    aria-controls="mobile-menu-overlay"
                 >
                     <div class="w-6 h-5 flex flex-col justify-between relative">
                         <span
@@ -358,6 +374,8 @@ const bannerHref = statusBanner.href.startsWith("/")
 {/* Mobile Menu Overlay */}
 <div
     id="mobile-menu-overlay"
+    aria-hidden="true"
+    inert
     class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col pt-32 px-6 pb-8 overflow-y-auto h-screen"
 >
     <nav class="flex flex-col gap-4 text-center">
@@ -395,6 +413,20 @@ const bannerHref = statusBanner.href.startsWith("/")
             Events
         </a>
         <a
+            href={`${base}sweatfest`}
+            aria-current={isSweatFest ? "page" : undefined}
+            class="mobile-link relative my-1 overflow-hidden rounded-2xl border border-[#ff6b52]/40 bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] px-5 py-4 text-off-black shadow-md transition-all hover:border-[#ff6b52]/70 hover:shadow-lg"
+            data-conversion-event="sweatfest_explore_click"
+            data-conversion-context="mobile_header"
+        >
+            <span class="absolute inset-x-0 top-0 h-1" style={`background: ${sweatFestGradient};`} aria-hidden="true"></span>
+            <span class="flex items-center justify-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#9b2c18]">
+                First-ever festival · {sweatFest.shortDateLabel}
+            </span>
+            <span class="mt-1 block text-2xl font-extrabold">Sweat Fest</span>
+            <span class="mt-1 block text-sm font-semibold text-medium-gray">Run · Sweat · Pachanga</span>
+        </a>
+        <a
             href={`${base}pricing`}
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
@@ -423,12 +455,6 @@ const bannerHref = statusBanner.href.startsWith("/")
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
             Gala
-        </a>
-        <a
-            href={`${base}sweatfest`}
-            class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
-        >
-            Sweat Fest
         </a>
         <a
             href={`${base}corporate-collaborations`}
@@ -658,6 +684,8 @@ const bannerHref = statusBanner.href.startsWith("/")
 
         if (isMenuOpen) {
             overlay?.classList.remove("translate-x-full");
+            overlay?.removeAttribute("inert");
+            overlay?.setAttribute("aria-hidden", "false");
             document.body.style.overflow = "hidden";
 
             // Animate Hamburger to X
@@ -666,6 +694,8 @@ const bannerHref = statusBanner.href.startsWith("/")
             bottomBar?.classList.add("-rotate-45", "-translate-y-[9px]");
         } else {
             overlay?.classList.add("translate-x-full");
+            overlay?.setAttribute("inert", "");
+            overlay?.setAttribute("aria-hidden", "true");
             document.body.style.overflow = "";
 
             // Reset Hamburger
@@ -720,6 +750,18 @@ const bannerHref = statusBanner.href.startsWith("/")
     document.addEventListener("click", (e) => {
         if (isDropdownOpen && moreContainer && !moreContainer.contains(e.target as Node)) {
             setDropdownState(false);
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (isDropdownOpen) {
+            setDropdownState(false);
+            moreBtn?.focus();
+        }
+        if (isMenuOpen) {
+            toggleBtn?.click();
+            toggleBtn?.focus();
         }
     });
 </script>

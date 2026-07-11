@@ -4,11 +4,12 @@ import Header from "@/components/Header.astro";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import GalaImpactStats from "@/components/GalaImpactStats.astro";
+import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestDay,
-  sweatFestArt,
+  sweatFestTickets,
   sweatFestColors,
 } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
@@ -27,6 +28,13 @@ const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${
 const sweatFestDeepAccents = { sunrise: "#d47500", ember: "#e8452a", dusk: "#c81e63" };
 const sweatFestDeepGradient = `linear-gradient(90deg, ${sweatFestDeepAccents.sunrise}, ${sweatFestDeepAccents.ember}, ${sweatFestDeepAccents.dusk})`;
 const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`;
+const sweatFestPrimaryUrl =
+  sweatFestTickets.onSale && sweatFestTickets.url
+    ? sweatFestTickets.url
+    : withBase("sweatfest");
+const sweatFestPrimaryLabel = sweatFestTickets.onSale
+  ? sweatFest.ticketsLabel
+  : "Explore passes + plan your day";
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -56,6 +64,21 @@ const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; 
       <div
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
+        <a
+          href={withBase("sweatfest")}
+          class="group mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-accent-gold hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
+          data-conversion-event="sweatfest_explore_click"
+          data-conversion-context="home_hero_announcement"
+        >
+          <span class="relative flex h-2 w-2" aria-hidden="true">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-accent-gold"></span>
+          </span>
+          First-ever Sweat Fest · {sweatFest.shortDateLabel}
+          <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </a>
         <h1
           class="font-sans text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
         >
@@ -100,17 +123,13 @@ const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; 
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-off-black">
         <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14">
-          {/* Media (left): the Sweat Fest poster */}
-          <div class="reveal relative mx-auto w-full max-w-sm lg:max-w-none">
-            <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-[#ffbd59]/45 via-[#ff6b52]/25 to-[#e94f8a]/20 blur-2xl"></div>
-            <div class="relative overflow-hidden rounded-2xl border border-off-black/10 bg-white p-2 shadow-xl shadow-[#ff6b52]/15">
-              <img
-                src={withBase(sweatFestArt.poster.src)}
-                alt={sweatFestArt.poster.alt}
-                class="aspect-[4/5] w-full rounded-xl object-cover"
-                loading="lazy"
-              />
-            </div>
+          {/* Media (left): one edge-to-edge campaign image. The official logo
+              and event copy are real DOM, never baked into generated art. */}
+          <div class="reveal relative mx-auto w-full max-w-md lg:max-w-none">
+            <SweatFestArtwork
+              variant="portrait"
+              className="rounded-[2rem] shadow-2xl shadow-[#ff6b52]/25 ring-1 ring-off-black/10"
+            />
           </div>
 
           {/* Copy (right) */}
@@ -120,10 +139,10 @@ const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; 
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ff6b52] opacity-75"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-[#ff6b52]"></span>
               </span>
-              Sweat Fest · Summer Festival · Save the Date
+              LSP's first-ever all-day festival · Chicago · August 22
             </div>
             <h2 class="mt-4 font-sans text-5xl font-extrabold uppercase leading-[0.95] tracking-tight text-off-black sm:text-6xl lg:text-7xl">
-              Movement Is <span style={sweatFestWordmarkDeepStyle}>Ours</span>
+              Run. Sweat. <span style={sweatFestWordmarkDeepStyle}>Pachanga.</span>
             </h2>
             <p class="mt-4 text-lg font-bold text-off-black">
               {sweatFest.dateLabel} · {sweatFest.timeLabel}
@@ -151,15 +170,21 @@ const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; 
               {sweatFest.homepageDescription}
             </p>
 
+            <p class="mt-3 text-sm font-bold text-off-black/70">
+              Passes from $25 · All-day $60 · All levels welcome
+            </p>
+
             <div class="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <a
-                href={withBase("sweatfest")}
-                class="btn group inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ff6b52]/25 transition-all duration-300 hover:scale-[1.02]"
+                href={sweatFestPrimaryUrl}
+                target={sweatFestTickets.onSale ? "_blank" : undefined}
+                rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
+                class="btn group inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ff6b52]/25 transition-all duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
                 style={`background-image: ${sweatFestGradient};`}
-                data-conversion-event="sweatfest_explore_click"
+                data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
                 data-conversion-context="home_sweatfest_band"
               >
-                Explore Sweat Fest
+                {sweatFestPrimaryLabel}
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
@@ -1534,46 +1559,37 @@ const sweatFestWordmarkDeepStyle = `background-image: ${sweatFestDeepGradient}; 
 
           {/* Sweat Fest event card */}
           <a
-            href={withBase("sweatfest")}
+            href={sweatFestPrimaryUrl}
+            target={sweatFestTickets.onSale ? "_blank" : undefined}
+            rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
             class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="sweatfest_explore_click"
+            data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
             data-conversion-context="home_events_carousel"
           >
             <div
               class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-[#ff6b52]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ff6b52]/20 h-full"
             >
-              <div class="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff3e0] via-[#fff8ef] to-[#ffe3ec]">
-                <div class="absolute inset-x-0 top-0 h-1.5" style={`background-image: ${sweatFestGradient};`}></div>
-                <span class="text-center text-4xl font-extrabold uppercase leading-[0.9] tracking-tight" style={sweatFestWordmarkDeepStyle}>Sweat<br />Fest</span>
-                <div class="absolute top-3 left-3 flex gap-2">
-                  <span class="rounded-full bg-white/95 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#e8452a] shadow-md">
-                    Summer Festival
-                  </span>
-                  <span class="rounded-full bg-off-black/80 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                    Tickets Soon
-                  </span>
-                </div>
-              </div>
+              <SweatFestArtwork variant="landscape" className="h-52 w-full" />
               <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#e8452a]">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b52815]">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
-                  Sat, Aug 22 · 7 AM to 9 PM
+                  {sweatFest.shortDateLabel} · 7 AM to 9 PM
                 </div>
-                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-[#e8452a]">
-                  Sweat Fest
+                <h3 class="mt-2 text-xl font-bold leading-tight transition-colors group-hover:text-[#b52815]">
+                  LSP's first all-day festival
                 </h3>
                 <p class="mt-2 text-sm text-medium-gray leading-relaxed">
                   {sweatFest.homepageDescription}
                 </p>
                 <div class="mt-4 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#e8452a]">Run</span>
-                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#e8452a]">Sweat</span>
-                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#e8452a]">Party</span>
+                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#b52815]">Run</span>
+                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#b52815]">Sweat</span>
+                  <span class="rounded-full bg-[#ff6b52]/10 px-2.5 py-1 text-[11px] font-bold text-[#b52815]">Pachanga</span>
                 </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#e8452a] transition-all group-hover:gap-2">
-                  Explore Sweat Fest
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b52815] transition-all group-hover:gap-2">
+                  {sweatFestPrimaryLabel}
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>

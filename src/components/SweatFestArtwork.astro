@@ -1,0 +1,82 @@
+---
+import { sweatFest, sweatFestArt } from "@/data/sweatFest";
+
+interface Props {
+  variant?: "landscape" | "portrait" | "square";
+  className?: string;
+  loading?: "eager" | "lazy";
+  fetchpriority?: "high" | "low" | "auto";
+}
+
+const {
+  variant = "landscape",
+  className = "",
+  loading = "lazy",
+  fetchpriority = "auto",
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const art =
+  variant === "portrait"
+    ? sweatFestArt.poster
+    : variant === "square"
+      ? sweatFestArt.square
+      : sweatFestArt.hero;
+const aspectClass =
+  variant === "portrait"
+    ? "aspect-[4/5]"
+    : variant === "square"
+      ? "aspect-square"
+      : "aspect-video";
+---
+
+<figure
+  class:list={[
+    "group relative isolate overflow-hidden bg-off-black",
+    aspectClass,
+    className,
+  ]}
+>
+  <img
+    src={`${base}${art.src.replace(/^\//, "")}`}
+    width={art.width}
+    height={art.height}
+    alt={art.alt}
+    class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.025]"
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+  />
+  <div
+    class="pointer-events-none absolute inset-0 bg-gradient-to-t from-off-black/85 via-off-black/5 to-off-black/10"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="absolute left-4 top-4 flex items-center gap-2.5 rounded-full border border-white/55 bg-white/90 py-1.5 pl-1.5 pr-3 text-off-black shadow-lg backdrop-blur-md sm:left-5 sm:top-5">
+    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white">
+      <img
+        src={`${base}logo.png`}
+        width="1000"
+        height="1000"
+        alt=""
+        class="h-7 w-7 object-contain"
+        loading="lazy"
+        decoding="async"
+      />
+    </span>
+    <span class="text-left leading-none">
+      <span class="block text-[8px] font-extrabold uppercase tracking-[0.18em] text-medium-gray">Presented by</span>
+      <span class="mt-1 block text-[11px] font-extrabold sm:text-xs">Latina Sweat Project</span>
+    </span>
+  </div>
+
+  <figcaption class="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/80 sm:text-xs">
+      {sweatFest.shortDateLabel} · Chicago
+    </p>
+    <p class="mt-1.5 font-sans text-xl font-extrabold uppercase leading-none tracking-tight sm:text-2xl">
+      Run · Sweat · Pachanga
+    </p>
+  </figcaption>
+</figure>

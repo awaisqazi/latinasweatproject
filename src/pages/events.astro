@@ -4,12 +4,12 @@ import Header from "@/components/Header.astro";
 import EventsList from "@/components/EventsList.svelte";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
+import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestDay,
   sweatFestTickets,
-  sweatFestArt,
   sweatFestColors,
 } from "@/data/sweatFest";
 const base = import.meta.env.BASE_URL;
@@ -81,23 +81,19 @@ const featuredSlugs = [
 
       <div class="relative mx-auto max-w-7xl px-4">
         <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
-          {/* Media (left): poster art with warm glow, white sticker frame */}
+          {/* Media (left): edge-to-edge campaign art with the exact logo and
+              event copy layered as HTML. */}
           <div class="reveal group relative lg:col-span-2">
-            <div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-[#ffbd59]/35 via-[#ff6b52]/25 to-[#e94f8a]/25 blur-xl"></div>
-            <div class="relative overflow-hidden rounded-2xl bg-white p-1.5 shadow-2xl shadow-[#ff6b52]/15 ring-1 ring-off-black/5 transition-transform duration-300 group-hover:-translate-y-1">
-              <img
-                src={withBase(sweatFestArt.poster.src)}
-                alt={sweatFestArt.poster.alt}
-                class="aspect-[4/5] w-full rounded-xl object-cover"
-                loading="lazy"
-              />
-            </div>
+            <SweatFestArtwork
+              variant="portrait"
+              className="rounded-[2rem] shadow-2xl shadow-[#ff6b52]/20 ring-1 ring-off-black/10 transition-transform duration-300 group-hover:-translate-y-1"
+            />
           </div>
 
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
             <p class="flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-[#d63d22] lg:justify-start">
               <span class="h-px w-8 bg-[#d63d22]/70"></span>
-              New · Summer Festival
+              First-ever · All-day movement festival
             </p>
             <h2 class="mt-3 font-sans text-4xl font-extrabold uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.95]">
               <span style={sweatFestWordmarkStyle}>Sweat Fest</span>
@@ -116,7 +112,7 @@ const featuredSlugs = [
               {sweatFest.pageDescription}
             </p>
 
-            {/* The arc of the day: Run / Sweat / Party (sticker chips) */}
+            {/* The arc of the day: Run / Sweat / Pachanga (sticker chips) */}
             <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3 max-w-2xl mx-auto lg:mx-0">
               {sweatFestDay.map((phase) => (
                 <div class="rounded-2xl bg-white border border-off-black/10 shadow-sm px-4 py-3 text-left">
