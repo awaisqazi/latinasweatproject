@@ -1,5 +1,11 @@
 # build output
 dist/
+
+# local design and print-production artifacts
+output/
+tmp/
+public/images/juice-menu-qr.png
+
 # generated types
 .astro/
 

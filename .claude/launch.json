@@ -7,6 +7,15 @@
       "runtimeArgs": ["-c", "npx astro dev --port ${PORT:-4321}"],
       "port": 4321,
       "autoPort": true
+    },
+    {
+      "name": "mqpena",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/fezqazi/Documents/MQPena && npx astro dev --port 4322"
+      ],
+      "port": 4322
     }
   ]
 }
