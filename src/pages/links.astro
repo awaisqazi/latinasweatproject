@@ -18,7 +18,7 @@ const sweatFestPrimaryUrl =
     : sweatFestPageUrl;
 const sweatFestPrimaryLabel = sweatFestTickets.onSale
   ? sweatFest.ticketsLabel
-  : "Explore passes + plan your day";
+  : "Plan your Sweat Fest day";
 // Sweat Fest "sunrise to last set" gradient (gold -> ember -> magenta),
 // used for the badges, top strip, and the card CTA.
 const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
@@ -35,7 +35,7 @@ const sweatFestTierCopy = {
   },
   run: { en: "Sunrise 5K", es: "5K al amanecer" },
   "sweat-party": { en: "Sweat + Pachanga", es: "Sweat + Pachanga" },
-  party: { en: "Pachanga · From 6 PM", es: "Pachanga · Desde las 6 PM" },
+  party: { en: "Pachanga", es: "Pachanga" },
 };
 
 // Define links data with English and Spanish translations
@@ -590,7 +590,7 @@ const getLinkConversionProvider = (url = "") => {
                         <span class="lang-es hidden">Mejor precio</span>
                       </p>
                     )}
-                    <p class="truncate text-[9px] font-extrabold uppercase tracking-[0.1em] text-off-black/65">
+                    <p class="text-[8px] font-extrabold uppercase leading-tight tracking-[0.06em] text-off-black/65">
                       <span class="lang-en">{sweatFestTierCopy[tier.id].en}</span>
                       <span class="lang-es hidden">{sweatFestTierCopy[tier.id].es}</span>
                     </p>
@@ -607,7 +607,7 @@ const getLinkConversionProvider = (url = "") => {
             rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
             data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
             data-conversion-context="links_sweatfest_card"
-            class="gala-sheen mt-4 flex items-center justify-between rounded-xl px-4 py-3 text-off-black shadow-lg shadow-[#ff6b52]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+            class="mt-4 flex items-center justify-between rounded-xl px-4 py-3 text-off-black shadow-lg shadow-[#ff6b52]/25 transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
             style={`background-image: ${sweatFestGradient};`}
           >
             <span class="relative z-[1] text-sm font-extrabold">

@@ -126,9 +126,64 @@ const closingMotes = Array.from({ length: 14 }, (_, i) => ({
 
 const metaDescription =
   "Join Latina Sweat Project's first Sweat Fest in Chicago on August 22, 2026: a sunrise 5K, all-day classes, local vendors, food, and a sunset Pachanga.";
+const canonicalEventUrl = "https://latinasweatproject.com/sweatfest";
+const eventJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Festival",
+  name: "Sweat Fest 2026 — Movement Is Ours",
+  description: metaDescription,
+  startDate: sweatFest.startsAtISO,
+  endDate: "2026-08-22T21:00:00-05:00",
+  eventStatus: "https://schema.org/EventScheduled",
+  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  url: canonicalEventUrl,
+  image: [
+    "https://latinasweatproject.com/images/sweatfest/sweatfest-calendar-v2.jpg",
+  ],
+  location: {
+    "@type": "Place",
+    name: "Sweat Fest · Location announced soon",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Chicago",
+      addressRegion: "IL",
+      addressCountry: "US",
+    },
+  },
+  organizer: {
+    "@type": "Organization",
+    name: "The Latina Sweat Project",
+    url: "https://latinasweatproject.com",
+    email: sweatFest.contactEmail,
+  },
+  offers: sweatFestTickets.tiers.map((tier) => ({
+    "@type": "Offer",
+    name: `${tier.name} pass`,
+    price: tier.price,
+    priceCurrency: "USD",
+    availability: sweatFestTickets.onSale
+      ? "https://schema.org/InStock"
+      : "https://schema.org/PreOrder",
+    url: sweatFestTickets.url || canonicalEventUrl,
+  })),
+};
 ---
 
-<Layout title="Sweat Fest | The Latina Sweat Project" description={metaDescription}>
+<Layout
+  title="Sweat Fest | The Latina Sweat Project"
+  description={metaDescription}
+  socialImage="/images/sweatfest/sweatfest-calendar-v2.jpg"
+  socialImageAlt="Sweat Fest: a joyful Chicago community moving together from sunrise to Pachanga"
+  socialImageWidth={1200}
+  socialImageHeight={675}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify(eventJsonLd)}
+  ></script>
   <Header />
   <main
     class="bg-white text-off-black"
