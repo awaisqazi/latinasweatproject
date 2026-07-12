@@ -73,6 +73,12 @@ export const galaTickets = {
   ],
   sponsorships: [
     {
+      name: "Champion Sponsor",
+      amount: 25000,
+      seats: "Premier partnership",
+      note: "Certifies 5 yoga teachers",
+    },
+    {
       name: "Presenting Sponsor",
       amount: 10000,
       seats: "Table of 20",

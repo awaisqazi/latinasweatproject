@@ -31,6 +31,10 @@
   /* Display serif used only for the Gala (signature event) headings and big
      impact numbers. Body copy stays Rubik. Generates a `font-display` utility. */
   --font-display: "Playfair Display", "Rubik", serif;
+  /* Woodtype slab used only for Sweat Fest surfaces: the same Clarendon-fat
+     letterform tradition as lotería cards and mercado signage. Generates a
+     `font-slab` utility. */
+  --font-slab: "Ultra", "Rubik", serif;
 }
 
 @layer components {
@@ -278,6 +282,86 @@
     }
   }
 
+  /* Art-deco diamond lattice: fine gold linework used as a low-opacity
+     texture on gala surfaces (replaces the generic square grid). Parent
+     controls intensity via an opacity utility. */
+  .gala-lattice {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 0L56 28L28 56L0 28Z' fill='none' stroke='%23ffbd59' stroke-width='0.8'/%3E%3Cpath d='M28 14L42 28L28 42L14 28Z' fill='none' stroke='%23ffbd59' stroke-width='0.5'/%3E%3C/svg%3E");
+    background-size: 56px 56px;
+  }
+
+  /* Black-tie keyline buttons: sharp stationery corners with an engraved
+     inner hairline (drawn by ::before so it composes with .gala-sheen's
+     ::after sweep). Replaces generic pill CTAs on gala surfaces. */
+  .gala-btn {
+    position: relative;
+    border-radius: 3px;
+    transition:
+      transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+      box-shadow 0.3s ease,
+      background-color 0.3s ease,
+      border-color 0.3s ease;
+  }
+  .gala-btn::before {
+    content: "";
+    position: absolute;
+    inset: 3.5px;
+    border: 1px solid;
+    border-radius: 1.5px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .gala-btn--gold {
+    background: #ffbd59;
+    color: #1e1e1e;
+    box-shadow: 0 10px 30px -12px rgba(255, 189, 89, 0.45);
+  }
+  .gala-btn--gold::before {
+    border-color: rgba(30, 30, 30, 0.55);
+  }
+  .gala-btn--gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px -12px rgba(255, 189, 89, 0.55);
+  }
+  .gala-btn--ghost {
+    border: 1px solid rgba(255, 189, 89, 0.55);
+    background: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+  }
+  .gala-btn--ghost::before {
+    border-color: rgba(255, 189, 89, 0.28);
+  }
+  .gala-btn--ghost:hover {
+    border-color: #ffbd59;
+    background: rgba(255, 189, 89, 0.08);
+    transform: translateY(-2px);
+  }
+  /* Ink variants for light stationery surfaces (e.g. the cream invitation). */
+  .gala-btn--ink {
+    border: 1px solid rgba(30, 30, 30, 0.45);
+    color: #1e1e1e;
+  }
+  .gala-btn--ink::before {
+    border-color: rgba(30, 30, 30, 0.25);
+  }
+  .gala-btn--ink:hover {
+    border-color: #1e1e1e;
+    background: rgba(30, 30, 30, 0.05);
+    transform: translateY(-2px);
+  }
+  .gala-btn--night {
+    background: #1e1e1e;
+    color: #ffffff;
+    box-shadow: 0 12px 30px -14px rgba(30, 30, 30, 0.6);
+  }
+  .gala-btn--night::before {
+    border-color: rgba(255, 189, 89, 0.45);
+  }
+  .gala-btn--night:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px -14px rgba(30, 30, 30, 0.7);
+  }
+
   /* Periodic light sweep across a solid element (e.g. the gala "Save the Date"
      bar). Content should sit above via a higher z-index. */
   .gala-sheen {
@@ -312,6 +396,122 @@
     55%,
     100% {
       transform: translateX(130%);
+    }
+  }
+
+  /* ============================================================
+     Sweat Fest print kit: shared by /sweatfest and its callouts on the
+     homepage and links page. The look is a screen-printed neighborhood
+     flyer: woodtype slab (font-slab), riso misregistration, rubber stamps,
+     mercado price tags, hard offset-shadow buttons, papel picado bunting.
+     ============================================================ */
+
+  /* Riso misregistration: the ink layer sits slightly off its color plate.
+     Set --sf-print to the plate color (defaults to the ember coral). */
+  .sf-print {
+    color: #1e1e1e;
+    text-shadow: 0.05em 0.055em 0 var(--sf-print, #ff6b52);
+  }
+
+  /* Rubber stamp: double ring, crooked by default, inked in currentColor. */
+  .sf-stamp {
+    display: inline-block;
+    position: relative;
+    border: 2.5px solid currentColor;
+    border-radius: 6px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    transform: rotate(-2deg);
+  }
+  .sf-stamp::after {
+    content: "";
+    position: absolute;
+    inset: 2.5px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Mercado price tag: hard-edged, hand-placed. */
+  .sf-tag {
+    background: #fffdf6;
+    border: 2px solid #1e1e1e;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.18);
+  }
+
+  /* Print-shop button: hard offset shadow that the hover press flattens. */
+  .sf-btn {
+    border: 2.5px solid #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0.3rem 0.3rem 0 #1e1e1e;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .sf-btn:hover {
+    transform: translate(0.15rem, 0.15rem);
+    box-shadow: 0.15rem 0.15rem 0 #1e1e1e;
+  }
+  .sf-btn:active {
+    transform: translate(0.3rem, 0.3rem);
+    box-shadow: 0 0 0 #1e1e1e;
+  }
+  /* On dark bands the shadow reads in dusk ink instead. */
+  .sf-btn-night {
+    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #e94f8a);
+  }
+  .sf-btn-night:hover {
+    box-shadow: 0.15rem 0.15rem 0 var(--sf-dusk, #e94f8a);
+  }
+  .sf-btn-night:active {
+    box-shadow: 0 0 0 var(--sf-dusk, #e94f8a);
+  }
+
+  /* Papel picado strip: tiled SVG bunting (background-image supplied via
+     inline style from sweatFestPicadoUri in src/data/sweatFest.js). */
+  .sf-picado {
+    background-repeat: repeat-x;
+    background-position: center top;
+    background-size: 216px 52px;
+  }
+
+  /* Strip of masking tape holding notes and prints up. */
+  .sf-tape {
+    position: absolute;
+    z-index: 2;
+    width: 86px;
+    height: 24px;
+    background: rgba(255, 224, 130, 0.55);
+    border: 1px solid rgba(30, 30, 30, 0.08);
+    clip-path: polygon(
+      3% 0,
+      97% 0,
+      100% 18%,
+      98% 45%,
+      100% 70%,
+      97% 100%,
+      3% 100%,
+      0 78%,
+      2% 42%,
+      0 20%
+    );
+  }
+
+  /* Taped-up print: white paper margin around the artwork, crooked hang. */
+  .sf-taped {
+    position: relative;
+    background: #fffdf6;
+    border: 1px solid rgba(30, 30, 30, 0.14);
+    padding: 12px;
+    box-shadow: 9px 11px 0 rgba(30, 30, 30, 0.12);
+  }
+
+  @media (forced-colors: active) {
+    .sf-print {
+      text-shadow: none;
     }
   }
 

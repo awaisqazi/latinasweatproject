@@ -10,7 +10,7 @@ import {
   sweatFest,
   sweatFestDay,
   sweatFestTickets,
-  sweatFestColors,
+  sweatFestPicadoUri,
 } from "@/data/sweatFest";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
@@ -19,13 +19,7 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
 const galaFromPrice = Math.min(
   ...galaTickets.tiers.map((tier) => tier.earlyBird),
 );
-// Sweat Fest "sunrise to last set" gradient (gold -> ember -> magenta).
-const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
-// Deepened warm stops so the gradient wordmark stays legible on this
-// light band (the signature stops are tuned for dark surfaces).
-const sweatFestWordmarkStyle =
-  "background-image: linear-gradient(90deg, #d47500, #e8452a, #c81e63); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;";
-// Same idea for the day-arc accents on the light mini-cards.
+// Deepened day-arc accents legible on the light mini-cards.
 const sweatFestDeepAccents = {
   sunrise: "#b56400",
   ember: "#d63d22",
@@ -67,36 +61,38 @@ const featuredSlugs = [
         Option C precedent, and leads because it is the soonest event) */}
     <section
       id="sweat-fest"
-      class="relative overflow-hidden bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] py-16 md:py-20 scroll-mt-28"
+      class="relative overflow-hidden py-16 md:py-20 scroll-mt-28"
+      style="background: linear-gradient(to bottom, #fff8ef, #fffaf1 45%, #ffefe2);"
     >
-      {/* Sunrise-to-last-set top strip */}
-      <div class="absolute inset-x-0 top-0 h-1" style={`background-image: ${sweatFestGradient};`}></div>
+      {/* Papel picado strung along the top */}
       <div
-        class="absolute inset-0 opacity-[0.05]"
-        style="background-image: linear-gradient(rgba(30,30,30,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.5) 1px, transparent 1px); background-size: 58px 58px;"
+        class="sf-picado absolute inset-x-0 top-0 h-[52px]"
+        style={`background-image: ${sweatFestPicadoUri};`}
+        aria-hidden="true"
       >
       </div>
-      <div class="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-[#ffbd59]/25 blur-[110px]"></div>
-      <div class="absolute -bottom-24 -right-20 h-80 w-80 rounded-full bg-[#e94f8a]/15 blur-[120px]"></div>
 
-      <div class="relative mx-auto max-w-7xl px-4">
-        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
-          {/* Media (left): edge-to-edge campaign art with the exact logo and
-              event copy layered as HTML. */}
-          <div class="reveal group relative lg:col-span-2">
-            <SweatFestArtwork
-              variant="portrait"
-              className="rounded-[2rem] shadow-2xl shadow-[#ff6b52]/20 ring-1 ring-off-black/10 transition-transform duration-300 group-hover:-translate-y-1"
-            />
+      <div class="relative mx-auto max-w-7xl px-4 pt-8">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-5 lg:gap-12">
+          {/* Media (left): the campaign poster taped to the wall, with the
+              exact logo and event copy layered as HTML. */}
+          <div class="reveal relative mx-auto w-full max-w-md lg:col-span-2 lg:max-w-none">
+            <div class="sf-taped -rotate-[1.3deg]">
+              <span class="sf-tape -left-4 -top-3 rotate-[-38deg]" aria-hidden="true"></span>
+              <span class="sf-tape -right-4 -top-3 rotate-[34deg]" aria-hidden="true"></span>
+              <SweatFestArtwork variant="portrait" className="rounded-[3px]" />
+              <p class="mt-3 text-center font-slab text-sm uppercase tracking-[0.2em] text-off-black/70">
+                {sweatFest.tagline}
+              </p>
+            </div>
           </div>
 
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
-            <p class="flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-[#d63d22] lg:justify-start">
-              <span class="h-px w-8 bg-[#d63d22]/70"></span>
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b03a20;">
               First-ever · All-day movement festival
-            </p>
-            <h2 class="mt-3 font-sans text-4xl font-extrabold uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.95]">
-              <span style={sweatFestWordmarkStyle}>Sweat Fest</span>
+            </span>
+            <h2 class="mt-5 font-slab text-4xl uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.98]">
+              <span class="sf-print" style="--sf-print: #e94f8a;">Sweat Fest</span>
             </h2>
             <p class="mt-4 text-lg font-bold text-off-black">
               {sweatFest.dateLabel} · {sweatFest.timeLabel}
@@ -112,10 +108,13 @@ const featuredSlugs = [
               {sweatFest.pageDescription}
             </p>
 
-            {/* The arc of the day: Run / Sweat / Pachanga (sticker chips) */}
+            {/* The arc of the day: Run / Sweat / Pachanga (mercado tags) */}
             <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3 max-w-2xl mx-auto lg:mx-0">
-              {sweatFestDay.map((phase) => (
-                <div class="rounded-2xl bg-white border border-off-black/10 shadow-sm px-4 py-3 text-left">
+              {sweatFestDay.map((phase, i) => (
+                <div
+                  class="sf-tag px-4 py-3 text-left"
+                  style={`transform: rotate(${[-0.9, 0.6, -0.5][i % 3]}deg);`}
+                >
                   <p class="text-[10px] font-bold uppercase tracking-widest" style={`color: ${sweatFestDeepAccents[phase.accent]};`}>
                     {phase.time}
                   </p>
@@ -126,20 +125,42 @@ const featuredSlugs = [
               ))}
             </div>
 
-            {/* Ticket tiers (not on sale yet), sticker-style pills */}
-            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
-              {sweatFestTickets.tiers.map((tier) => (
-                <span class="rounded-full border border-[#ff6b52]/30 bg-white shadow-sm px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black/75">
-                  {tier.name} · ${tier.price}
+            {/* Ticket tiers, priced like the stub wall on /sweatfest */}
+            <div class="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
+              {sweatFestTickets.tiers.map((tier, i) => (
+                <span
+                  class="sf-tag inline-flex items-baseline gap-1.5 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.06em] text-off-black/80"
+                  style={`transform: rotate(${[-0.8, 0.5, -0.4, 0.7][i % 4]}deg);`}
+                >
+                  {tier.name} · <span class="font-slab text-sm normal-case" style="color: #9b2c18;">${tier.price}</span>
                 </span>
               ))}
             </div>
 
-            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+            <div class="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+              {
+                sweatFestTickets.onSale && sweatFestTickets.url && (
+                  <a
+                    href={sweatFestTickets.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sf-btn group inline-flex items-center gap-3 bg-accent-gold px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                    data-conversion-event="sweatfest_ticket_click"
+                    data-conversion-context="events_sweatfest_feature"
+                  >
+                    {sweatFest.ticketsLabel}
+                    <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                )
+              }
               <a
                 href={withBase("sweatfest")}
-                class="btn group inline-flex items-center gap-3 rounded-full px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#ff6b52]/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                style={`background-image: ${sweatFestGradient};`}
+                class:list={[
+                  "sf-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4",
+                  sweatFestTickets.onSale ? "bg-white" : "bg-accent-gold",
+                ]}
                 data-conversion-event="sweatfest_explore_click"
                 data-conversion-context="events_sweatfest_feature"
               >
@@ -150,17 +171,14 @@ const featuredSlugs = [
               </a>
               <a
                 href={`${withBase("sweatfest")}#sponsors`}
-                class="inline-flex items-center gap-3 rounded-full border border-off-black/15 bg-white px-8 py-4 text-base font-bold text-off-black shadow-sm transition-all duration-300 hover:border-[#ff6b52]/60 hover:bg-[#ff6b52]/5"
+                class="inline-flex items-center gap-3 border-2 border-off-black/20 bg-white px-8 py-4 text-base font-bold text-off-black transition-colors duration-300 hover:border-[#ff6b52] hover:bg-[#ff6b52]/5"
+                style="border-radius: 8px;"
               >
                 Become a sponsor
               </a>
             </div>
-            <p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-off-black/70 lg:justify-start">
-              <span class="inline-flex items-center gap-1.5 rounded-full border border-[#ff6b52]/30 bg-[#ff6b52]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#d63d22]">
-                <span class="relative flex h-1.5 w-1.5">
-                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d63d22] opacity-75"></span>
-                  <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#d63d22]"></span>
-                </span>
+            <p class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-off-black/70 lg:justify-start">
+              <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b03a20;">
                 {sweatFestTickets.statusLabel}
               </span>
               Tickets from ${sweatFestFromPrice}
@@ -176,7 +194,7 @@ const featuredSlugs = [
       id="noche-inolvidable-gala"
       class="relative overflow-hidden bg-off-black py-16 text-white md:py-20 scroll-mt-28"
     >
-      <div class="absolute inset-0 opacity-[0.08]" style="background-image: linear-gradient(rgba(255,189,89,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,189,89,0.3) 1px, transparent 1px); background-size: 56px 56px;"></div>
+      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
       <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
       <div class="gala-ambient absolute -left-20 top-0 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
       <div class="gala-ambient absolute -right-20 bottom-0 h-72 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
@@ -229,18 +247,18 @@ const featuredSlugs = [
                 href={galaTeaser.ticketsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-8 py-4 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold"
                 data-conversion-event="gala_ticket_click"
                 data-conversion-context="events_featured_gala"
               >
-                {galaTeaser.ticketsLabel}
-                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
+                <svg class="relative z-[1] h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
               <a
                 href={galaPageUrl}
-                class="inline-flex items-center gap-3 rounded-full border border-accent-gold/45 bg-white/[0.04] px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
+                class="gala-btn gala-btn--ghost inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold"
               >
                 Explore the Gala
               </a>

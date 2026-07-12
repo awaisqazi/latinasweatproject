@@ -12,15 +12,16 @@ import {
   sweatFestImpactIntro,
   sweatFestImpact,
   sweatFestColors,
+  sweatFestPicadoUri,
 } from "@/data/sweatFest";
 
-// Sweat Fest: the "Daylight Festival". The page follows the arc of the day
-// because the event does: sunrise 5K (gold) → all-day classes (ember) →
-// night Pachanga (magenta). It reads BRIGHT: warm cream and white throughout,
-// with the full sunrise gradient reserved for thin accents, and the single
-// dark payoff held back for the closing "Pachanga at dusk" band. Every fact
-// renders from src/data/sweatFest.js so TBDs (venue, Zeffy URL) flip
-// automatically when the data updates.
+// Sweat Fest: the "Daylight Festival", art-directed like a screen-printed
+// neighborhood flyer instead of a SaaS landing page. The reference points are
+// real and local: lotería cards (Clarendon slab type, numbered, bordered),
+// papel picado bunting, mercado bulletin boards, riso misregistration, ticket
+// stubs. The day still arcs sunrise (gold) → ember → dusk (magenta), with the
+// single dark payoff held for the closing Pachanga band. Every fact renders
+// from src/data/sweatFest.js so TBDs (venue, Zeffy URL) flip automatically.
 
 const instagramUrl = "https://www.instagram.com/latinasweatproject/";
 const base = import.meta.env.BASE_URL;
@@ -70,6 +71,34 @@ const mottoLines = sweatFest.motto
   .map((line) => `${line}.`);
 const arcOrder = ["sunrise", "ember", "dusk"];
 
+// Lotería-card articles for the day phases: El Run, El Sweat, La Pachanga.
+const loteriaArticle = { run: "El", sweat: "El", party: "La" };
+// Alternating paper tilts, the hand-placed look shared by cards and notes.
+const tiltOf = (i) => [-1.4, 0.8, -0.6, 1.1, -1, 0.7][i % 6];
+
+// Papel picado bunting comes from the shared identity kit (sweatFest.js).
+const picadoUri = sweatFestPicadoUri;
+
+// Paper grain: one fixed noise layer over the whole page so everything reads
+// as printed stock, not backlit glass.
+const grainSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0 0 0 0"/></filter><rect width="180" height="180" filter="url(#n)"/></svg>`;
+const grainUri = `url("data:image/svg+xml,${encodeURIComponent(grainSvg)}")`;
+
+// Hand-drawn marker squiggle used under section titles and impact numbers.
+const squiggle = (color) =>
+  `<svg viewBox="0 0 120 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="none"><path d="M3 7c12-5 22 4 34 0s22-6 34-1 26 4 46-2" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+
+// Ticker strip copy: facts already stated elsewhere on the page, repeated as
+// pure flyer decoration (the strip is aria-hidden).
+const tickerItems = [
+  "Sweat Fest 2026",
+  "Sunrise 5K",
+  "Classes all day",
+  "La Pachanga",
+  `${sweatFest.shortDateLabel} · Chicago`,
+  sweatFest.tagline,
+];
+
 // Inline SVG icon paths (24x24 stroke), index-aligned with sweatFestExpect.
 const expectIcons = [
   // Sweat sessions: flame
@@ -90,7 +119,7 @@ const expectIcons = [
 // food=ember, Pachanga=dusk.
 const expectAccents = ["ember", "sunrise", "dusk", "sunrise", "ember", "dusk"];
 
-// Sun/moon marker icons for the day-arc phases, keyed by phase id.
+// Sun/moon marker icons for the lotería day cards, keyed by phase id.
 const dayIcons = {
   run: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5M5.3 5.9l1.7 1.7M18.7 5.9L17 7.6M3 18h18M6.5 14.5a5.5 5.5 0 0111 0" />',
   sweat:
@@ -99,8 +128,6 @@ const dayIcons = {
     '<path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />',
 };
 
-const checkPath =
-  '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />';
 const arrowRight =
   '<path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />';
 const arrowDown =
@@ -186,23 +213,28 @@ const eventJsonLd = {
   ></script>
   <Header />
   <main
-    class="bg-white text-off-black"
+    class="overflow-x-clip bg-[#fffaf1] text-off-black"
     style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
   >
+    {/* Printed-stock grain over the whole page. */}
+    <div
+      class="sf-grain pointer-events-none fixed inset-0 z-[60]"
+      style={`background-image: ${grainUri};`}
+      aria-hidden="true"
+    >
+    </div>
+
     {/* ======================= HERO: DAYBREAK ======================= */}
     <section
       id="save-the-date"
-      class="relative isolate overflow-hidden py-20 text-off-black scroll-mt-28 sm:py-24 lg:py-28"
-      style="background: linear-gradient(to bottom, #fff8ef 0%, #ffffff 38%, #ffefe2 100%);"
+      class="relative isolate overflow-hidden pb-16 pt-20 text-off-black scroll-mt-28 sm:pb-20 sm:pt-24 lg:pt-28"
+      style="background: linear-gradient(to bottom, #fff8ef 0%, #fffaf1 42%, #ffefe2 100%);"
     >
-      {/* The rising sun: a big luminous disc climbing behind the wordmark, with
-          soft rays fanning out. Bright gold core, ember halo, magenta edge, all
-          on cream so the sunrise READS. Clipped by the section. */}
+      {/* The rising sun: luminous disc + crisp pinwheel rays behind the
+          wordmark, like a screen-printed sol. Clipped by the section. */}
       <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {/* One shared positioning wrapper keeps every celestial layer on the
-            same center while the children rotate or breathe independently. */}
         <div
-          class="absolute left-1/2 top-[38%] h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 sm:h-[58rem] sm:w-[58rem] lg:h-[70rem] lg:w-[70rem]"
+          class="absolute left-1/2 top-[36%] h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 sm:h-[58rem] sm:w-[58rem] lg:h-[70rem] lg:w-[70rem]"
         >
           <div class="sf-rays absolute inset-0"></div>
           <div class="absolute inset-0 grid place-items-center">
@@ -223,15 +255,33 @@ const eventJsonLd = {
           <span class="h-px w-8 bg-[var(--sf-dusk)]" aria-hidden="true"></span>
         </p>
 
+        {/* Stacked woodtype wordmark with riso misregistration: SWEAT throws
+            an ember plate, FEST a dusk plate, and the year rides along as a
+            crooked sticker. */}
         <h1
-          class="sf-rise mt-6 font-sans text-6xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-7xl lg:text-[7rem]"
+          class="sf-rise mt-6 font-slab uppercase leading-[0.86] tracking-tight"
           style="animation-delay: 0.06s;"
         >
-          <span class="sf-foil-light">Sweat Fest</span>
+          <span
+            class="sf-print block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
+            style="--sf-print: var(--sf-ember);"
+          >
+            Sweat
+          </span>
+          <span
+            class="block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
+          >
+            <span class="sf-print" style="--sf-print: var(--sf-dusk);">Fest</span>
+            <span
+              class="ml-2 inline-block rotate-6 rounded-md bg-[var(--sf-dusk)] px-2.5 py-1 align-top font-sans text-base font-extrabold tracking-widest text-white shadow-[3px_3px_0_rgba(30,30,30,0.85)] sm:ml-3 sm:text-xl"
+            >
+              ’26
+            </span>
+          </span>
         </h1>
 
         <p
-          class="sf-rise mt-6 text-xl font-extrabold uppercase tracking-[0.14em] text-off-black sm:text-2xl"
+          class="sf-rise mt-7 text-xl font-extrabold uppercase tracking-[0.14em] text-off-black sm:text-2xl"
           style="animation-delay: 0.14s;"
         >
           {sweatFest.tagline}
@@ -243,9 +293,9 @@ const eventJsonLd = {
           {sweatFest.taglineSub}
         </p>
 
-        {/* Sticker-style fact chips: date, hours, location, access. */}
+        {/* Mercado price-tag chips: date, hours, location, access. */}
         <ul
-          class="sf-rise mt-8 flex flex-wrap items-center justify-center gap-2.5"
+          class="sf-rise mt-8 flex flex-wrap items-center justify-center gap-3"
           style="animation-delay: 0.26s;"
         >
           {
@@ -254,38 +304,63 @@ const eventJsonLd = {
               sweatFest.timeLabel,
               sweatFest.venueLine,
               "All levels welcome",
-            ].map((chip) => (
-              <li class="inline-flex items-center gap-2 rounded-full border border-off-black/10 bg-white/90 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-off-black shadow-sm backdrop-blur-sm">
+            ].map((chip, i) => (
+              <li
+                class="sf-tag inline-flex items-center px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-off-black"
+                style={`transform: rotate(${tiltOf(i)}deg);`}
+              >
                 {chip}
               </li>
             ))
           }
         </ul>
 
-        {/* Status pill: on sale soon, with a pulsing ember dot. */}
-        <div class="sf-rise mt-6 flex justify-center" style="animation-delay: 0.3s;">
+        {/* Rubber-stamped status. */}
+        <div class="sf-rise mt-7 flex justify-center" style="animation-delay: 0.3s;">
           <span
-            class="inline-flex items-center gap-2.5 rounded-full border px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em]"
-            style={`border-color: ${sweatFestColors.ember}66; background: ${sweatFestColors.ember}12; color: ${deep(sweatFestColors.ember)};`}
+            class="sf-stamp px-4 py-2 text-xs sm:text-sm"
+            style={`color: ${deep(sweatFestColors.ember)};`}
           >
-            <span class="relative flex h-2 w-2" aria-hidden="true">
-              <span class="sf-ping absolute inline-flex h-full w-full rounded-full bg-[var(--sf-ember)] opacity-75"></span>
-              <span class="relative inline-flex h-2 w-2 rounded-full bg-[var(--sf-ember)]"></span>
-            </span>
             {sweatFest.statusLabel}
           </span>
         </div>
 
-        {/* Give attendees useful, platform-specific calendar actions before
-            tickets go live. */}
+        {/* Primary conversion: tickets on Zeffy (renders once onSale flips). */}
+        {
+          sweatFestTickets.onSale && sweatFestTickets.url && (
+            <div class="sf-rise mt-9 flex justify-center" style="animation-delay: 0.33s;">
+              <a
+                href={sweatFestTickets.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="sf-btn group inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-10 py-4 text-lg font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                data-conversion-event="sweatfest_ticket_click"
+                data-conversion-context="sweatfest_page_hero"
+              >
+                {sweatFest.ticketsLabel}
+                <svg
+                  class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  aria-hidden="true"
+                  set:html={arrowRight}
+                />
+              </a>
+            </div>
+          )
+        }
+
+        {/* Useful, platform-specific calendar actions. */}
         <div
-          class="sf-rise mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          class="sf-rise mt-5 flex flex-col items-center justify-center gap-4 sm:flex-row"
           style="animation-delay: 0.36s;"
         >
           <a
             href={calendarHref}
             download
-            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
             data-conversion-event="sweatfest_save_date_click"
             data-conversion-context="sweatfest_page_hero_apple"
           >
@@ -304,7 +379,7 @@ const eventJsonLd = {
             href={googleCalendarHref}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center justify-center gap-3 rounded-full border border-off-black/15 bg-white px-8 py-4 text-base font-extrabold text-off-black shadow-sm transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
+            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
             data-conversion-event="sweatfest_save_date_click"
             data-conversion-context="sweatfest_page_hero_google"
           >
@@ -324,67 +399,99 @@ const eventJsonLd = {
 
         <a
           href="#the-day"
-          class="sf-rise mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+          class="sf-rise mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
           style="animation-delay: 0.4s;"
         >
           Explore the full run of show
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" set:html={arrowDown} />
         </a>
 
-        {/* Countdown to the kickoff 5K. */}
-        <div class="sf-rise mx-auto mt-9 max-w-2xl" style="animation-delay: 0.44s;">
+        {/* Countdown to the kickoff 5K, reframed as print cards. */}
+        <div class="sf-rise sf-countdown-frame mx-auto mt-10 max-w-2xl" style="animation-delay: 0.44s;">
           <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.26em] text-medium-gray">
             Countdown to the kickoff 5K
           </p>
           <SweatFestCountdown target={sweatFest.startsAtISO} variant="hero" />
         </div>
 
-        <p class="sf-rise mt-6 text-sm font-semibold text-medium-gray" style="animation-delay: 0.5s;">
+        <p class="sf-rise mt-7 text-sm font-semibold text-medium-gray" style="animation-delay: 0.5s;">
           Interested in partnering? <a href="#sponsors" class="font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
         </p>
       </div>
 
-      {/* Warm horizon hairline into the daylight below. */}
-      <div class="sf-rule absolute inset-x-0 bottom-0 h-px" aria-hidden="true"></div>
-    </section>
-
-    {/* ====================== MANIFESTO: FIRST LIGHT ====================== */}
-    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #ffefe2, #fff8ef 60%, #ffffff);">
-      {/* A faint sun disc rising at the edge, purely decorative. */}
+      {/* Papel picado bunting strung along the bottom of the hero. */}
       <div
-        class="pointer-events-none absolute -right-24 -top-16 h-72 w-72 rounded-full opacity-70 blur-2xl sm:h-96 sm:w-96"
-        style="background: radial-gradient(circle at 50% 50%, rgba(255,189,89,0.5) 0%, rgba(255,107,82,0.18) 45%, transparent 70%);"
+        class="sf-picado absolute inset-x-0 bottom-0 h-[52px]"
+        style={`background-image: ${picadoUri};`}
         aria-hidden="true"
       >
       </div>
+    </section>
 
+    {/* Screen-printed ticker strip, tilted like taped-on masking tape. */}
+    <div class="sf-ticker-wrap relative z-10 -my-2" aria-hidden="true">
+      <div class="sf-ticker -rotate-1 bg-off-black py-3">
+        <div class="sf-ticker-track">
+          {
+            [0, 1].map(() => (
+              <div class="flex shrink-0 items-center gap-8 pr-8 sm:gap-10 sm:pr-10">
+                {[0, 1, 2].map(() =>
+                  tickerItems.map((item, i) => (
+                    <>
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#fff8ef] sm:text-xl">
+                        {item}
+                      </span>
+                      <span
+                        class="text-xl leading-none sm:text-2xl"
+                        style={`color: ${accentOf(arcOrder[i % 3])};`}
+                      >
+                        ✶
+                      </span>
+                    </>
+                  )),
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    {/* ====================== MANIFESTO: FIRST LIGHT ====================== */}
+    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #ffefe2, #fff8ef 60%, #fffaf1);">
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-9 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
-          <SweatFestArtwork
-            variant="landscape"
-            className="reveal rounded-[2rem] shadow-2xl shadow-[#ff6b52]/20 ring-1 ring-off-black/10"
-          />
-          <div class="text-center lg:text-left">
-            <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
-              First light · First festival
+        <div class="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
+          {/* The campaign artwork as a taped-up print: white paper margin,
+              crooked hang, tape on the corners. */}
+          <div class="reveal sf-taped -rotate-[1.3deg]">
+            <span class="sf-tape -left-4 -top-3 rotate-[-38deg]" aria-hidden="true"></span>
+            <span class="sf-tape -right-4 -top-3 rotate-[34deg]" aria-hidden="true"></span>
+            <SweatFestArtwork variant="landscape" className="rounded-[3px]" />
+            <p class="mt-3 text-center font-slab text-sm uppercase tracking-[0.2em] text-off-black/70">
+              {sweatFest.tagline}
             </p>
-            <h2 class="mt-5 font-sans text-4xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-5xl">
+          </div>
+          <div class="text-center lg:text-left">
+            <p class="reveal">
+              <span class="sf-stamp px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
+                First light · First festival
+              </span>
+            </p>
+            <h2 class="mt-7 font-slab text-4xl uppercase leading-[1.04] tracking-tight sm:text-5xl">
               {
                 mottoLines.map((line, i) => (
                   <span
                     class="reveal block"
-                    style={`color: ${deep(accentOf(arcOrder[i % 3]))}; transition-delay: ${i * 120}ms;`}
+                    style={`color: ${deep(accentOf(arcOrder[i % 3]))}; transition-delay: ${i * 120}ms; transform: rotate(${[-0.8, 0.5, -0.4][i % 3]}deg);`}
                   >
                     {line}
                   </span>
                 ))
               }
             </h2>
-            <div class="reveal mt-6 flex justify-center lg:justify-start" style="transition-delay: 300ms;">
-              <span class="sf-track h-1 w-24 rounded-full" aria-hidden="true"></span>
-            </div>
+            <div class="reveal mx-auto mt-6 h-3 w-32 lg:mx-0" style="transition-delay: 300ms;" set:html={squiggle(sweatFestColors.ember)} />
             <p
-              class="reveal mt-7 text-lg leading-relaxed text-medium-gray"
+              class="reveal mt-6 text-lg leading-relaxed text-medium-gray"
               style="transition-delay: 360ms;"
             >
               {sweatFest.pageDescription}
@@ -394,44 +501,40 @@ const eventJsonLd = {
       </div>
     </section>
 
-    {/* ======================= WHAT TO EXPECT: DAYLIGHT ======================= */}
-    <section class="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
+    {/* ======================= WHAT TO EXPECT: THE BOARD ======================= */}
+    <section class="relative overflow-hidden bg-[#fffaf1] py-16 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.ember)};`}>
-            On the ground
+          <p class="reveal">
+            <span class="sf-stamp rotate-[1.5deg] px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.ember)};`}>
+              On the ground
+            </span>
           </p>
           <h2
-            class="reveal mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             What to expect
           </h2>
-          <div class="reveal mt-5 flex justify-center" style="transition-delay: 150ms;">
-            <span class="sf-track h-1 w-24 rounded-full" aria-hidden="true"></span>
-          </div>
+          <div class="reveal mx-auto mt-4 h-3 w-32" style="transition-delay: 150ms;" set:html={squiggle(sweatFestColors.sunrise)} />
         </div>
 
-        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Bulletin-board notes: tinted paper, taped up, each at its own
+            slight angle. Hover straightens the note like you grabbed it. */}
+        <div class="mt-14 grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {
             sweatFestExpect.map((item, index) => {
               const accent = accentOf(expectAccents[index]);
               return (
                 <div
-                  class="reveal group relative overflow-hidden rounded-2xl border border-off-black/10 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg lg:text-left"
-                  style={`transition-delay: ${index * 80}ms;`}
+                  class="sf-note reveal relative p-6 pt-8 text-center lg:text-left"
+                  style={`transition-delay: ${index * 80}ms; --sf-note-tilt: ${tiltOf(index)}deg; background: color-mix(in oklab, ${accent} 7%, #fffdf6);`}
                 >
-                  <div
-                    class="pointer-events-none absolute inset-x-0 top-0 h-1 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-                    style={`background: ${accent};`}
-                    aria-hidden="true"
-                  />
-                  <span
-                    class="inline-flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
-                    style={`background: ${accent}1f; color: ${deep(accent)};`}
-                  >
+                  <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg]" aria-hidden="true"></span>
+                  <div class="flex items-center justify-center gap-3 lg:justify-start">
                     <svg
-                      class="h-5 w-5"
+                      class="h-8 w-8 flex-shrink-0"
+                      style={`color: ${deep(accent)};`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -439,11 +542,11 @@ const eventJsonLd = {
                       aria-hidden="true"
                       set:html={expectIcons[index]}
                     />
-                  </span>
-                  <h3 class="mt-4 text-lg font-extrabold tracking-tight text-off-black">
-                    {item.title}
-                  </h3>
-                  <p class="mt-2 text-sm leading-relaxed text-medium-gray">
+                    <h3 class="font-slab text-xl uppercase tracking-wide text-off-black">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p class="mt-3 text-sm leading-relaxed text-medium-gray">
                     {item.detail}
                   </p>
                 </div>
@@ -454,19 +557,21 @@ const eventJsonLd = {
       </div>
     </section>
 
-    {/* ==================== THE DAY: SUNRISE TO LAST SET ==================== */}
+    {/* ==================== THE DAY: LOTERÍA RUN OF SHOW ==================== */}
     <section
       id="the-day"
       class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24"
-      style="background: linear-gradient(to bottom, #ffffff, #fff6ee 45%, #ffffff);"
+      style="background: linear-gradient(to bottom, #fffaf1, #fff6ee 45%, #fffaf1);"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
-            The itinerary
+          <p class="reveal">
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.sunrise)};`}>
+              The itinerary
+            </span>
           </p>
           <h2
-            class="reveal mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             Sunrise to last set
@@ -479,191 +584,135 @@ const eventJsonLd = {
           </p>
         </div>
 
-        {/* Desktop sun track: one gradient line from gold through ember to
-            magenta, with a sun or moon marker over each phase. */}
-        <div class="reveal relative mx-auto mt-14 hidden max-w-6xl lg:block">
-          <div class="relative h-14" aria-hidden="true">
-            {/* Dotted 5K route weaving under the solid day arc. */}
-            <div class="sf-route absolute inset-x-10 top-[calc(50%-7px)] h-2"></div>
-            <div class="sf-track absolute inset-x-10 top-1/2 h-1 -translate-y-1/2 rounded-full"></div>
-            <div class="relative grid h-full grid-cols-3">
-              {
-                sweatFestDay.map((phase) => (
-                  <div class="flex items-center justify-center">
-                    <span
-                      class="relative z-10 inline-flex h-12 w-12 items-center justify-center rounded-full text-off-black shadow-lg"
-                      style={`background: ${accentOf(phase.accent)}; box-shadow: 0 0 24px -4px ${accentOf(phase.accent)};`}
+        {/* Three lotería cards: numbered, double-bordered, each phase under
+            its own sky. El Run, El Sweat, La Pachanga. */}
+        <ol class="mx-auto mt-14 grid max-w-6xl gap-8 sm:gap-6 lg:grid-cols-3">
+          {
+            sweatFestDay.map((phase, index) => {
+              const accent = accentOf(phase.accent);
+              const isDusk = phase.accent === "dusk";
+              return (
+                <li
+                  class="sf-loteria reveal"
+                  style={`transition-delay: ${index * 130}ms; --sf-note-tilt: ${[-1.4, 0.6, -0.8][index]}deg;`}
+                >
+                  <div class="sf-loteria-inner flex h-full flex-col p-5 sm:p-6">
+                    <div class="flex items-baseline justify-between gap-3">
+                      <span class="font-slab text-2xl leading-none text-off-black" aria-hidden="true">
+                        {index + 1}
+                      </span>
+                      <span class="sf-tag px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-off-black">
+                        {phase.time}
+                      </span>
+                    </div>
+                    {/* Phase sky: sun low, sun high, moon out. */}
+                    <div
+                      class="mt-4 flex h-32 items-center justify-center rounded-md border-2 border-off-black/80 sm:h-36"
+                      style={
+                        isDusk
+                          ? `background: linear-gradient(to bottom, #2a1e33, ${accent}66);`
+                          : `background: linear-gradient(to bottom, #fffdf6 15%, ${accent}55);`
+                      }
+                      aria-hidden="true"
                     >
                       <svg
-                        class="h-6 w-6"
+                        class:list={["h-16 w-16", index === 0 && "translate-y-3"]}
+                        style={`color: ${isDusk ? "#ffe9c4" : "#1e1e1e"};`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                        stroke-width="1.8"
+                        stroke-width="1.6"
                         set:html={dayIcons[phase.id]}
                       />
-                    </span>
-                  </div>
-                ))
-              }
-            </div>
-          </div>
-        </div>
-
-        {/* Phase cards. On mobile a vertical gradient rail carries the arc. */}
-        <div class="relative mx-auto mt-6 max-w-6xl lg:mt-8">
-          <div
-            class="sf-track-v absolute bottom-6 left-1 top-6 w-1 rounded-full lg:hidden"
-            aria-hidden="true"
-          >
-          </div>
-          <ol class="grid gap-6 pl-7 lg:grid-cols-3 lg:gap-6 lg:pl-0">
-            {
-              sweatFestDay.map((phase, index) => {
-                const accent = accentOf(phase.accent);
-                return (
-                  <li
-                    class="reveal relative flex flex-col overflow-hidden rounded-3xl border border-off-black/10 bg-white p-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-8 lg:text-left"
-                    style={`transition-delay: ${index * 130}ms;`}
-                  >
+                    </div>
+                    <h3 class="mt-5 text-center font-slab text-3xl uppercase leading-none tracking-wide text-off-black sm:text-4xl">
+                      <span class="mr-2 text-xl align-middle" style={`color: ${deep(accent)};`}>{loteriaArticle[phase.id]}</span>{phase.title}
+                    </h3>
                     <div
-                      class="pointer-events-none absolute inset-x-0 top-0 h-1.5"
+                      class="mx-auto mt-3 h-1.5 w-14"
                       style={`background: ${accent};`}
                       aria-hidden="true"
                     />
-                    {/* Ghost phase number. */}
-                    <span
-                      class="pointer-events-none absolute -right-2 -top-4 font-sans text-[7rem] font-extrabold leading-none tracking-tighter"
-                      style={`color: ${accent}; opacity: 0.12;`}
-                      aria-hidden="true"
-                    >
-                      0{index + 1}
-                    </span>
+                    <p class="mt-4 flex-1 text-center text-base leading-relaxed text-medium-gray">
+                      {phase.detail}
+                    </p>
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ol>
 
-                    <div class="relative">
-                      <div class="flex items-center justify-center gap-3 lg:justify-start">
-                        <span
-                          class="inline-flex h-9 w-9 items-center justify-center rounded-full text-off-black lg:hidden"
-                          style={`background: ${accent};`}
-                          aria-hidden="true"
-                        >
-                          <svg
-                            class="h-4.5 w-4.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            set:html={dayIcons[phase.id]}
-                          />
-                        </span>
-                        <span
-                          class="inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-off-black"
-                          style={`background: ${accent};`}
-                        >
-                          {phase.time}
-                        </span>
-                      </div>
-                      <h3 class="mt-5 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl">
-                        {phase.title}
-                      </h3>
-                      <div
-                        class="mx-auto mt-3 h-2 w-16 rounded-full lg:mx-0"
-                        style={`background: ${accent};`}
-                        aria-hidden="true"
-                      />
-                      <p class="mt-5 text-base leading-relaxed text-medium-gray">
-                        {phase.detail}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })
-            }
-          </ol>
-        </div>
-
-        <p class="reveal mt-10 text-center text-sm font-bold uppercase tracking-[0.14em] text-medium-gray">
+        <p class="reveal mt-12 text-center text-sm font-bold uppercase tracking-[0.14em] text-medium-gray">
           {sweatFest.doorsLine}
         </p>
       </div>
     </section>
 
     {/* ============================ TICKETS ============================ */}
-    <section id="tickets" class="relative overflow-hidden bg-white py-16 scroll-mt-28 sm:py-20 lg:py-24">
-      <div
-        class="pointer-events-none absolute inset-x-0 top-0 h-px bg-off-black/10"
-        aria-hidden="true"
-      >
-      </div>
+    <section id="tickets" class="relative overflow-hidden bg-[#fffaf1] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
-            Attend
+          <p class="reveal">
+            <span class="sf-stamp rotate-[1deg] px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.dusk)};`}>
+              Attend
+            </span>
           </p>
           <h2
-            class="reveal mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             Choose your experience
           </h2>
-          <div class="reveal mt-6 flex justify-center" style="transition-delay: 150ms;">
+          <div class="reveal mt-5 flex justify-center" style="transition-delay: 150ms;">
             <span
-              class="inline-flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em]"
-              style={`border-color: ${sweatFestColors.ember}66; background: ${sweatFestColors.ember}14; color: ${deep(sweatFestColors.ember)};`}
+              class="sf-stamp px-4 py-2 text-xs"
+              style={`color: ${deep(sweatFestColors.ember)};`}
             >
-              <span class="relative flex h-2 w-2" aria-hidden="true">
-                <span class="sf-ping absolute inline-flex h-full w-full rounded-full bg-[var(--sf-ember)] opacity-75"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-[var(--sf-ember)]"></span>
-              </span>
               {sweatFestTickets.statusLabel}
             </span>
           </div>
         </div>
 
-        <div class="mt-12 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {/* Perforated ticket stubs, straight off the roll. */}
+        <div class="mt-14 grid items-stretch gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-4">
           {
             sweatFestTickets.tiers.map((tier, index) => (
               <div
-                class:list={[
-                  "reveal relative h-full rounded-3xl",
-                  tier.featured && "sf-gradient-border p-[2px]",
-                ]}
+                class:list={["sf-stub reveal relative flex h-full flex-col", tier.featured && "sf-stub-featured"]}
                 style={`transition-delay: ${index * 100}ms;`}
               >
                 {tier.featured && (
-                  <span class="absolute -top-3.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-off-black shadow-md" style={`background: ${sweatFestColors.sunrise};`}>
+                  <span
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#fffdf6] px-3 py-1.5 text-[11px]"
+                    style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
+                  >
                     Best value
                   </span>
                 )}
-                <div
-                  class:list={[
-                    "flex h-full flex-col p-7 text-center lg:text-left",
-                    tier.featured
-                      ? "rounded-[calc(1.5rem-2px)] bg-white"
-                      : "rounded-3xl border border-off-black/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
-                  ]}
-                >
-                  <h3 class="text-sm font-extrabold uppercase tracking-[0.2em] text-off-black">
+                <div class="p-6 pb-5 text-center">
+                  <p class="text-[10px] font-extrabold uppercase tracking-[0.24em] text-off-black/50">
+                    Sweat Fest 2026 · Admit one
+                  </p>
+                  <h3 class="mt-3 font-slab text-2xl uppercase tracking-wide text-off-black">
                     {tier.name}
                   </h3>
-                  <p class="mt-4 flex items-baseline justify-center gap-1 lg:justify-start">
-                    <span
-                      class="font-sans text-5xl font-extrabold tracking-tight text-off-black"
-                      style={tier.featured ? `color: ${deep(sweatFestColors.ember)};` : undefined}
-                    >
+                  <p class="mt-2 flex items-baseline justify-center gap-1">
+                    <span class="font-slab text-5xl tracking-tight" style={`color: ${tier.featured ? deep(sweatFestColors.ember) : "#1e1e1e"};`}>
                       ${tier.price}
                     </span>
-                    <span class="text-xs font-bold uppercase tracking-[0.14em] text-medium-gray">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-medium-gray">
                       per person
                     </span>
                   </p>
-                  <p
-                    class="mx-auto mt-4 inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] lg:mx-0 lg:self-start"
-                    style={`background: ${sweatFestColors.dusk}14; color: ${deep(sweatFestColors.dusk)};`}
-                  >
+                  <p class="mt-3 text-xs font-extrabold uppercase tracking-[0.12em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
                     {tier.includes}
                   </p>
-                  <p class="mt-4 flex-1 text-sm leading-relaxed text-medium-gray">
+                </div>
+                {/* Perforation with punched side notches. */}
+                <div class="sf-stub-perf" aria-hidden="true"></div>
+                <div class="flex flex-1 flex-col p-6 pt-5 text-center">
+                  <p class="flex-1 text-sm leading-relaxed text-medium-gray">
                     {tier.description}
                   </p>
                   <div class="mt-6">
@@ -672,7 +721,7 @@ const eventJsonLd = {
                         href={sweatFestTickets.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                        class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
                         data-conversion-event="sweatfest_ticket_click"
                         data-conversion-context={`sweatfest_page_tickets_${tier.id}`}
                       >
@@ -688,11 +737,15 @@ const eventJsonLd = {
                         />
                       </a>
                     ) : (
-                      <span class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-off-black/15 bg-off-black/[0.03] px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-medium-gray">
+                      <span class="inline-flex w-full items-center justify-center rounded-md border-2 border-dashed border-off-black/30 px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-medium-gray">
                         On sale soon
                       </span>
                     )}
                   </div>
+                  <div class="sf-barcode mx-auto mt-6" aria-hidden="true"></div>
+                  <p class="mt-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-off-black/40" aria-hidden="true">
+                    SF26-000{index + 1}
+                  </p>
                 </div>
               </div>
             ))
@@ -702,7 +755,7 @@ const eventJsonLd = {
         {/* Until sales open, the conversion is the follow. */}
         {
           !sweatFestTickets.onSale && (
-            <div class="reveal mx-auto mt-12 max-w-2xl text-center">
+            <div class="reveal mx-auto mt-14 max-w-2xl text-center">
               <p class="text-base leading-relaxed text-medium-gray">
                 Tickets are not on sale yet. Follow
                 <span class="font-extrabold text-off-black"> @latinasweatproject </span>
@@ -712,7 +765,7 @@ const eventJsonLd = {
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group mt-5 inline-flex items-center justify-center gap-3 rounded-full bg-off-black px-7 py-3.5 text-sm font-extrabold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
+                class="sf-btn mt-6 inline-flex items-center justify-center gap-3 bg-off-black px-7 py-3.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
                 data-conversion-event="sweatfest_follow_click"
                 data-conversion-context="sweatfest_page_tickets"
               >
@@ -725,15 +778,46 @@ const eventJsonLd = {
       </div>
     </section>
 
+    {/* Second ticker, tilted the other way. */}
+    <div class="sf-ticker-wrap relative z-10 -my-2" aria-hidden="true">
+      <div class="sf-ticker rotate-1 bg-off-black py-3">
+        <div class="sf-ticker-track sf-ticker-track-reverse">
+          {
+            [0, 1].map(() => (
+              <div class="flex shrink-0 items-center gap-8 pr-8 sm:gap-10 sm:pr-10">
+                {[0, 1, 2].map(() =>
+                  mottoLines.map((line, i) => (
+                    <>
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#fff8ef] sm:text-xl">
+                        {line.replace(/\.$/, "")}
+                      </span>
+                      <span
+                        class="text-xl leading-none sm:text-2xl"
+                        style={`color: ${accentOf(arcOrder[i % 3])};`}
+                      >
+                        ✶
+                      </span>
+                    </>
+                  )),
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
     {/* ============================ IMPACT ============================ */}
-    <section id="impact" class="relative overflow-hidden bg-light-gray py-16 scroll-mt-28 sm:py-20 lg:py-24">
+    <section id="impact" class="relative overflow-hidden bg-[#fff6ee] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.ember)};`}>
-            {sweatFestImpactIntro.eyebrow}
+          <p class="reveal">
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.ember)};`}>
+              {sweatFestImpactIntro.eyebrow}
+            </span>
           </p>
           <h2
-            class="reveal mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             {sweatFestImpactIntro.heading}
@@ -746,7 +830,7 @@ const eventJsonLd = {
           </p>
         </div>
 
-        <dl class="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        <dl class="mt-14 grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-4">
           {
             sweatFestImpact.map((stat, index) => {
               const accent = accentOf(arcOrder[index % 3]);
@@ -759,7 +843,7 @@ const eventJsonLd = {
                   style={`transition-delay: ${index * 90}ms;`}
                 >
                   <dd
-                    class="font-sans text-4xl font-extrabold leading-none tracking-tight text-off-black tabular-nums sm:text-5xl"
+                    class="font-slab text-4xl leading-none tracking-tight sm:text-5xl"
                     style={`color: ${deep(accent)};`}
                     data-sf-countup
                     data-sf-countup-to={stat.to}
@@ -769,12 +853,8 @@ const eventJsonLd = {
                   >
                     {finalValue}
                   </dd>
-                  <div
-                    class="mx-auto mt-4 h-1 w-12 rounded-full"
-                    style={`background: ${accent};`}
-                    aria-hidden="true"
-                  />
-                  <dt class="mt-4 text-sm font-bold leading-snug text-off-black">
+                  <div class="mx-auto mt-3 h-3 w-24" set:html={squiggle(accent)} />
+                  <dt class="mt-3 text-sm font-bold leading-snug text-off-black">
                     {stat.label}
                   </dt>
                 </div>
@@ -788,29 +868,31 @@ const eventJsonLd = {
     {/* ========================== SPONSORSHIP ========================== */}
     <section
       id="sponsors"
-      class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24"
-      style="background: linear-gradient(to bottom, #ffffff, #fff6ee 55%, #ffffff);"
+      class="relative overflow-hidden bg-[#fffaf1] py-16 scroll-mt-28 sm:py-20 lg:py-24"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div class="reveal text-center lg:text-left">
-            <p class="text-xs font-extrabold uppercase tracking-[0.3em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
-              Partner with us
+            <p>
+              <span class="sf-stamp px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.dusk)};`}>
+                Partner with us
+              </span>
             </p>
-            <h2 class="mt-4 font-sans text-4xl font-extrabold uppercase tracking-tight text-off-black sm:text-5xl">
+            <h2 class="mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl">
               Sponsor <span class="whitespace-nowrap">Sweat Fest</span>
             </h2>
             <p class="mt-5 text-base leading-relaxed text-medium-gray sm:text-lg">
               {sweatFestSponsorship.intro}
             </p>
-            <p class="mt-5 inline-flex items-center gap-2.5 rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em]" style={`background: ${sweatFestColors.dusk}14; color: ${deep(sweatFestColors.dusk)};`}>
+            <p class="mt-6 inline-block text-xs font-extrabold uppercase tracking-[0.16em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
               {sweatFestSponsorship.closesLabel}
             </p>
           </div>
 
-          {/* What sponsorship funds. */}
-          <div class="reveal rounded-3xl border border-off-black/10 bg-white p-7 shadow-sm sm:p-8" style="transition-delay: 120ms;">
-            <h3 class="text-center text-sm font-extrabold uppercase tracking-[0.2em] text-off-black lg:text-left">
+          {/* What sponsorship funds: a pinned-up note. */}
+          <div class="sf-note reveal relative p-7 pt-9 sm:p-8" style="transition-delay: 120ms; --sf-note-tilt: 0.9deg; background: #fffdf6;">
+            <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[2deg]" aria-hidden="true"></span>
+            <h3 class="text-center font-slab text-xl uppercase tracking-wide text-off-black lg:text-left">
               {sweatFestSponsorship.fundsHeading}
             </h3>
             <ul class="mt-5 space-y-3.5">
@@ -820,18 +902,10 @@ const eventJsonLd = {
                   return (
                     <li class="flex items-start gap-3 text-left">
                       <span
-                        class="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
-                        style={`background: ${accent}22; color: ${deep(accent)};`}
+                        class="mt-1.5 inline-block h-2.5 w-2.5 flex-shrink-0 rotate-45"
+                        style={`background: ${accent};`}
                         aria-hidden="true"
                       >
-                        <svg
-                          class="h-3 w-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="3"
-                          set:html={checkPath}
-                        />
                       </span>
                       <span class="text-sm font-semibold leading-relaxed text-off-black">
                         {item}
@@ -844,68 +918,92 @@ const eventJsonLd = {
           </div>
         </div>
 
-        {/* Sponsor tiers. */}
-        <div class="mt-14 grid items-stretch gap-5 md:grid-cols-3">
+        {/* Sponsor tiers as paper cards. */}
+        <div class="mt-16 grid items-stretch gap-x-5 gap-y-8 md:grid-cols-3">
           {
             sweatFestSponsorship.tiers.map((tier, index) => (
               <div
-                class:list={[
-                  "reveal relative h-full rounded-3xl",
-                  tier.featured && "sf-gradient-border p-[2px]",
-                ]}
+                class:list={["sf-stub reveal relative flex h-full flex-col", tier.featured && "sf-stub-featured"]}
                 style={`transition-delay: ${index * 110}ms;`}
               >
                 {tier.featured && (
-                  <span class="absolute -top-3.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-off-black shadow-md" style={`background: ${sweatFestColors.sunrise};`}>
+                  <span
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#fffdf6] px-3 py-1.5 text-[11px]"
+                    style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
+                  >
                     Top billing
                   </span>
                 )}
-                <div
-                  class:list={[
-                    "flex h-full flex-col p-7 text-center sm:p-8 lg:text-left",
-                    tier.featured
-                      ? "rounded-[calc(1.5rem-2px)] bg-white"
-                      : "rounded-3xl border border-off-black/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
-                  ]}
-                >
-                  <h3 class="text-sm font-extrabold uppercase tracking-[0.2em] text-off-black">
+                <div class="p-7 text-center sm:p-8">
+                  <h3 class="font-slab text-xl uppercase tracking-wide text-off-black">
                     {tier.name}
                   </h3>
                   <p
-                    class="mt-4 font-sans text-5xl font-extrabold tracking-tight"
+                    class="mt-3 font-slab text-5xl tracking-tight"
                     style={`color: ${deep(sweatFestColors.sunrise)};`}
                   >
                     ${tier.amount.toLocaleString("en-US")}
                   </p>
-                  <p
-                    class="mx-auto mt-4 inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] lg:mx-0 lg:self-start"
-                    style={`background: ${sweatFestColors.ember}14; color: ${deep(sweatFestColors.ember)};`}
-                  >
+                  <p class="mt-3 text-xs font-extrabold uppercase tracking-[0.12em]" style={`color: ${deep(sweatFestColors.ember)};`}>
                     {tier.tickets}
                   </p>
-                  <ul class="mt-6 flex-1 space-y-3">
-                    {tier.benefits.map((benefit) => (
-                      <li class="flex items-start gap-2.5 text-left">
-                        <span
-                          class="mt-0.5 inline-flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center rounded-full"
-                          style={`background: ${sweatFestColors.dusk}1c; color: ${deep(sweatFestColors.dusk)};`}
-                          aria-hidden="true"
-                        >
-                          <svg
-                            class="h-2.5 w-2.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="3"
-                            set:html={checkPath}
-                          />
-                        </span>
-                        <span class="text-sm leading-relaxed text-medium-gray">
-                          {benefit}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                </div>
+                <div class="sf-stub-perf" aria-hidden="true"></div>
+                <ul class="flex-1 space-y-3 p-7 pb-5 pt-5 sm:p-8 sm:pb-5 sm:pt-5">
+                  {tier.benefits.map((benefit, i) => (
+                    <li class="flex items-start gap-2.5 text-left">
+                      <span
+                        class="mt-1.5 inline-block h-2 w-2 flex-shrink-0 rotate-45"
+                        style={`background: ${accentOf(arcOrder[i % 3])};`}
+                        aria-hidden="true"
+                      >
+                      </span>
+                      <span class="text-sm leading-relaxed text-medium-gray">
+                        {benefit}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div class="px-7 pb-7 sm:px-8 sm:pb-8">
+                  {sweatFestTickets.onSale && sweatFestTickets.url ? (
+                    <a
+                      href={sweatFestTickets.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                      data-conversion-event="sweatfest_sponsor_purchase_click"
+                      data-conversion-context={`sweatfest_page_sponsors_${tier.id}`}
+                    >
+                      Purchase {tier.name}
+                      <svg
+                        class="h-4 w-4 flex-shrink-0 transition-transform group-hover:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        aria-hidden="true"
+                        set:html={arrowRight}
+                      />
+                    </a>
+                  ) : (
+                    <a
+                      href={sponsorMailto}
+                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                      data-conversion-event="sweatfest_sponsor_lead"
+                      data-conversion-context={`sweatfest_page_sponsors_${tier.id}`}
+                    >
+                      Ask about {tier.name}
+                      <svg
+                        class="h-4 w-4 flex-shrink-0 transition-transform group-hover:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        aria-hidden="true"
+                        set:html={arrowRight}
+                      />
+                    </a>
+                  )}
                 </div>
               </div>
             ))
@@ -913,60 +1011,61 @@ const eventJsonLd = {
         </div>
 
         {/* Benefits caveat: packages are still being confirmed. */}
-        <p class="reveal mx-auto mt-8 max-w-2xl text-center text-sm font-semibold italic text-medium-gray">
+        <p class="reveal mx-auto mt-9 max-w-2xl text-center text-sm font-semibold italic text-medium-gray">
           {sweatFestSponsorship.finePrint}
         </p>
 
-        {/* Sponsorship CTA: the page's primary conversion for now. Bright card
-            with a thin sunrise gradient top strip (the dark treatment is held
-            back for the closing band). */}
-        <div class="reveal relative mt-12 overflow-hidden rounded-[2rem] border border-off-black/10 bg-white px-6 py-12 text-center text-off-black shadow-xl shadow-[#ff6b52]/10 sm:px-10 lg:px-16">
-          <div
-            class="pointer-events-none absolute -left-16 top-0 h-56 w-1/2 rounded-full bg-gradient-to-r from-[var(--sf-ember)]/10 to-transparent blur-3xl"
-            aria-hidden="true"
-          >
-          </div>
-          <div
-            class="pointer-events-none absolute -right-16 bottom-0 h-56 w-1/2 rounded-full bg-gradient-to-l from-[var(--sf-dusk)]/10 to-transparent blur-3xl"
-            aria-hidden="true"
-          >
-          </div>
-          <div class="sf-track absolute inset-x-0 top-0 h-1.5" aria-hidden="true"></div>
+        {/* Sponsorship CTA as an airmail postcard: striped par-avion edges,
+            slab headline, hand-stamped deadline. */}
+        <div class="sf-postcard reveal relative mt-14 px-6 py-12 text-center text-off-black sm:px-10 lg:px-16">
+          <div class="sf-airmail absolute inset-x-0 top-0 h-2.5" aria-hidden="true"></div>
+          <div class="sf-airmail absolute inset-x-0 bottom-0 h-2.5" aria-hidden="true"></div>
 
           <div class="relative">
-            <h3 class="font-sans text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
-              <span class="sf-foil-light">{sweatFestSponsorship.ctaHeading}</span>
+            <h3 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+              {sweatFestSponsorship.ctaHeading}
             </h3>
             <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-medium-gray sm:text-lg">
               {sweatFestSponsorship.ctaBody}
             </p>
-            <div class="mt-8 flex flex-col items-center justify-center gap-4">
-              <a
-                href={sponsorMailto}
-                class="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-5 py-4 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto sm:px-8 sm:text-base"
-                data-conversion-event="sweatfest_sponsor_lead"
-                data-conversion-context="sweatfest_page_sponsors"
-              >
-                Start a sponsorship conversation
-                <svg
-                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  aria-hidden="true"
-                  set:html={arrowRight}
-                />
-              </a>
-              <a
-                href={sponsorMailto}
-                class="break-all text-sm font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
-              >
-                {sweatFestSponsorship.contactEmail}
-              </a>
-              <p class="text-xs font-extrabold uppercase tracking-[0.2em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
-                {sweatFestSponsorship.closesLabel}
+            <div class="mt-9 flex flex-col items-center justify-center gap-5">
+              {
+                sweatFestTickets.onSale && sweatFestTickets.url && (
+                  <a
+                    href={sweatFestTickets.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-5 py-4 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto sm:px-8 sm:text-base"
+                    data-conversion-event="sweatfest_sponsor_purchase_click"
+                    data-conversion-context="sweatfest_page_sponsors_postcard"
+                  >
+                    Purchase a sponsorship
+                    <svg
+                      class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      aria-hidden="true"
+                      set:html={arrowRight}
+                    />
+                  </a>
+                )
+              }
+              <p class="text-sm font-semibold text-medium-gray">
+                Need a custom partnership? Email
+                <a
+                  href={sponsorMailto}
+                  class="ml-1 font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+                  data-conversion-event="sweatfest_sponsor_lead"
+                  data-conversion-context="sweatfest_page_sponsors_custom"
+                >
+                  {sweatFestSponsorship.contactEmail}
+                </a>
               </p>
+              <span class="sf-stamp px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.dusk)};`}>
+                {sweatFestSponsorship.closesLabel}
+              </span>
             </div>
           </div>
         </div>
@@ -974,7 +1073,14 @@ const eventJsonLd = {
     </section>
 
     {/* ===================== CLOSING BAND: LAST SET ===================== */}
-    <section class="relative overflow-hidden bg-off-black py-16 text-white sm:py-20 lg:py-24">
+    <section class="relative overflow-hidden bg-off-black pb-16 pt-24 text-white sm:pb-20 sm:pt-28 lg:pb-24">
+      {/* Papel picado strung across the top of the night. */}
+      <div
+        class="sf-picado absolute inset-x-0 top-4 h-[52px]"
+        style={`background-image: ${picadoUri};`}
+        aria-hidden="true"
+      >
+      </div>
       {/* Dusk glows: the sun has crossed to magenta. */}
       <div
         class="gala-ambient pointer-events-none absolute -left-20 bottom-0 h-80 w-2/3 rounded-full bg-gradient-to-r from-[var(--sf-dusk)]/20 to-transparent blur-3xl"
@@ -1001,18 +1107,17 @@ const eventJsonLd = {
           ))
         }
       </div>
-      <div class="sf-rule absolute inset-x-0 top-0 h-px" aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-white/55">
           {sweatFest.title} · {sweatFest.shortDateLabel}
         </p>
-        <h2 class="mt-5 font-sans text-4xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-5xl">
+        <h2 class="mt-6 font-slab text-4xl uppercase leading-[1.06] tracking-tight sm:text-5xl">
           {
             mottoLines.map((line, i) => (
               <span
                 class="reveal block"
-                style={`color: ${accentOf(arcOrder[i % 3])}; transition-delay: ${90 + i * 120}ms;`}
+                style={`color: ${accentOf(arcOrder[i % 3])}; transition-delay: ${90 + i * 120}ms; transform: rotate(${[-0.7, 0.5, -0.4][i % 3]}deg);`}
               >
                 {line}
               </span>
@@ -1020,7 +1125,7 @@ const eventJsonLd = {
           }
         </h2>
         <p
-          class="reveal mx-auto mt-6 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-white/15 bg-white/[0.05] px-5 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white/85"
+          class="reveal mx-auto mt-7 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-2 border-white/25 px-5 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white/85"
           style="transition-delay: 420ms;"
         >
           <span>{sweatFest.dateTimeLabel}</span>
@@ -1029,18 +1134,18 @@ const eventJsonLd = {
         </p>
 
         <div
-          class="reveal mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          class="reveal mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
           style="transition-delay: 500ms;"
         >
           <a
             href="#tickets"
-            class="group inline-flex items-center justify-center gap-3 rounded-full bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#ffbd59]/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
           >
             Explore passes
           </a>
           <a
             href="#sponsors"
-            class="inline-flex items-center justify-center gap-3 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
           >
             Become a sponsor
           </a>
@@ -1048,7 +1153,7 @@ const eventJsonLd = {
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center justify-center gap-2.5 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-sm font-extrabold text-white transition-all duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="inline-flex items-center justify-center gap-2.5 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
             data-conversion-event="sweatfest_follow_click"
             data-conversion-context="sweatfest_page_closing"
           >
@@ -1058,7 +1163,7 @@ const eventJsonLd = {
         </div>
 
         <p
-          class="reveal mt-8 text-[11px] font-bold uppercase tracking-[0.22em] text-white/65"
+          class="reveal mt-9 text-[11px] font-bold uppercase tracking-[0.22em] text-white/65"
           style="transition-delay: 560ms;"
         >
           {sweatFest.statusLabel}
@@ -1070,114 +1175,163 @@ const eventJsonLd = {
 
 <style>
   /* ============================================================
-     Sweat Fest "Sunrise to Last Set" utilities. Scoped to this page.
+     Sweat Fest "printed flyer" utilities. Scoped to this page.
      The three arc colors ride on --sf-sunrise / --sf-ember / --sf-dusk,
      set from sweatFestColors on <main> so CSS and data never drift.
      ============================================================ */
 
-  /* Warm gradient signature clipped to text (dark backgrounds only). */
-  .sf-foil {
-    background-image: linear-gradient(
-      92deg,
-      var(--sf-sunrise) 0%,
-      var(--sf-ember) 48%,
-      var(--sf-dusk) 100%
+  /* Paper grain over everything: printed stock, not backlit glass. */
+  .sf-grain {
+    background-repeat: repeat;
+    background-size: 180px 180px;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+  }
+
+  /* The print kit itself (.sf-print, .sf-stamp, .sf-tag, .sf-btn,
+     .sf-picado, .sf-tape, .sf-taped) lives in global.css, shared with the
+     homepage and links callouts. Below are the page-only pieces. */
+
+  /* Bulletin-board note: tilted paper that straightens when grabbed. */
+  .sf-note {
+    border: 2px solid rgba(30, 30, 30, 0.85);
+    border-radius: 4px;
+    box-shadow: 4px 5px 0 rgba(30, 30, 30, 0.12);
+    transform: rotate(var(--sf-note-tilt, 0deg));
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .sf-note:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: 6px 8px 0 rgba(30, 30, 30, 0.14);
+  }
+
+  /* Lotería card: heavy outer border, hairline inner frame, hard shadow. */
+  .sf-loteria {
+    background: #fffdf6;
+    border: 3px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 7px 8px 0 rgba(30, 30, 30, 0.85);
+    transform: rotate(var(--sf-note-tilt, 0deg));
+    transition: transform 0.25s ease;
+  }
+  .sf-loteria:hover {
+    transform: rotate(0deg) translateY(-3px);
+  }
+  .sf-loteria-inner {
+    border: 1.5px solid rgba(30, 30, 30, 0.5);
+    border-radius: 5px;
+  }
+
+  /* Ticket stub: bordered paper with a perforation and punched notches. */
+  .sf-stub {
+    background: #fffdf6;
+    border: 2.5px solid #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 6px 7px 0 rgba(30, 30, 30, 0.16);
+  }
+  .sf-stub-featured {
+    box-shadow: 7px 8px 0 var(--sf-ember);
+  }
+  .sf-stub-perf {
+    position: relative;
+    border-top: 2.5px dashed rgba(30, 30, 30, 0.45);
+    margin: 0 14px;
+  }
+  .sf-stub-perf::before,
+  .sf-stub-perf::after {
+    content: "";
+    position: absolute;
+    top: -11px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fffaf1;
+    border: 2.5px solid #1e1e1e;
+  }
+  .sf-stub-perf::before {
+    left: -26.5px;
+  }
+  .sf-stub-perf::after {
+    right: -26.5px;
+  }
+
+  /* Fake barcode at the bottom of each stub. */
+  .sf-barcode {
+    width: 120px;
+    height: 30px;
+    opacity: 0.75;
+    background: repeating-linear-gradient(
+      90deg,
+      #1e1e1e 0 2px,
+      transparent 2px 5px,
+      #1e1e1e 5px 6px,
+      transparent 6px 11px,
+      #1e1e1e 11px 14px,
+      transparent 14px 17px
     );
-    background-size: 200% 100%;
-    background-position: 0% 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
+  }
+
+  /* Airmail postcard: cream card with striped par-avion edges. */
+  .sf-postcard {
+    background: #fffdf6;
+    border: 2.5px solid #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 8px 9px 0 rgba(30, 30, 30, 0.14);
+    overflow: hidden;
+  }
+  .sf-airmail {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--sf-ember) 0 14px,
+      #fffdf6 14px 28px,
+      var(--sf-dusk) 28px 42px,
+      #fffdf6 42px 56px
+    );
+  }
+
+  /* Countdown reframed as print cards (overrides the shared component's
+     rounded sand-bordered look on this page only). */
+  .sf-countdown-frame :global([data-sf-countdown] > div) {
+    border: 2px solid #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 rgba(30, 30, 30, 0.14);
+  }
+
+  /* Ticker strip: one long screen-printed tape, scrolling when motion is
+     allowed and standing still otherwise. */
+  .sf-ticker-wrap {
+    overflow: hidden;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+  }
+  .sf-ticker {
+    border-top: 2px solid #1e1e1e;
+    border-bottom: 2px solid #1e1e1e;
+    transform-origin: center;
+    scale: 1.02 1;
+  }
+  .sf-ticker-track {
+    display: flex;
+    width: max-content;
   }
   @media (prefers-reduced-motion: no-preference) {
-    .sf-foil {
-      animation: sf-foil-slide 8s ease-in-out infinite;
+    .sf-ticker-track {
+      animation: sf-ticker-scroll 36s linear infinite;
+    }
+    .sf-ticker-track-reverse {
+      animation-direction: reverse;
     }
   }
-  @keyframes sf-foil-slide {
-    0%,
-    100% {
-      background-position: 0% 50%;
+  @keyframes sf-ticker-scroll {
+    to {
+      transform: translateX(-50%);
     }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-
-  /* Daylight wordmark gradient: deepened stops so the sunrise gradient stays
-     legible clipped to text on cream/white (raw gold/coral wash out). Shares
-     the slow slide animation with .sf-foil. */
-  .sf-foil-light {
-    background-image: linear-gradient(
-      92deg,
-      #d47500 0%,
-      #e8452a 50%,
-      #c81e63 100%
-    );
-    background-size: 200% 100%;
-    background-position: 0% 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .sf-foil-light {
-      animation: sf-foil-slide 8s ease-in-out infinite;
-    }
-  }
-
-  /* Warm hairline rule (the horizon). */
-  .sf-rule {
-    background-image: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--sf-sunrise) 25%,
-      var(--sf-ember) 50%,
-      var(--sf-dusk) 75%,
-      transparent 100%
-    );
-  }
-
-  /* The day-arc gradient track, horizontal and vertical. */
-  .sf-track {
-    background-image: linear-gradient(
-      90deg,
-      var(--sf-sunrise),
-      var(--sf-ember),
-      var(--sf-dusk)
-    );
-  }
-  .sf-track-v {
-    background-image: linear-gradient(
-      180deg,
-      var(--sf-sunrise),
-      var(--sf-ember),
-      var(--sf-dusk)
-    );
-  }
-
-  /* Dotted 5K route line: a dashed border evoking a running route / track. */
-  .sf-route {
-    border-top: 2px dotted var(--sf-ember);
-    opacity: 0.4;
-  }
-
-  /* Featured-card gradient border (wrapper carries p-[2px]). */
-  .sf-gradient-border {
-    background-image: linear-gradient(
-      135deg,
-      var(--sf-sunrise),
-      var(--sf-ember),
-      var(--sf-dusk)
-    );
-    box-shadow: 0 18px 40px -18px rgba(255, 107, 82, 0.45);
   }
 
   /* The rising sun disc, centered behind the wordmark (positioned via Tailwind
-     -translate-x/y-1/2). A bright core, a warm glow halo, and soft rays fanning
-     out. All motion is motion-safe only. */
+     -translate-x/y-1/2). A bright core, a warm glow halo, and crisp printed
+     rays fanning out. All motion is motion-safe only. */
   .sf-sun {
     background: radial-gradient(
       circle at 50% 50%,
@@ -1199,24 +1353,26 @@ const eventJsonLd = {
     );
     filter: blur(2px);
   }
-  /* Soft rays: a faint conic fan clipped to a disc, slowly rotating. */
+  /* Printed sol rays: a crisp conic fan clipped to a ring, slowly rotating. */
   .sf-rays {
     background: repeating-conic-gradient(
       from 0deg at 50% 50%,
-      rgba(255, 189, 89, 0.16) 0deg 6deg,
-      transparent 6deg 18deg
+      rgba(255, 149, 77, 0.22) 0deg 7deg,
+      transparent 7deg 22.5deg
     );
     -webkit-mask-image: radial-gradient(
       circle at 50% 50%,
-      transparent 26%,
-      black 38%,
-      transparent 68%
+      transparent 27%,
+      black 34%,
+      black 52%,
+      transparent 66%
     );
     mask-image: radial-gradient(
       circle at 50% 50%,
-      transparent 26%,
-      black 38%,
-      transparent 68%
+      transparent 27%,
+      black 34%,
+      black 52%,
+      transparent 66%
     );
   }
   @media (prefers-reduced-motion: no-preference) {
@@ -1227,7 +1383,7 @@ const eventJsonLd = {
       animation: sf-sun-breathe 10s ease-in-out infinite reverse;
     }
     .sf-rays {
-      animation: sf-rays-spin 90s linear infinite;
+      animation: sf-rays-spin 120s linear infinite;
     }
   }
   @keyframes sf-sun-breathe {
@@ -1251,11 +1407,10 @@ const eventJsonLd = {
   }
 
   @media (forced-colors: active) {
-    .sf-foil,
-    .sf-foil-light {
-      background: none;
-      color: CanvasText;
-      -webkit-text-fill-color: CanvasText;
+    .sf-grain,
+    .sf-barcode,
+    .sf-airmail {
+      display: none;
     }
   }
 
@@ -1274,24 +1429,6 @@ const eventJsonLd = {
     to {
       opacity: 1;
       transform: none;
-    }
-  }
-
-  /* Pulsing status dot; static dot under reduced motion. */
-  .sf-ping {
-    display: none;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .sf-ping {
-      display: inline-flex;
-      animation: sf-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-  }
-  @keyframes sf-ping {
-    75%,
-    100% {
-      transform: scale(2.4);
-      opacity: 0;
     }
   }
 

@@ -3,9 +3,8 @@
 //
 // Several facts are still being finalized by the team. Every TBD is marked:
 //   - venueName is null until the location is announced.
-//   - ticketsUrl is null until the Zeffy ticketing form is created. When it
-//     goes live, set ticketsUrl and flip ticketsOnSale to true; every CTA on
-//     every surface updates automatically.
+//   - Tickets went live on Zeffy 2026-07-12 (ticketsOnSale: true); every CTA
+//     on every surface reads from ticketsUrl.
 // Prices, times, and sponsorship facts come from the planning doc; keep exact.
 
 export const sweatFest = {
@@ -30,10 +29,11 @@ export const sweatFest = {
     "Chicago, this is our first-ever all-day movement festival: a sunrise 5K, sweat sessions, wellbeing experiences, local vendors, food, and a closing Pachanga.",
   pagePath: "/sweatfest",
   calendarPath: "/sweat-fest-2026.ics",
-  ticketsOnSale: false,
-  ticketsUrl: null, // TBD: Zeffy ticketing form
+  ticketsOnSale: true,
+  ticketsUrl:
+    "https://www.zeffy.com/en-US/ticketing/sweat-fest-2026-movement-is-ours",
   ticketsLabel: "Get Tickets",
-  statusLabel: "Tickets on sale soon",
+  statusLabel: "Tickets on sale now",
   contactEmail: "rut@latinasweatproject.com",
 };
 
@@ -255,6 +255,15 @@ export const sweatFestColors = {
   ember: "#ff6b52", // midday heat: the classes
   dusk: "#e94f8a", // sunset into night: the Pachanga
 };
+
+// Papel picado bunting, tiled as a CSS background by the `.sf-picado`
+// utility (see global.css). Each flag is a single evenodd path so the
+// diamond cutouts are true holes and the strip works over any background:
+// cream, white, or the dark Pachanga band. One flag per arc color.
+const picadoFlag = (color) =>
+  `<path fill="${color}" fill-rule="evenodd" d="M0 0h60v34l-7.5 8-7.5-8-7.5 8-7.5-8-7.5 8-7.5-8-7.5 8-7.5-8zM30 10l8 9-8 9-8-9zM12 14l4 4-4 4-4-4zM48 14l4 4-4 4-4-4z"/>`;
+const picadoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="216" height="52" viewBox="0 0 216 52"><path d="M0 3h216" stroke="rgba(30,30,30,0.45)" stroke-width="1.5"/><g transform="translate(6 3)">${picadoFlag(sweatFestColors.sunrise)}</g><g transform="translate(78 3)">${picadoFlag(sweatFestColors.ember)}</g><g transform="translate(150 3)">${picadoFlag(sweatFestColors.dusk)}</g></svg>`;
+export const sweatFestPicadoUri = `url("data:image/svg+xml,${encodeURIComponent(picadoSvg)}")`;
 
 // Campaign artwork contains no generated lettering or logo. The exact LSP
 // mark and all event copy are layered in HTML by SweatFestArtwork.astro.
