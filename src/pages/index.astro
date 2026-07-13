@@ -318,6 +318,24 @@ const hausPrimaryLabel = hausHasTickets
             <p class="mt-5 text-xs font-extrabold uppercase tracking-[0.2em] text-white/45 text-center lg:text-left">
               {summerRenaissance.statusLabel}
             </p>
+
+            {/* Call for artists + collaborators: hand-scrawled P.S. straight
+                to the sign-up sheet on /hausoflsp#artists */}
+            <p class="mt-5 text-center lg:text-left">
+              <a
+                href={withBase("hausoflsp#artists")}
+                class="group inline-flex flex-wrap items-baseline justify-center gap-x-2 font-marker text-lg transition-opacity hover:opacity-80 lg:justify-start"
+                style={`color: ${hausColors.mint};`}
+                data-conversion-event="haus_artist_interest_click"
+                data-conversion-context="home_haus_band"
+              >
+                <span class="text-white/60">P.S.</span>
+                artists, poets + collaborators: sign up for the walls + the mic
+                <svg class="h-4 w-4 self-center transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </p>
           </div>
 
           {/* Media (right): a collage — the real 3D mirror ball hanging over

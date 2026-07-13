@@ -6,6 +6,7 @@ import {
   hausOfLsp,
   summerRenaissance,
   summerRenaissanceActs,
+  hausArtistForm,
   hausColors,
   hausDiscoUri,
   hausLightTileUri,
@@ -273,6 +274,246 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
       </div>
     </section>
 
+    {/* ============ CALL FOR ARTISTS: the sign-up sheet ============ */}
+    {/* The interest form, restyled as the Haus sign-up sheet. It mirrors the
+        Google Form field-for-field (entry ids in hausArtistForm); submitting
+        opens the real form pre-filled so the required art-photo upload can
+        be attached there (Google file uploads cannot be posted from outside
+        Google and require sign-in). */}
+    <section id="artists" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="pointer-events-none absolute -right-24 top-16 h-72 w-72 rounded-full blur-[110px]" style={`background: ${hausColors.violet}40;`} aria-hidden="true"></div>
+      <div class="haus-halftone absolute bottom-0 right-0 h-48 w-64 opacity-15 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-3xl px-4 sm:px-6">
+        <div class="reveal text-center">
+          <p class="font-marker text-xl" style={`color: ${hausColors.mint};`}>call for artists + poets</p>
+          <h2 class="mt-3 font-marker text-4xl sm:text-5xl">
+            <span class="haus-glow" style={`color: ${hausColors.pink};`}>Show your art.</span>
+            <span class="haus-chrome"> Take the mic.</span>
+          </h2>
+          <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/70">
+            The gallery walls and the open mic are built from our comunidad's
+            work. Tell us about you and your art; it takes two minutes.
+          </p>
+        </div>
+
+        {/* How it works: three sticker steps */}
+        <div class="reveal mt-8 flex flex-wrap items-stretch justify-center gap-3" style="transition-delay: 100ms;">
+          {[
+            "1 · Fill out the sheet",
+            "2 · Attach 2+ photos of your work on Google",
+            "3 · Submit + we'll be in touch",
+          ].map((step, i) => (
+            <span
+              class="haus-sticker inline-flex items-center rounded-lg bg-off-black/60 px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-white/85 backdrop-blur-sm"
+              style={`transform: rotate(${[-1, 0.8, -0.6][i % 3]}deg);`}
+            >
+              {step}
+            </span>
+          ))}
+        </div>
+
+        {/* The sign-up sheet, taped to the wall */}
+        <div class="reveal relative mt-12 rotate-[0.6deg]" style="transition-delay: 160ms;">
+          <span class="haus-tape -top-3 left-8 rotate-[-7deg]" aria-hidden="true"></span>
+          <span class="haus-tape -top-3 right-8 rotate-[6deg]" aria-hidden="true"></span>
+
+          <div class="haus-note px-6 py-10 sm:px-12 sm:py-12">
+            <p class="text-center font-marker text-3xl sm:text-4xl" style="color: #24201a;">
+              the sign-up sheet
+            </p>
+            <p class="mt-2 text-center text-sm font-semibold text-off-black/60">
+              For the art exhibit and the open mic / slam poetry hours.
+            </p>
+
+            <form
+              id="haus-artist-form"
+              class="mt-8 space-y-7 text-off-black"
+              data-form-url={hausArtistForm.viewUrl}
+              data-dob-entry={hausArtistForm.entries.dob}
+              novalidate={false}
+            >
+              <div class="grid gap-7 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="haus-label" for="haus-full-name">
+                    <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                    Full name <span class="text-off-black/45">(required)</span>
+                  </label>
+                  <input
+                    id="haus-full-name"
+                    class="haus-input"
+                    type="text"
+                    name={hausArtistForm.entries.fullName}
+                    autocomplete="name"
+                    placeholder="Your name, as you'd like it shown"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="haus-label" for="haus-dob">
+                    <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                    Date of birth <span class="text-off-black/45">(required)</span>
+                  </label>
+                  <input
+                    id="haus-dob"
+                    class="haus-input"
+                    type="date"
+                    name="dob"
+                    autocomplete="bday"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="haus-label" for="haus-phone">
+                    <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                    Phone number <span class="text-off-black/45">(required)</span>
+                  </label>
+                  <input
+                    id="haus-phone"
+                    class="haus-input"
+                    type="tel"
+                    name={hausArtistForm.entries.phone}
+                    autocomplete="tel"
+                    placeholder="So we can reach you"
+                    required
+                  />
+                </div>
+              </div>
+
+              <fieldset>
+                <legend class="haus-label">
+                  <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                  What's your interest in the event? <span class="text-off-black/45">(required)</span>
+                </legend>
+                <div class="mt-3 flex flex-wrap gap-3">
+                  {hausArtistForm.interestOptions.map((opt, i) => (
+                    <label class="cursor-pointer">
+                      <input
+                        class="peer sr-only"
+                        type="radio"
+                        name={hausArtistForm.entries.interest}
+                        value={opt}
+                        required
+                      />
+                      <span
+                        class="inline-block rounded-md border-2 border-off-black/60 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-off-black/75 transition-all peer-checked:border-off-black peer-checked:bg-[#ffb1d6] peer-checked:text-off-black peer-checked:shadow-[2.5px_2.5px_0_#24201a] peer-focus-visible:ring-2 peer-focus-visible:ring-[#c81e63] peer-focus-visible:ring-offset-2"
+                        style={`transform: rotate(${i % 2 ? 0.8 : -0.8}deg);`}
+                      >
+                        {opt === "Open Mic/Slam Poetry" ? "Open Mic + Slam Poetry" : opt}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="haus-label">
+                  <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                  Have you visited The Latina Sweat Project? <span class="text-off-black/45">(required)</span>
+                </legend>
+                <div class="mt-3 flex flex-wrap gap-3">
+                  {hausArtistForm.visitedOptions.map((opt, i) => (
+                    <label class="cursor-pointer">
+                      <input
+                        class="peer sr-only"
+                        type="radio"
+                        name={hausArtistForm.entries.visited}
+                        value={opt}
+                        required
+                      />
+                      <span
+                        class="inline-block rounded-md border-2 border-off-black/60 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-off-black/75 transition-all peer-checked:border-off-black peer-checked:bg-[#b8ecd2] peer-checked:text-off-black peer-checked:shadow-[2.5px_2.5px_0_#24201a] peer-focus-visible:ring-2 peer-focus-visible:ring-[#c81e63] peer-focus-visible:ring-offset-2"
+                        style={`transform: rotate(${i % 2 ? 0.8 : -0.8}deg);`}
+                      >
+                        {opt}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div>
+                <label class="haus-label" for="haus-impact">
+                  <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                  How do you want your art to impact the queer community?
+                </label>
+                <textarea
+                  id="haus-impact"
+                  class="haus-input"
+                  name={hausArtistForm.entries.impact}
+                  rows="3"
+                  placeholder="Dream big; this is what the night is for"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="haus-label" for="haus-invoke">
+                  <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                  What do you want to invoke through your art?
+                </label>
+                <input
+                  id="haus-invoke"
+                  class="haus-input"
+                  type="text"
+                  name={hausArtistForm.entries.invoke}
+                  placeholder="A feeling, a memory, a movement"
+                />
+              </div>
+
+              <div>
+                <label class="haus-label" for="haus-materials">
+                  <span class="font-marker" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                  Do you need additional material for your display? <span class="text-off-black/45">(required)</span>
+                </label>
+                <input
+                  id="haus-materials"
+                  class="haus-input"
+                  type="text"
+                  name={hausArtistForm.entries.materials}
+                  placeholder="Easels, frames, a table, nothing at all..."
+                  required
+                />
+              </div>
+
+              <div class="pt-2 text-center">
+                <button
+                  type="submit"
+                  class="haus-btn group inline-flex items-center gap-3 px-9 py-4 text-base font-extrabold text-off-black"
+                  style={`background-color: ${hausColors.pink};`}
+                  data-conversion-event="haus_artist_form_open"
+                  data-conversion-context="haus_page_artists"
+                >
+                  Save my spot
+                  <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </button>
+                <p id="haus-artist-status" class="mt-4 text-sm font-semibold text-off-black/60">
+                  One last step happens on Google Forms: your answers carry
+                  over, you attach {hausArtistForm.uploadNote}, and hit submit.
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <p class="reveal mt-8 text-center text-sm font-semibold text-white/55" style="transition-delay: 200ms;">
+          Prefer to start on Google Forms?
+          <a
+            href={hausArtistForm.viewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-bold underline decoration-dashed underline-offset-4 transition-colors hover:text-white"
+            style={`color: ${hausColors.mint};`}
+            data-conversion-event="haus_artist_form_open"
+            data-conversion-context="haus_page_artists_direct"
+          >
+            Open the form directly
+          </a>
+        </p>
+      </div>
+    </section>
+
     {/* ============ THE SERIES: what is Haus of LSP ============ */}
     <section id="the-haus" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
       <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
@@ -348,8 +589,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
           </div>
         </div>
         <p class="reveal mt-8 text-center text-sm font-semibold text-white/55" style="transition-delay: 180ms;">
-          Small print correction: the night lives at the LSP Studio, 949 W 16th
-          St in Pilsen.
+          Save them, post them, tape them somewhere loud.
         </p>
       </div>
     </section>
@@ -530,4 +770,72 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
 
   /* Room speckle styles live in global.css (.haus-lights) so the homepage
      spotlight shares them. */
+
+  /* Sign-up sheet fields: handwriting blanks on the notebook paper. */
+  .haus-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--font-marker);
+    font-size: 1.05rem;
+    color: #24201a;
+  }
+  .haus-input {
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 0.45rem 0.15rem;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px dashed rgba(36, 32, 26, 0.35);
+    border-radius: 0;
+    font-weight: 600;
+    color: #24201a;
+    color-scheme: light;
+  }
+  .haus-input:focus {
+    outline: none;
+    border-bottom-style: solid;
+    border-bottom-color: #c81e63;
+  }
+  .haus-input::placeholder {
+    font-weight: 500;
+    color: rgba(36, 32, 26, 0.4);
+  }
+  textarea.haus-input {
+    resize: vertical;
+  }
 </style>
+
+<script>
+  // The sign-up sheet hands off to the real Google Form pre-filled: the
+  // form's required art-photo upload can only happen on Google (uploads
+  // store to Drive and require sign-in), so we carry every typed answer
+  // over via viewform?usp=pp_url and the artist finishes there.
+  const form = document.getElementById("haus-artist-form");
+  if (form instanceof HTMLFormElement) {
+    const status = document.getElementById("haus-artist-status");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const params = new URLSearchParams({ usp: "pp_url" });
+      const dobEntry = form.dataset.dobEntry;
+      for (const [key, value] of new FormData(form).entries()) {
+        const v = String(value).trim();
+        if (!v) continue;
+        if (key === "dob" && dobEntry) {
+          const [y, m, d] = v.split("-");
+          params.append(`${dobEntry}_year`, y);
+          params.append(`${dobEntry}_month`, String(Number(m)));
+          params.append(`${dobEntry}_day`, String(Number(d)));
+        } else {
+          params.append(key, v);
+        }
+      }
+      window.open(`${form.dataset.formUrl}?${params}`, "_blank", "noopener");
+      if (status) {
+        status.textContent =
+          "Google Forms just opened with your answers filled in. Attach 2+ photos of your work there and hit submit. That tab not showing? Check your pop-up blocker.";
+      }
+    });
+  }
+</script>

@@ -51,6 +51,34 @@ export const summerRenaissance = {
   exploreLabel: "Step inside the Haus",
 };
 
+// Artist + performer interest form (Google Form "Latina Sweat Project:
+// Art Exhibit/Open Mic"). The form's final question is a REQUIRED file
+// upload (2+ photos of the artist's work), and Google file-upload questions
+// cannot be posted from outside Google (they store to Drive and force a
+// Google sign-in). So the on-site form collects every text/choice answer,
+// then opens the real form PRE-FILLED via viewform?usp=pp_url; the artist
+// signs in, attaches photos, and submits there. Entry ids extracted from
+// FB_PUBLIC_LOAD_DATA_ on 2026-07-13; date prefills use _year/_month/_day.
+export const hausArtistForm = {
+  title: "Latina Sweat Project: Art Exhibit/Open Mic",
+  viewUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLScusJlkvq9TVgPVzLcrxg0dyz2OYF0d8Je1Xw9x4c3I6qr2Xg/viewform",
+  entries: {
+    fullName: "entry.94017494",
+    dob: "entry.681432501", // date question: prefill as _year/_month/_day
+    phone: "entry.918116317",
+    interest: "entry.667126451",
+    visited: "entry.169214209",
+    impact: "entry.1892245547",
+    invoke: "entry.663036833",
+    materials: "entry.1198921460",
+    // entry.1824477100 = required art-photo upload; finished on Google.
+  },
+  interestOptions: ["Art Exhibit", "Open Mic/Slam Poetry"],
+  visitedOptions: ["Yes", "No"],
+  uploadNote: "at least two pictures of the art you would like to display",
+};
+
 // The night in two acts, straight from the flyer's "qué va a pasar?" note.
 export const summerRenaissanceActs = [
   {
