@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
+import HausDiscoBall from "@/components/HausDiscoBall.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
@@ -13,7 +14,6 @@ import {
   hausOfLsp,
   summerRenaissance,
   hausColors,
-  hausDiscoUri,
 } from "@/data/hausOfLsp";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
@@ -428,11 +428,10 @@ const getLinkConversionProvider = (url = "") => {
                   <span class="haus-chrome block">Renaissance</span>
                 </h2>
               </div>
-              <div
-                class="haus-disco h-16 w-16 flex-shrink-0 transition-transform duration-500 group-hover:rotate-6 sm:h-20 sm:w-20"
-                style={`background-image: ${hausDiscoUri};`}
-                aria-hidden="true"
-              >
+              {/* 3D mirror ball hanging from the card's top edge (flat SVG
+                  fallback inside the component); pt gives the cord room */}
+              <div class="pointer-events-none -mt-4 flex-shrink-0 pt-3 sm:-mt-5" aria-hidden="true">
+                <HausDiscoBall size="h-20 w-20 sm:h-24 sm:w-24" />
               </div>
             </div>
 
