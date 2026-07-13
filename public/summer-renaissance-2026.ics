@@ -1,0 +1,34 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Latina Sweat Project//Haus of LSP Summer Renaissance 2026//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Haus of LSP: Summer Renaissance
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VEVENT
+UID:haus-summer-renaissance-2026@latinasweatproject.com
+DTSTAMP:20260713T160000Z
+CREATED:20260713T160000Z
+LAST-MODIFIED:20260713T160000Z
+DTSTART:20260801T230000Z
+DTEND:20260802T040000Z
+SUMMARY:Haus of LSP: Summer Renaissance
+DESCRIPTION:Haus of LSP presents Summer Renaissance\, a night of queer
+ art\, voices\, and dancing in Pilsen.\n\nQUE VA A PASAR\n6:00 to 8:00 PM -
+ Art exhibit and open mic / slam poetry.\n8:00 to 11:00 PM - DJ set (let
+ loose and be free) and drinks.\n\nAll proceeds go toward the LSP Queer
+ Scholarship.\n\nDetails and updates at
+ https://latinasweatproject.com/hausoflsp
+LOCATION:LSP Studio\, 949 W 16th St\, Chicago\, IL (Pilsen)
+URL:https://latinasweatproject.com/hausoflsp
+CATEGORIES:Community,Art,Music,LGBTQ,Fundraiser
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+COLOR:#FF6FB5
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Summer Renaissance is tomorrow at 6:00 PM.
+END:VALARM
+END:VEVENT
+END:VCALENDAR

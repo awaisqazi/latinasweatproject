@@ -1,0 +1,533 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import HausDiscoBall from "@/components/HausDiscoBall.astro";
+import {
+  hausOfLsp,
+  summerRenaissance,
+  summerRenaissanceActs,
+  hausColors,
+  hausDiscoUri,
+  hausLightTileUri,
+} from "@/data/hausOfLsp";
+
+// Haus of LSP · Summer Renaissance: the "Nightlife Collage" identity. The
+// reference is the printed flyer itself: a queer scrapbook zine taped
+// together by hand. Marker handwriting, clear packing tape, a torn notebook
+// page for the schedule, sticker cutouts, chrome type, halftone dots, and a
+// disco ball over a deep plum room. Deliberately the opposite of both the
+// gala's black-tie foil and Sweat Fest's daylight print kit: this page is a
+// dark room with the lights low and the music on.
+// Every fact renders from src/data/hausOfLsp.js so ticketing flips in one
+// file when entry details are announced.
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
+const calendarHref = withBase(summerRenaissance.calendarPath);
+const calendarDescription = [
+  "Haus of LSP presents Summer Renaissance — a night of queer art, open mic + slam poetry, and a DJ set in Pilsen.",
+  "",
+  "QUE VA A PASAR",
+  ...summerRenaissanceActs.flatMap((act) =>
+    act.items.map((item) => `${act.time} — ${item.title}: ${item.detail}`),
+  ),
+  "",
+  `${summerRenaissance.cause}.`,
+  "Details and updates: https://latinasweatproject.com/hausoflsp",
+].join("\n");
+const googleCalendarHref = `https://calendar.google.com/calendar/render?${new URLSearchParams(
+  {
+    action: "TEMPLATE",
+    text: "Haus of LSP: Summer Renaissance",
+    dates: "20260801T180000/20260801T230000",
+    ctz: "America/Chicago",
+    location: summerRenaissance.address,
+    details: calendarDescription,
+  },
+).toString()}`;
+
+const hasTickets =
+  summerRenaissance.ticketsOnSale && summerRenaissance.ticketsUrl;
+
+// Sticker-chip rotations, hand-placed like the flyer's cutouts.
+const chipTilt = [-1.6, 1.1, -0.8, 1.4];
+---
+
+<Layout
+  title="Summer Renaissance | Haus of LSP | The Latina Sweat Project"
+  description={summerRenaissance.pageDescription}
+  socialImage="images/hausoflsp1.jpg"
+  socialImageAlt="Haus of LSP presents Summer Renaissance: Saturday, August 1, 2026, 6 to 11 PM in Pilsen. All proceeds go toward the LSP Queer Scholarship."
+  socialImageWidth={1000}
+  socialImageHeight={1250}
+  socialImageType="image/jpeg"
+>
+  <Header />
+  <main class="haus-page text-white" style={`background-color: ${hausColors.plum};`}>
+    {/* ============ HERO: the dark room ============ */}
+    <section
+      id="top"
+      class="relative overflow-hidden pb-20 pt-28 sm:pb-24 sm:pt-32 lg:pt-36"
+      style={`background:
+        radial-gradient(52rem 30rem at 82% -6rem, rgba(160, 107, 216, 0.32), transparent 62%),
+        radial-gradient(44rem 26rem at -10% 30%, rgba(255, 111, 181, 0.2), transparent 60%),
+        linear-gradient(to bottom, ${hausColors.maroon}, ${hausColors.plum} 70%);`}
+    >
+      {/* Disco ball hanging from the top of the room on its cord: real-time
+          3D mirror ball (silver facets, party lights, glints), with the flat
+          SVG as fallback. Kept low enough that the in-scene cord runs
+          unbroken from the section's top edge down to the ball. */}
+      <div
+        class="pointer-events-none absolute right-[-2.5rem] top-6 sm:right-[4%] sm:top-8"
+        aria-hidden="true"
+      >
+        <HausDiscoBall size="h-44 w-44 sm:h-72 sm:w-72 lg:h-[21rem] lg:w-[21rem]" />
+      </div>
+
+      {/* Halftone corner texture */}
+      <div class="haus-halftone absolute bottom-0 left-0 h-56 w-72 opacity-20 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <p class="reveal font-marker text-2xl text-white/90 sm:text-3xl">
+            <span class="haus-glow">Haus of LSP</span>
+            <span class="ml-2 inline-block -rotate-6 text-lg text-white/60 sm:text-xl">presents</span>
+          </p>
+
+          <h1 class="reveal mt-4 font-marker leading-[0.95]" style="transition-delay: 90ms;">
+            <span class="haus-glow block text-6xl sm:text-7xl lg:text-8xl" style={`color: ${hausColors.pink};`}>Summer</span>
+            <span class="haus-chrome block text-6xl sm:text-7xl lg:text-8xl">Renaissance</span>
+          </h1>
+
+          <p class="reveal mt-6 max-w-xl text-lg font-semibold leading-relaxed text-white/75" style="transition-delay: 160ms;">
+            {summerRenaissance.tagline} One night in {summerRenaissance.neighborhood}:
+            art on the walls, poets on the mic, and a floor that wants you on it.
+          </p>
+
+          {/* Sticker chips: the facts, hand-placed */}
+          <div class="reveal mt-8 flex flex-wrap gap-3" style="transition-delay: 220ms;">
+            {[
+              summerRenaissance.dateLabel,
+              summerRenaissance.timeLabel,
+              summerRenaissance.venueLine,
+              "All are welcome",
+            ].map((chip, i) => (
+              <span
+                class="haus-sticker inline-block rounded-lg bg-off-black px-3.5 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white"
+                style={`transform: rotate(${chipTilt[i % 4]}deg);`}
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+
+          {/* The cause, stamped on the wall */}
+          <p
+            class="reveal mt-7 inline-block -rotate-1 border-2 border-dashed px-4 py-2 text-sm font-extrabold uppercase tracking-[0.18em]"
+            style={`transition-delay: 280ms; color: ${hausColors.mint}; border-color: ${hausColors.mint}66;`}
+          >
+            {summerRenaissance.cause}
+          </p>
+
+          <div class="reveal mt-9 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center" style="transition-delay: 340ms;">
+            {
+              hasTickets ? (
+                <a
+                  href={summerRenaissance.ticketsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="haus-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-off-black"
+                  style={`background-color: ${hausColors.pink};`}
+                  data-conversion-event="haus_ticket_click"
+                  data-conversion-context="haus_page_hero"
+                >
+                  {summerRenaissance.ticketsLabel}
+                  <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </a>
+              ) : (
+                <a
+                  href={hausOfLsp.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="haus-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-off-black"
+                  style={`background-color: ${hausColors.pink};`}
+                  data-conversion-event="haus_follow_click"
+                  data-conversion-context="haus_page_hero"
+                >
+                  Follow for entry details
+                  <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </a>
+              )
+            }
+            <a
+              href="#que-va-a-pasar"
+              class="haus-btn inline-flex items-center gap-3 bg-white/10 px-8 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+            >
+              Qué va a pasar?
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+              </svg>
+            </a>
+          </div>
+          <p class="reveal mt-5 text-sm font-bold uppercase tracking-[0.2em] text-white/45" style="transition-delay: 400ms;">
+            {summerRenaissance.statusLabel}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* ============ QUE VA A PASAR: the torn notebook note ============ */}
+    <section id="que-va-a-pasar" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full blur-[110px]" style={`background: ${hausColors.violet}40;`} aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-3xl px-4 sm:px-6">
+        <div class="reveal relative rotate-[-0.8deg]">
+          <span class="haus-tape -top-3 left-8 rotate-[-8deg]" aria-hidden="true"></span>
+          <span class="haus-tape -top-3 right-8 rotate-[7deg]" aria-hidden="true"></span>
+
+          <div class="haus-note px-6 py-10 sm:px-12 sm:py-12">
+            <h2 class="text-center font-marker text-4xl sm:text-5xl" style="color: #24201a;">
+              qué va a pasar?
+            </h2>
+
+            <div class="mt-8 space-y-9">
+              {summerRenaissanceActs.map((act) => (
+                <div>
+                  <p
+                    class="inline-block -rotate-1 rounded px-2 py-0.5 font-marker text-lg text-off-black"
+                    style={`background: ${act.accent === "pink" ? `${hausColors.pink}55` : `${hausColors.mint}`};`}
+                  >
+                    {act.time} · {act.title}
+                  </p>
+                  <ul class="mt-3 space-y-3 pl-1">
+                    {act.items.map((item) => (
+                      <li class="flex items-baseline gap-3">
+                        <span class="font-marker text-xl leading-none" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                        <p class="text-base leading-snug">
+                          <span class="font-marker text-xl uppercase tracking-wide">{item.title}</span>
+                          <span class="ml-2 font-semibold text-off-black/65">{item.detail}</span>
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <p class="mt-9 text-center font-marker text-lg text-off-black/70">
+              all proceeds &rarr; {hausOfLsp.fundName} &hearts;
+            </p>
+          </div>
+        </div>
+
+        <p class="reveal mt-8 text-center text-sm font-semibold text-white/55" style="transition-delay: 120ms;">
+          Come at 6 for the art. Stay until 11 for everything else.
+        </p>
+      </div>
+    </section>
+
+    {/* ============ THE CAUSE: why we dance ============ */}
+    <section id="queer-scholarship" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full blur-[120px]" style={`background: ${hausColors.pink}33;`} aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-12 lg:grid-cols-2">
+          <div class="reveal">
+            <p class="font-marker text-xl" style={`color: ${hausColors.mint};`}>why we dance</p>
+            <h2 class="mt-3 font-marker text-4xl leading-tight sm:text-5xl">
+              A party with a<br />
+              <span class="haus-glow" style={`color: ${hausColors.pink};`}>purpose you can feel.</span>
+            </h2>
+            <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
+              Every drink poured, every ticket, every dollar from Summer
+              Renaissance goes to the {hausOfLsp.fundName}: funding LGBTQ+
+              community members' access to classes, training, and leadership at
+              The Latina Sweat Project.
+            </p>
+            <p class="mt-4 max-w-xl text-lg leading-relaxed text-white/70">
+              So when the DJ tells you to let loose and be free, take it
+              literally. The louder the night, the further the fund goes.
+            </p>
+          </div>
+
+          <div class="reveal relative mx-auto w-full max-w-md" style="transition-delay: 140ms;">
+            <span class="haus-tape -top-3 left-1/2 -translate-x-1/2 rotate-[3deg]" aria-hidden="true"></span>
+            <div class="haus-sticker rotate-[1.4deg] rounded-2xl p-8 text-center" style={`background: linear-gradient(160deg, ${hausColors.maroon}, #1c0c15);`}>
+              <p class="font-marker text-7xl leading-none" style={`color: ${hausColors.pink};`}>100%</p>
+              <p class="mt-3 text-sm font-extrabold uppercase tracking-[0.2em] text-white/80">
+                of proceeds fund the
+              </p>
+              <p class="haus-chrome mt-1 font-marker text-3xl">{hausOfLsp.fundName}</p>
+              <div class="mx-auto mt-5 h-px w-24 bg-white/20"></div>
+              <p class="mt-5 text-sm font-semibold leading-relaxed text-white/60">
+                Show up, show out, and send someone from our comunidad further
+                on their wellness journey.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ============ THE SERIES: what is Haus of LSP ============ */}
+    <section id="the-haus" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+        <div class="reveal">
+          <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-white/45">The series</p>
+          <h2 class="mt-3 font-marker text-4xl sm:text-5xl">
+            <span class="haus-chrome">What is the</span>
+            <span class="haus-glow" style={`color: ${hausColors.pink};`}> Haus</span><span class="haus-chrome">?</span>
+          </h2>
+          <p class="mt-3 text-sm font-extrabold uppercase tracking-[0.18em]" style={`color: ${hausColors.mint};`}>
+            {hausOfLsp.seriesLine}
+          </p>
+          <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
+            {hausOfLsp.seriesDescription}
+          </p>
+        </div>
+
+        <div class="reveal mt-10 grid gap-4 sm:grid-cols-3" style="transition-delay: 120ms;">
+          {[
+            { word: "Art", note: "Queer creativity on every wall" },
+            { word: "Voice", note: "Open mics that hold space" },
+            { word: "Joy", note: "Dance floors that give back" },
+          ].map((pillar, i) => (
+            <div
+              class="haus-sticker rounded-xl bg-white/[0.05] px-5 py-6 backdrop-blur-sm"
+              style={`transform: rotate(${[-1.2, 0.9, -0.7][i % 3]}deg);`}
+            >
+              <p class="font-marker text-3xl" style={`color: ${i === 1 ? hausColors.mint : hausColors.pink};`}>{pillar.word}</p>
+              <p class="mt-2 text-sm font-semibold text-white/65">{pillar.note}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ============ THE FLYERS: straight off the light pole ============ */}
+    <section id="flyers" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="haus-halftone absolute top-0 right-0 h-56 w-72 opacity-15 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="reveal text-center">
+          <p class="font-marker text-xl" style={`color: ${hausColors.mint};`}>pin it, post it, bring a friend</p>
+          <h2 class="mt-3 font-marker text-4xl sm:text-5xl">
+            <span class="haus-chrome">The</span>
+            <span class="haus-glow" style={`color: ${hausColors.pink};`}> flyers</span>
+          </h2>
+        </div>
+
+        <div class="mt-12 grid gap-10 sm:grid-cols-2 sm:gap-8">
+          <div class="reveal relative mx-auto w-full max-w-sm rotate-[-1.6deg]">
+            <span class="haus-tape -top-3 left-1/2 -translate-x-1/2 rotate-[-4deg]" aria-hidden="true"></span>
+            <img
+              src={`${base}images/hausoflsp1.jpg`}
+              width="1000"
+              height="1250"
+              alt="Summer Renaissance flyer: Haus of LSP presents, over a collage of dancers and a disco ball. Saturday, August 1, 2026, 6 to 11 PM in Pilsen. All proceeds go toward the LSP Queer Scholarship."
+              class="haus-sticker w-full rounded-sm"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="reveal relative mx-auto w-full max-w-sm rotate-[1.4deg] sm:mt-10" style="transition-delay: 130ms;">
+            <span class="haus-tape -top-3 left-1/2 -translate-x-1/2 rotate-[5deg]" aria-hidden="true"></span>
+            <img
+              src={`${base}images/hausoflsp2.jpg`}
+              width="1000"
+              height="1250"
+              alt="Summer Renaissance schedule flyer, collage style with a disco ball, pride flag, and megaphone. Qué va a pasar? 6 to 8 PM: art exhibit, open mic and slam poetry. 8 to 11 PM: DJ, let loose and be free, and drinks."
+              class="haus-sticker w-full rounded-sm"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+        <p class="reveal mt-8 text-center text-sm font-semibold text-white/55" style="transition-delay: 180ms;">
+          Small print correction: the night lives at the LSP Studio, 949 W 16th
+          St in Pilsen.
+        </p>
+      </div>
+    </section>
+
+    {/* ============ PLAN YOUR NIGHT ============ */}
+    <section id="plan" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+      <div class="pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full blur-[100px]" style={`background: ${hausColors.violet}38;`} aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal text-center">
+          <h2 class="font-marker text-4xl sm:text-5xl">
+            <span class="haus-glow" style={`color: ${hausColors.pink};`}>Plan your night</span>
+          </h2>
+        </div>
+
+        <div class="reveal mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-3" style="transition-delay: 100ms;">
+          {[
+            { label: "When", value: summerRenaissance.dateLabel },
+            { label: "Hours", value: summerRenaissance.timeLabel },
+            { label: "Where", value: summerRenaissance.venueLine },
+          ].map((fact, i) => (
+            <div
+              class="haus-sticker rounded-xl bg-off-black/60 px-5 py-5 text-center backdrop-blur-sm"
+              style={`transform: rotate(${[-0.9, 0.7, -0.6][i % 3]}deg);`}
+            >
+              <p class="text-[11px] font-extrabold uppercase tracking-[0.22em]" style={`color: ${hausColors.mint};`}>
+                {fact.label}
+              </p>
+              <p class="mt-2 text-base font-extrabold text-white">{fact.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div class="reveal mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap" style="transition-delay: 180ms;">
+          {
+            hasTickets && (
+              <a
+                href={summerRenaissance.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="haus-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-off-black"
+                style={`background-color: ${hausColors.pink};`}
+                data-conversion-event="haus_ticket_click"
+                data-conversion-context="haus_page_plan"
+              >
+                {summerRenaissance.ticketsLabel}
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            )
+          }
+          <a
+            href={googleCalendarHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="haus-btn inline-flex items-center gap-3 bg-white/10 px-7 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Add to Google Calendar
+          </a>
+          <a
+            href={calendarHref}
+            class="haus-btn inline-flex items-center gap-3 bg-white/10 px-7 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+            download
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"></path>
+            </svg>
+            Apple / Outlook (.ics)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ============ CLOSING: pull up ============ */}
+    <section
+      class="relative overflow-hidden py-20 text-center sm:py-24"
+      style={`background:
+        radial-gradient(40rem 22rem at 50% 120%, rgba(255, 111, 181, 0.28), transparent 70%),
+        linear-gradient(to bottom, ${hausColors.plum}, #180a12);`}
+    >
+      <div class="pointer-events-none absolute left-1/2 top-[-3.5rem] -translate-x-1/2" aria-hidden="true">
+        <div
+          class="haus-disco haus-sway h-28 w-28 opacity-90 sm:h-32 sm:w-32"
+          style={`background-image: ${hausDiscoUri};`}
+        >
+        </div>
+      </div>
+
+      <div class="relative mx-auto max-w-3xl px-4 pt-16 sm:px-6">
+        <p class="reveal font-marker text-2xl text-white/80">the Haus is calling</p>
+        <h2 class="reveal mt-3 font-marker text-5xl sm:text-6xl" style="transition-delay: 90ms;">
+          <span class="haus-glow" style={`color: ${hausColors.pink};`}>Pull up.</span>
+          <span class="haus-chrome"> Show out.</span>
+        </h2>
+        <p class="reveal mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/70" style="transition-delay: 160ms;">
+          {summerRenaissance.shortDateLabel} · {summerRenaissance.timeLabel} ·
+          {" "}{summerRenaissance.neighborhood}. Bring your people, your poems, and
+          your best moves. The scholarship fund grows with every one of you.
+        </p>
+        <div class="reveal mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row" style="transition-delay: 220ms;">
+          {
+            hasTickets ? (
+              <a
+                href={summerRenaissance.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="haus-btn group inline-flex items-center gap-3 px-9 py-4 text-base font-extrabold text-off-black"
+                style={`background-color: ${hausColors.pink};`}
+                data-conversion-event="haus_ticket_click"
+                data-conversion-context="haus_page_closing"
+              >
+                {summerRenaissance.ticketsLabel}
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            ) : (
+              <a
+                href={hausOfLsp.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="haus-btn group inline-flex items-center gap-3 px-9 py-4 text-base font-extrabold text-off-black"
+                style={`background-color: ${hausColors.pink};`}
+                data-conversion-event="haus_follow_click"
+                data-conversion-context="haus_page_closing"
+              >
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                </svg>
+                Follow @latinasweatproject
+              </a>
+            )
+          }
+          <span
+            class="inline-block rotate-1 border-2 border-dashed px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em]"
+            style={`color: ${hausColors.mint}; border-color: ${hausColors.mint}66;`}
+          >
+            {summerRenaissance.statusLabel}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    {/* Room light speckles: the mirror ball's throw, drifting across every
+        section. Fixed overlay, screen-blended, pointer-transparent; sits
+        last in <main> so it paints above section backgrounds but below the
+        site header. Motion-safety notes on .haus-lights in global.css. */}
+    <div
+      class="haus-lights haus-lights--fixed"
+      style={`--haus-light-tile: ${hausLightTileUri};`}
+      aria-hidden="true"
+    >
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Disco ball sway: a slow pendulum, motion-safe only. */
+  @media (prefers-reduced-motion: no-preference) {
+    .haus-sway {
+      animation: haus-sway 7s ease-in-out infinite;
+      transform-origin: 50% -6rem;
+    }
+    @keyframes haus-sway {
+      0%,
+      100% {
+        transform: rotate(-2.2deg);
+      }
+      50% {
+        transform: rotate(2.2deg);
+      }
+    }
+  }
+
+  /* Room speckle styles live in global.css (.haus-lights) so the homepage
+     spotlight shares them. */
+</style>

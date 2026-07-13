@@ -13,6 +13,15 @@ import {
   sweatFestColors,
   sweatFestPicadoUri,
 } from "@/data/sweatFest";
+import HausDiscoBall from "@/components/HausDiscoBall.astro";
+import {
+  hausOfLsp,
+  summerRenaissance,
+  summerRenaissanceActs,
+  hausColors,
+  hausDiscoUri,
+  hausLightTileUri,
+} from "@/data/hausOfLsp";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
@@ -31,6 +40,17 @@ const sweatFestPrimaryUrl =
 const sweatFestPrimaryLabel = sweatFestTickets.onSale
   ? sweatFest.ticketsLabel
   : "Explore passes + plan your day";
+// Haus of LSP: CTAs point at the ticketing form once entry details go live
+// (flip ticketsOnSale + ticketsUrl in src/data/hausOfLsp.js), and at the
+// event page until then.
+const hausHasTickets =
+  summerRenaissance.ticketsOnSale && summerRenaissance.ticketsUrl;
+const hausPrimaryUrl = hausHasTickets
+  ? summerRenaissance.ticketsUrl
+  : withBase("hausoflsp");
+const hausPrimaryLabel = hausHasTickets
+  ? summerRenaissance.ticketsLabel
+  : summerRenaissance.exploreLabel;
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -189,73 +209,171 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
     </section>
     {/* END: Sweat Fest (lead flyer spotlight) */}
 
-    {/* START: Gala Countdown Announcement */}
-    <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
-      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
-      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
-      <div class="gala-ambient absolute -left-24 top-0 h-64 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
-      <div class="gala-ambient absolute -right-24 bottom-0 h-64 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
+    {/* START: Haus of LSP — Summer Renaissance (dark nightlife-collage
+        spotlight, Option G identity. Chronologically Aug 1 comes before
+        Sweat Fest, but a dark section cannot follow the dark hero, so it
+        takes the first dark slot instead; every dark section below rotated
+        down one light-slot to keep strict alternation. Media sits RIGHT in
+        the zig-zag.) */}
+    <section
+      class="relative overflow-hidden py-16 text-white sm:py-20"
+      style={`background:
+        radial-gradient(46rem 26rem at 88% -4rem, rgba(160, 107, 216, 0.42), transparent 62%),
+        radial-gradient(38rem 22rem at -8% 100%, rgba(255, 111, 181, 0.28), transparent 60%),
+        radial-gradient(40rem 18rem at 50% 112%, rgba(255, 111, 181, 0.2), transparent 70%),
+        linear-gradient(to bottom, ${hausColors.maroon}, ${hausColors.plum});`}
+    >
+      <div class="haus-halftone absolute bottom-0 right-0 h-48 w-64 opacity-15 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
+      {/* Slow-breathing party glows (gala-ambient pulse: ~8s scale/opacity
+          drift, nothing close to a flash) */}
+      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(255, 111, 181, 0.3);" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(160, 107, 216, 0.34); animation-delay: 2.5s;" aria-hidden="true"></div>
+      {/* The mirror ball's throw, drifting across the whole section
+          (motion-safety notes on .haus-lights in global.css) */}
+      <div
+        class="haus-lights haus-lights--section"
+        style={`--haus-light-tile: ${hausLightTileUri};`}
+        aria-hidden="true"
+      >
+      </div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal rounded-3xl border border-accent-gold/30 bg-white/[0.04] p-5 shadow-2xl shadow-black/25 sm:p-7 lg:p-8">
-          <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
-              <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold sm:text-sm">
-                <span>Annual Gala</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.shortDateTimeLabel}</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.attire}</span>
-              </div>
-              <h2 class="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-                <span class="gala-foil">{galaTeaser.shortTitle}</span>
-                <span class="text-white/90"> Gala</span>
-              </h2>
-              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
-                {galaTeaser.homepageDescription} Join us at {galaTeaser.venueName}.
-              </p>
-              <div class="mt-6">
-                <GalaImpactStats variant="strip" class="justify-start" />
-              </div>
-              <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href={galaTeaser.ticketsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-                  data-conversion-event="gala_ticket_click"
-                  data-conversion-context="home_gala_band"
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* Copy (left) */}
+          <div class="reveal text-center lg:text-left">
+            <p class="font-marker text-xl text-white/85 sm:text-2xl">
+              <span class="haus-glow">Haus of LSP</span>
+              <span class="ml-2 inline-block -rotate-6 text-base text-white/55 sm:text-lg">presents</span>
+            </p>
+            <h2 class="mt-3 font-marker leading-[0.95]">
+              <span class="haus-glow block text-5xl sm:text-6xl" style={`color: ${hausColors.pink};`}>Summer</span>
+              <span class="haus-chrome block text-5xl sm:text-6xl">Renaissance</span>
+            </h2>
+            <p class="mt-4 text-lg font-bold text-white">
+              {summerRenaissance.dateLabel} · {summerRenaissance.timeLabel}
+            </p>
+            <p class="mt-1 text-base font-semibold text-white/60">
+              {summerRenaissance.venueLine}
+            </p>
+
+            {/* The night at a glance: one sticker chip per headline act */}
+            <div class="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
+              {[
+                { label: "Art exhibit", color: hausColors.mint },
+                { label: "Open mic + slam poetry", color: "#ffffff" },
+                { label: "DJ + drinks til 11", color: hausColors.pink },
+              ].map((chip, i) => (
+                <span
+                  class="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em]"
+                  style={`color: ${chip.color}; border-color: ${chip.color}59; background: ${chip.color}14; transform: rotate(${[-1.1, 0.7, -0.5][i % 3]}deg);`}
                 >
-                  <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
-                  <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </a>
-                <a
-                  href={galaPageUrl}
-                  class="gala-btn gala-btn--ghost inline-flex items-center justify-center px-7 py-4 text-base font-extrabold"
-                >
-                  Explore the Gala
-                </a>
-              </div>
-              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
-                <span class="inline-flex items-center gap-2 rounded-[3px] border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
-                  <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-                  On sale now
+                  <span class="inline-block h-1.5 w-1.5 rounded-full" style={`background-color: ${chip.color};`} aria-hidden="true"></span>
+                  {chip.label}
                 </span>
-                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
-              </p>
+              ))}
             </div>
 
-            <div class="group space-y-4">
-              <GalaPhotoFrame slot={galaPhotos.facade} variant="promo" corners />
-              <GalaCountdown variant="compact" />
+            <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/70 mx-auto lg:mx-0">
+              {summerRenaissance.homepageDescription}
+            </p>
+
+            <p
+              class="mt-5 inline-block -rotate-1 border-2 border-dashed px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em]"
+              style={`color: ${hausColors.mint}; border-color: ${hausColors.mint}66;`}
+            >
+              {summerRenaissance.cause}
+            </p>
+
+            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <a
+                href={hausPrimaryUrl}
+                target={hausHasTickets ? "_blank" : undefined}
+                rel={hausHasTickets ? "noopener noreferrer" : undefined}
+                class="haus-btn group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold text-off-black"
+                style={`background-color: ${hausColors.pink};`}
+                data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
+                data-conversion-context="home_haus_band"
+              >
+                {hausPrimaryLabel}
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              {
+                hausHasTickets && (
+                  <a
+                    href={withBase("hausoflsp")}
+                    class="haus-btn group inline-flex items-center justify-center gap-3 bg-white/10 px-7 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+                    data-conversion-event="haus_explore_click"
+                    data-conversion-context="home_haus_band"
+                  >
+                    {summerRenaissance.exploreLabel}
+                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                )
+              }
+            </div>
+            <p class="mt-5 text-xs font-extrabold uppercase tracking-[0.2em] text-white/45 text-center lg:text-left">
+              {summerRenaissance.statusLabel}
+            </p>
+          </div>
+
+          {/* Media (right): a collage — the real 3D mirror ball hanging over
+              the taped-up "qué va a pasar?" note, with the printed flyer
+              tucked behind it */}
+          <div class="reveal relative mx-auto w-full max-w-md pt-16" style="transition-delay: 120ms;">
+            <div class="pointer-events-none absolute -top-10 -right-2 z-[3] sm:-right-6" aria-hidden="true">
+              <HausDiscoBall size="h-36 w-36 sm:h-44 sm:w-44" />
+            </div>
+            <img
+              src={`${base}images/hausoflsp1.jpg`}
+              width="1000"
+              height="1250"
+              alt=""
+              class="haus-sticker absolute -left-5 top-4 hidden w-40 rotate-[-8deg] rounded-sm sm:block lg:-left-12 lg:w-44"
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true"
+            />
+            <div class="relative rotate-[1.1deg]">
+              <span class="haus-tape -top-3 left-6 rotate-[-8deg]" aria-hidden="true"></span>
+              <span class="haus-tape -top-3 right-6 rotate-[7deg]" aria-hidden="true"></span>
+              <div class="haus-note px-7 py-9 sm:px-9">
+                <p class="text-center font-marker text-3xl" style="color: #24201a;">
+                  qué va a pasar?
+                </p>
+                <div class="mt-5 space-y-5">
+                  {summerRenaissanceActs.map((act) => (
+                    <div>
+                      <p
+                        class="inline-block -rotate-1 rounded px-2 py-0.5 font-marker text-base text-off-black"
+                        style={`background: ${act.accent === "pink" ? `${hausColors.pink}55` : hausColors.mint};`}
+                      >
+                        {act.time}
+                      </p>
+                      <ul class="mt-2 space-y-1.5 pl-1">
+                        {act.items.map((item) => (
+                          <li class="flex items-baseline gap-2.5">
+                            <span class="font-marker text-lg leading-none" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                            <span class="font-marker text-lg uppercase tracking-wide text-off-black">{item.title}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                <p class="mt-6 text-center font-marker text-base text-off-black/70">
+                  all proceeds &rarr; {hausOfLsp.fundName} &hearts;
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Gala Countdown Announcement */}
+    {/* END: Haus of LSP — Summer Renaissance */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
@@ -553,180 +671,73 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
     </section>
     {/* END: Merch Drop — Monday Miles Tee Section */}
 
-    {/* START: WGN9 Spotlight Section */}
-    <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
-      {/* Background pattern */}
-      <div
-        class="absolute inset-0 opacity-[0.05]"
-        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
-      >
-      </div>
+    {/* START: Gala Countdown Announcement */}
+    <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
+      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+      <div class="gala-ambient absolute -left-24 top-0 h-64 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
+      <div class="gala-ambient absolute -right-24 bottom-0 h-64 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
 
-      {/* Top accent line */}
-      <div
-        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
-      >
-      </div>
-
-      {/* Decorative glows */}
-      <div
-        class="absolute -top-32 -left-20 w-[400px] h-[400px] bg-vibrant-pink/15 rounded-full blur-[120px] pointer-events-none"
-      >
-      </div>
-      <div
-        class="absolute -bottom-32 -right-20 w-[400px] h-[400px] bg-accent-gold/15 rounded-full blur-[120px] pointer-events-none"
-      >
-      </div>
-
-      <div
-        class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-      >
-        <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
-          {/* Left: Copy + CTAs */}
-          <div class="lg:col-span-5 text-center lg:text-left">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
-            >
-              <span class="relative flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
-                ></span>
-                <span
-                  class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
-                ></span>
-              </span>
-              <p
-                class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
-              >
-                As Seen On WGN9 Chicago
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal rounded-3xl border border-accent-gold/30 bg-white/[0.04] p-5 shadow-2xl shadow-black/25 sm:p-7 lg:p-8">
+          <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div>
+              <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold sm:text-sm">
+                <span>Annual Gala</span>
+                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                <span>{galaTeaser.shortDateTimeLabel}</span>
+                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                <span>{galaTeaser.attire}</span>
+              </div>
+              <h2 class="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
+                <span class="gala-foil">{galaTeaser.shortTitle}</span>
+                <span class="text-white/90"> Gala</span>
+              </h2>
+              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
+                {galaTeaser.homepageDescription} Join us at {galaTeaser.venueName}.
+              </p>
+              <div class="mt-6">
+                <GalaImpactStats variant="strip" class="justify-start" />
+              </div>
+              <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={galaTeaser.ticketsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
+                  data-conversion-event="gala_ticket_click"
+                  data-conversion-context="home_gala_band"
+                >
+                  <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
+                  <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </a>
+                <a
+                  href={galaPageUrl}
+                  class="gala-btn gala-btn--ghost inline-flex items-center justify-center px-7 py-4 text-base font-extrabold"
+                >
+                  Explore the Gala
+                </a>
+              </div>
+              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
+                <span class="inline-flex items-center gap-2 rounded-[3px] border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                  <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
+                  On sale now
+                </span>
+                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
               </p>
             </div>
 
-            <h2
-              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.05]"
-            >
-              Around Town<br />checks out{" "}
-              <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
-                >The Latina<br class="hidden sm:block" /> Sweat Project</span
-              >
-            </h2>
-            <p
-              class="mt-5 font-body text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0"
-            >
-              WGN9's Ana Belaval spent the morning with us in Pilsen. Four
-              segments: a Spanish yoga flow, our community art gallery, the
-              workout, and a conversation with our founder Margarita.
-            </p>
-
-            <div
-              class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3"
-            >
-              <a
-                href={`${base}wgn9-around-town`}
-                class="btn group inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                Watch all 4 segments
-              </a>
-              <a
-                href="https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
-              >
-                Read on WGN9
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  ></path></svg
-                >
-              </a>
+            <div class="group space-y-4">
+              <GalaPhotoFrame slot={galaPhotos.facade} variant="promo" corners />
+              <GalaCountdown variant="compact" />
             </div>
-
-            {/* Segment chips */}
-            <div
-              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2"
-            >
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">01</span> The Workout
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">02</span> Meet the Founder
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">03</span> Spanish Yoga Flow
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">04</span> Community & Art
-              </span>
-            </div>
-          </div>
-
-          {/* Right: Featured video */}
-          <div class="lg:col-span-7">
-            <div
-              class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
-            >
-              {/* Gradient halo */}
-              <div
-                class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/40 via-transparent to-accent-gold/40 opacity-60 pointer-events-none"
-                aria-hidden="true"
-              >
-              </div>
-
-              <div class="relative aspect-video w-full">
-                <iframe
-                  id="nxs-video-iframe-home"
-                  frameborder="0"
-                  allowfullscreen
-                  loading="lazy"
-                  title="WGN9 Around Town: Ana tries the workout at The Latina Sweat Project"
-                  src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584"
-                  rel="nofollow"
-                  class="absolute inset-0 w-full h-full"
-                ></iframe>
-              </div>
-            </div>
-
-            <p
-              class="mt-3 text-center lg:text-right text-xs font-medium text-white/40 italic"
-            >
-              Featured segment: Ana tries the workout · 3 more on the feature
-              page
-            </p>
           </div>
         </div>
       </div>
-
-      {/* Bottom accent line */}
-      <div
-        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
-      >
-      </div>
     </section>
-    {/* END: WGN9 Spotlight Section */}
+    {/* END: Gala Countdown Announcement */}
 
     {/* START: Free Day Promo */}
     <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#e8f6ed] py-12 sm:py-16">
@@ -1071,100 +1082,182 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
     </section>
     {/* END: Free Day Promo */}
 
-    {/* START: 40 Under 40 Spotlight */}
-    <section
-      class="relative overflow-hidden bg-off-black py-10 sm:py-14"
-    >
-      <div class="absolute inset-0 opacity-[0.12]">
-        <div
-          class="absolute inset-0"
-          style="background-image: radial-gradient(circle at 30% 50%, #b8860b 0%, transparent 50%), radial-gradient(circle at 70% 50%, #daa520 0%, transparent 50%);"
-        >
-        </div>
+    {/* START: WGN9 Spotlight Section */}
+    <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
+      {/* Background pattern */}
+      <div
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
+      >
       </div>
 
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          {/* Photo */}
-          <div class="flex-shrink-0 mx-auto md:mx-0">
-            <div class="relative">
-              <div
-                class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-amber-400/30 via-yellow-300/20 to-orange-400/30 blur-lg"
-              >
-              </div>
-              <img
-                src={`${base}images/40under40.png`}
-                alt="Margarita Quiñones Peña · Negocios Now 40 Under 40 Chicago 2025"
-                class="relative w-48 sm:w-56 rounded-2xl object-contain border-2 border-amber-200/60 shadow-lg"
-              />
-            </div>
-          </div>
+      {/* Top accent line */}
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
 
-          {/* Content */}
-          <div class="text-center md:text-left flex-1">
-              <div
-              class="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-300/30 px-4 py-2 mb-4"
+      {/* Decorative glows */}
+      <div
+        class="absolute -top-32 -left-20 w-[400px] h-[400px] bg-vibrant-pink/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="absolute -bottom-32 -right-20 w-[400px] h-[400px] bg-accent-gold/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+
+      <div
+        class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+      >
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
+          {/* Copy + CTAs (right on desktop: media-side zig-zag after the
+              July 2026 Haus of LSP insertion put the gala photo on the
+              right directly above, so the video swings left here) */}
+          <div class="lg:col-span-5 lg:order-2 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
             >
-              <svg
-                class="h-4 w-4 text-accent-gold"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
+                ></span>
+              </span>
+              <p
+                class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
               >
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                ></path>
-              </svg>
-              <span
-                class="text-sm font-bold uppercase tracking-widest text-accent-gold"
-                >40 Under 40 &middot; Chicago 2025</span
-              >
+                As Seen On WGN9 Chicago
+              </p>
             </div>
 
             <h2
-              class="font-sans text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl"
+              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.05]"
             >
-              Our Founder, Recognized
+              Around Town<br />checks out{" "}
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+                >The Latina<br class="hidden sm:block" /> Sweat Project</span
+              >
             </h2>
             <p
-              class="mt-3 text-base text-white/65 sm:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0"
+              class="mt-5 font-body text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0"
             >
-              Margarita Qui&ntilde;ones Pe&ntilde;a has been named to the
-              <strong class="text-accent-gold">Negocios Now 40 Under 40</strong>
-              list, honoring emerging leaders making an impact in Chicago. From building
-              a grassroots wellness movement in Pilsen to certifying over 50 yoga
-              instructors from underrepresented communities, her work continues to
-              transform lives.
+              WGN9's Ana Belaval spent the morning with us in Pilsen. Four
+              segments: a Spanish yoga flow, our community art gallery, the
+              workout, and a conversation with our founder Margarita.
             </p>
 
             <div
-              class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start"
+              class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3"
             >
               <a
-                href="https://negociosnow.com/margarita-quinones-pena-advocate-for-holistic-community-empowerment/"
+                href={`${base}wgn9-around-town`}
+                class="btn group inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Watch all 4 segments
+              </a>
+              <a
+                href="https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:bg-amber-300 hover:shadow-xl"
+                class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
               >
-                Read the Feature
+                Read on WGN9
                 <svg
-                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  class="w-4 h-4"
                   fill="none"
-                  viewBox="0 0 24 24"
                   stroke="currentColor"
+                  viewBox="0 0 24 24"
                   stroke-width="2.5"
-                >
-                  <path
+                  ><path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
               </a>
             </div>
+
+            {/* Segment chips */}
+            <div
+              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2"
+            >
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">01</span> The Workout
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">02</span> Meet the Founder
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">03</span> Spanish Yoga Flow
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">04</span> Community & Art
+              </span>
+            </div>
+          </div>
+
+          {/* Featured video (left on desktop) */}
+          <div class="lg:col-span-7 lg:order-1">
+            <div
+              class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
+            >
+              {/* Gradient halo */}
+              <div
+                class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/40 via-transparent to-accent-gold/40 opacity-60 pointer-events-none"
+                aria-hidden="true"
+              >
+              </div>
+
+              <div class="relative aspect-video w-full">
+                <iframe
+                  id="nxs-video-iframe-home"
+                  frameborder="0"
+                  allowfullscreen
+                  loading="lazy"
+                  title="WGN9 Around Town: Ana tries the workout at The Latina Sweat Project"
+                  src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584"
+                  rel="nofollow"
+                  class="absolute inset-0 w-full h-full"
+                ></iframe>
+              </div>
+            </div>
+
+            <p
+              class="mt-3 text-center lg:text-right text-xs font-medium text-white/40 italic"
+            >
+              Featured segment: Ana tries the workout · 3 more on the feature
+              page
+            </p>
           </div>
         </div>
       </div>
+
+      {/* Bottom accent line */}
+      <div
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
+      >
+      </div>
     </section>
-    {/* END: 40 Under 40 Spotlight */}
+    {/* END: WGN9 Spotlight Section */}
 
     {/* START: Monday Miles — Community Runs Section */}
     <section
@@ -1383,59 +1476,100 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
     </section>
     {/* END: Monday Miles — Community Runs Section */}
 
-    {/* START: Grand Opening Section */}
-    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    {/* START: 40 Under 40 Spotlight */}
+    <section
+      class="relative overflow-hidden bg-off-black py-10 sm:py-14"
+    >
+      <div class="absolute inset-0 opacity-[0.12]">
         <div
-          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
+          class="absolute inset-0"
+          style="background-image: radial-gradient(circle at 30% 50%, #b8860b 0%, transparent 50%), radial-gradient(circle at 70% 50%, #daa520 0%, transparent 50%);"
         >
-          <div class="lg:order-2">
-            <p
-              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
-            >
-              We&apos;re Open!
-            </p>
-            <h2
-              class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
-            >
-              Our New Studio Is Here
-            </h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-white/65">
-              <p>The wait is over! Our brand new studio is officially open.</p>
-              <p>
-                Experience the energy, meet our incredible teaching team, and
-                see firsthand what makes LSP more than just a place to move. We
-                are a community, a safe space, and a celebration of wellness in
-                our neighborhoods.
-              </p>
-              <p>
-                Come join a class and be part of our vibrant community. We can't
-                wait to welcome you!
-              </p>
-            </div>
-            <div class="mt-8 text-center">
-              <a
-                href={`${base}schedule`}
-                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="home_studio_section"
-                data-conversion-booking-path="schedule_page"
+        </div>
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          {/* Photo */}
+          <div class="flex-shrink-0 mx-auto md:mx-0">
+            <div class="relative">
+              <div
+                class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-amber-400/30 via-yellow-300/20 to-orange-400/30 blur-lg"
               >
-                View Class Schedule
-              </a>
+              </div>
+              <img
+                src={`${base}images/40under40.png`}
+                alt="Margarita Quiñones Peña · Negocios Now 40 Under 40 Chicago 2025"
+                class="relative w-48 sm:w-56 rounded-2xl object-contain border-2 border-amber-200/60 shadow-lg"
+              />
             </div>
           </div>
-          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-1">
-            <img
-              src={`${base}images/studio.png`}
-              alt="The brand new Latina Sweat Project yoga studio"
-              class="h-full w-full object-cover"
-            />
+
+          {/* Content */}
+          <div class="text-center md:text-left flex-1">
+              <div
+              class="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-300/30 px-4 py-2 mb-4"
+            >
+              <svg
+                class="h-4 w-4 text-accent-gold"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                ></path>
+              </svg>
+              <span
+                class="text-sm font-bold uppercase tracking-widest text-accent-gold"
+                >40 Under 40 &middot; Chicago 2025</span
+              >
+            </div>
+
+            <h2
+              class="font-sans text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl"
+            >
+              Our Founder, Recognized
+            </h2>
+            <p
+              class="mt-3 text-base text-white/65 sm:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0"
+            >
+              Margarita Qui&ntilde;ones Pe&ntilde;a has been named to the
+              <strong class="text-accent-gold">Negocios Now 40 Under 40</strong>
+              list, honoring emerging leaders making an impact in Chicago. From building
+              a grassroots wellness movement in Pilsen to certifying over 50 yoga
+              instructors from underrepresented communities, her work continues to
+              transform lives.
+            </p>
+
+            <div
+              class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start"
+            >
+              <a
+                href="https://negociosnow.com/margarita-quinones-pena-advocate-for-holistic-community-empowerment/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:bg-amber-300 hover:shadow-xl"
+              >
+                Read the Feature
+                <svg
+                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Grand Opening Section */}
+    {/* END: 40 Under 40 Spotlight */}
 
     {/* START: Events Section */}
     <section class="bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-12 sm:py-16">
@@ -1485,6 +1619,63 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
           </div>
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
+
+          {/* Haus of LSP · Summer Renaissance event card (leads: Aug 1 is
+              the soonest event) */}
+          <a
+            href={hausPrimaryUrl}
+            target={hausHasTickets ? "_blank" : undefined}
+            rel={hausHasTickets ? "noopener noreferrer" : undefined}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
+            data-conversion-context="home_events_carousel_haus"
+          >
+            <div
+              class="relative h-full overflow-hidden rounded-2xl border text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ff6fb5]/20"
+              style={`background: linear-gradient(165deg, ${hausColors.maroon}, ${hausColors.plum} 70%); border-color: ${hausColors.pink}4d;`}
+            >
+              <div class="relative h-52 overflow-hidden">
+                <div class="absolute inset-0" style={`background: radial-gradient(24rem 16rem at 78% -20%, ${hausColors.violet}59, transparent 65%);`}></div>
+                <div class="haus-halftone absolute inset-0 opacity-10" aria-hidden="true"></div>
+                <div
+                  class="haus-disco absolute right-5 top-4 h-24 w-24 transition-transform duration-500 group-hover:rotate-6"
+                  style={`background-image: ${hausDiscoUri};`}
+                  aria-hidden="true"
+                >
+                </div>
+                <div class="absolute bottom-4 left-5 right-5">
+                  <p class="font-marker text-base text-white/80">Haus of LSP presents</p>
+                  <p class="font-marker text-3xl leading-none">
+                    <span class="haus-glow" style={`color: ${hausColors.pink};`}>Summer</span>
+                    <span class="haus-chrome"> Renaissance</span>
+                  </p>
+                </div>
+                <div class="absolute top-3 left-3 flex gap-2">
+                  <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black" style={`background-color: ${hausColors.mint};`}>
+                    Fundraiser
+                  </span>
+                </div>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-sm font-semibold" style={`color: ${hausColors.pink};`}>
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  {summerRenaissance.shortDateLabel} · 6 to 11 PM · {summerRenaissance.neighborhood}
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-white/60">
+                  Art exhibit, open mic + slam poetry, then a DJ until 11.
+                  {" "}{summerRenaissance.cause}.
+                </p>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold transition-all group-hover:gap-2" style={`color: ${hausColors.pink};`}>
+                  {hausPrimaryLabel}
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
 
           {/* Sweat Fest event card */}
           <a
@@ -1790,42 +1981,61 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
       })();
     </script>
 
-    {/* START: Instagram Section */}
+    {/* START: Grand Opening Section */}
     <section class="bg-off-black py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2
-            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
-          >
-            Join Our Community Online
-          </h2>
-          <p class="mt-4 font-body text-lg text-white/65">
-            See our community in action! Follow us on Instagram for daily
-            inspiration, class updates, and behind-the-scenes moments that
-            celebrate our culture and movement.
-          </p>
-          <div class="mt-8">
-            <a
-              href="https://www.instagram.com/latinasweatproject/"
-              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
+        <div
+          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
+        >
+          {/* Copy left / image right on desktop: flipped July 2026 so the
+              zig-zag holds after 40 Under 40 (photo left) above */}
+          <div class="lg:order-1">
+            <p
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
             >
-              <svg
-                class="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                ><path
-                  fill-rule="evenodd"
-                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
-                  clip-rule="evenodd"></path></svg
+              We&apos;re Open!
+            </p>
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
+            >
+              Our New Studio Is Here
+            </h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-white/65">
+              <p>The wait is over! Our brand new studio is officially open.</p>
+              <p>
+                Experience the energy, meet our incredible teaching team, and
+                see firsthand what makes LSP more than just a place to move. We
+                are a community, a safe space, and a celebration of wellness in
+                our neighborhoods.
+              </p>
+              <p>
+                Come join a class and be part of our vibrant community. We can't
+                wait to welcome you!
+              </p>
+            </div>
+            <div class="mt-8 text-center">
+              <a
+                href={`${base}schedule`}
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="home_studio_section"
+                data-conversion-booking-path="schedule_page"
               >
-              Follow @LatinaSweatProject
-            </a>
+                View Class Schedule
+              </a>
+            </div>
+          </div>
+          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
+            <img
+              src={`${base}images/studio.png`}
+              alt="The brand new Latina Sweat Project yoga studio"
+              class="h-full w-full object-cover"
+            />
           </div>
         </div>
       </div>
     </section>
-    {/* END: Instagram Section */}
+    {/* END: Grand Opening Section */}
 
     {/* START: In The Press Section */}
     <section class="bg-gradient-to-br from-white via-[#f8f1e7] to-white py-16 sm:py-20 lg:py-24">
@@ -1925,6 +2135,43 @@ const sweatFestPrimaryLabel = sweatFestTickets.onSale
       </div>
     </section>
     {/* END: In The Press Section */}
+    {/* START: Instagram Section */}
+    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            Join Our Community Online
+          </h2>
+          <p class="mt-4 font-body text-lg text-white/65">
+            See our community in action! Follow us on Instagram for daily
+            inspiration, class updates, and behind-the-scenes moments that
+            celebrate our culture and movement.
+          </p>
+          <div class="mt-8">
+            <a
+              href="https://www.instagram.com/latinasweatproject/"
+              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                ><path
+                  fill-rule="evenodd"
+                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+                  clip-rule="evenodd"></path></svg
+              >
+              Follow @LatinaSweatProject
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Instagram Section */}
+
 
     {
       /*

@@ -5,6 +5,7 @@ import EventsList from "@/components/EventsList.svelte";
 import GalaCountdown from "@/components/GalaCountdown.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
+import HausDiscoBall from "@/components/HausDiscoBall.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
@@ -12,6 +13,13 @@ import {
   sweatFestTickets,
   sweatFestPicadoUri,
 } from "@/data/sweatFest";
+import {
+  hausOfLsp,
+  summerRenaissance,
+  summerRenaissanceActs,
+  hausColors,
+  hausLightTileUri,
+} from "@/data/hausOfLsp";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
@@ -28,12 +36,24 @@ const sweatFestDeepAccents = {
 const sweatFestFromPrice = Math.min(
   ...sweatFestTickets.tiers.map((tier) => tier.price),
 );
+// Haus of LSP CTA gating: points at the ticketing form once entry details
+// go live (flip in src/data/hausOfLsp.js), at the event page until then.
+const hausHasTickets =
+  summerRenaissance.ticketsOnSale && summerRenaissance.ticketsUrl;
+const hausPrimaryUrl = hausHasTickets
+  ? summerRenaissance.ticketsUrl
+  : withBase("hausoflsp");
+const hausPrimaryLabel = hausHasTickets
+  ? summerRenaissance.ticketsLabel
+  : summerRenaissance.exploreLabel;
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice.
 const featuredSlugs = [
   "noche-inolvidable-gala",
   "sweat-fest",
   "monday-miles",
+  "summer-renaissance",
+  "haus-of-lsp-summer-renaissance",
 ];
 ---
 
@@ -56,9 +76,183 @@ const featuredSlugs = [
     </section>
     {/* END: Page Header Section */}
 
+    {/* START: Haus of LSP — Summer Renaissance Featured Section (dark
+        nightlife-collage theme, Option G. Leads because Aug 1 is the
+        soonest event; the dark room between the light page header and the
+        light Sweat Fest section also removes the old L-L adjacency there) */}
+    <section
+      id="summer-renaissance"
+      class="relative overflow-hidden py-16 text-white md:py-20 scroll-mt-28"
+      style={`background:
+        radial-gradient(46rem 26rem at 10% -4rem, rgba(160, 107, 216, 0.42), transparent 62%),
+        radial-gradient(38rem 22rem at 100% 100%, rgba(255, 111, 181, 0.28), transparent 60%),
+        radial-gradient(40rem 18rem at 50% 112%, rgba(255, 111, 181, 0.2), transparent 70%),
+        linear-gradient(to bottom, ${hausColors.maroon}, ${hausColors.plum});`}
+    >
+      <div class="haus-halftone absolute bottom-0 left-0 h-48 w-64 opacity-15 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
+      {/* Slow-breathing party glows (gala-ambient pulse: ~8s scale/opacity
+          drift, nothing close to a flash) */}
+      <div class="gala-ambient pointer-events-none absolute -right-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(255, 111, 181, 0.3);" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -left-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(160, 107, 216, 0.34); animation-delay: 2.5s;" aria-hidden="true"></div>
+      {/* The mirror ball's throw, drifting across the whole section
+          (motion-safety notes on .haus-lights in global.css) */}
+      <div
+        class="haus-lights haus-lights--section"
+        style={`--haus-light-tile: ${hausLightTileUri};`}
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-5 lg:gap-12">
+          {/* Media (left, matching the page's media column rhythm): a
+              collage — the real 3D mirror ball hanging on its cord over the
+              taped-up note, with the printed flyer tucked behind it */}
+          <div class="reveal relative mx-auto w-full max-w-md pt-16 lg:col-span-2 lg:max-w-none">
+            <div class="pointer-events-none absolute -top-10 -right-2 z-[3] sm:-right-4" aria-hidden="true">
+              <HausDiscoBall size="h-36 w-36 sm:h-44 sm:w-44" />
+            </div>
+            <img
+              src={`${base}images/hausoflsp1.jpg`}
+              width="1000"
+              height="1250"
+              alt=""
+              class="haus-sticker absolute -left-5 top-4 hidden w-40 rotate-[-8deg] rounded-sm sm:block lg:-left-10 lg:w-44"
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true"
+            />
+            <div class="relative rotate-[-1.1deg]">
+              <span class="haus-tape -top-3 left-6 rotate-[-8deg]" aria-hidden="true"></span>
+              <span class="haus-tape -top-3 right-6 rotate-[7deg]" aria-hidden="true"></span>
+              <div class="haus-note px-7 py-9 sm:px-9">
+                <p class="text-center font-marker text-3xl" style="color: #24201a;">
+                  qué va a pasar?
+                </p>
+                <div class="mt-5 space-y-5">
+                  {summerRenaissanceActs.map((act) => (
+                    <div>
+                      <p
+                        class="inline-block -rotate-1 rounded px-2 py-0.5 font-marker text-base text-off-black"
+                        style={`background: ${act.accent === "pink" ? `${hausColors.pink}55` : hausColors.mint};`}
+                      >
+                        {act.time}
+                      </p>
+                      <ul class="mt-2 space-y-1.5 pl-1">
+                        {act.items.map((item) => (
+                          <li class="flex items-baseline gap-2.5">
+                            <span class="font-marker text-lg leading-none" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
+                            <span class="font-marker text-lg uppercase tracking-wide text-off-black">{item.title}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                <p class="mt-6 text-center font-marker text-base text-off-black/70">
+                  all proceeds &rarr; {hausOfLsp.fundName} &hearts;
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Copy (right) */}
+          <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
+            <p class="font-marker text-xl text-white/85 sm:text-2xl">
+              <span class="haus-glow">Haus of LSP</span>
+              <span class="ml-2 inline-block -rotate-6 text-base text-white/55 sm:text-lg">presents</span>
+            </p>
+            <h2 class="mt-3 font-marker leading-[0.95]">
+              <span class="haus-glow block text-5xl sm:text-6xl" style={`color: ${hausColors.pink};`}>Summer</span>
+              <span class="haus-chrome block text-5xl sm:text-6xl">Renaissance</span>
+            </h2>
+            <p class="mt-4 text-lg font-bold text-white">
+              {summerRenaissance.dateLabel} · {summerRenaissance.timeLabel}
+            </p>
+            <p class="mt-1 text-base font-semibold text-white/60">
+              {summerRenaissance.venueLine}
+            </p>
+
+            <p class="mt-5 max-w-2xl text-base leading-relaxed text-white/70 mx-auto lg:mx-0">
+              {summerRenaissance.pageDescription}
+            </p>
+
+            {/* The night in two acts */}
+            <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-2xl mx-auto lg:mx-0">
+              {summerRenaissanceActs.map((act, i) => (
+                <div
+                  class="haus-sticker rounded-xl bg-off-black/50 px-4 py-3 text-left backdrop-blur-sm"
+                  style={`transform: rotate(${[-0.8, 0.6][i % 2]}deg);`}
+                >
+                  <p class="text-[10px] font-bold uppercase tracking-widest" style={`color: ${act.accent === "pink" ? hausColors.pink : hausColors.mint};`}>
+                    {act.time}
+                  </p>
+                  <p class="mt-1 text-sm font-extrabold uppercase tracking-wide text-white">
+                    {act.title}
+                  </p>
+                  <p class="mt-1 text-xs font-semibold text-white/55">
+                    {act.items.map((item) => item.title).join(" · ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <p
+              class="mt-6 inline-block -rotate-1 border-2 border-dashed px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em]"
+              style={`color: ${hausColors.mint}; border-color: ${hausColors.mint}66;`}
+            >
+              {summerRenaissance.cause}
+            </p>
+
+            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+              <a
+                href={hausPrimaryUrl}
+                target={hausHasTickets ? "_blank" : undefined}
+                rel={hausHasTickets ? "noopener noreferrer" : undefined}
+                class="haus-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-off-black"
+                style={`background-color: ${hausColors.pink};`}
+                data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
+                data-conversion-context="events_haus_feature"
+              >
+                {hausPrimaryLabel}
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              {
+                hausHasTickets && (
+                  <a
+                    href={withBase("hausoflsp")}
+                    class="haus-btn group inline-flex items-center gap-3 bg-white/10 px-8 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+                    data-conversion-event="haus_explore_click"
+                    data-conversion-context="events_haus_feature"
+                  >
+                    {summerRenaissance.exploreLabel}
+                    <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                )
+              }
+              <a
+                href={withBase(summerRenaissance.calendarPath)}
+                class="haus-btn inline-flex items-center gap-3 bg-white/10 px-8 py-4 text-base font-extrabold text-white backdrop-blur-sm"
+                download
+              >
+                Add to calendar
+              </a>
+            </div>
+            <p class="mt-5 text-xs font-extrabold uppercase tracking-[0.2em] text-white/45">
+              {summerRenaissance.statusLabel}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Haus of LSP — Summer Renaissance Featured Section */}
+
     {/* START: Sweat Fest Featured Section (bright daylight festival theme;
-        light, sits directly after the light page header per design.md
-        Option C precedent, and leads because it is the soonest event) */}
+        light, follows the dark Summer Renaissance section above) */}
     <section
       id="sweat-fest"
       class="relative overflow-hidden py-16 md:py-20 scroll-mt-28"

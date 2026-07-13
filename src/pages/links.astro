@@ -9,9 +9,23 @@ import {
   sweatFestColors,
   sweatFestPicadoUri,
 } from "@/data/sweatFest";
+import {
+  hausOfLsp,
+  summerRenaissance,
+  hausColors,
+  hausDiscoUri,
+} from "@/data/hausOfLsp";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
+// Haus of LSP · Summer Renaissance: CTAs point at the ticketing form once
+// entry details go live (flip in src/data/hausOfLsp.js), event page until then.
+const hausPageUrl = withBase(summerRenaissance.pagePath);
+const hausHasTickets =
+  summerRenaissance.ticketsOnSale && summerRenaissance.ticketsUrl;
+const hausPrimaryUrl = hausHasTickets
+  ? summerRenaissance.ticketsUrl
+  : hausPageUrl;
 const sweatFestPageUrl = withBase(sweatFest.pagePath);
 const sweatFestPrimaryUrl =
   sweatFestTickets.onSale && sweatFestTickets.url
@@ -135,9 +149,21 @@ const links = [
   },
 ];
 
-// Highlight Stories Bar configuration. Sweat Fest leads: it is the soonest
-// event (Aug 22, before the Sep 25 gala), matching the card order below.
+// Highlight Stories Bar configuration. Chronological: Haus of LSP's Summer
+// Renaissance leads (Aug 1), then Sweat Fest (Aug 22), then the gala
+// (Sep 25), matching the card order below.
 const highlights = [
+  {
+    title: {
+      en: "Haus of LSP",
+      es: "Haus of LSP"
+    },
+    target: "#hausoflsp-card",
+    image: `${base}images/highlights/hl_haus.png`,
+    scale: "scale-[1.05]",
+    hoverScale: "group-hover:scale-[1.18]",
+    color: "vibrant-pink"
+  },
   {
     title: {
       en: "Sweat Fest",
@@ -372,8 +398,132 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Sweat Fest Featured Card: the printed neighborhood flyer, leading
-          because it is the soonest event (Aug 22, before the Sep 25 gala).
+      {/* Haus of LSP · Summer Renaissance Featured Card: the nightlife
+          collage flyer, leading because it is the soonest event (Aug 1).
+          Marker handwriting, disco ball, torn-note facts, sticker chips. */}
+      <div
+        id="hausoflsp-card"
+        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-xl border shadow-[6px_7px_0_#a06bd8] transition-transform duration-300 hover:-translate-y-0.5"
+        style={`animation: links-slide-up 0.5s ease backwards; animation-delay: 85ms; background: linear-gradient(165deg, ${hausColors.maroon}, ${hausColors.plum} 72%); border-color: ${hausColors.pink}59;`}
+      >
+        <div class="haus-halftone absolute inset-x-0 top-0 h-24 opacity-10" aria-hidden="true"></div>
+        <div class="relative p-4 sm:p-5">
+          <a
+            href={hausPageUrl}
+            class="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6fb5] focus-visible:ring-offset-4 focus-visible:ring-offset-[#241019]"
+            data-conversion-event="haus_explore_click"
+            data-conversion-context="links_haus_card_body"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="font-marker text-lg text-white/85">
+                  <span class="haus-glow">Haus of LSP</span>
+                  <span class="ml-1.5 inline-block -rotate-6 text-sm text-white/55">
+                    <span class="lang-en">presents</span>
+                    <span class="lang-es hidden">presenta</span>
+                  </span>
+                </p>
+                <h2 class="mt-1 font-marker text-3xl leading-[0.95] sm:text-4xl">
+                  <span class="haus-glow block" style={`color: ${hausColors.pink};`}>Summer</span>
+                  <span class="haus-chrome block">Renaissance</span>
+                </h2>
+              </div>
+              <div
+                class="haus-disco h-16 w-16 flex-shrink-0 transition-transform duration-500 group-hover:rotate-6 sm:h-20 sm:w-20"
+                style={`background-image: ${hausDiscoUri};`}
+                aria-hidden="true"
+              >
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="rounded-full px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-off-black" style={`background-color: ${hausColors.mint};`}>
+                <span class="lang-en">Queer scholarship fundraiser</span>
+                <span class="lang-es hidden">Recaudación · Beca queer</span>
+              </span>
+              <span class="rounded-full border px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest" style={`color: ${hausColors.pink}; border-color: ${hausColors.pink}66;`}>
+                <span class="lang-en">All are welcome</span>
+                <span class="lang-es hidden">Todes bienvenides</span>
+              </span>
+            </div>
+
+            <p class="mt-3.5 text-sm font-extrabold leading-relaxed text-white/85">
+              <span class="lang-en">One summer night in Pilsen: queer art on the walls, poets on the mic, then a DJ until 11.</span>
+              <span class="lang-es hidden">Una noche de verano en Pilsen: arte queer en las paredes, poesía en el micrófono y DJ hasta las 11.</span>
+            </p>
+
+            <div class="mt-4 grid grid-cols-2 gap-2.5 text-left">
+              <div class="haus-sticker rounded-lg bg-off-black/50 px-3 py-2.5 rotate-[-0.6deg]">
+                <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-white/50">
+                  <span class="lang-en">When</span><span class="lang-es hidden">Cuándo</span>
+                </p>
+                <p class="mt-1 text-[11px] font-extrabold text-white">
+                  <span class="lang-en">Sat · Aug 1</span><span class="lang-es hidden">Sáb · 1 Ago</span>
+                </p>
+              </div>
+              <div class="haus-sticker rounded-lg bg-off-black/50 px-3 py-2.5 rotate-[0.6deg]">
+                <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-white/50">
+                  <span class="lang-en">Hours</span><span class="lang-es hidden">Horario</span>
+                </p>
+                <p class="mt-1 text-[11px] font-extrabold text-white">6 PM · 11 PM</p>
+              </div>
+              <div class="haus-sticker col-span-2 rounded-lg bg-off-black/50 px-3 py-2.5 rotate-[-0.4deg]">
+                <p class="text-[8px] font-extrabold uppercase tracking-[0.16em] text-white/50">
+                  <span class="lang-en">Where</span><span class="lang-es hidden">Dónde</span>
+                </p>
+                <p class="mt-1 text-[11px] font-extrabold text-white">LSP Studio · 949 W 16th St, Pilsen</p>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-2.5">
+              <div class="rounded-lg border border-dashed px-3 py-2.5" style={`border-color: ${hausColors.mint}59;`}>
+                <p class="text-[9px] font-extrabold uppercase tracking-[0.12em]" style={`color: ${hausColors.mint};`}>6 · 8 PM</p>
+                <p class="mt-0.5 text-[11px] font-bold leading-snug text-white/80">
+                  <span class="lang-en">Art exhibit · Open mic + slam poetry</span>
+                  <span class="lang-es hidden">Exposición de arte · Micrófono abierto y poesía slam</span>
+                </p>
+              </div>
+              <div class="rounded-lg border border-dashed px-3 py-2.5" style={`border-color: ${hausColors.pink}59;`}>
+                <p class="text-[9px] font-extrabold uppercase tracking-[0.12em]" style={`color: ${hausColors.pink};`}>8 · 11 PM</p>
+                <p class="mt-0.5 text-[11px] font-bold leading-snug text-white/80">
+                  <span class="lang-en">DJ + drinks · Let loose and be free</span>
+                  <span class="lang-es hidden">DJ y bebidas · Suéltate y sé libre</span>
+                </p>
+              </div>
+            </div>
+
+            <p class="mt-4 text-center text-[11px] font-extrabold uppercase tracking-[0.14em]" style={`color: ${hausColors.mint};`}>
+              <span class="lang-en">100% of proceeds fund the LSP Queer Scholarship</span>
+              <span class="lang-es hidden">El 100% de lo recaudado apoya la beca LSP Queer Scholarship</span>
+            </p>
+          </a>
+
+          <a
+            href={hausPrimaryUrl}
+            target={hausHasTickets ? "_blank" : undefined}
+            rel={hausHasTickets ? "noopener noreferrer" : undefined}
+            data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
+            data-conversion-context="links_haus_card"
+            class="haus-btn mt-5 flex items-center justify-between px-4 py-3 text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#241019]"
+            style={`background-color: ${hausColors.pink};`}
+          >
+            <span class="text-sm font-extrabold">
+              <span class="lang-en">{hausHasTickets ? summerRenaissance.ticketsLabel : "Step inside the Haus"}</span>
+              <span class="lang-es hidden">{hausHasTickets ? "Únete a la lista de interés" : "Entra a la Haus"}</span>
+            </span>
+            <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+            <span class="lang-en">{hausHasTickets ? `${summerRenaissance.statusLabel} · See you at the Haus` : "Entry details announced soon · Follow for updates"}</span>
+            <span class="lang-es hidden">{hausHasTickets ? "Boletos de interés gratis · Nos vemos en la Haus" : "Detalles de entrada muy pronto · Síguenos para novedades"}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Sweat Fest Featured Card: the printed neighborhood flyer, next up
+          after Summer Renaissance (Aug 22, before the Sep 25 gala).
           Papel picado, woodtype wordmark with riso offset, mercado tags,
           ticket-stub prices. */}
       <div

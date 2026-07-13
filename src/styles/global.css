@@ -35,6 +35,10 @@
      letterform tradition as lotería cards and mercado signage. Generates a
      `font-slab` utility. */
   --font-slab: "Ultra", "Rubik", serif;
+  /* Hand-lettered marker used only for Haus of LSP surfaces: the scrapbook
+     handwriting scrawled across the series' collage flyers. Generates a
+     `font-marker` utility. */
+  --font-marker: "Permanent Marker", "Rubik", cursive;
 }
 
 @layer components {
@@ -512,6 +516,207 @@
   @media (forced-colors: active) {
     .sf-print {
       text-shadow: none;
+    }
+  }
+
+  /* ============================================================
+     Haus of LSP collage kit: shared by /hausoflsp and its callouts on the
+     homepage, events page, and links page. The look is a queer nightlife
+     scrapbook: marker handwriting (font-marker), clear packing tape, torn
+     notebook paper, sticker cutouts, chrome hardware, halftone photo dots,
+     and a disco ball over a deep plum room. Palette lives in
+     src/data/hausOfLsp.js (hausColors).
+     ============================================================ */
+
+  /* Marker headline glow: white ink catching the pink party light. */
+  .haus-glow {
+    text-shadow:
+      0 0 16px rgba(255, 111, 181, 0.55),
+      0 0 42px rgba(160, 107, 216, 0.35);
+  }
+
+  /* Chrome lettering: liquid-metal gradient clipped to the text. */
+  .haus-chrome {
+    background: linear-gradient(
+      178deg,
+      #f8fafc 0%,
+      #cdd6e2 30%,
+      #8f9aab 48%,
+      #eef2f8 58%,
+      #a7b1c2 80%,
+      #e3e9f2 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Clear packing tape: translucent plastic with a light sheen, hand-torn
+     ends. Position with absolute placement utilities like .sf-tape. */
+  .haus-tape {
+    position: absolute;
+    z-index: 2;
+    width: 104px;
+    height: 26px;
+    background: linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.12) 45%,
+      rgba(255, 255, 255, 0.32)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    clip-path: polygon(
+      2% 0,
+      98% 4%,
+      100% 22%,
+      97% 48%,
+      100% 74%,
+      98% 100%,
+      2% 96%,
+      0 72%,
+      3% 46%,
+      0 18%
+    );
+  }
+
+  /* Torn notebook page: ruled lines, a red margin rule, ripped top and
+     bottom edges. Carries the "qué va a pasar?" schedule. */
+  .haus-note {
+    position: relative;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        rgba(96, 125, 175, 0.35) 31px,
+        rgba(96, 125, 175, 0.35) 32px
+      ),
+      #f5f1e6;
+    color: #24201a;
+    clip-path: polygon(
+      0 2.2%, 4% 0.6%, 9% 2.4%, 15% 0.4%, 22% 2%, 30% 0.8%, 38% 2.6%,
+      47% 0.6%, 56% 2.2%, 64% 0.6%, 72% 2.4%, 80% 0.8%, 88% 2.2%, 95% 0.6%,
+      100% 2%, 100% 97.8%, 95% 99.4%, 88% 97.6%, 80% 99.4%, 72% 97.8%,
+      63% 99.2%, 54% 97.6%, 45% 99.4%, 36% 97.8%, 28% 99.4%, 20% 97.6%,
+      12% 99.2%, 6% 97.8%, 0 99.2%
+    );
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Sticker cutout: the thick white die-cut border around collage photos
+     and chips. */
+  .haus-sticker {
+    border: 3px solid rgba(255, 255, 255, 0.92);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Halftone photo dots, laid over image or color panels for the zine-scan
+     texture. Use as an absolutely-positioned overlay. */
+  .haus-halftone {
+    background-image: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.5) 1.1px,
+      transparent 1.2px
+    );
+    background-size: 7px 7px;
+    pointer-events: none;
+  }
+
+  /* Disco ball: tiled-mirror SVG supplied inline from hausDiscoUri in
+     src/data/hausOfLsp.js. Apply on a square element; keeps itself round. */
+  .haus-disco {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    border-radius: 9999px;
+    filter: drop-shadow(0 0 34px rgba(255, 111, 181, 0.35));
+  }
+
+  /* Mirror-ball room speckles: two tile layers (background supplied via
+     --haus-light-tile from hausLightTileUri in src/data/hausOfLsp.js) at
+     different scales drift diagonally; each loop travels exactly one tile
+     so the pattern is seamless. Photosensitivity rules: no opacity
+     animation anywhere, brightness never pulses, the pattern only glides
+     (WCAG 2.3.1-friendly), and reduced-motion holds the speckles still.
+     Use .haus-lights--fixed for a whole-page overlay (last child of main)
+     or .haus-lights--section inside a relative section. */
+  .haus-lights {
+    overflow: hidden;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .haus-lights--fixed {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+  }
+  .haus-lights--section {
+    position: absolute;
+    inset: 0;
+  }
+  .haus-lights::before,
+  .haus-lights::after {
+    content: "";
+    position: absolute;
+    background-image: var(--haus-light-tile);
+  }
+  .haus-lights::before {
+    inset: -480px -480px 0 -480px;
+    background-size: 480px 480px;
+    opacity: 0.5;
+  }
+  .haus-lights::after {
+    inset: -760px -760px 0 -760px;
+    background-size: 760px 760px;
+    opacity: 0.3;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .haus-lights::before {
+      animation: haus-drift-a 90s linear infinite;
+    }
+    .haus-lights::after {
+      animation: haus-drift-b 150s linear infinite;
+    }
+  }
+  @keyframes haus-drift-a {
+    to {
+      transform: translate3d(480px, 480px, 0);
+    }
+  }
+  @keyframes haus-drift-b {
+    to {
+      transform: translate3d(-760px, 760px, 0);
+    }
+  }
+
+  /* Marker-drawn button: hand-inked border, offset shadow in the purple
+     wash, presses flat like sf-btn. */
+  .haus-btn {
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 10px 8px 11px 7px;
+    box-shadow: 0.28rem 0.28rem 0 rgba(160, 107, 216, 0.85);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .haus-btn:hover {
+    transform: translate(0.14rem, 0.14rem);
+    box-shadow: 0.14rem 0.14rem 0 rgba(160, 107, 216, 0.85);
+  }
+  .haus-btn:active {
+    transform: translate(0.28rem, 0.28rem);
+    box-shadow: 0 0 0 rgba(160, 107, 216, 0.85);
+  }
+
+  @media (forced-colors: active) {
+    .haus-glow {
+      text-shadow: none;
+    }
+    .haus-chrome {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+      color: currentColor;
     }
   }
 

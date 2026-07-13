@@ -1,0 +1,422 @@
+---
+// Haus of LSP · 3D disco ball (Option G "Nightlife Collage" identity).
+//
+// A real mirrored ball rendered with three.js: ~900 instanced silver facets
+// on a lat/long grid (the classic disco-ball tiling), lit by an environment
+// map plus orbiting pink/violet party lights, with sparkle glints, a slow
+// spin, a pendulum sway, and a subtle pointer parallax.
+//
+// Progressive enhancement contract:
+//   - The flat SVG ball (hausDiscoUri) renders immediately and IS the
+//     experience if WebGL is unavailable or the module fails to load.
+//   - When the 3D scene is ready, the canvas cross-fades in over it.
+//   - prefers-reduced-motion: the 3D ball renders one static frame
+//     (no spin, no sway, no glint loop).
+//   - The render loop pauses off-screen and when the tab is hidden.
+import { hausDiscoUri } from "@/data/hausOfLsp";
+
+const { size = "h-40 w-40 sm:h-56 sm:w-56 lg:h-64 lg:w-64", className = "" } =
+  Astro.props;
+---
+
+<div
+  class:list={["haus-disco3d relative", size, className]}
+  data-haus-disco3d
+  aria-hidden="true"
+>
+  {/* Pink party-light halo behind the ball (replaces the CSS drop-shadow
+      so the canvas itself stays filter-free for performance) */}
+  <div
+    class="pointer-events-none absolute -inset-[18%]"
+    style="background: radial-gradient(closest-side, rgba(255, 111, 181, 0.32), rgba(160, 107, 216, 0.14) 55%, transparent 75%);"
+  >
+  </div>
+
+  {/* Flat SVG fallback: visible until (unless) the 3D scene takes over */}
+  <div
+    class="haus-disco haus-disco3d-sway absolute inset-0"
+    style={`background-image: ${hausDiscoUri};`}
+    data-disco-fallback
+  >
+  </div>
+
+  <canvas
+    class="absolute inset-x-0 bottom-0 h-[125%] w-full opacity-0 transition-opacity duration-700"
+    data-disco-canvas
+  ></canvas>
+</div>
+
+<style>
+  /* Same pendulum as the page-level .haus-sway, scoped to the fallback so
+     it works anywhere the component is dropped. */
+  @media (prefers-reduced-motion: no-preference) {
+    .haus-disco3d-sway {
+      animation: haus-disco3d-sway 7s ease-in-out infinite;
+      transform-origin: 50% -6rem;
+    }
+    @keyframes haus-disco3d-sway {
+      0%,
+      100% {
+        transform: rotate(-2.2deg);
+      }
+      50% {
+        transform: rotate(2.2deg);
+      }
+    }
+  }
+</style>
+
+<script>
+  import * as THREE from "three";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // One glint texture shared by every instance on the page.
+  function makeGlintTexture() {
+    const c = document.createElement("canvas");
+    c.width = c.height = 64;
+    const ctx = c.getContext("2d");
+    const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.25, "rgba(255,240,250,0.85)");
+    g.addColorStop(0.6, "rgba(255,190,225,0.25)");
+    g.addColorStop(1, "rgba(255,190,225,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 64, 64);
+    // A four-point star core so bright glints read as camera flares.
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(32, 4);
+    ctx.quadraticCurveTo(34, 30, 60, 32);
+    ctx.quadraticCurveTo(34, 34, 32, 60);
+    ctx.quadraticCurveTo(30, 34, 4, 32);
+    ctx.quadraticCurveTo(30, 30, 32, 4);
+    ctx.fill();
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }
+
+  // Soft vertical gradient for the volumetric beams: bright at the ball,
+  // dissolving outward.
+  function makeBeamTexture() {
+    const c = document.createElement("canvas");
+    c.width = 2;
+    c.height = 128;
+    const ctx = c.getContext("2d");
+    const g = ctx.createLinearGradient(0, 128, 0, 0);
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.7, "rgba(255,255,255,0.5)");
+    g.addColorStop(1, "rgba(255,255,255,0.9)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 2, 128);
+    return new THREE.CanvasTexture(c);
+  }
+
+  function initDiscoBall(root) {
+    const canvas = root.querySelector("[data-disco-canvas]");
+    const fallback = root.querySelector("[data-disco-fallback]");
+    if (!canvas || root.dataset.discoReady) return;
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: "low-power",
+      });
+    } catch {
+      return; // no WebGL: the SVG fallback stays
+    }
+    root.dataset.discoReady = "1";
+
+    renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 30);
+    camera.position.set(0, 0.35, 4.4);
+    camera.lookAt(0, 0.1, 0);
+
+    // Soft studio reflections for the mirror facets.
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+
+    // parallax (pointer) → pivot (sway) → ball (spin)
+    const parallax = new THREE.Group();
+    scene.add(parallax);
+    const pivot = new THREE.Group();
+    pivot.position.set(0, 1.6, 0);
+    parallax.add(pivot);
+    const ball = new THREE.Group();
+    ball.position.set(0, -1.6, 0);
+    pivot.add(ball);
+
+    const silver = {
+      color: 0xf4f6fa,
+      metalness: 1,
+      roughness: 0.12,
+      envMapIntensity: 1.25,
+    };
+
+    // Hanging cord + fitting.
+    const cord = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 1.8, 8),
+      new THREE.MeshStandardMaterial({
+        color: 0xcfd6df,
+        metalness: 0.9,
+        roughness: 0.35,
+      }),
+    );
+    cord.position.y = 0.3; // spans pivot space -0.6 .. 1.2
+    pivot.add(cord);
+    const cap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.075, 0.11, 0.12, 20),
+      new THREE.MeshStandardMaterial(silver),
+    );
+    cap.position.y = 0.99;
+    ball.add(cap);
+
+    // Dark core the mirror tiles sit on.
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(0.982, 48, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0x171019,
+        metalness: 0.5,
+        roughness: 0.55,
+      }),
+    );
+    ball.add(core);
+
+    // Mirror facets: square tiles ring by ring, the classic tiling.
+    const ROWS = 26;
+    const TILE = 0.105;
+    const STEP = Math.PI / ROWS;
+    const transforms = [];
+    for (let i = 0; i < ROWS; i++) {
+      const theta = STEP * (i + 0.5);
+      if (theta < 0.16 || theta > Math.PI - 0.16) continue;
+      const ringR = Math.sin(theta);
+      const count = Math.max(6, Math.floor((2 * Math.PI * ringR) / (TILE * 1.14)));
+      const offset = (i % 2) * 0.5;
+      for (let j = 0; j < count; j++) {
+        const phi = ((j + offset) / count) * Math.PI * 2;
+        transforms.push({ theta, phi });
+      }
+    }
+    const tileGeo = new THREE.BoxGeometry(TILE, TILE, 0.02);
+    const tileMat = new THREE.MeshStandardMaterial(silver);
+    const tiles = new THREE.InstancedMesh(tileGeo, tileMat, transforms.length);
+    const dummy = new THREE.Object3D();
+    const tint = new THREE.Color();
+    const tilePositions = [];
+    transforms.forEach(({ theta, phi }, i) => {
+      const n = new THREE.Vector3(
+        Math.sin(theta) * Math.cos(phi),
+        Math.cos(theta),
+        Math.sin(theta) * Math.sin(phi),
+      );
+      dummy.position.copy(n).multiplyScalar(0.99);
+      dummy.lookAt(n.clone().multiplyScalar(2));
+      // Tiny random tilt so facets catch the light unevenly, like real glass.
+      dummy.rotateX((Math.random() - 0.5) * 0.09);
+      dummy.rotateY((Math.random() - 0.5) * 0.09);
+      dummy.updateMatrix();
+      tiles.setMatrixAt(i, dummy.matrix);
+      // Cool silver with occasional warm-pink leaning facets.
+      const l = 0.82 + Math.random() * 0.18;
+      tint.setRGB(l, l * (0.97 + Math.random() * 0.03), Math.min(1, l * 1.03));
+      tiles.setColorAt(i, tint);
+      tilePositions.push(n);
+    });
+    tiles.instanceMatrix.needsUpdate = true;
+    if (tiles.instanceColor) tiles.instanceColor.needsUpdate = true;
+    ball.add(tiles);
+
+    // Lights: a white key plus the party colors circling the room.
+    scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+    const key = new THREE.DirectionalLight(0xffffff, 1.6);
+    key.position.set(2.5, 3, 4);
+    scene.add(key);
+    const pink = new THREE.PointLight(0xff6fb5, 36, 14, 2);
+    const violet = new THREE.PointLight(0xa06bd8, 30, 14, 2);
+    scene.add(pink, violet);
+    const placeLights = (t) => {
+      pink.position.set(Math.cos(t * 0.4) * 3, 1.2, Math.sin(t * 0.4) * 3);
+      violet.position.set(
+        Math.cos(t * 0.4 + Math.PI) * 3,
+        -0.8,
+        Math.sin(t * 0.4 + Math.PI) * 3,
+      );
+    };
+    placeLights(0);
+
+    // Volumetric light shafts thrown by the ball. Epilepsy-safe by design:
+    // opacity breathes on 15-25 second sine cycles between ~0.03 and ~0.14
+    // (a gentle glow, never a flash), and the sweep across the room comes
+    // from the ball's own slow spin (~28s per revolution). Under reduced
+    // motion they render once, dim and still.
+    const beams = [];
+    {
+      const beamGeo = new THREE.ConeGeometry(0.24, 3.1, 10, 1, true);
+      beamGeo.translate(0, -1.55, 0); // apex at the ball, shaft points out
+      const beamTex = makeBeamTexture();
+      const beamColors = [0xffffff, 0xff6fb5, 0xa06bd8, 0xfff3fa, 0xb8ecd2, 0xff8fc4];
+      const down = new THREE.Vector3(0, -1, 0);
+      for (let i = 0; i < beamColors.length; i++) {
+        const mat = new THREE.MeshBasicMaterial({
+          map: beamTex,
+          color: beamColors[i],
+          transparent: true,
+          opacity: 0.07,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        });
+        const beam = new THREE.Mesh(beamGeo, mat);
+        // Keep shafts near the equator so they rake the room, not the poles.
+        const theta = Math.PI * (0.38 + Math.random() * 0.24);
+        const phi =
+          (i / beamColors.length) * Math.PI * 2 + Math.random() * 0.5;
+        const n = new THREE.Vector3(
+          Math.sin(theta) * Math.cos(phi),
+          Math.cos(theta),
+          Math.sin(theta) * Math.sin(phi),
+        );
+        beam.position.copy(n).multiplyScalar(0.9);
+        beam.quaternion.setFromUnitVectors(down, n);
+        ball.add(beam);
+        beams.push({
+          mat,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.25 + Math.random() * 0.16, // 16-25s per breath
+          base: 0.09 + Math.random() * 0.06,
+        });
+      }
+    }
+
+    // Sparkle glints pulsing on random facets.
+    const glintTex = makeGlintTexture();
+    const glints = [];
+    if (!REDUCED) {
+      for (let i = 0; i < 9; i++) {
+        const sprite = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glintTex,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          }),
+        );
+        const pick = tilePositions[(Math.random() * tilePositions.length) | 0];
+        sprite.position.copy(pick).multiplyScalar(1.04);
+        ball.add(sprite);
+        glints.push({
+          sprite,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.7 + Math.random() * 1.4,
+          size: 0.14 + Math.random() * 0.2,
+        });
+      }
+    }
+
+    // Pointer parallax: the ball leans a few degrees toward the cursor.
+    let targetX = 0;
+    let targetY = 0;
+    if (!REDUCED && window.matchMedia("(pointer: fine)").matches) {
+      window.addEventListener(
+        "pointermove",
+        (e) => {
+          targetY = (e.clientX / window.innerWidth - 0.5) * 0.22;
+          targetX = (e.clientY / window.innerHeight - 0.5) * 0.12;
+        },
+        { passive: true },
+      );
+    }
+
+    const resize = () => {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (!w || !h) return;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+
+    const clock = new THREE.Clock();
+    let elapsed = Math.random() * 20; // desync multiple instances
+    const renderFrame = () => {
+      const t = elapsed;
+      ball.rotation.y = t * 0.22;
+      pivot.rotation.z = Math.sin(t * 0.9) * 0.038;
+      parallax.rotation.x += (targetX - parallax.rotation.x) * 0.04;
+      parallax.rotation.y += (targetY - parallax.rotation.y) * 0.04;
+      placeLights(t);
+      for (const b of beams) {
+        b.mat.opacity = b.base * (0.55 + 0.45 * Math.sin(t * b.speed + b.phase));
+      }
+      for (const g of glints) {
+        const pulse = Math.max(0, Math.sin(t * g.speed + g.phase));
+        const p = pulse ** 10;
+        g.sprite.material.opacity = p * 0.9;
+        const s = g.size * (0.6 + p);
+        g.sprite.scale.set(s, s, 1);
+      }
+      renderer.render(scene, camera);
+    };
+
+    // Reveal the 3D ball, retire the flat one.
+    canvas.classList.remove("opacity-0");
+    if (fallback) fallback.style.opacity = "0";
+
+    if (REDUCED) {
+      renderFrame(); // one beautiful still frame
+      return;
+    }
+
+    let running = false;
+    let rafId = 0;
+    const loop = () => {
+      if (!running) return;
+      elapsed += Math.min(clock.getDelta(), 0.05);
+      renderFrame();
+      rafId = requestAnimationFrame(loop);
+    };
+    const setRunning = (on) => {
+      if (on === running) return;
+      running = on;
+      if (on) {
+        clock.getDelta(); // swallow the pause so the ball doesn't jump
+        rafId = requestAnimationFrame(loop);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => setRunning(entry.isIntersecting && !document.hidden),
+      { threshold: 0.05 },
+    );
+    io.observe(root);
+    document.addEventListener("visibilitychange", () =>
+      setRunning(!document.hidden && root.dataset.inView !== "0"),
+    );
+    // Track view state for the visibilitychange handler.
+    new IntersectionObserver(([entry]) => {
+      root.dataset.inView = entry.isIntersecting ? "1" : "0";
+    }).observe(root);
+  }
+
+  document
+    .querySelectorAll("[data-haus-disco3d]")
+    .forEach((el) => initDiscoBall(el));
+</script>
