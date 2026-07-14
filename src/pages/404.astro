@@ -74,7 +74,11 @@ import Header from "../components/Header.astro";
 <script>
     // Case-insensitive redirects
     const path = window.location.pathname.toLowerCase();
-    if (path.includes("lspgala")) {
+    if (path === "/water" || path === "/water/") {
+        window.location.replace(
+            "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",
+        );
+    } else if (path.includes("lspgala")) {
         window.location.href =
             "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising";
     } else if (path.includes("silentauction")) {
