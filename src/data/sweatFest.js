@@ -139,9 +139,11 @@ export const sweatFestTickets = {
   ],
 };
 
-// Sponsorship program. NOTE: the source doc lists Platinum and Gold benefits
-// beyond tickets as "other possible benefits", so surfaces should include the
-// finePrint caveat wherever benefits are itemized.
+// Sponsorship program. The three benefit packages retain their original order
+// while moving to the 2026 tier names and prices: the former Platinum package
+// is now Sponsoring Partner, former Gold is now Platinum, and former Community
+// is now Gold. Surfaces should include the finePrint caveat wherever benefits
+// are itemized.
 export const sweatFestSponsorship = {
   closesLabel: "Sponsorships close August 12, 2026",
   contactEmail: sweatFest.contactEmail,
@@ -157,9 +159,9 @@ export const sweatFestSponsorship = {
   ],
   tiers: [
     {
-      id: "platinum",
-      name: "Platinum Sponsor",
-      amount: 5000,
+      id: "sponsoring-partner",
+      name: "Sponsoring Partner",
+      amount: 10000,
       tickets: "20 all day tickets",
       benefits: [
         "Five 10-class packs to LSP",
@@ -172,9 +174,9 @@ export const sweatFestSponsorship = {
       featured: true,
     },
     {
-      id: "gold",
-      name: "Gold Sponsor",
-      amount: 2500,
+      id: "platinum",
+      name: "Platinum Sponsor",
+      amount: 5000,
       tickets: "10 all day tickets",
       benefits: [
         "Two 10-class packs to LSP",
@@ -186,9 +188,9 @@ export const sweatFestSponsorship = {
       featured: false,
     },
     {
-      id: "community",
-      name: "Community Sponsor",
-      amount: 1000,
+      id: "gold",
+      name: "Gold Sponsor",
+      amount: 2500,
       tickets: "5 all day tickets",
       benefits: [
         "Logo or name on the flyer",
