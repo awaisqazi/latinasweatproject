@@ -40,6 +40,9 @@
   let prioritySaving = false;
   let priorityError = "";
   let prioritySuccess = "";
+  let scheduleSaving = false;
+  let scheduleError = "";
+  let scheduleSuccess = "";
   let publishScheduleOpen = false;
   let publishScheduleSaving = false;
   let publishScheduleError = "";
@@ -395,6 +398,64 @@
     publishScheduleOpen = false;
   }
 
+  // Deadline, publish date, and copy approval are deliberately open to
+  // everyone with marketing access (matching the ungated kanban): moving a
+  // date in either direction is normal planning work, not an admin action.
+  async function updateProjectDate(field, value, label) {
+    if (!displayedProject || scheduleSaving) return;
+
+    const nextValue = value || null;
+    if ((displayedProject[field] || null) === nextValue) return;
+
+    scheduleSaving = true;
+    scheduleError = "";
+    scheduleSuccess = "";
+
+    const { data, error, conflict } = await guardedProjectUpdate({ [field]: nextValue });
+
+    if (error || conflict) {
+      scheduleError = conflict ? CONFLICT_MESSAGE : error.message;
+      scheduleSaving = false;
+      return;
+    }
+
+    displayedProject = data;
+    onProjectUpdated(data);
+    await addTimelineLog(
+      data.id,
+      nextValue ? `Changed the ${label} to ${formatDate(nextValue)}.` : `Cleared the ${label}.`,
+    );
+    scheduleSuccess = nextValue
+      ? `${label[0].toUpperCase()}${label.slice(1)} set to ${formatDate(nextValue)}.`
+      : `${label[0].toUpperCase()}${label.slice(1)} cleared.`;
+    scheduleSaving = false;
+  }
+
+  async function toggleCopyApproved(checked) {
+    if (!displayedProject || scheduleSaving) return;
+
+    scheduleSaving = true;
+    scheduleError = "";
+    scheduleSuccess = "";
+
+    const { data, error, conflict } = await guardedProjectUpdate({ copy_approved: checked });
+
+    if (error || conflict) {
+      scheduleError = conflict ? CONFLICT_MESSAGE : error.message;
+      scheduleSaving = false;
+      return;
+    }
+
+    displayedProject = data;
+    onProjectUpdated(data);
+    await addTimelineLog(
+      data.id,
+      checked ? "Marked the copy as approved." : "Marked the copy as not approved.",
+    );
+    scheduleSuccess = checked ? "Copy marked approved." : "Copy approval removed.";
+    scheduleSaving = false;
+  }
+
   async function updateProjectPriority(targetPriority) {
     if (!displayedProject || prioritySaving) return;
 
@@ -687,11 +748,66 @@
               {assignedEmails.length ? assignedEmails.join(", ") : "Unassigned"}
             </dd>
           </div>
-          <div class="rounded-card border border-ink/8 bg-canvas px-4 py-3">
-            <dt class="font-bold text-ink">Copy approval</dt>
-            <dd class="mt-1 text-ink/70">{displayedProject.copy_approved ? "Approved" : "Not approved"}</dd>
-          </div>
         </dl>
+
+        <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="drawer-schedule-title">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h4 id="drawer-schedule-title" class="font-bold text-ink">Schedule & approval</h4>
+              <p class="mt-1 text-sm leading-6 text-ink/60">
+                Anyone on marketing can adjust these; every change is noted in
+                the timeline.
+              </p>
+            </div>
+            {#if scheduleSaving}
+              <Badge tone="neutral" class="shrink-0">Saving</Badge>
+            {/if}
+          </div>
+
+          {#if scheduleError}
+            <Banner tone="error" message={scheduleError} class="mt-3" />
+          {/if}
+
+          {#if scheduleSuccess}
+            <Banner tone="success" message={scheduleSuccess} class="mt-3" />
+          {/if}
+
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <Field label="Deadline" id={`project-deadline-${displayedProject.id}`}>
+              <input
+                id={`project-deadline-${displayedProject.id}`}
+                type="date"
+                class="input"
+                value={displayedProject.deadline || ""}
+                disabled={scheduleSaving}
+                onchange={(event) =>
+                  updateProjectDate("deadline", event.currentTarget.value, "deadline")}
+              />
+            </Field>
+            <Field label="Publish date" id={`project-publish-${displayedProject.id}`}>
+              <input
+                id={`project-publish-${displayedProject.id}`}
+                type="date"
+                class="input"
+                value={displayedProject.publish_date || ""}
+                disabled={scheduleSaving}
+                onchange={(event) =>
+                  updateProjectDate("publish_date", event.currentTarget.value, "publish date")}
+              />
+            </Field>
+          </div>
+
+          <label class="mt-3 flex cursor-pointer items-center gap-3 rounded-control border border-ink/8 bg-canvas px-3 py-2.5 text-sm font-semibold text-ink transition hover:border-accent/30">
+            <input
+              type="checkbox"
+              class="checkbox"
+              checked={Boolean(displayedProject.copy_approved)}
+              disabled={scheduleSaving}
+              onchange={(event) => toggleCopyApproved(event.currentTarget.checked)}
+            />
+            Copy approved
+          </label>
+        </section>
 
         <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="drawer-status-title">
           <div class="flex items-start justify-between gap-3">

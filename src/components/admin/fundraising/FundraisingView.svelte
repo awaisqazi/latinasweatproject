@@ -4,6 +4,7 @@
     Banknote,
     BookOpenText,
     CalendarClock,
+    CalendarDays,
     ChevronLeft,
     ChevronRight,
     Download,
@@ -25,6 +26,7 @@
   import StatCard from "../ui/StatCard.svelte";
   import Tabs from "../ui/Tabs.svelte";
   import DonorDrawer from "./DonorDrawer.svelte";
+  import FundraisingCalendarTab from "./FundraisingCalendarTab.svelte";
   import ImportTab from "./ImportTab.svelte";
   import OutreachTab from "./OutreachTab.svelte";
   import ProspectsBoard from "./ProspectsBoard.svelte";
@@ -39,6 +41,7 @@
   } from "../../../lib/dashboard/fundraising";
   import {
     loadDonorProfiles,
+    loadOutreachCampaigns,
     loadTemplates,
   } from "../../../lib/dashboard/fundraisingCrm";
   import {
@@ -64,6 +67,7 @@
     { id: "donors", label: "Donors", icon: UsersRound },
     { id: "outreach", label: "Outreach", icon: Megaphone },
     { id: "prospects", label: "Prospects & Grants", icon: Target },
+    { id: "calendar", label: "Calendar", icon: CalendarDays },
     { id: "templates", label: "Templates", icon: BookOpenText },
     { id: "import", label: "Import", icon: Upload },
   ];
@@ -78,6 +82,7 @@
   let last30Donations = [];
   let donorProfiles = [];
   let templates = [];
+  let outreachCampaigns = [];
   let isLoading = true;
   let errorMessage = "";
   let lastRefreshKey = refreshKey;
@@ -161,6 +166,7 @@
       recentResult,
       profilesResult,
       templatesResult,
+      outreachResult,
     ] = await Promise.all([
       loadDonorSummaries(supabase),
       loadCampaignSummaries(supabase),
@@ -168,6 +174,7 @@
       loadDonationsSince(supabase, daysAgoDateKey(30)),
       loadDonorProfiles(supabase),
       loadTemplates(supabase),
+      loadOutreachCampaigns(supabase),
     ]);
 
     const firstError =
@@ -176,7 +183,8 @@
       prospectsResult.error ||
       recentResult.error ||
       profilesResult.error ||
-      templatesResult.error;
+      templatesResult.error ||
+      outreachResult.error;
     if (firstError) errorMessage = firstError.message;
 
     if (!donorsResult.error) donorSummaries = donorsResult.data || [];
@@ -185,6 +193,7 @@
     if (!recentResult.error) last30Donations = recentResult.data || [];
     if (!profilesResult.error) donorProfiles = profilesResult.data || [];
     if (!templatesResult.error) templates = templatesResult.data || [];
+    if (!outreachResult.error) outreachCampaigns = outreachResult.data || [];
 
     isLoading = false;
   }
@@ -632,6 +641,17 @@
       {teamMembers}
       onSelect={(prospect) => (selectedProspectId = prospect.id)}
       onProspectUpdated={handleProspectUpdated}
+    />
+  {:else if activeTab === "calendar"}
+    <FundraisingCalendarTab
+      {prospects}
+      {donorProfiles}
+      campaigns={outreachCampaigns}
+      {teamMembers}
+      onOpenProspect={(prospect) => (selectedProspectId = prospect.id)}
+      onOpenDonorEmail={(email) =>
+        (selectedDonor =
+          donorSummaries.find((donor) => donor.email === email) || { email })}
     />
   {:else if activeTab === "templates"}
     <TemplatesTab

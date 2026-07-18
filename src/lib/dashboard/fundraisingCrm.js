@@ -54,6 +54,15 @@ export const DONOR_TASK_PRESETS = [
       'From your Workspace card, hit "View full details" to open the donor, then under "Send with a template" choose "Gala 2026 formal invite". Copy the merged subject and email, copy the two images under it (the formal invitation and the evening overview) into the email, and send from your own inbox. Then hit "Log as sent" so the contact log and outreach lists update.',
   },
   {
+    id: "sweatfest_push",
+    label: "Sweat Fest call to action",
+    templateTitle: "Sweat Fest call to action",
+    title: (donorLabel) => `Invite ${donorLabel} to Sweat Fest`,
+    note: (donorLabel) =>
+      `Ask ${donorLabel} to join Sweat Fest on Saturday, August 22 (tickets are live on Zeffy).\n\n` +
+      'From your Workspace card, hit "View full details" to open the donor, then under "Send with a template" choose "Sweat Fest call to action". Copy the merged subject and email, copy the poster and save-the-date images under it into the email, and send from your own inbox. Then hit "Log as sent" so the contact log and outreach lists update.',
+  },
+  {
     id: "gala_sponsor",
     label: "Gala sponsorship ask",
     templateTitle: null,
