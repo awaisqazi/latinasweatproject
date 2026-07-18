@@ -3,7 +3,7 @@
   // donor's details, copy it or open the mail app, then log it as sent so the
   // contact history stays honest. Rendered inside DonorDrawer (and anywhere
   // else a donor + template list are on hand).
-  import { Check, Copy, Mail, Send } from "@lucide/svelte";
+  import { Check, Copy, ExternalLink, Image, Mail, Send } from "@lucide/svelte";
   import Badge from "../ui/Badge.svelte";
   import Button from "../ui/Button.svelte";
   import {
@@ -38,6 +38,7 @@
   $: unresolved = listPlaceholders(`${mergedSubject}\n${mergedBody}`);
   $: mailtoHref = buildMailto(donor?.email, mergedSubject, mergedBody);
   $: mailtoMayTruncate = mailtoHref.length > MAILTO_SAFE_LENGTH;
+  $: attachedImages = selectedTemplate?.image_urls || [];
 
   function buildMailto(email, subject, body) {
     if (!email) return "";
@@ -68,6 +69,44 @@
       subject: mergedSubject,
       body: mergedBody,
     });
+  }
+
+  // Copy an image to the clipboard as PNG (the only type Chrome accepts) so
+  // it can be pasted straight into a compose window.
+  async function copyImage(url, index) {
+    copyErrorMessage = "";
+    try {
+      const image = new window.Image();
+      image.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("The image could not be loaded."));
+        image.src = url;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      canvas.getContext("2d").drawImage(image, 0, 0);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("The image could not be prepared.");
+
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      copied = `image-${index}`;
+      window.clearTimeout(copiedTimer);
+      copiedTimer = window.setTimeout(() => (copied = ""), 2000);
+    } catch {
+      copyErrorMessage =
+        "Couldn't copy the image here. Right-click it and choose Copy Image instead.";
+    }
+  }
+
+  function imageLabel(url) {
+    const file = String(url).split("/").pop() || "image";
+    return file
+      .replace(/\.(png|jpe?g|webp|gif)$/i, "")
+      .replace(/[-_]+/g, " ")
+      .trim();
   }
 </script>
 
@@ -141,6 +180,43 @@
           Log as sent
         </Button>
       </div>
+      {#if attachedImages.length}
+        <div class="mt-3 space-y-2">
+          <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+            <Image class="h-3.5 w-3.5" aria-hidden="true" />
+            Paste these into the email
+          </p>
+          {#each attachedImages as url, index (url)}
+            <div class="rounded-control border border-ink/8 bg-canvas/40 p-2">
+              <img
+                src={url}
+                alt={imageLabel(url)}
+                class="max-h-56 w-full rounded object-contain"
+              />
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  icon={copied === `image-${index}` ? Check : Copy}
+                  class="w-full"
+                  onclick={() => copyImage(url, index)}
+                >
+                  {copied === `image-${index}` ? "Copied" : "Copy image"}
+                </Button>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-control border border-ink/14 px-3 text-sm font-bold text-ink transition hover:border-accent/40 hover:text-accent-strong"
+                >
+                  <ExternalLink class="h-4 w-4" aria-hidden="true" />
+                  Open full size
+                </a>
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
+
       {#if copyErrorMessage}
         <p class="mt-2 text-xs font-semibold leading-5 text-red-700">{copyErrorMessage}</p>
       {/if}

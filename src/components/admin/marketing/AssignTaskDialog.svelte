@@ -19,9 +19,14 @@
   let note = "";
   let dueDate = "";
   let priority = "P2";
+  let presetId = "";
   let saving = false;
   let errorMessage = "";
   let lastOpen = false;
+
+  // Optional ready-made task types supplied by the record that opened this
+  // dialog (e.g. "Send the 2026 gala invite" from a donor).
+  $: presets = prefill?.presets || [];
 
   // Seed defaults the first time the panel opens: assign to me by default (the
   // common case, and it avoids a silent "no assignee picked" submit), and pull
@@ -34,6 +39,18 @@
     lastOpen = false;
   }
 
+  function applyPreset(nextPresetId) {
+    presetId = nextPresetId;
+    const preset = presets.find((option) => option.id === nextPresetId);
+    if (!preset) return;
+    // Presets overwrite the drafts: picking one IS the choice of what this
+    // task says. The fields stay editable afterwards.
+    title = preset.title;
+    note = preset.note;
+    if (preset.dueDate) dueDate = preset.dueDate;
+    if (preset.priority) priority = preset.priority;
+  }
+
   // Assignable teammates (anyone with an email), self last so it is easy to
   // self-assign a reminder but not the default.
   $: assignableMembers = (teamMembers || []).filter((member) => member.email);
@@ -44,6 +61,7 @@
     note = "";
     dueDate = "";
     priority = "P2";
+    presetId = "";
     saving = false;
     errorMessage = "";
   }
@@ -110,6 +128,26 @@
 
     {#if errorMessage}
       <Banner tone="error" message={errorMessage} />
+    {/if}
+
+    {#if presets.length}
+      <Field
+        label="Task type"
+        id="assign-task-preset"
+        hint="Picking one fills in the task and instructions; you can still edit them."
+      >
+        <select
+          id="assign-task-preset"
+          class="select"
+          value={presetId}
+          onchange={(event) => applyPreset(event.currentTarget.value)}
+        >
+          <option value="">Write my own</option>
+          {#each presets as preset (preset.id)}
+            <option value={preset.id}>{preset.label}</option>
+          {/each}
+        </select>
+      </Field>
     {/if}
 
     <Field label="Assign to" id="assign-task-assignee" required>

@@ -21,6 +21,7 @@
   import {
     CAPACITY_ESTIMATES,
     CONTACT_METHODS,
+    DONOR_TASK_PRESETS,
     loadDonorProfile,
     normalizeDonorEmail,
     upsertDonorProfile,
@@ -366,6 +367,12 @@
               // workspace sync trigger, which owns bare fundraising_donor refs.
               sourceRef: `open:fundraising_donor:${normalizeDonorEmail(displayedDonor.email)}`,
               title: `Follow up with ${donorTitle}`,
+              presets: DONOR_TASK_PRESETS.map((preset) => ({
+                id: preset.id,
+                label: preset.label,
+                title: preset.title(donorTitle),
+                note: preset.note(donorTitle),
+              })),
             })}
         >
           Assign a task about this donor

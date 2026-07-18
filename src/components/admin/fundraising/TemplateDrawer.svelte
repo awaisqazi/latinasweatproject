@@ -13,6 +13,7 @@
   import {
     createTemplate,
     deleteTemplate,
+    normalizeImageUrls,
     updateTemplate,
   } from "../../../lib/dashboard/fundraisingCrm";
 
@@ -48,6 +49,7 @@
   let draftKind = "email";
   let draftSubject = "";
   let draftBody = "";
+  let draftImageUrls = "";
 
   $: canDelete = isSuperuser(currentUserRole);
   // The drawer only ever closes from inside (its own close buttons), so the
@@ -85,6 +87,7 @@
     draftKind = source?.kind || "email";
     draftSubject = source?.subject || "";
     draftBody = source?.body || "";
+    draftImageUrls = (source?.image_urls || []).join("\n");
   }
 
   function requestClose() {
@@ -135,10 +138,14 @@
       kind: draftKind,
       subject: draftKind === "email" ? draftSubject.trim() || null : null,
       body: draftBody.trim(),
+      image_urls: normalizeImageUrls(draftImageUrls),
     };
 
     if (isCreating) {
-      const { data, error } = await createTemplate(supabase, fields);
+      const { data, error } = await createTemplate(supabase, {
+        ...fields,
+        imageUrls: fields.image_urls,
+      });
       isSaving = false;
       if (error) {
         errorMessage = error.message;
@@ -162,7 +169,9 @@
       errorMessage = CONFLICT_MESSAGE;
       const { data: fresh } = await supabase
         .from("fundraising_templates")
-        .select("id,category,title,kind,subject,body,sort_order,updated_by,created_at,updated_at")
+        .select(
+          "id,category,title,kind,subject,body,sort_order,image_urls,updated_by,created_at,updated_at",
+        )
         .eq("id", displayedTemplate.id)
         .maybeSingle();
       if (fresh) {
@@ -264,6 +273,21 @@
           ></textarea>
         </Field>
 
+        {#if draftKind === "email"}
+          <Field
+            label="Attached images"
+            id="template-images"
+            hint="One image URL per line (e.g. /images/gala/gala-2026-invite-letter.png). They show under the merged email with copy buttons."
+          >
+            <textarea
+              id="template-images"
+              class="textarea font-mono text-[13px] leading-6"
+              rows="2"
+              bind:value={draftImageUrls}
+            ></textarea>
+          </Field>
+        {/if}
+
         <p class="text-xs leading-5 text-ink/55">
           Square-bracket placeholders like [First Name] or [Your Name] are
           filled in automatically when the template is used from a donor.
@@ -317,6 +341,16 @@
       <div class="rounded-control border border-ink/8 bg-white px-4 py-3">
         <p class="whitespace-pre-wrap text-sm leading-6 text-ink/85">{#each bodySegments as segment}{#if segment.isPlaceholder}<mark class="rounded bg-amber-100 px-1 py-0.5 font-semibold text-amber-900">{segment.text}</mark>{:else}{segment.text}{/if}{/each}</p>
       </div>
+
+      {#if displayedTemplate.image_urls?.length}
+        <div class="grid grid-cols-2 gap-2">
+          {#each displayedTemplate.image_urls as url (url)}
+            <a href={url} target="_blank" rel="noreferrer" class="block rounded-control border border-ink/8 bg-canvas/40 p-1.5 transition hover:border-accent/40">
+              <img src={url} alt="Template attachment" class="max-h-40 w-full rounded object-contain" />
+            </a>
+          {/each}
+        </div>
+      {/if}
 
       <div class="grid grid-cols-2 gap-2">
         {#if displayedTemplate.subject}

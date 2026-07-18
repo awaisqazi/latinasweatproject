@@ -38,7 +38,38 @@ const ITEM_COLUMNS =
   "id,campaign_id,donor_email,donor_name,assignee_id,status,status_changed_at,created_at,updated_at";
 
 const TEMPLATE_COLUMNS =
-  "id,category,title,kind,subject,body,sort_order,updated_by,created_at,updated_at";
+  "id,category,title,kind,subject,body,sort_order,image_urls,updated_by,created_at,updated_at";
+
+// Preset choices for "Assign a task about this donor". Each preset pre-fills
+// the task with instructions that lead the assignee to the matching template
+// (with its mail merge and inline images) in the donor drawer.
+export const DONOR_TASK_PRESETS = [
+  {
+    id: "gala_invite",
+    label: "Send the 2026 gala invite",
+    templateTitle: "Gala 2026 formal invite",
+    title: (donorLabel) => `Send gala invite to ${donorLabel}`,
+    note: (donorLabel) =>
+      `Formally invite ${donorLabel} to the Annual Gala (Sept 25 at the MCA).\n\n` +
+      'From your Workspace card, hit "View full details" to open the donor, then under "Send with a template" choose "Gala 2026 formal invite". Copy the merged subject and email, copy the two images under it (the formal invitation and the evening overview) into the email, and send from your own inbox. Then hit "Log as sent" so the contact log and outreach lists update.',
+  },
+  {
+    id: "gala_sponsor",
+    label: "Gala sponsorship ask",
+    templateTitle: null,
+    title: (donorLabel) => `Gala sponsorship conversation with ${donorLabel}`,
+    note: () =>
+      'Reach out about sponsoring the Annual Gala (tiers from $2,500 to $25,000; sponsorships close September 15). The "Gala sponsorship packages" reference in the Templates tab has the tier details, and the sponsorship one-pager image is at /images/gala/gala-2026-sponsorship.png for attaching.',
+  },
+  {
+    id: "thank_you",
+    label: "Send a thank-you",
+    templateTitle: "Donation thank-you",
+    title: (donorLabel) => `Thank ${donorLabel} for their support`,
+    note: () =>
+      'Open the donor from your Workspace card and use the "Donation thank-you" template under "Send with a template". Personalize the impact line, send it from your inbox, and log it as sent.',
+  },
+];
 
 export function normalizeDonorEmail(email) {
   return String(email || "").trim().toLowerCase();
@@ -229,7 +260,10 @@ export async function loadTemplates(supabase) {
     .order("title", { ascending: true });
 }
 
-export async function createTemplate(supabase, { category, title, kind, subject, body }) {
+export async function createTemplate(
+  supabase,
+  { category, title, kind, subject, body, imageUrls },
+) {
   return supabase
     .from("fundraising_templates")
     .insert({
@@ -238,9 +272,17 @@ export async function createTemplate(supabase, { category, title, kind, subject,
       kind: kind === "reference" ? "reference" : "email",
       subject: subject?.trim() || null,
       body: String(body || "").trim(),
+      image_urls: normalizeImageUrls(imageUrls),
     })
     .select(TEMPLATE_COLUMNS)
     .single();
+}
+
+// Accepts an array or newline/comma separated text; keeps only non-empty
+// entries so the editor can use a plain textarea.
+export function normalizeImageUrls(value) {
+  const list = Array.isArray(value) ? value : String(value || "").split(/[\n,]/);
+  return list.map((url) => String(url || "").trim()).filter(Boolean);
 }
 
 export async function updateTemplate(supabase, template, updates) {
