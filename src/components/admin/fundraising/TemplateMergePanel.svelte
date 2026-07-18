@@ -62,6 +62,45 @@
     }
   }
 
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // Copy body = the whole email in one paste: merged text plus the hosted
+  // images appended, as rich HTML (with a plain-text fallback).
+  async function copyBody() {
+    if (!attachedImages.length) {
+      await copyText("body", mergedBody);
+      return;
+    }
+
+    copyErrorMessage = "";
+    try {
+      const html =
+        `<div>${escapeHtml(mergedBody).replace(/\n/g, "<br>")}</div>` +
+        attachedImages.map(imageHtml).join("");
+      const text =
+        mergedBody +
+        "\n\n" +
+        attachedImages.map((url) => new URL(url, window.location.origin).href).join("\n");
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([text], { type: "text/plain" }),
+        }),
+      ]);
+      copied = "body";
+      window.clearTimeout(copiedTimer);
+      copiedTimer = window.setTimeout(() => (copied = ""), 2000);
+    } catch {
+      copyErrorMessage =
+        "Copying isn't available in this browser. Select the text above manually.";
+    }
+  }
+
   function handleLogSend() {
     if (!selectedTemplate) return;
     onLogSend({
@@ -162,9 +201,9 @@
           size="sm"
           icon={copied === "body" ? Check : Copy}
           class="w-full {mergedSubject ? '' : 'col-span-2'}"
-          onclick={() => copyText("body", mergedBody)}
+          onclick={copyBody}
         >
-          {copied === "body" ? "Copied" : "Copy body"}
+          {copied === "body" ? "Copied" : attachedImages.length ? "Copy body + images" : "Copy body"}
         </Button>
         {#if mailtoHref}
           <Button size="sm" icon={Mail} href={mailtoHref} class="w-full">
@@ -232,9 +271,9 @@
 
       {#if attachedImages.length}
         <p class="mt-2 text-xs leading-5 text-ink/50">
-          Copied images paste as the hosted picture (no upload wait), so they
-          arrive intact. Paste them after the email text, then send once
-          everything shows in the draft.
+          "Copy body + images" puts the whole email (text and pictures) on
+          your clipboard in one go. Images paste as the hosted picture with
+          nothing to upload, so what you see in the draft is what arrives.
         </p>
       {/if}
       {#if copyErrorMessage}
