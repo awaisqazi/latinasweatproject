@@ -21,8 +21,14 @@
   import EmptyState from "../ui/EmptyState.svelte";
   import SkeletonCard from "../ui/SkeletonCard.svelte";
   import Tabs from "../ui/Tabs.svelte";
-  import ProjectTimeline from "./ProjectTimeline.svelte";
+  import ProjectDetailDrawer from "./ProjectDetailDrawer.svelte";
   import SlideOver from "./SlideOver.svelte";
+  import BoardProjectDrawer from "../board/BoardProjectDrawer.svelte";
+  import EventEditorDrawer from "../events/EventEditorDrawer.svelte";
+  import DonorDrawer from "../fundraising/DonorDrawer.svelte";
+  import OutreachQueueDrawer from "../fundraising/OutreachQueueDrawer.svelte";
+  import ProspectDrawer from "../fundraising/ProspectDrawer.svelte";
+  import SubRequestDrawer from "../subs/SubRequestDrawer.svelte";
   import {
     loadMyOpenTasks,
     loadMyDoneTasks,
@@ -31,19 +37,30 @@
     logDoneItem,
     reopenTask,
   } from "../../../lib/dashboard/workspaceTasks";
+  import { PROSPECT_COLUMNS } from "../../../lib/dashboard/fundraising";
+  import { loadTemplates } from "../../../lib/dashboard/fundraisingCrm";
+  import { isOperationalAdmin } from "../../../lib/dashboard/roles";
 
   export let supabase;
   export let email;
   export let profileId = "";
   export let teamMembers = [];
+  export let currentUserRole = "member";
   export let isFeedbackRecipient = false;
   // Whether the current user can open the Board Projects view; board-sourced
   // cards hide their "#board" link when they can't.
   export let hasBoardAccess = true;
+  // Per-module access ({ marketing, board, fundraising, subs, events }) so the
+  // in-place resolver never opens a drawer whose data RLS would blank out.
+  export let moduleAccess = {};
+  export let currentUserName = "";
+  export let availableStatuses = [];
+  export let scheduleProjects = [];
   export let refreshKey = 0;
   export let onProjectUpdated = () => {};
   export let onTasksChanged = () => {};
   export let onCreateProject = () => {};
+  export let onAssignTask = () => {};
 
   let projects = [];
   let tasks = [];
@@ -51,8 +68,6 @@
   let feedbackTasks = [];
   let activeTab = "open";
   let feedbackSearch = "";
-  let selectedProject = null;
-  let detailsOpen = false;
   let selectedTask = null;
   let taskDetailsOpen = false;
   let isLoading = true;
@@ -60,7 +75,40 @@
   let errorMessage = "";
   let lastRefreshKey = refreshKey;
 
+  // In-place module drawers: "View full details" resolves a task's source_ref
+  // to the real record and opens the same drawer the module itself uses.
+  let marketingProject = null;
+  let boardProject = null;
+  let prospectRecord = null;
+  let donorRecord = null;
+  let outreachCampaignId = "";
+  let subRequest = null;
+  let eventRecord = null;
+  let resolvingRef = false;
+  let fundraisingTemplates = null; // lazy-loaded for DonorDrawer
+  let outreachQueueRefresh = 0;
+
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const PROJECT_COLUMNS =
+    "id,title,status,priority,deadline,publish_date,edit_notes,details_url,brief_doc_status,files_url,deliverables_url,assigned_to,channel_tags,copy_approved,source,intake_reviewed,intake_submitted_at,updated_at";
+  const BOARD_PROJECT_COLUMNS =
+    "id, title, description, status, owner_id, due_date, created_by, created_at, updated_at";
+  const SUB_REQUEST_COLUMNS =
+    "id, kind, class_name, date, start_time, end_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
+  const EVENT_COLUMNS =
+    "id, slug, title, image_src, image_frame_class, image_class, date_label, time_label, starts_on, ends_on, location, address, description, registration_link, registration_label, featured, recurring, tags, published, sort_order, created_at, updated_at";
+  // source_ref kinds this view can open in place (mapped to the module whose
+  // access is required); anything else keeps the plain "open the module" link.
+  const OPENABLE_REF_MODULES = {
+    project: "marketing",
+    board_project: "board",
+    board_task: "board",
+    fundraising_prospect: "fundraising",
+    fundraising_donor: "fundraising",
+    fundraising_outreach: "fundraising",
+    sub_request: "subs",
+    event: "events",
+  };
 
   // Merge marketing projects + assigned tasks into one feed, soonest first.
   $: items = [
@@ -83,6 +131,7 @@
   $: filteredFeedbackTasks = feedbackTasks.filter((task) =>
     matchesFeedbackSearch(task, feedbackSearch),
   );
+  $: selectedTaskOpenable = canOpenSourceRecord(selectedTask, moduleAccess, hasBoardAccess);
 
   $: if (refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
@@ -112,9 +161,7 @@
       const { data, error } = await withTimeout(
         supabase
           .from("projects")
-          .select(
-            "id,title,status,priority,deadline,publish_date,edit_notes,details_url,files_url,deliverables_url,assigned_to,channel_tags,copy_approved,source,intake_reviewed,intake_submitted_at,updated_at",
-          )
+          .select(PROJECT_COLUMNS)
           .contains("assigned_to", [email])
           .neq("status", "Published")
           .neq("status", "Archived")
@@ -253,11 +300,196 @@
       .includes(query);
   }
 
+  // ── Source-record resolution ──────────────────────────────────
+
+  function parseSourceRef(task) {
+    // Trigger-managed refs are bare ("fundraising_donor:<email>"); manual
+    // per-record assigns use an "open:" namespace so DB sync triggers never
+    // mistake them for their own cards. Both open the same drawers here.
+    let ref = task?.source_ref || "";
+    if (ref.startsWith("open:")) ref = ref.slice(5);
+    const separator = ref.indexOf(":");
+    if (separator < 1) return null;
+    return { kind: ref.slice(0, separator), id: ref.slice(separator + 1) };
+  }
+
+  function canOpenSourceRecord(task, access, boardAccess) {
+    const parsed = parseSourceRef(task);
+    if (!parsed) return false;
+    const moduleKey = OPENABLE_REF_MODULES[parsed.kind];
+    if (!moduleKey) return false;
+    if (moduleKey === "board") return boardAccess;
+    return access?.[moduleKey] !== false;
+  }
+
+  async function openSourceRecord(task) {
+    const parsed = parseSourceRef(task);
+    if (!parsed || resolvingRef) return;
+
+    resolvingRef = true;
+    errorMessage = "";
+
+    try {
+      const opened = await resolveAndOpen(parsed);
+      if (opened) {
+        closeTaskDetails();
+      } else {
+        errorMessage =
+          "That record couldn't be opened here. It may have been deleted, or you may not have access to its module.";
+      }
+    } catch (error) {
+      errorMessage = error?.message || "That record couldn't be opened here.";
+    } finally {
+      resolvingRef = false;
+    }
+  }
+
+  async function resolveAndOpen({ kind, id }) {
+    if (kind === "project") {
+      const { data } = await supabase
+        .from("projects")
+        .select(PROJECT_COLUMNS)
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return false;
+      marketingProject = data;
+      return true;
+    }
+
+    if (kind === "board_project" || kind === "board_task") {
+      let projectId = id;
+      if (kind === "board_task") {
+        const { data: taskRow } = await supabase
+          .from("board_project_tasks")
+          .select("project_id")
+          .eq("id", id)
+          .maybeSingle();
+        if (!taskRow) return false;
+        projectId = taskRow.project_id;
+      }
+      const { data } = await supabase
+        .from("board_projects")
+        .select(BOARD_PROJECT_COLUMNS)
+        .eq("id", projectId)
+        .maybeSingle();
+      if (!data) return false;
+      boardProject = data;
+      return true;
+    }
+
+    if (kind === "fundraising_prospect") {
+      const { data } = await supabase
+        .from("fundraising_prospects")
+        .select(PROSPECT_COLUMNS)
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return false;
+      prospectRecord = data;
+      return true;
+    }
+
+    if (kind === "fundraising_donor") {
+      return openDonorByEmail(id);
+    }
+
+    if (kind === "fundraising_outreach") {
+      // Ref format: fundraising_outreach:<campaign_id>:<assignee_id>
+      const campaignId = id.split(":")[0];
+      if (!campaignId) return false;
+      await ensureTemplatesLoaded();
+      outreachCampaignId = campaignId;
+      return true;
+    }
+
+    if (kind === "sub_request") {
+      const { data } = await supabase
+        .from("sub_requests")
+        .select(SUB_REQUEST_COLUMNS)
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return false;
+      subRequest = data;
+      return true;
+    }
+
+    if (kind === "event") {
+      const { data } = await supabase
+        .from("events")
+        .select(EVENT_COLUMNS)
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return false;
+      eventRecord = data;
+      return true;
+    }
+
+    return false;
+  }
+
+  async function openDonorByEmail(donorEmail) {
+    const normalized = String(donorEmail || "").trim().toLowerCase();
+    if (!normalized) return false;
+
+    await ensureTemplatesLoaded();
+
+    const { data, error } = await supabase
+      .from("fundraising_donor_summary")
+      .select("*")
+      .eq("email", normalized)
+      .maybeSingle();
+
+    if (error) return false;
+
+    // A donor profile can exist for someone with no imported gifts yet; fall
+    // back to a stub so the drawer still opens with the contact log.
+    donorRecord = data || { email: normalized };
+    return true;
+  }
+
+  async function ensureTemplatesLoaded() {
+    if (fundraisingTemplates !== null) return;
+    const { data, error } = await loadTemplates(supabase);
+    // On error stay null so the next open retries instead of caching a miss.
+    if (!error) fundraisingTemplates = data || [];
+  }
+
+  function handleDonorWorkspaceChanged() {
+    // A template send can flip outreach rows to "contacted"; refresh the
+    // queue drawer underneath so it doesn't show (and save over) stale rows.
+    outreachQueueRefresh += 1;
+    onTasksChanged();
+  }
+
+  function handleModuleProjectUpdated(updated) {
+    if (updated?.id) {
+      const previous = projects.find((project) => project.id === updated.id);
+
+      if (
+        previous &&
+        Array.isArray(updated.assigned_to) &&
+        !isAssignedToCurrentUser(updated)
+      ) {
+        // No longer mine (unassigned, or completed via the card's Complete
+        // button, which writes its own History entry). A drawer refresh can't
+        // tell completion from unassignment, so never log from here.
+        projects = projects.filter((project) => project.id !== updated.id);
+      } else if (previous) {
+        projects = projects.map((project) =>
+          project.id === updated.id ? { ...project, ...updated } : project,
+        );
+      } else {
+        // Not in the feed (opened via source_ref); a full reload covers
+        // whether it should now appear.
+        loadWorkspaceProjects();
+      }
+    }
+    onProjectUpdated(updated);
+  }
+
   // ── Actions ───────────────────────────────────────────────────
   function openItem(item) {
     if (item.kind === "project") {
-      selectedProject = item.raw;
-      detailsOpen = true;
+      marketingProject = item.raw;
     } else {
       openTaskDetails(item.raw);
     }
@@ -334,14 +566,6 @@
     }
   }
 
-  function closeProjectDialog() {
-    detailsOpen = false;
-  }
-
-  function handleDrawerClosed() {
-    selectedProject = null;
-  }
-
   async function completeMyAssignment(project) {
     if (!project?.id || !isAssignedToCurrentUser(project) || completingId) {
       return;
@@ -364,11 +588,7 @@
       query = query.eq("updated_at", project.updated_at);
     }
 
-    const { data, error } = await query
-      .select(
-        "id,title,priority,status,deadline,publish_date,details_url,copy_approved,files_url,deliverables_url,assigned_to,edit_notes,channel_tags,source,intake_reviewed,intake_submitted_at,updated_at",
-      )
-      .maybeSingle();
+    const { data, error } = await query.select(PROJECT_COLUMNS).maybeSingle();
 
     if (error) {
       errorMessage = error.message;
@@ -401,8 +621,8 @@
     onProjectUpdated(data);
     await refreshTaskLists();
 
-    if (selectedProject?.id === project.id) {
-      closeProjectDialog();
+    if (marketingProject?.id === project.id) {
+      marketingProject = null;
     }
 
     completingId = "";
@@ -489,16 +709,6 @@
     if (status === "In Production") return "blue";
     if (status?.startsWith("Ready")) return "amber";
     return "neutral";
-  }
-
-  function getProjectLinks(project) {
-    if (!project) return [];
-
-    return [
-      { label: "Details", url: project.details_url },
-      { label: "Files", url: project.files_url },
-      { label: "Deliverables", url: project.deliverables_url },
-    ].filter((link) => Boolean(link.url));
   }
 </script>
 
@@ -702,73 +912,6 @@
 </section>
 
 <SlideOver
-  open={detailsOpen}
-  title={selectedProject?.title || ""}
-  eyebrow="Project details"
-  closeLabel="Close project details"
-  onClose={closeProjectDialog}
-  onClosed={handleDrawerClosed}
->
-  {#if selectedProject}
-    <div class="space-y-5 px-5 py-5">
-      {#if errorMessage}
-        <Banner tone="error" message={errorMessage} />
-      {/if}
-
-      <div class="flex flex-wrap gap-2">
-        <Badge tone={getStatusTone(selectedProject.status)}>
-          {selectedProject.status}
-        </Badge>
-        <Badge tone={getPriorityTone(selectedProject.priority)}>
-          {selectedProject.priority || "Priority unset"}
-        </Badge>
-        <Badge tone="neutral">
-          <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
-          {formatDate(selectedProject.deadline)}
-        </Badge>
-      </div>
-
-      {#if isAssignedToCurrentUser(selectedProject)}
-        <Button
-          variant="primary"
-          icon={CheckCircle2}
-          class="w-full"
-          onclick={() => completeMyAssignment(selectedProject)}
-          loading={completingId === selectedProject.id}
-        >
-          {completingId === selectedProject.id ? "Confirming" : "Confirm Complete"}
-        </Button>
-      {/if}
-
-      <ProjectTimeline {supabase} project={selectedProject} />
-
-      {#if getProjectLinks(selectedProject).length}
-        <section aria-labelledby="external-links-title">
-          <h4 id="external-links-title" class="font-bold text-ink">External links</h4>
-          <div class="mt-3 grid gap-2 sm:grid-cols-3">
-            {#each getProjectLinks(selectedProject) as link}
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-ink/14 px-3 text-sm font-bold text-ink transition hover:border-accent/40 hover:text-accent-strong"
-              >
-                <ExternalLink class="h-4 w-4" aria-hidden="true" />
-                {link.label}
-              </a>
-            {/each}
-          </div>
-        </section>
-      {/if}
-
-      <Button variant="primary" class="w-full" onclick={closeProjectDialog}>
-        Close
-      </Button>
-    </div>
-  {/if}
-</SlideOver>
-
-<SlideOver
   open={taskDetailsOpen}
   title={selectedTask?.title || ""}
   eyebrow={selectedTask ? taskKindLabel(selectedTask) : "Task"}
@@ -820,6 +963,18 @@
         </section>
       {/if}
 
+      {#if selectedTaskOpenable}
+        <Button
+          variant="primary"
+          icon={Eye}
+          class="w-full"
+          loading={resolvingRef}
+          onclick={() => openSourceRecord(selectedTask)}
+        >
+          {resolvingRef ? "Opening" : "View full details"}
+        </Button>
+      {/if}
+
       {#if selectedTask.source_link}
         {#if selectedTask.source_link === "#board" && !hasBoardAccess}
           <p class="rounded-control border border-ink/10 bg-canvas/60 px-3 py-2.5 text-sm font-semibold text-ink/60">
@@ -864,6 +1019,95 @@
     </div>
   {/if}
 </SlideOver>
+
+<ProjectDetailDrawer
+  {supabase}
+  project={marketingProject}
+  {teamMembers}
+  currentUserEmail={email}
+  {currentUserRole}
+  {availableStatuses}
+  {scheduleProjects}
+  eyebrow="Project details"
+  onClose={() => (marketingProject = null)}
+  onProjectUpdated={handleModuleProjectUpdated}
+  {onAssignTask}
+/>
+
+<BoardProjectDrawer
+  {supabase}
+  project={boardProject}
+  {teamMembers}
+  {currentUserRole}
+  onClose={() => (boardProject = null)}
+  onProjectUpdated={onTasksChanged}
+  onProjectDeleted={() => {
+    boardProject = null;
+    onTasksChanged();
+  }}
+  {onAssignTask}
+/>
+
+<ProspectDrawer
+  {supabase}
+  prospect={prospectRecord}
+  {teamMembers}
+  {currentUserRole}
+  onClose={() => (prospectRecord = null)}
+  onProspectUpdated={onTasksChanged}
+  onProspectDeleted={() => {
+    prospectRecord = null;
+    onTasksChanged();
+  }}
+  {onAssignTask}
+/>
+
+<DonorDrawer
+  {supabase}
+  donor={donorRecord}
+  {teamMembers}
+  templates={fundraisingTemplates || []}
+  currentUserId={profileId}
+  {currentUserName}
+  onClose={() => (donorRecord = null)}
+  {onAssignTask}
+  onWorkspaceChanged={handleDonorWorkspaceChanged}
+/>
+
+<OutreachQueueDrawer
+  {supabase}
+  campaignId={outreachCampaignId}
+  {profileId}
+  refreshKey={outreachQueueRefresh}
+  onOpenDonor={(item) => openDonorByEmail(item.donor_email)}
+  onChanged={onTasksChanged}
+  onClose={() => (outreachCampaignId = "")}
+/>
+
+<SubRequestDrawer
+  {supabase}
+  request={subRequest}
+  onClose={() => (subRequest = null)}
+  onRequestUpdated={onTasksChanged}
+  onRequestDeleted={() => {
+    subRequest = null;
+    onTasksChanged();
+  }}
+  {onAssignTask}
+/>
+
+<EventEditorDrawer
+  {supabase}
+  event={eventRecord}
+  isAdmin={isOperationalAdmin({ role: currentUserRole })}
+  onClose={() => (eventRecord = null)}
+  onSaved={onTasksChanged}
+  onDeleted={() => {
+    eventRecord = null;
+    onTasksChanged();
+  }}
+  {onAssignTask}
+/>
 
 {#snippet WorkspaceSection(title, description, icon, sectionItems, emptyTitle, emptyMessage)}
   {@const Icon = icon}

@@ -668,6 +668,7 @@
                 sourceModule: "marketing",
                 sourceLabel: `Marketing: ${displayedProject.title}`,
                 sourceLink: "#kanban",
+                sourceRef: `open:project:${displayedProject.id}`,
                 title: `Follow up: ${displayedProject.title}`,
               })}
           >

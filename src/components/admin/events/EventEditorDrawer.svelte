@@ -210,6 +210,7 @@
                   sourceModule: "events",
                   sourceLabel: `Event: ${form.title}`,
                   sourceLink: "#events",
+                  sourceRef: event?.id ? `open:event:${event.id}` : null,
                   title: `Follow up: ${form.title}`,
                 })}
             >

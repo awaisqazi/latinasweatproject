@@ -45,6 +45,26 @@ export function subscribeDashboardRealtime(
       { event: "*", schema: "public", table: "fundraising_interactions" },
       (payload) => onFundraising?.(payload),
     )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_donor_profiles" },
+      (payload) => onFundraising?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_outreach_campaigns" },
+      (payload) => onFundraising?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_outreach_items" },
+      (payload) => onFundraising?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "fundraising_templates" },
+      (payload) => onFundraising?.(payload),
+    )
     .subscribe();
 
   return () => {

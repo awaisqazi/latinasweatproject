@@ -1496,12 +1496,24 @@
               email={profile?.email || user?.email}
               profileId={user?.id}
               {teamMembers}
+              currentUserRole={profile?.role || "member"}
+              currentUserName={profile?.full_name || profile?.email || user?.email}
               isFeedbackRecipient={Boolean(feedbackRecipientId) && feedbackRecipientId === user?.id}
               hasBoardAccess={canSeeNavItem({ modules: ["board_projects"] }, profile, moduleGrants)}
+              moduleAccess={{
+                marketing: canSeeNavItem({ modules: ["marketing"] }, profile, moduleGrants),
+                board: canSeeNavItem({ modules: ["board_projects"] }, profile, moduleGrants),
+                fundraising: canSeeNavItem({ modules: ["fundraising"] }, profile, moduleGrants),
+                subs: canSeeNavItem({ modules: ["subs"] }, profile, moduleGrants),
+                events: canSeeNavItem({ modules: ["events"] }, profile, moduleGrants),
+              }}
+              availableStatuses={statuses}
+              scheduleProjects={latestProjects}
               refreshKey={workspaceRefreshKey}
               onProjectUpdated={handleProjectUpdated}
               onTasksChanged={loadWorkspaceTaskCount}
               onCreateProject={openCreateDrawer}
+              onAssignTask={openAssignTask}
             />
           {:else if activeView === "kanban"}
             <section aria-labelledby="kanban-title">

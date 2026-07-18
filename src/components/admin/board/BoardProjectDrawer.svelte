@@ -235,6 +235,7 @@
                 sourceModule: "board_projects",
                 sourceLabel: `Board: ${displayedProject.title}`,
                 sourceLink: "#board",
+                sourceRef: `open:board_project:${displayedProject.id}`,
                 title: `Follow up: ${displayedProject.title}`,
               })}
           >

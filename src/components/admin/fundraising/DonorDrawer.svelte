@@ -1,11 +1,16 @@
 <script>
-  // One donor's full picture: lifetime giving, gift history, and the team's
-  // contact log so anyone can see the last touch before reaching out.
+  // One donor's full picture: lifetime giving, gift history, the team's
+  // contact log, and now the relationship layer — who owns this donor, the
+  // outreach CRM fields, and template-powered sends. The summary row stays
+  // read-only (it's aggregated from Zeffy imports); everything editable lives
+  // on fundraising_donor_profiles keyed by email.
   import { CalendarClock, HandCoins, Mail, Phone, Send, UserPlus } from "@lucide/svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
+  import Field from "../ui/Field.svelte";
+  import TemplateMergePanel from "./TemplateMergePanel.svelte";
   import {
     INTERACTION_KINDS,
     addInteraction,
@@ -13,11 +18,27 @@
     loadDonationsForEmail,
     loadInteractions,
   } from "../../../lib/dashboard/fundraising";
+  import {
+    CAPACITY_ESTIMATES,
+    CONTACT_METHODS,
+    loadDonorProfile,
+    normalizeDonorEmail,
+    upsertDonorProfile,
+  } from "../../../lib/dashboard/fundraisingCrm";
 
   export let supabase;
   export let donor = null;
+  export let teamMembers = [];
+  export let templates = [];
+  export let currentUserId = "";
+  export let currentUserName = "";
   export let onClose = () => {};
   export let onAssignTask = () => {};
+  export let onProfileSaved = () => {};
+  export let onWorkspaceChanged = () => {};
+
+  const PROFILE_CONFLICT_MESSAGE =
+    "Someone else just updated this donor's relationship info, so their version has been loaded. Please re-apply your change.";
 
   let displayedDonor = null;
   let drawerOpen = false;
@@ -29,6 +50,21 @@
   let newInteractionKind = "note";
   let newInteractionBody = "";
   let loggingInteraction = false;
+  let loggingTemplateSend = false;
+
+  // Relationship profile state. Drafts are separate top-level variables so
+  // Svelte legacy mode tracks every read directly in the template.
+  let donorProfile = null;
+  let profileLoading = false;
+  let profileSaving = false;
+  let draftOwnerId = "";
+  let draftNextAction = "";
+  let draftNextActionDate = "";
+  let draftPreferredMethod = "";
+  let draftCapacity = "";
+  let draftAreas = "";
+  let draftWarmIntro = "";
+  let draftBoardConnection = "";
 
   $: if (donor?.email && donor.email !== displayedDonor?.email) {
     openDrawer(donor);
@@ -38,6 +74,16 @@
   $: donorTitle =
     displayedDonor?.donor_name || displayedDonor?.company_name || displayedDonor?.email || "";
   $: lastContact = interactions[0] || null;
+  $: ownerMember = teamMembers.find((member) => member.id === donorProfile?.owner_id) || null;
+  $: profileDirty =
+    draftOwnerId !== (donorProfile?.owner_id || "") ||
+    draftNextAction !== (donorProfile?.next_action || "") ||
+    draftNextActionDate !== (donorProfile?.next_action_date || "") ||
+    draftPreferredMethod !== (donorProfile?.preferred_contact_method || "") ||
+    draftCapacity !== (donorProfile?.capacity_estimate || "") ||
+    draftAreas !== (donorProfile?.areas_of_interest || "") ||
+    draftWarmIntro !== (donorProfile?.warm_intro_source || "") ||
+    draftBoardConnection !== (donorProfile?.board_connection || "");
 
   function openDrawer(nextDonor) {
     displayedDonor = nextDonor;
@@ -45,18 +91,51 @@
     newInteractionBody = "";
     drawerOpen = true;
     loadHistory(nextDonor.email);
+    loadProfile(nextDonor.email);
   }
 
   // requestClose starts the slide-out; handleClose runs after the animation
   // so the drawer content doesn't vanish mid-slide.
   function requestClose() {
+    if (profileSaving) return;
     drawerOpen = false;
   }
 
   function handleClose() {
     drawerOpen = false;
     displayedDonor = null;
+    donorProfile = null;
+    seedProfileDrafts(null);
     onClose();
+  }
+
+  function seedProfileDrafts(profile) {
+    draftOwnerId = profile?.owner_id || "";
+    draftNextAction = profile?.next_action || "";
+    draftNextActionDate = profile?.next_action_date || "";
+    draftPreferredMethod = profile?.preferred_contact_method || "";
+    draftCapacity = profile?.capacity_estimate || "";
+    draftAreas = profile?.areas_of_interest || "";
+    draftWarmIntro = profile?.warm_intro_source || "";
+    draftBoardConnection = profile?.board_connection || "";
+  }
+
+  async function loadProfile(email) {
+    profileLoading = true;
+    donorProfile = null;
+    seedProfileDrafts(null);
+
+    const { data, error } = await loadDonorProfile(supabase, email);
+
+    if (displayedDonor?.email !== email) return;
+
+    if (error) {
+      errorMessage = errorMessage || error.message;
+    } else {
+      donorProfile = data;
+      seedProfileDrafts(data);
+    }
+    profileLoading = false;
   }
 
   async function loadHistory(email) {
@@ -87,6 +166,52 @@
     interactionsLoading = false;
   }
 
+  async function saveProfile(event) {
+    event?.preventDefault();
+    if (profileSaving || !displayedDonor?.email) return;
+
+    profileSaving = true;
+    errorMessage = "";
+
+    const { data, error } = await upsertDonorProfile(supabase, {
+      email: displayedDonor.email,
+      displayName: donorTitle,
+      expectedUpdatedAt: donorProfile?.updated_at || null,
+      ownerId: draftOwnerId || null,
+      nextAction: draftNextAction,
+      nextActionDate: draftNextActionDate || null,
+      preferredContactMethod: draftPreferredMethod || null,
+      capacityEstimate: draftCapacity || null,
+      areasOfInterest: draftAreas,
+      warmIntroSource: draftWarmIntro,
+      boardConnection: draftBoardConnection,
+    });
+
+    profileSaving = false;
+
+    if (error) {
+      // A concurrent first save can beat our insert; retry as an update.
+      if (!donorProfile && error.code === "23505") {
+        await loadProfile(displayedDonor.email);
+        errorMessage = PROFILE_CONFLICT_MESSAGE;
+        return;
+      }
+      errorMessage = error.message;
+      return;
+    }
+
+    if (!data) {
+      errorMessage = PROFILE_CONFLICT_MESSAGE;
+      await loadProfile(displayedDonor.email);
+      return;
+    }
+
+    donorProfile = data;
+    seedProfileDrafts(data);
+    onProfileSaved(data);
+    onWorkspaceChanged();
+  }
+
   async function logInteraction(event) {
     event?.preventDefault();
 
@@ -110,6 +235,47 @@
     }
 
     loggingInteraction = false;
+  }
+
+  // Template send: record it in the contact log, then move any open outreach
+  // list entries for this donor from "to contact" to "contacted" so campaign
+  // progress tracks itself.
+  async function handleTemplateLogSend({ template, subject }) {
+    if (loggingTemplateSend || !displayedDonor?.email) return;
+
+    loggingTemplateSend = true;
+    errorMessage = "";
+
+    const summary = subject
+      ? `Sent "${template.title}" (subject: ${subject})`
+      : `Sent "${template.title}"`;
+
+    const { data, error } = await addInteraction(supabase, {
+      donorEmail: displayedDonor.email,
+      kind: "email",
+      body: summary,
+    });
+
+    if (error) {
+      errorMessage = error.message;
+      loggingTemplateSend = false;
+      return;
+    }
+
+    interactions = [data, ...interactions];
+
+    const { error: outreachError } = await supabase
+      .from("fundraising_outreach_items")
+      .update({ status: "contacted" })
+      .eq("donor_email", normalizeDonorEmail(displayedDonor.email))
+      .eq("status", "to_contact");
+
+    if (outreachError) {
+      errorMessage = `Logged the email, but outreach lists could not be updated: ${outreachError.message}`;
+    }
+
+    loggingTemplateSend = false;
+    onWorkspaceChanged();
   }
 
   function formatDate(value) {
@@ -162,6 +328,9 @@
         {#if lastContact}
           <Badge tone="teal">Last contact {formatDateTime(lastContact.occurred_at)}</Badge>
         {/if}
+        {#if ownerMember}
+          <Badge tone="blue">Owner: {ownerMember.full_name || ownerMember.email}</Badge>
+        {/if}
       </div>
 
       <div class="mt-4 space-y-1.5 text-sm text-ink/75">
@@ -193,6 +362,9 @@
               sourceModule: "fundraising",
               sourceLabel: `Donor: ${donorTitle}`,
               sourceLink: "#fundraising",
+              // "open:" namespace keeps manual tasks out of reach of the
+              // workspace sync trigger, which owns bare fundraising_donor refs.
+              sourceRef: `open:fundraising_donor:${normalizeDonorEmail(displayedDonor.email)}`,
               title: `Follow up with ${donorTitle}`,
             })}
         >
@@ -203,6 +375,119 @@
       {#if errorMessage}
         <Banner tone="error" message={errorMessage} class="mt-4" />
       {/if}
+
+      <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="donor-relationship-title">
+        <h4 id="donor-relationship-title" class="font-bold text-ink">Relationship</h4>
+        {#if profileLoading}
+          <p class="mt-2 text-sm text-ink/55">Loading relationship info…</p>
+        {:else}
+          <form class="mt-3 space-y-3" onsubmit={saveProfile}>
+            <Field label="Relationship owner" id="donor-owner" hint="Who on the team manages this donor. They'll see it in their Workspace.">
+              <select id="donor-owner" class="select" bind:value={draftOwnerId} disabled={profileSaving}>
+                <option value="">Unassigned</option>
+                {#each teamMembers as member (member.id)}
+                  <option value={member.id}>
+                    {member.full_name || member.email}{member.id === currentUserId ? " (me)" : ""}
+                  </option>
+                {/each}
+              </select>
+            </Field>
+
+            <div class="grid grid-cols-[1fr_auto] gap-3">
+              <Field label="Next action" id="donor-next-action">
+                <input
+                  id="donor-next-action"
+                  type="text"
+                  class="input"
+                  placeholder="e.g. Invite to the gala, schedule a call"
+                  bind:value={draftNextAction}
+                  disabled={profileSaving}
+                />
+              </Field>
+              <Field label="By when" id="donor-next-action-date">
+                <input
+                  id="donor-next-action-date"
+                  type="date"
+                  class="input"
+                  bind:value={draftNextActionDate}
+                  disabled={profileSaving}
+                />
+              </Field>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <Field label="Preferred contact" id="donor-preferred-method">
+                <select id="donor-preferred-method" class="select" bind:value={draftPreferredMethod} disabled={profileSaving}>
+                  <option value="">Not set</option>
+                  {#each CONTACT_METHODS as method (method.value)}
+                    <option value={method.value}>{method.label}</option>
+                  {/each}
+                </select>
+              </Field>
+              <Field label="Capacity estimate" id="donor-capacity">
+                <select id="donor-capacity" class="select" bind:value={draftCapacity} disabled={profileSaving}>
+                  <option value="">Not set</option>
+                  {#each CAPACITY_ESTIMATES as estimate (estimate.value)}
+                    <option value={estimate.value}>{estimate.label}</option>
+                  {/each}
+                </select>
+              </Field>
+            </div>
+
+            <Field label="Areas of interest" id="donor-areas">
+              <input
+                id="donor-areas"
+                type="text"
+                class="input"
+                placeholder="Youth, wellness, equity, education…"
+                bind:value={draftAreas}
+                disabled={profileSaving}
+              />
+            </Field>
+
+            <div class="grid grid-cols-2 gap-3">
+              <Field label="Warm intro source" id="donor-warm-intro" hint="Who connected you?">
+                <input
+                  id="donor-warm-intro"
+                  type="text"
+                  class="input"
+                  bind:value={draftWarmIntro}
+                  disabled={profileSaving}
+                />
+              </Field>
+              <Field label="Board connection" id="donor-board-connection" hint="Which board member knows them?">
+                <input
+                  id="donor-board-connection"
+                  type="text"
+                  class="input"
+                  bind:value={draftBoardConnection}
+                  disabled={profileSaving}
+                />
+              </Field>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              class="w-full"
+              loading={profileSaving}
+              disabled={!profileDirty}
+            >
+              {profileSaving ? "Saving" : "Save relationship info"}
+            </Button>
+          </form>
+        {/if}
+      </section>
+
+      <div class="mt-5">
+        <TemplateMergePanel
+          donor={displayedDonor}
+          {templates}
+          {currentUserName}
+          logging={loggingTemplateSend}
+          onLogSend={handleTemplateLogSend}
+        />
+      </div>
 
       <section class="mt-5 rounded-control border border-ink/8 bg-white p-4" aria-labelledby="donor-log-title">
         <h4 id="donor-log-title" class="font-bold text-ink">Contact log</h4>

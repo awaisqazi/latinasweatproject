@@ -338,6 +338,9 @@
               sourceModule: "fundraising",
               sourceLabel: `Prospect: ${displayedProspect.name}`,
               sourceLink: "#fundraising",
+              // "open:" namespace keeps manual tasks out of reach of the
+              // workspace sync trigger, which owns bare fundraising_prospect refs.
+              sourceRef: `open:fundraising_prospect:${displayedProspect.id}`,
               title: `Follow up: ${displayedProspect.name}`,
             })}
         >

@@ -84,6 +84,7 @@ export async function createTask(
     sourceModule,
     sourceLabel,
     sourceLink,
+    sourceRef,
   },
 ) {
   return supabase
@@ -98,6 +99,7 @@ export async function createTask(
       source_module: sourceModule || null,
       source_label: sourceLabel || null,
       source_link: sourceLink || null,
+      source_ref: sourceRef || null,
     })
     .select(TASK_COLUMNS)
     .single();

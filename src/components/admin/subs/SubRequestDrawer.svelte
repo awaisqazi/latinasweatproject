@@ -392,6 +392,7 @@
                 sourceModule: "subs",
                 sourceLabel: `${displayedRequest.kind === "coordinator" ? "Coverage" : "Sub"}: ${getRequestTitle(displayedRequest)} · ${formatDate(displayedRequest.date)}`,
                 sourceLink: "#subs",
+                sourceRef: `open:sub_request:${displayedRequest.id}`,
                 title: `Cover ${displayedRequest.kind === "coordinator" ? "coordinator shift" : "sub"}: ${getRequestTitle(displayedRequest)}`,
               })}
           >

@@ -78,6 +78,7 @@
       sourceModule: prefill?.sourceModule || "manual",
       sourceLabel: prefill?.sourceLabel || null,
       sourceLink: prefill?.sourceLink || null,
+      sourceRef: prefill?.sourceRef || null,
     });
 
     saving = false;
