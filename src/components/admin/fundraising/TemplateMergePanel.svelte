@@ -71,33 +71,35 @@
     });
   }
 
-  // Copy an image to the clipboard as PNG (the only type Chrome accepts) so
-  // it can be pasted straight into a compose window.
-  async function copyImage(url, index) {
+  // Copy images as an email-ready HTML snippet pointing at the hosted file.
+  // Pasting a raw picture makes Gmail re-upload it in the background, and a
+  // send (or second paste) that lands mid-upload leaves broken img-tag text
+  // in the delivered email. A hosted-image snippet pastes instantly with
+  // nothing to upload.
+  function imageHtml(url) {
+    const absolute = new URL(url, window.location.origin).href;
+    return `<img src="${absolute}" alt="${imageLabel(url)}" width="560" style="max-width:100%;height:auto;display:block;margin:12px 0;">`;
+  }
+
+  async function copyImages(urls, copiedKey) {
     copyErrorMessage = "";
     try {
-      const image = new window.Image();
-      image.crossOrigin = "anonymous";
-      await new Promise((resolve, reject) => {
-        image.onload = resolve;
-        image.onerror = () => reject(new Error("The image could not be loaded."));
-        image.src = url;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      canvas.getContext("2d").drawImage(image, 0, 0);
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-      if (!blob) throw new Error("The image could not be prepared.");
-
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      copied = `image-${index}`;
+      const html = urls.map(imageHtml).join("");
+      const text = urls
+        .map((url) => new URL(url, window.location.origin).href)
+        .join("\n");
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([text], { type: "text/plain" }),
+        }),
+      ]);
+      copied = copiedKey;
       window.clearTimeout(copiedTimer);
       copiedTimer = window.setTimeout(() => (copied = ""), 2000);
     } catch {
       copyErrorMessage =
-        "Couldn't copy the image here. Right-click it and choose Copy Image instead.";
+        "Couldn't copy here. Open the image full size and copy it from there instead.";
     }
   }
 
@@ -182,10 +184,21 @@
       </div>
       {#if attachedImages.length}
         <div class="mt-3 space-y-2">
-          <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
-            <Image class="h-3.5 w-3.5" aria-hidden="true" />
-            Paste these into the email
-          </p>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+              <Image class="h-3.5 w-3.5" aria-hidden="true" />
+              Paste these into the email
+            </p>
+            {#if attachedImages.length > 1}
+              <Button
+                size="sm"
+                icon={copied === "image-all" ? Check : Copy}
+                onclick={() => copyImages(attachedImages, "image-all")}
+              >
+                {copied === "image-all" ? "Copied" : `Copy all ${attachedImages.length} images`}
+              </Button>
+            {/if}
+          </div>
           {#each attachedImages as url, index (url)}
             <div class="rounded-control border border-ink/8 bg-canvas/40 p-2">
               <img
@@ -198,7 +211,7 @@
                   size="sm"
                   icon={copied === `image-${index}` ? Check : Copy}
                   class="w-full"
-                  onclick={() => copyImage(url, index)}
+                  onclick={() => copyImages([url], `image-${index}`)}
                 >
                   {copied === `image-${index}` ? "Copied" : "Copy image"}
                 </Button>
@@ -217,6 +230,13 @@
         </div>
       {/if}
 
+      {#if attachedImages.length}
+        <p class="mt-2 text-xs leading-5 text-ink/50">
+          Copied images paste as the hosted picture (no upload wait), so they
+          arrive intact. Paste them after the email text, then send once
+          everything shows in the draft.
+        </p>
+      {/if}
       {#if copyErrorMessage}
         <p class="mt-2 text-xs font-semibold leading-5 text-red-700">{copyErrorMessage}</p>
       {/if}
