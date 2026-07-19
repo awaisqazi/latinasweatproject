@@ -433,6 +433,10 @@
 
   async function toggleCopyApproved(checked) {
     if (!displayedProject || scheduleSaving) return;
+    if (!isCurrentUserAdmin) {
+      scheduleError = "Only marketing admins can change copy approval.";
+      return;
+    }
 
     scheduleSaving = true;
     scheduleError = "";
@@ -755,8 +759,8 @@
             <div class="min-w-0">
               <h4 id="drawer-schedule-title" class="font-bold text-ink">Schedule & approval</h4>
               <p class="mt-1 text-sm leading-6 text-ink/60">
-                Anyone on marketing can adjust these; every change is noted in
-                the timeline.
+                Anyone on marketing can adjust the dates; copy approval is up
+                to marketing admins. Every change is noted in the timeline.
               </p>
             </div>
             {#if scheduleSaving}
@@ -797,16 +801,22 @@
             </Field>
           </div>
 
-          <label class="mt-3 flex cursor-pointer items-center gap-3 rounded-control border border-ink/8 bg-canvas px-3 py-2.5 text-sm font-semibold text-ink transition hover:border-accent/30">
-            <input
-              type="checkbox"
-              class="checkbox"
-              checked={Boolean(displayedProject.copy_approved)}
-              disabled={scheduleSaving}
-              onchange={(event) => toggleCopyApproved(event.currentTarget.checked)}
-            />
-            Copy approved
-          </label>
+          {#if isCurrentUserAdmin}
+            <label class="mt-3 flex cursor-pointer items-center gap-3 rounded-control border border-ink/8 bg-canvas px-3 py-2.5 text-sm font-semibold text-ink transition hover:border-accent/30">
+              <input
+                type="checkbox"
+                class="checkbox"
+                checked={Boolean(displayedProject.copy_approved)}
+                disabled={scheduleSaving}
+                onchange={(event) => toggleCopyApproved(event.currentTarget.checked)}
+              />
+              Copy approved
+            </label>
+          {:else}
+            <p class="mt-3 rounded-control border border-ink/8 bg-canvas px-3 py-2.5 text-sm font-semibold text-ink/60">
+              Copy {displayedProject.copy_approved ? "approved" : "not approved yet"} · set by marketing admins
+            </p>
+          {/if}
         </section>
 
         <section class="mt-5 rounded-card border border-ink/8 bg-white p-4" aria-labelledby="drawer-status-title">
