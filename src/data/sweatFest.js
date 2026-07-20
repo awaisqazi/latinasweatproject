@@ -258,6 +258,53 @@ export const sweatFestColors = {
   dusk: "#e94f8a", // sunset into night: the Pachanga
 };
 
+// Public Google Form backing the native, on-theme volunteer application on
+// /sweatfest. Keep option strings character-for-character aligned with Google
+// Forms: checkbox values are matched by their labels when posted.
+export const sweatFestVolunteer = {
+  viewUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLSdtghuy_d7HXOpK9SINHCFg_nKg-a6MomOQd1mDe0eaK-iTeQ/viewform",
+  postUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLSdtghuy_d7HXOpK9SINHCFg_nKg-a6MomOQd1mDe0eaK-iTeQ/formResponse",
+  entries: {
+    fullName: "entry.871482363",
+    email: "entry.1558654196",
+    phone: "entry.1054238402",
+    shifts: "entry.2140327823",
+    roles: "entry.799969201",
+    motivation: "entry.1437478280",
+    experience: "entry.930074439",
+    accessibility: "entry.1797729039",
+    acknowledgement: "entry.699238784",
+  },
+  shifts: [
+    "6:00-8:00 AM (setup + 5K)",
+    "8:00-10:00 AM",
+    "10:00 AM-12:00 PM",
+    "12:00-2:00 PM",
+    "2:00-4:00 PM",
+    "4:00-6:00 PM",
+    "6:00-8:00 PM",
+    "8:00-10:00 PM (closing + cleanup)",
+  ],
+  roles: [
+    "Event setup",
+    "Check-in + guest welcome",
+    "5K/course support",
+    "Class + activity support",
+    "Vendor + community partner support",
+    "Hydration + hospitality",
+    "Pachanga support",
+    "Cleanup",
+    "Wherever needed",
+  ],
+  acknowledgements: [
+    "I understand that this application is not a guarantee of placement.",
+    "I agree to attend required pre-event training if selected.",
+    "I consent to being contacted by the Latina Sweat Project regarding selection, scheduling, and training.",
+  ],
+};
+
 // Papel picado bunting, tiled as a CSS background by the `.sf-picado`
 // utility (see global.css). Each flag is a single evenodd path so the
 // diamond cutouts are true holes and the strip works over any background:

@@ -12,6 +12,7 @@ import {
   sweatFestImpactIntro,
   sweatFestImpact,
   sweatFestColors,
+  sweatFestVolunteer,
   sweatFestPicadoUri,
 } from "@/data/sweatFest";
 
@@ -415,7 +416,7 @@ const eventJsonLd = {
         </div>
 
         <p class="sf-rise mt-7 text-sm font-semibold text-medium-gray" style="animation-delay: 0.5s;">
-          Interested in partnering? <a href="#sponsors" class="font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
+          Want to help make the day happen? <a href="#volunteer" class="font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Apply to volunteer</a>. Interested in partnering? <a href="#sponsors" class="font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
         </p>
       </div>
 
@@ -646,6 +647,288 @@ const eventJsonLd = {
         <p class="reveal mt-12 text-center text-sm font-bold uppercase tracking-[0.14em] text-medium-gray">
           {sweatFest.doorsLine}
         </p>
+      </div>
+    </section>
+
+    {/* ===================== VOLUNTEER: HIDDEN NATIVE FORM =====================
+        The Google Form stays as the response store, but its UI is not embedded.
+        This native application is collapsed until requested and posts the exact
+        Google entry ids into a hidden response frame. */}
+    <section
+      id="volunteer"
+      class="relative overflow-hidden bg-[#fff6ee] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+    >
+      <div
+        class="absolute inset-x-0 top-0 h-1"
+        style="background: linear-gradient(90deg, var(--sf-sunrise), var(--sf-ember), var(--sf-dusk));"
+        aria-hidden="true"
+      ></div>
+      <div class="pointer-events-none absolute -left-24 top-24 h-64 w-64 rounded-full bg-[var(--sf-sunrise)]/15 blur-3xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-[var(--sf-dusk)]/10 blur-3xl" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal">
+            <span class="sf-stamp rotate-[-1deg] px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.ember)};`}>
+              Exclusive volunteer opportunity
+            </span>
+          </p>
+          <h2
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            style="transition-delay: 90ms;"
+          >
+            Join the crew
+          </h2>
+          <div class="reveal mx-auto mt-4 h-3 w-32" style="transition-delay: 150ms;" set:html={squiggle(sweatFestColors.dusk)} />
+          <p
+            class="reveal mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-medium-gray"
+            style="transition-delay: 210ms;"
+          >
+            Help welcome our comunidad, support the run and classes, and carry
+            Sweat Fest from first setup to final cleanup.
+          </p>
+        </div>
+
+        <div class="reveal mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-3" style="transition-delay: 260ms;">
+          {
+            [
+              ["2-hour shifts", "Choose every time you can attend"],
+              ["Training required", "Selected volunteers train before the event"],
+              ["Approval required", "Applying does not guarantee placement"],
+            ].map(([title, detail], index) => (
+              <div
+                class="sf-note bg-[#fffdf6] px-5 py-5 text-center"
+                style={`--sf-note-tilt: ${[-0.7, 0.5, -0.4][index]}deg;`}
+              >
+                <p class="font-slab text-lg uppercase tracking-wide text-off-black">{title}</p>
+                <p class="mt-1.5 text-sm leading-relaxed text-medium-gray">{detail}</p>
+              </div>
+            ))
+          }
+        </div>
+
+        <details class="sf-volunteer-details reveal mx-auto mt-10 max-w-5xl" style="transition-delay: 320ms;">
+          <summary class="sf-btn group flex cursor-pointer items-center justify-between gap-5 bg-off-black px-6 py-5 text-left text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4 sm:px-8">
+            <span>
+              <span class="block font-slab text-xl uppercase tracking-wide sm:text-2xl">Apply to volunteer</span>
+              <span class="mt-1 block text-sm font-semibold text-white/70">The application takes about five minutes.</span>
+            </span>
+            <svg class="sf-volunteer-chevron h-6 w-6 flex-none text-[var(--sf-sunrise)] transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+
+          <div class="sf-volunteer-sheet border-x-2 border-b-2 border-off-black bg-[#fffdf6] px-5 py-8 sm:px-8 lg:px-10">
+            <div class="rounded-md border-2 border-dashed border-[var(--sf-ember)] bg-[var(--sf-ember)]/5 p-5">
+              <p class="font-extrabold text-off-black">Before you apply</p>
+              <p class="mt-2 text-sm leading-relaxed text-medium-gray">
+                This is an application, not a confirmed assignment. Our team
+                reviews every submission. If selected, you must attend a
+                required pre-event training before volunteering at Sweat Fest.
+              </p>
+            </div>
+
+            <iframe
+              name="sf-volunteer-submit"
+              title="Sweat Fest volunteer application response"
+              class="hidden"
+              tabindex="-1"
+              aria-hidden="true"
+              data-sf-volunteer-frame
+            ></iframe>
+
+            <form
+              action={sweatFestVolunteer.postUrl}
+              method="POST"
+              target="sf-volunteer-submit"
+              class="mt-8 space-y-9"
+              data-sf-volunteer-form
+            >
+              <input type="hidden" name="fvv" value="1" />
+              <input type="hidden" name="pageHistory" value="0" />
+
+              <fieldset>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Your information</legend>
+                <div class="mt-5 grid gap-5 md:grid-cols-2">
+                  <label class="block">
+                    <span class="text-sm font-extrabold text-off-black">Full name <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <input
+                      type="text"
+                      name={sweatFestVolunteer.entries.fullName}
+                      autocomplete="name"
+                      required
+                      class="sf-volunteer-input mt-2"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-sm font-extrabold text-off-black">Best email <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <input
+                      type="email"
+                      name={sweatFestVolunteer.entries.email}
+                      autocomplete="email"
+                      required
+                      class="sf-volunteer-input mt-2"
+                    />
+                  </label>
+                  <label class="block md:col-span-2">
+                    <span class="text-sm font-extrabold text-off-black">Mobile phone <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <input
+                      type="tel"
+                      name={sweatFestVolunteer.entries.phone}
+                      autocomplete="tel"
+                      inputmode="tel"
+                      required
+                      class="sf-volunteer-input mt-2 md:max-w-md"
+                    />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset data-sf-required-group="shifts" aria-describedby="sf-shift-help sf-shift-error">
+                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">
+                  Your availability <span class="text-[var(--sf-dusk)]">*</span>
+                </legend>
+                <p id="sf-shift-help" class="mt-2 max-w-3xl text-sm leading-relaxed text-medium-gray">
+                  Select <strong class="text-off-black">every two-hour shift</strong>
+                  you can genuinely attend, even if you have a preference. More
+                  availability gives our team the best chance of placing you.
+                </p>
+                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                  {
+                    sweatFestVolunteer.shifts.map((shift, index) => (
+                      <label class="sf-volunteer-choice">
+                        <input
+                          type="checkbox"
+                          name={sweatFestVolunteer.entries.shifts}
+                          value={shift}
+                          class="h-5 w-5 flex-none accent-[var(--sf-ember)]"
+                          data-sf-shift
+                        />
+                        <span>
+                          <span class="block font-bold text-off-black">{shift}</span>
+                          {(index === 0 || index === sweatFestVolunteer.shifts.length - 1) && (
+                            <span class="mt-0.5 block text-xs text-medium-gray">
+                              {index === 0 ? "Includes early event setup" : "Includes closing cleanup"}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    ))
+                  }
+                </div>
+                <p id="sf-shift-error" class="mt-3 hidden text-sm font-bold text-[var(--sf-dusk)]" data-sf-shift-error role="alert">
+                  Choose at least one shift you are available to attend.
+                </p>
+              </fieldset>
+
+              <fieldset>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Where you can help</legend>
+                <p class="mt-2 text-sm leading-relaxed text-medium-gray">Optional - select every role you would feel comfortable supporting.</p>
+                <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {
+                    sweatFestVolunteer.roles.map((role) => (
+                      <label class="sf-volunteer-choice">
+                        <input
+                          type="checkbox"
+                          name={sweatFestVolunteer.entries.roles}
+                          value={role}
+                          class="h-5 w-5 flex-none accent-[var(--sf-dusk)]"
+                        />
+                        <span class="font-bold text-off-black">{role}</span>
+                      </label>
+                    ))
+                  }
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Tell us about you</legend>
+                <div class="mt-5 space-y-5">
+                  <label class="block">
+                    <span class="text-sm font-extrabold text-off-black">Why would you like to volunteer? <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <textarea
+                      name={sweatFestVolunteer.entries.motivation}
+                      rows="4"
+                      required
+                      class="sf-volunteer-input mt-2 resize-y"
+                    ></textarea>
+                  </label>
+                  <label class="block">
+                    <span class="text-sm font-extrabold text-off-black">Relevant volunteer, event, fitness, wellness, or community experience <span class="font-normal text-medium-gray">(optional)</span></span>
+                    <textarea
+                      name={sweatFestVolunteer.entries.experience}
+                      rows="3"
+                      class="sf-volunteer-input mt-2 resize-y"
+                    ></textarea>
+                  </label>
+                  <label class="block">
+                    <span class="text-sm font-extrabold text-off-black">Accessibility needs, scheduling constraints, or anything else we should know <span class="font-normal text-medium-gray">(optional)</span></span>
+                    <textarea
+                      name={sweatFestVolunteer.entries.accessibility}
+                      rows="3"
+                      class="sf-volunteer-input mt-2 resize-y"
+                    ></textarea>
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">
+                  Volunteer acknowledgement <span class="text-[var(--sf-dusk)]">*</span>
+                </legend>
+                <p class="mt-2 text-sm leading-relaxed text-medium-gray">Check all three statements to submit your application.</p>
+                <div class="mt-5 space-y-3">
+                  {
+                    sweatFestVolunteer.acknowledgements.map((acknowledgement) => (
+                      <label class="sf-volunteer-choice">
+                        <input
+                          type="checkbox"
+                          name={sweatFestVolunteer.entries.acknowledgement}
+                          value={acknowledgement}
+                          required
+                          class="h-5 w-5 flex-none accent-[var(--sf-ember)]"
+                        />
+                        <span class="text-sm font-semibold leading-relaxed text-off-black">{acknowledgement}</span>
+                      </label>
+                    ))
+                  }
+                </div>
+              </fieldset>
+
+              <div class="border-t-2 border-dashed border-off-black/25 pt-7 text-center">
+                <button
+                  type="submit"
+                  class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto"
+                  data-sf-volunteer-submit
+                  data-conversion-event="sweatfest_volunteer_apply"
+                  data-conversion-context="sweatfest_page_volunteer_form"
+                >
+                  Send my application
+                  <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" set:html={arrowRight} />
+                </button>
+                <p class="mt-4 text-xs leading-relaxed text-medium-gray">
+                  Your application is reviewed by The Latina Sweat Project team.
+                  Prefer Google's form? <a href={sweatFestVolunteer.viewUrl} target="_blank" rel="noopener noreferrer" class="font-bold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4">Open it directly</a>.
+                </p>
+              </div>
+            </form>
+
+            <div
+              class="mt-8 hidden rounded-md border-2 border-[var(--sf-sunrise)] bg-[var(--sf-sunrise)]/10 p-6 text-center"
+              data-sf-volunteer-success
+              role="status"
+              aria-live="polite"
+              tabindex="-1"
+            >
+              <p class="font-slab text-2xl uppercase tracking-wide text-off-black">Application received</p>
+              <p class="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-medium-gray">
+                Thank you for offering your time. This is not a confirmed
+                placement; our team will contact approved volunteers with a
+                shift assignment and required training details.
+              </p>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -1205,6 +1488,64 @@ const eventJsonLd = {
     box-shadow: 6px 8px 0 rgba(30, 30, 30, 0.14);
   }
 
+  /* Volunteer application: the Google-backed form wears the same paper,
+     border, and ink language as the rest of the festival page. */
+  .sf-volunteer-details > summary {
+    list-style: none;
+  }
+  .sf-volunteer-details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .sf-volunteer-details[open] .sf-volunteer-chevron {
+    transform: rotate(180deg);
+  }
+  .sf-volunteer-sheet {
+    box-shadow: 8px 9px 0 rgba(30, 30, 30, 0.14);
+  }
+  .sf-volunteer-input {
+    display: block;
+    width: 100%;
+    border: 2px solid rgba(30, 30, 30, 0.72);
+    border-radius: 5px;
+    background: #fffaf1;
+    padding: 0.8rem 0.9rem;
+    color: #1e1e1e;
+    font: inherit;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease,
+      background-color 0.16s ease;
+  }
+  .sf-volunteer-input:focus {
+    outline: none;
+    border-color: var(--sf-dusk);
+    background: #fffdf6;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-dusk) 22%, transparent);
+  }
+  .sf-volunteer-choice {
+    display: flex;
+    cursor: pointer;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border: 1.5px solid rgba(30, 30, 30, 0.3);
+    border-radius: 5px;
+    background: #fffaf1;
+    padding: 0.85rem 0.9rem;
+    transition: border-color 0.16s ease, background-color 0.16s ease,
+      transform 0.16s ease;
+  }
+  .sf-volunteer-choice:hover {
+    border-color: rgba(30, 30, 30, 0.72);
+    background: #fffdf6;
+    transform: translateY(-1px);
+  }
+  .sf-volunteer-choice:has(input:focus-visible) {
+    outline: 3px solid color-mix(in srgb, var(--sf-dusk) 28%, transparent);
+    outline-offset: 2px;
+  }
+  .sf-volunteer-choice:has(input:checked) {
+    border-color: var(--sf-ember);
+    background: color-mix(in srgb, var(--sf-sunrise) 13%, #fffdf6);
+  }
+
   /* Lotería card: heavy outer border, hairline inner frame, hard shadow. */
   .sf-loteria {
     background: #fffdf6;
@@ -1517,5 +1858,63 @@ const eventJsonLd = {
     );
 
     nums.forEach((el) => observer.observe(el));
+  })();
+
+  // The on-page application posts directly to Google Forms in a hidden
+  // response frame. Checkboxes need a small group validator because native
+  // HTML `required` would otherwise require one specific shift, not any shift.
+  (() => {
+    const form = document.querySelector<HTMLFormElement>(
+      "[data-sf-volunteer-form]",
+    );
+    const frame = document.querySelector<HTMLIFrameElement>(
+      "[data-sf-volunteer-frame]",
+    );
+    const success = document.querySelector<HTMLElement>(
+      "[data-sf-volunteer-success]",
+    );
+    const shiftError = document.querySelector<HTMLElement>(
+      "[data-sf-shift-error]",
+    );
+    const submitButton = document.querySelector<HTMLButtonElement>(
+      "[data-sf-volunteer-submit]",
+    );
+    const shifts = Array.from(
+      document.querySelectorAll<HTMLInputElement>("[data-sf-shift]"),
+    );
+
+    if (!form || !frame || !success || !shiftError || !submitButton) return;
+
+    let submitted = false;
+    const hasShift = () => shifts.some((input) => input.checked);
+    const clearShiftError = () => {
+      if (!hasShift()) return;
+      shiftError.classList.add("hidden");
+      shifts.forEach((input) => input.removeAttribute("aria-invalid"));
+    };
+
+    shifts.forEach((input) => input.addEventListener("change", clearShiftError));
+
+    form.addEventListener("submit", (event) => {
+      if (!hasShift()) {
+        event.preventDefault();
+        shiftError.classList.remove("hidden");
+        shifts.forEach((input) => input.setAttribute("aria-invalid", "true"));
+        shifts[0]?.focus();
+        return;
+      }
+
+      submitted = true;
+      submitButton.disabled = true;
+      submitButton.setAttribute("aria-busy", "true");
+      submitButton.textContent = "Sending application...";
+    });
+
+    frame.addEventListener("load", () => {
+      if (!submitted) return;
+      form.classList.add("hidden");
+      success.classList.remove("hidden");
+      success.focus({ preventScroll: true });
+    });
   })();
 </script>
