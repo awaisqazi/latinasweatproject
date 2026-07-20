@@ -1,0 +1,606 @@
+---
+import Layout from "../layouts/Layout.astro";
+import graduationInvite from "../data/graduationInvite.js";
+
+const googleFormUrl =
+  "https://docs.google.com/forms/d/e/1FAIpQLScLZetbOVHg4EUpYnTc8BvPSZqmSjlGx_kFc0I8QFCHCOqnYA/viewform?usp=header";
+const googleFormAction =
+  "https://docs.google.com/forms/d/e/1FAIpQLScLZetbOVHg4EUpYnTc8BvPSZqmSjlGx_kFc0I8QFCHCOqnYA/formResponse";
+---
+
+<Layout
+  title="YTT Graduation RSVP | The Latina Sweat Project"
+  description="Private RSVP for the Latina Sweat Project Yoga Teacher Training graduation ceremony."
+  robots="noindex, nofollow, noarchive"
+  hideFooter={true}
+>
+  <main class="graduation-page">
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <section class="event-shell" aria-labelledby="graduation-title">
+      <div class="invite-panel">
+        <p class="eyebrow">A private celebration</p>
+        <img
+          class="invite-art"
+          src={graduationInvite}
+          width="360"
+          height="503"
+          alt="Invitation to the YTT 2025 and 2026 graduation ceremony on Friday, August 7, 2026 at 6:00 PM at LSP Studio."
+        />
+        <div class="event-facts" aria-label="Event details">
+          <div>
+            <span>Date</span>
+            <strong>Friday, August 7, 2026</strong>
+          </div>
+          <div>
+            <span>Time</span>
+            <strong>6:00 PM</strong>
+          </div>
+          <div>
+            <span>Location</span>
+            <strong>LSP Studio</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="rsvp-panel">
+        <div class="rsvp-heading">
+          <p class="eyebrow">YTT cohorts 2025 + 2026</p>
+          <h1 id="graduation-title">Will you celebrate with us?</h1>
+          <p>
+            Join us as we honor the dedication, growth, and accomplishments of
+            our Yoga Teacher Training graduates.
+          </p>
+        </div>
+
+        <form
+          id="graduation-rsvp"
+          class="rsvp-form"
+          action={googleFormAction}
+          method="POST"
+          target="google-form-response"
+        >
+          <label class="field">
+            <span>Full name</span>
+            <input
+              type="text"
+              name="entry.2092325669"
+              autocomplete="name"
+              required
+              placeholder="Your first and last name"
+            />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="emailAddress"
+              autocomplete="email"
+              required
+              placeholder="you@example.com"
+            />
+          </label>
+
+          <fieldset class="attendance-fieldset">
+            <legend>Can you attend?</legend>
+            <div class="attendance-options">
+              <label class="attendance-option">
+                <input type="radio" name="attendance" value="yes" required />
+                <span>
+                  <strong>Joyfully accepting</strong>
+                  <small>Yes, I’ll be there</small>
+                </span>
+              </label>
+              <label class="attendance-option">
+                <input type="radio" name="attendance" value="no" required />
+                <span>
+                  <strong>Sending my love</strong>
+                  <small>I’m unable to attend</small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <input id="google-yes-entry" type="hidden" value="Option 1" disabled />
+          <input id="google-no-entry" type="hidden" value="Option 1" disabled />
+          <input type="hidden" name="fvv" value="1" />
+          <input type="hidden" name="pageHistory" value="0" />
+
+          <button class="submit-button" type="submit">
+            <span class="button-label">Send RSVP</span>
+            <span class="button-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <p class="form-note">
+            Your response is recorded in our private Google Form. Having
+            trouble? <a href={googleFormUrl} target="_blank" rel="noopener noreferrer">Open the original form</a>.
+          </p>
+        </form>
+
+        <div id="rsvp-success" class="success-card" hidden aria-live="polite">
+          <span class="success-mark" aria-hidden="true">✓</span>
+          <p class="eyebrow">RSVP received</p>
+          <h2>Thank you, graduate!</h2>
+          <p>We can’t wait to celebrate this milestone with our YTT community.</p>
+          <button id="send-another" type="button">Send another response</button>
+        </div>
+      </div>
+    </section>
+
+    <iframe
+      id="google-form-response"
+      name="google-form-response"
+      title="Google Form submission response"
+      hidden
+    ></iframe>
+  </main>
+</Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("#graduation-rsvp");
+  const responseFrame = document.querySelector<HTMLIFrameElement>(
+    "#google-form-response",
+  );
+  const successCard = document.querySelector<HTMLElement>("#rsvp-success");
+  const sendAnother = document.querySelector<HTMLButtonElement>("#send-another");
+  const yesEntry = document.querySelector<HTMLInputElement>("#google-yes-entry");
+  const noEntry = document.querySelector<HTMLInputElement>("#google-no-entry");
+  let submissionStarted = false;
+
+  form?.addEventListener("submit", () => {
+    const attendance = new FormData(form).get("attendance");
+
+    if (yesEntry && noEntry) {
+      yesEntry.disabled = attendance !== "yes";
+      noEntry.disabled = attendance !== "no";
+      yesEntry.name = attendance === "yes" ? "entry.80277954" : "";
+      noEntry.name = attendance === "no" ? "entry.323787278" : "";
+    }
+
+    submissionStarted = true;
+    const button = form.querySelector<HTMLButtonElement>("button[type='submit']");
+    if (button) {
+      button.disabled = true;
+      const label = button.querySelector<HTMLElement>(".button-label");
+      if (label) label.textContent = "Sending…";
+    }
+  });
+
+  responseFrame?.addEventListener("load", () => {
+    if (!submissionStarted || !form || !successCard) return;
+    form.hidden = true;
+    successCard.hidden = false;
+    successCard.focus({ preventScroll: true });
+    window.trackConversion?.("ytt_graduation_rsvp_submit", {
+      event_category: "internal_event",
+    });
+  });
+
+  sendAnother?.addEventListener("click", () => {
+    if (!form || !successCard) return;
+    form.reset();
+    submissionStarted = false;
+    successCard.hidden = true;
+    form.hidden = false;
+    const button = form.querySelector<HTMLButtonElement>("button[type='submit']");
+    if (button) {
+      button.disabled = false;
+      const label = button.querySelector<HTMLElement>(".button-label");
+      if (label) label.textContent = "Send RSVP";
+    }
+    form.querySelector<HTMLInputElement>("input")?.focus();
+  });
+</script>
+
+<style>
+  :global(body) {
+    background: #171616;
+  }
+
+  .graduation-page {
+    --ink: #1c1a19;
+    --paper: #f6efe3;
+    --gold: #d79b47;
+    --gold-light: #f0c57c;
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 4vw, 4rem);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(215, 155, 71, 0.12), transparent 30rem),
+      radial-gradient(circle at 85% 85%, rgba(240, 197, 124, 0.1), transparent 28rem),
+      #171616;
+    color: var(--paper);
+  }
+
+  .ambient {
+    position: absolute;
+    width: 22rem;
+    height: 22rem;
+    border: 1px solid rgba(215, 155, 71, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .ambient-one {
+    top: -14rem;
+    right: -6rem;
+  }
+
+  .ambient-two {
+    bottom: -16rem;
+    left: -7rem;
+  }
+
+  .event-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(17rem, 0.8fr) minmax(22rem, 1.2fr);
+    width: min(68rem, 100%);
+    overflow: hidden;
+    border: 1px solid rgba(215, 155, 71, 0.42);
+    border-radius: 1.5rem;
+    background: rgba(28, 26, 25, 0.94);
+    box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(16px);
+  }
+
+  .invite-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-right: 1px solid rgba(215, 155, 71, 0.25);
+    background: #201e1e;
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--gold-light);
+    font-family: "Rubik", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .invite-art {
+    width: min(100%, 22rem);
+    height: auto;
+    margin-inline: auto;
+    border: 1px solid rgba(215, 155, 71, 0.35);
+    border-radius: 0.85rem;
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.34);
+  }
+
+  .event-facts {
+    display: grid;
+    grid-template-columns: 1.45fr 0.65fr 0.85fr;
+    gap: 0.75rem;
+  }
+
+  .event-facts div {
+    min-width: 0;
+  }
+
+  .event-facts span,
+  .event-facts strong {
+    display: block;
+    font-family: "Rubik", sans-serif;
+  }
+
+  .event-facts span {
+    margin-bottom: 0.2rem;
+    color: rgba(246, 239, 227, 0.48);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .event-facts strong {
+    color: var(--paper);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .rsvp-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 4.75rem);
+  }
+
+  .rsvp-heading {
+    margin-bottom: 2.25rem;
+  }
+
+  .rsvp-heading h1 {
+    max-width: 10ch;
+    margin: 0.55rem 0 1rem;
+    color: var(--paper);
+    font-family: "Playfair Display", serif;
+    font-size: clamp(2.55rem, 5vw, 4.8rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+  }
+
+  .rsvp-heading > p:last-child {
+    max-width: 34rem;
+    margin: 0;
+    color: rgba(246, 239, 227, 0.7);
+    font-family: "Rubik", sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .rsvp-form {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .field > span,
+  .attendance-fieldset legend {
+    color: rgba(246, 239, 227, 0.82);
+    font-family: "Rubik", sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .field input {
+    width: 100%;
+    border: 1px solid rgba(246, 239, 227, 0.2);
+    border-radius: 0.7rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.035);
+    padding: 0.9rem 1rem;
+    color: var(--paper);
+    font-family: "Rubik", sans-serif;
+    font-size: 1rem;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .field input::placeholder {
+    color: rgba(246, 239, 227, 0.32);
+  }
+
+  .field input:focus {
+    border-color: var(--gold);
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow: 0 0 0 3px rgba(215, 155, 71, 0.14);
+  }
+
+  .attendance-fieldset {
+    min-width: 0;
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .attendance-fieldset legend {
+    margin-bottom: 0.55rem;
+  }
+
+  .attendance-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .attendance-option {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .attendance-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .attendance-option span {
+    display: grid;
+    gap: 0.15rem;
+    height: 100%;
+    border: 1px solid rgba(246, 239, 227, 0.18);
+    border-radius: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+
+  .attendance-option strong,
+  .attendance-option small {
+    font-family: "Rubik", sans-serif;
+  }
+
+  .attendance-option strong {
+    color: var(--paper);
+    font-size: 0.82rem;
+  }
+
+  .attendance-option small {
+    color: rgba(246, 239, 227, 0.5);
+    font-size: 0.7rem;
+  }
+
+  .attendance-option:hover span,
+  .attendance-option input:focus-visible + span {
+    border-color: rgba(215, 155, 71, 0.72);
+    transform: translateY(-1px);
+  }
+
+  .attendance-option input:checked + span {
+    border-color: var(--gold);
+    background: rgba(215, 155, 71, 0.13);
+    box-shadow: inset 0 0 0 1px rgba(215, 155, 71, 0.25);
+  }
+
+  .submit-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 0.25rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    padding: 0.95rem 1.1rem;
+    color: #1a1817;
+    cursor: pointer;
+    font-family: "Rubik", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  }
+
+  .submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0.9rem 2rem rgba(215, 155, 71, 0.2);
+  }
+
+  .submit-button:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
+  }
+
+  .submit-button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
+
+  .button-arrow {
+    font-size: 1.25rem;
+  }
+
+  .form-note {
+    margin: -0.2rem 0 0;
+    color: rgba(246, 239, 227, 0.38);
+    font-family: "Rubik", sans-serif;
+    font-size: 0.7rem;
+    line-height: 1.55;
+    text-align: center;
+  }
+
+  .form-note a {
+    color: var(--gold-light);
+    text-underline-offset: 0.18em;
+  }
+
+  .success-card {
+    outline: none;
+  }
+
+  .success-mark {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(215, 155, 71, 0.5);
+    border-radius: 50%;
+    background: rgba(215, 155, 71, 0.12);
+    color: var(--gold-light);
+    font-size: 1.4rem;
+  }
+
+  .success-card h2 {
+    margin: 0.55rem 0 0.75rem;
+    color: var(--paper);
+    font-family: "Playfair Display", serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .success-card > p:last-of-type {
+    max-width: 30rem;
+    margin: 0 0 1.5rem;
+    color: rgba(246, 239, 227, 0.68);
+    font-family: "Rubik", sans-serif;
+    line-height: 1.7;
+  }
+
+  .success-card button {
+    border: 0;
+    border-bottom: 1px solid rgba(240, 197, 124, 0.55);
+    background: none;
+    padding: 0.3rem 0;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-family: "Rubik", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 800px) {
+    .graduation-page {
+      padding: 0;
+    }
+
+    .event-shell {
+      grid-template-columns: 1fr;
+      min-height: 100vh;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .invite-panel {
+      border-right: 0;
+      border-bottom: 1px solid rgba(215, 155, 71, 0.25);
+      padding: 1.5rem;
+    }
+
+    .invite-art {
+      width: min(100%, 20rem);
+    }
+
+    .rsvp-panel {
+      padding: 2.25rem 1.5rem 3rem;
+    }
+
+    .rsvp-heading h1 {
+      max-width: 12ch;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .event-facts {
+      grid-template-columns: 1fr 0.55fr 0.75fr;
+      gap: 0.55rem;
+    }
+
+    .attendance-options {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

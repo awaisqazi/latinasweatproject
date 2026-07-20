@@ -18,6 +18,7 @@ export default defineConfig({
           '/marketing', '/forms', '/register', '/account',
           '/intake', '/donate', '/lspgala', '/galaraffle',
           '/silentauction', '/teachertrainingclasses', '/teach/',
+          '/graduation',
         ];
         return !excluded.some((path) => page.includes(path));
       },
