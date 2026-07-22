@@ -1,0 +1,30 @@
+---
+// Unlisted volunteer tool: the gala invite email, ready to personalize and
+// copy. Shared by link only (noindex); no login and no tracking.
+import Layout from "../layouts/Layout.astro";
+import GalaInviteKit from "../components/gala/GalaInviteKit.svelte";
+---
+
+<Layout
+  title="Gala Invite Kit | The Latina Sweat Project"
+  description="Copy-and-send invitation kit for The Latina Sweat Project Annual Gala."
+  robots="noindex, nofollow, noarchive"
+  hideFooter={true}
+>
+  <main class="min-h-screen bg-[#101a2c]">
+    <header class="mx-auto w-full max-w-3xl px-4 pb-8 pt-14 text-center">
+      <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#ffbd59]">
+        The Latina Sweat Project
+      </p>
+      <h1 class="mt-2 font-serif text-3xl font-bold text-white sm:text-4xl">
+        Gala Invite Kit
+      </h1>
+      <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/70">
+        Help us fill the room on September 25. Personalize the invitation
+        below, copy it with one click, and send it from your own email to the
+        people you'd love to see there.
+      </p>
+    </header>
+    <GalaInviteKit client:only="svelte" />
+  </main>
+</Layout>
