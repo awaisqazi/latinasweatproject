@@ -39,12 +39,44 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     },
   ];
 
+  import { onMount } from "svelte";
+
   const PERSONAL_LINE_PLACEHOLDER =
     "[Add a personal line about their giving or connection to LSP.]";
+  // The sender's name is the one thing that stays constant across invites,
+  // so remember it on this device. Guest name and personal line reset per
+  // invite on purpose.
+  const SENDER_STORAGE_KEY = "lsp-gala-invite-sender";
 
   let guestName = "";
   let senderName = "";
   let personalLine = "";
+  // Reactive statements run before onMount, so gate persistence until the
+  // stored value has been loaded or the initial empty value would erase it.
+  let senderLoaded = false;
+
+  onMount(() => {
+    try {
+      senderName = localStorage.getItem(SENDER_STORAGE_KEY) || "";
+    } catch {
+      // Private browsing can block storage; the field just starts empty.
+    }
+    senderLoaded = true;
+  });
+
+  $: if (senderLoaded) persistSenderName(senderName);
+
+  function persistSenderName(value) {
+    try {
+      if (value.trim()) {
+        localStorage.setItem(SENDER_STORAGE_KEY, value.trim());
+      } else {
+        localStorage.removeItem(SENDER_STORAGE_KEY);
+      }
+    } catch {
+      // Storage unavailable; nothing to persist.
+    }
+  }
   let copied = "";
   let copiedTimer;
   let copyError = "";
