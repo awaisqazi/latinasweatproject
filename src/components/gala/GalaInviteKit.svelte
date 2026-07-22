@@ -39,14 +39,18 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     },
   ];
 
+  const PERSONAL_LINE_PLACEHOLDER =
+    "[Add a personal line about their giving or connection to LSP.]";
+
   let guestName = "";
   let senderName = "";
+  let personalLine = "";
   let copied = "";
   let copiedTimer;
   let copyError = "";
 
-  $: mergedSubject = fillTemplate(SUBJECT, guestName, senderName);
-  $: mergedBody = fillTemplate(BODY, guestName, senderName);
+  $: mergedSubject = fillTemplate(SUBJECT, guestName, senderName, personalLine);
+  $: mergedBody = fillTemplate(BODY, guestName, senderName, personalLine);
   $: bodySegments = mergedBody
     .split(/(\[[^\][]+\])/g)
     .map((part) => ({ text: part, isPlaceholder: /^\[[^\][]+\]$/.test(part) }));
@@ -54,10 +58,13 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     ...new Set(`${mergedSubject}\n${mergedBody}`.match(/\[[^\][]+\]/g) || []),
   ];
 
-  function fillTemplate(text, guest, sender) {
+  function fillTemplate(text, guest, sender, personal) {
     let out = text;
     if (guest.trim()) out = out.replaceAll("[First Name]", guest.trim());
     if (sender.trim()) out = out.replaceAll("[Your Name]", sender.trim());
+    if (personal.trim()) {
+      out = out.replaceAll(PERSONAL_LINE_PLACEHOLDER, personal.trim());
+    }
     return out;
   }
 
@@ -161,6 +168,17 @@ P.S. Your formal invitation and an overview of the evening are below.`;
           placeholder="e.g. Ana Lopez"
           bind:value={senderName}
         />
+      </label>
+      <label class="block sm:col-span-2">
+        <span class="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
+          A personal line about them (goes right into the letter)
+        </span>
+        <textarea
+          rows="2"
+          class="mt-1.5 w-full rounded-lg border border-white/15 bg-[#101a2c] px-3 py-2.5 text-white placeholder-white/30 focus:border-[#ffbd59] focus:outline-none"
+          placeholder="e.g. Your support of our teacher training scholarships last year helped four new instructors graduate."
+          bind:value={personalLine}
+        ></textarea>
       </label>
     </div>
 
