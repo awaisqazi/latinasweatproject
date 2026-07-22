@@ -62,45 +62,6 @@
     }
   }
 
-  function escapeHtml(text) {
-    return String(text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
-
-  // Copy body = the whole email in one paste: merged text plus the hosted
-  // images appended, as rich HTML (with a plain-text fallback).
-  async function copyBody() {
-    if (!attachedImages.length) {
-      await copyText("body", mergedBody);
-      return;
-    }
-
-    copyErrorMessage = "";
-    try {
-      const html =
-        `<div>${escapeHtml(mergedBody).replace(/\n/g, "<br>")}</div>` +
-        attachedImages.map(imageHtml).join("");
-      const text =
-        mergedBody +
-        "\n\n" +
-        attachedImages.map((url) => new URL(url, window.location.origin).href).join("\n");
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        }),
-      ]);
-      copied = "body";
-      window.clearTimeout(copiedTimer);
-      copiedTimer = window.setTimeout(() => (copied = ""), 2000);
-    } catch {
-      copyErrorMessage =
-        "Copying isn't available in this browser. Select the text above manually.";
-    }
-  }
-
   function handleLogSend() {
     if (!selectedTemplate) return;
     onLogSend({
@@ -110,35 +71,82 @@
     });
   }
 
-  // Copy images as an email-ready HTML snippet pointing at the hosted file.
-  // Pasting a raw picture makes Gmail re-upload it in the background, and a
-  // send (or second paste) that lands mid-upload leaves broken img-tag text
-  // in the delivered email. A hosted-image snippet pastes instantly with
-  // nothing to upload.
-  function imageHtml(url) {
-    const absolute = new URL(url, window.location.origin).href;
-    return `<img src="${absolute}" alt="${imageLabel(url)}" width="560" style="max-width:100%;height:auto;display:block;margin:12px 0;">`;
+  // Images are embedded into the copied content itself (email-sized, ~900px).
+  // Hosted-image references LOOK right but desktop Gmail's compose window
+  // refuses to load pictures from outside sites, leaving an empty alt-text
+  // box (live-tested 2026-07-22); embedded images render in the draft on
+  // both desktop and mobile. Downscaling keeps the paste light so Gmail's
+  // background attach finishes fast.
+  const MAX_COPY_WIDTH = 900;
+
+  async function renderEmailImage(src) {
+    const el = new window.Image();
+    el.crossOrigin = "anonymous";
+    await new Promise((resolve, reject) => {
+      el.onload = resolve;
+      el.onerror = () => reject(new Error("load"));
+      el.src = src;
+    });
+
+    const scale = Math.min(1, MAX_COPY_WIDTH / el.naturalWidth);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(el.naturalWidth * scale);
+    canvas.height = Math.round(el.naturalHeight * scale);
+    canvas.getContext("2d").drawImage(el, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!blob) throw new Error("encode");
+    return { blob, dataUri: canvas.toDataURL("image/png"), width: canvas.width };
   }
 
-  async function copyImages(urls, copiedKey) {
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // One-click whole email: merged body plus every template image embedded.
+  async function copyBodyWithImages() {
     copyErrorMessage = "";
     try {
-      const html = urls.map(imageHtml).join("");
-      const text = urls
-        .map((url) => new URL(url, window.location.origin).href)
-        .join("\n");
+      const rendered = [];
+      for (const url of attachedImages) {
+        rendered.push({ url, ...(await renderEmailImage(url)) });
+      }
+      const html =
+        `<div>${escapeHtml(mergedBody).replace(/\n/g, "<br>")}</div>` +
+        rendered
+          .map(
+            ({ url, dataUri, width }) =>
+              `<br><img src="${dataUri}" alt="${imageLabel(url)}" width="${Math.min(560, width)}" style="max-width:100%;height:auto;">`,
+          )
+          .join("");
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
+          "text/plain": new Blob([mergedBody], { type: "text/plain" }),
         }),
       ]);
+      copied = "body-images";
+      window.clearTimeout(copiedTimer);
+      copiedTimer = window.setTimeout(() => (copied = ""), 2000);
+    } catch {
+      copyErrorMessage =
+        "Couldn't copy everything at once here. Copy the body and each image separately below.";
+    }
+  }
+
+  async function copyPhoto(url, copiedKey) {
+    copyErrorMessage = "";
+    try {
+      const { blob } = await renderEmailImage(url);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
       copied = copiedKey;
       window.clearTimeout(copiedTimer);
       copiedTimer = window.setTimeout(() => (copied = ""), 2000);
     } catch {
       copyErrorMessage =
-        "Couldn't copy here. Open the image full size and copy it from there instead.";
+        "Couldn't copy that image here. Open it full size and copy it from there instead.";
     }
   }
 
@@ -186,7 +194,19 @@
         <p class="whitespace-pre-wrap text-sm leading-6 text-ink/80">{mergedBody}</p>
       </div>
 
-      <div class="mt-3 grid grid-cols-2 gap-2">
+      {#if attachedImages.length}
+        <Button
+          size="sm"
+          variant="primary"
+          icon={copied === "body-images" ? Check : Copy}
+          class="mt-3 w-full"
+          onclick={copyBodyWithImages}
+        >
+          {copied === "body-images" ? "Copied" : "Copy body + images"}
+        </Button>
+      {/if}
+
+      <div class="mt-2 grid grid-cols-2 gap-2">
         {#if mergedSubject}
           <Button
             size="sm"
@@ -201,9 +221,9 @@
           size="sm"
           icon={copied === "body" ? Check : Copy}
           class="w-full {mergedSubject ? '' : 'col-span-2'}"
-          onclick={copyBody}
+          onclick={() => copyText("body", mergedBody)}
         >
-          {copied === "body" ? "Copied" : attachedImages.length ? "Copy body + images" : "Copy body"}
+          {copied === "body" ? "Copied" : "Copy body"}
         </Button>
         {#if mailtoHref}
           <Button size="sm" icon={Mail} href={mailtoHref} class="w-full">
@@ -223,21 +243,10 @@
       </div>
       {#if attachedImages.length}
         <div class="mt-3 space-y-2">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
-              <Image class="h-3.5 w-3.5" aria-hidden="true" />
-              Paste these into the email
-            </p>
-            {#if attachedImages.length > 1}
-              <Button
-                size="sm"
-                icon={copied === "image-all" ? Check : Copy}
-                onclick={() => copyImages(attachedImages, "image-all")}
-              >
-                {copied === "image-all" ? "Copied" : `Copy all ${attachedImages.length} images`}
-              </Button>
-            {/if}
-          </div>
+          <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
+            <Image class="h-3.5 w-3.5" aria-hidden="true" />
+            Or paste each one separately
+          </p>
           {#each attachedImages as url, index (url)}
             <div class="rounded-control border border-ink/8 bg-canvas/40 p-2">
               <img
@@ -250,7 +259,7 @@
                   size="sm"
                   icon={copied === `image-${index}` ? Check : Copy}
                   class="w-full"
-                  onclick={() => copyImages([url], `image-${index}`)}
+                  onclick={() => copyPhoto(url, `image-${index}`)}
                 >
                   {copied === `image-${index}` ? "Copied" : "Copy image"}
                 </Button>
@@ -271,9 +280,10 @@
 
       {#if attachedImages.length}
         <p class="mt-2 text-xs leading-5 text-ink/50">
-          "Copy body + images" puts the whole email (text and pictures) on
-          your clipboard in one go. Images paste as the hosted picture with
-          nothing to upload, so what you see in the draft is what arrives.
+          "Copy body + images" drops the whole email (words and pictures) in
+          one paste. After pasting, give the draft a few seconds until the
+          pictures are fully visible before you send; your email app attaches
+          them in the background.
         </p>
       {/if}
       {#if copyErrorMessage}

@@ -112,18 +112,6 @@ P.S. Your formal invitation and an overview of the evening are below.`;
       "Copying isn't available in this browser. Select the text manually, or try Chrome or Safari.";
   }
 
-  function escapeHtml(text) {
-    return String(text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
-
-  function imageHtml(image) {
-    const absolute = new URL(image.src, window.location.origin).href;
-    return `<img src="${absolute}" alt="${image.alt}" width="560" style="max-width:100%;height:auto;display:block;margin:12px 0;">`;
-  }
-
   async function copySubject() {
     try {
       await navigator.clipboard.writeText(mergedSubject);
@@ -133,44 +121,89 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     }
   }
 
-  // The whole email in one paste: text plus both pictures, referencing the
-  // hosted images so nothing has to upload in the compose window.
-  async function copyEmail() {
+  async function copyBodyText() {
     try {
-      const html =
-        `<div>${escapeHtml(mergedBody).replace(/\n/g, "<br>")}</div>` +
-        IMAGES.map(imageHtml).join("");
-      const text =
-        mergedBody +
-        "\n\n" +
-        IMAGES.map((image) => new URL(image.src, window.location.origin).href).join("\n");
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        }),
-      ]);
-      markCopied("email");
+      await navigator.clipboard.writeText(mergedBody);
+      markCopied("body");
     } catch {
       failCopy();
     }
   }
 
-  async function copyImagesOnly() {
+  // Photos are copied as real (email-sized) pictures. Gmail's compose window
+  // refuses to display images hosted on outside sites, so linking to the
+  // hosted files is out; and full-resolution pastes upload so slowly that a
+  // quick send can corrupt the draft. Scaling to ~900px keeps the upload
+  // near-instant, which closes that gap.
+  const MAX_COPY_WIDTH = 900;
+
+  // Downscale an image to email size and return both a PNG blob and data URI.
+  async function renderEmailImage(src) {
+    const el = new window.Image();
+    el.crossOrigin = "anonymous";
+    await new Promise((resolve, reject) => {
+      el.onload = resolve;
+      el.onerror = () => reject(new Error("load"));
+      el.src = src;
+    });
+
+    const scale = Math.min(1, MAX_COPY_WIDTH / el.naturalWidth);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(el.naturalWidth * scale);
+    canvas.height = Math.round(el.naturalHeight * scale);
+    canvas.getContext("2d").drawImage(el, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!blob) throw new Error("encode");
+    return { blob, dataUri: canvas.toDataURL("image/png"), width: canvas.width };
+  }
+
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // One-click whole email: merged text plus both photos embedded directly in
+  // the copied content (no reference back to the website, so desktop Gmail's
+  // compose window can show them; nothing external to load on mobile either).
+  async function copyEverything() {
+    copyError = "";
     try {
-      const html = IMAGES.map(imageHtml).join("");
-      const text = IMAGES.map(
-        (image) => new URL(image.src, window.location.origin).href,
-      ).join("\n");
+      const rendered = [];
+      for (const image of IMAGES) {
+        rendered.push({ image, ...(await renderEmailImage(image.src)) });
+      }
+      const html =
+        `<div>${escapeHtml(mergedBody).replace(/\n/g, "<br>")}</div>` +
+        rendered
+          .map(
+            ({ image, dataUri, width }) =>
+              `<br><img src="${dataUri}" alt="${image.alt}" width="${Math.min(560, width)}" style="max-width:100%;height:auto;">`,
+          )
+          .join("");
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
+          "text/plain": new Blob([mergedBody], { type: "text/plain" }),
         }),
       ]);
-      markCopied("images");
+      markCopied("everything");
     } catch {
-      failCopy();
+      copyError =
+        "Couldn't copy everything at once in this browser. Use the buttons below to copy the text and each photo separately.";
+    }
+  }
+
+  async function copyPhoto(image, key) {
+    copyError = "";
+    try {
+      const { blob } = await renderEmailImage(image.src);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      markCopied(key);
+    } catch {
+      copyError =
+        "Couldn't copy that photo here. Open it full size (click the preview) and copy it from there instead.";
     }
   }
 </script>
@@ -224,7 +257,18 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     {/if}
 
     <h2 class="mt-7 text-lg font-bold text-[#ffbd59]">2 · Copy it</h2>
-    <div class="mt-3 grid gap-2 sm:grid-cols-3">
+    <button
+      type="button"
+      class="mt-3 w-full rounded-lg bg-[#ffbd59] px-3 py-3 text-sm font-bold text-[#101a2c] transition hover:brightness-105"
+      onclick={copyEverything}
+    >
+      {copied === "everything" ? "Copied ✓" : "Copy email + both photos"}
+    </button>
+    <p class="mt-2 text-xs leading-5 text-white/50">
+      One paste drops the whole invitation into your email: words and photos
+      together. Or copy the pieces separately below.
+    </p>
+    <div class="mt-3 grid gap-2 sm:grid-cols-2">
       <button
         type="button"
         class="rounded-lg border border-white/20 px-3 py-2.5 text-sm font-bold text-white transition hover:border-[#ffbd59] hover:text-[#ffbd59]"
@@ -235,25 +279,46 @@ P.S. Your formal invitation and an overview of the evening are below.`;
       <button
         type="button"
         class="rounded-lg bg-[#ffbd59] px-3 py-2.5 text-sm font-bold text-[#101a2c] transition hover:brightness-105"
-        onclick={copyEmail}
+        onclick={copyBodyText}
       >
-        {copied === "email" ? "Copied ✓" : "Copy email + images"}
+        {copied === "body" ? "Copied ✓" : "Copy email text"}
       </button>
-      <button
-        type="button"
-        class="rounded-lg border border-white/20 px-3 py-2.5 text-sm font-bold text-white transition hover:border-[#ffbd59] hover:text-[#ffbd59]"
-        onclick={copyImagesOnly}
-      >
-        {copied === "images" ? "Copied ✓" : "Copy images only"}
-      </button>
+    </div>
+
+    <h2 class="mt-7 text-lg font-bold text-[#ffbd59]">3 · Copy each photo</h2>
+    <p class="mt-2 text-sm leading-6 text-white/70">
+      Paste the email text first, click at the very end of it (after the
+      P.S.), then copy and paste each photo below, one at a time.
+    </p>
+    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+      {#each IMAGES as image, index (image.src)}
+        <figure class="rounded-lg border border-white/10 bg-[#101a2c] p-3">
+          <a href={image.src} target="_blank" rel="noreferrer">
+            <img
+              src={image.src}
+              alt={image.alt}
+              class="w-full rounded-lg border border-white/10"
+              loading="lazy"
+            />
+          </a>
+          <figcaption class="mt-2 text-center text-xs text-white/50">{image.label}</figcaption>
+          <button
+            type="button"
+            class="mt-2 w-full rounded-lg border border-white/20 px-3 py-2.5 text-sm font-bold text-white transition hover:border-[#ffbd59] hover:text-[#ffbd59]"
+            onclick={() => copyPhoto(image, `photo-${index}`)}
+          >
+            {copied === `photo-${index}` ? "Copied ✓" : `Copy ${image.label.toLowerCase()}`}
+          </button>
+        </figure>
+      {/each}
     </div>
     {#if copyError}
       <p class="mt-2 text-sm font-semibold text-red-300">{copyError}</p>
     {/if}
-    <p class="mt-2 text-xs leading-5 text-white/50">
-      3 · Paste into a new email, replace anything still in [brackets], and
-      send. The pictures paste instantly (nothing uploads), so what you see in
-      the draft is exactly what arrives.
+    <p class="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2.5 text-xs leading-5 text-amber-200">
+      Before you hit send: give the draft a few seconds until both photos are
+      fully visible. Your email app is attaching them in the background, and
+      sending too fast can cut them off.
     </p>
 
     <h2 class="mt-7 text-lg font-bold text-[#ffbd59]">Preview</h2>
@@ -263,21 +328,9 @@ P.S. Your formal invitation and an overview of the evening are below.`;
     </div>
     <div class="mt-2 rounded-lg border border-white/10 bg-[#101a2c] px-4 py-3">
       <p class="whitespace-pre-wrap text-sm leading-6 text-white/85">{#each bodySegments as segment}{#if segment.isPlaceholder}<mark class="rounded bg-amber-300/20 px-1 py-0.5 font-semibold text-amber-200">{segment.text}</mark>{:else}{segment.text}{/if}{/each}</p>
-      <div class="mt-3 grid gap-3 sm:grid-cols-2">
-        {#each IMAGES as image (image.src)}
-          <figure>
-            <a href={image.src} target="_blank" rel="noreferrer">
-              <img
-                src={image.src}
-                alt={image.alt}
-                class="w-full rounded-lg border border-white/10"
-                loading="lazy"
-              />
-            </a>
-            <figcaption class="mt-1 text-center text-xs text-white/50">{image.label}</figcaption>
-          </figure>
-        {/each}
-      </div>
+      <p class="mt-3 border-t border-white/10 pt-3 text-xs text-white/50">
+        + the two photos from step 3, pasted underneath.
+      </p>
     </div>
   </div>
 </section>
