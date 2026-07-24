@@ -42,6 +42,10 @@ firebase-debug.log
 ffmpeg/
 remotion-video/
 .codex/skills/remotion-ffmpeg/
+tools/
+
+# working drafts (not published to the site)
+docs/lpb-documentary-proposal-working-draft.md
 
 # Noche Inolvidable gala teaser assets (testing locally, not ready for site)
 public/videos/noche-inolvidable*
