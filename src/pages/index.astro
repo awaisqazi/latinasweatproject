@@ -32,7 +32,7 @@ const galaFromPrice = Math.min(
 );
 // Deepened arc stops (deep gold -> ember -> magenta) so day-phase labels
 // stay legible on the cream lead spotlight and the light carousel card.
-const sweatFestDeepAccents = { sunrise: "#d47500", ember: "#e8452a", dusk: "#c81e63" };
+const sweatFestDeepAccents = { rosa: "#b34a67", cielo: "#22648f", lima: "#5b7a26" };
 const sweatFestPrimaryUrl =
   sweatFestTickets.onSale && sweatFestTickets.url
     ? sweatFestTickets.url
@@ -117,18 +117,18 @@ const hausPrimaryLabel = hausHasTickets
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Sweat Fest (lead flyer spotlight, print-kit identity: papel
-        picado, taped-up poster, woodtype wordmark with riso offsets) */}
-    <section class="relative overflow-hidden py-16 sm:py-20 lg:py-24" style="background: linear-gradient(to bottom, #fff8ef, #fffaf1 45%, #ffefe2);">
-      {/* Papel picado strung along the top */}
+    {/* START: Sweat Fest (lead flyer spotlight, retro-rainbow '26 identity:
+        rainbow scallops, taped-up poster, Cubao bubble wordmark) */}
+    <section class="relative overflow-hidden py-16 sm:py-20 lg:py-24" style="background: linear-gradient(to bottom, #f6f0e3, #f3eee5 45%, #eee6d6);">
+      {/* Rainbow scallops strung along the top */}
       <div
         class="sf-picado absolute inset-x-0 top-0 h-[52px]"
         style={`background-image: ${sweatFestPicadoUri};`}
         aria-hidden="true"
       >
       </div>
-      {/* Soft sun glow behind the poster */}
-      <div class="pointer-events-none absolute -top-24 -right-16 h-80 w-80 rounded-full bg-gradient-to-br from-[#ffbd59]/40 to-[#ff6b52]/20 blur-[110px]" aria-hidden="true"></div>
+      {/* Soft butter glow behind the poster */}
+      <div class="pointer-events-none absolute -top-24 -right-16 h-80 w-80 rounded-full bg-gradient-to-br from-[#f2cf6b]/45 to-[#ef8f3e]/20 blur-[110px]" aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 text-off-black">
         <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14">
@@ -147,13 +147,13 @@ const hausPrimaryLabel = hausHasTickets
 
           {/* Copy (right) */}
           <div class="reveal text-center lg:text-left" style="transition-delay: 80ms;">
-            <span class="sf-stamp px-3 py-1.5 text-[11px] sm:text-xs" style="color: #b03a20;">
+            <span class="sf-stamp px-3 py-1.5 text-[11px] sm:text-xs" style="color: #a3512b;">
               LSP's first-ever all-day festival · Chicago · August 22
             </span>
-            <h2 class="mt-6 font-slab text-5xl uppercase leading-[0.98] tracking-tight text-off-black sm:text-6xl lg:text-7xl">
-              <span class="sf-print" style="--sf-print: #ffbd59;">Run.</span>
-              <span class="sf-print" style="--sf-print: #ff6b52;">Sweat.</span>
-              <span class="sf-print whitespace-nowrap" style="--sf-print: #e94f8a;">Pachanga.</span>
+            <h2 class="mt-6 font-slab text-5xl uppercase leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl" style="color: #40291a;">
+              <span class="sf-print" style="--sf-print: #ef9db6;">Run.</span>
+              <span class="sf-print" style="--sf-print: #7ec3ed;">Sweat.</span>
+              <span class="sf-print whitespace-nowrap" style="--sf-print: #9cc15d;">Pachanga.</span>
             </h2>
             <p class="mt-5 text-lg font-bold text-off-black">
               {sweatFest.dateLabel} · {sweatFest.timeLabel}
@@ -190,7 +190,7 @@ const hausPrimaryLabel = hausHasTickets
                 href={sweatFestPrimaryUrl}
                 target={sweatFestTickets.onSale ? "_blank" : undefined}
                 rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
-                class="sf-btn group inline-flex items-center justify-center gap-3 bg-accent-gold px-7 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                class="sf-btn group inline-flex items-center justify-center gap-3 bg-[#f2cf6b] px-7 py-4 text-base font-extrabold text-[#40291a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40291a] focus-visible:ring-offset-4"
                 data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
                 data-conversion-context="home_sweatfest_band"
               >
@@ -199,7 +199,7 @@ const hausPrimaryLabel = hausHasTickets
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
-              <span class="sf-stamp rotate-[1.5deg] px-3.5 py-1.5 text-[11px]" style="color: #b03a20;">
+              <span class="sf-stamp rotate-[1.5deg] px-3.5 py-1.5 text-[11px]" style="color: #a3512b;">
                 {sweatFest.statusLabel}
               </span>
             </div>
@@ -1705,17 +1705,17 @@ const hausPrimaryLabel = hausHasTickets
             data-conversion-context="home_events_carousel"
           >
             <div
-              class="relative overflow-hidden rounded-2xl bg-white text-off-black shadow-lg ring-1 ring-[#ff6b52]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ff6b52]/20 h-full"
+              class="relative overflow-hidden rounded-2xl bg-[#fdf8ec] text-[#40291a] shadow-lg ring-1 ring-[#40291a]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ef8f3e]/25 h-full"
             >
               <SweatFestArtwork variant="landscape" className="h-52 w-full" />
               <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b52815]">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#a3512b]">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                   {sweatFest.shortDateLabel} · 7 AM to 9 PM
                 </div>
-                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b52815]">
+                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#a3512b]">
                   LSP's first all-day festival
                 </h3>
                 <p class="mt-2 text-sm text-medium-gray leading-relaxed">
@@ -1732,7 +1732,7 @@ const hausPrimaryLabel = hausHasTickets
                     </span>
                   ))}
                 </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b52815] transition-all group-hover:gap-2">
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#a3512b] transition-all group-hover:gap-2">
                   {sweatFestPrimaryLabel}
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

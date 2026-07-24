@@ -12,8 +12,9 @@ import {
   sweatFestImpactIntro,
   sweatFestImpact,
   sweatFestColors,
+  sweatFestPalette,
   sweatFestVolunteer,
-  sweatFestPicadoUri,
+  sweatFestRainbowUri,
 } from "@/data/sweatFest";
 
 // Sweat Fest: the "Daylight Festival", art-directed like a screen-printed
@@ -59,9 +60,9 @@ const sponsorMailto = `mailto:${sweatFestSponsorship.contactEmail}?subject=${enc
 // which map 1:1 onto sweatFestColors.
 const accentOf = (key) => sweatFestColors[key] ?? sweatFestColors.sunrise;
 
-// Deepened accent for text on light backgrounds. The stronger off-black mix
+// Deepened accent for text on light backgrounds. The stronger choco mix
 // keeps even small gold labels readable on white and warm cream.
-const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #1e1e1e)`;
+const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #40291a)`;
 
 // The motto splits into its three arc-colored lines.
 // "Move Together. Celebrate Culture. Build Community."
@@ -77,8 +78,17 @@ const loteriaArticle = { run: "El", sweat: "El", party: "La" };
 // Alternating paper tilts, the hand-placed look shared by cards and notes.
 const tiltOf = (i) => [-1.4, 0.8, -0.6, 1.1, -1, 0.7][i % 6];
 
-// Papel picado bunting comes from the shared identity kit (sweatFest.js).
-const picadoUri = sweatFestPicadoUri;
+// Rainbow-scallop strip comes from the shared identity kit (sweatFest.js).
+const picadoUri = sweatFestRainbowUri;
+
+// Ticket stubs tint like the Canva pricelist: pink 5K, butter Sweat &
+// Pachanga, orange Pachanga, green All Day.
+const stubTint = {
+  run: sweatFestPalette.pink,
+  "sweat-party": sweatFestPalette.butter,
+  party: sweatFestPalette.orange,
+  "all-day": sweatFestPalette.green,
+};
 
 // Paper grain: one fixed noise layer over the whole page so everything reads
 // as printed stock, not backlit glass.
@@ -166,7 +176,7 @@ const eventJsonLd = {
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   url: canonicalEventUrl,
   image: [
-    "https://latinasweatproject.com/images/sweatfest/sweatfest-calendar-v2.jpg",
+    "https://latinasweatproject.com/images/sweatfest/sweatfest-social-v3.jpg",
   ],
   location: {
     "@type": "Place",
@@ -200,8 +210,8 @@ const eventJsonLd = {
 <Layout
   title="Sweat Fest | The Latina Sweat Project"
   description={metaDescription}
-  socialImage="/images/sweatfest/sweatfest-calendar-v2.jpg"
-  socialImageAlt="Sweat Fest: a joyful Chicago community moving together from sunrise to Pachanga"
+  socialImage="/images/sweatfest/sweatfest-social-v3.jpg"
+  socialImageAlt="Sweat Fest '26: a retro rainbow arch over August 22, 2026, 7:00 AM to 9:00 PM, Chicago, location announced soon"
   socialImageWidth={1200}
   socialImageHeight={675}
   socialImageType="image/jpeg"
@@ -214,7 +224,7 @@ const eventJsonLd = {
   ></script>
   <Header />
   <main
-    class="overflow-x-clip bg-[#fffaf1] text-off-black"
+    class="overflow-x-clip bg-[#f3eee5] text-choco"
     style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
   >
     {/* Printed-stock grain over the whole page. */}
@@ -228,51 +238,42 @@ const eventJsonLd = {
     {/* ======================= HERO: DAYBREAK ======================= */}
     <section
       id="save-the-date"
-      class="relative isolate overflow-hidden pb-16 pt-20 text-off-black scroll-mt-28 sm:pb-20 sm:pt-24 lg:pt-28"
-      style="background: linear-gradient(to bottom, #fff8ef 0%, #fffaf1 42%, #ffefe2 100%);"
+      class="relative isolate overflow-hidden pb-16 pt-20 text-choco scroll-mt-28 sm:pb-20 sm:pt-24 lg:pt-28"
+      style="background: linear-gradient(to bottom, #8fd0f4 0rem, #8fd0f4 30rem, #f3eee5 30rem, #f3eee5 100%);"
     >
-      {/* The rising sun: luminous disc + crisp pinwheel rays behind the
-          wordmark, like a screen-printed sol. Clipped by the section. */}
+      {/* The '70s rainbow dome behind the wordmark: chocolate rule, then
+          green / pink / orange bands over the cream interior, opening onto
+          the sky. Clipped by the section. */}
       <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div
-          class="absolute left-1/2 top-[36%] h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 sm:h-[58rem] sm:w-[58rem] lg:h-[70rem] lg:w-[70rem]"
-        >
-          <div class="sf-rays absolute inset-0"></div>
-          <div class="absolute inset-0 grid place-items-center">
-            <div class="sf-sun h-[30rem] w-[30rem] rounded-full sm:h-[40rem] sm:w-[40rem] lg:h-[48rem] lg:w-[48rem]"></div>
-          </div>
-          <div class="absolute inset-0 grid place-items-center">
-            <div class="sf-sun-core h-52 w-52 rounded-full sm:h-64 sm:w-64 lg:h-72 lg:w-72"></div>
-          </div>
-        </div>
+        <div class="sf-dome absolute left-1/2 top-[3rem] h-[27rem] w-[56rem] -translate-x-1/2"></div>
       </div>
 
       <div class="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <p
-          class="sf-rise inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-medium-gray"
+          class="sf-rise inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-choco/75"
         >
           <span class="h-px w-8 bg-[var(--sf-sunrise)]" aria-hidden="true"></span>
           {sweatFest.presentedBy}
           <span class="h-px w-8 bg-[var(--sf-dusk)]" aria-hidden="true"></span>
         </p>
 
-        {/* Stacked woodtype wordmark with riso misregistration: SWEAT throws
-            an ember plate, FEST a dusk plate, and the year rides along as a
-            crooked sticker. */}
+        {/* Stacked Cubao bubble wordmark, straight off the flyer: SWEAT in
+            cream, FEST in tan, both outlined in chocolate, and the year
+            rides along as a crooked sticker. */}
         <h1
-          class="sf-rise mt-6 font-slab uppercase leading-[0.86] tracking-tight"
+          class="sf-rise mt-6 font-slab uppercase leading-[0.92] tracking-tight"
           style="animation-delay: 0.06s;"
         >
           <span
             class="sf-print block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
-            style="--sf-print: var(--sf-ember);"
+            style="--sf-print: #fdf8ec;"
           >
             Sweat
           </span>
           <span
             class="block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
           >
-            <span class="sf-print" style="--sf-print: var(--sf-dusk);">Fest</span>
+            <span class="sf-print" style="--sf-print: #b9a794;">Fest</span>
             <span
               class="ml-2 inline-block rotate-6 rounded-md bg-[var(--sf-dusk)] px-2.5 py-1 align-top font-sans text-base font-extrabold tracking-widest text-white shadow-[3px_3px_0_rgba(30,30,30,0.85)] sm:ml-3 sm:text-xl"
             >
@@ -282,13 +283,13 @@ const eventJsonLd = {
         </h1>
 
         <p
-          class="sf-rise mt-7 text-xl font-extrabold uppercase tracking-[0.14em] text-off-black sm:text-2xl"
+          class="sf-rise mt-7 text-xl font-extrabold uppercase tracking-[0.14em] text-choco sm:text-2xl"
           style="animation-delay: 0.14s;"
         >
           {sweatFest.tagline}
         </p>
         <p
-          class="sf-rise mt-2 text-lg font-semibold text-medium-gray sm:text-xl"
+          class="sf-rise mt-2 text-lg font-semibold text-choco/75 sm:text-xl"
           style="animation-delay: 0.2s;"
         >
           {sweatFest.taglineSub}
@@ -307,7 +308,7 @@ const eventJsonLd = {
               "All levels welcome",
             ].map((chip, i) => (
               <li
-                class="sf-tag inline-flex items-center px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-off-black"
+                class="sf-tag inline-flex items-center px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-choco"
                 style={`transform: rotate(${tiltOf(i)}deg);`}
               >
                 {chip}
@@ -334,7 +335,7 @@ const eventJsonLd = {
                 href={sweatFestTickets.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="sf-btn group inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-10 py-4 text-lg font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                class="sf-btn group inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-10 py-4 text-lg font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
                 data-conversion-event="sweatfest_ticket_click"
                 data-conversion-context="sweatfest_page_hero"
               >
@@ -361,7 +362,7 @@ const eventJsonLd = {
           <a
             href={calendarHref}
             download
-            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
             data-conversion-event="sweatfest_save_date_click"
             data-conversion-context="sweatfest_page_hero_apple"
           >
@@ -380,7 +381,7 @@ const eventJsonLd = {
             href={googleCalendarHref}
             target="_blank"
             rel="noopener noreferrer"
-            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
+            class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-8 py-4 text-base font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
             data-conversion-event="sweatfest_save_date_click"
             data-conversion-context="sweatfest_page_hero_google"
           >
@@ -400,7 +401,7 @@ const eventJsonLd = {
 
         <a
           href="#the-day"
-          class="sf-rise mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+          class="sf-rise mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-choco underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
           style="animation-delay: 0.4s;"
         >
           Explore the full run of show
@@ -409,14 +410,14 @@ const eventJsonLd = {
 
         {/* Countdown to the kickoff 5K, reframed as print cards. */}
         <div class="sf-rise sf-countdown-frame mx-auto mt-10 max-w-2xl" style="animation-delay: 0.44s;">
-          <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.26em] text-medium-gray">
+          <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.26em] text-choco/75">
             Countdown to the kickoff 5K
           </p>
           <SweatFestCountdown target={sweatFest.startsAtISO} variant="hero" />
         </div>
 
-        <p class="sf-rise mt-7 text-sm font-semibold text-medium-gray" style="animation-delay: 0.5s;">
-          Want to help make the day happen? <a href="#volunteer" class="font-extrabold text-off-black underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Apply to volunteer</a>. Interested in partnering? <a href="#sponsors" class="font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
+        <p class="sf-rise mt-7 text-sm font-semibold text-choco/75" style="animation-delay: 0.5s;">
+          Want to help make the day happen? <a href="#volunteer" class="font-extrabold text-choco underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Apply to volunteer</a>. Interested in partnering? <a href="#sponsors" class="font-extrabold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
         </p>
       </div>
 
@@ -431,7 +432,7 @@ const eventJsonLd = {
 
     {/* Screen-printed ticker strip, tilted like taped-on masking tape. */}
     <div class="sf-ticker-wrap relative z-10 -my-2" aria-hidden="true">
-      <div class="sf-ticker -rotate-1 bg-off-black py-3">
+      <div class="sf-ticker -rotate-1 bg-choco py-3">
         <div class="sf-ticker-track">
           {
             [0, 1].map(() => (
@@ -439,7 +440,7 @@ const eventJsonLd = {
                 {[0, 1, 2].map(() =>
                   tickerItems.map((item, i) => (
                     <>
-                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#fff8ef] sm:text-xl">
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#f6f0e3] sm:text-xl">
                         {item}
                       </span>
                       <span
@@ -459,7 +460,7 @@ const eventJsonLd = {
     </div>
 
     {/* ====================== MANIFESTO: FIRST LIGHT ====================== */}
-    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #ffefe2, #fff8ef 60%, #fffaf1);">
+    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #eee6d6, #f6f0e3 60%, #f3eee5);">
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
           {/* The campaign artwork as a taped-up print: white paper margin,
@@ -468,7 +469,7 @@ const eventJsonLd = {
             <span class="sf-tape -left-4 -top-3 rotate-[-38deg]" aria-hidden="true"></span>
             <span class="sf-tape -right-4 -top-3 rotate-[34deg]" aria-hidden="true"></span>
             <SweatFestArtwork variant="landscape" className="rounded-[3px]" />
-            <p class="mt-3 text-center font-slab text-sm uppercase tracking-[0.2em] text-off-black/70">
+            <p class="mt-3 text-center font-slab text-sm uppercase tracking-[0.2em] text-choco/70">
               {sweatFest.tagline}
             </p>
           </div>
@@ -492,7 +493,7 @@ const eventJsonLd = {
             </h2>
             <div class="reveal mx-auto mt-6 h-3 w-32 lg:mx-0" style="transition-delay: 300ms;" set:html={squiggle(sweatFestColors.ember)} />
             <p
-              class="reveal mt-6 text-lg leading-relaxed text-medium-gray"
+              class="reveal mt-6 text-lg leading-relaxed text-choco/75"
               style="transition-delay: 360ms;"
             >
               {sweatFest.pageDescription}
@@ -503,7 +504,7 @@ const eventJsonLd = {
     </section>
 
     {/* ======================= WHAT TO EXPECT: THE BOARD ======================= */}
-    <section class="relative overflow-hidden bg-[#fffaf1] py-16 sm:py-20 lg:py-24">
+    <section class="relative overflow-hidden bg-[#f3eee5] py-16 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -512,7 +513,7 @@ const eventJsonLd = {
             </span>
           </p>
           <h2
-            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             What to expect
@@ -529,7 +530,7 @@ const eventJsonLd = {
               return (
                 <div
                   class="sf-note reveal relative p-6 pt-8 text-center lg:text-left"
-                  style={`transition-delay: ${index * 80}ms; --sf-note-tilt: ${tiltOf(index)}deg; background: color-mix(in oklab, ${accent} 7%, #fffdf6);`}
+                  style={`transition-delay: ${index * 80}ms; --sf-note-tilt: ${tiltOf(index)}deg; background: color-mix(in oklab, ${accent} 7%, #fdf8ec);`}
                 >
                   <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg]" aria-hidden="true"></span>
                   <div class="flex items-center justify-center gap-3 lg:justify-start">
@@ -543,11 +544,11 @@ const eventJsonLd = {
                       aria-hidden="true"
                       set:html={expectIcons[index]}
                     />
-                    <h3 class="font-slab text-xl uppercase tracking-wide text-off-black">
+                    <h3 class="font-slab text-xl uppercase tracking-wide text-choco">
                       {item.title}
                     </h3>
                   </div>
-                  <p class="mt-3 text-sm leading-relaxed text-medium-gray">
+                  <p class="mt-3 text-sm leading-relaxed text-choco/75">
                     {item.detail}
                   </p>
                 </div>
@@ -562,7 +563,7 @@ const eventJsonLd = {
     <section
       id="the-day"
       class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24"
-      style="background: linear-gradient(to bottom, #fffaf1, #fff6ee 45%, #fffaf1);"
+      style="background: linear-gradient(to bottom, #f3eee5, #f0e9dc 45%, #f3eee5);"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
@@ -572,13 +573,13 @@ const eventJsonLd = {
             </span>
           </p>
           <h2
-            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             Sunrise to last set
           </h2>
           <p
-            class="reveal mt-4 text-lg leading-relaxed text-medium-gray"
+            class="reveal mt-4 text-lg leading-relaxed text-choco/75"
             style="transition-delay: 180ms;"
           >
             {sweatFest.dateLabel} · {sweatFest.timeLabel}
@@ -591,34 +592,34 @@ const eventJsonLd = {
           {
             sweatFestDay.map((phase, index) => {
               const accent = accentOf(phase.accent);
-              const isDusk = phase.accent === "dusk";
+              const isDusk = phase.id === "party";
               return (
                 <li
                   class="sf-loteria reveal"
-                  style={`transition-delay: ${index * 130}ms; --sf-note-tilt: ${[-1.4, 0.6, -0.8][index]}deg;`}
+                  style={`transition-delay: ${index * 130}ms; --sf-note-tilt: ${[-1.4, 0.6, -0.8][index]}deg; --sf-card: ${accent};`}
                 >
                   <div class="sf-loteria-inner flex h-full flex-col p-5 sm:p-6">
                     <div class="flex items-baseline justify-between gap-3">
-                      <span class="font-slab text-2xl leading-none text-off-black" aria-hidden="true">
+                      <span class="font-slab text-2xl leading-none text-choco" aria-hidden="true">
                         {index + 1}
                       </span>
-                      <span class="sf-tag px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-off-black">
+                      <span class="sf-tag px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-choco">
                         {phase.time}
                       </span>
                     </div>
                     {/* Phase sky: sun low, sun high, moon out. */}
                     <div
-                      class="mt-4 flex h-32 items-center justify-center rounded-md border-2 border-off-black/80 sm:h-36"
+                      class="mt-4 flex h-32 items-center justify-center rounded-md border-2 border-choco/80 sm:h-36"
                       style={
                         isDusk
                           ? `background: linear-gradient(to bottom, #2a1e33, ${accent}66);`
-                          : `background: linear-gradient(to bottom, #fffdf6 15%, ${accent}55);`
+                          : `background: linear-gradient(to bottom, #fdf8ec 15%, ${accent}55);`
                       }
                       aria-hidden="true"
                     >
                       <svg
                         class:list={["h-16 w-16", index === 0 && "translate-y-3"]}
-                        style={`color: ${isDusk ? "#ffe9c4" : "#1e1e1e"};`}
+                        style={`color: ${isDusk ? "#ffe9c4" : "#40291a"};`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -626,7 +627,7 @@ const eventJsonLd = {
                         set:html={dayIcons[phase.id]}
                       />
                     </div>
-                    <h3 class="mt-5 text-center font-slab text-3xl uppercase leading-none tracking-wide text-off-black sm:text-4xl">
+                    <h3 class="mt-5 text-center font-slab text-3xl uppercase leading-none tracking-wide text-choco sm:text-4xl">
                       <span class="mr-2 text-xl align-middle" style={`color: ${deep(accent)};`}>{loteriaArticle[phase.id]}</span>{phase.title}
                     </h3>
                     <div
@@ -634,7 +635,7 @@ const eventJsonLd = {
                       style={`background: ${accent};`}
                       aria-hidden="true"
                     />
-                    <p class="mt-4 flex-1 text-center text-base leading-relaxed text-medium-gray">
+                    <p class="mt-4 flex-1 text-center text-base leading-relaxed text-choco/75">
                       {phase.detail}
                     </p>
                   </div>
@@ -644,7 +645,7 @@ const eventJsonLd = {
           }
         </ol>
 
-        <p class="reveal mt-12 text-center text-sm font-bold uppercase tracking-[0.14em] text-medium-gray">
+        <p class="reveal mt-12 text-center text-sm font-bold uppercase tracking-[0.14em] text-choco/75">
           {sweatFest.doorsLine}
         </p>
       </div>
@@ -656,7 +657,7 @@ const eventJsonLd = {
         Google entry ids into a hidden response frame. */}
     <section
       id="volunteer"
-      class="relative overflow-hidden bg-[#fff6ee] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+      class="relative overflow-hidden bg-[#f0e9dc] py-16 scroll-mt-28 sm:py-20 lg:py-24"
     >
       <div
         class="absolute inset-x-0 top-0 h-1"
@@ -674,14 +675,14 @@ const eventJsonLd = {
             </span>
           </p>
           <h2
-            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             Join the crew
           </h2>
           <div class="reveal mx-auto mt-4 h-3 w-32" style="transition-delay: 150ms;" set:html={squiggle(sweatFestColors.dusk)} />
           <p
-            class="reveal mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-medium-gray"
+            class="reveal mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-choco/75"
             style="transition-delay: 210ms;"
           >
             Help welcome our comunidad, support the run and classes, and carry
@@ -697,18 +698,18 @@ const eventJsonLd = {
               ["Approval required", "Applying does not guarantee placement"],
             ].map(([title, detail], index) => (
               <div
-                class="sf-note bg-[#fffdf6] px-5 py-5 text-center"
+                class="sf-note bg-[#fdf8ec] px-5 py-5 text-center"
                 style={`--sf-note-tilt: ${[-0.7, 0.5, -0.4][index]}deg;`}
               >
-                <p class="font-slab text-lg uppercase tracking-wide text-off-black">{title}</p>
-                <p class="mt-1.5 text-sm leading-relaxed text-medium-gray">{detail}</p>
+                <p class="font-slab text-lg uppercase tracking-wide text-choco">{title}</p>
+                <p class="mt-1.5 text-sm leading-relaxed text-choco/75">{detail}</p>
               </div>
             ))
           }
         </div>
 
         <details class="sf-volunteer-details reveal mx-auto mt-10 max-w-5xl" style="transition-delay: 320ms;">
-          <summary class="sf-btn group flex cursor-pointer items-center justify-between gap-5 bg-off-black px-6 py-5 text-left text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4 sm:px-8">
+          <summary class="sf-btn group flex cursor-pointer items-center justify-between gap-5 bg-choco px-6 py-5 text-left text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4 sm:px-8">
             <span>
               <span class="block font-slab text-xl uppercase tracking-wide sm:text-2xl">Apply to volunteer</span>
               <span class="mt-1 block text-sm font-semibold text-white/70">The application takes about five minutes.</span>
@@ -718,10 +719,10 @@ const eventJsonLd = {
             </svg>
           </summary>
 
-          <div class="sf-volunteer-sheet border-x-2 border-b-2 border-off-black bg-[#fffdf6] px-5 py-8 sm:px-8 lg:px-10">
+          <div class="sf-volunteer-sheet border-x-2 border-b-2 border-choco bg-[#fdf8ec] px-5 py-8 sm:px-8 lg:px-10">
             <div class="rounded-md border-2 border-dashed border-[var(--sf-ember)] bg-[var(--sf-ember)]/5 p-5">
-              <p class="font-extrabold text-off-black">Before you apply</p>
-              <p class="mt-2 text-sm leading-relaxed text-medium-gray">
+              <p class="font-extrabold text-choco">Before you apply</p>
+              <p class="mt-2 text-sm leading-relaxed text-choco/75">
                 This is an application, not a confirmed assignment. Our team
                 reviews every submission. If selected, you must attend a
                 required pre-event training before volunteering at Sweat Fest.
@@ -748,10 +749,10 @@ const eventJsonLd = {
               <input type="hidden" name="pageHistory" value="0" />
 
               <fieldset>
-                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Your information</legend>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">Your information</legend>
                 <div class="mt-5 grid gap-5 md:grid-cols-2">
                   <label class="block">
-                    <span class="text-sm font-extrabold text-off-black">Full name <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <span class="text-sm font-extrabold text-choco">Full name <span class="text-[var(--sf-dusk)]">*</span></span>
                     <input
                       type="text"
                       name={sweatFestVolunteer.entries.fullName}
@@ -761,7 +762,7 @@ const eventJsonLd = {
                     />
                   </label>
                   <label class="block">
-                    <span class="text-sm font-extrabold text-off-black">Best email <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <span class="text-sm font-extrabold text-choco">Best email <span class="text-[var(--sf-dusk)]">*</span></span>
                     <input
                       type="email"
                       name={sweatFestVolunteer.entries.email}
@@ -771,7 +772,7 @@ const eventJsonLd = {
                     />
                   </label>
                   <label class="block md:col-span-2">
-                    <span class="text-sm font-extrabold text-off-black">Mobile phone <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <span class="text-sm font-extrabold text-choco">Mobile phone <span class="text-[var(--sf-dusk)]">*</span></span>
                     <input
                       type="tel"
                       name={sweatFestVolunteer.entries.phone}
@@ -785,11 +786,11 @@ const eventJsonLd = {
               </fieldset>
 
               <fieldset data-sf-required-group="shifts" aria-describedby="sf-shift-help sf-shift-error">
-                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">
                   Your availability <span class="text-[var(--sf-dusk)]">*</span>
                 </legend>
-                <p id="sf-shift-help" class="mt-2 max-w-3xl text-sm leading-relaxed text-medium-gray">
-                  Select <strong class="text-off-black">every two-hour shift</strong>
+                <p id="sf-shift-help" class="mt-2 max-w-3xl text-sm leading-relaxed text-choco/75">
+                  Select <strong class="text-choco">every two-hour shift</strong>
                   you can genuinely attend, even if you have a preference. More
                   availability gives our team the best chance of placing you.
                 </p>
@@ -805,9 +806,9 @@ const eventJsonLd = {
                           data-sf-shift
                         />
                         <span>
-                          <span class="block font-bold text-off-black">{shift}</span>
+                          <span class="block font-bold text-choco">{shift}</span>
                           {(index === 0 || index === sweatFestVolunteer.shifts.length - 1) && (
-                            <span class="mt-0.5 block text-xs text-medium-gray">
+                            <span class="mt-0.5 block text-xs text-choco/75">
                               {index === 0 ? "Includes early event setup" : "Includes closing cleanup"}
                             </span>
                           )}
@@ -822,8 +823,8 @@ const eventJsonLd = {
               </fieldset>
 
               <fieldset>
-                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Where you can help</legend>
-                <p class="mt-2 text-sm leading-relaxed text-medium-gray">Optional - select every role you would feel comfortable supporting.</p>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">Where you can help</legend>
+                <p class="mt-2 text-sm leading-relaxed text-choco/75">Optional - select every role you would feel comfortable supporting.</p>
                 <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {
                     sweatFestVolunteer.roles.map((role) => (
@@ -834,7 +835,7 @@ const eventJsonLd = {
                           value={role}
                           class="h-5 w-5 flex-none accent-[var(--sf-dusk)]"
                         />
-                        <span class="font-bold text-off-black">{role}</span>
+                        <span class="font-bold text-choco">{role}</span>
                       </label>
                     ))
                   }
@@ -842,10 +843,10 @@ const eventJsonLd = {
               </fieldset>
 
               <fieldset>
-                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">Tell us about you</legend>
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">Tell us about you</legend>
                 <div class="mt-5 space-y-5">
                   <label class="block">
-                    <span class="text-sm font-extrabold text-off-black">Why would you like to volunteer? <span class="text-[var(--sf-dusk)]">*</span></span>
+                    <span class="text-sm font-extrabold text-choco">Why would you like to volunteer? <span class="text-[var(--sf-dusk)]">*</span></span>
                     <textarea
                       name={sweatFestVolunteer.entries.motivation}
                       rows="4"
@@ -854,7 +855,7 @@ const eventJsonLd = {
                     ></textarea>
                   </label>
                   <label class="block">
-                    <span class="text-sm font-extrabold text-off-black">Relevant volunteer, event, fitness, wellness, or community experience <span class="font-normal text-medium-gray">(optional)</span></span>
+                    <span class="text-sm font-extrabold text-choco">Relevant volunteer, event, fitness, wellness, or community experience <span class="font-normal text-choco/75">(optional)</span></span>
                     <textarea
                       name={sweatFestVolunteer.entries.experience}
                       rows="3"
@@ -862,7 +863,7 @@ const eventJsonLd = {
                     ></textarea>
                   </label>
                   <label class="block">
-                    <span class="text-sm font-extrabold text-off-black">Accessibility needs, scheduling constraints, or anything else we should know <span class="font-normal text-medium-gray">(optional)</span></span>
+                    <span class="text-sm font-extrabold text-choco">Accessibility needs, scheduling constraints, or anything else we should know <span class="font-normal text-choco/75">(optional)</span></span>
                     <textarea
                       name={sweatFestVolunteer.entries.accessibility}
                       rows="3"
@@ -873,10 +874,10 @@ const eventJsonLd = {
               </fieldset>
 
               <fieldset>
-                <legend class="font-slab text-2xl uppercase tracking-wide text-off-black">
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">
                   Volunteer acknowledgement <span class="text-[var(--sf-dusk)]">*</span>
                 </legend>
-                <p class="mt-2 text-sm leading-relaxed text-medium-gray">Check all three statements to submit your application.</p>
+                <p class="mt-2 text-sm leading-relaxed text-choco/75">Check all three statements to submit your application.</p>
                 <div class="mt-5 space-y-3">
                   {
                     sweatFestVolunteer.acknowledgements.map((acknowledgement) => (
@@ -888,17 +889,17 @@ const eventJsonLd = {
                           required
                           class="h-5 w-5 flex-none accent-[var(--sf-ember)]"
                         />
-                        <span class="text-sm font-semibold leading-relaxed text-off-black">{acknowledgement}</span>
+                        <span class="text-sm font-semibold leading-relaxed text-choco">{acknowledgement}</span>
                       </label>
                     ))
                   }
                 </div>
               </fieldset>
 
-              <div class="border-t-2 border-dashed border-off-black/25 pt-7 text-center">
+              <div class="border-t-2 border-dashed border-choco/25 pt-7 text-center">
                 <button
                   type="submit"
-                  class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto"
+                  class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4 sm:w-auto"
                   data-sf-volunteer-submit
                   data-conversion-event="sweatfest_volunteer_apply"
                   data-conversion-context="sweatfest_page_volunteer_form"
@@ -906,9 +907,9 @@ const eventJsonLd = {
                   Send my application
                   <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" set:html={arrowRight} />
                 </button>
-                <p class="mt-4 text-xs leading-relaxed text-medium-gray">
+                <p class="mt-4 text-xs leading-relaxed text-choco/75">
                   Your application is reviewed by The Latina Sweat Project team.
-                  Prefer Google's form? <a href={sweatFestVolunteer.viewUrl} target="_blank" rel="noopener noreferrer" class="font-bold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4">Open it directly</a>.
+                  Prefer Google's form? <a href={sweatFestVolunteer.viewUrl} target="_blank" rel="noopener noreferrer" class="font-bold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4">Open it directly</a>.
                 </p>
               </div>
             </form>
@@ -920,8 +921,8 @@ const eventJsonLd = {
               aria-live="polite"
               tabindex="-1"
             >
-              <p class="font-slab text-2xl uppercase tracking-wide text-off-black">Application received</p>
-              <p class="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-medium-gray">
+              <p class="font-slab text-2xl uppercase tracking-wide text-choco">Application received</p>
+              <p class="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-choco/75">
                 Thank you for offering your time. This is not a confirmed
                 placement; our team will contact approved volunteers with a
                 shift assignment and required training details.
@@ -933,7 +934,7 @@ const eventJsonLd = {
     </section>
 
     {/* ============================ TICKETS ============================ */}
-    <section id="tickets" class="relative overflow-hidden bg-[#fffaf1] py-16 scroll-mt-28 sm:py-20 lg:py-24">
+    <section id="tickets" class="relative overflow-hidden bg-[#f3eee5] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -942,7 +943,7 @@ const eventJsonLd = {
             </span>
           </p>
           <h2
-            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             Choose your experience
@@ -963,28 +964,28 @@ const eventJsonLd = {
             sweatFestTickets.tiers.map((tier, index) => (
               <div
                 class:list={["sf-stub reveal relative flex h-full flex-col", tier.featured && "sf-stub-featured"]}
-                style={`transition-delay: ${index * 100}ms;`}
+                style={`transition-delay: ${index * 100}ms; --sf-stub-bg: color-mix(in oklab, ${stubTint[tier.id] ?? sweatFestPalette.butter} 40%, #fdf8ec);`}
               >
                 {tier.featured && (
                   <span
-                    class="sf-stamp -top-4 right-4 z-10 bg-[#fffdf6] px-3 py-1.5 text-[11px]"
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#fdf8ec] px-3 py-1.5 text-[11px]"
                     style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
                   >
                     Best value
                   </span>
                 )}
                 <div class="p-6 pb-5 text-center">
-                  <p class="text-[10px] font-extrabold uppercase tracking-[0.24em] text-off-black/50">
+                  <p class="text-[10px] font-extrabold uppercase tracking-[0.24em] text-choco/50">
                     Sweat Fest 2026 · Admit one
                   </p>
-                  <h3 class="mt-3 font-slab text-2xl uppercase tracking-wide text-off-black">
+                  <h3 class="mt-3 font-slab text-2xl uppercase tracking-wide text-choco">
                     {tier.name}
                   </h3>
                   <p class="mt-2 flex items-baseline justify-center gap-1">
-                    <span class="font-slab text-5xl tracking-tight" style={`color: ${tier.featured ? deep(sweatFestColors.ember) : "#1e1e1e"};`}>
+                    <span class="font-slab text-5xl tracking-tight" style={`color: ${tier.featured ? deep(sweatFestColors.ember) : "#40291a"};`}>
                       ${tier.price}
                     </span>
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-medium-gray">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-choco/75">
                       per person
                     </span>
                   </p>
@@ -995,7 +996,7 @@ const eventJsonLd = {
                 {/* Perforation with punched side notches. */}
                 <div class="sf-stub-perf" aria-hidden="true"></div>
                 <div class="flex flex-1 flex-col p-6 pt-5 text-center">
-                  <p class="flex-1 text-sm leading-relaxed text-medium-gray">
+                  <p class="flex-1 text-sm leading-relaxed text-choco/75">
                     {tier.description}
                   </p>
                   <div class="mt-6">
@@ -1004,7 +1005,7 @@ const eventJsonLd = {
                         href={sweatFestTickets.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                        class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-6 py-3.5 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
                         data-conversion-event="sweatfest_ticket_click"
                         data-conversion-context={`sweatfest_page_tickets_${tier.id}`}
                       >
@@ -1020,13 +1021,13 @@ const eventJsonLd = {
                         />
                       </a>
                     ) : (
-                      <span class="inline-flex w-full items-center justify-center rounded-md border-2 border-dashed border-off-black/30 px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-medium-gray">
+                      <span class="inline-flex w-full items-center justify-center rounded-md border-2 border-dashed border-choco/30 px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-choco/75">
                         On sale soon
                       </span>
                     )}
                   </div>
                   <div class="sf-barcode mx-auto mt-6" aria-hidden="true"></div>
-                  <p class="mt-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-off-black/40" aria-hidden="true">
+                  <p class="mt-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-choco/40" aria-hidden="true">
                     SF26-000{index + 1}
                   </p>
                 </div>
@@ -1039,16 +1040,16 @@ const eventJsonLd = {
         {
           !sweatFestTickets.onSale && (
             <div class="reveal mx-auto mt-14 max-w-2xl text-center">
-              <p class="text-base leading-relaxed text-medium-gray">
+              <p class="text-base leading-relaxed text-choco/75">
                 Tickets are not on sale yet. Follow
-                <span class="font-extrabold text-off-black"> @latinasweatproject </span>
+                <span class="font-extrabold text-choco"> @latinasweatproject </span>
                 on Instagram to hear first when they drop.
               </p>
               <a
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="sf-btn mt-6 inline-flex items-center justify-center gap-3 bg-off-black px-7 py-3.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
+                class="sf-btn mt-6 inline-flex items-center justify-center gap-3 bg-choco px-7 py-3.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4"
                 data-conversion-event="sweatfest_follow_click"
                 data-conversion-context="sweatfest_page_tickets"
               >
@@ -1063,7 +1064,7 @@ const eventJsonLd = {
 
     {/* Second ticker, tilted the other way. */}
     <div class="sf-ticker-wrap relative z-10 -my-2" aria-hidden="true">
-      <div class="sf-ticker rotate-1 bg-off-black py-3">
+      <div class="sf-ticker rotate-1 bg-choco py-3">
         <div class="sf-ticker-track sf-ticker-track-reverse">
           {
             [0, 1].map(() => (
@@ -1071,7 +1072,7 @@ const eventJsonLd = {
                 {[0, 1, 2].map(() =>
                   mottoLines.map((line, i) => (
                     <>
-                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#fff8ef] sm:text-xl">
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#f6f0e3] sm:text-xl">
                         {line.replace(/\.$/, "")}
                       </span>
                       <span
@@ -1091,7 +1092,7 @@ const eventJsonLd = {
     </div>
 
     {/* ============================ IMPACT ============================ */}
-    <section id="impact" class="relative overflow-hidden bg-[#fff6ee] py-16 scroll-mt-28 sm:py-20 lg:py-24">
+    <section id="impact" class="relative overflow-hidden bg-[#f0e9dc] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -1100,13 +1101,13 @@ const eventJsonLd = {
             </span>
           </p>
           <h2
-            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl"
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
             style="transition-delay: 90ms;"
           >
             {sweatFestImpactIntro.heading}
           </h2>
           <p
-            class="reveal mt-5 text-lg leading-relaxed text-medium-gray"
+            class="reveal mt-5 text-lg leading-relaxed text-choco/75"
             style="transition-delay: 180ms;"
           >
             {sweatFestImpactIntro.body}
@@ -1137,7 +1138,7 @@ const eventJsonLd = {
                     {finalValue}
                   </dd>
                   <div class="mx-auto mt-3 h-3 w-24" set:html={squiggle(accent)} />
-                  <dt class="mt-3 text-sm font-bold leading-snug text-off-black">
+                  <dt class="mt-3 text-sm font-bold leading-snug text-choco">
                     {stat.label}
                   </dt>
                 </div>
@@ -1151,7 +1152,7 @@ const eventJsonLd = {
     {/* ========================== SPONSORSHIP ========================== */}
     <section
       id="sponsors"
-      class="relative overflow-hidden bg-[#fffaf1] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+      class="relative overflow-hidden bg-[#f3eee5] py-16 scroll-mt-28 sm:py-20 lg:py-24"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -1161,10 +1162,10 @@ const eventJsonLd = {
                 Partner with us
               </span>
             </p>
-            <h2 class="mt-6 font-slab text-4xl uppercase tracking-tight text-off-black sm:text-5xl">
+            <h2 class="mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl">
               Sponsor <span class="whitespace-nowrap">Sweat Fest</span>
             </h2>
-            <p class="mt-5 text-base leading-relaxed text-medium-gray sm:text-lg">
+            <p class="mt-5 text-base leading-relaxed text-choco/75 sm:text-lg">
               {sweatFestSponsorship.intro}
             </p>
             <p class="mt-6 inline-block text-xs font-extrabold uppercase tracking-[0.16em]" style={`color: ${deep(sweatFestColors.dusk)};`}>
@@ -1173,9 +1174,9 @@ const eventJsonLd = {
           </div>
 
           {/* What sponsorship funds: a pinned-up note. */}
-          <div class="sf-note reveal relative p-7 pt-9 sm:p-8" style="transition-delay: 120ms; --sf-note-tilt: 0.9deg; background: #fffdf6;">
+          <div class="sf-note reveal relative p-7 pt-9 sm:p-8" style="transition-delay: 120ms; --sf-note-tilt: 0.9deg; background: #fdf8ec;">
             <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[2deg]" aria-hidden="true"></span>
-            <h3 class="text-center font-slab text-xl uppercase tracking-wide text-off-black lg:text-left">
+            <h3 class="text-center font-slab text-xl uppercase tracking-wide text-choco lg:text-left">
               {sweatFestSponsorship.fundsHeading}
             </h3>
             <ul class="mt-5 space-y-3.5">
@@ -1190,7 +1191,7 @@ const eventJsonLd = {
                         aria-hidden="true"
                       >
                       </span>
-                      <span class="text-sm font-semibold leading-relaxed text-off-black">
+                      <span class="text-sm font-semibold leading-relaxed text-choco">
                         {item}
                       </span>
                     </li>
@@ -1211,14 +1212,14 @@ const eventJsonLd = {
               >
                 {tier.featured && (
                   <span
-                    class="sf-stamp -top-4 right-4 z-10 bg-[#fffdf6] px-3 py-1.5 text-[11px]"
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#fdf8ec] px-3 py-1.5 text-[11px]"
                     style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
                   >
                     Top billing
                   </span>
                 )}
                 <div class="p-7 text-center sm:p-8">
-                  <h3 class="font-slab text-xl uppercase tracking-wide text-off-black">
+                  <h3 class="font-slab text-xl uppercase tracking-wide text-choco">
                     {tier.name}
                   </h3>
                   <p
@@ -1241,7 +1242,7 @@ const eventJsonLd = {
                         aria-hidden="true"
                       >
                       </span>
-                      <span class="text-sm leading-relaxed text-medium-gray">
+                      <span class="text-sm leading-relaxed text-choco/75">
                         {benefit}
                       </span>
                     </li>
@@ -1253,7 +1254,7 @@ const eventJsonLd = {
                       href={sweatFestTickets.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
                       data-conversion-event="sweatfest_sponsor_purchase_click"
                       data-conversion-context={`sweatfest_page_sponsors_${tier.id}`}
                     >
@@ -1271,7 +1272,7 @@ const eventJsonLd = {
                   ) : (
                     <a
                       href={sponsorMailto}
-                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4"
+                      class="sf-btn group inline-flex w-full items-center justify-center gap-2.5 bg-[var(--sf-sunrise)] px-5 py-3.5 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
                       data-conversion-event="sweatfest_sponsor_lead"
                       data-conversion-context={`sweatfest_page_sponsors_${tier.id}`}
                     >
@@ -1294,13 +1295,13 @@ const eventJsonLd = {
         </div>
 
         {/* Benefits caveat: packages are still being confirmed. */}
-        <p class="reveal mx-auto mt-9 max-w-2xl text-center text-sm font-semibold italic text-medium-gray">
+        <p class="reveal mx-auto mt-9 max-w-2xl text-center text-sm font-semibold italic text-choco/75">
           {sweatFestSponsorship.finePrint}
         </p>
 
         {/* Sponsorship CTA as an airmail postcard: striped par-avion edges,
             slab headline, hand-stamped deadline. */}
-        <div class="sf-postcard reveal relative mt-14 px-6 py-12 text-center text-off-black sm:px-10 lg:px-16">
+        <div class="sf-postcard reveal relative mt-14 px-6 py-12 text-center text-choco sm:px-10 lg:px-16">
           <div class="sf-airmail absolute inset-x-0 top-0 h-2.5" aria-hidden="true"></div>
           <div class="sf-airmail absolute inset-x-0 bottom-0 h-2.5" aria-hidden="true"></div>
 
@@ -1308,7 +1309,7 @@ const eventJsonLd = {
             <h3 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
               {sweatFestSponsorship.ctaHeading}
             </h3>
-            <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-medium-gray sm:text-lg">
+            <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-choco/75 sm:text-lg">
               {sweatFestSponsorship.ctaBody}
             </p>
             <div class="mt-9 flex flex-col items-center justify-center gap-5">
@@ -1318,7 +1319,7 @@ const eventJsonLd = {
                     href={sweatFestTickets.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-5 py-4 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-off-black focus-visible:ring-offset-4 sm:w-auto sm:px-8 sm:text-base"
+                    class="sf-btn group inline-flex w-full items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-5 py-4 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4 sm:w-auto sm:px-8 sm:text-base"
                     data-conversion-event="sweatfest_sponsor_purchase_click"
                     data-conversion-context="sweatfest_page_sponsors_postcard"
                   >
@@ -1335,11 +1336,11 @@ const eventJsonLd = {
                   </a>
                 )
               }
-              <p class="text-sm font-semibold text-medium-gray">
+              <p class="text-sm font-semibold text-choco/75">
                 Need a custom partnership? Email
                 <a
                   href={sponsorMailto}
-                  class="ml-1 font-extrabold text-off-black underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+                  class="ml-1 font-extrabold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
                   data-conversion-event="sweatfest_sponsor_lead"
                   data-conversion-context="sweatfest_page_sponsors_custom"
                 >
@@ -1356,7 +1357,7 @@ const eventJsonLd = {
     </section>
 
     {/* ===================== CLOSING BAND: LAST SET ===================== */}
-    <section class="relative overflow-hidden bg-off-black pb-16 pt-24 text-white sm:pb-20 sm:pt-28 lg:pb-24">
+    <section class="relative overflow-hidden bg-choco pb-16 pt-24 text-white sm:pb-20 sm:pt-28 lg:pb-24">
       {/* Papel picado strung across the top of the night. */}
       <div
         class="sf-picado absolute inset-x-0 top-4 h-[52px]"
@@ -1422,13 +1423,13 @@ const eventJsonLd = {
         >
           <a
             href="#tickets"
-            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-choco"
           >
             Explore passes
           </a>
           <a
             href="#sponsors"
-            class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-choco"
           >
             Become a sponsor
           </a>
@@ -1436,7 +1437,7 @@ const eventJsonLd = {
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center justify-center gap-2.5 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+            class="inline-flex items-center justify-center gap-2.5 border-2 border-white/30 px-7 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-dusk)] hover:bg-[var(--sf-dusk)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-choco"
             data-conversion-event="sweatfest_follow_click"
             data-conversion-context="sweatfest_page_closing"
           >
@@ -1477,15 +1478,15 @@ const eventJsonLd = {
 
   /* Bulletin-board note: tilted paper that straightens when grabbed. */
   .sf-note {
-    border: 2px solid rgba(30, 30, 30, 0.85);
+    border: 2px solid rgba(64, 41, 26, 0.85);
     border-radius: 4px;
-    box-shadow: 4px 5px 0 rgba(30, 30, 30, 0.12);
+    box-shadow: 4px 5px 0 rgba(64, 41, 26, 0.12);
     transform: rotate(var(--sf-note-tilt, 0deg));
     transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
   .sf-note:hover {
     transform: rotate(0deg) translateY(-2px);
-    box-shadow: 6px 8px 0 rgba(30, 30, 30, 0.14);
+    box-shadow: 6px 8px 0 rgba(64, 41, 26, 0.14);
   }
 
   /* Volunteer application: the Google-backed form wears the same paper,
@@ -1500,16 +1501,16 @@ const eventJsonLd = {
     transform: rotate(180deg);
   }
   .sf-volunteer-sheet {
-    box-shadow: 8px 9px 0 rgba(30, 30, 30, 0.14);
+    box-shadow: 8px 9px 0 rgba(64, 41, 26, 0.14);
   }
   .sf-volunteer-input {
     display: block;
     width: 100%;
-    border: 2px solid rgba(30, 30, 30, 0.72);
+    border: 2px solid rgba(64, 41, 26, 0.72);
     border-radius: 5px;
-    background: #fffaf1;
+    background: #f3eee5;
     padding: 0.8rem 0.9rem;
-    color: #1e1e1e;
+    color: #40291a;
     font: inherit;
     transition: border-color 0.16s ease, box-shadow 0.16s ease,
       background-color 0.16s ease;
@@ -1517,7 +1518,7 @@ const eventJsonLd = {
   .sf-volunteer-input:focus {
     outline: none;
     border-color: var(--sf-dusk);
-    background: #fffdf6;
+    background: #fdf8ec;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-dusk) 22%, transparent);
   }
   .sf-volunteer-choice {
@@ -1525,16 +1526,16 @@ const eventJsonLd = {
     cursor: pointer;
     align-items: flex-start;
     gap: 0.75rem;
-    border: 1.5px solid rgba(30, 30, 30, 0.3);
+    border: 1.5px solid rgba(64, 41, 26, 0.3);
     border-radius: 5px;
-    background: #fffaf1;
+    background: #f3eee5;
     padding: 0.85rem 0.9rem;
     transition: border-color 0.16s ease, background-color 0.16s ease,
       transform 0.16s ease;
   }
   .sf-volunteer-choice:hover {
-    border-color: rgba(30, 30, 30, 0.72);
-    background: #fffdf6;
+    border-color: rgba(64, 41, 26, 0.72);
+    background: #fdf8ec;
     transform: translateY(-1px);
   }
   .sf-volunteer-choice:has(input:focus-visible) {
@@ -1543,16 +1544,17 @@ const eventJsonLd = {
   }
   .sf-volunteer-choice:has(input:checked) {
     border-color: var(--sf-ember);
-    background: color-mix(in srgb, var(--sf-sunrise) 13%, #fffdf6);
+    background: color-mix(in srgb, var(--sf-sunrise) 13%, #fdf8ec);
   }
 
-  /* Lotería card: heavy outer border, hairline inner frame, hard shadow. */
+  /* Itinerary card, straight off the flyer: thick rounded border in the
+     phase color over a pale-butter interior. */
   .sf-loteria {
-    background: #fffdf6;
-    border: 3px solid #1e1e1e;
-    border-radius: 10px;
-    padding: 8px;
-    box-shadow: 7px 8px 0 rgba(30, 30, 30, 0.85);
+    background: var(--sf-card, #40291a);
+    border: 3px solid rgba(64, 41, 26, 0.25);
+    border-radius: 30px;
+    padding: 9px;
+    box-shadow: 7px 8px 0 rgba(64, 41, 26, 0.3);
     transform: rotate(var(--sf-note-tilt, 0deg));
     transition: transform 0.25s ease;
   }
@@ -1560,23 +1562,25 @@ const eventJsonLd = {
     transform: rotate(0deg) translateY(-3px);
   }
   .sf-loteria-inner {
-    border: 1.5px solid rgba(30, 30, 30, 0.5);
-    border-radius: 5px;
+    background: #fbf4d8;
+    border: none;
+    border-radius: 22px;
   }
 
-  /* Ticket stub: bordered paper with a perforation and punched notches. */
+  /* Ticket stub: bordered paper with a perforation and punched notches,
+     tinted per tier like the flyer's pricelist. */
   .sf-stub {
-    background: #fffdf6;
-    border: 2.5px solid #1e1e1e;
-    border-radius: 12px;
-    box-shadow: 6px 7px 0 rgba(30, 30, 30, 0.16);
+    background: var(--sf-stub-bg, #fdf8ec);
+    border: 2.5px solid #40291a;
+    border-radius: 18px;
+    box-shadow: 6px 7px 0 rgba(64, 41, 26, 0.16);
   }
   .sf-stub-featured {
     box-shadow: 7px 8px 0 var(--sf-ember);
   }
   .sf-stub-perf {
     position: relative;
-    border-top: 2.5px dashed rgba(30, 30, 30, 0.45);
+    border-top: 2.5px dashed rgba(64, 41, 26, 0.45);
     margin: 0 14px;
   }
   .sf-stub-perf::before,
@@ -1587,8 +1591,8 @@ const eventJsonLd = {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #fffaf1;
-    border: 2.5px solid #1e1e1e;
+    background: #f3eee5;
+    border: 2.5px solid #40291a;
   }
   .sf-stub-perf::before {
     left: -26.5px;
@@ -1604,39 +1608,39 @@ const eventJsonLd = {
     opacity: 0.75;
     background: repeating-linear-gradient(
       90deg,
-      #1e1e1e 0 2px,
+      #40291a 0 2px,
       transparent 2px 5px,
-      #1e1e1e 5px 6px,
+      #40291a 5px 6px,
       transparent 6px 11px,
-      #1e1e1e 11px 14px,
+      #40291a 11px 14px,
       transparent 14px 17px
     );
   }
 
   /* Airmail postcard: cream card with striped par-avion edges. */
   .sf-postcard {
-    background: #fffdf6;
-    border: 2.5px solid #1e1e1e;
+    background: #fdf8ec;
+    border: 2.5px solid #40291a;
     border-radius: 12px;
-    box-shadow: 8px 9px 0 rgba(30, 30, 30, 0.14);
+    box-shadow: 8px 9px 0 rgba(64, 41, 26, 0.14);
     overflow: hidden;
   }
   .sf-airmail {
     background: repeating-linear-gradient(
       -45deg,
       var(--sf-ember) 0 14px,
-      #fffdf6 14px 28px,
+      #fdf8ec 14px 28px,
       var(--sf-dusk) 28px 42px,
-      #fffdf6 42px 56px
+      #fdf8ec 42px 56px
     );
   }
 
   /* Countdown reframed as print cards (overrides the shared component's
      rounded sand-bordered look on this page only). */
   .sf-countdown-frame :global([data-sf-countdown] > div) {
-    border: 2px solid #1e1e1e;
+    border: 2px solid #40291a;
     border-radius: 8px;
-    box-shadow: 4px 4px 0 rgba(30, 30, 30, 0.14);
+    box-shadow: 4px 4px 0 rgba(64, 41, 26, 0.14);
   }
 
   /* Ticker strip: one long screen-printed tape, scrolling when motion is
@@ -1647,8 +1651,8 @@ const eventJsonLd = {
     margin-right: -0.75rem;
   }
   .sf-ticker {
-    border-top: 2px solid #1e1e1e;
-    border-bottom: 2px solid #1e1e1e;
+    border-top: 2px solid #40291a;
+    border-bottom: 2px solid #40291a;
     transform-origin: center;
     scale: 1.02 1;
   }
@@ -1670,81 +1674,19 @@ const eventJsonLd = {
     }
   }
 
-  /* The rising sun disc, centered behind the wordmark (positioned via Tailwind
-     -translate-x/y-1/2). A bright core, a warm glow halo, and crisp printed
-     rays fanning out. All motion is motion-safe only. */
-  .sf-sun {
+  /* The '70s rainbow dome behind the hero wordmark: hard-stop radial bands
+     anchored to the bottom edge of the div (the horizon line where the sky
+     gradient hands over to cream). */
+  .sf-dome {
     background: radial-gradient(
-      circle at 50% 50%,
-      rgba(255, 189, 89, 0.55) 0%,
-      rgba(255, 189, 89, 0.3) 24%,
-      rgba(255, 107, 82, 0.18) 46%,
-      rgba(233, 79, 138, 0.07) 62%,
-      transparent 74%
+      circle at 50% 100%,
+      #f3eee5 0 318px,
+      #ef8f3e 318px 352px,
+      #ef9db6 352px 386px,
+      #9cc15d 386px 420px,
+      #40291a 420px 430px,
+      transparent 430px
     );
-  }
-  .sf-sun-core {
-    background: radial-gradient(
-      circle at 50% 44%,
-      rgba(255, 250, 238, 0.98) 0%,
-      rgba(255, 212, 130, 0.9) 34%,
-      rgba(255, 148, 92, 0.55) 62%,
-      rgba(233, 79, 138, 0.18) 84%,
-      transparent 100%
-    );
-    filter: blur(2px);
-  }
-  /* Printed sol rays: a crisp conic fan clipped to a ring, slowly rotating. */
-  .sf-rays {
-    background: repeating-conic-gradient(
-      from 0deg at 50% 50%,
-      rgba(255, 149, 77, 0.22) 0deg 7deg,
-      transparent 7deg 22.5deg
-    );
-    -webkit-mask-image: radial-gradient(
-      circle at 50% 50%,
-      transparent 27%,
-      black 34%,
-      black 52%,
-      transparent 66%
-    );
-    mask-image: radial-gradient(
-      circle at 50% 50%,
-      transparent 27%,
-      black 34%,
-      black 52%,
-      transparent 66%
-    );
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .sf-sun {
-      animation: sf-sun-breathe 10s ease-in-out infinite;
-    }
-    .sf-sun-core {
-      animation: sf-sun-breathe 10s ease-in-out infinite reverse;
-    }
-    .sf-rays {
-      animation: sf-rays-spin 120s linear infinite;
-    }
-  }
-  @keyframes sf-sun-breathe {
-    0%,
-    100% {
-      opacity: 0.9;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-  }
-  @keyframes sf-rays-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   @media (forced-colors: active) {

@@ -72,7 +72,7 @@ export const sweatFestExpect = [
 export const sweatFestDay = [
   {
     id: "run",
-    accent: "sunrise",
+    accent: "rosa",
     time: "7:00 to 8:30 AM",
     title: "Run",
     detail:
@@ -80,7 +80,7 @@ export const sweatFestDay = [
   },
   {
     id: "sweat",
-    accent: "ember",
+    accent: "cielo",
     time: "9:00 AM to 5:00 PM",
     title: "Sweat",
     detail:
@@ -88,7 +88,7 @@ export const sweatFestDay = [
   },
   {
     id: "party",
-    accent: "dusk",
+    accent: "lima",
     time: "6:00 to 9:00 PM",
     title: "Pachanga",
     detail:
@@ -250,12 +250,34 @@ export const sweatFestImpact = [
   },
 ];
 
-// Sweat Fest visual identity: the day arc, sunrise to last set. Shared by all
-// surfaces so the gradient reads identically everywhere.
+// Sweat Fest '26 visual identity (retro-rainbow, from the 2026 Canva kit):
+// '70s rainbow arches over cream, chocolate ink, butter-yellow badges.
+// The legacy sunrise/ember/dusk keys stay so every surface keeps working;
+// they now point at the kit's butter / orange / bubblegum trio. The phase
+// keys (rosa / cielo / lima) color the itinerary cards like the flyer:
+// El Run = pink, El Sweat = sky blue, La Pachanga = green.
 export const sweatFestColors = {
-  sunrise: "#ffbd59", // brand gold: the 7 AM run
-  ember: "#ff6b52", // midday heat: the classes
-  dusk: "#e94f8a", // sunset into night: the Pachanga
+  sunrise: "#f2cf6b", // butter yellow: badges and CTAs
+  ember: "#ef8f3e", // '70s orange: rainbow + accents
+  dusk: "#e8749e", // bubblegum pink: rainbow + the Pachanga at night
+  rosa: "#ef9db6", // El Run card
+  cielo: "#7ec3ed", // El Sweat card
+  lima: "#9cc15d", // La Pachanga card
+};
+
+// The full retro palette for one-off surfaces (poster art, page backdrops).
+export const sweatFestPalette = {
+  sky: "#8fd0f4",
+  cream: "#f3eee5",
+  paper: "#fdf8ec",
+  chocolate: "#40291a",
+  butter: "#f2cf6b",
+  mustard: "#f0aa4a",
+  tan: "#b9a794",
+  pink: "#ef9db6",
+  orange: "#ef8f3e",
+  green: "#9cc15d",
+  blue: "#7ec3ed",
 };
 
 // Public Google Form backing the native, on-theme volunteer application on
@@ -305,34 +327,42 @@ export const sweatFestVolunteer = {
   ],
 };
 
-// Papel picado bunting, tiled as a CSS background by the `.sf-picado`
-// utility (see global.css). Each flag is a single evenodd path so the
-// diamond cutouts are true holes and the strip works over any background:
-// cream, white, or the dark Pachanga band. One flag per arc color.
-const picadoFlag = (color) =>
-  `<path fill="${color}" fill-rule="evenodd" d="M0 0h60v34l-7.5 8-7.5-8-7.5 8-7.5-8-7.5 8-7.5-8-7.5 8-7.5-8zM30 10l8 9-8 9-8-9zM12 14l4 4-4 4-4-4zM48 14l4 4-4 4-4-4z"/>`;
-const picadoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="216" height="52" viewBox="0 0 216 52"><path d="M0 3h216" stroke="rgba(30,30,30,0.45)" stroke-width="1.5"/><g transform="translate(6 3)">${picadoFlag(sweatFestColors.sunrise)}</g><g transform="translate(78 3)">${picadoFlag(sweatFestColors.ember)}</g><g transform="translate(150 3)">${picadoFlag(sweatFestColors.dusk)}</g></svg>`;
-export const sweatFestPicadoUri = `url("data:image/svg+xml,${encodeURIComponent(picadoSvg)}")`;
+// Rainbow-scallop strip, tiled as a CSS background by the `.sf-picado`
+// utility (see global.css): a row of little '70s rainbow arches hanging
+// from a chocolate rule, replacing the old papel picado bunting. Works over
+// any background: cream, sky, or the dark Pachanga band.
+const rainbowArch = (cx) =>
+  `<circle cx="${cx}" cy="2" r="48" fill="${sweatFestPalette.chocolate}"/>` +
+  `<circle cx="${cx}" cy="2" r="44" fill="${sweatFestPalette.green}"/>` +
+  `<circle cx="${cx}" cy="2" r="33" fill="${sweatFestPalette.pink}"/>` +
+  `<circle cx="${cx}" cy="2" r="22" fill="${sweatFestPalette.orange}"/>` +
+  `<circle cx="${cx}" cy="2" r="11" fill="${sweatFestPalette.butter}"/>`;
+const rainbowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="208" height="52" viewBox="0 0 208 52"><path d="M0 2h208" stroke="${sweatFestPalette.chocolate}" stroke-width="4"/>${rainbowArch(52)}${rainbowArch(156)}</svg>`;
+export const sweatFestRainbowUri = `url("data:image/svg+xml,${encodeURIComponent(rainbowSvg)}")`;
+// Legacy alias: older surfaces import the strip under its papel picado name.
+export const sweatFestPicadoUri = sweatFestRainbowUri;
 
-// Campaign artwork contains no generated lettering or logo. The exact LSP
-// mark and all event copy are layered in HTML by SweatFestArtwork.astro.
+// Rendered copies of the retro-rainbow '26 flyer (drawn live on the site by
+// SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG
+// cards. Re-render with scripts/render-sweatfest-social.mjs after art or fact
+// changes.
 export const sweatFestArt = {
   hero: {
-    src: "/images/sweatfest/sweatfest-hero-v2.webp", // 16:9 landscape
-    width: 1600,
-    height: 900,
-    alt: "Editorial illustration of a multigenerational Chicago community running, stretching, and dancing together at Sweat Fest",
+    src: "/images/sweatfest/sweatfest-social-v3.jpg", // 16:9 OG/social card
+    width: 1200,
+    height: 675,
+    alt: "Sweat Fest '26 flyer: a retro rainbow arch over the event facts for August 22, 2026 in Chicago",
   },
   poster: {
-    src: "/images/sweatfest/sweatfest-poster-v2.webp", // 4:5 portrait
+    src: "/images/sweatfest/sweatfest-poster-v3.webp", // 4:5 portrait
     width: 1080,
     height: 1350,
-    alt: "Editorial illustration of a joyful, inclusive Chicago movement festival with runners, fitness, and yoga",
+    alt: "Sweat Fest '26 flyer: retro rainbow arch, bubble wordmark, and butter-yellow info badges",
   },
   square: {
-    src: "/images/sweatfest/sweatfest-card-v2.webp", // 1:1
+    src: "/images/sweatfest/sweatfest-card-v3.webp", // 1:1
     width: 1080,
     height: 1080,
-    alt: "Editorial illustration of a joyful, inclusive Chicago movement festival from sunrise to celebration",
+    alt: "Sweat Fest '26 flyer: retro rainbow arch, bubble wordmark, and butter-yellow info badges",
   },
 };

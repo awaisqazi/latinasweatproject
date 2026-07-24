@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @import "./portal.css";
 
+/* Cubao Free (Aaron Amar, free for commercial use): the groovy bubble display
+   face of the Sweat Fest '26 retro-rainbow identity. Self-hosted woff2. */
+@font-face {
+  font-family: "Cubao Free";
+  src: url("/fonts/cubao-free-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cubao Free Wide";
+  src: url("/fonts/cubao-free-wide.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cubao Free Narrow";
+  src: url("/fonts/cubao-free-narrow.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-vibrant-pink: #b5a18d;
   --color-accent-gold: #ffbd59;
@@ -31,10 +55,17 @@
   /* Display serif used only for the Gala (signature event) headings and big
      impact numbers. Body copy stays Rubik. Generates a `font-display` utility. */
   --font-display: "Playfair Display", "Rubik", serif;
-  /* Woodtype slab used only for Sweat Fest surfaces: the same Clarendon-fat
-     letterform tradition as lotería cards and mercado signage. Generates a
-     `font-slab` utility. */
-  --font-slab: "Ultra", "Rubik", serif;
+  /* Sweat Fest '26 display type (retro-rainbow identity, from the Canva
+     kit): Cubao bubble letters for headlines. Generates a `font-slab`
+     utility (name kept so every Sweat Fest surface flips together). */
+  --font-slab: "Cubao Free", "Rubik", sans-serif;
+  /* Cubao's wide cut, for short poster wordmarks only. `font-slab-wide`. */
+  --font-slab-wide: "Cubao Free Wide", "Cubao Free", "Rubik", sans-serif;
+  /* Anton stands in for the kit's condensed sub-head face (Brice Bold
+     Condensed needs a paid license). Generates a `font-fest` utility. */
+  --font-fest: "Anton", "Rubik", sans-serif;
+  /* Sweat Fest '26 chocolate ink. `text-choco` / `border-choco` etc. */
+  --color-choco: #40291a;
   /* Hand-lettered marker used only for Haus of LSP surfaces: the scrapbook
      handwriting scrawled across the series' collage flyers. Generates a
      `font-marker` utility. */
@@ -404,25 +435,28 @@
   }
 
   /* ============================================================
-     Sweat Fest print kit: shared by /sweatfest and its callouts on the
-     homepage and links page. The look is a screen-printed neighborhood
-     flyer: woodtype slab (font-slab), riso misregistration, rubber stamps,
-     mercado price tags, hard offset-shadow buttons, papel picado bunting.
+     Sweat Fest '26 retro-rainbow kit: shared by /sweatfest and its callouts
+     on the homepage, events, and links pages. The look comes from the 2026
+     Canva kit: '70s rainbow arches over cream paper, Cubao bubble type with
+     chocolate outlines, butter-yellow info badges, daisies and sparkles.
+     Ink is chocolate (#40291a), never pure black.
      ============================================================ */
 
-  /* Riso misregistration: the ink layer sits slightly off its color plate.
-     Set --sf-print to the plate color (defaults to the ember coral). */
+  /* Bubble sticker type: letters take the plate color (--sf-print) and wear
+     the chocolate outline + hard drop shadow of the Canva wordmark. */
   .sf-print {
-    color: #1e1e1e;
-    text-shadow: 0.05em 0.055em 0 var(--sf-print, #ff6b52);
+    color: var(--sf-print, #f2cf6b);
+    -webkit-text-stroke: 0.032em #40291a;
+    paint-order: stroke fill;
+    text-shadow: 0.055em 0.065em 0 rgba(64, 41, 26, 0.92);
   }
 
-  /* Rubber stamp: double ring, crooked by default, inked in currentColor. */
+  /* Rubber stamp chip: rounded, crooked by default, inked in currentColor. */
   .sf-stamp {
     display: inline-block;
     position: relative;
     border: 2.5px solid currentColor;
-    border-radius: 6px;
+    border-radius: 999px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.16em;
@@ -431,55 +465,57 @@
   .sf-stamp::after {
     content: "";
     position: absolute;
-    inset: 2.5px;
+    inset: 3px;
     border: 1px solid currentColor;
-    border-radius: 3px;
+    border-radius: 999px;
     opacity: 0.45;
     pointer-events: none;
   }
 
-  /* Mercado price tag: hard-edged, hand-placed. */
+  /* Butter-yellow info badge, straight off the flyer's date/place/time row. */
   .sf-tag {
-    background: #fffdf6;
-    border: 2px solid #1e1e1e;
-    border-radius: 4px;
-    box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.18);
+    background: #f2cf6b;
+    border: 2.5px solid #40291a;
+    border-radius: 14px;
+    box-shadow: 2px 3px 0 rgba(64, 41, 26, 0.35);
   }
 
-  /* Print-shop button: hard offset shadow that the hover press flattens. */
+  /* Retro button: chunky chocolate border, hard offset shadow that the
+     hover press flattens. */
   .sf-btn {
-    border: 2.5px solid #1e1e1e;
-    border-radius: 8px;
-    box-shadow: 0.3rem 0.3rem 0 #1e1e1e;
+    border: 2.5px solid #40291a;
+    border-radius: 999px;
+    box-shadow: 0.3rem 0.3rem 0 #40291a;
     transition:
       transform 0.15s ease,
       box-shadow 0.15s ease;
   }
   .sf-btn:hover {
     transform: translate(0.15rem, 0.15rem);
-    box-shadow: 0.15rem 0.15rem 0 #1e1e1e;
+    box-shadow: 0.15rem 0.15rem 0 #40291a;
   }
   .sf-btn:active {
     transform: translate(0.3rem, 0.3rem);
-    box-shadow: 0 0 0 #1e1e1e;
+    box-shadow: 0 0 0 #40291a;
   }
-  /* On dark bands the shadow reads in dusk ink instead. */
+  /* On dark bands the shadow reads in bubblegum pink instead. */
   .sf-btn-night {
-    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #e94f8a);
+    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #e8749e);
   }
   .sf-btn-night:hover {
-    box-shadow: 0.15rem 0.15rem 0 var(--sf-dusk, #e94f8a);
+    box-shadow: 0.15rem 0.15rem 0 var(--sf-dusk, #e8749e);
   }
   .sf-btn-night:active {
-    box-shadow: 0 0 0 var(--sf-dusk, #e94f8a);
+    box-shadow: 0 0 0 var(--sf-dusk, #e8749e);
   }
 
-  /* Papel picado strip: tiled SVG bunting (background-image supplied via
-     inline style from sweatFestPicadoUri in src/data/sweatFest.js). */
+  /* Rainbow-scallop strip: tiled SVG awning of '70s arches (background-image
+     supplied via inline style from sweatFestRainbowUri in
+     src/data/sweatFest.js). Replaces the old papel picado bunting. */
   .sf-picado {
     background-repeat: repeat-x;
     background-position: center top;
-    background-size: 216px 52px;
+    background-size: 208px 52px;
   }
 
   /* Strip of masking tape holding notes and prints up. */
@@ -489,7 +525,7 @@
     width: 86px;
     height: 24px;
     background: rgba(255, 224, 130, 0.55);
-    border: 1px solid rgba(30, 30, 30, 0.08);
+    border: 1px solid rgba(64, 41, 26, 0.1);
     clip-path: polygon(
       3% 0,
       97% 0,
@@ -504,18 +540,20 @@
     );
   }
 
-  /* Taped-up print: white paper margin around the artwork, crooked hang. */
+  /* Taped-up print: cream paper margin around the artwork, crooked hang. */
   .sf-taped {
     position: relative;
-    background: #fffdf6;
-    border: 1px solid rgba(30, 30, 30, 0.14);
+    background: #fdf8ec;
+    border: 2px solid rgba(64, 41, 26, 0.55);
+    border-radius: 6px;
     padding: 12px;
-    box-shadow: 9px 11px 0 rgba(30, 30, 30, 0.12);
+    box-shadow: 9px 11px 0 rgba(64, 41, 26, 0.18);
   }
 
   @media (forced-colors: active) {
     .sf-print {
       text-shadow: none;
+      -webkit-text-stroke: 0;
     }
   }
 
