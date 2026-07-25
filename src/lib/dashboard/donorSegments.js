@@ -7,6 +7,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export const DONOR_SEGMENTS = [
   { id: "all", label: "All donors" },
   { id: "mine", label: "Assigned to me" },
+  { id: "assigned", label: "Assigned to someone" },
   { id: "gala", label: "Gala donors", needsEmailSet: true },
   { id: "top", label: "$500+ lifetime" },
   { id: "repeat", label: "Repeat donors" },
@@ -30,6 +31,8 @@ export function donorMatchesSegment(donor, segmentId, context = {}) {
       const profile = context.profilesByEmail?.[donor.email];
       return Boolean(profile?.owner_id) && profile.owner_id === context.profileId;
     }
+    case "assigned":
+      return Boolean(context.profilesByEmail?.[donor.email]?.owner_id);
     case "gala":
       return Boolean(context.emailSet?.has(donor.email));
     case "top":
