@@ -1,8 +1,8 @@
 ---
-// Sweat Fest '26 poster, drawn live as SVG in the retro-rainbow identity
-// from the 2026 Canva kit. The actual flyer compositions live in
-// src/data/sweatFestPoster.js, shared with the social-image render script
-// (scripts/render-sweatfest-social.mjs) so the art has a single source.
+// Sweat Fest poster, drawn live as SVG from the team's official logo lockups.
+// The flyer compositions live in src/data/sweatFestPoster.js, shared with the
+// social-image render script (scripts/render-sweatfest-social.mjs) so the art
+// has a single source.
 import { sweatFest, sweatFestPalette as p } from "@/data/sweatFest";
 import { buildPosterSvg } from "@/data/sweatFestPoster";
 
@@ -15,8 +15,6 @@ interface Props {
 
 const { variant = "landscape", className = "" } = Astro.props;
 
-const base = import.meta.env.BASE_URL;
-
 const aspectClass =
   variant === "portrait"
     ? "aspect-[4/5]"
@@ -24,9 +22,9 @@ const aspectClass =
       ? "aspect-square"
       : "aspect-video";
 
-const alt = `Sweat Fest '26 poster: a retro rainbow arch over ${sweatFest.dateLabel}, ${sweatFest.venueLine}, ${sweatFest.timeLabel}. ${sweatFest.taglineSub}`;
+const alt = `Sweat Fest poster: the checkerboard-bordered Sweat Fest logo over ${sweatFest.dateLabel}, ${sweatFest.venueLine}, ${sweatFest.timeLabel}. ${sweatFest.taglineSub}`;
 
-const svg = buildPosterSvg(variant, `${base}logo.svg`);
+const svg = buildPosterSvg(variant);
 ---
 
 <figure
@@ -37,7 +35,7 @@ const svg = buildPosterSvg(variant, `${base}logo.svg`);
   ]}
   role="img"
   aria-label={alt}
-  style={`background: ${p.cream};`}
+  style={`background: ${p.honeydew};`}
 >
   <div class="absolute inset-0 [&>svg]:h-full [&>svg]:w-full" set:html={svg} aria-hidden="true" />
 </figure>

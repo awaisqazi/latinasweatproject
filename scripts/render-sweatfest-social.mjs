@@ -1,18 +1,19 @@
-// Render the Sweat Fest '26 social/OG share images from the same SVG
+// Render the Sweat Fest social/OG share images from the same SVG
 // compositions the site draws live (src/data/sweatFestPoster.js).
 //
-// librsvg (sharp's SVG rasterizer) can't do <textPath>, so the SVG is
-// rendered in headless Chrome with the real webfonts, then post-processed
-// with sharp. Fonts: Cubao woff2 from public/fonts; Anton + Rubik TTFs are
+// The SVG is rendered in headless Chrome with the real webfonts, then
+// post-processed with sharp. Chrome (rather than sharp's librsvg) so the
+// self-hosted woff2 faces load the same way they do in the browser.
+// Fonts: Hello Baddie + Filson Soft woff2 from public/fonts; Rubik TTF is
 // looked up in FONT_DIR (defaults to the session scratchpad used when this
 // was first run; pass FONT_DIR=/path env to override).
 //
 // Usage:  node scripts/render-sweatfest-social.mjs
-// Output: public/images/sweatfest/sweatfest-social-v3.jpg   (1200x675 OG)
-//         public/images/sweatfest/sweatfest-poster-v3.webp  (1080x1350)
-//         public/images/sweatfest/sweatfest-card-v3.webp    (1080x1080)
+// Output: public/images/sweatfest/sweatfest-social-v4.jpg   (1200x675 OG)
+//         public/images/sweatfest/sweatfest-poster-v4.webp  (1080x1350)
+//         public/images/sweatfest/sweatfest-card-v4.webp    (1080x1080)
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -34,20 +35,21 @@ const FONT_DIR =
   process.env.FONT_DIR ||
   "/private/tmp/claude-501/-Users-fezqazi-Documents-Latina-Sweat-Project-Website-latinasweatproject/89c8c51f-e0f6-4de7-b080-a73569ab8cd4/scratchpad/renderfonts";
 
-// Inline the LSP logo so the SVG needs no network.
-const logoSvg = readFileSync(path.join(root, "public/logo.svg"), "utf8");
-const logoHref = `data:image/svg+xml;base64,${Buffer.from(logoSvg).toString("base64")}`;
-
-const fontFace = (family, file, format) => `
+const fontFace = (family, file, format, weight = 400) => `
   @font-face {
     font-family: "${family}";
     src: url("file://${file}") format("${format}");
+    font-weight: ${weight};
   }`;
 
+const siteFont = (file) => path.join(root, "public/fonts", file);
+
 const css = `
-  ${fontFace("Cubao Free", path.join(root, "public/fonts/cubao-free-regular.woff2"), "woff2")}
-  ${fontFace("Cubao Free Wide", path.join(root, "public/fonts/cubao-free-wide.woff2"), "woff2")}
-  ${fontFace("Anton", path.join(FONT_DIR, "Anton-Regular.ttf"), "truetype")}
+  ${fontFace("Hello Baddie", siteFont("hello-baddie.woff2"), "woff2")}
+  ${fontFace("Filson Soft", siteFont("filson-soft-400.woff2"), "woff2", 400)}
+  ${fontFace("Filson Soft", siteFont("filson-soft-500.woff2"), "woff2", 500)}
+  ${fontFace("Filson Soft", siteFont("filson-soft-700.woff2"), "woff2", 700)}
+  ${fontFace("Filson Soft", siteFont("filson-soft-800.woff2"), "woff2", 800)}
   ${fontFace("Rubik", path.join(FONT_DIR, "Rubik.ttf"), "truetype")}
   html, body { margin: 0; padding: 0; }
   svg { display: block; width: 100vw; height: 100vh; }
@@ -62,7 +64,7 @@ const shots = [
 
 for (const { variant, w, h } of shots) {
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head>
-<body>${buildPosterSvg(variant, logoHref)}</body></html>`;
+<body>${buildPosterSvg(variant)}</body></html>`;
   const htmlPath = path.join(tmpDir, `${variant}.html`);
   const pngPath = path.join(tmpDir, `${variant}.png`);
   writeFileSync(htmlPath, html);
@@ -82,11 +84,11 @@ for (const { variant, w, h } of shots) {
 await sharp(path.join(tmpDir, "landscape.png"))
   .resize(1200, 675)
   .jpeg({ quality: 88 })
-  .toFile(path.join(outDir, "sweatfest-social-v3.jpg"));
+  .toFile(path.join(outDir, "sweatfest-social-v4.jpg"));
 await sharp(path.join(tmpDir, "portrait.png"))
   .webp({ quality: 90 })
-  .toFile(path.join(outDir, "sweatfest-poster-v3.webp"));
+  .toFile(path.join(outDir, "sweatfest-poster-v4.webp"));
 await sharp(path.join(tmpDir, "square.png"))
   .webp({ quality: 90 })
-  .toFile(path.join(outDir, "sweatfest-card-v3.webp"));
+  .toFile(path.join(outDir, "sweatfest-card-v4.webp"));
 console.log("wrote", outDir);

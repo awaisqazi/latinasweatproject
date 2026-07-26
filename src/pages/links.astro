@@ -8,7 +8,7 @@ import {
   sweatFest,
   sweatFestTickets,
   sweatFestColors,
-  sweatFestPicadoUri,
+  sweatFestCheckerUri,
 } from "@/data/sweatFest";
 import {
   hausOfLsp,
@@ -521,19 +521,19 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Sweat Fest Featured Card: the retro-rainbow '26 flyer, next up
-          after Summer Renaissance (Aug 22, before the Sep 25 gala).
-          Rainbow scallops, Cubao bubble wordmark, butter badges,
+      {/* Sweat Fest Featured Card: the official checkerboard-logo flyer,
+          next up after Summer Renaissance (Aug 22, before the Sep 25 gala).
+          Checkerboard tile strip, handmade wordmark, honeydew badges,
           ticket-stub prices. */}
       <div
         id="sweatfest-card"
-        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-xl border-[3px] border-[#40291a] bg-[#fdf8ec] shadow-[6px_7px_0_#e8749e] transition-transform duration-300 hover:-translate-y-0.5"
+        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-xl border-[3px] border-[#123f36] bg-[#f4f7dc] shadow-[6px_7px_0_#ee3083] transition-transform duration-300 hover:-translate-y-0.5"
         style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;"
       >
-        {/* Rainbow scallops strung inside the top edge */}
+        {/* Checkerboard tile strip inside the top edge */}
         <div
           class="sf-picado h-[26px] w-full"
-          style={`background-image: ${sweatFestPicadoUri}; background-size: 108px 26px;`}
+          style={`background-image: ${sweatFestCheckerUri}; background-size: 78px 26px;`}
           aria-hidden="true"
         >
         </div>
@@ -551,7 +551,7 @@ const getLinkConversionProvider = (url = "") => {
 
             <div class="px-1 pt-4 sm:px-2">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span class="sf-stamp px-2 py-1 text-[9px]" style="color: #a3512b;">
+                <span class="sf-stamp px-2 py-1 text-[9px]" style="color: #b23c14;">
                   <span class="lang-en">First-ever festival</span>
                   <span class="lang-es hidden">Primer festival</span>
                 </span>
@@ -561,9 +561,9 @@ const getLinkConversionProvider = (url = "") => {
                 </span>
               </div>
 
-              <h2 class="mt-3.5 font-slab text-3xl uppercase leading-none tracking-tight sm:text-4xl" style="color: #40291a;">
-                <span class="sf-print" style="--sf-print: #f0aa4a;">Sweat Fest</span>
-                <span class="sf-print ml-1" style="--sf-print: #b9a794;">’26</span>
+              <h2 class="mt-3.5 font-slab text-3xl uppercase leading-none tracking-tight sm:text-4xl" style="color: #123f36;">
+                <span class="sf-print" style="--sf-print: #60a444;">Sweat Fest</span>
+                <span class="sf-print ml-1" style="--sf-print: #ee3083;">’26</span>
               </h2>
               <p class="mt-2 text-sm font-extrabold leading-relaxed text-off-black/85">
                 <span class="lang-en">Movement Is Ours: wellness, cultura, and connection from sunrise to last set.</span>
@@ -610,14 +610,14 @@ const getLinkConversionProvider = (url = "") => {
                   class:list={[
                     "flex min-w-0 items-center justify-between gap-2 rounded-md border-2 bg-white px-3 py-2.5",
                     tier.featured
-                      ? "border-[#40291a] shadow-[3px_3px_0_#ef8f3e]"
-                      : "border-[#40291a]/75 shadow-[2px_2px_0_rgba(64,41,26,0.18)]",
+                      ? "border-[#123f36] shadow-[3px_3px_0_#00a7ab]"
+                      : "border-[#123f36]/75 shadow-[2px_2px_0_rgba(18,63,54,0.18)]",
                   ]}
                   style={`transform: rotate(${[-0.7, 0.5, -0.4, 0.6][i % 4]}deg);`}
                 >
                   <div class="min-w-0">
                     {tier.featured && (
-                      <p class="mb-0.5 text-[7px] font-extrabold uppercase tracking-[0.14em] text-[#a3512b]">
+                      <p class="mb-0.5 text-[7px] font-extrabold uppercase tracking-[0.14em] text-[#b23c14]">
                         <span class="lang-en">Best value</span>
                         <span class="lang-es hidden">Mejor precio</span>
                       </p>
@@ -627,7 +627,7 @@ const getLinkConversionProvider = (url = "") => {
                       <span class="lang-es hidden">{sweatFestTierCopy[tier.id].es}</span>
                     </p>
                   </div>
-                  <p class="flex-shrink-0 font-slab text-lg text-[#a3512b]">${tier.price}</p>
+                  <p class="flex-shrink-0 font-slab text-lg text-[#b23c14]">${tier.price}</p>
                 </div>
               ))
             }
@@ -639,7 +639,7 @@ const getLinkConversionProvider = (url = "") => {
             rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
             data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
             data-conversion-context="links_sweatfest_card"
-            class="sf-btn mt-5 flex items-center justify-between bg-[#f2cf6b] px-4 py-3 text-[#40291a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40291a] focus-visible:ring-offset-4"
+            class="sf-btn mt-5 flex items-center justify-between bg-[#ee3083] px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
           >
             <span class="text-sm font-extrabold">
               <span class="lang-en">{sweatFestPrimaryLabel}</span>

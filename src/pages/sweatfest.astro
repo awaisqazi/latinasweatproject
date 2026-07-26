@@ -14,16 +14,17 @@ import {
   sweatFestColors,
   sweatFestPalette,
   sweatFestVolunteer,
-  sweatFestRainbowUri,
+  sweatFestCheckerUri,
 } from "@/data/sweatFest";
 
-// Sweat Fest: the "Daylight Festival", art-directed like a screen-printed
-// neighborhood flyer instead of a SaaS landing page. The reference points are
-// real and local: lotería cards (Clarendon slab type, numbered, bordered),
-// papel picado bunting, mercado bulletin boards, riso misregistration, ticket
-// stubs. The day still arcs sunrise (gold) → ember → dusk (magenta), with the
-// single dark payoff held for the closing Pachanga band. Every fact renders
-// from src/data/sweatFest.js so TBDs (venue, Zeffy URL) flip automatically.
+// Sweat Fest: the "Daylight Festival", art-directed from the team's official
+// logo instead of a SaaS landing page. The language is the logo's: honeydew
+// grounds, flat solid color blocks, checkerboard tile strips as dividers,
+// hard boxy edges, and handmade distressed display type. Local reference
+// points still shape the layout: numbered itinerary cards, mercado bulletin
+// boards, ticket stubs. The day arcs magenta, orange, teal, with the single
+// dark payoff held for the closing Pachanga band. Every fact renders from
+// src/data/sweatFest.js so TBDs (venue, Zeffy URL) flip automatically.
 
 const instagramUrl = "https://www.instagram.com/latinasweatproject/";
 const base = import.meta.env.BASE_URL;
@@ -60,9 +61,9 @@ const sponsorMailto = `mailto:${sweatFestSponsorship.contactEmail}?subject=${enc
 // which map 1:1 onto sweatFestColors.
 const accentOf = (key) => sweatFestColors[key] ?? sweatFestColors.sunrise;
 
-// Deepened accent for text on light backgrounds. The stronger choco mix
-// keeps even small gold labels readable on white and warm cream.
-const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #40291a)`;
+// Deepened accent for text on light backgrounds. The stronger ink mix keeps
+// even small labels readable on white and honeydew.
+const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #123f36)`;
 
 // The motto splits into its three arc-colored lines.
 // "Move Together. Celebrate Culture. Build Community."
@@ -73,21 +74,21 @@ const mottoLines = sweatFest.motto
   .map((line) => `${line}.`);
 const arcOrder = ["sunrise", "ember", "dusk"];
 
-// Lotería-card articles for the day phases: El Run, El Sweat, La Pachanga.
+// Card articles for the day phases: El Run, El Sweat, La Pachanga.
 const loteriaArticle = { run: "El", sweat: "El", party: "La" };
 // Alternating paper tilts, the hand-placed look shared by cards and notes.
 const tiltOf = (i) => [-1.4, 0.8, -0.6, 1.1, -1, 0.7][i % 6];
 
-// Rainbow-scallop strip comes from the shared identity kit (sweatFest.js).
-const picadoUri = sweatFestRainbowUri;
+// Checkerboard tile strip comes from the shared identity kit (sweatFest.js).
+const picadoUri = sweatFestCheckerUri;
 
-// Ticket stubs tint like the Canva pricelist: pink 5K, butter Sweat &
-// Pachanga, orange Pachanga, green All Day.
+// Ticket stubs tint from the logo tiles: magenta 5K, teal Sweat & Pachanga,
+// orange Pachanga, green All Day.
 const stubTint = {
-  run: sweatFestPalette.pink,
-  "sweat-party": sweatFestPalette.butter,
-  party: sweatFestPalette.orange,
-  "all-day": sweatFestPalette.green,
+  run: sweatFestPalette.magenta,
+  "sweat-party": sweatFestPalette.teal,
+  party: sweatFestPalette.naranja,
+  "all-day": sweatFestPalette.verde,
 };
 
 // Paper grain: one fixed noise layer over the whole page so everything reads
@@ -130,7 +131,7 @@ const expectIcons = [
 // food=ember, Pachanga=dusk.
 const expectAccents = ["ember", "sunrise", "dusk", "sunrise", "ember", "dusk"];
 
-// Sun/moon marker icons for the lotería day cards, keyed by phase id.
+// Sun/moon marker icons for the itinerary day cards, keyed by phase id.
 const dayIcons = {
   run: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5M5.3 5.9l1.7 1.7M18.7 5.9L17 7.6M3 18h18M6.5 14.5a5.5 5.5 0 0111 0" />',
   sweat:
@@ -148,8 +149,8 @@ const calendarGlyph =
 const instagramGlyph =
   '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />';
 
-// Ember motes floating up through the closing band, warm counterpart to the
-// gala's gold particles. Colors cycle across the day arc.
+// Motes floating up through the closing band, the festival's counterpart to
+// the gala's gold particles. Colors cycle across the day arc.
 const closingMotes = Array.from({ length: 14 }, (_, i) => ({
   left: (i * 71 + 9) % 100,
   size: i % 4 === 0 ? 5 + (i % 3) : 3 + (i % 3),
@@ -176,7 +177,7 @@ const eventJsonLd = {
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   url: canonicalEventUrl,
   image: [
-    "https://latinasweatproject.com/images/sweatfest/sweatfest-social-v3.jpg",
+    "https://latinasweatproject.com/images/sweatfest/sweatfest-social-v4.jpg",
   ],
   location: {
     "@type": "Place",
@@ -210,8 +211,8 @@ const eventJsonLd = {
 <Layout
   title="Sweat Fest | The Latina Sweat Project"
   description={metaDescription}
-  socialImage="/images/sweatfest/sweatfest-social-v3.jpg"
-  socialImageAlt="Sweat Fest '26: a retro rainbow arch over August 22, 2026, 7:00 AM to 9:00 PM, Chicago, location announced soon"
+  socialImage="/images/sweatfest/sweatfest-social-v4.jpg"
+  socialImageAlt="Sweat Fest: the checkerboard-bordered Sweat Fest logo over August 22, 2026, 7:00 AM to 9:00 PM, Chicago, location announced soon"
   socialImageWidth={1200}
   socialImageHeight={675}
   socialImageType="image/jpeg"
@@ -224,7 +225,7 @@ const eventJsonLd = {
   ></script>
   <Header />
   <main
-    class="overflow-x-clip bg-[#f3eee5] text-choco"
+    class="overflow-x-clip bg-[#e2ecac] text-choco"
     style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
   >
     {/* Printed-stock grain over the whole page. */}
@@ -238,14 +239,15 @@ const eventJsonLd = {
     {/* ======================= HERO: DAYBREAK ======================= */}
     <section
       id="save-the-date"
-      class="relative isolate overflow-hidden pb-16 pt-20 text-choco scroll-mt-28 sm:pb-20 sm:pt-24 lg:pt-28"
-      style="background: linear-gradient(to bottom, #8fd0f4 0rem, #8fd0f4 30rem, #f3eee5 30rem, #f3eee5 100%);"
+      class="relative isolate overflow-hidden bg-[#e2ecac] pb-16 pt-24 text-choco scroll-mt-28 sm:pb-20 sm:pt-28 lg:pt-32"
     >
-      {/* The '70s rainbow dome behind the wordmark: chocolate rule, then
-          green / pink / orange bands over the cream interior, opening onto
-          the sky. Clipped by the section. */}
-      <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div class="sf-dome absolute left-1/2 top-[3rem] h-[27rem] w-[56rem] -translate-x-1/2"></div>
+      {/* Checkerboard tile strip along the top edge, straight off the logo
+          border. */}
+      <div
+        class="sf-picado absolute inset-x-0 top-0 h-[52px]"
+        style={`background-image: ${picadoUri};`}
+        aria-hidden="true"
+      >
       </div>
 
       <div class="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -257,25 +259,25 @@ const eventJsonLd = {
           <span class="h-px w-8 bg-[var(--sf-dusk)]" aria-hidden="true"></span>
         </p>
 
-        {/* Stacked Cubao bubble wordmark, straight off the flyer: SWEAT in
-            cream, FEST in tan, both outlined in chocolate, and the year
-            rides along as a crooked sticker. */}
+        {/* Stacked handmade wordmark echoing the logo lettering: SWEAT in the
+            wordmark green, FEST in brand magenta, each over a hard ink
+            offset, with the year riding along as a crooked teal chip. */}
         <h1
-          class="sf-rise mt-6 font-slab uppercase leading-[0.92] tracking-tight"
+          class="sf-rise mt-6 font-slab uppercase leading-[0.95] tracking-tight"
           style="animation-delay: 0.06s;"
         >
           <span
-            class="sf-print block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
-            style="--sf-print: #fdf8ec;"
+            class="sf-print block text-[4.2rem] sm:text-[6.5rem] lg:text-[8rem]"
+            style="--sf-print: #60a444;"
           >
             Sweat
           </span>
           <span
-            class="block text-[4.6rem] sm:text-[7rem] lg:text-[8.75rem]"
+            class="block text-[4.2rem] sm:text-[6.5rem] lg:text-[8rem]"
           >
-            <span class="sf-print" style="--sf-print: #b9a794;">Fest</span>
+            <span class="sf-print" style="--sf-print: #ee3083;">Fest</span>
             <span
-              class="ml-2 inline-block rotate-6 rounded-md bg-[var(--sf-dusk)] px-2.5 py-1 align-top font-sans text-base font-extrabold tracking-widest text-white shadow-[3px_3px_0_rgba(30,30,30,0.85)] sm:ml-3 sm:text-xl"
+              class="ml-2 inline-block rotate-6 rounded-md bg-[#00a7ab] px-2.5 py-1 align-top font-sans text-base font-extrabold tracking-widest text-white shadow-[3px_3px_0_rgba(18,63,54,0.85)] sm:ml-3 sm:text-xl"
             >
               ’26
             </span>
@@ -421,7 +423,8 @@ const eventJsonLd = {
         </p>
       </div>
 
-      {/* Papel picado bunting strung along the bottom of the hero. */}
+      {/* Matching checkerboard strip closing the bottom edge, so the hero
+          reads as a framed panel like the logo itself. */}
       <div
         class="sf-picado absolute inset-x-0 bottom-0 h-[52px]"
         style={`background-image: ${picadoUri};`}
@@ -440,7 +443,7 @@ const eventJsonLd = {
                 {[0, 1, 2].map(() =>
                   tickerItems.map((item, i) => (
                     <>
-                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#f6f0e3] sm:text-xl">
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#eaf0c8] sm:text-xl">
                         {item}
                       </span>
                       <span
@@ -460,7 +463,7 @@ const eventJsonLd = {
     </div>
 
     {/* ====================== MANIFESTO: FIRST LIGHT ====================== */}
-    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #eee6d6, #f6f0e3 60%, #f3eee5);">
+    <section class="relative overflow-hidden py-16 sm:py-20" style="background: linear-gradient(to bottom, #dde8a8, #eaf0c8 60%, #e2ecac);">
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
           {/* The campaign artwork as a taped-up print: white paper margin,
@@ -504,7 +507,7 @@ const eventJsonLd = {
     </section>
 
     {/* ======================= WHAT TO EXPECT: THE BOARD ======================= */}
-    <section class="relative overflow-hidden bg-[#f3eee5] py-16 sm:py-20 lg:py-24">
+    <section class="relative overflow-hidden bg-[#e2ecac] py-16 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -530,7 +533,7 @@ const eventJsonLd = {
               return (
                 <div
                   class="sf-note reveal relative p-6 pt-8 text-center lg:text-left"
-                  style={`transition-delay: ${index * 80}ms; --sf-note-tilt: ${tiltOf(index)}deg; background: color-mix(in oklab, ${accent} 7%, #fdf8ec);`}
+                  style={`transition-delay: ${index * 80}ms; --sf-note-tilt: ${tiltOf(index)}deg; background: color-mix(in oklab, ${accent} 7%, #f4f7dc);`}
                 >
                   <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg]" aria-hidden="true"></span>
                   <div class="flex items-center justify-center gap-3 lg:justify-start">
@@ -559,11 +562,11 @@ const eventJsonLd = {
       </div>
     </section>
 
-    {/* ==================== THE DAY: LOTERÍA RUN OF SHOW ==================== */}
+    {/* ======================= THE DAY: RUN OF SHOW ======================= */}
     <section
       id="the-day"
       class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24"
-      style="background: linear-gradient(to bottom, #f3eee5, #f0e9dc 45%, #f3eee5);"
+      style="background: linear-gradient(to bottom, #e2ecac, #e7eebd 45%, #e2ecac);"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
@@ -586,8 +589,8 @@ const eventJsonLd = {
           </p>
         </div>
 
-        {/* Three lotería cards: numbered, double-bordered, each phase under
-            its own sky. El Run, El Sweat, La Pachanga. */}
+        {/* Three numbered cards, each phase framed in its own logo color and
+            under its own sky. El Run, El Sweat, La Pachanga. */}
         <ol class="mx-auto mt-14 grid max-w-6xl gap-8 sm:gap-6 lg:grid-cols-3">
           {
             sweatFestDay.map((phase, index) => {
@@ -612,14 +615,14 @@ const eventJsonLd = {
                       class="mt-4 flex h-32 items-center justify-center rounded-md border-2 border-choco/80 sm:h-36"
                       style={
                         isDusk
-                          ? `background: linear-gradient(to bottom, #2a1e33, ${accent}66);`
-                          : `background: linear-gradient(to bottom, #fdf8ec 15%, ${accent}55);`
+                          ? `background: linear-gradient(to bottom, #0d2f2b, ${accent}66);`
+                          : `background: linear-gradient(to bottom, #f4f7dc 15%, ${accent}55);`
                       }
                       aria-hidden="true"
                     >
                       <svg
                         class:list={["h-16 w-16", index === 0 && "translate-y-3"]}
-                        style={`color: ${isDusk ? "#ffe9c4" : "#40291a"};`}
+                        style={`color: ${isDusk ? "#ffe9c4" : "#123f36"};`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -657,7 +660,7 @@ const eventJsonLd = {
         Google entry ids into a hidden response frame. */}
     <section
       id="volunteer"
-      class="relative overflow-hidden bg-[#f0e9dc] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+      class="relative overflow-hidden bg-[#e7eebd] py-16 scroll-mt-28 sm:py-20 lg:py-24"
     >
       <div
         class="absolute inset-x-0 top-0 h-1"
@@ -698,7 +701,7 @@ const eventJsonLd = {
               ["Approval required", "Applying does not guarantee placement"],
             ].map(([title, detail], index) => (
               <div
-                class="sf-note bg-[#fdf8ec] px-5 py-5 text-center"
+                class="sf-note bg-[#f4f7dc] px-5 py-5 text-center"
                 style={`--sf-note-tilt: ${[-0.7, 0.5, -0.4][index]}deg;`}
               >
                 <p class="font-slab text-lg uppercase tracking-wide text-choco">{title}</p>
@@ -719,7 +722,7 @@ const eventJsonLd = {
             </svg>
           </summary>
 
-          <div class="sf-volunteer-sheet border-x-2 border-b-2 border-choco bg-[#fdf8ec] px-5 py-8 sm:px-8 lg:px-10">
+          <div class="sf-volunteer-sheet border-x-2 border-b-2 border-choco bg-[#f4f7dc] px-5 py-8 sm:px-8 lg:px-10">
             <div class="rounded-md border-2 border-dashed border-[var(--sf-ember)] bg-[var(--sf-ember)]/5 p-5">
               <p class="font-extrabold text-choco">Before you apply</p>
               <p class="mt-2 text-sm leading-relaxed text-choco/75">
@@ -934,7 +937,7 @@ const eventJsonLd = {
     </section>
 
     {/* ============================ TICKETS ============================ */}
-    <section id="tickets" class="relative overflow-hidden bg-[#f3eee5] py-16 scroll-mt-28 sm:py-20 lg:py-24">
+    <section id="tickets" class="relative overflow-hidden bg-[#e2ecac] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -964,11 +967,11 @@ const eventJsonLd = {
             sweatFestTickets.tiers.map((tier, index) => (
               <div
                 class:list={["sf-stub reveal relative flex h-full flex-col", tier.featured && "sf-stub-featured"]}
-                style={`transition-delay: ${index * 100}ms; --sf-stub-bg: color-mix(in oklab, ${stubTint[tier.id] ?? sweatFestPalette.butter} 40%, #fdf8ec);`}
+                style={`transition-delay: ${index * 100}ms; --sf-stub-bg: color-mix(in oklab, ${stubTint[tier.id] ?? sweatFestPalette.verde} 40%, #f4f7dc);`}
               >
                 {tier.featured && (
                   <span
-                    class="sf-stamp -top-4 right-4 z-10 bg-[#fdf8ec] px-3 py-1.5 text-[11px]"
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#f4f7dc] px-3 py-1.5 text-[11px]"
                     style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
                   >
                     Best value
@@ -982,7 +985,7 @@ const eventJsonLd = {
                     {tier.name}
                   </h3>
                   <p class="mt-2 flex items-baseline justify-center gap-1">
-                    <span class="font-slab text-5xl tracking-tight" style={`color: ${tier.featured ? deep(sweatFestColors.ember) : "#40291a"};`}>
+                    <span class="font-slab text-5xl tracking-tight" style={`color: ${tier.featured ? deep(sweatFestColors.ember) : "#123f36"};`}>
                       ${tier.price}
                     </span>
                     <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-choco/75">
@@ -1072,7 +1075,7 @@ const eventJsonLd = {
                 {[0, 1, 2].map(() =>
                   mottoLines.map((line, i) => (
                     <>
-                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#f6f0e3] sm:text-xl">
+                      <span class="whitespace-nowrap font-slab text-lg uppercase tracking-wide text-[#eaf0c8] sm:text-xl">
                         {line.replace(/\.$/, "")}
                       </span>
                       <span
@@ -1092,7 +1095,7 @@ const eventJsonLd = {
     </div>
 
     {/* ============================ IMPACT ============================ */}
-    <section id="impact" class="relative overflow-hidden bg-[#f0e9dc] py-16 scroll-mt-28 sm:py-20 lg:py-24">
+    <section id="impact" class="relative overflow-hidden bg-[#e7eebd] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal">
@@ -1152,7 +1155,7 @@ const eventJsonLd = {
     {/* ========================== SPONSORSHIP ========================== */}
     <section
       id="sponsors"
-      class="relative overflow-hidden bg-[#f3eee5] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+      class="relative overflow-hidden bg-[#e2ecac] py-16 scroll-mt-28 sm:py-20 lg:py-24"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -1174,7 +1177,7 @@ const eventJsonLd = {
           </div>
 
           {/* What sponsorship funds: a pinned-up note. */}
-          <div class="sf-note reveal relative p-7 pt-9 sm:p-8" style="transition-delay: 120ms; --sf-note-tilt: 0.9deg; background: #fdf8ec;">
+          <div class="sf-note reveal relative p-7 pt-9 sm:p-8" style="transition-delay: 120ms; --sf-note-tilt: 0.9deg; background: #f4f7dc;">
             <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[2deg]" aria-hidden="true"></span>
             <h3 class="text-center font-slab text-xl uppercase tracking-wide text-choco lg:text-left">
               {sweatFestSponsorship.fundsHeading}
@@ -1212,7 +1215,7 @@ const eventJsonLd = {
               >
                 {tier.featured && (
                   <span
-                    class="sf-stamp -top-4 right-4 z-10 bg-[#fdf8ec] px-3 py-1.5 text-[11px]"
+                    class="sf-stamp -top-4 right-4 z-10 bg-[#f4f7dc] px-3 py-1.5 text-[11px]"
                     style={`position: absolute; color: ${deep(sweatFestColors.ember)}; transform: rotate(3deg);`}
                   >
                     Top billing
@@ -1358,7 +1361,7 @@ const eventJsonLd = {
 
     {/* ===================== CLOSING BAND: LAST SET ===================== */}
     <section class="relative overflow-hidden bg-choco pb-16 pt-24 text-white sm:pb-20 sm:pt-28 lg:pb-24">
-      {/* Papel picado strung across the top of the night. */}
+      {/* Checkerboard tile strip across the top of the night. */}
       <div
         class="sf-picado absolute inset-x-0 top-4 h-[52px]"
         style={`background-image: ${picadoUri};`}
@@ -1478,15 +1481,15 @@ const eventJsonLd = {
 
   /* Bulletin-board note: tilted paper that straightens when grabbed. */
   .sf-note {
-    border: 2px solid rgba(64, 41, 26, 0.85);
+    border: 2px solid rgba(18, 63, 54, 0.85);
     border-radius: 4px;
-    box-shadow: 4px 5px 0 rgba(64, 41, 26, 0.12);
+    box-shadow: 4px 5px 0 rgba(18, 63, 54, 0.12);
     transform: rotate(var(--sf-note-tilt, 0deg));
     transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
   .sf-note:hover {
     transform: rotate(0deg) translateY(-2px);
-    box-shadow: 6px 8px 0 rgba(64, 41, 26, 0.14);
+    box-shadow: 6px 8px 0 rgba(18, 63, 54, 0.14);
   }
 
   /* Volunteer application: the Google-backed form wears the same paper,
@@ -1501,16 +1504,16 @@ const eventJsonLd = {
     transform: rotate(180deg);
   }
   .sf-volunteer-sheet {
-    box-shadow: 8px 9px 0 rgba(64, 41, 26, 0.14);
+    box-shadow: 8px 9px 0 rgba(18, 63, 54, 0.14);
   }
   .sf-volunteer-input {
     display: block;
     width: 100%;
-    border: 2px solid rgba(64, 41, 26, 0.72);
+    border: 2px solid rgba(18, 63, 54, 0.72);
     border-radius: 5px;
-    background: #f3eee5;
+    background: #e2ecac;
     padding: 0.8rem 0.9rem;
-    color: #40291a;
+    color: #123f36;
     font: inherit;
     transition: border-color 0.16s ease, box-shadow 0.16s ease,
       background-color 0.16s ease;
@@ -1518,7 +1521,7 @@ const eventJsonLd = {
   .sf-volunteer-input:focus {
     outline: none;
     border-color: var(--sf-dusk);
-    background: #fdf8ec;
+    background: #f4f7dc;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-dusk) 22%, transparent);
   }
   .sf-volunteer-choice {
@@ -1526,16 +1529,16 @@ const eventJsonLd = {
     cursor: pointer;
     align-items: flex-start;
     gap: 0.75rem;
-    border: 1.5px solid rgba(64, 41, 26, 0.3);
+    border: 1.5px solid rgba(18, 63, 54, 0.3);
     border-radius: 5px;
-    background: #f3eee5;
+    background: #e2ecac;
     padding: 0.85rem 0.9rem;
     transition: border-color 0.16s ease, background-color 0.16s ease,
       transform 0.16s ease;
   }
   .sf-volunteer-choice:hover {
-    border-color: rgba(64, 41, 26, 0.72);
-    background: #fdf8ec;
+    border-color: rgba(18, 63, 54, 0.72);
+    background: #f4f7dc;
     transform: translateY(-1px);
   }
   .sf-volunteer-choice:has(input:focus-visible) {
@@ -1544,17 +1547,17 @@ const eventJsonLd = {
   }
   .sf-volunteer-choice:has(input:checked) {
     border-color: var(--sf-ember);
-    background: color-mix(in srgb, var(--sf-sunrise) 13%, #fdf8ec);
+    background: color-mix(in srgb, var(--sf-sunrise) 13%, #f4f7dc);
   }
 
-  /* Itinerary card, straight off the flyer: thick rounded border in the
-     phase color over a pale-butter interior. */
+  /* Itinerary card: thick boxy frame in the phase color over a pale
+     honeydew interior, the flat block language of the logo. */
   .sf-loteria {
-    background: var(--sf-card, #40291a);
-    border: 3px solid rgba(64, 41, 26, 0.25);
-    border-radius: 30px;
+    background: var(--sf-card, #123f36);
+    border: 3px solid rgba(18, 63, 54, 0.25);
+    border-radius: 14px;
     padding: 9px;
-    box-shadow: 7px 8px 0 rgba(64, 41, 26, 0.3);
+    box-shadow: 7px 8px 0 rgba(18, 63, 54, 0.3);
     transform: rotate(var(--sf-note-tilt, 0deg));
     transition: transform 0.25s ease;
   }
@@ -1562,25 +1565,25 @@ const eventJsonLd = {
     transform: rotate(0deg) translateY(-3px);
   }
   .sf-loteria-inner {
-    background: #fbf4d8;
+    background: #f4f7dc;
     border: none;
-    border-radius: 22px;
+    border-radius: 8px;
   }
 
   /* Ticket stub: bordered paper with a perforation and punched notches,
      tinted per tier like the flyer's pricelist. */
   .sf-stub {
-    background: var(--sf-stub-bg, #fdf8ec);
-    border: 2.5px solid #40291a;
-    border-radius: 18px;
-    box-shadow: 6px 7px 0 rgba(64, 41, 26, 0.16);
+    background: var(--sf-stub-bg, #f4f7dc);
+    border: 2.5px solid #123f36;
+    border-radius: 12px;
+    box-shadow: 6px 7px 0 rgba(18, 63, 54, 0.16);
   }
   .sf-stub-featured {
     box-shadow: 7px 8px 0 var(--sf-ember);
   }
   .sf-stub-perf {
     position: relative;
-    border-top: 2.5px dashed rgba(64, 41, 26, 0.45);
+    border-top: 2.5px dashed rgba(18, 63, 54, 0.45);
     margin: 0 14px;
   }
   .sf-stub-perf::before,
@@ -1591,8 +1594,8 @@ const eventJsonLd = {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #f3eee5;
-    border: 2.5px solid #40291a;
+    background: #e2ecac;
+    border: 2.5px solid #123f36;
   }
   .sf-stub-perf::before {
     left: -26.5px;
@@ -1608,39 +1611,39 @@ const eventJsonLd = {
     opacity: 0.75;
     background: repeating-linear-gradient(
       90deg,
-      #40291a 0 2px,
+      #123f36 0 2px,
       transparent 2px 5px,
-      #40291a 5px 6px,
+      #123f36 5px 6px,
       transparent 6px 11px,
-      #40291a 11px 14px,
+      #123f36 11px 14px,
       transparent 14px 17px
     );
   }
 
-  /* Airmail postcard: cream card with striped par-avion edges. */
+  /* Airmail postcard: pale honeydew card with striped par-avion edges. */
   .sf-postcard {
-    background: #fdf8ec;
-    border: 2.5px solid #40291a;
+    background: #f4f7dc;
+    border: 2.5px solid #123f36;
     border-radius: 12px;
-    box-shadow: 8px 9px 0 rgba(64, 41, 26, 0.14);
+    box-shadow: 8px 9px 0 rgba(18, 63, 54, 0.14);
     overflow: hidden;
   }
   .sf-airmail {
     background: repeating-linear-gradient(
       -45deg,
       var(--sf-ember) 0 14px,
-      #fdf8ec 14px 28px,
+      #f4f7dc 14px 28px,
       var(--sf-dusk) 28px 42px,
-      #fdf8ec 42px 56px
+      #f4f7dc 42px 56px
     );
   }
 
   /* Countdown reframed as print cards (overrides the shared component's
      rounded sand-bordered look on this page only). */
   .sf-countdown-frame :global([data-sf-countdown] > div) {
-    border: 2px solid #40291a;
+    border: 2px solid #123f36;
     border-radius: 8px;
-    box-shadow: 4px 4px 0 rgba(64, 41, 26, 0.14);
+    box-shadow: 4px 4px 0 rgba(18, 63, 54, 0.14);
   }
 
   /* Ticker strip: one long screen-printed tape, scrolling when motion is
@@ -1651,8 +1654,8 @@ const eventJsonLd = {
     margin-right: -0.75rem;
   }
   .sf-ticker {
-    border-top: 2px solid #40291a;
-    border-bottom: 2px solid #40291a;
+    border-top: 2px solid #123f36;
+    border-bottom: 2px solid #123f36;
     transform-origin: center;
     scale: 1.02 1;
   }
@@ -1672,21 +1675,6 @@ const eventJsonLd = {
     to {
       transform: translateX(-50%);
     }
-  }
-
-  /* The '70s rainbow dome behind the hero wordmark: hard-stop radial bands
-     anchored to the bottom edge of the div (the horizon line where the sky
-     gradient hands over to cream). */
-  .sf-dome {
-    background: radial-gradient(
-      circle at 50% 100%,
-      #f3eee5 0 318px,
-      #ef8f3e 318px 352px,
-      #ef9db6 352px 386px,
-      #9cc15d 386px 420px,
-      #40291a 420px 430px,
-      transparent 430px
-    );
   }
 
   @media (forced-colors: active) {

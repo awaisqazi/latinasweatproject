@@ -11,7 +11,7 @@ import {
   sweatFest,
   sweatFestDay,
   sweatFestTickets,
-  sweatFestPicadoUri,
+  sweatFestCheckerUri,
 } from "@/data/sweatFest";
 import {
   hausOfLsp,
@@ -27,12 +27,12 @@ const galaPageUrl = withBase(galaTeaser.pagePath);
 const galaFromPrice = Math.min(
   ...galaTickets.tiers.map((tier) => tier.earlyBird),
 );
-// Deepened phase accents legible on the light mini-cards (retro-rainbow
-// identity: El Run pink, El Sweat sky, La Pachanga green).
+// Deepened phase accents legible on the light mini-cards (official logo
+// identity: El Run magenta, El Sweat teal, La Pachanga green).
 const sweatFestDeepAccents = {
-  rosa: "#b34a67",
-  cielo: "#22648f",
-  lima: "#5b7a26",
+  rosa: "#c21e64",
+  cielo: "#017277",
+  lima: "#43722c",
 };
 const sweatFestFromPrice = Math.min(
   ...sweatFestTickets.tiers.map((tier) => tier.price),
@@ -252,18 +252,19 @@ const featuredSlugs = [
     </section>
     {/* END: Haus of LSP — Summer Renaissance Featured Section */}
 
-    {/* START: Sweat Fest Featured Section (retro-rainbow '26 identity:
-        cream paper, chocolate ink, rainbow scallops strung along the top;
-        light, follows the dark Summer Renaissance section above) */}
+    {/* START: Sweat Fest Featured Section (official checkerboard-logo
+        identity: honeydew ground, deep teal-green ink, checkerboard tile
+        strip along the top; light, follows the dark Summer Renaissance
+        section above) */}
     <section
       id="sweat-fest"
       class="relative overflow-hidden py-16 md:py-20 scroll-mt-28"
-      style="background: linear-gradient(to bottom, #f6f0e3, #f3eee5 45%, #eee6d6);"
+      style="background: linear-gradient(to bottom, #eaf0c8, #e2ecac 45%, #dde8a8);"
     >
-      {/* Rainbow scallops strung along the top */}
+      {/* Checkerboard tile strip along the top */}
       <div
         class="sf-picado absolute inset-x-0 top-0 h-[52px]"
-        style={`background-image: ${sweatFestPicadoUri};`}
+        style={`background-image: ${sweatFestCheckerUri};`}
         aria-hidden="true"
       >
       </div>
@@ -284,12 +285,12 @@ const featuredSlugs = [
           </div>
 
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
-            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #a3512b;">
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b23c14;">
               First-ever · All-day movement festival
             </span>
-            <h2 class="mt-5 font-slab text-4xl uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.98]" style="color: #40291a;">
-              <span class="sf-print" style="--sf-print: #f0aa4a;">Sweat Fest</span>
-              <span class="sf-print ml-1" style="--sf-print: #b9a794;">’26</span>
+            <h2 class="mt-5 font-slab text-4xl uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.98]" style="color: #123f36;">
+              <span class="sf-print" style="--sf-print: #60a444;">Sweat Fest</span>
+              <span class="sf-print ml-1" style="--sf-print: #ee3083;">’26</span>
             </h2>
             <p class="mt-4 text-lg font-bold text-off-black">
               {sweatFest.dateLabel} · {sweatFest.timeLabel}
@@ -329,7 +330,7 @@ const featuredSlugs = [
                   class="sf-tag inline-flex items-baseline gap-1.5 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.06em] text-off-black/80"
                   style={`transform: rotate(${[-0.8, 0.5, -0.4, 0.7][i % 4]}deg);`}
                 >
-                  {tier.name} · <span class="font-slab text-sm normal-case" style="color: #a3512b;">${tier.price}</span>
+                  {tier.name} · <span class="font-slab text-sm normal-case" style="color: #b23c14;">${tier.price}</span>
                 </span>
               ))}
             </div>
@@ -341,7 +342,7 @@ const featuredSlugs = [
                     href={sweatFestTickets.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="sf-btn group inline-flex items-center gap-3 bg-[#f2cf6b] px-8 py-4 text-base font-extrabold text-[#40291a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40291a] focus-visible:ring-offset-4"
+                    class="sf-btn group inline-flex items-center gap-3 bg-[#ee3083] px-8 py-4 text-base font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
                     data-conversion-event="sweatfest_ticket_click"
                     data-conversion-context="events_sweatfest_feature"
                   >
@@ -355,8 +356,10 @@ const featuredSlugs = [
               <a
                 href={withBase("sweatfest")}
                 class:list={[
-                  "sf-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold text-[#40291a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40291a] focus-visible:ring-offset-4",
-                  sweatFestTickets.onSale ? "bg-[#fdf8ec]" : "bg-[#f2cf6b]",
+                  "sf-btn group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4",
+                  sweatFestTickets.onSale
+                    ? "bg-[#f4f7dc] text-[#123f36]"
+                    : "bg-[#ee3083] text-white",
                 ]}
                 data-conversion-event="sweatfest_explore_click"
                 data-conversion-context="events_sweatfest_feature"
@@ -368,14 +371,14 @@ const featuredSlugs = [
               </a>
               <a
                 href={`${withBase("sweatfest")}#sponsors`}
-                class="inline-flex items-center gap-3 border-2 border-[#40291a]/25 bg-[#fdf8ec] px-8 py-4 text-base font-bold text-[#40291a] transition-colors duration-300 hover:border-[#ef8f3e] hover:bg-[#ef8f3e]/10"
-                style="border-radius: 999px;"
+                class="inline-flex items-center gap-3 border-2 border-[#123f36]/25 bg-[#f4f7dc] px-8 py-4 text-base font-bold text-[#123f36] transition-colors duration-300 hover:border-[#00a7ab] hover:bg-[#00a7ab]/10"
+                style="border-radius: 10px;"
               >
                 Become a sponsor
               </a>
             </div>
             <p class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-off-black/70 lg:justify-start">
-              <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #a3512b;">
+              <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b23c14;">
                 {sweatFestTickets.statusLabel}
               </span>
               Tickets from ${sweatFestFromPrice}

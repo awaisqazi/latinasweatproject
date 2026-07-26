@@ -67,8 +67,8 @@ export const sweatFestExpect = [
   },
 ];
 
-// The arc of the day. `accent` keys the sunrise-to-sunset color coding used
-// across surfaces: sunrise = gold, ember = midday coral, dusk = night magenta.
+// The arc of the day. `accent` keys the color coding used across surfaces,
+// drawn from the logo tiles: rosa = magenta, cielo = teal, lima = green.
 export const sweatFestDay = [
   {
     id: "run",
@@ -250,34 +250,34 @@ export const sweatFestImpact = [
   },
 ];
 
-// Sweat Fest '26 visual identity (retro-rainbow, from the 2026 Canva kit):
-// '70s rainbow arches over cream, chocolate ink, butter-yellow badges.
+// Sweat Fest visual identity, taken straight from the team's official logo:
+// flat solid color blocks on a honeydew field, framed by a multicolor
+// checkerboard tile border, with handmade distressed display lettering.
 // The legacy sunrise/ember/dusk keys stay so every surface keeps working;
-// they now point at the kit's butter / orange / bubblegum trio. The phase
-// keys (rosa / cielo / lima) color the itinerary cards like the flyer:
-// El Run = pink, El Sweat = sky blue, La Pachanga = green.
+// they now point at magenta / orange / teal. The phase keys (rosa / cielo /
+// lima) color the itinerary cards: Run = magenta, Sweat = teal,
+// Pachanga = green, matching the wordmark and X mark.
 export const sweatFestColors = {
-  sunrise: "#f2cf6b", // butter yellow: badges and CTAs
-  ember: "#ef8f3e", // '70s orange: rainbow + accents
-  dusk: "#e8749e", // bubblegum pink: rainbow + the Pachanga at night
-  rosa: "#ef9db6", // El Run card
-  cielo: "#7ec3ed", // El Sweat card
-  lima: "#9cc15d", // La Pachanga card
+  sunrise: "#ee3083", // brand magenta: the LSP X, primary CTAs
+  ember: "#f15b27", // orange checker tile: accents
+  dusk: "#00a7ab", // teal checker tile: night shadows and the Pachanga
+  rosa: "#ee3083", // Run card
+  cielo: "#00a7ab", // Sweat card
+  lima: "#60a444", // Pachanga card
 };
 
-// The full retro palette for one-off surfaces (poster art, page backdrops).
+// The full logo palette for one-off surfaces (poster art, page backdrops).
+// Every hex is lifted from src/assets/sweatfest/logo-stacked.svg except the
+// ink, the derived deep teal-green used for type on the light grounds.
 export const sweatFestPalette = {
-  sky: "#8fd0f4",
-  cream: "#f3eee5",
-  paper: "#fdf8ec",
-  chocolate: "#40291a",
-  butter: "#f2cf6b",
-  mustard: "#f0aa4a",
-  tan: "#b9a794",
-  pink: "#ef9db6",
-  orange: "#ef8f3e",
-  green: "#9cc15d",
-  blue: "#7ec3ed",
+  honeydew: "#e2ecac", // the logo's background field
+  paper: "#f4f7dc", // paler honeydew for cards and chips
+  ink: "#123f36", // derived deep teal-green: all type on light grounds
+  magenta: "#ee3083",
+  rosa: "#f6a9c8",
+  naranja: "#f15b27",
+  teal: "#00a7ab",
+  verde: "#60a444", // the wordmark letters
 };
 
 // Public Google Form backing the native, on-theme volunteer application on
@@ -327,42 +327,56 @@ export const sweatFestVolunteer = {
   ],
 };
 
-// Rainbow-scallop strip, tiled as a CSS background by the `.sf-picado`
-// utility (see global.css): a row of little '70s rainbow arches hanging
-// from a chocolate rule, replacing the old papel picado bunting. Works over
-// any background: cream, sky, or the dark Pachanga band.
-const rainbowArch = (cx) =>
-  `<circle cx="${cx}" cy="2" r="48" fill="${sweatFestPalette.chocolate}"/>` +
-  `<circle cx="${cx}" cy="2" r="44" fill="${sweatFestPalette.green}"/>` +
-  `<circle cx="${cx}" cy="2" r="33" fill="${sweatFestPalette.pink}"/>` +
-  `<circle cx="${cx}" cy="2" r="22" fill="${sweatFestPalette.orange}"/>` +
-  `<circle cx="${cx}" cy="2" r="11" fill="${sweatFestPalette.butter}"/>`;
-const rainbowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="208" height="52" viewBox="0 0 208 52"><path d="M0 2h208" stroke="${sweatFestPalette.chocolate}" stroke-width="4"/>${rainbowArch(52)}${rainbowArch(156)}</svg>`;
-export const sweatFestRainbowUri = `url("data:image/svg+xml,${encodeURIComponent(rainbowSvg)}")`;
-// Legacy alias: older surfaces import the strip under its papel picado name.
-export const sweatFestPicadoUri = sweatFestRainbowUri;
+// Checkerboard tile strip, tiled as a CSS background by the `.sf-picado`
+// utility (see global.css): the logo's multicolor border rhythm run out flat
+// as a section divider. Two rows of 26px squares in a 156x52 tile, the second
+// row offset three columns so the colors interlock like the logo frame.
+// Works over any background: honeydew, paper, or the dark Pachanga band.
+const checkerColors = [
+  sweatFestPalette.magenta,
+  sweatFestPalette.rosa,
+  sweatFestPalette.naranja,
+  sweatFestPalette.teal,
+  sweatFestPalette.verde,
+  sweatFestPalette.honeydew,
+];
+const checkerRow = (y, offset) =>
+  checkerColors
+    .map(
+      (_, i) =>
+        `<rect x="${i * 26}" y="${y}" width="26" height="26" fill="${
+          checkerColors[(i + offset) % checkerColors.length]
+        }"/>`,
+    )
+    .join("");
+const checkerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="156" height="52" viewBox="0 0 156 52">${checkerRow(0, 0)}${checkerRow(26, 3)}</svg>`;
+export const sweatFestCheckerUri = `url("data:image/svg+xml,${encodeURIComponent(checkerSvg)}")`;
+// Legacy aliases: older surfaces import the strip under its rainbow and
+// papel picado names. Every one of them just tiles whatever ships here.
+export const sweatFestRainbowUri = sweatFestCheckerUri;
+export const sweatFestPicadoUri = sweatFestCheckerUri;
 
-// Rendered copies of the retro-rainbow '26 flyer (drawn live on the site by
+// Rendered copies of the flyer (drawn live on the site by
 // SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG
 // cards. Re-render with scripts/render-sweatfest-social.mjs after art or fact
 // changes.
 export const sweatFestArt = {
   hero: {
-    src: "/images/sweatfest/sweatfest-social-v3.jpg", // 16:9 OG/social card
+    src: "/images/sweatfest/sweatfest-social-v4.jpg", // 16:9 OG/social card
     width: 1200,
     height: 675,
-    alt: "Sweat Fest '26 flyer: a retro rainbow arch over the event facts for August 22, 2026 in Chicago",
+    alt: "Sweat Fest flyer: the checkerboard-bordered Sweat Fest logo over the event facts for August 22, 2026 in Chicago",
   },
   poster: {
-    src: "/images/sweatfest/sweatfest-poster-v3.webp", // 4:5 portrait
+    src: "/images/sweatfest/sweatfest-poster-v4.webp", // 4:5 portrait
     width: 1080,
     height: 1350,
-    alt: "Sweat Fest '26 flyer: retro rainbow arch, bubble wordmark, and butter-yellow info badges",
+    alt: "Sweat Fest flyer: the checkerboard-bordered Sweat Fest logo above date, place, and time chips",
   },
   square: {
-    src: "/images/sweatfest/sweatfest-card-v3.webp", // 1:1
+    src: "/images/sweatfest/sweatfest-card-v4.webp", // 1:1
     width: 1080,
     height: 1080,
-    alt: "Sweat Fest '26 flyer: retro rainbow arch, bubble wordmark, and butter-yellow info badges",
+    alt: "Sweat Fest flyer: the checkerboard-bordered Sweat Fest logo above date, place, and time chips",
   },
 };

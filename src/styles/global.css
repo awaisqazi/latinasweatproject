@@ -1,26 +1,45 @@
 @import "tailwindcss";
 @import "./portal.css";
 
-/* Cubao Free (Aaron Amar, free for commercial use): the groovy bubble display
-   face of the Sweat Fest '26 retro-rainbow identity. Self-hosted woff2. */
+/* Hello Baddie (Studio Funshop): the handmade, distressed, reverse-contrast
+   display face of the official Sweat Fest identity. Caps-focused, so headings
+   render through the existing `uppercase` utilities. Self-hosted woff2. */
 @font-face {
-  font-family: "Cubao Free";
-  src: url("/fonts/cubao-free-regular.woff2") format("woff2");
+  font-family: "Hello Baddie";
+  src: url("/fonts/hello-baddie.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Filson Soft: the rounded geometric subhead face of the Sweat Fest identity,
+   self-hosted alongside Hello Baddie. Four weights cover labels through
+   poster chips. */
+@font-face {
+  font-family: "Filson Soft";
+  src: url("/fonts/filson-soft-400.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Cubao Free Wide";
-  src: url("/fonts/cubao-free-wide.woff2") format("woff2");
-  font-weight: 400;
+  font-family: "Filson Soft";
+  src: url("/fonts/filson-soft-500.woff2") format("woff2");
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Cubao Free Narrow";
-  src: url("/fonts/cubao-free-narrow.woff2") format("woff2");
-  font-weight: 400;
+  font-family: "Filson Soft";
+  src: url("/fonts/filson-soft-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Filson Soft";
+  src: url("/fonts/filson-soft-800.woff2") format("woff2");
+  font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
@@ -55,17 +74,17 @@
   /* Display serif used only for the Gala (signature event) headings and big
      impact numbers. Body copy stays Rubik. Generates a `font-display` utility. */
   --font-display: "Playfair Display", "Rubik", serif;
-  /* Sweat Fest '26 display type (retro-rainbow identity, from the Canva
-     kit): Cubao bubble letters for headlines. Generates a `font-slab`
-     utility (name kept so every Sweat Fest surface flips together). */
-  --font-slab: "Cubao Free", "Rubik", sans-serif;
-  /* Cubao's wide cut, for short poster wordmarks only. `font-slab-wide`. */
-  --font-slab-wide: "Cubao Free Wide", "Cubao Free", "Rubik", sans-serif;
-  /* Anton stands in for the kit's condensed sub-head face (Brice Bold
-     Condensed needs a paid license). Generates a `font-fest` utility. */
-  --font-fest: "Anton", "Rubik", sans-serif;
-  /* Sweat Fest '26 chocolate ink. `text-choco` / `border-choco` etc. */
-  --color-choco: #40291a;
+  /* Sweat Fest display type: Hello Baddie, the handmade distressed face of
+     the official checkerboard-logo identity. Generates a `font-slab` utility
+     (name kept so every Sweat Fest surface flips together). */
+  --font-slab: "Hello Baddie", "Rubik", sans-serif;
+  /* Sweat Fest subhead face: Filson Soft, self-hosted in four weights above.
+     Anton is retired from this identity. Generates a `font-fest` utility. */
+  --font-fest: "Filson Soft", "Rubik", sans-serif;
+  /* Sweat Fest ink: the deep teal-green that replaced chocolate when the
+     identity moved to the official logo. Utility name kept: `text-choco` /
+     `border-choco` etc. */
+  --color-choco: #123f36;
   /* Hand-lettered marker used only for Haus of LSP surfaces: the scrapbook
      handwriting scrawled across the series' collage flyers. Generates a
      `font-marker` utility. */
@@ -435,20 +454,21 @@
   }
 
   /* ============================================================
-     Sweat Fest '26 retro-rainbow kit: shared by /sweatfest and its callouts
-     on the homepage, events, and links pages. The look comes from the 2026
-     Canva kit: '70s rainbow arches over cream paper, Cubao bubble type with
-     chocolate outlines, butter-yellow info badges, daisies and sparkles.
-     Ink is chocolate (#40291a), never pure black.
+     Sweat Fest kit: shared by /sweatfest and its callouts on the homepage,
+     events, and links pages. The look comes from the team's official
+     checkerboard logo: flat solid color blocks on a honeydew field
+     (#e2ecac), multicolor checkerboard tile strips as dividers, hard boxy
+     edges with small radii, and handmade distressed display type (Hello
+     Baddie). Ink is deep teal-green (#123f36), never pure black.
      ============================================================ */
 
-  /* Bubble sticker type: letters take the plate color (--sf-print) and wear
-     the chocolate outline + hard drop shadow of the Canva wordmark. */
+  /* Handmade display type: letters take the plate color (--sf-print) over a
+     hard ink offset, the flat print-block shadow of the logo lettering. No
+     outline stroke: Hello Baddie is already distressed and strokes muddy it. */
   .sf-print {
-    color: var(--sf-print, #f2cf6b);
-    -webkit-text-stroke: 0.032em #40291a;
+    color: var(--sf-print, #60a444);
     paint-order: stroke fill;
-    text-shadow: 0.055em 0.065em 0 rgba(64, 41, 26, 0.92);
+    text-shadow: 0.05em 0.06em 0 rgba(18, 63, 54, 0.9);
   }
 
   /* Rubber stamp chip: rounded, crooked by default, inked in currentColor. */
@@ -472,50 +492,51 @@
     pointer-events: none;
   }
 
-  /* Butter-yellow info badge, straight off the flyer's date/place/time row. */
+  /* Honeydew info badge, straight off the logo field: boxy, hard-edged. */
   .sf-tag {
-    background: #f2cf6b;
-    border: 2.5px solid #40291a;
-    border-radius: 14px;
-    box-shadow: 2px 3px 0 rgba(64, 41, 26, 0.35);
+    background: #e2ecac;
+    border: 2.5px solid #123f36;
+    border-radius: 8px;
+    box-shadow: 2px 3px 0 rgba(18, 63, 54, 0.3);
   }
 
-  /* Retro button: chunky chocolate border, hard offset shadow that the
-     hover press flattens. */
+  /* Flat button: chunky ink border, boxy corners, hard offset shadow that
+     the hover press flattens. */
   .sf-btn {
-    border: 2.5px solid #40291a;
-    border-radius: 999px;
-    box-shadow: 0.3rem 0.3rem 0 #40291a;
+    border: 2.5px solid #123f36;
+    border-radius: 10px;
+    box-shadow: 0.3rem 0.3rem 0 #123f36;
     transition:
       transform 0.15s ease,
       box-shadow 0.15s ease;
   }
   .sf-btn:hover {
     transform: translate(0.15rem, 0.15rem);
-    box-shadow: 0.15rem 0.15rem 0 #40291a;
+    box-shadow: 0.15rem 0.15rem 0 #123f36;
   }
   .sf-btn:active {
     transform: translate(0.3rem, 0.3rem);
-    box-shadow: 0 0 0 #40291a;
+    box-shadow: 0 0 0 #123f36;
   }
-  /* On dark bands the shadow reads in bubblegum pink instead. */
+  /* On dark bands the shadow reads in the logo's teal instead. */
   .sf-btn-night {
-    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #e8749e);
+    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #00a7ab);
   }
   .sf-btn-night:hover {
-    box-shadow: 0.15rem 0.15rem 0 var(--sf-dusk, #e8749e);
+    box-shadow: 0.15rem 0.15rem 0 var(--sf-dusk, #00a7ab);
   }
   .sf-btn-night:active {
-    box-shadow: 0 0 0 var(--sf-dusk, #e8749e);
+    box-shadow: 0 0 0 var(--sf-dusk, #00a7ab);
   }
 
-  /* Rainbow-scallop strip: tiled SVG awning of '70s arches (background-image
-     supplied via inline style from sweatFestRainbowUri in
-     src/data/sweatFest.js). Replaces the old papel picado bunting. */
+  /* Checkerboard tile strip: the logo's border rhythm run out flat as a
+     section divider (background-image supplied via inline style from
+     sweatFestCheckerUri in src/data/sweatFest.js). Class name kept: it just
+     tiles whatever strip the data module exports. */
   .sf-picado {
     background-repeat: repeat-x;
     background-position: center top;
-    background-size: 208px 52px;
+    background-size: 156px 52px;
   }
 
   /* Strip of masking tape holding notes and prints up. */
@@ -525,7 +546,7 @@
     width: 86px;
     height: 24px;
     background: rgba(255, 224, 130, 0.55);
-    border: 1px solid rgba(64, 41, 26, 0.1);
+    border: 1px solid rgba(18, 63, 54, 0.1);
     clip-path: polygon(
       3% 0,
       97% 0,
@@ -540,14 +561,14 @@
     );
   }
 
-  /* Taped-up print: cream paper margin around the artwork, crooked hang. */
+  /* Taped-up print: pale honeydew paper margin around the artwork. */
   .sf-taped {
     position: relative;
-    background: #fdf8ec;
-    border: 2px solid rgba(64, 41, 26, 0.55);
+    background: #f4f7dc;
+    border: 2px solid rgba(18, 63, 54, 0.55);
     border-radius: 6px;
     padding: 12px;
-    box-shadow: 9px 11px 0 rgba(64, 41, 26, 0.18);
+    box-shadow: 9px 11px 0 rgba(18, 63, 54, 0.18);
   }
 
   @media (forced-colors: active) {
