@@ -45,7 +45,7 @@ export const summerRenaissance = {
   calendarPath: "/summer-renaissance-2026.ics",
   ticketsOnSale: true,
   ticketsUrl:
-    "https://www.zeffy.com/en-US/ticketing/haus-of-lsp-summer-renaissance",
+    "https://www.zeffy.com/en-US/ticketing/haus-of-lsp-2",
   ticketsLabel: "Express Interest",
   statusLabel: "Pricing and ticketing details coming soon",
   exploreLabel: "Step inside the Haus",
