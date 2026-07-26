@@ -7,7 +7,13 @@
 //     (the flyer's "949 W 19th St" was a typo; the studio is 949 W 16th St)
 //   - 6 to 8 PM: art exhibit + open mic / slam poetry
 //   - 8 to 11 PM: DJ ("let loose and be free") + drinks
-//   - All proceeds go toward the LSP Queer Scholarship
+//   - All proceeds support LSP's LGBTQ+ comunidad
+//
+// NOTE (2026-07-26): the site used to name a specific "LSP Queer Scholarship"
+// as the destination of every dollar. How that fund actually gets implemented
+// is still undecided, so the web copy now says proceeds support our LGBTQ+
+// comunidad and stops there. The printed flyer art still shows the older
+// scholarship line on purpose; do not regenerate the flyers to match.
 // Tickets went live on Zeffy 2026-07-26: $15 general admission, one tier.
 // Every event CTA reads this URL and label from the shared data below.
 
@@ -15,8 +21,10 @@ export const hausOfLsp = {
   seriesName: "Haus of LSP",
   seriesLine: "The queer-centered event series from The Latina Sweat Project",
   seriesDescription:
-    "Haus of LSP is how our LGBTQ+ comunidad gathers: nights built around queer art, queer voices, and dance floors where everyone belongs. Every Haus event raises money for the LSP Queer Scholarship.",
-  fundName: "LSP Queer Scholarship",
+    "Haus of LSP is how our LGBTQ+ comunidad gathers: nights built around queer art, queer voices, and dance floors where everyone belongs. Every Haus event raises money for our LGBTQ+ comunidad.",
+  // Short phrase for the "all proceeds -> ___" lockups. Deliberately names a
+  // comunidad, not a named fund; see the note at the top of this file.
+  causeShort: "our LGBTQ+ comunidad",
   instagramUrl: "https://www.instagram.com/latinasweatproject/",
 };
 
@@ -35,11 +43,11 @@ export const summerRenaissance = {
   address: "949 W 16th St, Chicago",
   venueLine: "LSP Studio · 949 W 16th St, Pilsen",
   tagline: "Queer art, open mics, and a dance floor of our own.",
-  cause: "All proceeds go toward the LSP Queer Scholarship",
+  cause: "All proceeds support LSP's LGBTQ+ comunidad",
   homepageDescription:
-    "A summer night from Haus of LSP: an art exhibit and open mic that melt into a DJ set, with every dollar building the LSP Queer Scholarship.",
+    "A summer night from Haus of LSP: an art exhibit and open mic that melt into a DJ set, with every dollar going back to our LGBTQ+ comunidad.",
   pageDescription:
-    "Haus of LSP throws open the doors for one summer night in Pilsen: queer art on the walls, poets on the mic, and a DJ carrying us to 11. Come for the gallery, stay for the dance floor, and know that every dollar raised funds the LSP Queer Scholarship.",
+    "Haus of LSP throws open the doors for one summer night in Pilsen: queer art on the walls, poets on the mic, and a DJ carrying us to 11. Come for the gallery, stay for the dance floor, and know that every dollar raised goes back to our LGBTQ+ comunidad.",
   pagePath: "/hausoflsp",
   calendarPath: "/summer-renaissance-2026.ics",
   ticketsOnSale: true,
@@ -108,7 +116,7 @@ export const summerRenaissanceActs = [
       },
       {
         title: "Drinks",
-        detail: "Raise a glass; the proceeds raise a scholarship.",
+        detail: "Raise a glass; the proceeds raise la comunidad.",
       },
     ],
   },

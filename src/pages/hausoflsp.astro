@@ -58,7 +58,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
   title="Summer Renaissance | Haus of LSP | The Latina Sweat Project"
   description={summerRenaissance.pageDescription}
   socialImage="images/hausoflsp1.jpg"
-  socialImageAlt="Haus of LSP presents Summer Renaissance: Saturday, August 1, 2026, 6 to 11 PM in Pilsen. All proceeds go toward the LSP Queer Scholarship."
+  socialImageAlt="Haus of LSP presents Summer Renaissance: Saturday, August 1, 2026, 6 to 11 PM in Pilsen. All proceeds support LSP's LGBTQ+ comunidad."
   socialImageWidth={1000}
   socialImageHeight={1250}
   socialImageType="image/jpeg"
@@ -220,7 +220,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
             </div>
 
             <p class="mt-9 text-center font-marker text-lg text-off-black/70">
-              all proceeds &rarr; {hausOfLsp.fundName} &hearts;
+              all proceeds &rarr; {hausOfLsp.causeShort} &hearts;
             </p>
           </div>
         </div>
@@ -232,7 +232,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
     </section>
 
     {/* ============ THE CAUSE: why we dance ============ */}
-    <section id="queer-scholarship" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
+    <section id="why-we-dance" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20">
       <div class="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full blur-[120px]" style={`background: ${hausColors.pink}33;`} aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -245,13 +245,13 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
             </h2>
             <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
               Every drink poured, every ticket, every dollar from Summer
-              Renaissance goes to the {hausOfLsp.fundName}: funding LGBTQ+
-              community members' access to classes, training, and leadership at
-              The Latina Sweat Project.
+              Renaissance goes back to {hausOfLsp.causeShort}: access to
+              classes, training, and leadership at The Latina Sweat Project for
+              the people in this room.
             </p>
             <p class="mt-4 max-w-xl text-lg leading-relaxed text-white/70">
               So when the DJ tells you to let loose and be free, take it
-              literally. The louder the night, the further the fund goes.
+              literally. The louder the night, the further it goes.
             </p>
           </div>
 
@@ -260,9 +260,9 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
             <div class="haus-sticker rotate-[1.4deg] rounded-2xl p-8 text-center" style={`background: linear-gradient(160deg, ${hausColors.maroon}, #1c0c15);`}>
               <p class="font-marker text-7xl leading-none" style={`color: ${hausColors.pink};`}>100%</p>
               <p class="mt-3 text-sm font-extrabold uppercase tracking-[0.2em] text-white/80">
-                of proceeds fund the
+                of proceeds go back to
               </p>
-              <p class="haus-chrome mt-1 font-marker text-3xl">{hausOfLsp.fundName}</p>
+              <p class="haus-chrome mt-1 font-marker text-3xl">{hausOfLsp.causeShort}</p>
               <div class="mx-auto mt-5 h-px w-24 bg-white/20"></div>
               <p class="mt-5 text-sm font-semibold leading-relaxed text-white/60">
                 Show up, show out, and send someone from our comunidad further
@@ -569,7 +569,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
               src={`${base}images/hausoflsp1.jpg`}
               width="1000"
               height="1250"
-              alt="Summer Renaissance flyer: Haus of LSP presents, over a collage of dancers and a disco ball. Saturday, August 1, 2026, 6 to 11 PM in Pilsen. All proceeds go toward the LSP Queer Scholarship."
+              alt="Summer Renaissance flyer: Haus of LSP presents, over a collage of dancers and a disco ball. Saturday, August 1, 2026, 6 to 11 PM at 949 W 16th St, Pilsen."
               class="haus-sticker w-full rounded-sm"
               loading="lazy"
               decoding="async"
@@ -691,7 +691,7 @@ const chipTilt = [-1.6, 1.1, -0.8, 1.4];
         <p class="reveal mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/70" style="transition-delay: 160ms;">
           {summerRenaissance.shortDateLabel} · {summerRenaissance.timeLabel} ·
           {" "}{summerRenaissance.neighborhood}. Bring your people, your poems, and
-          your best moves. The scholarship fund grows with every one of you.
+          your best moves. La comunidad grows with every one of you.
         </p>
         <div class="reveal mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row" style="transition-delay: 220ms;">
           {
