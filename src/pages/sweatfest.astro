@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import SweatFestCountdown from "@/components/SweatFestCountdown.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import SweatFestConfetti from "@/components/SweatFestConfetti.astro";
+import { whiteHorizontalLogoSvg } from "@/data/sweatFestLogos";
 import {
   sweatFest,
   sweatFestExpect,
@@ -923,12 +924,22 @@ const eventJsonLd = {
             </form>
 
             <div
-              class="mt-8 hidden rounded-md border-2 border-[var(--sf-sunrise)] bg-[var(--sf-sunrise)]/10 p-6 text-center"
+              class="sf-volunteer-success relative mt-8 hidden rounded-md border-2 border-[var(--sf-sunrise)] bg-[var(--sf-sunrise)]/10 p-6 text-center"
               data-sf-volunteer-success
               role="status"
               aria-live="polite"
               tabindex="-1"
             >
+              {/* Checker-tile confetti burst, fired when the card appears. */}
+              <span class="sf-burst" aria-hidden="true">
+                {
+                  Array.from({ length: 12 }, (_, i) => (
+                    <i
+                      style={`--sf-burst-a: ${i * 30}deg; --sf-burst-d: ${70 + (i % 3) * 26}px; --sf-burst-c: ${[sweatFestPalette.magenta, sweatFestPalette.teal, sweatFestPalette.verde, sweatFestPalette.naranja, sweatFestPalette.rosa][i % 5]}; animation-delay: ${(i % 4) * 45}ms;`}
+                    />
+                  ))
+                }
+              </span>
               <p class="font-slab text-2xl uppercase tracking-wide text-choco">Application received</p>
               <p class="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-choco/75">
                 Thank you for offering your time. This is not a confirmed
@@ -1401,9 +1412,14 @@ const eventJsonLd = {
       </div>
 
       <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-white/55">
-          {sweatFest.title} · {sweatFest.shortDateLabel}
-        </p>
+        {/* The official all-white lockup, sized as the band's eyebrow. */}
+        <div
+          class="reveal mx-auto w-64 sm:w-80 [&>svg]:h-auto [&>svg]:w-full"
+          role="img"
+          aria-label={`${sweatFest.title}, presented by Latina Sweat Project · ${sweatFest.shortDateLabel}`}
+          set:html={whiteHorizontalLogoSvg}
+        />
+        <p class="sr-only">{sweatFest.title} · {sweatFest.shortDateLabel}</p>
         <h2 class="mt-6 font-slab text-4xl uppercase leading-[1.06] tracking-tight sm:text-5xl">
           {
             mottoLines.map((line, i) => (
@@ -1510,6 +1526,96 @@ const eventJsonLd = {
   }
   .sf-volunteer-sheet {
     box-shadow: 8px 9px 0 rgba(18, 63, 54, 0.14);
+  }
+
+  /* Opening experience: the sheet unfolds (JS drives the height), and the
+     form sections walk in one after another. All motion-safe. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sf-volunteer-sheet {
+      overflow: hidden;
+      transition:
+        height 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+        opacity 0.4s ease;
+    }
+    .sf-volunteer-details[open] .sf-volunteer-sheet > :is(div, form) > :is(fieldset, div) {
+      animation: sf-rise 0.55s cubic-bezier(0.25, 0.8, 0.25, 1) backwards;
+    }
+    .sf-volunteer-details[open] form > :nth-child(3) { animation-delay: 90ms; }
+    .sf-volunteer-details[open] form > :nth-child(4) { animation-delay: 180ms; }
+    .sf-volunteer-details[open] form > :nth-child(5) { animation-delay: 270ms; }
+    .sf-volunteer-details[open] form > :nth-child(6) { animation-delay: 360ms; }
+    .sf-volunteer-details[open] form > :nth-child(7) { animation-delay: 450ms; }
+    .sf-volunteer-details[open] form > :nth-child(8) { animation-delay: 540ms; }
+
+    /* Ticking a shift or role gives a happy little pop. */
+    .sf-volunteer-choice:has(input:checked) {
+      animation: sf-choice-pop 0.28s ease;
+    }
+
+    /* Success card pops in and throws checker confetti. */
+    .sf-volunteer-success:not(.hidden) {
+      animation: sf-success-pop 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .sf-burst i {
+      animation: sf-burst-fly 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+    }
+  }
+  @keyframes sf-choice-pop {
+    50% {
+      transform: translateY(-2px) scale(1.02);
+    }
+  }
+  @keyframes sf-success-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.94) translateY(12px);
+    }
+  }
+
+  /* The burst tiles themselves: little checker squares flying out from the
+     top center of the success card, then fading. Hidden without motion. */
+  .sf-burst {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .sf-burst i {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background: var(--sf-burst-c, #ee3083);
+    opacity: 0;
+  }
+  @keyframes sf-burst-fly {
+    0% {
+      opacity: 1;
+      transform: rotate(var(--sf-burst-a)) translateY(-6px) rotate(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(var(--sf-burst-a)) translateY(calc(-1 * var(--sf-burst-d)))
+        rotate(300deg);
+    }
+  }
+
+  /* Sending state: spinner beside the button label. */
+  [data-sf-volunteer-submit][aria-busy="true"]::after {
+    content: "";
+    width: 1em;
+    height: 1em;
+    margin-left: 0.55rem;
+    border: 3px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: sf-spin 0.75s linear infinite;
+  }
+  @keyframes sf-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .sf-volunteer-input {
     display: block;
@@ -1863,5 +1969,64 @@ const eventJsonLd = {
       success.classList.remove("hidden");
       success.focus({ preventScroll: true });
     });
+
+    // Unfold/refold the application sheet smoothly. Under reduced motion the
+    // native instant <details> toggle is left alone.
+    const details = document.querySelector<HTMLDetailsElement>(
+      ".sf-volunteer-details",
+    );
+    const sheet = details?.querySelector<HTMLElement>(".sf-volunteer-sheet");
+    const volunteerSummary = details?.querySelector<HTMLElement>("summary");
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (details && sheet && volunteerSummary && !reduceMotion) {
+      let animating = false;
+      volunteerSummary.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (animating) return;
+        animating = true;
+        // Settle on transitionend, with a timeout fallback so a missed
+        // event can never wedge the sheet mid-animation.
+        const settle = (after: () => void) => {
+          let done = false;
+          const finish = () => {
+            if (done) return;
+            done = true;
+            after();
+            animating = false;
+          };
+          sheet.addEventListener("transitionend", function onEnd(ev) {
+            if (ev.propertyName !== "height") return;
+            sheet.removeEventListener("transitionend", onEnd);
+            finish();
+          });
+          window.setTimeout(finish, 650);
+        };
+        if (details.open) {
+          sheet.style.height = `${sheet.scrollHeight}px`;
+          void sheet.offsetHeight; // commit the start height
+          sheet.style.height = "0px";
+          sheet.style.opacity = "0";
+          settle(() => {
+            details.open = false;
+            sheet.style.height = "";
+            sheet.style.opacity = "";
+          });
+        } else {
+          details.open = true;
+          const target = sheet.scrollHeight;
+          sheet.style.height = "0px";
+          sheet.style.opacity = "0";
+          void sheet.offsetHeight; // commit the collapsed start
+          sheet.style.height = `${target}px`;
+          sheet.style.opacity = "1";
+          settle(() => {
+            sheet.style.height = "";
+            sheet.style.opacity = "";
+          });
+        }
+      });
+    }
   })();
 </script>
