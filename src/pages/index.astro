@@ -9,7 +9,6 @@ import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestDay,
-  sweatFestTickets,
   sweatFestColors,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
@@ -33,13 +32,10 @@ const galaFromPrice = Math.min(
 // Deepened arc stops (deep gold -> ember -> magenta) so day-phase labels
 // stay legible on the cream lead spotlight and the light carousel card.
 const sweatFestDeepAccents = { rosa: "#c21e64", cielo: "#017277", lima: "#43722c" };
-const sweatFestPrimaryUrl =
-  sweatFestTickets.onSale && sweatFestTickets.url
-    ? sweatFestTickets.url
-    : withBase("sweatfest");
-const sweatFestPrimaryLabel = sweatFestTickets.onSale
-  ? sweatFest.ticketsLabel
-  : "Explore passes + plan your day";
+// Homepage CTAs route to the full Sweat Fest page (the story, itinerary,
+// and ticket stubs live there); /sweatfest owns the jump to Zeffy.
+const sweatFestPrimaryUrl = withBase("sweatfest");
+const sweatFestPrimaryLabel = "Learn More";
 // Haus of LSP: CTAs point at the ticketing form once entry details go live
 // (flip ticketsOnSale + ticketsUrl in src/data/hausOfLsp.js), and at the
 // event page until then.
@@ -189,10 +185,8 @@ const hausPrimaryLabel = hausHasTickets
             <div class="mt-8 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
               <a
                 href={sweatFestPrimaryUrl}
-                target={sweatFestTickets.onSale ? "_blank" : undefined}
-                rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
                 class="sf-btn group inline-flex items-center justify-center gap-3 bg-[#ee3083] px-7 py-4 text-base font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
-                data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
+                data-conversion-event="sweatfest_explore_click"
                 data-conversion-context="home_sweatfest_band"
               >
                 {sweatFestPrimaryLabel}
@@ -1699,10 +1693,8 @@ const hausPrimaryLabel = hausHasTickets
           {/* Sweat Fest event card */}
           <a
             href={sweatFestPrimaryUrl}
-            target={sweatFestTickets.onSale ? "_blank" : undefined}
-            rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
             class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
+            data-conversion-event="sweatfest_explore_click"
             data-conversion-context="home_events_carousel"
           >
             <div
