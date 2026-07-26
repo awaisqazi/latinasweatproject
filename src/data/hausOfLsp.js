@@ -8,9 +8,8 @@
 //   - 6 to 8 PM: art exhibit + open mic / slam poetry
 //   - 8 to 11 PM: DJ ("let loose and be free") + drinks
 //   - All proceeds go toward the LSP Queer Scholarship
-// The Zeffy interest form is live while pricing and ticketing details are
-// being finalized. Every event CTA reads this URL and label from the shared
-// data below.
+// Tickets went live on Zeffy 2026-07-26: $15 general admission, one tier.
+// Every event CTA reads this URL and label from the shared data below.
 
 export const hausOfLsp = {
   seriesName: "Haus of LSP",
@@ -46,8 +45,8 @@ export const summerRenaissance = {
   ticketsOnSale: true,
   ticketsUrl:
     "https://www.zeffy.com/en-US/ticketing/haus-of-lsp-2",
-  ticketsLabel: "Express Interest",
-  statusLabel: "Pricing and ticketing details coming soon",
+  ticketsLabel: "Get Tickets",
+  statusLabel: "Tickets on sale now · $15 general admission",
   exploreLabel: "Step inside the Haus",
 };
 
