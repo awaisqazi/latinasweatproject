@@ -1,0 +1,194 @@
+---
+// Sweat Fest hero confetti: the logo's checkerboard tiles come alive as a
+// slow 3D drift of colored squares behind the wordmark. One InstancedMesh
+// (a single draw call), lazy-loaded only when the hero is on screen, fully
+// skipped under prefers-reduced-motion, and paused off-screen/off-tab.
+// Palette mirrors sweatFestPalette in src/data/sweatFest.js.
+---
+
+<div
+  class="pointer-events-none absolute inset-0 overflow-hidden"
+  data-sf-confetti
+  aria-hidden="true"
+>
+</div>
+
+<script>
+  (() => {
+    const host = document.querySelector<HTMLElement>("[data-sf-confetti]");
+    if (!host) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const TILE_COLORS = [
+      "#ee3083", // magenta
+      "#f6a9c8", // light pink
+      "#f15b27", // orange
+      "#00a7ab", // teal
+      "#60a444", // green
+      "#f4f7dc", // paper
+    ];
+
+    let started = false;
+
+    const start = async () => {
+      if (started) return;
+      started = true;
+
+      const THREE = await import("three");
+
+      const coarse = window.matchMedia("(pointer: coarse)").matches;
+      const COUNT = coarse ? 110 : 190;
+
+      const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "low-power",
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+      renderer.domElement.style.cssText =
+        "position:absolute;inset:0;width:100%;height:100%;";
+      host.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.z = 30;
+
+      const geometry = new THREE.PlaneGeometry(1, 1);
+      const material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.92,
+      });
+      const mesh = new THREE.InstancedMesh(geometry, material, COUNT);
+      scene.add(mesh);
+
+      // Per-tile state: position, tumble axis speeds, fall + sway rhythm.
+      const dummy = new THREE.Object3D();
+      const color = new THREE.Color();
+      const X = 30;
+      const Y = 17;
+      const tiles = Array.from({ length: COUNT }, (_, i) => ({
+        x: (Math.random() * 2 - 1) * X,
+        y: (Math.random() * 2 - 1) * Y,
+        z: -7 + Math.random() * 12,
+        rx: Math.random() * Math.PI,
+        ry: Math.random() * Math.PI,
+        rz: Math.random() * Math.PI,
+        vrx: (Math.random() - 0.5) * 1.1,
+        vry: (Math.random() - 0.5) * 1.3,
+        vrz: (Math.random() - 0.5) * 0.7,
+        fall: 0.55 + Math.random() * 1.1,
+        swayAmp: 0.4 + Math.random() * 1,
+        swayFreq: 0.25 + Math.random() * 0.5,
+        phase: Math.random() * Math.PI * 2,
+        scale: 0.55 + Math.random() * 0.95,
+      }));
+      tiles.forEach((t, i) =>
+        mesh.setColorAt(i, color.set(TILE_COLORS[i % TILE_COLORS.length])),
+      );
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+      const resize = () => {
+        const { width, height } = host.getBoundingClientRect();
+        if (!width || !height) return;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+      resize();
+      new ResizeObserver(resize).observe(host);
+
+      // Gentle camera parallax toward the pointer (fine pointers only).
+      let targetPX = 0;
+      let targetPY = 0;
+      if (!coarse) {
+        window.addEventListener(
+          "pointermove",
+          (e) => {
+            targetPX = (e.clientX / window.innerWidth - 0.5) * 1.6;
+            targetPY = -(e.clientY / window.innerHeight - 0.5) * 1;
+          },
+          { passive: true },
+        );
+      }
+
+      const clock = new THREE.Clock();
+      let visible = true;
+      let rafId = 0;
+      // Debug handle (harmless in prod; used by dev tooling).
+      (window as any).__sfConfetti = { renderer, scene, camera, mesh };
+
+      const frame = () => {
+        rafId = requestAnimationFrame(frame);
+        const dt = Math.min(clock.getDelta(), 0.05);
+        const t = clock.elapsedTime;
+
+        camera.position.x += (targetPX - camera.position.x) * 0.04;
+        camera.position.y += (targetPY - camera.position.y) * 0.04;
+
+        for (let i = 0; i < COUNT; i++) {
+          const tile = tiles[i];
+          tile.y -= tile.fall * dt;
+          if (tile.y < -Y - 1) {
+            tile.y = Y + 1;
+            tile.x = (Math.random() * 2 - 1) * X;
+          }
+          tile.rx += tile.vrx * dt;
+          tile.ry += tile.vry * dt;
+          tile.rz += tile.vrz * dt;
+          dummy.position.set(
+            tile.x + Math.sin(t * tile.swayFreq + tile.phase) * tile.swayAmp,
+            tile.y,
+            tile.z,
+          );
+          dummy.rotation.set(tile.rx, tile.ry, tile.rz);
+          dummy.scale.setScalar(tile.scale);
+          dummy.updateMatrix();
+          mesh.setMatrixAt(i, dummy.matrix);
+        }
+        mesh.instanceMatrix.needsUpdate = true;
+        renderer.render(scene, camera);
+      };
+
+      const play = () => {
+        if (!rafId && visible && !document.hidden) {
+          clock.getDelta();
+          frame();
+        }
+      };
+      const pause = () => {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      };
+
+      new IntersectionObserver(
+        ([entry]) => {
+          visible = entry.isIntersecting;
+          visible ? play() : pause();
+        },
+        { threshold: 0.02 },
+      ).observe(host);
+      document.addEventListener("visibilitychange", () =>
+        document.hidden ? pause() : play(),
+      );
+
+      play();
+    };
+
+    // Load three only once the hero is actually near the viewport.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          io.disconnect();
+          if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(() => start());
+          } else {
+            setTimeout(start, 200);
+          }
+        }
+      },
+      { rootMargin: "160px" },
+    );
+    io.observe(host);
+  })();
+</script>

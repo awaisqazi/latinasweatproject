@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import SweatFestCountdown from "@/components/SweatFestCountdown.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
+import SweatFestConfetti from "@/components/SweatFestConfetti.astro";
 import {
   sweatFest,
   sweatFestExpect,
@@ -249,6 +250,10 @@ const eventJsonLd = {
         aria-hidden="true"
       >
       </div>
+
+      {/* The logo's checker tiles drifting through the hero in 3D (lazy,
+          motion-safe, paused off-screen). */}
+      <SweatFestConfetti />
 
       <div class="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <p
@@ -1577,6 +1582,18 @@ const eventJsonLd = {
     border: 2.5px solid #123f36;
     border-radius: 12px;
     box-shadow: 6px 7px 0 rgba(18, 63, 54, 0.16);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  /* Grab a ticket: the stub lifts and straightens like it's being pulled
+     off the roll. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sf-stub:hover {
+      transform: translateY(-5px) rotate(-0.6deg);
+      box-shadow: 9px 12px 0 rgba(18, 63, 54, 0.2);
+    }
+    .sf-stub-featured:hover {
+      box-shadow: 10px 13px 0 var(--sf-ember);
+    }
   }
   .sf-stub-featured {
     box-shadow: 7px 8px 0 var(--sf-ember);
