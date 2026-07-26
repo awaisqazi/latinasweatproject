@@ -50,6 +50,9 @@ const ticketLines = (cx, y, size) =>
   `<text x="${cx}" y="${y}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="${size}" font-weight="600" fill="${p.ink}">Tickets available on our website</text>
    <text x="${cx}" y="${y + size * 1.42}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="${size * 0.88}" font-weight="500" fill="${p.ink}" text-decoration="underline">latinasweatproject.com/sweatfest</text>`;
 
+// Solid lockups: their honeydew field matches the poster grounds exactly, so
+// they read as transparent here. (The kit's "transparent color" variants are
+// light-tint versions for dark grounds; on light paper they wash out.)
 const stacked = (x, y, w) => placeLogo(stackedLogoSvg, stackedLogoSize, x, y, w);
 const horizontal = (x, y, w) =>
   placeLogo(horizontalLogoSvg, horizontalLogoSize, x, y, w);
@@ -78,6 +81,17 @@ export function buildPosterSvg(variant, logoHref) {
   ${stacked(140, 18, 520)}
   ${chipRow(400, 654, [190, 276, 212], 14, 58, 16)}
   <text x="400" y="752" text-anchor="middle" font-family="Rubik, sans-serif" font-size="21" font-weight="600" fill="${p.ink}">Tickets on <tspan text-decoration="underline">latinasweatproject.com/sweatfest</tspan></text>
+</svg>`;
+  }
+
+  if (variant === "lockup") {
+    // Card art: the horizontal lockup alone on its own honeydew, for small
+    // renders (like the homepage events carousel) where the full poster's
+    // fact chips would shrink past legibility.
+    return `
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="${p.honeydew}"/>
+  ${horizontal(80, 234, 1440)}
 </svg>`;
   }
 

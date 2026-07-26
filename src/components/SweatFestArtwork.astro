@@ -7,7 +7,7 @@ import { sweatFest, sweatFestPalette as p } from "@/data/sweatFest";
 import { buildPosterSvg } from "@/data/sweatFestPoster";
 
 interface Props {
-  variant?: "landscape" | "portrait" | "square";
+  variant?: "landscape" | "portrait" | "square" | "lockup";
   className?: string;
   loading?: "eager" | "lazy";
   fetchpriority?: "high" | "low" | "auto";
@@ -22,7 +22,12 @@ const aspectClass =
       ? "aspect-square"
       : "aspect-video";
 
-const alt = `Sweat Fest poster: the checkerboard-bordered Sweat Fest logo over ${sweatFest.dateLabel}, ${sweatFest.venueLine}, ${sweatFest.timeLabel}. ${sweatFest.taglineSub}`;
+// The lockup variant is just the logo (no fact chips), so its label should
+// not claim details the artwork does not show.
+const alt =
+  variant === "lockup"
+    ? "The checkerboard-bordered Sweat Fest logo, presented by Latina Sweat Project"
+    : `Sweat Fest poster: the checkerboard-bordered Sweat Fest logo over ${sweatFest.dateLabel}, ${sweatFest.venueLine}, ${sweatFest.timeLabel}. ${sweatFest.taglineSub}`;
 
 const svg = buildPosterSvg(variant);
 ---
