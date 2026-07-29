@@ -7,8 +7,8 @@
 //
 // Shared by SweatFestArtwork.astro (live site) and the social image render
 // script (scripts/render-sweatfest-social.mjs) so the flyer only exists in
-// one place. The facts match src/data/sweatFest.js; the venue line stays
-// "CHICAGO · LOCATION SOON" until the team announces a location.
+// one place. The facts match src/data/sweatFest.js; venue announced
+// 2026-07-27: 18th & Peoria.
 import { sweatFestPalette as p } from "./sweatFest.js";
 import {
   stackedLogoSvg,
@@ -21,7 +21,7 @@ import {
 // --- Fact chips -----------------------------------------------------------
 
 // The three flyer facts, kept in one place so every composition agrees.
-const facts = ["AUGUST 22, 2026", "CHICAGO · LOCATION SOON", "7:00 AM - 9:00 PM"];
+const facts = ["AUGUST 22, 2026", "18TH & PEORIA · CHICAGO", "7:00 AM - 9:00 PM"];
 
 // Boxy chip: 4px ink border, pale honeydew fill, small radius, Filson Soft
 // bold caps centered inside.

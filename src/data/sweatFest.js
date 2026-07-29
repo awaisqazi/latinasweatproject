@@ -2,7 +2,7 @@
 // (homepage teaser, links card, events feature, /sweatfest page, graphics).
 //
 // Several facts are still being finalized by the team. Every TBD is marked:
-//   - venueName is null until the location is announced.
+//   - venueName/venueLine announced 2026-07-27: 18th & Peoria (Pilsen).
 //   - Tickets went live on Zeffy 2026-07-12 (ticketsOnSale: true); every CTA
 //     on every surface reads from ticketsUrl.
 // Prices, times, and sponsorship facts come from the planning doc; keep exact.
@@ -18,8 +18,8 @@ export const sweatFest = {
   timeLabel: "7:00 AM to 9:00 PM",
   dateTimeLabel: "August 22, 2026 · 7:00 AM to 9:00 PM",
   doorsLine: "Kickoff 5K at 7:00 AM · Doors open 8:30 AM · Final set ends 9:00 PM",
-  venueName: null, // TBD: location not announced yet
-  venueLine: "Location announced soon · Chicago",
+  venueName: "18th & Peoria", // announced 2026-07-27
+  venueLine: "18th & Peoria · Chicago",
   tagline: "Movement Is Ours",
   taglineSub: "A celebration of wellness, cultura, and connection.",
   motto: "Move Together. Celebrate Culture. Build Community.",
@@ -62,7 +62,7 @@ export const sweatFestExpect = [
     detail: "Fuel up and refuel throughout the day.",
   },
   {
-    title: "The Pachanga",
+    title: "Pachanga",
     detail: "Dance, connect, and celebrate with your comunidad until the final set.",
   },
 ];

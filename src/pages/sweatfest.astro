@@ -51,7 +51,7 @@ const googleCalendarHref = `https://calendar.google.com/calendar/render?${new UR
     text: "Sweat Fest 2026 — Movement Is Ours",
     dates: "20260822T070000/20260822T210000",
     ctz: "America/Chicago",
-    location: "Chicago, IL · Location announced soon",
+    location: "18th & Peoria, Chicago, IL",
     details: calendarDescription,
   },
 ).toString()}`;
@@ -76,8 +76,6 @@ const mottoLines = sweatFest.motto
   .map((line) => `${line}.`);
 const arcOrder = ["sunrise", "ember", "dusk"];
 
-// Card articles for the day phases: El Run, El Sweat, La Pachanga.
-const loteriaArticle = { run: "El", sweat: "El", party: "La" };
 // Alternating paper tilts, the hand-placed look shared by cards and notes.
 const tiltOf = (i) => [-1.4, 0.8, -0.6, 1.1, -1, 0.7][i % 6];
 
@@ -108,7 +106,7 @@ const tickerItems = [
   "Sweat Fest 2026",
   "Sunrise 5K",
   "Classes all day",
-  "La Pachanga",
+  "Pachanga",
   `${sweatFest.shortDateLabel} · Chicago`,
   sweatFest.tagline,
 ];
@@ -183,7 +181,7 @@ const eventJsonLd = {
   ],
   location: {
     "@type": "Place",
-    name: "Sweat Fest · Location announced soon",
+    name: "Sweat Fest · 18th & Peoria",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Chicago",
@@ -214,7 +212,7 @@ const eventJsonLd = {
   title="Sweat Fest | The Latina Sweat Project"
   description={metaDescription}
   socialImage="/images/sweatfest/sweatfest-social-v4.jpg"
-  socialImageAlt="Sweat Fest: the checkerboard-bordered Sweat Fest logo over August 22, 2026, 7:00 AM to 9:00 PM, Chicago, location announced soon"
+  socialImageAlt="Sweat Fest: the checkerboard-bordered Sweat Fest logo over August 22, 2026, 7:00 AM to 9:00 PM, 18th & Peoria, Chicago"
   socialImageWidth={1200}
   socialImageHeight={675}
   socialImageType="image/jpeg"
@@ -596,7 +594,7 @@ const eventJsonLd = {
         </div>
 
         {/* Three numbered cards, each phase framed in its own logo color and
-            under its own sky. El Run, El Sweat, La Pachanga. */}
+            under its own sky. Run, Sweat, Pachanga. */}
         <ol class="mx-auto mt-14 grid max-w-6xl gap-8 sm:gap-6 lg:grid-cols-3">
           {
             sweatFestDay.map((phase, index) => {
@@ -637,7 +635,7 @@ const eventJsonLd = {
                       />
                     </div>
                     <h3 class="mt-5 text-center font-slab text-3xl uppercase leading-none tracking-wide text-choco sm:text-4xl">
-                      <span class="mr-2 text-xl align-middle" style={`color: ${deep(accent)};`}>{loteriaArticle[phase.id]}</span>{phase.title}
+                      {phase.title}
                     </h3>
                     <div
                       class="mx-auto mt-3 h-1.5 w-14"

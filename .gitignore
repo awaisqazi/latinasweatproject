@@ -54,3 +54,6 @@ public/videos/noche-inolvidable*
 scripts/migration/keys/
 scripts/migration/exports/
 scripts/migration/node_modules/
+
+# Sweat Fest local render scratch (flyers, teaser video; never published)
+.sweatfest-render-tmp/
