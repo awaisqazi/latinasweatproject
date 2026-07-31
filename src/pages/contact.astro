@@ -4,6 +4,19 @@ import Header from '@/components/Header.astro';
 ---
 
 <Layout title="Contact Us | The Latina Sweat Project">
+  {/* XplorGrowth form assets, loaded only on this page (the only one that
+      uses them). The classic script below executes during HTML parsing, so
+      the XplFormContainer/XplFormAPI globals exist before this page's
+      bundled module script runs after parse. */}
+  <script
+    is:inline
+    type="application/javascript"
+    src="https://forms.prd.xplorcs.com/assets/embed/xpl-form-api.js"></script>
+  <link
+    href="https://forms.prd.xplorcs.com/assets/embed/embed.css"
+    rel="stylesheet"
+    type="text/css"
+  />
   <Header />
   <main>
     {/* START: Page Header Section */}

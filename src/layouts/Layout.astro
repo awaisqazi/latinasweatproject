@@ -239,15 +239,10 @@ const GOOGLE_ADS_ID = "AW-17990206229";
       rel="stylesheet"
     />
 
-    <!-- XplorGrowth Signup Form Assets -->
-    <script
-      type="application/javascript"
-      src="https://forms.prd.xplorcs.com/assets/embed/xpl-form-api.js"></script>
-    <link
-      href="https://forms.prd.xplorcs.com/assets/embed/embed.css"
-      rel="stylesheet"
-      type="text/css"
-    />
+    <!-- XplorGrowth form assets load on /contact only (the one page that
+         uses them), not site-wide: third-party in-page scripts stay scoped
+         to the pages that need them, same policy as the MarianaTek loader
+         below. -->
   </head>
   <body class="bg-white text-off-black overflow-x-hidden">
     <slot />
