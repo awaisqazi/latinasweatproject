@@ -4,9 +4,18 @@
         supabase,
         SUPABASE_CONFIG_ERROR,
     } from "../lib/supabaseClient.js";
+    import { candidateKey } from "../data/elections2026.js";
 
     // Props - candidate data passed from parent
     export let roles = [];
+
+    // Ballot section order, unchanged since the 2025 election.
+    const BALLOT_ORDER = [
+        "secretary",
+        "treasurer",
+        "vice-president",
+        "president",
+    ];
 
     // Voting period status
     let votingStatus = {
@@ -34,6 +43,10 @@
         "vice-president": "",
         president: "",
     };
+
+    // Speech acknowledgments, keyed by candidateKey(roleId, name). Every
+    // candidate must be checked off before the selections unlock.
+    let speechAck = {};
 
     // Form submission state
     let isSubmitting = false;
@@ -157,12 +170,45 @@
         }
     }
 
+    // Flat list of every candidate on the ballot, in ballot order, each with
+    // its role and its acknowledgment key. Derived from the roles prop so the
+    // data file stays the single source of truth.
+    // NOTE (Svelte legacy mode): keep these reads inline in the reactive
+    // statements. State read inside a separate helper function is not tracked.
+    $: ballotRoles = BALLOT_ORDER.map((roleId) => {
+        const role = roles.find((r) => r.id === roleId);
+        return {
+            id: roleId,
+            title: role ? role.title : formatRoleTitle(roleId),
+            candidates: (role ? role.candidates : []).map((candidate) => ({
+                ...candidate,
+                roleId,
+                key: candidateKey(roleId, candidate.name),
+            })),
+        };
+    });
+
+    $: allCandidates = ballotRoles.flatMap((role) => role.candidates);
+    $: totalSpeeches = allCandidates.length;
+    $: acknowledgedCount = allCandidates.reduce(
+        (count, candidate) => count + (speechAck[candidate.key] ? 1 : 0),
+        0,
+    );
+    $: allSpeechesAcknowledged =
+        totalSpeeches > 0 && acknowledgedCount === totalSpeeches;
+
+    // Reassign rather than mutate so the derived counts above stay reactive.
+    function toggleSpeech(key, checked) {
+        speechAck = { ...speechAck, [key]: checked };
+    }
+
     // Form validation
     $: isFormValid =
         voterName.trim() !== "" &&
         voterEmail.trim() !== "" &&
         voterEmail.includes("@") &&
         voterAffiliation !== "" &&
+        allSpeechesAcknowledged &&
         !hasVotedBefore;
 
     // Handle form submission
@@ -182,10 +228,13 @@
 
         const { data, error } = await supabase.rpc("cast_vote", {
             p_email: voterEmail.trim(),
+            p_name: voterName.trim(),
+            p_affiliation: voterAffiliation,
             p_president: selections.president || "abstain",
             p_vice_president: selections["vice-president"] || "abstain",
             p_treasurer: selections.treasurer || "abstain",
             p_secretary: selections.secretary || "abstain",
+            p_speeches_acknowledged: true,
         });
 
         if (error) {
@@ -200,20 +249,17 @@
             submitError =
                 "Voting is currently closed, so your vote could not be recorded.";
             fetchVotingStatus();
+        } else if (data?.reason === "acknowledgment_required") {
+            submitError =
+                "Please confirm that you watched every candidate's speech, then submit again.";
         } else if (data?.reason === "invalid_input") {
             submitError =
-                "Please double-check your email address and try again.";
+                "Please double-check your name and email address, then try again.";
         } else {
             submitError = "An error occurred. Please try again.";
         }
 
         isSubmitting = false;
-    }
-
-    // Get candidate list for a role
-    function getCandidatesForRole(roleId) {
-        const role = roles.find((r) => r.id === roleId);
-        return role ? role.candidates : [];
     }
 
     // Format role title for display
@@ -251,10 +297,10 @@
                     />
                 </svg>
             </div>
-            <h3 class="success-title">Thank You for Voting!</h3>
+            <h3 class="success-title">¡Gracias for Voting!</h3>
             <p class="success-message">
-                Your vote has been successfully submitted and recorded. Thank
-                you for participating in the LSP Junior Board election!
+                Your vote has been submitted and recorded. Thank you for
+                helping choose the next LSP Junior Board.
             </p>
             <p class="success-note">
                 A confirmation has been recorded under: <strong
@@ -301,9 +347,18 @@
                 </div>
                 <p class="closed-note">
                     Please come back during the voting period to cast your vote.
-                    Make sure to review all candidates above before the voting
-                    window opens!
+                    In the meantime, watch the candidate speeches above and get
+                    to know everyone on the ballot.
                 </p>
+                {#if votingStatusError}
+                    <button
+                        type="button"
+                        class="retry-button"
+                        on:click={retryVotingStatus}
+                    >
+                        Check again
+                    </button>
+                {/if}
             </div>
         </div>
     {:else}
@@ -386,51 +441,160 @@
                 </div>
             </div>
 
+            <!-- Candidate Speeches Acknowledgment -->
+            <div class="speeches-section">
+                <h4 class="section-title">Candidate Speeches</h4>
+                <p class="section-description">
+                    Confirm that you watched each candidate speak. The full
+                    speeches are in the livestream at the top of this page.
+                    Your selections unlock once every box is checked.
+                </p>
+
+                <div
+                    class="ack-progress"
+                    class:complete={allSpeechesAcknowledged}
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span class="ack-progress-count"
+                        >{acknowledgedCount} of {totalSpeeches}</span
+                    >
+                    <span class="ack-progress-label">
+                        {#if allSpeechesAcknowledged}
+                            speeches acknowledged. Your ballot is unlocked.
+                        {:else}
+                            speeches acknowledged
+                        {/if}
+                    </span>
+                </div>
+
+                {#each ballotRoles as role}
+                    <div class="ack-role-block">
+                        <h5 class="role-title">{role.title}</h5>
+                        <div class="ack-list">
+                            {#each role.candidates as candidate}
+                                <div
+                                    class="ack-row"
+                                    class:checked={speechAck[candidate.key] ===
+                                        true}
+                                >
+                                    <label class="ack-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={speechAck[
+                                                candidate.key
+                                            ] === true}
+                                            on:change={(event) =>
+                                                toggleSpeech(
+                                                    candidate.key,
+                                                    event.currentTarget.checked,
+                                                )}
+                                        />
+                                        <span class="ack-text"
+                                            >I watched {candidate.name}'s
+                                            speech</span
+                                        >
+                                    </label>
+                                    {#if candidate.speechClip}
+                                        <!-- Per-candidate edited speech clip.
+                                             Set `speechClip` in
+                                             src/data/elections2026.js to show
+                                             it here. -->
+                                        <div class="speech-clip">
+                                            <iframe
+                                                src={candidate.speechClip}
+                                                title={`${candidate.name} speech`}
+                                                loading="lazy"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                referrerpolicy="strict-origin-when-cross-origin"
+                                                allowfullscreen
+                                            ></iframe>
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            </div>
+
             <!-- Voting Section -->
-            <div class="voting-section">
+            <div class="voting-section" class:locked={!allSpeechesAcknowledged}>
                 <h4 class="section-title">Your Selections</h4>
                 <p class="section-description">
                     Select one candidate for each role, or choose to abstain.
                     All selections default to abstain if nothing is chosen.
                 </p>
 
-                {#each ["secretary", "treasurer", "vice-president", "president"] as roleId}
-                    <div class="role-voting-block">
-                        <h5 class="role-title">{formatRoleTitle(roleId)}</h5>
-                        <div class="candidates-grid">
-                            {#each getCandidatesForRole(roleId) as candidate}
+                {#if !allSpeechesAcknowledged}
+                    <div class="lock-note">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+                        <span>
+                            Locked until you confirm every speech.
+                            <strong
+                                >{acknowledgedCount} of {totalSpeeches} speeches
+                                acknowledged.</strong
+                            >
+                        </span>
+                    </div>
+                {/if}
+
+                <div class="voting-fields" aria-hidden={!allSpeechesAcknowledged}>
+                    {#each ballotRoles as role}
+                        <div class="role-voting-block">
+                            <h5 class="role-title">{role.title}</h5>
+                            <div class="candidates-grid">
+                                {#each role.candidates as candidate}
+                                    <label
+                                        class="candidate-option"
+                                        class:selected={selections[role.id] ===
+                                            candidate.name}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name={role.id}
+                                            value={candidate.name}
+                                            disabled={!allSpeechesAcknowledged}
+                                            bind:group={selections[role.id]}
+                                        />
+                                        <span class="candidate-name"
+                                            >{candidate.name}</span
+                                        >
+                                    </label>
+                                {/each}
                                 <label
-                                    class="candidate-option"
-                                    class:selected={selections[roleId] ===
-                                        candidate.name}
+                                    class="candidate-option abstain-option"
+                                    class:selected={selections[role.id] ===
+                                        "abstain"}
                                 >
                                     <input
                                         type="radio"
-                                        name={roleId}
-                                        value={candidate.name}
-                                        bind:group={selections[roleId]}
+                                        name={role.id}
+                                        value="abstain"
+                                        disabled={!allSpeechesAcknowledged}
+                                        bind:group={selections[role.id]}
                                     />
-                                    <span class="candidate-name"
-                                        >{candidate.name}</span
-                                    >
+                                    <span class="candidate-name">Abstain</span>
                                 </label>
-                            {/each}
-                            <label
-                                class="candidate-option abstain-option"
-                                class:selected={selections[roleId] ===
-                                    "abstain"}
-                            >
-                                <input
-                                    type="radio"
-                                    name={roleId}
-                                    value="abstain"
-                                    bind:group={selections[roleId]}
-                                />
-                                <span class="candidate-name">Abstain</span>
-                            </label>
+                            </div>
                         </div>
-                    </div>
-                {/each}
+                    {/each}
+                </div>
             </div>
 
             <!-- Error Message -->
@@ -468,6 +632,11 @@
                         Submit My Vote
                     {/if}
                 </button>
+                {#if !allSpeechesAcknowledged}
+                    <p class="submit-blocked">
+                        Confirm all {totalSpeeches} speeches above to submit.
+                    </p>
+                {/if}
                 <p class="submit-note">
                     {#if voterAffiliation === "community-member"}
                         By submitting, you acknowledge that your community vote
@@ -618,6 +787,23 @@
         line-height: 1.5;
     }
 
+    .retry-button {
+        margin-top: 1.25rem;
+        padding: 0.5rem 1.5rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #f59e0b;
+        border-radius: 9999px;
+        color: #92400e;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .retry-button:hover {
+        background: #ffffff;
+    }
+
     /* Form Styles */
     .ballot-form {
         background: white;
@@ -646,6 +832,7 @@
 
     /* Sections */
     .voter-info-section,
+    .speeches-section,
     .voting-section {
         padding: 2rem;
         border-bottom: 1px solid #e5e7eb;
@@ -748,6 +935,177 @@
         color: #5b21b6;
         margin: 0;
         line-height: 1.5;
+    }
+
+    /* Speech Acknowledgments */
+    .ack-progress {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding: 0.875rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        transition:
+            background 0.2s,
+            border-color 0.2s;
+    }
+
+    .ack-progress.complete {
+        background: #ecfdf5;
+        border-color: #6ee7b7;
+    }
+
+    .ack-progress-count {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #b5a18d;
+    }
+
+    .ack-progress.complete .ack-progress-count {
+        color: #047857;
+    }
+
+    .ack-progress-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .ack-progress.complete .ack-progress-label {
+        color: #047857;
+    }
+
+    .ack-role-block {
+        margin-bottom: 1.5rem;
+        padding: 1.25rem 1.5rem;
+        background: #f9fafb;
+        border-radius: 0.75rem;
+    }
+
+    .ack-role-block:last-child {
+        margin-bottom: 0;
+    }
+
+    .ack-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ack-row {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.875rem 1rem;
+        transition: all 0.2s;
+    }
+
+    .ack-row.checked {
+        border-color: #b5a18d;
+        background: linear-gradient(135deg, #faf8f6 0%, #f5f0eb 100%);
+    }
+
+    .ack-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        /* iOS touch fixes */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
+    }
+
+    .ack-label input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 1.5rem;
+        height: 1.5rem;
+        min-width: 1.5rem;
+        border: 2px solid #d1d5db;
+        border-radius: 0.375rem;
+        background: white;
+        cursor: pointer;
+        position: relative;
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .ack-label input[type="checkbox"]:checked {
+        border-color: #b5a18d;
+        background: #b5a18d;
+    }
+
+    .ack-label input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        width: 0.35rem;
+        height: 0.7rem;
+        border: solid white;
+        border-width: 0 2.5px 2.5px 0;
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .ack-text {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: #1e1e1e;
+    }
+
+    .speech-clip {
+        position: relative;
+        margin-top: 0.875rem;
+        aspect-ratio: 16 / 9;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #000;
+    }
+
+    .speech-clip iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+    /* Locked Selections */
+    .voting-section.locked .voting-fields {
+        opacity: 0.4;
+        filter: grayscale(0.5);
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .lock-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border: 1px solid #fcd34d;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        color: #92400e;
+        line-height: 1.5;
+    }
+
+    .lock-note svg {
+        flex-shrink: 0;
+        color: #d97706;
+    }
+
+    .lock-note strong {
+        display: block;
+        margin-top: 0.125rem;
     }
 
     /* Role Voting Block */
@@ -925,6 +1283,13 @@
         to {
             transform: rotate(360deg);
         }
+    }
+
+    .submit-blocked {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #b45309;
+        margin-top: 0.75rem;
     }
 
     .submit-note {
