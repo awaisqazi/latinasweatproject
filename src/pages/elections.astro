@@ -15,6 +15,14 @@ import {
 // an initials monogram and stay balanced whenever a role has two or three
 // candidates. Voting dates are never hardcoded here: the ballot reads the
 // live window from the get_voting_status RPC.
+
+// Builds a timestamped link into the livestream replay for a candidate's
+// speech, per the watchUrl + (?|&)t=<seconds>s convention. Only called when
+// a candidate has a numeric speechTimestamp.
+function timestampedSpeechUrl(seconds) {
+    const separator = electionLivestream.watchUrl.includes("?") ? "&" : "?";
+    return `${electionLivestream.watchUrl}${separator}t=${seconds}s`;
+}
 ---
 
 <Layout
@@ -71,13 +79,10 @@ import {
                     >
                         <span class="relative flex h-3 w-3">
                             <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"
-                            ></span>
-                            <span
                                 class="relative inline-flex rounded-full h-3 w-3 bg-red-600"
                             ></span>
                         </span>
-                        Live Stream
+                        Watch the replay
                     </span>
                     <h2
                         class="font-sans text-2xl sm:text-3xl font-bold text-off-black"
@@ -89,14 +94,7 @@ import {
                         Board.
                     </p>
                     <p class="mt-3 text-sm text-gray-500 max-w-xl mx-auto">
-                        Follow <a
-                            href="https://www.instagram.com/latinasweatproject"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="text-vibrant-pink hover:underline font-medium"
-                            >@latinasweatproject on Instagram</a
-                        > for a story announcement when we go live, or come back
-                        here to watch on demand after the stream ends.
+                        The full candidate speeches are available on demand.
                     </p>
                 </div>
                 <div
@@ -202,32 +200,100 @@ import {
                             </div>
 
                             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {role.candidates.map((candidate) => (
-                                    <article class="flex h-full flex-col items-center rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                                        <span
-                                            class="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-vibrant-pink/20 to-accent-gold/30 font-sans text-2xl font-extrabold tracking-wide text-off-black"
-                                            aria-hidden="true"
-                                        >
-                                            {candidateInitials(candidate.name)}
-                                        </span>
-                                        <h3 class="mt-5 font-sans text-xl font-bold text-off-black">
-                                            {candidate.name}
-                                        </h3>
-                                        <p class="mt-1 font-sans text-xs font-bold uppercase tracking-[0.15em] text-vibrant-pink">
-                                            Nominee for {role.title}
-                                        </p>
-                                        <p class="mt-4 font-body text-sm leading-relaxed text-gray-500">
-                                            Hear from this candidate in the
-                                            speeches above.
-                                        </p>
-                                        <a
-                                            href="#speeches"
-                                            class="mt-auto pt-5 font-sans text-sm font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 transition hover:text-vibrant-pink"
-                                        >
-                                            Watch the speeches
-                                        </a>
-                                    </article>
-                                ))}
+                                {role.candidates.map((candidate) => {
+                                    const hasSpeech =
+                                        typeof candidate.speech === "string" &&
+                                        candidate.speech.trim().length > 0;
+                                    const speechParagraphs = hasSpeech
+                                        ? candidate.speech
+                                              .split("\n\n")
+                                              .map((paragraph) =>
+                                                  paragraph.trim(),
+                                              )
+                                              .filter(Boolean)
+                                        : [];
+                                    const hasTimestamp =
+                                        typeof candidate.speechTimestamp ===
+                                        "number";
+                                    const speechHref = hasTimestamp
+                                        ? timestampedSpeechUrl(
+                                              candidate.speechTimestamp,
+                                          )
+                                        : "#speeches";
+                                    return (
+                                        <article class="flex h-full flex-col items-center rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                                            <span
+                                                class="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-vibrant-pink/20 to-accent-gold/30 font-sans text-2xl font-extrabold tracking-wide text-off-black"
+                                                aria-hidden="true"
+                                            >
+                                                {candidateInitials(
+                                                    candidate.name,
+                                                )}
+                                            </span>
+                                            <h3 class="mt-5 font-sans text-xl font-bold text-off-black">
+                                                {candidate.name}
+                                            </h3>
+                                            <p class="mt-1 font-sans text-xs font-bold uppercase tracking-[0.15em] text-vibrant-pink">
+                                                Nominee for {role.title}
+                                            </p>
+                                            {hasSpeech ? (
+                                                <div class="mt-4 w-full">
+                                                    <p class="font-sans text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
+                                                        From their speech
+                                                    </p>
+                                                    <details class="mt-2 text-left">
+                                                        <summary class="list-none cursor-pointer text-center font-sans text-sm font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 transition hover:text-vibrant-pink [&::-webkit-details-marker]:hidden">
+                                                            Read their speech
+                                                        </summary>
+                                                        <div class="mt-3 space-y-3">
+                                                            {speechParagraphs.map(
+                                                                (
+                                                                    paragraph,
+                                                                ) => (
+                                                                    <p class="font-body text-sm text-gray-600">
+                                                                        {
+                                                                            paragraph
+                                                                        }
+                                                                    </p>
+                                                                ),
+                                                            )}
+                                                            <p class="font-body text-xs italic text-gray-400">
+                                                                Transcribed
+                                                                from the live
+                                                                broadcast and
+                                                                lightly edited
+                                                                for
+                                                                readability.
+                                                            </p>
+                                                        </div>
+                                                    </details>
+                                                </div>
+                                            ) : (
+                                                <p class="mt-4 font-body text-sm leading-relaxed text-gray-500">
+                                                    Hear from this candidate
+                                                    in the speeches above.
+                                                </p>
+                                            )}
+                                            {hasTimestamp ? (
+                                                <a
+                                                    href={speechHref}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="mt-auto pt-5 font-sans text-sm font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 transition hover:text-vibrant-pink"
+                                                >
+                                                    Watch their speech
+                                                </a>
+                                            ) : (
+                                                <a
+                                                    href="#speeches"
+                                                    class="mt-auto pt-5 font-sans text-sm font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 transition hover:text-vibrant-pink"
+                                                >
+                                                    Watch the speeches
+                                                </a>
+                                            )}
+                                        </article>
+                                    );
+                                })}
                             </div>
                         </div>
                     </section>

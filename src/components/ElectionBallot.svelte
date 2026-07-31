@@ -4,7 +4,7 @@
         supabase,
         SUPABASE_CONFIG_ERROR,
     } from "../lib/supabaseClient.js";
-    import { candidateKey } from "../data/elections2026.js";
+    import { candidateKey, electionLivestream } from "../data/elections2026.js";
 
     // Props - candidate data passed from parent
     export let roles = [];
@@ -269,6 +269,26 @@
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ");
     }
+
+    // Builds a timestamped link into the livestream replay for a candidate's
+    // speech, per the watchUrl + (?|&)t=<seconds>s convention. Mirrors the
+    // same helper in src/pages/elections.astro. Only called when a candidate
+    // has a numeric speechTimestamp.
+    function timestampedSpeechUrl(seconds) {
+        const separator = electionLivestream.watchUrl.includes("?")
+            ? "&"
+            : "?";
+        return `${electionLivestream.watchUrl}${separator}t=${seconds}s`;
+    }
+
+    // Splits a candidate's transcribed speech into paragraphs for the "Read
+    // their speech" disclosure. Mirrors the same logic in elections.astro.
+    function speechParagraphs(speech) {
+        return speech
+            .split("\n\n")
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean);
+    }
 </script>
 
 <div class="election-ballot">
@@ -495,6 +515,59 @@
                                             speech</span
                                         >
                                     </label>
+                                    {#if typeof candidate.speechTimestamp === "number" || (typeof candidate.speech === "string" && candidate.speech.trim() !== "")}
+                                        <div class="ack-actions">
+                                            {#if typeof candidate.speechTimestamp === "number"}
+                                                <a
+                                                    href={timestampedSpeechUrl(
+                                                        candidate.speechTimestamp,
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="ack-action-link"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        class="h-4 w-4"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                        />
+                                                    </svg>
+                                                    Watch their speech
+                                                </a>
+                                            {/if}
+                                            {#if typeof candidate.speech === "string" && candidate.speech.trim() !== ""}
+                                                <details class="ack-speech">
+                                                    <summary
+                                                        >Read their speech</summary
+                                                    >
+                                                    <div
+                                                        class="ack-speech-body"
+                                                    >
+                                                        {#each speechParagraphs(candidate.speech) as paragraph}
+                                                            <p>{paragraph}</p>
+                                                        {/each}
+                                                        <p
+                                                            class="ack-speech-note"
+                                                        >
+                                                            Transcribed from
+                                                            the live broadcast
+                                                            and lightly edited
+                                                            for readability.
+                                                        </p>
+                                                    </div>
+                                                </details>
+                                            {/if}
+                                        </div>
+                                    {/if}
                                     {#if candidate.speechClip}
                                         <!-- Per-candidate edited speech clip.
                                              Set `speechClip` in
@@ -1057,6 +1130,107 @@
         font-size: 0.9375rem;
         font-weight: 500;
         color: #1e1e1e;
+    }
+
+    /* Speech actions: watch link + read-speech disclosure. Sits below the
+       ack-label, never inside it, so clicking these never toggles the
+       checkbox. */
+    .ack-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.5rem 1.25rem;
+        margin-top: 0.625rem;
+        padding-left: 2.25rem;
+    }
+
+    .ack-action-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .ack-action-link svg {
+        flex-shrink: 0;
+    }
+
+    .ack-action-link:hover {
+        color: #b5a18d;
+    }
+
+    .ack-speech {
+        font-size: 0.8125rem;
+    }
+
+    .ack-speech summary {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        list-style: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: color 0.2s;
+    }
+
+    .ack-speech summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .ack-speech summary::before {
+        content: "▸";
+        display: inline-block;
+        margin-right: 0.375rem;
+        color: #b5a18d;
+        transition: transform 0.2s;
+    }
+
+    .ack-speech[open] summary::before {
+        transform: rotate(90deg);
+    }
+
+    .ack-speech summary:hover {
+        color: #b5a18d;
+    }
+
+    .ack-speech-body {
+        margin-top: 0.625rem;
+        max-height: 15rem;
+        overflow-y: auto;
+        padding: 0.75rem 0.875rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        text-align: left;
+    }
+
+    .ack-speech-body p {
+        font-size: 0.8125rem;
+        line-height: 1.55;
+        color: #374151;
+        margin: 0 0 0.75rem;
+    }
+
+    .ack-speech-body p:last-child {
+        margin-bottom: 0;
+    }
+
+    .ack-speech-body p.ack-speech-note {
+        margin-top: 0.25rem;
+        font-style: italic;
+        color: #9ca3af;
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+        .ack-actions {
+            padding-left: 0;
+        }
     }
 
     .speech-clip {
