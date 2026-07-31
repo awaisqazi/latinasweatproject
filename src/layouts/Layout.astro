@@ -281,7 +281,14 @@ const GOOGLE_ADS_ID = "AW-17990206229";
         // MarianaTek booking widgets are only used on public pages. Skip the
         // loader on the admin dashboard, where there's no booking element and
         // its script throws "Cannot read properties of null (reading 'url')".
+        // Also skip /elections: MarianaTek's "polyfills" bundle is served
+        // per user agent and on mobile Safari it monkey-patches fetch and
+        // Promise in a way that breaks the ballot's Supabase calls (voters
+        // saw an endless status spinner or "Failed to submit vote" until
+        // they requested the desktop site). The ballot needs no booking
+        // widget, so the loader has no business on that page.
         if (window.location.pathname.includes("/admin")) return;
+        if (window.location.pathname.includes("/elections")) return;
 
         // Set tenant name here
         var TENANT_NAME = "latinasweatproject";

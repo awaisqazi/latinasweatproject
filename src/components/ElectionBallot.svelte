@@ -74,6 +74,19 @@
         }).format(new Date(iso));
     }
 
+    // Timebox a Supabase call so a hung request (e.g. a third-party script
+    // interfering with fetch on some devices) surfaces the retry UI instead
+    // of spinning forever. Resolves to the sentinel on timeout.
+    const RPC_TIMEOUT = { __timedOut: true };
+    function withTimeout(promise, ms) {
+        return Promise.race([
+            promise,
+            new Promise((resolve) =>
+                setTimeout(() => resolve(RPC_TIMEOUT), ms),
+            ),
+        ]);
+    }
+
     // Fetch the effective voting status from the server (RPC handles the
     // schedule and any admin override).
     async function fetchVotingStatus() {
@@ -90,7 +103,25 @@
             return;
         }
 
-        const { data, error } = await supabase.rpc("get_voting_status");
+        const result = await withTimeout(
+            supabase.rpc("get_voting_status"),
+            10000,
+        );
+
+        if (result === RPC_TIMEOUT) {
+            console.error("Voting status check timed out.");
+            votingStatus = {
+                isOpen: false,
+                message:
+                    "We could not check the voting status. Please try again.",
+                status: "error",
+            };
+            votingStatusLoading = false;
+            votingStatusError = true;
+            return;
+        }
+
+        const { data, error } = result;
 
         if (error) {
             console.error("Error fetching voting status:", error.message);
@@ -159,9 +190,15 @@
     async function checkEmail() {
         if (!supabase) return;
         if (voterEmail && voterEmail.includes("@")) {
-            const { data, error } = await supabase.rpc("has_voted", {
-                p_email: voterEmail.trim(),
-            });
+            const result = await withTimeout(
+                supabase.rpc("has_voted", { p_email: voterEmail.trim() }),
+                8000,
+            );
+            if (result === RPC_TIMEOUT) {
+                console.error("has_voted check timed out; not blocking.");
+                return;
+            }
+            const { data, error } = result;
             if (error) {
                 console.error("Error checking email:", error.message);
                 return;
@@ -226,16 +263,28 @@
         isSubmitting = true;
         submitError = "";
 
-        const { data, error } = await supabase.rpc("cast_vote", {
-            p_email: voterEmail.trim(),
-            p_name: voterName.trim(),
-            p_affiliation: voterAffiliation,
-            p_president: selections.president || "abstain",
-            p_vice_president: selections["vice-president"] || "abstain",
-            p_treasurer: selections.treasurer || "abstain",
-            p_secretary: selections.secretary || "abstain",
-            p_speeches_acknowledged: true,
-        });
+        const result = await withTimeout(
+            supabase.rpc("cast_vote", {
+                p_email: voterEmail.trim(),
+                p_name: voterName.trim(),
+                p_affiliation: voterAffiliation,
+                p_president: selections.president || "abstain",
+                p_vice_president: selections["vice-president"] || "abstain",
+                p_treasurer: selections.treasurer || "abstain",
+                p_secretary: selections.secretary || "abstain",
+                p_speeches_acknowledged: true,
+            }),
+            15000,
+        );
+
+        if (result === RPC_TIMEOUT) {
+            submitError =
+                "That took too long to send. Please check your connection and tap Submit again.";
+            isSubmitting = false;
+            return;
+        }
+
+        const { data, error } = result;
 
         if (error) {
             console.error("Error submitting vote:", error.message);
