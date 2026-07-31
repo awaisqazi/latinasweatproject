@@ -54,6 +54,20 @@ const GOOGLE_ADS_ID = "AW-17990206229";
   <head>
     <meta charset="UTF-8" />
     <script is:inline>
+      // MUST STAY THE FIRST SCRIPT ON THE PAGE.
+      // Captures the pristine window.fetch before any third party can patch it.
+      // MarianaTek's web-integration "polyfills" bundle is served per user
+      // agent, and the mobile-Safari variant monkey-patches window.fetch and
+      // Promise in a way that breaks supabase-js calls made by our Svelte
+      // islands (endless loading spinners, failed submissions, all of which
+      // went away when the visitor asked for the desktop site).
+      // src/lib/supabaseClient.js reuses this captured reference, so supabase
+      // stays immune even on pages that legitimately embed MarianaTek widgets.
+      if (!window.__lspNativeFetch && typeof window.fetch === "function") {
+        window.__lspNativeFetch = window.fetch.bind(window);
+      }
+    </script>
+    <script is:inline>
       // Marks JS as available so scroll-reveal elements only start hidden when
       // we can actually reveal them. Runs before paint to avoid a flash.
       document.documentElement.classList.add("js");
@@ -276,19 +290,56 @@ const GOOGLE_ADS_ID = "AW-17990206229";
         }
       })();
     </script>
-    <script>
+    <script is:inline>
       (function () {
-        // MarianaTek booking widgets are only used on public pages. Skip the
-        // loader on the admin dashboard, where there's no booking element and
-        // its script throws "Cannot read properties of null (reading 'url')".
-        // Also skip /elections: MarianaTek's "polyfills" bundle is served
-        // per user agent and on mobile Safari it monkey-patches fetch and
-        // Promise in a way that breaks the ballot's Supabase calls (voters
-        // saw an endless status spinner or "Failed to submit vote" until
-        // they requested the desktop site). The ballot needs no booking
-        // widget, so the loader has no business on that page.
-        if (window.location.pathname.includes("/admin")) return;
-        if (window.location.pathname.includes("/elections")) return;
+        // ALLOWLIST, not a denylist.
+        //
+        // Only five routes actually render MarianaTek web-integration markup
+        // (a div carrying data-mariana-integrations):
+        //   /schedule  src/pages/schedule.astro
+        //   /classes   src/pages/classes.astro
+        //   /pricing   src/pages/pricing.astro
+        //   /account   src/pages/account.astro
+        //   /register  src/pages/register.astro
+        // Everywhere else this loader is pure downside, so it now runs only
+        // where a widget needs it.
+        //
+        // Why it matters: MarianaTek serves its "polyfills" bundle per user
+        // agent, and the mobile-Safari variant monkey-patches window.fetch and
+        // Promise in a way that breaks supabase-js calls from our Svelte
+        // islands. Symptoms were endless loading spinners and failed
+        // submissions on /elections, /shifts, /subs and friends, which is why
+        // "Request Desktop Website" fixed it (a desktop UA gets a different
+        // bundle). On the admin dashboard the loader additionally threw
+        // "Cannot read properties of null (reading 'url')" because there is no
+        // booking element for it to hydrate.
+        //
+        // Matching is by path segment, so it keeps working under any BASE_URL
+        // prefix (for example /latinasweatproject/schedule) and with or
+        // without a trailing slash, the same way the old includes() check did.
+        var MARIANA_ROUTES = [
+          "/schedule",
+          "/classes",
+          "/pricing",
+          "/account",
+          "/register",
+        ];
+
+        var path = window.location.pathname.replace(/\/+$/, "") || "/";
+        var onMarianaRoute = false;
+
+        for (var r = 0; r < MARIANA_ROUTES.length; r++) {
+          var route = MARIANA_ROUTES[r];
+          if (
+            path.slice(-route.length) === route ||
+            path.indexOf(route + "/") !== -1
+          ) {
+            onMarianaRoute = true;
+            break;
+          }
+        }
+
+        if (!onMarianaRoute) return;
 
         // Set tenant name here
         var TENANT_NAME = "latinasweatproject";
