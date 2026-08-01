@@ -7,6 +7,7 @@
     ChevronLeft,
     ChevronRight,
     ClipboardList,
+    Clock,
     DoorOpen,
     HandCoins,
     HeartHandshake,
@@ -66,6 +67,7 @@
   import GalaView from "../gala/GalaView.svelte";
   import SpacesView from "../spaces/SpacesView.svelte";
   import InventoryView from "../inventory/InventoryView.svelte";
+  import TimeClockView from "../timeclock/TimeClockView.svelte";
 
   const LOGIN_PATH = "/admin/marketing/login";
   const DASHBOARD_PATH = "/admin/marketing";
@@ -105,6 +107,7 @@
     { id: "fundraising", label: "Fundraising", icon: HandCoins, section: "Operations", modules: ["fundraising"] },
     { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
     { id: "inventory", label: "Inventory", icon: Package, section: "Operations", modules: ["inventory"] },
+    { id: "time-clock", label: "Time Clock", icon: Clock, section: "Operations", modules: ["time_clock"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
   ];
 
@@ -145,6 +148,7 @@
   let fundraisingRefreshKey = 0;
   let spacesRefreshKey = 0;
   let inventoryRefreshKey = 0;
+  let timeClockRefreshKey = 0;
   let selectedKanbanProject = null;
   let createDrawerOpen = false;
   let publishScheduleProject = null;
@@ -364,6 +368,7 @@
   let boardRealtimeTimer = 0;
   let workspaceRealtimeTimer = 0;
   let fundraisingRealtimeTimer = 0;
+  let timeClockRealtimeTimer = 0;
 
   function startRealtime() {
     realtimeUnsubscribe?.();
@@ -372,6 +377,7 @@
       onBoard: scheduleBoardRealtimeRefresh,
       onWorkspace: scheduleWorkspaceRealtimeRefresh,
       onFundraising: scheduleFundraisingRealtimeRefresh,
+      onTimeClock: scheduleTimeClockRealtimeRefresh,
     });
   }
 
@@ -425,6 +431,13 @@
     window.clearTimeout(fundraisingRealtimeTimer);
     fundraisingRealtimeTimer = window.setTimeout(() => {
       fundraisingRefreshKey += 1;
+    }, 500);
+  }
+
+  function scheduleTimeClockRealtimeRefresh() {
+    window.clearTimeout(timeClockRealtimeTimer);
+    timeClockRealtimeTimer = window.setTimeout(() => {
+      timeClockRefreshKey += 1;
     }, 500);
   }
 
@@ -649,6 +662,7 @@
       fundraising: () => (fundraisingRefreshKey += 1),
       spaces: () => (spacesRefreshKey += 1),
       inventory: () => (inventoryRefreshKey += 1),
+      "time-clock": () => (timeClockRefreshKey += 1),
       "user-access": () => (userAccessRefreshKey += 1),
       admin: () => {
         adminRefreshKey += 1;
@@ -1803,6 +1817,12 @@
               {supabase}
               {profile}
               refreshKey={inventoryRefreshKey}
+            />
+          {:else if activeView === "time-clock"}
+            <TimeClockView
+              {supabase}
+              {profile}
+              refreshKey={timeClockRefreshKey}
             />
           {:else if activeView === "publishing"}
             <PublishingCalendarView

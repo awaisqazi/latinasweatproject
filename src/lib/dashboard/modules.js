@@ -52,6 +52,11 @@ export const MODULES = [
     label: "Inventory",
     description: "Studio supply levels, end-of-shift logs, and consumption trends.",
   },
+  {
+    key: "time_clock",
+    label: "Time Clock",
+    description: "Studio check-ins, timesheets, and kiosk messages.",
+  },
 ];
 
 export const MODULE_KEYS = MODULES.map((module) => module.key);

@@ -9,7 +9,7 @@
 
 export function subscribeDashboardRealtime(
   supabase,
-  { onProjects, onBoard, onWorkspace, onFundraising } = {},
+  { onProjects, onBoard, onWorkspace, onFundraising, onTimeClock } = {},
 ) {
   if (!supabase) return () => {};
 
@@ -64,6 +64,23 @@ export function subscribeDashboardRealtime(
       "postgres_changes",
       { event: "*", schema: "public", table: "fundraising_templates" },
       (payload) => onFundraising?.(payload),
+    )
+    // The studio iPad kiosk pushes punches, roster edits, and a heartbeat on
+    // every sync, so the Time Clock view can stay live while staff clock in.
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "timeclock_punches" },
+      (payload) => onTimeClock?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "timeclock_employees" },
+      (payload) => onTimeClock?.(payload),
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "timeclock_kiosk_status" },
+      (payload) => onTimeClock?.(payload),
     )
     .subscribe();
 
