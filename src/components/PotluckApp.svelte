@@ -222,9 +222,14 @@
                   )
             : null;
 
-    $: totalServings = items.reduce((sum, i) => sum + (i.serves || 0), 0);
+    // Only mains count toward the headline coverage number: chips, desserts,
+    // and drinks pad a grand total fast without actually feeding anyone
+    // dinner, so a sum across every category reads as more food than there is.
+    $: mainServings = items
+        .filter((i) => i.category === "main")
+        .reduce((sum, i) => sum + (i.serves || 0), 0);
     $: totalGuests = rsvps.reduce((sum, r) => sum + (r.party_size || 0), 0);
-    $: needMoreFood = totalGuests > 0 && totalServings < totalGuests;
+    $: needMoreFood = totalGuests > 0 && mainServings < totalGuests;
 
     $: veggieFriendly = items.filter(
         (i) =>
@@ -648,10 +653,10 @@
                     <dd
                         class="font-sans text-3xl font-extrabold text-off-black"
                     >
-                        ~{totalServings}
+                        ~{mainServings}
                     </dd>
                     <dt class="mt-1 font-sans text-xs font-bold uppercase tracking-wider text-medium-gray">
-                        Servings
+                        Main-dish servings
                     </dt>
                 </div>
                 <div class="rounded-xl bg-light-gray px-2 py-4">
@@ -665,6 +670,10 @@
                     </dt>
                 </div>
             </dl>
+            <p class="mt-2 text-center font-body text-xs text-medium-gray">
+                Mains only, and serving counts are the cooks' best guess. When
+                in doubt, bring a little extra.
+            </p>
 
             <div class="mt-4 flex flex-wrap gap-2">
                 {#each categoryCounts as cat (cat.id)}
@@ -687,10 +696,17 @@
                 <p
                     class="mt-4 rounded-xl bg-amber-50 px-4 py-3 font-body text-sm text-amber-800"
                 >
-                    Heads up: about {totalServings} servings planned for
-                    {totalGuests} confirmed guests{mostNeeded
-                        ? `. More ${mostNeeded.label.toLowerCase()} would go a long way`
-                        : ""}.
+                    {#if mainServings === 0}
+                        Heads up: {totalGuests}
+                        {totalGuests === 1 ? "person is" : "people are"} confirmed
+                        and there's no main dish yet. Mains would go a long
+                        way.
+                    {:else}
+                        Heads up: the mains so far serve about {mainServings},
+                        and {totalGuests}
+                        {totalGuests === 1 ? "person is" : "people are"} confirmed.
+                        More mains would go a long way.
+                    {/if}
                 </p>
             {:else if mostNeeded && mostNeeded.count === 0}
                 <p
