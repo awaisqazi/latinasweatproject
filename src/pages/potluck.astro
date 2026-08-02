@@ -78,9 +78,13 @@ import { potluckEvent } from "@/data/potluck.js";
                         <p class="mt-2 font-sans font-bold text-off-black">
                             {potluckEvent.timeLabel}
                         </p>
-                        <p class="mt-2 font-body text-xs text-medium-gray">
-                            {potluckEvent.timeNote}
-                        </p>
+                        {
+                            potluckEvent.timeNote && (
+                                <p class="mt-2 font-body text-xs text-medium-gray">
+                                    {potluckEvent.timeNote}
+                                </p>
+                            )
+                        }
                     </div>
                     <div
                         class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"

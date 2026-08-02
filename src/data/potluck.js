@@ -10,13 +10,14 @@ export const potluckEvent = {
   name: "LSP Community Potluck",
   tagline:
     "One table, every flavor. Add what you're bringing, watch the spread come together live, and come hungry. No sign-up sheets, no spreadsheets, just comida y comunidad.",
-  dateLabel: "Thursday, August 6, 2026",
-  // Flip to true once the board locks the date; until then the page shows a
-  // "date being confirmed" note so nobody meal-preps for the wrong night.
-  dateConfirmed: false,
+  dateLabel: "Tuesday, August 4, 2026",
+  // Flip to false if the date ever goes back up in the air; the page then
+  // shows a "date being confirmed" note so nobody meal-preps for the wrong
+  // night.
+  dateConfirmed: true,
   dateNote: "We're finalizing the date, check back before you cook.",
-  timeLabel: "Time TBA",
-  timeNote: "Exact time coming soon.",
+  timeLabel: "6:00 PM",
+  timeNote: "",
   locationName: "The LSP Studio",
   locationAddress: "949 W 16th St, Chicago, IL 60607",
   contactPath: "/contact",
