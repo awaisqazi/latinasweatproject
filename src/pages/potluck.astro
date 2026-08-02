@@ -1,0 +1,273 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import PotluckApp from "@/components/PotluckApp.svelte";
+import { potluckEvent } from "@/data/potluck.js";
+
+// Community coordination tool, shared by link (group chats, stories), so it
+// stays out of search results like /inventory and /forms. All event details
+// live in src/data/potluck.js; the live board itself is Supabase-backed and
+// renders entirely client-side in PotluckApp.svelte.
+---
+
+<Layout
+    title={`${potluckEvent.name} | The Latina Sweat Project`}
+    description="See what everyone is bringing to the LSP community potluck and add your own dish. Updates live."
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main>
+        {/* Page header */}
+        <section
+            class="bg-gradient-to-br from-light-gray to-pink-50 py-16 sm:py-20"
+        >
+            <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+                <span
+                    class="rounded-full bg-vibrant-pink/10 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-vibrant-pink"
+                >
+                    Comida y Comunidad
+                </span>
+                <h1
+                    class="mt-6 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
+                >
+                    {potluckEvent.name}
+                </h1>
+                <p
+                    class="mx-auto mt-6 max-w-3xl font-body text-xl leading-relaxed text-medium-gray"
+                >
+                    {potluckEvent.tagline}
+                </p>
+
+                <div
+                    class="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3"
+                >
+                    <div
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"
+                    >
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                        >
+                            When
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-off-black">
+                            {potluckEvent.dateLabel}
+                        </p>
+                        {
+                            !potluckEvent.dateConfirmed && (
+                                <p class="mt-2 inline-block rounded-full bg-amber-100 px-3 py-1 font-sans text-xs font-bold text-amber-800">
+                                    Being confirmed
+                                </p>
+                            )
+                        }
+                        {
+                            !potluckEvent.dateConfirmed && (
+                                <p class="mt-2 font-body text-xs text-medium-gray">
+                                    {potluckEvent.dateNote}
+                                </p>
+                            )
+                        }
+                    </div>
+                    <div
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"
+                    >
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                        >
+                            Time
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-off-black">
+                            {potluckEvent.timeLabel}
+                        </p>
+                        <p class="mt-2 font-body text-xs text-medium-gray">
+                            {potluckEvent.timeNote}
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"
+                    >
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                        >
+                            Where
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-off-black">
+                            {potluckEvent.locationName}
+                        </p>
+                        <p class="mt-2 font-body text-xs text-medium-gray">
+                            {potluckEvent.locationAddress}
+                        </p>
+                    </div>
+                </div>
+
+                <a
+                    href="#potluck-board"
+                    class="mt-10 inline-block rounded-full bg-off-black px-8 py-3 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink"
+                >
+                    See the table + add your dish
+                </a>
+            </div>
+        </section>
+
+        {/* How it works */}
+        <section class="bg-white py-12">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-6 sm:grid-cols-3">
+                    <div class="text-center">
+                        <span
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-vibrant-pink/10 font-sans text-lg font-extrabold text-vibrant-pink"
+                        >
+                            1
+                        </span>
+                        <h2 class="mt-4 font-sans text-lg font-bold text-off-black">
+                            Add what you're bringing
+                        </h2>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Takes ten seconds, no account needed. Homemade or
+                            store-bought, both are welcome.
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <span
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-vibrant-pink/10 font-sans text-lg font-extrabold text-vibrant-pink"
+                        >
+                            2
+                        </span>
+                        <h2 class="mt-4 font-sans text-lg font-bold text-off-black">
+                            Watch the table fill up
+                        </h2>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Everyone sees the list update live, so the menu
+                            balances itself. No group-chat archaeology.
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <span
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-vibrant-pink/10 font-sans text-lg font-extrabold text-vibrant-pink"
+                        >
+                            3
+                        </span>
+                        <h2 class="mt-4 font-sans text-lg font-bold text-off-black">
+                            Show up hungry
+                        </h2>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Come through on potluck day, eat well, meet people,
+                            and take your dish and container home after.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* The live board */}
+        <section id="potluck-board" class="scroll-mt-28 bg-slate-50 py-16">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <PotluckApp client:only="svelte" />
+            </div>
+        </section>
+
+        {/* Potluck playbook */}
+        <section class="bg-white py-16">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-10 text-center">
+                    <h2
+                        class="inline-block border-b-4 border-accent-gold pb-2 font-sans text-3xl font-extrabold uppercase tracking-tight text-off-black"
+                    >
+                        Potluck Playbook
+                    </h2>
+                    <p
+                        class="mx-auto mt-6 max-w-2xl font-body text-lg text-medium-gray"
+                    >
+                        A few small things that make a big difference for the
+                        whole table.
+                    </p>
+                </div>
+                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">🏷️</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Label your dish
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            A little card listing ingredients helps friends
+                            with allergies eat with confidence. Nuts, dairy,
+                            and gluten are the big three to call out.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">🥄</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Bring a serving utensil
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            The dish that shows up with its own tongs or spoon
+                            is the dish that actually gets eaten.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">🌡️</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Ready to serve
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Heating space at the studio is limited. Dishes that
+                            are great at room temperature, or arrive hot, keep
+                            the line moving.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">🍽️</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Not a cook? No problem
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Plates, cups, ice, and drinks are just as
+                            essential as the mains. Claim a supplies slot on
+                            the board and you're a hero.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">💗</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Presence over perfection
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Store-bought counts. A bag of limes counts. What
+                            matters is that you come and share the table.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl border border-black/5 bg-white p-6 shadow-sm"
+                    >
+                        <p class="text-2xl" aria-hidden="true">🧺</p>
+                        <h3 class="mt-3 font-sans text-base font-bold text-off-black">
+                            Take it home
+                        </h3>
+                        <p class="mt-2 font-body text-sm text-medium-gray">
+                            Leftovers and containers go home with their owners
+                            at the end of the night, the studio can't store
+                            them.
+                        </p>
+                    </div>
+                </div>
+
+                <p class="mt-12 text-center font-body text-sm text-gray-500">
+                    Questions or ideas for the potluck? Reach the team through
+                    the <a
+                        href={potluckEvent.contactPath}
+                        class="text-vibrant-pink hover:underline">contact page</a
+                    >.
+                </p>
+            </div>
+        </section>
+    </main>
+</Layout>
