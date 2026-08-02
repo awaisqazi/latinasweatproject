@@ -111,12 +111,29 @@
     const map = {};
     for (const receipt of list) {
       if (!map[receipt.message_id]) {
-        map[receipt.message_id] = { total: 0, latestByEmployee: new Map() };
+        map[receipt.message_id] = {
+          total: 0,
+          latestByEmployee: new Map(),
+          ackByEmployee: new Map(),
+        };
       }
       const bucket = map[receipt.message_id];
       bucket.total += 1;
       if (!bucket.latestByEmployee.has(receipt.employee_id)) {
         bucket.latestByEmployee.set(receipt.employee_id, receipt);
+      }
+      // A person can rack up several receipts for the same message; they
+      // count as acknowledged the moment any one of those rows was
+      // explicitly confirmed, and we surface the latest such confirmation.
+      if (receipt.acknowledged_at) {
+        const ackMs = new Date(receipt.acknowledged_at).getTime();
+        const existing = bucket.ackByEmployee.get(receipt.employee_id);
+        if (!existing || ackMs > existing.ackMs) {
+          bucket.ackByEmployee.set(receipt.employee_id, {
+            acknowledgedAt: receipt.acknowledged_at,
+            ackMs,
+          });
+        }
       }
     }
     return map;
@@ -125,20 +142,27 @@
   $: rows = messages.map((message) => {
     const bucket = receiptsByMessage[message.id];
     const viewers = bucket ? Array.from(bucket.latestByEmployee.values()) : [];
+    const ackByEmployee = bucket?.ackByEmployee || new Map();
     return {
       message,
       total: bucket?.total || 0,
       people: viewers.length,
+      acknowledgedCount: ackByEmployee.size,
       viewers: viewers
-        .map((receipt) => ({
-          id: receipt.id,
-          employeeId: receipt.employee_id,
-          name: employeeById[receipt.employee_id]
-            ? employeeLabel(employeeById[receipt.employee_id])
-            : "Former employee",
-          seen: formatChicagoDateTimeLabel(receipt.seen_at),
-          seenMs: new Date(receipt.seen_at).getTime(),
-        }))
+        .map((receipt) => {
+          const ack = ackByEmployee.get(receipt.employee_id);
+          return {
+            id: receipt.id,
+            employeeId: receipt.employee_id,
+            name: employeeById[receipt.employee_id]
+              ? employeeLabel(employeeById[receipt.employee_id])
+              : "Former employee",
+            seen: formatChicagoDateTimeLabel(receipt.seen_at),
+            seenMs: new Date(receipt.seen_at).getTime(),
+            acknowledged: Boolean(ack),
+            acknowledgedAt: ack ? formatChicagoDateTimeLabel(ack.acknowledgedAt) : "",
+          };
+        })
         .sort((a, b) => b.seenMs - a.seenMs),
       audienceLabel: audienceLabelFor(message),
       window: windowLabel(message),
@@ -353,8 +377,7 @@
                   aria-hidden="true"
                 />
                 {#if row.people}
-                  Seen by {row.people} {row.people === 1 ? "person" : "people"} · {row.total}
-                  {row.total === 1 ? "time" : "times"}
+                  Seen by {row.people} · acknowledged by {row.acknowledgedCount}
                 {:else}
                   Not seen yet
                 {/if}
@@ -364,9 +387,16 @@
                 {#if row.viewers.length}
                   <ul class="mt-2 space-y-1 pb-1">
                     {#each row.viewers as viewer (viewer.employeeId)}
-                      <li class="flex flex-wrap items-baseline justify-between gap-2 text-xs">
+                      <li class="flex flex-wrap items-center justify-between gap-2 text-xs">
                         <span class="font-semibold text-ink/80">{viewer.name}</span>
-                        <span class="text-ink/50">{viewer.seen}</span>
+                        <span class="flex items-center gap-2">
+                          <span class="text-ink/50">{viewer.seen}</span>
+                          {#if viewer.acknowledged}
+                            <Badge tone="green" size="xs">Confirmed {viewer.acknowledgedAt}</Badge>
+                          {:else}
+                            <Badge tone="neutral" size="xs">Not confirmed</Badge>
+                          {/if}
+                        </span>
                       </li>
                     {/each}
                   </ul>

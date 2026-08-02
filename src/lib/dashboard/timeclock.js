@@ -33,7 +33,8 @@ export const PUNCH_COLUMNS =
   "id,employee_id,clock_in_at,clock_out_at,was_forced_out,shift_role,scheduled_classes,actual_classes_taught,source,note,created_at,updated_at";
 export const MESSAGE_COLUMNS =
   "id,title,body,audience,employee_id,starts_on,ends_on,is_active,sort_order,created_by,created_at,updated_at";
-export const RECEIPT_COLUMNS = "id,message_id,employee_id,punch_id,seen_at";
+export const RECEIPT_COLUMNS =
+  "id,message_id,employee_id,punch_id,seen_at,acknowledged_at";
 export const IMPORT_COLUMNS =
   "id,file_name,format,total_rows,imported_punches,skipped_rows,created_employees,created_by,created_at";
 export const KIOSK_STATUS_COLUMNS =
