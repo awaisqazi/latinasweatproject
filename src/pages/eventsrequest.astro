@@ -1,0 +1,34 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import EventRequestApp from "../components/EventRequestApp.svelte";
+---
+
+<Layout
+    title="Event & Scheduling Requests | The Latina Sweat Project"
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <div class="bg-off-black text-white py-16 px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-accent-gold mb-4"
+                >
+                    For the LSP team
+                </p>
+                <h1 class="text-4xl md:text-5xl font-bold font-rubik mb-4">
+                    Event &amp; Scheduling Requests
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Planning an event or need studio time? Tell us the details
+                    so we can coordinate instructors, staffing, and logistics.
+                </p>
+            </div>
+        </div>
+
+        <!-- App Container -->
+        <EventRequestApp client:load />
+    </main>
+</Layout>
