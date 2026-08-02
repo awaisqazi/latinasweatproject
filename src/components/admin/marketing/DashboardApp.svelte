@@ -355,6 +355,7 @@
       window.clearTimeout(boardRealtimeTimer);
       window.clearTimeout(workspaceRealtimeTimer);
       window.clearTimeout(fundraisingRealtimeTimer);
+      window.clearTimeout(spacesRealtimeTimer);
     };
   });
 
@@ -369,6 +370,7 @@
   let workspaceRealtimeTimer = 0;
   let fundraisingRealtimeTimer = 0;
   let timeClockRealtimeTimer = 0;
+  let spacesRealtimeTimer = 0;
 
   function startRealtime() {
     realtimeUnsubscribe?.();
@@ -378,6 +380,7 @@
       onWorkspace: scheduleWorkspaceRealtimeRefresh,
       onFundraising: scheduleFundraisingRealtimeRefresh,
       onTimeClock: scheduleTimeClockRealtimeRefresh,
+      onSpaces: scheduleSpacesRealtimeRefresh,
     });
   }
 
@@ -438,6 +441,13 @@
     window.clearTimeout(timeClockRealtimeTimer);
     timeClockRealtimeTimer = window.setTimeout(() => {
       timeClockRefreshKey += 1;
+    }, 500);
+  }
+
+  function scheduleSpacesRealtimeRefresh() {
+    window.clearTimeout(spacesRealtimeTimer);
+    spacesRealtimeTimer = window.setTimeout(() => {
+      spacesRefreshKey += 1;
     }, 500);
   }
 

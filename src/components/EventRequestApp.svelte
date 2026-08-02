@@ -32,7 +32,7 @@
     const LOCATION_OPTIONS = [
         "Little Village Room",
         "Gage Park Room",
-        "Studio Kitchen",
+        "Cafe",
     ];
 
     // Form state

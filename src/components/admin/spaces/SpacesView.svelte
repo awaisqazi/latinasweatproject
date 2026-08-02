@@ -7,10 +7,12 @@
     ClipboardList,
     DoorOpen,
     GraduationCap,
+    Inbox,
   } from "@lucide/svelte";
   import StatCard from "../ui/StatCard.svelte";
   import Tabs from "../ui/Tabs.svelte";
   import SpaceCalendarTab from "./SpaceCalendarTab.svelte";
+  import EventRequestsTab from "./EventRequestsTab.svelte";
   import ClassScheduleTab from "./ClassScheduleTab.svelte";
   import PlanningTab from "./PlanningTab.svelte";
   import InsightsTab from "./InsightsTab.svelte";
@@ -20,15 +22,23 @@
   export let refreshKey = 0;
 
   let activeTab = "calendar";
+  let requestsVisited = false;
   let scheduleVisited = false;
   let planningVisited = false;
   let insightsVisited = false;
+  $: if (activeTab === "requests") requestsVisited = true;
   $: if (activeTab === "schedule") scheduleVisited = true;
   $: if (activeTab === "planning") planningVisited = true;
   $: if (activeTab === "insights") insightsVisited = true;
 
-  const moduleTabs = [
+  $: moduleTabs = [
     { id: "calendar", label: "Space Calendar", icon: CalendarRange },
+    {
+      id: "requests",
+      label: "Event Requests",
+      icon: Inbox,
+      count: pendingRequests > 0 ? pendingRequests : undefined,
+    },
     { id: "schedule", label: "Class Schedule", icon: GraduationCap },
     { id: "planning", label: "Planning", icon: ClipboardList },
     { id: "insights", label: "Insights", icon: ChartColumn },
@@ -36,6 +46,7 @@
 
   let activeSlots = 0;
   let bookingsThisWeek = 0;
+  let pendingRequests = 0;
   let avgUtilization = null;
   let statsLoading = true;
   // Bumped by tabs whenever they change data, so the stat cards stay honest.
@@ -57,7 +68,7 @@
     const weekAhead = new Date();
     weekAhead.setDate(weekAhead.getDate() + 7);
 
-    const [slotsRes, bookingsRes, utilRes] = await Promise.all([
+    const [slotsRes, bookingsRes, requestsRes, utilRes] = await Promise.all([
       supabase
         .from("class_schedule_slots")
         .select("id", { count: "exact", head: true })
@@ -67,11 +78,16 @@
         .select("id", { count: "exact", head: true })
         .gte("ends_at", new Date().toISOString())
         .lte("starts_at", weekAhead.toISOString()),
+      supabase
+        .from("event_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
       supabase.from("class_history_type_stats").select("sessions, avg_utilization"),
     ]);
 
     activeSlots = slotsRes.count || 0;
     bookingsThisWeek = bookingsRes.count || 0;
+    pendingRequests = requestsRes.count || 0;
 
     const rows = utilRes.data || [];
     const totalSessions = rows.reduce((sum, r) => sum + Number(r.sessions || 0), 0);
@@ -98,9 +114,17 @@
 <section class="space-y-4" aria-labelledby="spaces-view-title">
   <h3 id="spaces-view-title" class="sr-only">Studio Spaces</h3>
 
-  <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
     <StatCard label="Active class slots" value={activeSlots} icon={GraduationCap} tone="teal" loading={statsLoading} />
     <StatCard label="Bookings next 7 days" value={bookingsThisWeek} icon={CalendarDays} tone="gold" loading={statsLoading} />
+    <StatCard
+      label="Pending event requests"
+      value={pendingRequests}
+      icon={Inbox}
+      tone={pendingRequests > 0 ? "rose" : "neutral"}
+      hint="From /eventsrequest"
+      loading={statsLoading}
+    />
     <StatCard label="Rooms" value={2} hint="Little Village · Gage Park" icon={DoorOpen} tone="neutral" />
     <StatCard
       label="Historic utilization"
@@ -122,6 +146,17 @@
   >
     <SpaceCalendarTab {supabase} {dataVersion} onChanged={handleDataChanged} />
   </div>
+
+  {#if requestsVisited}
+    <div
+      id="tabpanel-requests"
+      role="tabpanel"
+      aria-labelledby="tab-requests"
+      class:hidden={activeTab !== "requests"}
+    >
+      <EventRequestsTab {supabase} {dataVersion} onChanged={handleDataChanged} />
+    </div>
+  {/if}
 
   {#if scheduleVisited}
     <div

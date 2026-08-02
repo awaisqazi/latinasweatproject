@@ -9,7 +9,7 @@
 
 export function subscribeDashboardRealtime(
   supabase,
-  { onProjects, onBoard, onWorkspace, onFundraising, onTimeClock } = {},
+  { onProjects, onBoard, onWorkspace, onFundraising, onTimeClock, onSpaces } = {},
 ) {
   if (!supabase) return () => {};
 
@@ -81,6 +81,13 @@ export function subscribeDashboardRealtime(
       "postgres_changes",
       { event: "*", schema: "public", table: "timeclock_kiosk_status" },
       (payload) => onTimeClock?.(payload),
+    )
+    // Event requests arrive from the public /eventsrequest form via the
+    // Apps Script webhook, so the Studio Spaces queue refreshes live.
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "event_requests" },
+      (payload) => onSpaces?.(payload),
     )
     .subscribe();
 
