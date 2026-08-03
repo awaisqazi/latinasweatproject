@@ -12,6 +12,13 @@
 // Output: public/images/sweatfest/sweatfest-social-v4.jpg   (1200x675 OG)
 //         public/images/sweatfest/sweatfest-poster-v4.webp  (1080x1350)
 //         public/images/sweatfest/sweatfest-card-v4.webp    (1080x1080)
+//         public/images/sweatfest/sweatfest-benevity.png    (1115x765)
+//         public/images/sweatfest/sweatfest-volunteer-benevity.png (900x450)
+//
+// Usage:  node scripts/render-sweatfest-social.mjs --benevity-only
+//         Renders only the Benevity asset without touching the site images.
+// Usage:  node scripts/render-sweatfest-social.mjs --volunteer-only
+//         Renders only the 2:1 Benevity volunteer asset.
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -55,12 +62,25 @@ const css = `
   svg { display: block; width: 100vw; height: 100vh; }
 `;
 
-const shots = [
+const allShots = [
   // OG/social card (16:9): capture at 2x-ish then downsize for crispness.
   { variant: "landscape", w: 1600, h: 900 },
   { variant: "portrait", w: 1080, h: 1350 },
   { variant: "square", w: 1080, h: 1080 },
+  // Benevity's project image is displayed at 223x153. Capture at 10x and
+  // export at 5x the display dimensions for clean text and exact cropping.
+  { variant: "benevity", w: 2230, h: 1530 },
+  // Benevity volunteer images require a 900x450 (2:1) file. Capture at 2x
+  // and downsize for clean edges and compact output.
+  { variant: "benevityVolunteer", w: 1800, h: 900 },
 ];
+const benevityOnly = process.argv.includes("--benevity-only");
+const volunteerOnly = process.argv.includes("--volunteer-only");
+const shots = allShots.filter(({ variant }) => {
+  if (benevityOnly) return variant === "benevity";
+  if (volunteerOnly) return variant === "benevityVolunteer";
+  return true;
+});
 
 for (const { variant, w, h } of shots) {
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head>
@@ -81,14 +101,28 @@ for (const { variant, w, h } of shots) {
   console.log(`rendered ${variant} at ${w}x${h}`);
 }
 
-await sharp(path.join(tmpDir, "landscape.png"))
-  .resize(1200, 675)
-  .jpeg({ quality: 88 })
-  .toFile(path.join(outDir, "sweatfest-social-v4.jpg"));
-await sharp(path.join(tmpDir, "portrait.png"))
-  .webp({ quality: 90 })
-  .toFile(path.join(outDir, "sweatfest-poster-v4.webp"));
-await sharp(path.join(tmpDir, "square.png"))
-  .webp({ quality: 90 })
-  .toFile(path.join(outDir, "sweatfest-card-v4.webp"));
+if (!benevityOnly && !volunteerOnly) {
+  await sharp(path.join(tmpDir, "landscape.png"))
+    .resize(1200, 675)
+    .jpeg({ quality: 88 })
+    .toFile(path.join(outDir, "sweatfest-social-v4.jpg"));
+  await sharp(path.join(tmpDir, "portrait.png"))
+    .webp({ quality: 90 })
+    .toFile(path.join(outDir, "sweatfest-poster-v4.webp"));
+  await sharp(path.join(tmpDir, "square.png"))
+    .webp({ quality: 90 })
+    .toFile(path.join(outDir, "sweatfest-card-v4.webp"));
+}
+if (!volunteerOnly) {
+  await sharp(path.join(tmpDir, "benevity.png"))
+    .resize(1115, 765)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(outDir, "sweatfest-benevity.png"));
+}
+if (!benevityOnly) {
+  await sharp(path.join(tmpDir, "benevityVolunteer.png"))
+    .resize(900, 450)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(outDir, "sweatfest-volunteer-benevity.png"));
+}
 console.log("wrote", outDir);

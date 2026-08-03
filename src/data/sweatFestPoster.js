@@ -62,6 +62,36 @@ const horizontal = (x, y, w) =>
 // `logoHref` is unused now that the real lockups are inlined; the signature
 // is kept so existing call sites do not have to change.
 export function buildPosterSvg(variant, logoHref) {
+  if (variant === "benevityVolunteer") {
+    // Benevity's volunteer title image is 2:1. Keep the official horizontal
+    // lockup large enough to read at card size, then use one compact facts
+    // row and a high-contrast volunteer callout.
+    return `
+<svg viewBox="0 0 900 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <rect width="900" height="450" fill="${p.honeydew}"/>
+  ${horizontal(45, 30, 810)}
+  ${chip(45, 285, 320, 58, "AUGUST 22, 2026", 25)}
+  ${chip(385, 285, 470, 58, "18TH & PEORIA · CHICAGO", 23)}
+  <rect x="45" y="360" width="810" height="64" rx="10" fill="${p.ink}"/>
+  <text x="450" y="392" text-anchor="middle" dominant-baseline="central" font-family="'Filson Soft', Rubik, sans-serif" font-weight="800" font-size="27" letter-spacing="0.7" fill="${p.paper}">VOLUNTEER WITH US · TWO-HOUR SHIFTS</text>
+</svg>`;
+  }
+
+  if (variant === "benevity") {
+    // Benevity displays project artwork at 223x153 (a 1.458:1 ratio). Keep
+    // the lockup dominant and limit supporting copy to two large fact rows
+    // so the image remains legible at the actual thumbnail size.
+    return `
+<svg viewBox="0 0 1115 765" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <rect width="1115" height="765" fill="${p.honeydew}"/>
+  ${horizontal(55, 55, 1005)}
+  ${chip(55, 420, 430, 112, "AUGUST 22, 2026", 43)}
+  ${chip(510, 420, 550, 112, "18TH & PEORIA · CHICAGO", 36)}
+  <rect x="55" y="565" width="1005" height="112" rx="12" fill="${p.ink}"/>
+  <text x="557.5" y="621" text-anchor="middle" dominant-baseline="central" font-family="'Filson Soft', Rubik, sans-serif" font-weight="800" font-size="44" letter-spacing="1" fill="${p.paper}">7:00 AM - 9:00 PM</text>
+</svg>`;
+  }
+
   if (variant === "portrait") {
     // Stacked logo 640 wide (756.4 tall) from y=40, chips, then the URL.
     return `
