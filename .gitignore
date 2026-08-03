@@ -57,3 +57,4 @@ scripts/migration/node_modules/
 
 # Sweat Fest local render scratch (flyers, teaser video; never published)
 .sweatfest-render-tmp/
+public/images/sweatfest/sweatfest-benevity.png
