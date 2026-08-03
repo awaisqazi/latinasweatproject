@@ -880,6 +880,24 @@ const eventJsonLd = {
                 </div>
               </fieldset>
 
+              <fieldset aria-describedby="sf-age-error">
+                <legend class="font-slab text-2xl uppercase tracking-wide text-choco">
+                  Age requirement <span class="text-[var(--sf-dusk)]">*</span>
+                </legend>
+                {/* Attestation only: no `name`, so it never posts to Google. */}
+                <label class="sf-volunteer-choice mt-5">
+                  <input
+                    type="checkbox"
+                    class="h-5 w-5 flex-none accent-[var(--sf-ember)]"
+                    data-sf-age
+                  />
+                  <span class="text-sm font-semibold leading-relaxed text-choco">I attest that I am 18 years of age or older.</span>
+                </label>
+                <p id="sf-age-error" class="mt-3 hidden text-sm font-bold text-[var(--sf-dusk)]" data-sf-age-error role="alert">
+                  This opportunity is only available for folks 18 years and older. Please do not submit this application if you are under 18.
+                </p>
+              </fieldset>
+
               <fieldset>
                 <legend class="font-slab text-2xl uppercase tracking-wide text-choco">
                   Volunteer acknowledgement <span class="text-[var(--sf-dusk)]">*</span>
@@ -1933,6 +1951,8 @@ const eventJsonLd = {
     const shifts = Array.from(
       document.querySelectorAll<HTMLInputElement>("[data-sf-shift]"),
     );
+    const ageBox = document.querySelector<HTMLInputElement>("[data-sf-age]");
+    const ageError = document.querySelector<HTMLElement>("[data-sf-age-error]");
 
     if (!form || !frame || !success || !shiftError || !submitButton) return;
 
@@ -1946,7 +1966,21 @@ const eventJsonLd = {
 
     shifts.forEach((input) => input.addEventListener("change", clearShiftError));
 
+    ageBox?.addEventListener("change", () => {
+      if (!ageBox.checked) return;
+      ageError?.classList.add("hidden");
+      ageBox.removeAttribute("aria-invalid");
+    });
+
     form.addEventListener("submit", (event) => {
+      if (ageBox && !ageBox.checked) {
+        event.preventDefault();
+        ageError?.classList.remove("hidden");
+        ageBox.setAttribute("aria-invalid", "true");
+        ageBox.focus();
+        return;
+      }
+
       if (!hasShift()) {
         event.preventDefault();
         shiftError.classList.remove("hidden");
