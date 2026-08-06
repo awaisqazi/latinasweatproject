@@ -18,7 +18,7 @@ export default defineConfig({
           '/marketing', '/forms', '/register', '/account',
           '/intake', '/donate', '/lspgala', '/galaraffle',
           '/silentauction', '/teachertrainingclasses', '/teach/',
-          '/graduation', '/potluck', '/eventsrequest',
+          '/graduation', '/potluck', '/eventsrequest', '/adobe',
         ];
         return !excluded.some((path) => page.includes(path));
       },

@@ -1,0 +1,524 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import { galaTeaser, galaTickets } from "@/data/galaTeaser";
+const base = import.meta.env.BASE_URL;
+
+// Unlisted thank-you page for Adobe after they hosted an LSP candlelight
+// class at their office (August 2026). Not in the nav, noindex, and excluded
+// from the sitemap in astro.config.mjs. Shared directly with the Adobe team.
+
+// Photos live in the public "LSP x Adobe August" Flickr album; we hotlink
+// Flickr's CDN (same approach as /gallery) rather than committing 25 images.
+// `_c` = 800px for the grid, `_b` = 1024px for the lightbox.
+const flickrAlbumUrl =
+  "https://www.flickr.com/photos/88623248@N07/albums/72177720335030784";
+const flickrSrc = (photo, size) =>
+  `https://live.staticflickr.com/65535/${photo.id}_${photo.secret}_${size}.jpg`;
+
+// Album order. `wide: true` marks the two landscape frames (3:2); the rest
+// are portrait (2:3).
+const photos = [
+  { id: "55445927010", secret: "e1c522ff37", alt: "LSP instructor kneeling among candles, drawing a yoga strap taut overhead" },
+  { id: "55444567817", secret: "5ab8df071f", alt: "Close-up of an LSP-branded core disc, resistance band, and strap laid out on a mat" },
+  { id: "55445695864", secret: "f59cc20806", alt: "Two participants seated on mats facing the big screens, with the LSP banner between them" },
+  { id: "55445926965", secret: "6d09f112e9", alt: "A participant stretches in the foreground while the instructor demonstrates with a strap" },
+  { id: "55445926950", secret: "ec37631204", alt: "Participants pulling straps skyward in the candlelit room" },
+  { id: "55445926945", secret: "5804bbfd85", alt: "The instructor seated beneath the LSP banner, hands lifted at heart center" },
+  { id: "55445531771", secret: "3e5b96151e", alt: "A cross-legged moment of meditation at the front of the room" },
+  { id: "55444567697", secret: "3d3eaf9e51", alt: "The instructor opens her arms wide, mid-flow, smiling at the class" },
+  { id: "55445531721", secret: "986dc1e9bd", alt: "Arms sweep overhead in a V as the class follows along" },
+  { id: "55444567687", secret: "c9d46c8394", alt: "The instructor laughing with arms raised, a participant's hand mirroring in the foreground" },
+  { id: "55445656928", secret: "36a977f649", alt: "Participants seen from behind, all reaching overhead together" },
+  { id: "55445926795", secret: "227b3f5e20", alt: "Hands pressed to prayer and lifted overhead, echoed by a participant up close" },
+  { id: "55445531651", secret: "9193a81d21", alt: "The strap pulled wide to the side, a participant mirroring the stretch" },
+  { id: "55445656893", secret: "aa4cc28750", alt: "The room mid-stretch: rows of mats, candles, and straps held overhead", wide: true },
+  { id: "55445926745", secret: "3286c0bb15", alt: "A wide view of the class stretching with straps by candlelight", wide: true },
+  { id: "55445926715", secret: "8db31d9f10", alt: "A long diagonal stretch with the strap, framed by flickering candles" },
+  { id: "55445656803", secret: "5e823ac29b", alt: "The room settled into rest, screens glowing softly above" },
+  { id: "55445656813", secret: "4c902f7b14", alt: "The instructor seated among candles, smiling between cues" },
+  { id: "55445656773", secret: "8a4db484ec", alt: "A long seated reach, arms clasped overhead" },
+  { id: "55445656743", secret: "051296b3b8", alt: "One arm sweeps up and over into a seated side bend" },
+  { id: "55445656728", secret: "4d0e7f6277", alt: "A kneeling backbend, one arm reaching for the ceiling" },
+  { id: "55445926635", secret: "580eb75b8b", alt: "A deep, candlelit backbend in front of the LSP banner" },
+  { id: "55444567337", secret: "b3c4942919", alt: "A glowing hip-opener stretch, face turned up" },
+  { id: "55444567277", secret: "e8f1f7e084", alt: "The instructor laughing mid-class, hand to chest" },
+  { id: "55445695429", secret: "003b78546d", alt: "The whole room rises into cobra, facing the screens together" },
+];
+
+const sponsorAmounts = galaTickets.sponsorships.map((s) => s.amount);
+const sponsorMin = Math.min(...sponsorAmounts).toLocaleString("en-US");
+const sponsorMax = Math.max(...sponsorAmounts).toLocaleString("en-US");
+---
+
+<Layout
+  title="Dear Adobe | The Latina Sweat Project"
+  description="A thank-you note from The Latina Sweat Project to our friends at Adobe, with photos from the candlelight class we shared."
+  robots="noindex, nofollow"
+  socialImage="images/adobe/lsp-x-adobe.jpg"
+  socialImageAlt="Participants stretch with straps by candlelight at the LSP x Adobe class"
+  socialImageWidth={1024}
+  socialImageHeight={683}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <Header />
+  <main class="bg-light-gray">
+    {/* ========================= THE LETTER ========================= */}
+    <section class="px-4 pb-10 pt-10 sm:pt-14">
+      <div class="mx-auto max-w-3xl">
+        <p class="reveal text-center text-xs font-bold uppercase tracking-[0.28em] text-medium-gray">
+          From our mats to your office
+        </p>
+
+        <div
+          class="reveal relative mt-6 rounded-lg border border-off-black/5 bg-white px-6 py-10 shadow-[0_20px_50px_-24px_rgb(30_30_30/0.35)] sm:px-12 sm:py-14"
+        >
+          <span class="absolute inset-x-0 top-0 h-1 rounded-t-lg bg-accent-gold"></span>
+
+          {/* Stamp: the LSP prop close-up with perforated edges */}
+          <div class="stamp absolute right-5 top-6 rotate-3 sm:right-9 sm:top-9">
+            <img
+              src={flickrSrc(photos[1], "w")}
+              alt=""
+              aria-hidden="true"
+              width="66"
+              height="99"
+              loading="eager"
+            />
+          </div>
+
+          {/* Postmark, inked over the stamp's corner */}
+          <svg
+            class="pointer-events-none absolute right-14 top-16 h-24 w-24 -rotate-12 text-off-black/35 sm:right-20 sm:top-16 sm:h-28 sm:w-28"
+            viewBox="0 0 120 120"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle cx="60" cy="60" r="44" stroke="currentColor" stroke-width="1.5" />
+            <circle cx="60" cy="60" r="34" stroke="currentColor" stroke-width="0.75" />
+            <path id="postmark-arc-top" d="M 60 60 m -39 0 a 39 39 0 1 1 78 0" fill="none"></path>
+            <text font-size="8.5" letter-spacing="2.2" fill="currentColor" font-family="Rubik, sans-serif" font-weight="600">
+              <textPath href="#postmark-arc-top" startOffset="8%">LATINA SWEAT PROJECT</textPath>
+            </text>
+            <text x="60" y="57" text-anchor="middle" font-size="9" letter-spacing="1" fill="currentColor" font-family="Rubik, sans-serif" font-weight="700">AUG 2026</text>
+            <text x="60" y="70" text-anchor="middle" font-size="7" letter-spacing="1.5" fill="currentColor" font-family="Rubik, sans-serif">PILSEN, CHI</text>
+            <path d="M14 78 Q 40 70, 66 78 T 118 78" stroke="currentColor" stroke-width="1" />
+            <path d="M10 86 Q 36 78, 62 86 T 114 86" stroke="currentColor" stroke-width="1" />
+            <path d="M14 94 Q 40 86, 66 94 T 118 94" stroke="currentColor" stroke-width="1" />
+          </svg>
+
+          <h1 class="font-display text-4xl font-semibold text-off-black sm:text-5xl">
+            Dear Adobe,
+          </h1>
+
+          <div class="mt-8 max-w-xl space-y-6 font-body text-lg leading-8 text-medium-gray">
+            {/* Extra right padding keeps the opening lines clear of the
+                stamp + postmark pinned to the card's top-right corner. */}
+            <p class="pr-24">
+              Thank you for opening your doors to us this August. Your team
+              rolled out mats beneath the big screens, we lit our candles (the
+              flameless kind, your facilities crew can breathe easy), and for
+              one hour the office slowed all the way down: straps overhead,
+              deep stretches, a little laughter, and a very quiet room by the
+              end.
+            </p>
+            <p>
+              Hours like that one do more than loosen shoulders. Corporate
+              classes help keep our community programming accessible back home
+              in Pilsen, where we teach yoga, pilates, dance fitness, and
+              bootcamp on Chicago's Southwest Side. When your team moves with
+              us, our neighborhood gets to keep moving too.
+            </p>
+            <p>
+              So: gracias. For the space, the warmth, and a room full of
+              people willing to try a candlelit backbend at work. You were
+              wonderful hosts, and we hope this was the first hour of many.
+            </p>
+          </div>
+
+          <div class="mt-10">
+            <p class="font-display text-xl italic text-off-black">Con cariño,</p>
+            <p class="mt-2 inline-block -rotate-2 font-marker text-2xl text-off-black sm:text-3xl">
+              The Latina Sweat Project
+            </p>
+            <p class="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-medium-gray">
+              Pilsen, Chicago
+            </p>
+          </div>
+        </div>
+
+        {/* Quick links pinned right under the letter, so the gala, schedule,
+            and about pages don't rely on anyone scrolling past 25 photos. */}
+        <nav class="reveal mt-6" aria-label="Quick links">
+          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+            <span class="font-marker text-lg text-medium-gray">while you're here:</span>
+            <a
+              href={`${base}gala`}
+              class="inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black shadow-card transition hover:border-accent-gold hover:text-brand-ink"
+              data-conversion-event="gala_ticket_click"
+              data-conversion-context="adobe_thank_you_quick_links"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+              The Gala · {galaTeaser.shortDateLabel}
+            </a>
+            <a
+              href={`${base}schedule`}
+              class="inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black shadow-card transition hover:border-accent-gold hover:text-brand-ink"
+              data-conversion-event="schedule_view"
+              data-conversion-context="adobe_thank_you_quick_links"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+              Class Schedule
+            </a>
+            <a
+              href={`${base}about`}
+              class="inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black shadow-card transition hover:border-accent-gold hover:text-brand-ink"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+              About LSP
+            </a>
+          </div>
+        </nav>
+      </div>
+    </section>
+
+    {/* ========================= THE PHOTOS ========================= */}
+    <section class="px-4 py-12 sm:py-16">
+      <div class="mx-auto max-w-6xl">
+        <div class="reveal text-center">
+          <p class="font-marker text-lg text-brand-ink">enclosed: {photos.length} photos</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold text-off-black sm:text-4xl">
+            The hour, in pictures
+          </h2>
+          <p class="mx-auto mt-3 max-w-2xl font-body text-medium-gray">
+            Tap any photo to see it big. The full album lives on
+            <a
+              href={flickrAlbumUrl}
+              target="_blank"
+              rel="noopener"
+              class="font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 hover:text-brand-ink"
+            >Flickr</a>, free to download and share around the office.
+          </p>
+        </div>
+
+        {/* No `reveal` here: the site observer needs 10% of an element in
+            view, and this grid is thousands of pixels tall, so it would stay
+            transparent through most (on phones, all) of the scroll. */}
+        <div class="mt-10 columns-2 gap-3 md:columns-3 [&>button]:mb-3">
+          {
+            photos.map((photo, index) => (
+              <button
+                type="button"
+                class="group block w-full break-inside-avoid overflow-hidden rounded-md bg-off-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-gold"
+                data-lightbox-trigger
+                data-full={flickrSrc(photo, "b")}
+                data-alt={photo.alt}
+                data-index={index}
+                aria-label={`View photo ${index + 1} of ${photos.length}: ${photo.alt}`}
+              >
+                <img
+                  src={flickrSrc(photo, "c")}
+                  alt={photo.alt}
+                  loading={index < 6 ? "eager" : "lazy"}
+                  decoding="async"
+                  width={photo.wide ? 800 : 534}
+                  height={photo.wide ? 534 : 800}
+                  class="h-auto w-full transition duration-300 group-hover:scale-[1.03]"
+                  style={`aspect-ratio: ${photo.wide ? "3 / 2" : "2 / 3"}`}
+                />
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ========================= P.S. CARDS ========================= */}
+    <section class="px-4 py-12 sm:py-16">
+      <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-3">
+        {/* P.S. Gala */}
+        <div class="reveal flex flex-col rounded-lg bg-off-black p-8 text-white shadow-pop">
+          <p class="font-marker text-2xl text-accent-gold">P.S.</p>
+          <h3 class="mt-3 font-display text-2xl font-semibold">
+            Save us a dance in September.
+          </h3>
+          <p class="mt-3 flex-1 font-body leading-7 text-slate-200">
+            Our {galaTeaser.title} lands at the
+            {" "}{galaTeaser.venueName} on {galaTeaser.dateLabel}. Black tie,
+            contemporary art, a seated dinner, and dancing until midnight, all
+            in support of wellness access across Chicago. We would love to see
+            Adobe in the room.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              href={`${base}gala`}
+              class="btn inline-flex items-center justify-center rounded-full bg-accent-gold px-5 py-2.5 text-sm font-bold text-off-black transition hover:bg-white"
+              data-conversion-event="gala_ticket_click"
+              data-conversion-context="adobe_thank_you_ps"
+            >
+              Explore the Gala
+            </a>
+            <a
+              href={galaTeaser.ticketsUrl}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center justify-center rounded-full border border-white/40 px-5 py-2.5 text-sm font-bold text-white transition hover:border-accent-gold hover:text-accent-gold"
+              data-conversion-event="gala_ticket_click"
+              data-conversion-context="adobe_thank_you_ps_tickets"
+            >
+              Get Tickets
+            </a>
+          </div>
+        </div>
+
+        {/* P.P.S. Sponsorship */}
+        <div class="reveal flex flex-col rounded-lg border-2 border-accent-gold bg-white p-8 shadow-card">
+          <p class="font-marker text-2xl text-brand-ink">P.P.S.</p>
+          <h3 class="mt-3 font-display text-2xl font-semibold text-off-black">
+            Want to go bigger with us?
+          </h3>
+          <p class="mt-3 flex-1 font-body leading-7 text-medium-gray">
+            Gala sponsorships run from ${sponsorMin} to ${sponsorMax}, and our
+            Champion tier certifies five new yoga teachers from our community.
+            {" "}{galaTickets.sponsorshipsCloseLabel}. Prefer more hours like
+            the one we shared? We bring classes to offices year-round.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              href={`${base}gala#tickets`}
+              class="btn inline-flex items-center justify-center rounded-full bg-off-black px-5 py-2.5 text-sm font-bold text-white transition"
+              data-conversion-event="gala_sponsor_click"
+              data-conversion-context="adobe_thank_you_pps"
+            >
+              Sponsorship Details
+            </a>
+            <a
+              href={`${base}collab`}
+              class="inline-flex items-center justify-center rounded-full border border-off-black/20 px-5 py-2.5 text-sm font-bold text-off-black transition hover:border-accent-gold"
+              data-conversion-event="partnership_lead_start"
+              data-conversion-context="adobe_thank_you_pps"
+              data-conversion-lead-type="corporate_wellness"
+            >
+              Book Another Class
+            </a>
+          </div>
+        </div>
+
+        {/* P.P.P.S. Free week */}
+        <div class="reveal flex flex-col rounded-lg bg-vibrant-pink p-8 text-white shadow-card">
+          <p class="font-marker text-2xl text-off-black">P.P.P.S.</p>
+          <h3 class="mt-3 font-display text-2xl font-semibold">
+            Your first week is on us.
+          </h3>
+          <p class="mt-3 flex-1 font-body leading-7 text-white/90">
+            Every new member gets a free week of unlimited classes at our
+            studio: yoga, pilates, dance fitness, and bootcamp. If the hour at
+            your office left you wanting more, come take the long version in
+            Pilsen.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              href={`${base}schedule`}
+              class="btn inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-off-black transition"
+              data-conversion-event="schedule_view"
+              data-conversion-context="adobe_thank_you_ppps"
+            >
+              See the Schedule
+            </a>
+            <a
+              href={`${base}pricing`}
+              class="inline-flex items-center justify-center rounded-full border border-white/50 px-5 py-2.5 text-sm font-bold text-white transition hover:border-off-black hover:text-off-black"
+            >
+              Membership Options
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== RETURN ADDRESS ===================== */}
+    <section class="px-4 pb-16 pt-6 sm:pb-24">
+      <div class="reveal mx-auto max-w-3xl rounded-lg border border-dashed border-off-black/25 bg-white/70 px-6 py-10 text-center sm:px-12">
+        <p class="text-xs font-bold uppercase tracking-[0.28em] text-medium-gray">
+          Our return address
+        </p>
+        <h2 class="mt-3 font-display text-2xl font-semibold text-off-black sm:text-3xl">
+          The Latina Sweat Project Studio
+        </h2>
+        <p class="mt-2 font-body text-lg text-medium-gray">
+          949 W 16th St, Chicago, IL 60608 · in the heart of Pilsen
+        </p>
+        <p class="mx-auto mt-4 max-w-xl font-body leading-7 text-medium-gray">
+          The door is always open to our friends at Adobe. Come take a class,
+          say hola, and see the studio that hours like ours help keep running.
+        </p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <a
+            href="https://maps.google.com/?q=949+W+16th+St,+Chicago,+IL+60608"
+            target="_blank"
+            rel="noopener"
+            class="btn inline-flex items-center justify-center rounded-full bg-off-black px-5 py-2.5 text-sm font-bold text-white transition"
+          >
+            Get Directions
+          </a>
+          <a
+            href={`${base}contact`}
+            class="inline-flex items-center justify-center rounded-full border border-off-black/20 px-5 py-2.5 text-sm font-bold text-off-black transition hover:border-accent-gold"
+          >
+            Say Hello
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {/* ========================= LIGHTBOX ========================= */}
+  <dialog
+    id="photo-lightbox"
+    class="m-auto w-full max-w-none bg-transparent p-0 backdrop:bg-off-black/90"
+  >
+    <div class="flex h-[100dvh] w-full flex-col items-center justify-center gap-3 p-4">
+      <img
+        id="lightbox-image"
+        src=""
+        alt=""
+        class="max-h-[80dvh] max-w-full rounded-md object-contain shadow-pop"
+      />
+      <div class="flex items-center gap-6 text-white">
+        <button
+          type="button"
+          id="lightbox-prev"
+          class="rounded-full border border-white/30 px-4 py-2 text-sm font-bold transition hover:border-accent-gold hover:text-accent-gold"
+          aria-label="Previous photo"
+        >&larr; Prev</button>
+        <span id="lightbox-counter" class="font-body text-sm tabular-nums text-white/80"></span>
+        <button
+          type="button"
+          id="lightbox-next"
+          class="rounded-full border border-white/30 px-4 py-2 text-sm font-bold transition hover:border-accent-gold hover:text-accent-gold"
+          aria-label="Next photo"
+        >Next &rarr;</button>
+      </div>
+      <button
+        type="button"
+        id="lightbox-close"
+        class="absolute right-4 top-4 rounded-full border border-white/30 px-4 py-2 text-sm font-bold text-white transition hover:border-accent-gold hover:text-accent-gold"
+        aria-label="Close photo viewer"
+      >Close ✕</button>
+    </div>
+  </dialog>
+</Layout>
+
+<style>
+  /* Postage-stamp perforation: a white frame whose edge is punched out by
+     evenly spaced transparent dots. */
+  .stamp {
+    background-image: radial-gradient(
+      circle at 3px 3px,
+      transparent 2.2px,
+      #ffffff 2.4px
+    );
+    background-size: 9px 9px;
+    background-position: -3px -3px;
+    padding: 6px;
+    filter: drop-shadow(0 2px 4px rgb(30 30 30 / 0.25));
+    width: 78px;
+  }
+  .stamp img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  @media (min-width: 640px) {
+    .stamp {
+      width: 96px;
+    }
+  }
+
+  /* Native <dialog> fade-in. */
+  #photo-lightbox[open] {
+    animation: lightbox-in 160ms ease-out;
+  }
+  @keyframes lightbox-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #photo-lightbox[open] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Minimal gallery lightbox over the native <dialog>: click a photo to open
+  // it full-size, then arrows/buttons to move, Escape or backdrop to close.
+  (() => {
+    const dialog = document.getElementById(
+      "photo-lightbox",
+    ) as HTMLDialogElement | null;
+    const image = document.getElementById(
+      "lightbox-image",
+    ) as HTMLImageElement | null;
+    const counter = document.getElementById("lightbox-counter");
+    const triggers = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-lightbox-trigger]"),
+    );
+    if (!dialog || !image || !counter || !triggers.length) return;
+
+    let current = 0;
+
+    const show = (index: number) => {
+      current = (index + triggers.length) % triggers.length;
+      const trigger = triggers[current];
+      image.src = trigger.dataset.full || "";
+      image.alt = trigger.dataset.alt || "";
+      counter.textContent = `${current + 1} / ${triggers.length}`;
+      // Warm the cache for the neighbors so Prev/Next feel instant.
+      [current + 1, current - 1].forEach((n) => {
+        const neighbor = triggers[(n + triggers.length) % triggers.length];
+        new Image().src = neighbor.dataset.full || "";
+      });
+    };
+
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener("click", () => {
+        show(index);
+        dialog.showModal();
+      });
+    });
+
+    document
+      .getElementById("lightbox-prev")
+      ?.addEventListener("click", () => show(current - 1));
+    document
+      .getElementById("lightbox-next")
+      ?.addEventListener("click", () => show(current + 1));
+    document
+      .getElementById("lightbox-close")
+      ?.addEventListener("click", () => dialog.close());
+
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") show(current - 1);
+      if (event.key === "ArrowRight") show(current + 1);
+      // Browsers close modal dialogs on Escape natively; this fallback covers
+      // environments where that cancel behavior doesn't fire.
+      if (event.key === "Escape") dialog.close();
+    });
+
+    // A click on the dialog itself (not its children) is the backdrop.
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+
+    // Free the ~1MB image when closed.
+    dialog.addEventListener("close", () => {
+      image.src = "";
+    });
+  })();
+</script>
