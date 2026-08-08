@@ -18,14 +18,14 @@ export const PHOTOBOOTH_RATIOS = [
   {
     id: "story",
     label: "Story",
-    hint: "IG + TikTok stories",
+    hint: "Personal · IG + TikTok",
     width: 1080,
     height: 1920,
   },
   {
     id: "portrait",
     label: "Post",
-    hint: "Instagram feed",
+    hint: "Grid-worthy · IG feed",
     width: 1080,
     height: 1350,
   },

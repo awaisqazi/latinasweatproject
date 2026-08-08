@@ -48,6 +48,7 @@ const fontFace = (family, file, format, weight = 400) => `
   }`;
 
 const css = `
+  ${fontFace("Hello Baddie", siteFont("hello-baddie.woff2"), "woff2")}
   ${fontFace("Filson Soft", siteFont("filson-soft-400.woff2"), "woff2", 400)}
   ${fontFace("Filson Soft", siteFont("filson-soft-700.woff2"), "woff2", 700)}
   ${fontFace("Filson Soft", siteFont("filson-soft-800.woff2"), "woff2", 800)}
@@ -78,10 +79,29 @@ const diamond = (cx, cy, s, fill) =>
 const centered = (cx, y, text, attrs) =>
   `<text x="${cx}" y="${y}" text-anchor="middle" ${attrs}>${text}</text>`;
 
+const tilted = (cx, cy, angle, inner) =>
+  `<g transform="rotate(${angle} ${cx} ${cy})">${inner}</g>`;
+
+// Four-point "champagne" sparkle.
+const sparkle = (cx, cy, r, fill, opacity = 1) =>
+  `<path d="M ${cx} ${cy - r} L ${cx + r * 0.22} ${cy - r * 0.22} L ${cx + r} ${cy}
+     L ${cx + r * 0.22} ${cy + r * 0.22} L ${cx} ${cy + r} L ${cx - r * 0.22} ${cy + r * 0.22}
+     L ${cx - r} ${cy} L ${cx - r * 0.22} ${cy - r * 0.22} Z" fill="${fill}" opacity="${opacity}"/>`;
+
+// Fixed-position confetti squares: [x, y, size, rotation, color]
+const confetti = (cells) =>
+  cells
+    .map(
+      ([x, y, s, rot, c]) =>
+        `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="${c}"
+       transform="rotate(${rot} ${x + s / 2} ${y + s / 2})"/>`,
+    )
+    .join("");
+
 // ---------------------------------------------------------------------------
 // Studio classic: cream field, gold window, ringed logo up top, CTA pill.
 // ---------------------------------------------------------------------------
-function buildStudio({ W, H, win }) {
+function buildStudio({ W, H, win, ratioId }) {
   const cx = W / 2;
   // Truly transparent studio mark (logo2.png carries an opaque white field).
   const logo = fileUrl(path.join(root, "public/images/lsp-studio-logo.png"));
@@ -89,33 +109,45 @@ function buildStudio({ W, H, win }) {
   const logoY = (win.y - logoH) / 2;
   const band = H - (win.y + win.h);
   const bandTop = win.y + win.h;
-  const line1Y = bandTop + band * (band > 220 ? 0.3 : 0.38);
-  const pillY = bandTop + band * (band > 220 ? 0.52 : 0.6);
-  const pillW = 660;
-  const pillH = 56;
-  const siteLine =
-    band > 220
-      ? centered(
-          cx,
-          pillY + pillH + 52,
-          "latinasweatproject.com",
-          `font-family="Rubik" font-weight="700" font-size="28" letter-spacing="2" fill="#555555"`,
-        )
-      : "";
-  const handle =
-    band > 220
-      ? "@latinasweatproject"
-      : "@latinasweatproject · latinasweatproject.com";
-  return `
-  ${punchedField(W, H, win, 'fill="#FDF2F2"')}
-  ${windowStroke(win, "#ffbd59", 6)}
-  <image href="${logo}" x="${cx - logoH / 2}" y="${logoY}" width="${logoH}" height="${logoH}"/>
+  let bottom;
+  if (ratioId === "story") {
+    // Stories are personal: the guest speaks in first person, sticker-style.
+    const bannerY = bandTop + band * 0.36;
+    const bannerW = 790;
+    const bannerH = 66;
+    const pillY = bandTop + band * 0.66;
+    const pillW = 680;
+    const pillH = 54;
+    bottom = `
+  ${diamond(cx - 448, bannerY, 12, "#ffbd59")}
+  ${diamond(cx + 448, bannerY, 12, "#ffbd59")}
+  ${tilted(
+    cx,
+    bannerY,
+    -3,
+    `<rect x="${cx - bannerW / 2}" y="${bannerY - bannerH / 2}" width="${bannerW}" height="${bannerH}" rx="18" fill="#1E1E1E"/>
+  ${centered(cx, bannerY + 11, "I JUST FINISHED CLASS AT LSP", `font-family="Rubik" font-weight="800" font-size="32" fill="#FFFFFF"`)}`,
+  )}
+  <rect x="${cx - pillW / 2}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillH / 2}" fill="#ffbd59"/>
+  ${centered(cx, pillY + pillH / 2 + 9, "@latinasweatproject · latinasweatproject.com", `font-family="Rubik" font-weight="800" font-size="26" fill="#1E1E1E"`)}`;
+  } else {
+    // Feed formats live on the profile grid: keep the timeless brand line.
+    const line1Y = bandTop + band * 0.38;
+    const pillY = bandTop + band * 0.6;
+    const pillW = 660;
+    const pillH = 56;
+    bottom = `
   ${diamond(cx - 428, line1Y - 9, 13, "#ffbd59")}
   ${diamond(cx + 428, line1Y - 9, 13, "#ffbd59")}
   ${centered(cx, line1Y, "MOVEMENT, CULTURE &amp; COMUNIDAD · PILSEN, CHICAGO", `font-family="Rubik" font-weight="700" font-size="25" letter-spacing="1.5" fill="#1E1E1E"`)}
   <rect x="${cx - pillW / 2}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillH / 2}" fill="#ffbd59"/>
-  ${centered(cx, pillY + pillH / 2 + 9, handle, `font-family="Rubik" font-weight="800" font-size="${band > 220 ? 30 : 25}" fill="#1E1E1E"`)}
-  ${siteLine}`;
+  ${centered(cx, pillY + pillH / 2 + 9, "@latinasweatproject · latinasweatproject.com", `font-family="Rubik" font-weight="800" font-size="25" fill="#1E1E1E"`)}`;
+  }
+  return `
+  ${punchedField(W, H, win, 'fill="#FDF2F2"')}
+  ${windowStroke(win, "#ffbd59", 6)}
+  <image href="${logo}" x="${cx - logoH / 2}" y="${logoY}" width="${logoH}" height="${logoH}"/>
+  ${bottom}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -135,7 +167,7 @@ function checkerStrip(W, y, rows, size) {
   return cells.join("");
 }
 
-function buildSweatfest({ W, H, win }) {
+function buildSweatfest({ W, H, win, ratioId }) {
   const cx = W / 2;
   const checker = 24;
   const stripH = checker * 2;
@@ -151,34 +183,71 @@ function buildSweatfest({ W, H, win }) {
   const bandTop = win.y + win.h;
   const line1Y = bandTop + band * 0.42;
   const line2Y = bandTop + band * (band > 180 ? 0.68 : 0.78);
+  let text;
+  let extras = "";
+  if (ratioId === "story") {
+    // Personal invite in the fest's own hand, with confetti in the margins
+    // (the logo owns the top band's center, so cells hug the sides).
+    text = `
+  ${tilted(cx, line1Y, -3, centered(cx, line1Y + 16, "Join me at Sweat Fest!", `font-family="Hello Baddie" font-size="58" fill="#ee3083"`))}
+  ${centered(cx, line2Y + 12, "SAT, AUG 22, 2026 · CHICAGO · @latinasweatproject", `font-family="Filson Soft" font-weight="700" font-size="24" letter-spacing="1" fill="#1e1e1e"`)}`;
+    extras = confetti([
+      [80, 120, 20, 15, "#ee3083"],
+      [124, 232, 14, -20, "#00a7ab"],
+      [62, 300, 16, 30, "#f15b27"],
+      [948, 110, 18, -15, "#60a444"],
+      [988, 222, 14, 25, "#f6a9c8"],
+      [930, 302, 20, -30, "#00a7ab"],
+      [90, bandTop + 36, 16, 20, "#f15b27"],
+      [140, bandTop + 122, 20, -15, "#ee3083"],
+      [920, bandTop + 32, 18, -25, "#60a444"],
+      [962, bandTop + 126, 14, 15, "#00a7ab"],
+    ]);
+  } else {
+    text = `
+  ${centered(cx, line1Y, "SAT, AUGUST 22, 2026 · CHICAGO", `font-family="Filson Soft" font-weight="800" font-size="34" letter-spacing="2" fill="#ee3083"`)}
+  ${centered(cx, line2Y, "@latinasweatproject · latinasweatproject.com", `font-family="Filson Soft" font-weight="700" font-size="26" letter-spacing="1" fill="#1e1e1e"`)}`;
+  }
   return `
   ${punchedField(W, H, win, 'fill="#e2ecac"')}
   ${checkerStrip(W, 0, 2, checker)}
   ${checkerStrip(W, H - stripH, 2, checker)}
   ${windowStroke(win, "#1e1e1e", 5)}
   ${logoSvg}
-  ${centered(cx, line1Y, "SAT, AUGUST 22, 2026 · CHICAGO", `font-family="Filson Soft" font-weight="800" font-size="34" letter-spacing="2" fill="#ee3083"`)}
-  ${centered(cx, line2Y, "@latinasweatproject · latinasweatproject.com", `font-family="Filson Soft" font-weight="700" font-size="26" letter-spacing="1" fill="#1e1e1e"`)}`;
+  ${text}
+  ${extras}`;
 }
 
 // ---------------------------------------------------------------------------
 // Annual Gala: dramatic dark gradient, gold hairlines, Didot.
 // ---------------------------------------------------------------------------
-function buildGala({ W, H, win }) {
+function buildGala({ W, H, win, ratioId }) {
   const cx = W / 2;
   const band = H - (win.y + win.h);
   const bandTop = win.y + win.h;
   const line1Y = bandTop + band * 0.42;
   const line2Y = bandTop + band * (band > 220 ? 0.62 : 0.72);
-  const siteLine =
-    band > 220
-      ? centered(
-          cx,
-          bandTop + band * 0.78,
-          "latinasweatproject.com",
-          `font-family="Didot" font-size="24" letter-spacing="3" fill="#F2E4D2" opacity="0.85"`,
-        )
-      : "";
+  let bottomText;
+  let extras = "";
+  if (ratioId === "story") {
+    // A personal invitation with the ask attached: attendees do the selling.
+    bottomText = `
+  ${sparkle(cx - 310, line1Y - 14, 15, "#FFBD59")}
+  ${sparkle(cx + 310, line1Y - 14, 15, "#FFBD59")}
+  ${centered(cx, line1Y, "Meet me at the Gala", `font-family="Didot" font-style="italic" font-size="44" fill="#FFBD59"`)}
+  ${centered(cx, bandTop + band * 0.66, "Support LSP's mission · Sept 25 · MCA Chicago", `font-family="Didot" font-size="24" letter-spacing="2" fill="#FFF8EF"`)}
+  ${centered(cx, bandTop + band * 0.82, "tickets at latinasweatproject.com/gala", `font-family="Didot" font-size="23" letter-spacing="2" fill="#F2E4D2" opacity="0.9"`)}`;
+    extras = `
+  ${sparkle(84, 140, 10, "#FFBD59", 0.9)}
+  ${sparkle(1000, 118, 12, "#FFBD59", 0.9)}
+  ${sparkle(952, 208, 7, "#FFBD59", 0.7)}
+  ${sparkle(120, 1876, 8, "#FFBD59", 0.7)}
+  ${sparkle(962, 1868, 10, "#FFBD59", 0.9)}`;
+  } else {
+    bottomText = `
+  ${centered(cx, line1Y, "SEPT 25, 2026 · MCA CHICAGO", `font-family="Didot" font-size="30" letter-spacing="4" fill="#FFBD59"`)}
+  ${centered(cx, line2Y, "@latinasweatproject", `font-family="Didot" font-size="26" letter-spacing="3" fill="#FFF8EF"`)}`;
+  }
   const titleY = win.y * 0.47;
   const nameY = win.y * 0.78;
   return `
@@ -197,9 +266,8 @@ function buildGala({ W, H, win }) {
   ${diamond(cx - 268, nameY - 14, 11, "#FFBD59")}
   ${diamond(cx + 268, nameY - 14, 11, "#FFBD59")}
   ${centered(cx, nameY, "Annual Gala 2026", `font-family="Didot" font-style="italic" font-size="52" fill="#FFBD59"`)}
-  ${centered(cx, line1Y, "SEPT 25, 2026 · MCA CHICAGO", `font-family="Didot" font-size="30" letter-spacing="4" fill="#FFBD59"`)}
-  ${centered(cx, line2Y, "@latinasweatproject", `font-family="Didot" font-size="26" letter-spacing="3" fill="#FFF8EF"`)}
-  ${siteLine}`;
+  ${bottomText}
+  ${extras}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +280,7 @@ const scrimCard = (x, y, w, h, r, fill, opacity, stroke = "") =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}"
      fill="${fill}" opacity="${opacity}" ${stroke}/>`;
 
-function buildStudioStamp({ W, H }) {
+function buildStudioStamp({ W, H, ratioId }) {
   const cx = W / 2;
   const logo = fileUrl(path.join(root, "public/images/lsp-studio-logo.png"));
   const cardW = 430;
@@ -227,10 +295,10 @@ function buildStudioStamp({ W, H }) {
   <image href="${logo}" x="${cx - logoH / 2}" y="${cardY + 22}" width="${logoH}" height="${logoH}"/>
   ${centered(cx, cardY + cardH - 32, "@latinasweatproject", `font-family="Rubik" font-weight="800" font-size="28" fill="#1E1E1E"`)}
   ${scrimCard(cx - pillW / 2, pillY, pillW, pillH, pillH / 2, "#1E1E1E", 0.55)}
-  ${centered(cx, pillY + pillH / 2 + 8, "latinasweatproject.com · Pilsen, Chicago", `font-family="Rubik" font-weight="700" font-size="24" fill="#FFFFFF"`)}`;
+  ${centered(cx, pillY + pillH / 2 + 8, ratioId === "story" ? "COME SWEAT WITH ME · LATINASWEATPROJECT.COM" : "latinasweatproject.com · Pilsen, Chicago", `font-family="Rubik" font-weight="700" font-size="24" fill="#FFFFFF"`)}`;
 }
 
-function buildSweatfestStamp({ W, H }) {
+function buildSweatfestStamp({ W, H, ratioId }) {
   const cx = W / 2;
   const logoAspect = horizontalLogoSize.width / horizontalLogoSize.height;
   const logoH = 170;
@@ -249,10 +317,10 @@ function buildSweatfestStamp({ W, H }) {
   ${scrimCard(cx - cardW / 2, cardY, cardW, cardH, 24, "#e2ecac", 0.85)}
   ${logoSvg}
   ${scrimCard(cx - pillW / 2, pillY, pillW, pillH, pillH / 2, "#1e1e1e", 0.6)}
-  ${centered(cx, pillY + pillH / 2 + 8, "SAT, AUG 22, 2026 · CHICAGO · @latinasweatproject", `font-family="Filson Soft" font-weight="700" font-size="25" letter-spacing="1" fill="#e2ecac"`)}`;
+  ${centered(cx, pillY + pillH / 2 + 8, ratioId === "story" ? "COME FIND ME AT SWEAT FEST · SAT, AUG 22" : "SAT, AUG 22, 2026 · CHICAGO · @latinasweatproject", `font-family="Filson Soft" font-weight="700" font-size="25" letter-spacing="1" fill="#e2ecac"`)}`;
 }
 
-function buildGalaStamp({ W, H }) {
+function buildGalaStamp({ W, H, ratioId }) {
   const cx = W / 2;
   const cardW = 560;
   const cardH = 170;
@@ -267,7 +335,7 @@ function buildGalaStamp({ W, H }) {
   ${diamond(cx + 218, cardY + 116, 9, "#FFBD59")}
   ${centered(cx, cardY + 128, "Annual Gala 2026", `font-family="Didot" font-style="italic" font-size="46" fill="#FFBD59"`)}
   ${scrimCard(cx - pillW / 2, pillY, pillW, pillH, pillH / 2, "#05070C", 0.55)}
-  ${centered(cx, pillY + pillH / 2 + 8, "SEPT 25, 2026 · MCA CHICAGO · @latinasweatproject", `font-family="Didot" font-size="24" letter-spacing="2" fill="#FFBD59"`)}`;
+  ${centered(cx, pillY + pillH / 2 + 8, ratioId === "story" ? "Meet me at the Gala · tickets at latinasweatproject.com/gala" : "SEPT 25, 2026 · MCA CHICAGO · @latinasweatproject", `font-family="Didot" font-size="24" letter-spacing="2" fill="#FFBD59"`)}`;
 }
 
 const builders = {
@@ -285,7 +353,7 @@ for (const frame of PHOTOBOOTH_FRAMES) {
   for (const ratio of PHOTOBOOTH_RATIOS) {
     const { width: W, height: H } = ratio;
     const win = photoWindow(frame.id, ratio.id);
-    const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${build({ W, H, win })}</svg>`;
+    const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${build({ W, H, win, ratioId: ratio.id })}</svg>`;
     const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${svg}</body></html>`;
     const name = `frame-${frame.id}-${ratio.id}`;
     const htmlPath = path.join(tmpDir, `${name}.html`);
