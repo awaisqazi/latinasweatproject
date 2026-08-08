@@ -385,36 +385,87 @@ for (const frame of PHOTOBOOTH_FRAMES) {
 const stickerDir = path.join(outDir, "stickers");
 mkdirSync(stickerDir, { recursive: true });
 
+// Shared die-cut treatment: white sticker border + soft drop shadow + a
+// foil-gold gradient. Chrome headless enforces a minimum window size, so
+// small stickers capture at 3x and downscale (a 1:1 240px window renders in
+// a larger viewport and screenshots a misaligned crop).
+const stickerDefs = `
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD98A"/>
+      <stop offset="0.55" stop-color="#FFBD59"/>
+      <stop offset="1" stop-color="#F0A030"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>`;
+const dieCut = `stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" paint-order="stroke" filter="url(#ds)"`;
+
+const sparklePath = (cx, cy, r) =>
+  `M ${cx} ${cy - r} L ${cx + r * 0.22} ${cy - r * 0.22} L ${cx + r} ${cy}
+   L ${cx + r * 0.22} ${cy + r * 0.22} L ${cx} ${cy + r} L ${cx - r * 0.22} ${cy + r * 0.22}
+   L ${cx - r} ${cy} L ${cx - r * 0.22} ${cy - r * 0.22} Z`;
+
 const festH = 240;
 const festW = Math.round(
   festH * (horizontalLogoSize.width / horizontalLogoSize.height),
 );
+const festPad = 18;
 const stickers = [
   {
+    // The lockup already reads as a card; a white die-cut ring + shadow
+    // makes it sit on photos like a real sticker.
     name: "sweatfest",
-    w: festW,
-    h: festH,
-    body: horizontalLogoSvg.replace(
-      "<svg ",
-      `<svg x="0" y="0" width="${festW}" height="${festH}" `,
-    ),
+    w: festW + festPad * 2,
+    h: festH + festPad * 2,
+    body: `
+  <rect x="${festPad - 8}" y="${festPad - 8}" width="${festW + 16}" height="${festH + 16}" rx="14" fill="#FFFFFF" filter="url(#ds)"/>
+  ${horizontalLogoSvg.replace(
+    "<svg ",
+    `<svg x="${festPad}" y="${festPad}" width="${festW}" height="${festH}" `,
+  )}`,
   },
-  { name: "sparkle", w: 240, h: 240, body: sparkle(120, 120, 112, "#FFBD59") },
-  { name: "diamond", w: 200, h: 200, body: diamond(100, 100, 128, "#FFBD59") },
+  {
+    name: "sparkle",
+    w: 300,
+    h: 300,
+    body: `
+  <path d="${sparklePath(140, 160, 104)}" fill="url(#foil)" ${dieCut}/>
+  <path d="${sparklePath(232, 78, 44)}" fill="url(#foil)" ${dieCut}/>`,
+  },
+  {
+    name: "diamond",
+    w: 280,
+    h: 280,
+    body: `
+  <g transform="rotate(45 140 140)">
+    <rect x="52" y="52" width="176" height="176" rx="20" fill="url(#foil)" ${dieCut}/>
+  </g>
+  <path d="M 140 52 L 140 228 M 52 140 L 228 140" stroke="#B9842F" stroke-width="5" opacity="0.55"/>
+  <path d="M 96 96 L 184 184 M 184 96 L 96 184" stroke="#FFE9BF" stroke-width="4" opacity="0.7"/>`,
+  },
   {
     name: "checker",
-    w: 336,
-    h: 96,
-    body: Array.from({ length: 14 }, (_, i) => {
-      const r = Math.floor(i / 7);
-      const c = i % 7;
-      return `<rect x="${c * 48}" y="${r * 48}" width="48" height="48" fill="${(r + c) % 2 === 0 ? "#1e1e1e" : "#e2ecac"}"/>`;
-    }).join(""),
+    w: 400,
+    h: 160,
+    body: `
+  <clipPath id="chip"><rect x="40" y="36" width="320" height="88" rx="18"/></clipPath>
+  <rect x="40" y="36" width="320" height="88" rx="18" fill="#e2ecac" ${dieCut}/>
+  <g clip-path="url(#chip)">
+    ${Array.from({ length: 16 }, (_, i) => {
+      const r = Math.floor(i / 8);
+      const c = i % 8;
+      return (r + c) % 2 === 0
+        ? `<rect x="${40 + c * 44}" y="${36 + r * 44}" width="44" height="44" fill="#1e1e1e"/>`
+        : "";
+    }).join("")}
+  </g>`,
   },
 ];
 
 for (const { name, w, h, body } of stickers) {
-  const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${stickerDefs}${body}</svg>`;
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${svg}</body></html>`;
   const htmlPath = path.join(tmpDir, `sticker-${name}.html`);
   const pngPath = path.join(tmpDir, `sticker-${name}.png`);
@@ -422,7 +473,7 @@ for (const { name, w, h, body } of stickers) {
   execFileSync(CHROME, [
     "--headless=new",
     `--screenshot=${pngPath}`,
-    `--window-size=${w},${h}`,
+    `--window-size=${w * 3},${h * 3}`,
     "--default-background-color=00000000",
     "--force-device-scale-factor=1",
     "--hide-scrollbars",
@@ -431,6 +482,7 @@ for (const { name, w, h, body } of stickers) {
     `file://${htmlPath}`,
   ]);
   await sharp(pngPath)
+    .resize(w, h)
     .png({ compressionLevel: 9 })
     .toFile(path.join(stickerDir, `${name}.png`));
   console.log(`rendered sticker ${name}`);

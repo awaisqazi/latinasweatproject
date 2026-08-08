@@ -817,7 +817,7 @@
                             <img
                                 src={s.src}
                                 alt={s.label}
-                                class="max-h-8 max-w-9 object-contain"
+                                class="max-h-9 max-w-10 object-contain"
                                 loading="lazy"
                             />
                         {/if}
