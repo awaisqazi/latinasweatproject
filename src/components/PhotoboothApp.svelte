@@ -40,6 +40,7 @@
     let customText = $state("");
     let elementSeq = 1;
     let dragMode = "photo"; // what a one-finger drag moves right now
+    let deleteBadge = null; // canvas-space ✕ badge on the selected element
     const bboxes = new Map(); // element id -> {w, h} from the last draw
     const stickerImgs = new Map(); // src -> HTMLImageElement
 
@@ -155,17 +156,20 @@
         }
         if (overlay) ctx.drawImage(overlay, 0, 0, ratio.width, ratio.height);
         for (const el of elements) drawElement(ctx, el);
+        deleteBadge = null;
         if (selectedEl) {
             const bb = bboxes.get(selectedEl.id);
             if (bb) {
                 ctx.save();
+                ctx.translate(selectedEl.x, selectedEl.y);
+                ctx.rotate(elementAngle(selectedEl));
                 ctx.setLineDash([10, 8]);
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = "#ffffff";
                 roundRectPath(
                     ctx,
-                    selectedEl.x - bb.w / 2 - 10,
-                    selectedEl.y - bb.h / 2 - 10,
+                    -bb.w / 2 - 10,
+                    -bb.h / 2 - 10,
                     bb.w + 20,
                     bb.h + 20,
                     14,
@@ -174,9 +178,40 @@
                 ctx.lineWidth = 1.5;
                 ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
                 ctx.stroke();
+                // ✕ badge on the outline corner; its canvas position is
+                // remembered so a tap on it deletes the element.
+                const lx = -bb.w / 2 - 10;
+                const ly = -bb.h / 2 - 10;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.arc(lx, ly, 30, 0, Math.PI * 2);
+                ctx.fillStyle = "#1E1E1E";
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#ffffff";
+                ctx.stroke();
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(lx - 11, ly - 11);
+                ctx.lineTo(lx + 11, ly + 11);
+                ctx.moveTo(lx + 11, ly - 11);
+                ctx.lineTo(lx - 11, ly + 11);
+                ctx.stroke();
                 ctx.restore();
+                const ang = elementAngle(selectedEl);
+                deleteBadge = {
+                    x: selectedEl.x + lx * Math.cos(ang) - ly * Math.sin(ang),
+                    y: selectedEl.y + lx * Math.sin(ang) + ly * Math.cos(ang),
+                    r: 44,
+                };
             }
         }
+    }
+
+    // Total rotation applied to an element (theme tilt + the guest's own).
+    function elementAngle(el) {
+        const tilt = el.kind === "text" ? frameTextStyle(frameId).tilt : 0;
+        return ((tilt + (el.rotation || 0)) * Math.PI) / 180;
     }
 
     // Manual path: canvas roundRect() is missing on older iOS Safari.
@@ -205,9 +240,9 @@
     function drawElement(ctx, el) {
         ctx.save();
         ctx.translate(el.x, el.y);
+        ctx.rotate(elementAngle(el));
         if (el.kind === "text") {
             const st = frameTextStyle(frameId);
-            ctx.rotate((st.tilt * Math.PI) / 180);
             const fontOf = (px) =>
                 `${st.italic ? "italic " : ""}${st.weight} ${px}px ${st.family}`;
             let fontPx = st.size * el.scale;
@@ -289,10 +324,16 @@
             const el = elements[i];
             const bb = bboxes.get(el.id);
             if (!bb) continue;
+            // Test in the element's local (unrotated) space.
+            const ang = -elementAngle(el);
+            const dx = pt.x - el.x;
+            const dy = pt.y - el.y;
+            const lx = dx * Math.cos(ang) - dy * Math.sin(ang);
+            const ly = dx * Math.sin(ang) + dy * Math.cos(ang);
             // Generous minimum target so small stickers stay grabbable.
             const hw = Math.max(bb.w / 2, 54);
             const hh = Math.max(bb.h / 2, 54);
-            if (Math.abs(pt.x - el.x) <= hw && Math.abs(pt.y - el.y) <= hh) {
+            if (Math.abs(lx) <= hw && Math.abs(ly) <= hh) {
                 return el;
             }
         }
@@ -308,7 +349,18 @@
         }
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (pointers.size === 1) {
-            const hit = hitElement(canvasPoint(e));
+            const pt = canvasPoint(e);
+            if (
+                deleteBadge &&
+                Math.hypot(pt.x - deleteBadge.x, pt.y - deleteBadge.y) <=
+                    deleteBadge.r
+            ) {
+                // Tap on the ✕ badge deletes the selected element.
+                pointers.delete(e.pointerId);
+                removeSelected();
+                return;
+            }
+            const hit = hitElement(pt);
             if (hit) {
                 selectedId = hit.id;
                 dragMode = "element";
@@ -320,8 +372,10 @@
             const [a, b] = [...pointers.values()];
             pinchStart = {
                 dist: Math.hypot(a.x - b.x, a.y - b.y),
+                angle: Math.atan2(b.y - a.y, b.x - a.x),
                 zoom,
                 elScale: selectedEl?.scale,
+                elRotation: selectedEl?.rotation || 0,
             };
         }
     }
@@ -356,6 +410,12 @@
                         0.35,
                         Math.min(4, (pinchStart.elScale * dist) / pinchStart.dist),
                     );
+                    // Two-finger twist rotates the selected element.
+                    const angle = Math.atan2(b.y - a.y, b.x - a.x);
+                    const delta =
+                        ((angle - pinchStart.angle) * 180) / Math.PI;
+                    selectedEl.rotation =
+                        ((pinchStart.elRotation + delta + 540) % 360) - 180;
                 } else {
                     zoom = Math.max(
                         1,
@@ -410,6 +470,7 @@
             // Stagger stacked lines so a second one never hides the first.
             y: win.y + win.h * (0.18 + (nthText % 4) * 0.09),
             scale: 1,
+            rotation: 0,
         });
         selectedId = id;
         track(
@@ -436,6 +497,7 @@
             x: ratio.width / 2 + ((elements.length % 3) - 1) * 60,
             y: win.y + win.h * 0.34,
             scale: 1,
+            rotation: 0,
         });
         selectedId = id;
         track("photobooth_sticker");
@@ -629,8 +691,8 @@
             ></canvas>
             <p class="mt-2 text-center font-body text-xs text-medium-gray">
                 {#if selectedEl}
-                    Drag to place it · pinch or scroll to resize · tap
-                    elsewhere when done
+                    Drag to place it · pinch to resize · twist to rotate · tap
+                    the ✕ to delete
                 {:else}
                     Drag to move · pinch or scroll to zoom · tap text or
                     stickers to adjust them
@@ -766,34 +828,63 @@
 
         {#if selectedEl}
             <div
-                class="mt-3 flex items-center gap-3 rounded-2xl bg-off-black p-3 text-white"
+                class="mt-3 flex flex-col gap-2.5 rounded-2xl bg-off-black p-3.5 text-white"
             >
-                <span class="shrink-0 font-sans text-xs font-bold uppercase">
-                    Size
-                </span>
-                <input
-                    type="range"
-                    min="0.35"
-                    max="4"
-                    step="0.01"
-                    value={selectedEl.scale}
-                    oninput={(e) => (selectedEl.scale = +e.target.value)}
-                    class="min-w-0 flex-1 accent-accent-gold"
-                />
-                <button
-                    type="button"
-                    onclick={removeSelected}
-                    class="shrink-0 rounded-full border border-white/40 px-3.5 py-1.5 font-sans text-xs font-bold transition hover:bg-white/10"
-                >
-                    Remove
-                </button>
-                <button
-                    type="button"
-                    onclick={() => (selectedId = null)}
-                    class="shrink-0 rounded-full bg-accent-gold px-3.5 py-1.5 font-sans text-xs font-extrabold text-off-black"
-                >
-                    Done
-                </button>
+                <div class="flex items-center gap-3">
+                    <span
+                        class="w-14 shrink-0 font-sans text-xs font-bold uppercase"
+                    >
+                        Size
+                    </span>
+                    <input
+                        type="range"
+                        min="0.35"
+                        max="4"
+                        step="0.01"
+                        value={selectedEl.scale}
+                        oninput={(e) => (selectedEl.scale = +e.target.value)}
+                        class="min-w-0 flex-1 accent-accent-gold"
+                    />
+                </div>
+                <div class="flex items-center gap-3">
+                    <span
+                        class="w-14 shrink-0 font-sans text-xs font-bold uppercase"
+                    >
+                        Rotate
+                    </span>
+                    <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        step="1"
+                        value={selectedEl.rotation || 0}
+                        oninput={(e) => (selectedEl.rotation = +e.target.value)}
+                        class="min-w-0 flex-1 accent-accent-gold"
+                    />
+                    <button
+                        type="button"
+                        onclick={() => (selectedEl.rotation = 0)}
+                        class="shrink-0 rounded-full border border-white/40 px-2.5 py-1 font-sans text-[10px] font-bold transition hover:bg-white/10"
+                    >
+                        0°
+                    </button>
+                </div>
+                <div class="flex items-center justify-end gap-2">
+                    <button
+                        type="button"
+                        onclick={removeSelected}
+                        class="shrink-0 rounded-full border border-white/40 px-3.5 py-1.5 font-sans text-xs font-bold transition hover:bg-white/10"
+                    >
+                        Remove
+                    </button>
+                    <button
+                        type="button"
+                        onclick={() => (selectedId = null)}
+                        class="shrink-0 rounded-full bg-accent-gold px-3.5 py-1.5 font-sans text-xs font-extrabold text-off-black"
+                    >
+                        Done
+                    </button>
+                </div>
             </div>
         {/if}
 
