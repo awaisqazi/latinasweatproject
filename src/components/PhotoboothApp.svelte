@@ -26,6 +26,10 @@
     let exporting = $state(false);
     let shared = $state(""); // "shared" | "saved" | ""
     let errorMsg = $state("");
+    // "Save to Photos" viewer: on phones the OS can only write to the photo
+    // library through its own UI (share sheet's Save Image, or long-press ->
+    // Add to Photos), so we show the finished JPEG and hand off to those.
+    let saveView = $state(null); // { url, file }
 
     let canvasEl = $state(null);
     let fileInput;
@@ -269,19 +273,45 @@
         }
     }
 
-    async function onDownload() {
+    async function onSaveToPhotos() {
         if (!photo || exporting) return;
         exporting = true;
         errorMsg = "";
         shared = "";
         try {
-            downloadFile(await exportFile());
-            shared = "saved";
-            track("photobooth_download");
+            const file = await exportFile();
+            const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+            if (isTouchDevice) {
+                saveView = { url: URL.createObjectURL(file), file };
+                track("photobooth_save_photos");
+            } else {
+                downloadFile(file);
+                shared = "saved";
+                track("photobooth_download");
+            }
         } catch {
             errorMsg = "Couldn't save the image. Try again.";
         } finally {
             exporting = false;
+        }
+    }
+
+    function closeSaveView() {
+        if (saveView) URL.revokeObjectURL(saveView.url);
+        saveView = null;
+    }
+
+    async function shareFromSaveView() {
+        try {
+            if (navigator.canShare?.({ files: [saveView.file] })) {
+                await navigator.share({ files: [saveView.file] });
+                shared = "shared";
+            } else {
+                downloadFile(saveView.file);
+                shared = "saved";
+            }
+        } catch (err) {
+            if (err?.name !== "AbortError") downloadFile(saveView.file);
         }
     }
 </script>
@@ -428,11 +458,11 @@
             </button>
             <button
                 type="button"
-                onclick={onDownload}
+                onclick={onSaveToPhotos}
                 disabled={exporting}
                 class="rounded-full border-2 border-off-black bg-white px-6 py-3.5 font-sans text-base font-extrabold text-off-black transition hover:bg-off-black hover:text-white disabled:opacity-60"
             >
-                Save
+                Save to Photos
             </button>
         </div>
 
@@ -473,4 +503,46 @@
         Your photo never leaves your device. The frame is added right here in
         your browser, nothing is uploaded or stored.
     </p>
+
+    {#if saveView}
+        <!-- Save-to-Photos viewer: a real <img> so the OS long-press "Add to
+             Photos" works, plus a share-sheet shortcut ("Save Image" on iOS,
+             gallery apps on Android). -->
+        <div
+            class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/90 p-5"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Save your photo"
+        >
+            <img
+                src={saveView.url}
+                alt="Your framed LSP photo"
+                class="max-h-[62vh] w-auto max-w-full rounded-xl shadow-2xl"
+            />
+            <p
+                class="max-w-xs text-center font-body text-sm leading-relaxed text-white"
+            >
+                <span class="font-bold">Press and hold the photo</span> and
+                choose <span class="font-bold">Add to Photos</span> (or
+                <span class="font-bold">Download image</span>), or use the
+                button below.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <button
+                    type="button"
+                    onclick={shareFromSaveView}
+                    class="rounded-full bg-accent-gold px-6 py-3 font-sans text-sm font-extrabold text-off-black"
+                >
+                    Save via share sheet
+                </button>
+                <button
+                    type="button"
+                    onclick={closeSaveView}
+                    class="rounded-full border-2 border-white/70 px-6 py-3 font-sans text-sm font-extrabold text-white"
+                >
+                    Done
+                </button>
+            </div>
+        </div>
+    {/if}
 </div>
