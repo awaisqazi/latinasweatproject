@@ -128,6 +128,80 @@ export const PHOTOBOOTH_FRAMES = [
 export const frameSrc = (frameId, ratioId) =>
   `/images/photobooth/frame-${frameId}-${ratioId}.png`;
 
+// ---------------------------------------------------------------------------
+// Guest personalization: preset lines, custom text, stickers. Text renders
+// on-canvas in the frame's own voice (both styles of a design share one).
+// Didot is an iOS system font; Georgia italic is the Android/desktop stand-in.
+// ---------------------------------------------------------------------------
+const TEXT_STYLES = {
+  studio: {
+    family: '"Rubik", sans-serif',
+    weight: 800,
+    italic: false,
+    size: 34,
+    color: "#FFFFFF",
+    scrim: "rgba(30, 30, 30, 0.82)",
+    tilt: -2,
+  },
+  sweatfest: {
+    family: '"Hello Baddie", "Rubik", sans-serif',
+    weight: 400,
+    italic: false,
+    size: 46,
+    color: "#ee3083",
+    scrim: "rgba(226, 236, 172, 0.9)",
+    tilt: -3,
+  },
+  gala: {
+    family: "Didot, Georgia, serif",
+    weight: 400,
+    italic: true,
+    size: 40,
+    color: "#FFBD59",
+    scrim: "rgba(5, 7, 12, 0.68)",
+    tilt: 0,
+  },
+};
+
+const PRESET_LINES = {
+  studio: [
+    "I just finished class at LSP",
+    "Getting ready to sweat",
+    "Come sweat with me",
+    "Movement, culture y comunidad",
+  ],
+  sweatfest: [
+    "Join me at Sweat Fest!",
+    "See you Aug 22!",
+    "Come find me at Sweat Fest",
+  ],
+  gala: [
+    "Meet me at the Gala",
+    "Support LSP's mission",
+    "See you Sept 25",
+  ],
+};
+
+const baseDesign = (frameId) => frameId.replace(/-stamp$/, "");
+export const frameTextStyle = (frameId) => TEXT_STYLES[baseDesign(frameId)];
+export const framePresets = (frameId) => PRESET_LINES[baseDesign(frameId)];
+
+// Sticker tray: brand marks (PNGs with real transparency; the small ones are
+// rendered by scripts/render-photobooth-frames.mjs) plus a curated emoji set.
+export const PHOTOBOOTH_STICKERS = [
+  { id: "lsp-x", kind: "image", src: "/images/lsp-studio-logo.png", label: "LSP logo" },
+  { id: "lsp-ring", kind: "image", src: "/logo3.png", label: "LSP ring" },
+  { id: "fest", kind: "image", src: "/images/photobooth/stickers/sweatfest.png", label: "Sweat Fest" },
+  { id: "sparkle", kind: "image", src: "/images/photobooth/stickers/sparkle.png", label: "Gold sparkle" },
+  { id: "diamond", kind: "image", src: "/images/photobooth/stickers/diamond.png", label: "Gold diamond" },
+  { id: "checker", kind: "image", src: "/images/photobooth/stickers/checker.png", label: "Checkerboard" },
+  ...["🔥", "💪", "✨", "🎉", "💛", "💃", "🧘", "🙌"].map((char) => ({
+    id: `emoji-${char}`,
+    kind: "emoji",
+    char,
+  })),
+];
+
 // Frames whose sunset date (if any) hasn't passed yet, newest events first.
 export const activeFrames = (today = new Date()) =>
   PHOTOBOOTH_FRAMES.filter(

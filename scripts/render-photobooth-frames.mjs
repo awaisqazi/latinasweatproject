@@ -377,5 +377,64 @@ for (const frame of PHOTOBOOTH_FRAMES) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Sticker tray assets (transparent PNGs the guest can place/resize on-canvas;
+// catalog lives in PHOTOBOOTH_STICKERS). The studio X and ring stickers reuse
+// existing site PNGs, so only the drawn marks render here.
+// ---------------------------------------------------------------------------
+const stickerDir = path.join(outDir, "stickers");
+mkdirSync(stickerDir, { recursive: true });
+
+const festH = 240;
+const festW = Math.round(
+  festH * (horizontalLogoSize.width / horizontalLogoSize.height),
+);
+const stickers = [
+  {
+    name: "sweatfest",
+    w: festW,
+    h: festH,
+    body: horizontalLogoSvg.replace(
+      "<svg ",
+      `<svg x="0" y="0" width="${festW}" height="${festH}" `,
+    ),
+  },
+  { name: "sparkle", w: 240, h: 240, body: sparkle(120, 120, 112, "#FFBD59") },
+  { name: "diamond", w: 200, h: 200, body: diamond(100, 100, 128, "#FFBD59") },
+  {
+    name: "checker",
+    w: 336,
+    h: 96,
+    body: Array.from({ length: 14 }, (_, i) => {
+      const r = Math.floor(i / 7);
+      const c = i % 7;
+      return `<rect x="${c * 48}" y="${r * 48}" width="48" height="48" fill="${(r + c) % 2 === 0 ? "#1e1e1e" : "#e2ecac"}"/>`;
+    }).join(""),
+  },
+];
+
+for (const { name, w, h, body } of stickers) {
+  const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${svg}</body></html>`;
+  const htmlPath = path.join(tmpDir, `sticker-${name}.html`);
+  const pngPath = path.join(tmpDir, `sticker-${name}.png`);
+  writeFileSync(htmlPath, html);
+  execFileSync(CHROME, [
+    "--headless=new",
+    `--screenshot=${pngPath}`,
+    `--window-size=${w},${h}`,
+    "--default-background-color=00000000",
+    "--force-device-scale-factor=1",
+    "--hide-scrollbars",
+    "--virtual-time-budget=4000",
+    "--disable-gpu",
+    `file://${htmlPath}`,
+  ]);
+  await sharp(pngPath)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(stickerDir, `${name}.png`));
+  console.log(`rendered sticker ${name}`);
+}
+
 rmSync(tmpDir, { recursive: true, force: true });
 console.log("wrote", outDir);
