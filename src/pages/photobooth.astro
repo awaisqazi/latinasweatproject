@@ -1,0 +1,89 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import PhotoboothApp from "@/components/PhotoboothApp.svelte";
+
+// Reached from a QR code next to the studio's selfie mirror; the mirror
+// signage is the front door, so this stays out of search results like
+// /potluck and /inventory. Frames + geometry live in src/data/photobooth.js
+// (re-render overlays with scripts/render-photobooth-frames.mjs). Guest
+// photos are composited entirely on-device; nothing is uploaded.
+---
+
+<Layout
+    title="LSP Photo Booth | The Latina Sweat Project"
+    description="Frame your LSP mirror selfie with an on-brand design and share it. Your photo never leaves your phone."
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main>
+        <section
+            class="bg-gradient-to-br from-light-gray to-pink-50 py-14 sm:py-16"
+        >
+            <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
+                <span
+                    class="rounded-full bg-vibrant-pink/10 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-vibrant-pink"
+                >
+                    Strike a pose
+                </span>
+                <h1
+                    class="mt-5 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
+                >
+                    LSP Photo Booth
+                </h1>
+                <p
+                    class="mx-auto mt-4 max-w-xl font-body text-lg leading-relaxed text-medium-gray"
+                >
+                    Took a selfie in the studio mirror? Frame it here in LSP
+                    style, then post it and tag us.
+                </p>
+            </div>
+        </section>
+
+        <section class="bg-white py-10 sm:py-14">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6">
+                <PhotoboothApp client:only="svelte" />
+            </div>
+        </section>
+
+        <section class="bg-light-gray py-12 sm:py-16">
+            <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
+                <h2 class="font-sans text-2xl font-extrabold text-off-black">
+                    Who we are
+                </h2>
+                <p
+                    class="mx-auto mt-4 max-w-xl font-body text-base leading-relaxed text-medium-gray"
+                >
+                    The Latina Sweat Project brings free community yoga,
+                    fitness classes, and wellness events to Pilsen and the
+                    Southwest Side of Chicago. Movement, culture y comunidad,
+                    open to everyone.
+                </p>
+                <div
+                    class="mt-8 flex flex-wrap items-center justify-center gap-3"
+                >
+                    <a
+                        href="/classes"
+                        class="rounded-full bg-accent-gold px-6 py-3 font-sans text-sm font-bold text-off-black transition hover:brightness-95"
+                    >
+                        Take a free class
+                    </a>
+                    <a
+                        href="https://www.instagram.com/latinasweatproject/"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-full border-2 border-off-black px-6 py-3 font-sans text-sm font-bold text-off-black transition hover:bg-off-black hover:text-white"
+                    >
+                        @latinasweatproject
+                    </a>
+                    <a
+                        href="/donate"
+                        class="rounded-full border-2 border-off-black px-6 py-3 font-sans text-sm font-bold text-off-black transition hover:bg-off-black hover:text-white"
+                    >
+                        Support our work
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+</Layout>
