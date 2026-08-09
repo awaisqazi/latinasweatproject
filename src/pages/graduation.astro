@@ -555,8 +555,8 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
           <p class="eyebrow">La noche, en fotos</p>
           <h2 id="story-title" class="display">The story of the night</h2>
           <p class="section-lede">
-            Two cohorts walked into the studio as students and walked out as
-            teachers. Here is how it went, in order.
+            Two cohorts of teachers, many already leading classes of their own,
+            were formally celebrated at last. Here is how it went, in order.
           </p>
         </header>
 
@@ -1249,9 +1249,9 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
   let resetTimer: number | undefined;
 
   copyButton?.addEventListener("click", async () => {
-    if (!galleryUrl) return;
+    if (!shareUrl) return;
     const label = copyButton.querySelector<HTMLElement>(".copy-label");
-    const copied = await writeToClipboard(galleryUrl);
+    const copied = await writeToClipboard(shareUrl);
 
     if (label) label.textContent = copied ? "Link copied" : "Copy failed";
     copyButton.classList.toggle("is-copied", copied);

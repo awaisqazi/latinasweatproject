@@ -99,9 +99,165 @@ const graduationFlickrUrl =
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Sweat Fest (lead flyer spotlight, official checkerboard-logo
+    {/* START: Graduation 2026 (LEAD dark celebration spotlight; the
+        "candlelit rose" identity, consistent with /graduation: deep
+        rose-ink #2b1520/#1e1216 room, cream #f6efe3 text, gold #f0c57c
+        accents with #d79b47 CTA fill, orchid #e08cb8 + gold glows,
+        Fraunces display serif (450/560/650, loaded in Layout.astro), Rubik
+        body. Keepsake framing: generous radii, dark gold-washed mat,
+        candle-bokeh dots, no hairline rules or gradient bands. Leads
+        directly after the dark hero: that dark/dark junction is the page's
+        one deliberate chapter break, crafted via the candlelit-horizon
+        seam treatment below (the hero's overlay is neutral black, this
+        room is warm rose-ink, and gold + orchid candlelight bleeds across
+        the top edge). Strict light/dark alternation holds at every
+        junction below this seam. Media sits RIGHT in the zig-zag so the
+        Sweat Fest poster swings left directly below. Not a gala surface:
+        no .gala-foil, no accent-gold.) */}
+    <section
+      class="relative overflow-hidden py-16 text-[#f6efe3] sm:py-20"
+      style="background:
+        radial-gradient(44rem 24rem at 86% -6rem, rgba(215, 155, 71, 0.16), transparent 62%),
+        radial-gradient(36rem 20rem at -8% 104%, rgba(224, 140, 184, 0.12), transparent 60%),
+        linear-gradient(to bottom, #2b1520, #1e1216);"
+    >
+      {/* Seam treatment: the candlelit horizon. Where the neutral-black
+          hero ends, warm candle light spills over the sill of the rose-ink
+          room: a full-width static wash of gold + orchid pooling at the top
+          edge, two slow-breathing light pools hugging the seam, and a few
+          candle-bokeh dots rising into it. Photosensitivity-safe: only
+          gala-ambient's ~8s breathing, staggered; no flicker, no strobe. */}
+      <div
+        class="pointer-events-none absolute inset-x-0 top-0 h-44"
+        style="background:
+          radial-gradient(58% 130% at 26% 0%, rgba(215, 155, 71, 0.26), transparent 72%),
+          radial-gradient(50% 115% at 72% 0%, rgba(224, 140, 184, 0.22), transparent 70%),
+          linear-gradient(to bottom, rgba(240, 197, 124, 0.12), transparent 55%);"
+        aria-hidden="true"
+      >
+      </div>
+      <div class="gala-ambient pointer-events-none absolute -top-14 left-[10%] h-36 w-72 rounded-full blur-[80px]" style="background: rgba(215, 155, 71, 0.3);" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -top-16 right-[14%] h-40 w-80 rounded-full blur-[90px]" style="background: rgba(224, 140, 184, 0.26); animation-delay: 4s;" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute inset-x-0 top-0 h-24" aria-hidden="true">
+        <span class="gala-ambient absolute left-[16%] top-7 h-2 w-2 rounded-full bg-[#f0c57c]/70 blur-[1.5px]"></span>
+        <span class="gala-ambient absolute left-[31%] top-3 h-1.5 w-1.5 rounded-full bg-[#d79b47]/60 blur-[1px]" style="animation-delay: 2s;"></span>
+        <span class="gala-ambient absolute left-[55%] top-9 h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]" style="animation-delay: 5s;"></span>
+        <span class="gala-ambient absolute left-[68%] top-4 h-2.5 w-2.5 rounded-full bg-[#e08cb8]/50 blur-[2px]" style="animation-delay: 3s;"></span>
+        <span class="gala-ambient absolute left-[84%] top-8 h-1.5 w-1.5 rounded-full bg-[#f0c57c]/55 blur-[1.5px]" style="animation-delay: 6.5s;"></span>
+      </div>
+
+      {/* Slow-breathing candlelight glows (gala-ambient pulse: ~8s
+          scale/opacity drift, nothing close to a flash) */}
+      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(215, 155, 71, 0.2);" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(224, 140, 184, 0.16); animation-delay: 2.5s;" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* Copy (left on desktop; DOM order copy-first preserved for
+              mobile) */}
+          <div class="reveal text-center lg:order-1 lg:text-left">
+            <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-[#f0c57c] sm:text-sm">
+              A night that lives forever
+            </p>
+            <h2 class="mt-3 text-4xl leading-[1.05] tracking-tight [font-family:Fraunces,serif] [font-weight:650] sm:text-5xl">
+              <span class="text-[#f6efe3]">Graduation</span>
+              <span class="italic text-[#f0c57c]">2026</span>
+            </h2>
+            <p class="mt-4 text-lg font-bold text-[#f6efe3]">
+              Friday, August 7, 2026 · LSP Studio, Pilsen
+            </p>
+            <p class="mt-1 text-base font-semibold text-[#f6efe3]/60">
+              The YTT cohorts of 2025 and 2026 received their certificates together
+            </p>
+
+            <p class="mt-6 text-2xl text-[#f0c57c] [font-family:Fraunces,serif] [font-weight:560] sm:text-3xl">
+              Nearly 100 teachers strong.
+            </p>
+            <p class="mt-1 text-base italic text-[#f0c57c]/90 [font-family:Fraunces,serif] [font-weight:560]">
+              Casi 100 maestras y contando.
+            </p>
+
+            <blockquote class="mx-auto mt-6 max-w-xl text-left lg:mx-0">
+              {/* Candle-bokeh dot row (replaces the hairline quote rule) */}
+              <div class="flex items-center gap-2" aria-hidden="true">
+                <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]/70 blur-[1px]"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-[#f0c57c]/80 blur-[1.5px]"></span>
+                <span class="h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]"></span>
+                <span class="h-2 w-2 rounded-full bg-[#d79b47]/50 blur-[2px]"></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]/45 blur-[1.5px]"></span>
+              </div>
+              <p class="mt-3 text-lg italic leading-relaxed text-[#f6efe3]/80 [font-family:Fraunces,serif] [font-weight:450]">
+                &ldquo;The Latina Sweat Project was never these walls. It has
+                always been the people.&rdquo;
+              </p>
+              <footer class="mt-2 text-sm font-semibold text-[#f6efe3]/50">
+                Margarita Quiñones-Peña, Founder
+              </footer>
+            </blockquote>
+
+            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <a
+                href={graduationPageUrl}
+                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[#d79b47] px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="graduation_spotlight_click"
+                data-conversion-context="home_graduation"
+              >
+                Relive the night
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={graduationFlickrUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center justify-center gap-3 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-7 py-4 text-base font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="graduation_gallery_click"
+                data-conversion-context="home_graduation"
+              >
+                View the full gallery
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+            <p class="mt-5 text-center text-xs font-extrabold uppercase tracking-[0.2em] text-[#f6efe3]/45 lg:text-left">
+              Photos and the full story on the recap page
+            </p>
+          </div>
+
+          {/* Media (right on desktop): the class photo on a dark
+              gold-washed keepsake mat */}
+          <div class="reveal relative mx-auto w-full max-w-xl lg:order-2" style="transition-delay: 120ms;">
+            <div class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#d79b47]/25 via-[#e08cb8]/12 to-transparent opacity-80 blur-2xl" aria-hidden="true"></div>
+            <figure class="relative">
+              <div class="rounded-[2rem] bg-gradient-to-br from-[#d79b47]/20 via-[#2b1520] to-[#1e1216] p-2.5 shadow-2xl shadow-black/40 sm:p-3">
+                <img
+                  src={`${base}images/graduation/hero.jpg`}
+                  width="1024"
+                  height="683"
+                  alt="The 2025 and 2026 YTT cohorts holding their certificates at LSP Studio"
+                  class="w-full rounded-[1.4rem]"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption class="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-xs font-bold uppercase tracking-[0.18em] text-[#f6efe3]/45 lg:justify-end">
+                <span class="text-[#f0c57c]">Graduation night</span>
+                <span aria-hidden="true">·</span>
+                <span>Friday, August 7, 2026</span>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Graduation 2026 */}
+
+    {/* START: Sweat Fest (first event spotlight, official checkerboard-logo
         identity: checkerboard tile strip, taped-up poster, handmade
-        wordmark over honeydew) */}
+        wordmark over honeydew. First light section, directly after the
+        dark Graduation lead) */}
     <section class="relative overflow-hidden py-16 sm:py-20 lg:py-24" style="background: linear-gradient(to bottom, #eaf0c8, #e2ecac 45%, #dde8a8);">
       {/* Checkerboard tile strip along the top */}
       <div
@@ -188,132 +344,75 @@ const graduationFlickrUrl =
         </div>
       </div>
     </section>
-    {/* END: Sweat Fest (lead flyer spotlight) */}
+    {/* END: Sweat Fest (first event spotlight) */}
 
-    {/* START: Graduation 2026 (dark celebration spotlight in the graduation
-        "candlelit rose" identity: deep rose-ink #2b1520/#1e1216 room, orchid
-        rose #e08cb8 + gold glows, gold accents (#f0c57c captions, #d79b47
-        CTA fill), cream #f6efe3 text, Fraunces display serif (weights
-        450/560/650, loaded in Layout.astro), Rubik body. Keepsake framing:
-        generous radii + soft glows + candle-bokeh dots, no hairline rules
-        or gradient bands. Takes the dark slot Summer Renaissance held
-        (event passed
-        Aug 1, 2026); a same-theme slot swap, so the strict light/dark
-        alternation is untouched. Media sits RIGHT in the zig-zag, matching
-        the slot it replaced. Not a gala surface: no .gala-foil, no
-        accent-gold.) */}
-    <section
-      class="relative overflow-hidden py-16 text-[#f6efe3] sm:py-20"
-      style="background:
-        radial-gradient(44rem 24rem at 86% -6rem, rgba(215, 155, 71, 0.16), transparent 62%),
-        radial-gradient(36rem 20rem at -8% 104%, rgba(224, 140, 184, 0.12), transparent 60%),
-        linear-gradient(to bottom, #2b1520, #1e1216);"
-    >
-      {/* Slow-breathing candlelight glows (gala-ambient pulse: ~8s
-          scale/opacity drift, nothing close to a flash) */}
-      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(215, 155, 71, 0.2);" aria-hidden="true"></div>
-      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(224, 140, 184, 0.16); animation-delay: 2.5s;" aria-hidden="true"></div>
+    {/* START: Gala Countdown Announcement */}
+    <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
+      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+      <div class="gala-ambient absolute -left-24 top-0 h-64 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
+      <div class="gala-ambient absolute -right-24 bottom-0 h-64 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Copy (left) */}
-          <div class="reveal text-center lg:order-1 lg:text-left">
-            <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-[#f0c57c] sm:text-sm">
-              A night that lives forever
-            </p>
-            <h2 class="mt-3 text-4xl leading-[1.05] tracking-tight [font-family:Fraunces,serif] [font-weight:650] sm:text-5xl">
-              <span class="text-[#f6efe3]">Graduation</span>
-              <span class="italic text-[#f0c57c]">2026</span>
-            </h2>
-            <p class="mt-4 text-lg font-bold text-[#f6efe3]">
-              Friday, August 7, 2026 · LSP Studio, Pilsen
-            </p>
-            <p class="mt-1 text-base font-semibold text-[#f6efe3]/60">
-              The YTT cohorts of 2025 and 2026 received their certificates together
-            </p>
-
-            <p class="mt-6 text-2xl text-[#f0c57c] [font-family:Fraunces,serif] [font-weight:560] sm:text-3xl">
-              Nearly 100 teachers strong.
-            </p>
-            <p class="mt-1 text-base italic text-[#f0c57c]/90 [font-family:Fraunces,serif] [font-weight:560]">
-              Casi 100 maestras y contando.
-            </p>
-
-            <blockquote class="mx-auto mt-6 max-w-xl text-left lg:mx-0">
-              {/* Candle-bokeh dot row (replaces the hairline quote rule) */}
-              <div class="flex items-center gap-2" aria-hidden="true">
-                <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]/70 blur-[1px]"></span>
-                <span class="h-2.5 w-2.5 rounded-full bg-[#f0c57c]/80 blur-[1.5px]"></span>
-                <span class="h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]"></span>
-                <span class="h-2 w-2 rounded-full bg-[#d79b47]/50 blur-[2px]"></span>
-                <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]/45 blur-[1.5px]"></span>
+        <div class="reveal rounded-3xl border border-accent-gold/30 bg-white/[0.04] p-5 shadow-2xl shadow-black/25 sm:p-7 lg:p-8">
+          <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div>
+              <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold sm:text-sm">
+                <span>Annual Gala</span>
+                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                <span>{galaTeaser.shortDateTimeLabel}</span>
+                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
+                <span>{galaTeaser.attire}</span>
               </div>
-              <p class="mt-3 text-lg italic leading-relaxed text-[#f6efe3]/80 [font-family:Fraunces,serif] [font-weight:450]">
-                &ldquo;The Latina Sweat Project was never these walls. It has
-                always been the people.&rdquo;
+              <h2 class="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
+                <span class="gala-foil">{galaTeaser.shortTitle}</span>
+                <span class="text-white/90"> Gala</span>
+              </h2>
+              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
+                {galaTeaser.homepageDescription} Join us at {galaTeaser.venueName}.
               </p>
-              <footer class="mt-2 text-sm font-semibold text-[#f6efe3]/50">
-                Margarita Quiñones-Peña, Founder
-              </footer>
-            </blockquote>
-
-            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <a
-                href={graduationPageUrl}
-                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[#d79b47] px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
-                data-conversion-event="graduation_spotlight_click"
-                data-conversion-context="home_graduation"
-              >
-                Relive the night
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-              <a
-                href={graduationFlickrUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center justify-center gap-3 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-7 py-4 text-base font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
-                data-conversion-event="graduation_gallery_click"
-                data-conversion-context="home_graduation"
-              >
-                View the full gallery
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-            </div>
-            <p class="mt-5 text-center text-xs font-extrabold uppercase tracking-[0.2em] text-[#f6efe3]/45 lg:text-left">
-              Photos and the full story on the recap page
-            </p>
-          </div>
-
-          {/* Media (right): the class photo in a soft gold frame */}
-          <div class="reveal relative mx-auto w-full max-w-xl lg:order-2" style="transition-delay: 120ms;">
-            <div class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#d79b47]/25 via-[#e08cb8]/12 to-transparent opacity-80 blur-2xl" aria-hidden="true"></div>
-            <figure class="relative">
-              <div class="rounded-[2rem] bg-gradient-to-br from-[#d79b47]/20 via-[#2b1520] to-[#1e1216] p-2.5 shadow-2xl shadow-black/40 sm:p-3">
-                <img
-                  src={`${base}images/graduation/hero.jpg`}
-                  width="1024"
-                  height="683"
-                  alt="The 2025 and 2026 YTT cohorts holding their certificates at LSP Studio"
-                  class="w-full rounded-[1.4rem]"
-                  loading="lazy"
-                  decoding="async"
-                />
+              <div class="mt-6">
+                <GalaImpactStats variant="strip" class="justify-start" />
               </div>
-              <figcaption class="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-xs font-bold uppercase tracking-[0.18em] text-[#f6efe3]/45 lg:justify-end">
-                <span class="text-[#f0c57c]">Graduation night</span>
-                <span aria-hidden="true">·</span>
-                <span>Friday, August 7, 2026</span>
-              </figcaption>
-            </figure>
+              <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={galaTeaser.ticketsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
+                  data-conversion-event="gala_ticket_click"
+                  data-conversion-context="home_gala_band"
+                >
+                  <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
+                  <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </a>
+                <a
+                  href={galaPageUrl}
+                  class="gala-btn gala-btn--ghost inline-flex items-center justify-center px-7 py-4 text-base font-extrabold"
+                >
+                  Explore the Gala
+                </a>
+              </div>
+              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
+                <span class="inline-flex items-center gap-2 rounded-[3px] border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                  <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
+                  On sale now
+                </span>
+                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
+              </p>
+            </div>
+
+            <div class="group space-y-4">
+              <GalaPhotoFrame slot={galaPhotos.facade} variant="promo" corners />
+              <GalaCountdown variant="compact" />
+            </div>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Graduation 2026 */}
+    {/* END: Gala Countdown Announcement */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
@@ -611,417 +710,6 @@ const graduationFlickrUrl =
     </section>
     {/* END: Merch Drop — Monday Miles Tee Section */}
 
-    {/* START: Gala Countdown Announcement */}
-    <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
-      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
-      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
-      <div class="gala-ambient absolute -left-24 top-0 h-64 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
-      <div class="gala-ambient absolute -right-24 bottom-0 h-64 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal rounded-3xl border border-accent-gold/30 bg-white/[0.04] p-5 shadow-2xl shadow-black/25 sm:p-7 lg:p-8">
-          <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
-              <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold sm:text-sm">
-                <span>Annual Gala</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.shortDateTimeLabel}</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.attire}</span>
-              </div>
-              <h2 class="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-                <span class="gala-foil">{galaTeaser.shortTitle}</span>
-                <span class="text-white/90"> Gala</span>
-              </h2>
-              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
-                {galaTeaser.homepageDescription} Join us at {galaTeaser.venueName}.
-              </p>
-              <div class="mt-6">
-                <GalaImpactStats variant="strip" class="justify-start" />
-              </div>
-              <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href={galaTeaser.ticketsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-                  data-conversion-event="gala_ticket_click"
-                  data-conversion-context="home_gala_band"
-                >
-                  <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
-                  <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </a>
-                <a
-                  href={galaPageUrl}
-                  class="gala-btn gala-btn--ghost inline-flex items-center justify-center px-7 py-4 text-base font-extrabold"
-                >
-                  Explore the Gala
-                </a>
-              </div>
-              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
-                <span class="inline-flex items-center gap-2 rounded-[3px] border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
-                  <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-                  On sale now
-                </span>
-                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
-              </p>
-            </div>
-
-            <div class="group space-y-4">
-              <GalaPhotoFrame slot={galaPhotos.facade} variant="promo" corners />
-              <GalaCountdown variant="compact" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Gala Countdown Announcement */}
-
-    {/* START: Free Day Promo */}
-    <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#e8f6ed] py-12 sm:py-16">
-      {/* Decorative ambient glows */}
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-20 left-[10%] w-[420px] h-[420px] bg-accent-gold/25 rounded-full blur-[120px]"></div>
-        <div class="absolute -bottom-24 right-[10%] w-[380px] h-[380px] bg-emerald-500/20 rounded-full blur-[110px]"></div>
-        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-vibrant-pink/10 rounded-full blur-[100px]"></div>
-      </div>
-      {/* Subtle grid texture */}
-      <div class="absolute inset-0 opacity-[0.05]" style="background-image: linear-gradient(rgba(30,30,30,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,30,0.5) 1px, transparent 1px); background-size: 40px 40px;"></div>
-
-      <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          {/* Pulsing badge */}
-          <div class="inline-flex items-center gap-2 rounded-full bg-accent-gold/15 border border-accent-gold/40 px-4 py-2 mb-4 backdrop-blur-sm">
-            <span class="relative flex h-2.5 w-2.5">
-              <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
-              <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-gold"></span>
-            </span>
-            <span class="text-sm font-bold uppercase tracking-widest text-accent-gold">Free · May to July 2026</span>
-          </div>
-
-          <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-off-black">
-            Free Classes, <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold via-amber-300 to-emerald-400">Two Locations</span>&nbsp;🎉
-          </h2>
-          <p class="mt-3 text-medium-gray text-base sm:text-lg font-medium">Clases gratis · No membership needed · Two locations, two ways to register</p>
-        </div>
-
-        <div class="mt-10 grid gap-6 lg:grid-cols-2">
-          {/* PILSEN CARD */}
-          <div class="group relative rounded-3xl bg-off-black border border-accent-gold/30 shadow-2xl shadow-off-black/25 p-6 sm:p-7 transition-all duration-300 hover:border-accent-gold/60 hover:shadow-accent-gold/20 flex flex-col">
-            {/* Gradient accent edge */}
-            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/60 to-transparent"></div>
-
-            <div class="flex items-center gap-3 mb-4">
-              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-gold text-off-black font-extrabold text-2xl shadow-lg shadow-accent-gold/30">X</span>
-              <div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-accent-gold">Location 1</p>
-                <h3 class="font-sans text-2xl font-extrabold tracking-tight text-white leading-tight">Pilsen</h3>
-              </div>
-              <div class="ml-auto text-right">
-                <p class="text-3xl font-extrabold text-accent-gold leading-none">8</p>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-light-gray/60 leading-none mt-1">Free Days</p>
-              </div>
-            </div>
-            <p class="text-sm text-light-gray/70 font-medium">
-              LSP Studio &middot; <span class="font-semibold text-white">949 W 16th St</span>, Chicago, IL 60608
-            </p>
-
-            {/* Day rotation insight */}
-            <div class="mt-4 rounded-xl bg-accent-gold/10 border border-accent-gold/20 px-3 py-2.5">
-              <p class="text-[11px] font-bold uppercase tracking-widest text-accent-gold mb-1.5">Rotates Through Every Day</p>
-              <div class="flex items-center justify-between gap-1">
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">FRI</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">SAT</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">SUN</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">MON</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">TUE</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">WED</span>
-                <span class="flex-1 rounded-md bg-accent-gold/20 text-center text-[10px] font-bold text-accent-gold py-1">THU</span>
-              </div>
-            </div>
-
-            {/* May dates - large grid */}
-            <div class="mt-5">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">May 2026</p>
-              <div class="grid grid-cols-2 gap-3.5">
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-01" data-free-loc="pilsen">
-                  <p class="free-card__day">Fri</p>
-                  <p class="free-card__date">1</p>
-                  <p class="free-card__month">May</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-09" data-free-loc="pilsen">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">9</p>
-                  <p class="free-card__month">May</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-05-17" data-free-loc="pilsen">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">17</p>
-                  <p class="free-card__month">May</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg free-card--holiday" data-free-date="2026-05-25" data-free-loc="pilsen">
-                  <span class="free-card__badge">Holiday</span>
-                  <p class="free-card__day">Mon</p>
-                  <p class="free-card__date">25</p>
-                  <p class="free-card__month">May</p>
-                </div>
-              </div>
-            </div>
-
-            {/* June dates */}
-            <div class="mt-4">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5">June 2026</p>
-              <div class="grid grid-cols-2 gap-3.5">
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-02" data-free-loc="pilsen">
-                  <p class="free-card__day">Tue</p>
-                  <p class="free-card__date">2</p>
-                  <p class="free-card__month">Jun</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-10" data-free-loc="pilsen">
-                  <p class="free-card__day">Wed</p>
-                  <p class="free-card__date">10</p>
-                  <p class="free-card__month">Jun</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-18" data-free-loc="pilsen">
-                  <p class="free-card__day">Thu</p>
-                  <p class="free-card__date">18</p>
-                  <p class="free-card__month">Jun</p>
-                </div>
-                <div class="free-card free-card--gold free-card--lg" data-free-date="2026-06-26" data-free-loc="pilsen">
-                  <p class="free-card__day">Fri</p>
-                  <p class="free-card__date">26</p>
-                  <p class="free-card__month">Jun</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilsen registration */}
-            <div class="mt-auto pt-5 border-t border-accent-gold/15">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold mb-2.5">Reserve your spot</p>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <a
-                  href={`${base}schedule`}
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent-gold px-4 py-2.5 text-xs font-bold text-off-black shadow-md shadow-accent-gold/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent-gold/40"
-                  data-conversion-event="class_booking_start"
-                  data-conversion-context="home_free_classes_pilsen"
-                  data-conversion-booking-path="schedule_page"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  Schedule
-                </a>
-                <a
-                  href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-white/[0.12] hover:border-white/30"
-                  data-conversion-event="app_download_click"
-                  data-conversion-context="home_free_classes"
-                  data-conversion-platform="ios"
-                >
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"></path></svg>
-                  iOS
-                </a>
-                <a
-                  href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-white/[0.12] hover:border-white/30"
-                  data-conversion-event="app_download_click"
-                  data-conversion-context="home_free_classes"
-                  data-conversion-platform="android"
-                >
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"></path></svg>
-                  Android
-                </a>
-              </div>
-              <p class="mt-2.5 text-[10px] text-light-gray/55 font-medium text-center">Book up to <span class="text-accent-gold font-bold">7 days ahead</span> in the LSP Studio app or schedule page</p>
-            </div>
-          </div>
-
-          {/* BACK OF THE YARDS CARD */}
-          <div class="group relative rounded-3xl bg-off-black border border-emerald-400/30 shadow-2xl shadow-off-black/25 p-6 sm:p-7 transition-all duration-300 hover:border-emerald-400/60 hover:shadow-emerald-500/20 flex flex-col">
-            {/* Gradient accent edge */}
-            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"></div>
-
-            <div class="flex items-center gap-3 mb-4">
-              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-white font-extrabold text-2xl shadow-lg shadow-emerald-500/30">X</span>
-              <div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-300">Location 2</p>
-                <h3 class="font-sans text-2xl font-extrabold tracking-tight text-white leading-tight">Back of the Yards</h3>
-              </div>
-              <div class="ml-auto text-right">
-                <p class="text-3xl font-extrabold text-emerald-400 leading-none">18</p>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-light-gray/60 leading-none mt-1">Free Days</p>
-              </div>
-            </div>
-            <p class="text-sm text-light-gray/70 font-medium">
-              Southside Social &middot; <span class="font-semibold text-white">4432 S Ashland Ave</span>, Chicago, IL 60609
-            </p>
-
-            <div class="mt-4 rounded-xl bg-emerald-500/10 border border-emerald-400/20 px-3 py-2.5 text-center">
-              <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-300">Every Saturday &amp; Sunday</p>
-              <p class="text-sm font-semibold text-white/80 mt-0.5">All May &amp; June, plus July 4 &amp; 5</p>
-            </div>
-
-            {/* Weekly lineup */}
-            <div class="mt-4 rounded-xl bg-emerald-500/[0.07] border border-emerald-400/20 p-3.5">
-              <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-300 mb-2.5">Weekly Lineup</p>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <p class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/80 mb-1.5">Saturday</p>
-                  <div class="space-y-1.5">
-                    <div>
-                      <p class="text-xs font-bold text-white tabular-nums leading-tight">8:00 AM</p>
-                      <p class="text-[11px] text-white/65 font-medium leading-tight">Andrea Fuentes</p>
-                    </div>
-                    <div>
-                      <p class="text-xs font-bold text-white tabular-nums leading-tight">9:15 AM</p>
-                      <p class="text-[11px] text-white/65 font-medium leading-tight">Melissa Salinas</p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/80 mb-1.5">Sunday</p>
-                  <div class="space-y-1.5">
-                    <div>
-                      <p class="text-xs font-bold text-white tabular-nums leading-tight">9:15 AM</p>
-                      <p class="text-[11px] text-white/65 font-medium leading-tight">Lizsandra Heredia</p>
-                    </div>
-                    <div>
-                      <p class="text-xs font-bold text-white tabular-nums leading-tight">10:30 AM</p>
-                      <p class="text-[11px] text-white/65 font-medium leading-tight">Arturo Zurita</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-5">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5 text-center">May 2026</p>
-              <div class="grid grid-cols-4 gap-2.5">
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-09" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">9</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-10" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">10</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-16" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">16</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-17" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">17</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-23" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">23</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-24" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">24</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-30" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">30</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-05-31" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">31</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5 text-center">June 2026</p>
-              <div class="grid grid-cols-4 gap-2.5">
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-06" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">6</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-07" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">7</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-13" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">13</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-14" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">14</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-20" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">20</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-21" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">21</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-27" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">27</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-06-28" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">28</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-light-gray/60 mb-2.5 text-center">July 2026 · Final Weekend</p>
-              <div class="grid grid-cols-4 gap-2.5">
-                <div class="free-card free-card--emerald free-card--sm col-start-2" data-free-date="2026-07-04" data-free-loc="boty">
-                  <p class="free-card__day">Sat</p>
-                  <p class="free-card__date">4</p>
-                </div>
-                <div class="free-card free-card--emerald free-card--sm" data-free-date="2026-07-05" data-free-loc="boty">
-                  <p class="free-card__day">Sun</p>
-                  <p class="free-card__date">5</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Southside Social registration */}
-            <div class="mt-auto pt-5 border-t border-emerald-400/15">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-300 mb-2.5">Reserve your spot</p>
-              <a
-                href="https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/50"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="home_free_classes_southside"
-                data-conversion-provider="zeffy"
-                data-conversion-booking-path="southside_ticketing"
-                data-conversion-location="southside_social"
-              >
-                Register on Zeffy
-                <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-              </a>
-              <p class="mt-2.5 text-[10px] text-light-gray/55 font-medium text-center">Southside Social classes are <span class="text-emerald-300 font-bold">not in the LSP app or schedule page</span></p>
-            </div>
-          </div>
-        </div>
-
-        {/* Side-by-side path summary */}
-        <div class="mt-8 rounded-2xl bg-white/85 backdrop-blur-xl border border-off-black/10 px-5 py-4 sm:px-6 sm:py-5 text-center shadow-xl shadow-off-black/5">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-off-black/45 mb-2">Two locations, two ways to register</p>
-          <p class="text-sm text-off-black/80 font-medium leading-relaxed">
-            <span class="text-accent-gold font-bold">Pilsen</span> → LSP Studio app or schedule page &nbsp;·&nbsp; <span class="text-emerald-700 font-bold">Southside Social</span> → Zeffy
-          </p>
-          <p class="mt-2 text-[12px] text-medium-gray font-medium">All ages 12+ welcome. No membership required at either location.</p>
-        </div>
-      </div>
-    </section>
-    {/* END: Free Day Promo */}
-
     {/* START: WGN9 Spotlight Section */}
     <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
       {/* Background pattern */}
@@ -1051,10 +739,10 @@ const graduationFlickrUrl =
         class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
-          {/* Copy + CTAs (right on desktop: media-side zig-zag after the
-              July 2026 Haus of LSP insertion put the gala photo on the
-              right directly above, so the video swings left here) */}
-          <div class="lg:col-span-5 lg:order-2 text-center lg:text-left">
+          {/* Copy + CTAs (left on desktop: the Merch tee sits on the left
+              directly above, so the video swings right here, natural DOM
+              order) */}
+          <div class="lg:col-span-5 text-center lg:text-left">
             <div
               class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
             >
@@ -1156,7 +844,7 @@ const graduationFlickrUrl =
           </div>
 
           {/* Featured video (left on desktop) */}
-          <div class="lg:col-span-7 lg:order-1">
+          <div class="lg:col-span-7">
             <div
               class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
             >
@@ -1216,8 +904,10 @@ const graduationFlickrUrl =
         <div
           class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16"
         >
-          {/* Left: Content */}
-          <div class="text-center lg:text-left">
+          {/* Content (right on desktop via lg:order-2, Aug 2026 reorder:
+              zig-zags with the WGN9 video right above and the 40 Under 40
+              flyer right below; DOM order copy-first preserved for mobile) */}
+          <div class="text-center lg:order-2 lg:text-left">
             {/* Badge */}
             <div
               class="inline-flex items-center gap-2 rounded-full bg-off-black px-4 py-2 mb-6 shadow-lg shadow-off-black/10"
@@ -1341,8 +1031,8 @@ const graduationFlickrUrl =
             </div>
           </div>
 
-          {/* Right: Visual card */}
-          <div class="relative mx-auto w-full max-w-md lg:max-w-none">
+          {/* Visual card (left on desktop via lg:order-1) */}
+          <div class="relative mx-auto w-full max-w-md lg:order-1 lg:max-w-none">
             {/* Decorative glow */}
             <div
               class="absolute -inset-4 rounded-3xl bg-gradient-to-br from-accent-gold/20 via-vibrant-pink/10 to-transparent blur-2xl"
@@ -1429,7 +1119,10 @@ const graduationFlickrUrl =
       </div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+        {/* md:flex-row-reverse: flyer flipped to the RIGHT (Aug 2026
+            reorder) so it zig-zags with the Monday Miles visual left above
+            and the Grand Opening image left below the events carousel */}
+        <div class="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
           {/* Photo */}
           <div class="flex-shrink-0 mx-auto md:mx-0">
             <div class="relative">
@@ -1924,9 +1617,10 @@ const graduationFlickrUrl =
         <div
           class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
         >
-          {/* Copy left / image right on desktop: flipped July 2026 so the
-              zig-zag holds after 40 Under 40 (photo left) above */}
-          <div class="lg:order-1">
+          {/* Copy right / image left on desktop (Aug 2026 reorder):
+              zig-zags with the 40 Under 40 flyer on the right above the
+              events carousel */}
+          <div class="lg:order-2">
             <p
               class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
             >
@@ -1962,7 +1656,7 @@ const graduationFlickrUrl =
               </a>
             </div>
           </div>
-          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
+          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-1">
             <img
               src={`${base}images/studio.png`}
               alt="The brand new Latina Sweat Project yoga studio"
@@ -2072,6 +1766,7 @@ const graduationFlickrUrl =
       </div>
     </section>
     {/* END: In The Press Section */}
+
     {/* START: Instagram Section */}
     <section class="bg-off-black py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -2227,164 +1922,6 @@ const graduationFlickrUrl =
       .scrollbar-hide::-webkit-scrollbar {
         display: none;
       }
-
-      /* Free-class date cards */
-      .free-card {
-        position: relative;
-        border-radius: 0.75rem;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 189, 89, 0.3);
-        padding: 0.75rem 0.5rem;
-        text-align: center;
-        transition: all 0.3s ease;
-      }
-      .free-card:hover {
-        background: rgba(255, 189, 89, 0.15);
-        border-color: rgba(255, 189, 89, 0.6);
-        transform: scale(1.05);
-      }
-      .free-card--emerald {
-        border-color: rgba(52, 211, 153, 0.3);
-      }
-      .free-card--emerald:hover {
-        background: rgba(16, 185, 129, 0.15);
-        border-color: rgba(52, 211, 153, 0.6);
-      }
-      .free-card--sm {
-        padding: 0.875rem 0.625rem;
-      }
-      .free-card--lg {
-        padding: 0.875rem 0.75rem;
-      }
-      .free-card--lg .free-card__day {
-        font-size: 10px;
-      }
-      .free-card--lg .free-card__date {
-        font-size: 2rem;
-      }
-      .free-card--lg .free-card__month {
-        font-size: 10px;
-      }
-      .free-card--holiday {
-        background: rgba(255, 189, 89, 0.15);
-        border-color: rgba(255, 189, 89, 0.6);
-      }
-      .free-card__day {
-        font-size: 9px;
-        font-weight: 700;
-        line-height: 1;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: rgba(255, 189, 89, 0.85);
-      }
-      .free-card--emerald .free-card__day {
-        color: rgba(110, 231, 183, 0.85);
-      }
-      .free-card__date {
-        font-size: 1.5rem;
-        line-height: 1.1;
-        font-weight: 800;
-        color: #fff;
-        margin-top: 2px;
-      }
-      .free-card--sm .free-card__date {
-        font-size: 1.5rem;
-      }
-      .free-card__month {
-        font-size: 9px;
-        line-height: 1;
-        color: rgba(255, 255, 255, 0.5);
-      }
-      .free-card__badge {
-        position: absolute;
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #b5a18d;
-        color: #fff;
-        font-size: 7px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 2px 6px;
-        border-radius: 9999px;
-        white-space: nowrap;
-      }
-
-      /* Next-up highlight */
-      .free-card[data-free-next="true"] {
-        background: linear-gradient(135deg, rgba(255, 189, 89, 0.35), rgba(255, 189, 89, 0.18));
-        border-color: #ffbd59;
-        transform: none;
-        box-shadow: 0 8px 24px -6px rgba(255, 189, 89, 0.5);
-        animation: free-card-pulse-gold 2.2s ease-in-out infinite;
-      }
-      .free-card--emerald[data-free-next="true"] {
-        background: linear-gradient(135deg, rgba(52, 211, 153, 0.35), rgba(52, 211, 153, 0.18));
-        border-color: #34d399;
-        box-shadow: 0 8px 24px -6px rgba(52, 211, 153, 0.5);
-        animation: free-card-pulse-emerald 2.2s ease-in-out infinite;
-      }
-      .free-card[data-free-next="true"]::before {
-        content: '↓ NEXT FREE DAY';
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 8px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 3px 8px;
-        border-radius: 9999px;
-        background: #ffbd59;
-        color: #1e1e1e;
-        white-space: nowrap;
-        box-shadow: 0 4px 10px rgba(255, 189, 89, 0.4);
-        z-index: 2;
-      }
-      .free-card--emerald[data-free-next="true"]::before {
-        background: #34d399;
-        color: #064e3b;
-        box-shadow: 0 4px 10px rgba(52, 211, 153, 0.4);
-      }
-      .free-card--holiday[data-free-next="true"] .free-card__badge {
-        display: none;
-      }
-      @keyframes free-card-pulse-gold {
-        0%, 100% { box-shadow: 0 8px 24px -6px rgba(255, 189, 89, 0.5), 0 0 0 0 rgba(255, 189, 89, 0.5); }
-        50% { box-shadow: 0 8px 24px -6px rgba(255, 189, 89, 0.5), 0 0 0 10px rgba(255, 189, 89, 0); }
-      }
-      @keyframes free-card-pulse-emerald {
-        0%, 100% { box-shadow: 0 8px 24px -6px rgba(52, 211, 153, 0.5), 0 0 0 0 rgba(52, 211, 153, 0.5); }
-        50% { box-shadow: 0 8px 24px -6px rgba(52, 211, 153, 0.5), 0 0 0 10px rgba(52, 211, 153, 0); }
-      }
     </style>
-
-    <script>
-      (function () {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayStr =
-          today.getFullYear() +
-          '-' +
-          String(today.getMonth() + 1).padStart(2, '0') +
-          '-' +
-          String(today.getDate()).padStart(2, '0');
-
-        const groups = new Map<string, HTMLElement[]>();
-        document.querySelectorAll<HTMLElement>('[data-free-date][data-free-loc]').forEach((el) => {
-          const loc = el.dataset.freeLoc || 'default';
-          if (!groups.has(loc)) groups.set(loc, []);
-          groups.get(loc)!.push(el);
-        });
-
-        groups.forEach((pills) => {
-          pills.sort((a, b) => (a.dataset.freeDate || '').localeCompare(b.dataset.freeDate || ''));
-          const next = pills.find((p) => (p.dataset.freeDate || '') >= todayStr);
-          if (next) next.dataset.freeNext = 'true';
-        });
-      })();
-    </script>
   </main></Layout
 >
