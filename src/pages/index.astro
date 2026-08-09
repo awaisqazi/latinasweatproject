@@ -12,15 +12,6 @@ import {
   sweatFestColors,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
-import HausDiscoBall from "@/components/HausDiscoBall.astro";
-import {
-  hausOfLsp,
-  summerRenaissance,
-  summerRenaissanceActs,
-  hausColors,
-  hausDiscoUri,
-  hausLightTileUri,
-} from "@/data/hausOfLsp";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
@@ -36,17 +27,12 @@ const sweatFestDeepAccents = { rosa: "#c21e64", cielo: "#017277", lima: "#43722c
 // and ticket stubs live there); /sweatfest owns the jump to Zeffy.
 const sweatFestPrimaryUrl = withBase("sweatfest");
 const sweatFestPrimaryLabel = "Learn More";
-// Haus of LSP: CTAs point at the ticketing form once entry details go live
-// (flip ticketsOnSale + ticketsUrl in src/data/hausOfLsp.js), and at the
-// event page until then.
-const hausHasTickets =
-  summerRenaissance.ticketsOnSale && summerRenaissance.ticketsUrl;
-const hausPrimaryUrl = hausHasTickets
-  ? summerRenaissance.ticketsUrl
-  : withBase("hausoflsp");
-const hausPrimaryLabel = hausHasTickets
-  ? summerRenaissance.ticketsLabel
-  : summerRenaissance.exploreLabel;
+// Graduation 2026 (YTT ceremony, Fri Aug 7, 2026): the homepage spotlight
+// and carousel card route to the /graduation photo-and-story recap page;
+// the full 307-photo album lives on Flickr.
+const graduationPageUrl = withBase("graduation");
+const graduationFlickrUrl =
+  "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -204,189 +190,130 @@ const hausPrimaryLabel = hausHasTickets
     </section>
     {/* END: Sweat Fest (lead flyer spotlight) */}
 
-    {/* START: Haus of LSP — Summer Renaissance (dark nightlife-collage
-        spotlight, Option G identity. Chronologically Aug 1 comes before
-        Sweat Fest, but a dark section cannot follow the dark hero, so it
-        takes the first dark slot instead; every dark section below rotated
-        down one light-slot to keep strict alternation. Media sits RIGHT in
-        the zig-zag.) */}
+    {/* START: Graduation 2026 (dark celebration spotlight in the graduation
+        "candlelit rose" identity: deep rose-ink #2b1520/#1e1216 room, orchid
+        rose #e08cb8 + gold glows, gold accents (#f0c57c captions, #d79b47
+        CTA fill), cream #f6efe3 text, Fraunces display serif (weights
+        450/560/650, loaded in Layout.astro), Rubik body. Keepsake framing:
+        generous radii + soft glows + candle-bokeh dots, no hairline rules
+        or gradient bands. Takes the dark slot Summer Renaissance held
+        (event passed
+        Aug 1, 2026); a same-theme slot swap, so the strict light/dark
+        alternation is untouched. Media sits RIGHT in the zig-zag, matching
+        the slot it replaced. Not a gala surface: no .gala-foil, no
+        accent-gold.) */}
     <section
-      class="relative overflow-hidden py-16 text-white sm:py-20"
-      style={`background:
-        radial-gradient(46rem 26rem at 88% -4rem, rgba(160, 107, 216, 0.42), transparent 62%),
-        radial-gradient(38rem 22rem at -8% 100%, rgba(255, 111, 181, 0.28), transparent 60%),
-        radial-gradient(40rem 18rem at 50% 112%, rgba(255, 111, 181, 0.2), transparent 70%),
-        linear-gradient(to bottom, ${hausColors.maroon}, ${hausColors.plum});`}
+      class="relative overflow-hidden py-16 text-[#f6efe3] sm:py-20"
+      style="background:
+        radial-gradient(44rem 24rem at 86% -6rem, rgba(215, 155, 71, 0.16), transparent 62%),
+        radial-gradient(36rem 20rem at -8% 104%, rgba(224, 140, 184, 0.12), transparent 60%),
+        linear-gradient(to bottom, #2b1520, #1e1216);"
     >
-      <div class="haus-halftone absolute bottom-0 right-0 h-48 w-64 opacity-15 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true"></div>
-      {/* Slow-breathing party glows (gala-ambient pulse: ~8s scale/opacity
-          drift, nothing close to a flash) */}
-      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(255, 111, 181, 0.3);" aria-hidden="true"></div>
-      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(160, 107, 216, 0.34); animation-delay: 2.5s;" aria-hidden="true"></div>
-      {/* The mirror ball's throw, drifting across the whole section
-          (motion-safety notes on .haus-lights in global.css) */}
-      <div
-        class="haus-lights haus-lights--section"
-        style={`--haus-light-tile: ${hausLightTileUri};`}
-        aria-hidden="true"
-      >
-      </div>
+      {/* Slow-breathing candlelight glows (gala-ambient pulse: ~8s
+          scale/opacity drift, nothing close to a flash) */}
+      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(215, 155, 71, 0.2);" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(224, 140, 184, 0.16); animation-delay: 2.5s;" aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Copy (left) */}
-          <div class="reveal text-center lg:text-left">
-            <p class="font-marker text-xl text-white/85 sm:text-2xl">
-              <span class="haus-glow">Haus of LSP</span>
-              <span class="ml-2 inline-block -rotate-6 text-base text-white/55 sm:text-lg">presents</span>
+          <div class="reveal text-center lg:order-1 lg:text-left">
+            <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-[#f0c57c] sm:text-sm">
+              Last night lives forever
             </p>
-            <h2 class="mt-3 font-marker leading-[0.95]">
-              <span class="haus-glow block text-5xl sm:text-6xl" style={`color: ${hausColors.pink};`}>Summer</span>
-              <span class="haus-chrome block text-5xl sm:text-6xl">Renaissance</span>
+            <h2 class="mt-3 text-4xl leading-[1.05] tracking-tight [font-family:Fraunces,serif] [font-weight:650] sm:text-5xl">
+              <span class="text-[#f6efe3]">Graduation</span>
+              <span class="italic text-[#f0c57c]">2026</span>
             </h2>
-            <p class="mt-4 text-lg font-bold text-white">
-              {summerRenaissance.dateLabel} · {summerRenaissance.timeLabel}
+            <p class="mt-4 text-lg font-bold text-[#f6efe3]">
+              Friday, August 7, 2026 · LSP Studio, Pilsen
             </p>
-            <p class="mt-1 text-base font-semibold text-white/60">
-              {summerRenaissance.venueLine}
-            </p>
-
-            {/* The night at a glance: one sticker chip per headline act */}
-            <div class="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
-              {[
-                { label: "Art exhibit", color: hausColors.mint },
-                { label: "Open mic + slam poetry", color: "#ffffff" },
-                { label: "DJ + drinks til 11", color: hausColors.pink },
-              ].map((chip, i) => (
-                <span
-                  class="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em]"
-                  style={`color: ${chip.color}; border-color: ${chip.color}59; background: ${chip.color}14; transform: rotate(${[-1.1, 0.7, -0.5][i % 3]}deg);`}
-                >
-                  <span class="inline-block h-1.5 w-1.5 rounded-full" style={`background-color: ${chip.color};`} aria-hidden="true"></span>
-                  {chip.label}
-                </span>
-              ))}
-            </div>
-
-            <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/70 mx-auto lg:mx-0">
-              {summerRenaissance.homepageDescription}
+            <p class="mt-1 text-base font-semibold text-[#f6efe3]/60">
+              The YTT cohorts of 2025 and 2026 received their certificates together
             </p>
 
-            <p
-              class="mt-5 inline-block -rotate-1 border-2 border-dashed px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em]"
-              style={`color: ${hausColors.mint}; border-color: ${hausColors.mint}66;`}
-            >
-              {summerRenaissance.cause}
+            <p class="mt-6 text-2xl text-[#f0c57c] [font-family:Fraunces,serif] [font-weight:560] sm:text-3xl">
+              Nearly 100 teachers strong.
             </p>
+            <p class="mt-1 text-base italic text-[#f0c57c]/90 [font-family:Fraunces,serif] [font-weight:560]">
+              Casi 100 maestras y contando.
+            </p>
+
+            <blockquote class="mx-auto mt-6 max-w-xl text-left lg:mx-0">
+              {/* Candle-bokeh dot row (replaces the hairline quote rule) */}
+              <div class="flex items-center gap-2" aria-hidden="true">
+                <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]/70 blur-[1px]"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-[#f0c57c]/80 blur-[1.5px]"></span>
+                <span class="h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]"></span>
+                <span class="h-2 w-2 rounded-full bg-[#d79b47]/50 blur-[2px]"></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]/45 blur-[1.5px]"></span>
+              </div>
+              <p class="mt-3 text-lg italic leading-relaxed text-[#f6efe3]/80 [font-family:Fraunces,serif] [font-weight:450]">
+                &ldquo;The Latina Sweat Project was never these walls. It has
+                always been the people.&rdquo;
+              </p>
+              <footer class="mt-2 text-sm font-semibold text-[#f6efe3]/50">
+                Margarita Quiñones-Peña, Founder
+              </footer>
+            </blockquote>
 
             <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <a
-                href={hausPrimaryUrl}
-                target={hausHasTickets ? "_blank" : undefined}
-                rel={hausHasTickets ? "noopener noreferrer" : undefined}
-                class="haus-btn group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold text-off-black"
-                style={`background-color: ${hausColors.pink};`}
-                data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
-                data-conversion-context="home_haus_band"
+                href={graduationPageUrl}
+                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[#d79b47] px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="graduation_spotlight_click"
+                data-conversion-context="home_graduation"
               >
-                {hausPrimaryLabel}
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                Relive the night
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
-              {
-                hausHasTickets && (
-                  <a
-                    href={withBase("hausoflsp")}
-                    class="haus-btn group inline-flex items-center justify-center gap-3 bg-white/10 px-7 py-4 text-base font-extrabold text-white backdrop-blur-sm"
-                    data-conversion-event="haus_explore_click"
-                    data-conversion-context="home_haus_band"
-                  >
-                    {summerRenaissance.exploreLabel}
-                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                    </svg>
-                  </a>
-                )
-              }
-            </div>
-            <p class="mt-5 text-xs font-extrabold uppercase tracking-[0.2em] text-white/45 text-center lg:text-left">
-              {summerRenaissance.statusLabel}
-            </p>
-
-            {/* Call for artists + collaborators: hand-scrawled P.S. straight
-                to the sign-up sheet on /hausoflsp#artists */}
-            <p class="mt-5 text-center lg:text-left">
               <a
-                href={withBase("hausoflsp#artists")}
-                class="group inline-flex flex-wrap items-baseline justify-center gap-x-2 font-marker text-lg transition-opacity hover:opacity-80 lg:justify-start"
-                style={`color: ${hausColors.mint};`}
-                data-conversion-event="haus_artist_interest_click"
-                data-conversion-context="home_haus_band"
+                href={graduationFlickrUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center justify-center gap-3 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-7 py-4 text-base font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="graduation_gallery_click"
+                data-conversion-context="home_graduation"
               >
-                <span class="text-white/60">P.S.</span>
-                artists, poets + collaborators: sign up for the walls + the mic
-                <svg class="h-4 w-4 self-center transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                View the full gallery
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
+            </div>
+            <p class="mt-5 text-center text-xs font-extrabold uppercase tracking-[0.2em] text-[#f6efe3]/45 lg:text-left">
+              Photos and the full story on the recap page
             </p>
           </div>
 
-          {/* Media (right): a collage — the real 3D mirror ball hanging over
-              the taped-up "qué va a pasar?" note, with the printed flyer
-              tucked behind it */}
-          <div class="reveal relative mx-auto w-full max-w-md pt-16" style="transition-delay: 120ms;">
-            <div class="pointer-events-none absolute -top-10 -right-2 z-[3] sm:-right-6" aria-hidden="true">
-              <HausDiscoBall size="h-36 w-36 sm:h-44 sm:w-44" />
-            </div>
-            <img
-              src={`${base}images/hausoflsp1.jpg`}
-              width="1000"
-              height="1250"
-              alt=""
-              class="haus-sticker absolute -left-5 top-4 hidden w-40 rotate-[-8deg] rounded-sm sm:block lg:-left-12 lg:w-44"
-              loading="lazy"
-              decoding="async"
-              aria-hidden="true"
-            />
-            <div class="relative rotate-[1.1deg]">
-              <span class="haus-tape -top-3 left-6 rotate-[-8deg]" aria-hidden="true"></span>
-              <span class="haus-tape -top-3 right-6 rotate-[7deg]" aria-hidden="true"></span>
-              <div class="haus-note px-7 py-9 sm:px-9">
-                <p class="text-center font-marker text-3xl" style="color: #24201a;">
-                  qué va a pasar?
-                </p>
-                <div class="mt-5 space-y-5">
-                  {summerRenaissanceActs.map((act) => (
-                    <div>
-                      <p
-                        class="inline-block -rotate-1 rounded px-2 py-0.5 font-marker text-base text-off-black"
-                        style={`background: ${act.accent === "pink" ? `${hausColors.pink}55` : hausColors.mint};`}
-                      >
-                        {act.time}
-                      </p>
-                      <ul class="mt-2 space-y-1.5 pl-1">
-                        {act.items.map((item) => (
-                          <li class="flex items-baseline gap-2.5">
-                            <span class="font-marker text-lg leading-none" style={`color: ${hausColors.pink};`} aria-hidden="true">x</span>
-                            <span class="font-marker text-lg uppercase tracking-wide text-off-black">{item.title}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-                <p class="mt-6 text-center font-marker text-base text-off-black/70">
-                  all proceeds &rarr; {hausOfLsp.causeShort} &hearts;
-                </p>
+          {/* Media (right): the class photo in a soft gold frame */}
+          <div class="reveal relative mx-auto w-full max-w-xl lg:order-2" style="transition-delay: 120ms;">
+            <div class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#d79b47]/25 via-[#e08cb8]/12 to-transparent opacity-80 blur-2xl" aria-hidden="true"></div>
+            <figure class="relative">
+              <div class="rounded-[2rem] bg-gradient-to-br from-[#d79b47]/20 via-[#2b1520] to-[#1e1216] p-2.5 shadow-2xl shadow-black/40 sm:p-3">
+                <img
+                  src={`${base}images/graduation/hero.jpg`}
+                  width="1024"
+                  height="683"
+                  alt="The 2025 and 2026 YTT cohorts holding their certificates at LSP Studio"
+                  class="w-full rounded-[1.4rem]"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
-            </div>
+              <figcaption class="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-xs font-bold uppercase tracking-[0.18em] text-[#f6efe3]/45 lg:justify-end">
+                <span class="text-[#f0c57c]">Graduation night</span>
+                <span aria-hidden="true">·</span>
+                <span>Friday, August 7, 2026</span>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Haus of LSP — Summer Renaissance */}
+    {/* END: Graduation 2026 */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
@@ -1633,55 +1560,54 @@ const hausPrimaryLabel = hausHasTickets
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
-          {/* Haus of LSP · Summer Renaissance event card (leads: Aug 1 is
-              the soonest event) */}
+          {/* Graduation 2026 Gallery card (leads: fresh photos from the
+              Aug 7 YTT ceremony; graduation candlelit-rose identity) */}
           <a
-            href={hausPrimaryUrl}
-            target={hausHasTickets ? "_blank" : undefined}
-            rel={hausHasTickets ? "noopener noreferrer" : undefined}
+            href={graduationPageUrl}
             class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event={hausHasTickets ? "haus_ticket_click" : "haus_explore_click"}
-            data-conversion-context="home_events_carousel_haus"
+            data-conversion-event="graduation_spotlight_click"
+            data-conversion-context="home_events_carousel_graduation"
           >
             <div
-              class="relative h-full overflow-hidden rounded-2xl border text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ff6fb5]/20"
-              style={`background: linear-gradient(165deg, ${hausColors.maroon}, ${hausColors.plum} 70%); border-color: ${hausColors.pink}4d;`}
+              class="relative h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2b1520] to-[#1e1216] text-[#f6efe3] shadow-lg shadow-[#d79b47]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#d79b47]/20"
             >
               <div class="relative h-52 overflow-hidden">
-                <div class="absolute inset-0" style={`background: radial-gradient(24rem 16rem at 78% -20%, ${hausColors.violet}59, transparent 65%);`}></div>
-                <div class="haus-halftone absolute inset-0 opacity-10" aria-hidden="true"></div>
-                <div
-                  class="haus-disco absolute right-5 top-4 h-24 w-24 transition-transform duration-500 group-hover:rotate-6"
-                  style={`background-image: ${hausDiscoUri};`}
-                  aria-hidden="true"
-                >
-                </div>
-                <div class="absolute bottom-4 left-5 right-5">
-                  <p class="font-marker text-base text-white/80">Haus of LSP presents</p>
-                  <p class="font-marker text-3xl leading-none">
-                    <span class="haus-glow" style={`color: ${hausColors.pink};`}>Summer</span>
-                    <span class="haus-chrome"> Renaissance</span>
-                  </p>
-                </div>
-                <div class="absolute top-3 left-3 flex gap-2">
-                  <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black" style={`background-color: ${hausColors.mint};`}>
-                    Fundraiser
+                <img
+                  src={`${base}images/graduation/g15.jpg`}
+                  width="1024"
+                  height="683"
+                  alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#2b1520] via-[#2b1520]/25 to-transparent"></div>
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span class="rounded-full bg-[#d79b47] px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
+                    New Photos
+                  </span>
+                  <span class="rounded-full bg-[#2b1520]/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#f6efe3] backdrop-blur-sm">
+                    Fotos Nuevas
                   </span>
                 </div>
               </div>
               <div class="p-5">
-                <div class="flex items-center gap-2 text-sm font-semibold" style={`color: ${hausColors.pink};`}>
+                <div class="flex items-center gap-2 text-sm font-semibold text-[#f0c57c]">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
-                  {summerRenaissance.shortDateLabel} · 6 to 11 PM · {summerRenaissance.neighborhood}
+                  Fri, Aug 7 · LSP Studio, Pilsen
                 </div>
-                <p class="mt-2 text-sm leading-relaxed text-white/60">
-                  Art exhibit, open mic + slam poetry, then a DJ until 11.
-                  {" "}{summerRenaissance.cause}.
+                <h3 class="mt-2 text-2xl leading-tight transition-colors [font-family:Fraunces,serif] [font-weight:650] group-hover:text-[#f0c57c]">
+                  Graduation <span class="italic text-[#f0c57c]">2026</span> Gallery
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-[#f6efe3]/60">
+                  The YTT 2025 and 2026 cohorts received their certificates.
+                  Nearly 100 teachers strong, casi 100 maestras: relive
+                  graduation night with us.
                 </p>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold transition-all group-hover:gap-2" style={`color: ${hausColors.pink};`}>
-                  {hausPrimaryLabel}
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#f0c57c] transition-all group-hover:gap-2">
+                  Relive the night
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>

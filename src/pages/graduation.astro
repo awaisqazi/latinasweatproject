@@ -1,606 +1,3377 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import graduationInvite from "../data/graduationInvite.js";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import { sweatFest, sweatFestTickets } from "@/data/sweatFest";
+import { galaTeaser } from "@/data/galaTeaser";
+import galleryPhotos, { galleryCdnBase } from "@/data/graduationGallery";
 
-const googleFormUrl =
-  "https://docs.google.com/forms/d/e/1FAIpQLScLZetbOVHg4EUpYnTc8BvPSZqmSjlGx_kFc0I8QFCHCOqnYA/viewform?usp=header";
-const googleFormAction =
-  "https://docs.google.com/forms/d/e/1FAIpQLScLZetbOVHg4EUpYnTc8BvPSZqmSjlGx_kFc0I8QFCHCOqnYA/formResponse";
+// Public recap of the YTT 2025 + 2026 graduation ceremony (Friday, August 7,
+// 2026, LSP Studio, Pilsen). This route used to be the private RSVP form for
+// that night; the event has passed, so the form, its Google-Form plumbing, the
+// noindex robots tag, and hideFooter are all gone, and the page is now an
+// indexable story page whose job is to send people to the photo gallery.
+//
+// IDENTITY: "candlelit rose", drawn from the room in the photos (soft rose and
+// orchid party light, rows of candles, cream walls). It is deliberately NOT the
+// gala and NOT Haus of LSP, and the rules that keep it distinct are:
+//   - Display type is FRAUNCES (450/560/650, italics 450/560, loaded globally
+//     in Layout.astro). Body and labels stay Rubik.
+//   - NO hairline rules and NO gradient bars anywhere. Dividers and ornaments
+//     are candle-bokeh dot rows (`.sep`), soft glow orbs, and generously
+//     rounded shapes: cream photo mats, pill badges, large corner radii.
+//   - Gold stays soft: #f0c57c for accents, #d79b47 in CTA fills only.
+//
+// THE ONE EXCEPTION is the closing invitation section: those two cards are
+// invitations FROM Sweat Fest and from the gala, so each carries its own full
+// identity per design.md (Option F daylight for Sweat Fest; dark luxe with
+// Playfair, `.gala-foil`, and gold hairlines for the gala). Those signature
+// moves are scoped to their own card and must not leak into the rest of the
+// page, which stays rose ink and Fraunces.
+//
+// NOTE: /graduation is still listed in the sitemap `filter` exclusion array in
+// astro.config.mjs (left over from its private-RSVP days). That file is owned
+// elsewhere; removing "/graduation" from that list is what actually puts this
+// page in the sitemap now that it is public.
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
+const img = (file) => withBase(`images/graduation/${file}`);
+
+// The full album lives on Flickr; we link out rather than committing the files.
+// The count appears exactly ONCE on the page (the hero stat). Every gallery CTA
+// is a warm invitation, never a number.
+const galleryUrl =
+  "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
+const galleryCount = 307;
+
+// The album renders natively: a thumbnail wall plus our own lightbox, with
+// every image hotlinked from Flickr's CDN (src/data/graduationGallery.js holds
+// the path stems in album order). All 307 cells ship in the HTML, but the ones
+// past INITIAL_THUMBS start with the `hidden` attribute, so their lazy images
+// are never fetched until someone expands the wall.
+const galleryTotal = galleryPhotos.length;
+const INITIAL_THUMBS = 24;
+
+const eventDateLabel = "Friday, August 7, 2026";
+const eventVenueLabel = "LSP Studio · Pilsen, Chicago";
+
+// The three leaders, exactly as they are titled. Never invent titles here, and
+// never render nicknames: full name plus title only.
+const leaders = [
+  { name: "Margarita Quiñones-Peña", role: "Founder" },
+  { name: "Vanessa Tirado", role: "Co-Founder & Director" },
+  { name: "Veronica Quiñones", role: "Co-Founder, Director & Studio Manager" },
+];
+
+// The night, in five short chapters. Every photo is described from what is
+// actually in the frame. `tall` photos are portrait (683x1024), the rest are
+// landscape (1024x683), and all of them render at their natural aspect ratio so
+// nobody's face gets cropped by a grid.
+const chapters = [
+  {
+    id: "llegada",
+    step: "6:00 PM",
+    label: "Llegada",
+    title: "The room filled before the ceremony did",
+    body: "Bouquets still in their paper, diploma folders already in hand, and the studio kitchen full of hugs and introductions before anyone sat down.",
+    photos: [
+      {
+        file: "g01.jpg",
+        w: 1600,
+        h: 1067,
+        alt: "A guest laughs with his eyes shut while holding a wrapped bouquet of yellow and lavender flowers, surrounded by friends and family in the studio kitchen.",
+      },
+      {
+        file: "g02.jpg",
+        w: 1024,
+        h: 683,
+        alt: "A graduate holds her black and gold LSP diploma folder against her chest, talking with two friends beside a counter of sunflowers, a disco ball hanging overhead.",
+      },
+      {
+        file: "g03.jpg",
+        w: 1024,
+        h: 683,
+        alt: "Two people talk across a table of iced coffees, a laptop covered in stickers open between them.",
+      },
+    ],
+  },
+  {
+    id: "breathwork",
+    // The ceremonial heart of the night: rendered as a featured moment on a
+    // raised panel with cream keepsake mats, not as three more grid photos.
+    ceremonial: true,
+    step: "The opening",
+    label: "Respiración guiada · Guided breathwork",
+    title: "Guided breathwork, hands over hearts",
+    body: "A sound bath opened the ceremony. Then the whole room, graduates, familias and friends together, breathed through a guided practice with a hand resting over the heart.",
+    photos: [
+      {
+        file: "g04.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        alt: "An older woman in a black and silver brocade dress sits with her hand over her heart, eyes forward, a younger woman doing the same behind her, both lit in warm pink light.",
+      },
+      {
+        file: "g05.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        alt: "A row of guests seated in front of a gold fringe curtain with their hands over their hearts and eyes closed, one man standing behind them doing the same.",
+      },
+      {
+        file: "g06.jpg",
+        w: 1024,
+        h: 683,
+        alt: "Guests standing along the studio wall with hands pressed over their hearts, kettlebells stacked on the floor behind them.",
+      },
+    ],
+    quote: {
+      text: "The Latina Sweat Project was never these walls. It was never an address. It has always been the people standing in this room.",
+      author: "Margarita Quiñones-Peña",
+      role: "Founder",
+    },
+  },
+  {
+    id: "diplomas",
+    step: "The ceremony",
+    label: "Diplomas",
+    title: "Names called, one at a time",
+    body: "Diplomas were presented at the front of the studio, and almost nobody made it back to their spot without being pulled into a hug first.",
+    photos: [
+      {
+        file: "g07.jpg",
+        w: 1024,
+        h: 683,
+        alt: "Two graduates hold each other in a long hug while a classmate waits alongside them holding diploma folders, candles glowing at the base of the mirror.",
+      },
+      {
+        file: "g08.jpg",
+        w: 1024,
+        h: 683,
+        alt: "A graduate is lifted into a hug, her diploma folder still in her hand, while a guest films the moment on his phone from across the room.",
+      },
+      {
+        file: "g09.jpg",
+        w: 1024,
+        h: 683,
+        alt: "The room applauds as two graduates embrace, one in a gold dress holding her diploma folder behind her friend's back, rows of candles lining the floor.",
+      },
+    ],
+  },
+  {
+    id: "speeches",
+    step: "The mic",
+    label: "Speeches",
+    title: "Then the microphone went around the room",
+    body: "Our founders spoke. So did our Junior Board and our graduates, several of them reading from notes on their phones, with the rest of the room sitting on the floor around them.",
+    photos: [
+      {
+        file: "g10.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        credit: { name: "Vanessa Tirado", role: "Co-Founder & Director" },
+        alt: "Vanessa Tirado speaks into a handheld microphone while reading from her phone, wearing a Chicago basketball jersey, the seated room reflected in the mirror behind her.",
+      },
+      {
+        file: "g11.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        credit: { name: "Margarita Quiñones-Peña", role: "Founder" },
+        alt: "Margarita Quiñones-Peña speaks mid-sentence with a microphone, in a white top and long strand of pearls, graduates seated on the floor around her.",
+      },
+      {
+        file: "g12.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        credit: {
+          name: "Yesi Peyret",
+          role: "Vice President, 2025 Junior Board",
+        },
+        alt: "Yesi Peyret smiles as she speaks into a microphone, holding her phone in her other hand, wearing a cream rebozo printed with monarch butterflies.",
+      },
+      {
+        file: "g13.jpg",
+        w: 683,
+        h: 1024,
+        tall: true,
+        credit: { name: "Margarita Quiñones-Peña", role: "Founder" },
+        alt: "Margarita Quiñones-Peña laughs mid-speech with the microphone in one hand and a bouquet of blue hydrangeas and roses held against her chest.",
+      },
+    ],
+  },
+  {
+    id: "celebracion",
+    step: "After",
+    label: "Flores y celebración",
+    title: "Flowers, one very crowded selfie, and the class photo",
+    body: "Bouquets went around, everyone piled into a group selfie, and the night closed with the whole graduating group together, certificates in the frame.",
+    photos: [
+      {
+        file: "g14.jpg",
+        w: 1024,
+        h: 683,
+        alt: "A crowd of graduates and guests packs into a group selfie, one arm stretched out holding the phone, everyone leaning in and laughing.",
+      },
+      {
+        file: "g16.jpg",
+        w: 1024,
+        h: 683,
+        alt: "The full graduating group poses together in warm pink light, some kneeling in front, gold and white balloons on the studio floor around them.",
+      },
+      {
+        file: "g15.jpg",
+        w: 1024,
+        h: 683,
+        feature: true,
+        caption: "The 2025 and 2026 cohorts with their certificates.",
+        alt: "The full 2025 and 2026 cohorts pose in two rows across the studio, nearly every person holding a framed certificate, papel picado and a gold fringe curtain visible in the room behind them.",
+      },
+    ],
+  },
+];
+
+// What makes this training one of a kind, in its own band: the anchor quote,
+// where graduates go on to teach, and the lineage that follows them.
+const programQuote = {
+  text: "We were never trying to create simply more yoga teachers. We were always building leaders and a pipeline of teachers.",
+  author: "Margarita Quiñones-Peña",
+  role: "Founder",
+};
+
+const programPlaces = [
+  "Studios",
+  "Schools",
+  "Parks",
+  "Hospitals",
+  "Shelters",
+];
+
+const lineage = [
+  {
+    figure: "2025 + 2026",
+    label: "The cohorts honored this August",
+  },
+  {
+    figure: "Nearly 100",
+    label: "Teachers certified through LSP so far",
+  },
+  {
+    figure: "Hundreds more",
+    label: "Still to come, taught by the ones in this room",
+  },
+];
+
+// Speech lines that carry the night. Verified against the footage; attribute
+// exactly as written.
+const voices = [
+  {
+    text: "You are not simply graduating from the Latina Sweat Project. You are building its future.",
+    author: "Margarita Quiñones-Peña",
+    role: "Founder",
+  },
+  {
+    text: "Continue to lead with courage, service, and compassion.",
+    author: "Vanessa Tirado",
+    role: "Co-Founder & Director",
+  },
+];
+
+// What the share button and the copy button hand out: this page, not the raw
+// Flickr album, so anyone who follows it lands on the story first.
+const pageShareUrl = "https://latinasweatproject.com/graduation";
+const pageShareLabel = "latinasweatproject.com/graduation";
+const pageShareText =
+  "Graduation 2026 at the Latina Sweat Project. Nearly 100 teachers strong.";
+
+// Share kit, generated in this same candlelit rose identity. The story graphic
+// is the one shown; the rest stay reachable as quiet download links. If a file
+// is not there yet, its preview removes itself instead of rendering broken.
+const shareGraphics = [
+  {
+    key: "story",
+    file: "story.jpg",
+    label: "Story graphic",
+    note: "1080 x 1920 · Instagram story",
+    download: "lsp-graduation-2026-story.jpg",
+    w: 1080,
+    h: 1920,
+    alt: "Instagram story graphic for the LSP Graduation 2026 photo gallery.",
+    tall: true,
+  },
+  {
+    key: "carousel_1",
+    file: "carousel-1.jpg",
+    label: "Carousel · 1",
+    note: "1080 x 1350 · first slide",
+    download: "lsp-graduation-2026-carousel-1.jpg",
+    w: 1080,
+    h: 1350,
+    alt: "First slide of the LSP Graduation 2026 Instagram carousel.",
+  },
+  {
+    key: "carousel_2",
+    file: "carousel-2.jpg",
+    label: "Carousel · 2",
+    note: "1080 x 1350 · second slide",
+    download: "lsp-graduation-2026-carousel-2.jpg",
+    w: 1080,
+    h: 1350,
+    alt: "Second slide of the LSP Graduation 2026 Instagram carousel.",
+  },
+  {
+    key: "carousel_3",
+    file: "carousel-3.jpg",
+    label: "Carousel · 3",
+    note: "1080 x 1350 · third slide",
+    download: "lsp-graduation-2026-carousel-3.jpg",
+    w: 1080,
+    h: 1350,
+    alt: "Third slide of the LSP Graduation 2026 Instagram carousel.",
+  },
+  {
+    key: "post",
+    file: "post.jpg",
+    label: "Feed post",
+    note: "1080 x 1350 · single post",
+    download: "lsp-graduation-2026-post.jpg",
+    w: 1080,
+    h: 1350,
+    alt: "Single feed post graphic for the LSP Graduation 2026 photo gallery.",
+  },
+];
+
+// The story graphic is the only one previewed; the feed post and the three
+// carousel slides live in the quiet "More sizes" line beneath the button.
+const storyGraphic = shareGraphics.find((g) => g.key === "story");
+const moreGraphics = [
+  { ...shareGraphics.find((g) => g.key === "post"), short: "post" },
+  { ...shareGraphics.find((g) => g.key === "carousel_1"), short: "carousel 1" },
+  { ...shareGraphics.find((g) => g.key === "carousel_2"), short: "carousel 2" },
+  { ...shareGraphics.find((g) => g.key === "carousel_3"), short: "carousel 3" },
+];
+
+// Closing invitations. Both events read from their own single source of truth,
+// so links, prices, and on-sale state never drift from the rest of the site.
+const sweatFestHasTickets = sweatFestTickets.onSale && sweatFestTickets.url;
+const sweatFestPrimaryUrl = sweatFestHasTickets
+  ? sweatFestTickets.url
+  : withBase("sweatfest");
+const sweatFestPrimaryLabel = sweatFestHasTickets
+  ? sweatFest.ticketsLabel
+  : "Learn more";
+const sweatFestPrimaryEvent = sweatFestHasTickets
+  ? "sweatfest_ticket_click"
+  : "sweatfest_explore_click";
+const sweatFestVolunteerUrl = withBase("sweatfest#volunteer");
+const galaPageUrl = withBase(galaTeaser.pagePath);
+
+const pageTitle = "Graduation 2026 | The Latina Sweat Project";
+const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga Teacher Training graduation on ${eventDateLabel} in Pilsen, Chicago, where the 2025 and 2026 cohorts were certified and LSP reached nearly 100 teachers trained.`;
 ---
 
 <Layout
-  title="YTT Graduation RSVP | The Latina Sweat Project"
-  description="Private RSVP for the Latina Sweat Project Yoga Teacher Training graduation ceremony."
-  robots="noindex, nofollow, noarchive"
-  hideFooter={true}
+  title={pageTitle}
+  description={pageDescription}
+  socialImage="images/graduation/hero.jpg"
+  socialImageAlt="The 2025 and 2026 LSP Yoga Teacher Training cohorts holding their certificates at the studio in Pilsen."
+  socialImageWidth={1024}
+  socialImageHeight={683}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
 >
-  <main class="graduation-page">
-    <div class="ambient ambient-one" aria-hidden="true"></div>
-    <div class="ambient ambient-two" aria-hidden="true"></div>
+  <Header />
 
-    <section class="event-shell" aria-labelledby="graduation-title">
-      <div class="invite-panel">
-        <p class="eyebrow">A private celebration</p>
-        <img
-          class="invite-art"
-          src={graduationInvite}
-          width="360"
-          height="503"
-          alt="Invitation to the YTT 2025 and 2026 graduation ceremony on Friday, August 7, 2026 at 6:00 PM at LSP Studio."
-        />
-        <div class="event-facts" aria-label="Event details">
-          <div>
-            <span>Date</span>
-            <strong>Friday, August 7, 2026</strong>
-          </div>
-          <div>
-            <span>Time</span>
-            <strong>6:00 PM</strong>
-          </div>
-          <div>
-            <span>Location</span>
-            <strong>LSP Studio</strong>
-          </div>
-        </div>
-      </div>
+  <main class="grad-page">
+    {/* Candle bokeh drifting behind the whole page: the page's signature
+        ornament, static and low contrast so it never competes with the photos. */}
+    <div class="candles" aria-hidden="true">
+      <span style="--x: 6%; --y: 14%; --s: 14px; --o: 0.5;"></span>
+      <span style="--x: 21%; --y: 47%; --s: 9px; --o: 0.34;"></span>
+      <span style="--x: 46%; --y: 8%; --s: 11px; --o: 0.3;"></span>
+      <span style="--x: 79%; --y: 27%; --s: 16px; --o: 0.42;"></span>
+      <span style="--x: 92%; --y: 61%; --s: 10px; --o: 0.3;"></span>
+      <span style="--x: 63%; --y: 78%; --s: 13px; --o: 0.28;"></span>
+      <span style="--x: 12%; --y: 88%; --s: 11px; --o: 0.26;"></span>
+    </div>
 
-      <div class="rsvp-panel">
-        <div class="rsvp-heading">
-          <p class="eyebrow">YTT cohorts 2025 + 2026</p>
-          <h1 id="graduation-title">Will you celebrate with us?</h1>
-          <p>
-            Join us as we honor the dedication, growth, and accomplishments of
-            our Yoga Teacher Training graduates.
-          </p>
-        </div>
+    {/* ============================== HERO ============================== */}
+    <section class="hero" aria-labelledby="graduation-title">
+      <div class="wrap">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Yoga Teacher Training · Pilsen, Chicago</p>
+            <h1 id="graduation-title" class="display hero-title">
+              <span class="hero-title-main">Graduation</span>
+              <span class="hero-title-year">2026</span>
+            </h1>
+            {/* The class lockup, treated with commencement honor. */}
+            <p class="class-lockup">
+              <span class="class-lockup-label">In honor of the</span>
+              <span class="class-lockup-name display">
+                YTT Class of 2025 <span class="class-lockup-amp">+</span> 2026
+              </span>
+            </p>
+            <div class="sep sep--left" aria-hidden="true"></div>
+            <p class="hero-facts">
+              {eventDateLabel} · 6:00 PM<br />
+              {eventVenueLabel}
+            </p>
+            <p class="lede">
+              One candlelit Friday: a sound bath, guided breathwork with a hand
+              over every heart, and two cohorts of new yoga teachers.
+            </p>
+            <p class="lede-es" lang="es">Casi 100 maestras y contando.</p>
 
-        <form
-          id="graduation-rsvp"
-          class="rsvp-form"
-          action={googleFormAction}
-          method="POST"
-          target="google-form-response"
-        >
-          <label class="field">
-            <span>Full name</span>
-            <input
-              type="text"
-              name="entry.2092325669"
-              autocomplete="name"
-              required
-              placeholder="Your first and last name"
-            />
-          </label>
-
-          <label class="field">
-            <span>Email</span>
-            <input
-              type="email"
-              name="emailAddress"
-              autocomplete="email"
-              required
-              placeholder="you@example.com"
-            />
-          </label>
-
-          <fieldset class="attendance-fieldset">
-            <legend>Can you attend?</legend>
-            <div class="attendance-options">
-              <label class="attendance-option">
-                <input type="radio" name="attendance" value="yes" required />
-                <span>
-                  <strong>Joyfully accepting</strong>
-                  <small>Yes, I’ll be there</small>
-                </span>
-              </label>
-              <label class="attendance-option">
-                <input type="radio" name="attendance" value="no" required />
-                <span>
-                  <strong>Sending my love</strong>
-                  <small>I’m unable to attend</small>
-                </span>
-              </label>
+            <div class="cta-row">
+              <a
+                class="btn btn--gold"
+                href={galleryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-conversion-event="graduation_gallery_click"
+                data-conversion-context="graduation_hero"
+              >
+                Relive Graduation Night
+                <svg
+                  class="btn-arrow"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a class="btn btn--ghost" href="#story">Read the story of the night</a>
             </div>
-          </fieldset>
 
-          <input id="google-yes-entry" type="hidden" value="Option 1" disabled />
-          <input id="google-no-entry" type="hidden" value="Option 1" disabled />
-          <input type="hidden" name="fvv" value="1" />
-          <input type="hidden" name="pageHistory" value="0" />
+            <dl class="stats">
+              <div class="stat">
+                <dt>Teachers certified through LSP</dt>
+                <dd>Nearly 100</dd>
+              </div>
+              <div class="stat">
+                <dt>Cohorts honored</dt>
+                <dd>2</dd>
+              </div>
+              <div class="stat">
+                <dt>Photos from the night</dt>
+                <dd>{galleryCount}</dd>
+              </div>
+            </dl>
+          </div>
 
-          <button class="submit-button" type="submit">
-            <span class="button-label">Send RSVP</span>
-            <span class="button-arrow" aria-hidden="true">→</span>
-          </button>
+          <figure class="hero-figure">
+            <div class="mat mat--cream">
+              <img
+                src={img("hero.jpg")}
+                width="1024"
+                height="683"
+                alt="The full 2025 and 2026 cohorts pose in two rows across the studio, nearly every person holding a framed certificate."
+                fetchpriority="high"
+                decoding="async"
+              />
+            </div>
 
-          <p class="form-note">
-            Your response is recorded in our private Google Form. Having
-            trouble? <a href={googleFormUrl} target="_blank" rel="noopener noreferrer">Open the original form</a>.
-          </p>
-        </form>
+            {/* Soft gold seal, pressed into the corner of the keepsake mat the
+                way a seal is pressed into a diploma. Purely ornamental: the
+                class lockup beside it carries the same words in real text. */}
+            {/* Seal geometry, worked against the ring circumference so the two
+                arc texts can never collide (the old build overflowed both):
+                  · text arcs are semicircles of r=45, length pi*45 = 141.4
+                  · both texts are centred with text-anchor=middle +
+                    startOffset=50%, so gaps are symmetric by construction
+                  · top "YOGA TEACHER TRAINING" ~= 12.64em; at 6.5px with
+                    0.8px tracking that is ~99px, leaving ~21px clear at each
+                    of the 3 and 9 o'clock ends
+                  · bottom "LATINA SWEAT PROJECT" ~= 12.16em, ~95px, ~23px clear
+                  · top glyphs sit r45 -> r49.6 (cap height .7em), inside the
+                    r=52 ring; bottom glyphs sit inward, r40.5 -> r45, so the
+                    two bands never overlap
+                  · separator dots sit exactly at the 3 and 9 o'clock junctions
+                  · centre block stays inside r=39: "CLASS OF" ~48px wide,
+                    "2025 + 2026" at 10.5px ~64px wide (half-width 32 against
+                    a 37.7 half-chord at that height) */}
+            <svg
+              class="seal"
+              viewBox="0 0 120 120"
+              role="presentation"
+              aria-hidden="true"
+            >
+              <circle cx="60" cy="60" r="57" class="seal-disc" />
+              <circle cx="60" cy="60" r="52" class="seal-ring" />
+              <path
+                id="seal-arc-top"
+                d="M 60 60 m -45 0 a 45 45 0 1 1 90 0"
+                fill="none"></path>
+              <path
+                id="seal-arc-bottom"
+                d="M 60 60 m -45 0 a 45 45 0 1 0 90 0"
+                fill="none"></path>
+              <text class="seal-text" text-anchor="middle">
+                <textPath href="#seal-arc-top" startOffset="50%"
+                  >YOGA TEACHER TRAINING</textPath
+                >
+              </text>
+              <text class="seal-text" text-anchor="middle">
+                <textPath href="#seal-arc-bottom" startOffset="50%"
+                  >LATINA SWEAT PROJECT</textPath
+                >
+              </text>
+              <circle cx="15" cy="60" r="1.5" class="seal-dot" />
+              <circle cx="105" cy="60" r="1.5" class="seal-dot" />
+              <text class="seal-small" x="60" y="52" text-anchor="middle">
+                CLASS OF
+              </text>
+              <text class="seal-year" x="60" y="70" text-anchor="middle">
+                2025 + 2026
+              </text>
+              <circle cx="54.5" cy="82" r="1.1" class="seal-dot" />
+              <circle cx="60" cy="82" r="1.1" class="seal-dot" />
+              <circle cx="65.5" cy="82" r="1.1" class="seal-dot" />
+            </svg>
 
-        <div id="rsvp-success" class="success-card" hidden aria-live="polite">
-          <span class="success-mark" aria-hidden="true">✓</span>
-          <p class="eyebrow">RSVP received</p>
-          <h2>Thank you, graduate!</h2>
-          <p>We can’t wait to celebrate this milestone with our YTT community.</p>
-          <button id="send-another" type="button">Send another response</button>
+            <figcaption>
+              The class of 2025 and 2026, certificates in hand, at LSP Studio.
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
 
-    <iframe
-      id="google-form-response"
-      name="google-form-response"
-      title="Google Form submission response"
-      hidden
-    ></iframe>
+    {/* ============================= THE STORY ========================== */}
+    <section id="story" class="story" aria-labelledby="story-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <header class="section-head">
+          <p class="eyebrow">La noche, en fotos</p>
+          <h2 id="story-title" class="display">The story of the night</h2>
+          <p class="section-lede">
+            Two cohorts walked into the studio as students and walked out as
+            teachers. Here is how it went, in order.
+          </p>
+        </header>
+
+        {
+          chapters.map((chapter) => (
+            <article
+              class:list={["chapter", chapter.ceremonial && "chapter--ceremony"]}
+              aria-labelledby={`ch-${chapter.id}`}
+            >
+              {chapter.ceremonial && <div class="sep" aria-hidden="true" />}
+              <div class="chapter-head reveal">
+                <p class="chapter-step">
+                  <span class="chapter-step-time">{chapter.step}</span>
+                  <span class="chapter-step-label">{chapter.label}</span>
+                </p>
+                <h3 id={`ch-${chapter.id}`} class="display chapter-title">
+                  {chapter.title}
+                </h3>
+                <p class="chapter-body">{chapter.body}</p>
+              </div>
+
+              <div
+                class:list={[
+                  "mosaic",
+                  chapter.photos.length === 4 && "mosaic--four",
+                ]}
+              >
+                {chapter.photos.map((photo) => (
+                  <figure
+                    class:list={[
+                      "shot",
+                      "reveal",
+                      photo.tall && "shot--tall",
+                      photo.feature && "shot--feature",
+                    ]}
+                  >
+                    <div
+                      class:list={[
+                        "mat",
+                        (photo.feature || chapter.ceremonial) && "mat--cream",
+                      ]}
+                    >
+                      <img
+                        src={img(photo.file)}
+                        width={photo.w}
+                        height={photo.h}
+                        alt={photo.alt}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    {photo.credit && (
+                      <figcaption class="shot-credit">
+                        <span class="shot-credit-name">
+                          {photo.credit.name}
+                        </span>
+                        <span class="shot-credit-role">
+                          {photo.credit.role}
+                        </span>
+                      </figcaption>
+                    )}
+                    {photo.caption && <figcaption>{photo.caption}</figcaption>}
+                  </figure>
+                ))}
+              </div>
+
+              {chapter.quote && (
+                <blockquote class="pull reveal">
+                  <span class="pull-mark" aria-hidden="true">
+                    “
+                  </span>
+                  <p>{chapter.quote.text}</p>
+                  <footer>
+                    <span class="pull-author">{chapter.quote.author}</span>
+                    <span class="pull-role">{chapter.quote.role}</span>
+                  </footer>
+                </blockquote>
+              )}
+            </article>
+          ))
+        }
+
+        {/* The whole album, on the page. Both Flickr embed routes (the embedr
+            transform script and the static /player iframe) came up empty in
+            testing, so this is a native thumbnail wall plus our own lightbox,
+            hotlinking Flickr's CDN the same way /adobe and /gallery do. The
+            outbound album link stays underneath as attribution. */}
+        <div class="gallery-band reveal">
+          <div class="gallery-band-head">
+            <div class="gallery-band-copy">
+              <p class="eyebrow">The full album</p>
+              <p class="gallery-band-title display">
+                Every moment from the night
+              </p>
+              <p class="gallery-band-note">
+                Flip through all of it right here: find yourself, find your
+                cohort, and take home anything you want.
+              </p>
+              <p class="gallery-band-es" lang="es">
+                Revive la noche de graduación.
+              </p>
+            </div>
+
+            {/* Same outbound link as the line below the wall, kept at the top
+                too so it stays reachable once all 307 thumbs are expanded. */}
+            <a
+              class="btn btn--ghost btn--small gallery-band-out"
+              href={galleryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-conversion-event="graduation_gallery_click"
+              data-conversion-context="graduation_gallery_top"
+            >
+              Open in Flickr
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M14 5h5v5M19 5l-7 7M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                ></path>
+              </svg>
+            </a>
+          </div>
+
+          <div class="mat mat--cream gallery-wall" data-cdn={galleryCdnBase}>
+            <ul class="thumb-grid" role="list">
+              {
+                galleryPhotos.map((photo, i) => (
+                  <li class="thumb-cell" hidden={i >= INITIAL_THUMBS}>
+                    <button
+                      type="button"
+                      class="thumb"
+                      data-index={i}
+                      data-full={photo.f}
+                      aria-label={`Open photo ${i + 1} of ${galleryTotal}`}
+                    >
+                      <img
+                        src={`${galleryCdnBase}${photo.t}.jpg`}
+                        alt={`Graduation photo ${i + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <button id="gallery-expand" class="gallery-expand" type="button">
+              <span>Show every photo</span>
+              <span class="gallery-expand-es" lang="es">
+                Ver todas las fotos
+              </span>
+            </button>
+          </div>
+
+          <p class="gallery-embed-note">
+            Prefer it full screen?
+            <a
+              class="gallery-embed-link"
+              href={galleryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-conversion-event="graduation_gallery_click"
+              data-conversion-context="graduation_story_end"
+            >
+              Open the album on Flickr
+            </a>
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    {/* ===================== A TRAINING LIKE NO OTHER =================== */}
+    <section class="program" aria-labelledby="program-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <header class="section-head section-head--center">
+          <p class="eyebrow" lang="es">Una formación como ninguna</p>
+          <h2 id="program-title" class="display">
+            A teacher training that exists nowhere else
+          </h2>
+          <p class="section-lede">
+            Community rooted and Latina led, taught in Pilsen, and built so that
+            the people who grew up in these neighborhoods are the ones leading
+            the room.
+          </p>
+        </header>
+
+        <blockquote class="pull reveal">
+          <span class="pull-mark" aria-hidden="true">“</span>
+          <p>{programQuote.text}</p>
+          <footer>
+            <span class="pull-author">{programQuote.author}</span>
+            <span class="pull-role">{programQuote.role}</span>
+          </footer>
+        </blockquote>
+
+        <div class="places reveal">
+          <p class="places-label">Where these teachers go on to teach</p>
+          <ul class="places-list" role="list">
+            {programPlaces.map((place) => <li class="place-chip">{place}</li>)}
+          </ul>
+          <p class="places-quote">
+            “In our neighborhoods, where we belong.”
+            <span class="places-cite">Margarita Quiñones-Peña, Founder</span>
+          </p>
+        </div>
+
+        {/* Signature element: one delicate thread carrying the lineage from
+            this class, through the count so far, to the teachers they will
+            train. The thread is an SVG curve on wider screens; on phones the
+            same three nodes stack with candle dots. */}
+        <div class="lineage reveal">
+          <p class="lineage-label">The lineage</p>
+
+          <svg
+            class="lineage-thread"
+            viewBox="0 0 1000 64"
+            preserveAspectRatio="none"
+            role="presentation"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="lineage-stroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#f0c57c" stop-opacity="0"></stop>
+                <stop offset="18%" stop-color="#f0c57c" stop-opacity="0.85"
+                ></stop>
+                <stop offset="52%" stop-color="#e08cb8" stop-opacity="0.85"
+                ></stop>
+                <stop offset="86%" stop-color="#f0c57c" stop-opacity="0.85"
+                ></stop>
+                <stop offset="100%" stop-color="#f0c57c" stop-opacity="0"
+                ></stop>
+              </linearGradient>
+            </defs>
+            <path
+              d="M 26 56 C 90 48, 132 46, 167 42 C 280 8, 400 8, 500 28 C 620 52, 730 54, 833 20 C 890 12, 934 10, 974 14"
+              fill="none"
+              stroke="url(#lineage-stroke)"
+              stroke-width="1.6"
+              stroke-linecap="round"></path>
+            <circle cx="167" cy="42" r="4.5" class="lineage-anchor"></circle>
+            <circle cx="500" cy="28" r="5.5" class="lineage-anchor"></circle>
+            <circle cx="833" cy="20" r="4.5" class="lineage-anchor"></circle>
+          </svg>
+
+          <ol class="lineage-nodes">
+            {
+              lineage.map((node) => (
+                <li class="lineage-node">
+                  <span class="lineage-dot" aria-hidden="true" />
+                  <p class="lineage-figure display">{node.figure}</p>
+                  <p class="lineage-note">{node.label}</p>
+                </li>
+              ))
+            }
+          </ol>
+
+          <p class="lineage-closer">
+            Someday hundreds of teachers will trace their lineage back to the
+            people who stood in this room.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* ============================== VOICES ============================ */}
+    <section class="voices" aria-labelledby="voices-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <header class="section-head">
+          <p class="eyebrow">Voces de la noche</p>
+          <h2 id="voices-title" class="display">What was said</h2>
+        </header>
+
+        <div class="voice-grid">
+          {
+            voices.map((voice) => (
+              <blockquote class="voice reveal">
+                <span class="pull-mark" aria-hidden="true">
+                  “
+                </span>
+                <p>{voice.text}</p>
+                <footer>
+                  <span class="pull-author">{voice.author}</span>
+                  <span class="pull-role">{voice.role}</span>
+                </footer>
+              </blockquote>
+            ))
+          }
+        </div>
+
+        <div class="sep sep--wide" aria-hidden="true"></div>
+        <blockquote class="voice-closer reveal">
+          <p class="display">And please, dream bigger.</p>
+          <footer>
+            <span class="pull-author">Margarita Quiñones-Peña</span>
+            <span class="pull-role">Founder</span>
+          </footer>
+        </blockquote>
+      </div>
+    </section>
+
+    {/* =============================== SHARE ============================ */}
+    <section id="share" class="share" aria-labelledby="share-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <header class="section-head">
+          <p class="eyebrow" lang="es">Comparte la galería</p>
+          <h2 id="share-title" class="display">Share the graduation gallery</h2>
+          <p class="section-lede">
+            Post it to your story and add a link sticker, or share straight
+            from here.
+          </p>
+        </header>
+
+        <div class="share-kit">
+          {/* One preview, at roughly the size it will appear on a phone. */}
+          <div class="mat share-preview" data-share-card>
+            <img
+              src={img(`share/${storyGraphic.file}`)}
+              width={storyGraphic.w}
+              height={storyGraphic.h}
+              alt={storyGraphic.alt}
+              loading="lazy"
+              decoding="async"
+              data-share-img
+            />
+          </div>
+
+          <div class="share-controls">
+            <button
+              id="share-social"
+              class="btn btn--gold share-primary"
+              type="button"
+              data-file={img(`share/${storyGraphic.file}`)}
+              data-download={storyGraphic.download}
+            >
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 15V3m0 0L8 7m4-4l4 4M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
+                ></path>
+              </svg>
+              <span class="share-primary-label">
+                <span class="share-primary-en">Share on social media</span>
+                <span class="share-primary-es" lang="es">Comparte en redes</span>
+              </span>
+            </button>
+
+            <div class="share-link-row">
+              <span class="share-link-text">{pageShareLabel}</span>
+              <button
+                id="copy-link"
+                class="share-copy"
+                type="button"
+                data-copy={pageShareUrl}
+                aria-label="Copy the graduation page link"
+              >
+                <svg
+                  class="btn-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="9" width="12" height="12" rx="3"></rect>
+                  <path
+                    stroke-linecap="round"
+                    d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"
+                  ></path>
+                </svg>
+                <span class="copy-label">Copy</span>
+              </button>
+            </div>
+
+            {/* The other four graphics stay reachable without a card grid. */}
+            <p class="share-more">
+              More sizes:
+              {
+                moreGraphics.map((graphic, i) => (
+                  <>
+                    {i > 0 && <span class="share-more-dot"> · </span>}
+                    <a
+                      class="share-more-link"
+                      href={img(`share/${graphic.file}`)}
+                      download={graphic.download}
+                      data-conversion-event="graduation_share_download"
+                      data-conversion-label={graphic.key}
+                      data-conversion-context="graduation_share_section"
+                    >
+                      {graphic.short}
+                    </a>
+                  </>
+                ))
+              }
+            </p>
+          </div>
+        </div>
+        <p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    {/* ============================== GRACIAS =========================== */}
+    <section class="gracias" aria-labelledby="gracias-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <div class="gracias-inner">
+          <p class="eyebrow" lang="es">Gracias, maestras</p>
+          <h2 id="gracias-title" class="display">
+            To everyone who walked across that floor
+          </h2>
+          <p class="gracias-body">
+            Thank you to the 2025 and 2026 graduates for the hours, the work,
+            and the trust. Thank you to the families and friends who filled the
+            room, and to everyone who came to stand with them. Nearly 100 people
+            have now been certified through this program, and every one of them
+            started exactly where this cohort is standing.
+          </p>
+
+          <ul class="leaders" role="list">
+            {
+              leaders.map((leader) => (
+                <li class="leader">
+                  <span class="leader-name">{leader.name}</span>
+                  <span class="leader-role">{leader.role}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    {/* ============================ NEXT HOME =========================== */}
+    <section class="next-home" aria-labelledby="next-home-title">
+      <div class="wrap">
+        <div class="next-home-inner reveal">
+          <div class="next-home-copy">
+            <p class="eyebrow">Our next home</p>
+            <h2 id="next-home-title" class="display">
+              Help us build the room this happens in next
+            </h2>
+            <p>
+              Our lease at 949 W 16th St ends in December 2026, so this
+              graduation was one of the last big nights in this space. We are
+              raising the funds for our next studio, and the speeches said it
+              plainly that night: the program travels with the people, not the
+              address.
+            </p>
+            <p class="next-home-es" lang="es">
+              Ayúdanos a construir nuestra próxima casa.
+            </p>
+            <div class="cta-row">
+              <a
+                class="btn btn--gold"
+                href={withBase("donate")}
+                data-conversion-event="graduation_donate_click"
+                data-conversion-context="graduation_next_home"
+              >
+                Support the next studio
+              </a>
+              <a class="btn btn--ghost" href={withBase("about")}>Learn more</a>
+            </div>
+          </div>
+
+          <blockquote class="next-home-quote">
+            <span class="pull-mark" aria-hidden="true">“</span>
+            <p>
+              That is what makes what we have built together impossible to
+              displace.
+            </p>
+            <footer>
+              <span class="pull-author">Margarita Quiñones-Peña</span>
+              <span class="pull-role">Founder</span>
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    {/* ========================= COME CELEBRATE ========================= */}
+    <section class="invite" aria-labelledby="invite-title">
+      <div class="wrap">
+        <div class="sep" aria-hidden="true"></div>
+        <header class="section-head">
+          <p class="eyebrow">Te esperamos</p>
+          <h2 id="invite-title" class="display">Come stand in the next room</h2>
+          <p class="section-lede">
+            If this page made you want to be in the photos next time, there are
+            two open doors between now and the fall. Consider this your
+            invitation.
+          </p>
+        </header>
+
+        <div class="invite-grid">
+          {/* Sweat Fest in its own Option F daylight identity: light cream
+              card, sunrise arc strip, deepened clipped wordmark, sticker
+              chips. No Fraunces and no gala foil on this card. */}
+          <article class="invite-card invite-card--fest reveal">
+            <span class="fest-strip" aria-hidden="true"></span>
+            <p class="fest-eyebrow">LSP's first-ever all-day festival</p>
+            <h3 class="fest-wordmark">{sweatFest.title}</h3>
+            <p class="fest-tagline">{sweatFest.tagline}</p>
+            <ul class="fest-chips" role="list">
+              <li class="fest-chip fest-chip--gold">
+                {sweatFest.shortDateLabel}
+              </li>
+              <li class="fest-chip fest-chip--ember">{sweatFest.timeLabel}</li>
+              <li class="fest-chip fest-chip--magenta">
+                {sweatFest.venueName}
+              </li>
+            </ul>
+            <p class="fest-body">
+              {sweatFest.homepageDescription} It is exactly the kind of day
+              these new teachers get to lead.
+            </p>
+            <div class="cta-row cta-row--tight">
+              <a
+                class="btn btn--gold btn--small"
+                href={sweatFestPrimaryUrl}
+                target={sweatFestHasTickets ? "_blank" : undefined}
+                rel={sweatFestHasTickets ? "noopener noreferrer" : undefined}
+                data-conversion-event={sweatFestPrimaryEvent}
+                data-conversion-context="graduation_page"
+              >
+                {sweatFestPrimaryLabel}
+              </a>
+              <a
+                class="btn btn--ghost btn--small"
+                href={sweatFestVolunteerUrl}
+                data-conversion-event="sweatfest_explore_click"
+                data-conversion-context="graduation_page_volunteer"
+              >
+                Volunteer with us
+              </a>
+            </div>
+          </article>
+
+          {/* The gala in its own dark-luxe identity: off-black, Playfair, gold
+              foil and hairline rules. This card IS a gala surface, so the
+              global .gala-foil utilities are correct here and only here. */}
+          <article class="invite-card invite-card--gala reveal">
+            <p class="gala-eyebrow">The Latina Sweat Project presents</p>
+            <h3 class="gala-wordmark">
+              <span class="gala-foil">{galaTeaser.shortTitle}</span>
+              <span class="gala-wordmark-rest">Gala</span>
+            </h3>
+            <div class="gala-rule" aria-hidden="true">
+              <span class="gala-foil-rule gala-rule-short"></span>
+              <span class="gala-diamond"></span>
+              <span class="gala-foil-rule gala-rule-long"></span>
+            </div>
+            <p class="gala-meta">{galaTeaser.dateTimeLabel}</p>
+            <p class="gala-meta gala-meta--venue">{galaTeaser.venueName}</p>
+            <p class="gala-body">
+              {galaTeaser.homepageDescription} It is the night that funds the
+              scholarships, the trainings, and the next studio, so the room you
+              just scrolled through keeps growing.
+            </p>
+            <p class="gala-status">{galaTeaser.statusLabel}</p>
+            <div class="cta-row cta-row--tight">
+              <a
+                class="btn btn--gold btn--small"
+                href={galaTeaser.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-conversion-event="gala_ticket_click"
+                data-conversion-context="graduation_page"
+              >
+                {galaTeaser.ticketsLabel}
+              </a>
+              <a class="btn btn--ghost btn--small" href={galaPageUrl}>
+                See the evening
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  {/* Full-screen viewer for the album wall.
+
+      IT MUST STAY OUTSIDE <main class="grad-page">. `.grad-page` sets
+      `isolation: isolate` (so the candle bokeh can sit at z-index -1 without
+      falling behind the page background), which makes it a stacking context
+      and traps every descendant's z-index inside it. While the dialog lived in
+      there, the site header (`#header-wrapper`, fixed, z-50 in the ROOT
+      stacking context) painted on top of the open lightbox and covered the
+      close button, no matter how high the dialog's own z-index went. Out here
+      the dialog competes in the root stacking context, where its z-index 1000
+      clears the header (50) and the mobile menu (40).
+
+      Because it no longer inherits from `.grad-page`, the palette custom
+      properties it needs are redeclared on `.lightbox` itself. */}
+  <div
+    id="lightbox"
+    class="lightbox"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Graduation photo viewer"
+    hidden
+  >
+    <div class="lb-stage">
+      <img id="lb-image" class="lb-image" alt="" decoding="async" />
+    </div>
+
+    <p id="lb-counter" class="lb-counter" role="status" aria-live="polite"></p>
+
+    <button id="lb-prev" class="lb-nav lb-prev" type="button" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"></path>
+      </svg>
+    </button>
+
+    <button id="lb-next" class="lb-nav lb-next" type="button" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+
+    <button id="lb-close" class="lb-close" type="button" aria-label="Close photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"></path>
+      </svg>
+    </button>
+  </div>
 </Layout>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>("#graduation-rsvp");
-  const responseFrame = document.querySelector<HTMLIFrameElement>(
-    "#google-form-response",
-  );
-  const successCard = document.querySelector<HTMLElement>("#rsvp-success");
-  const sendAnother = document.querySelector<HTMLButtonElement>("#send-another");
-  const yesEntry = document.querySelector<HTMLInputElement>("#google-yes-entry");
-  const noEntry = document.querySelector<HTMLInputElement>("#google-no-entry");
-  let submissionStarted = false;
+  // Share tools: copy-to-clipboard with a success state, the native share sheet
+  // where the browser offers one, and a guard so a share graphic that has not
+  // been generated yet removes its own card instead of rendering broken art.
+  const GALLERY_MESSAGE =
+    "Graduation 2026 at the Latina Sweat Project. Nearly 100 teachers strong.";
 
-  form?.addEventListener("submit", () => {
-    const attendance = new FormData(form).get("attendance");
+  const copyButton = document.querySelector<HTMLButtonElement>("#copy-link");
+  const copyStatus = document.querySelector<HTMLElement>("#copy-status");
+  const shareButton = document.querySelector<HTMLButtonElement>("#share-social");
+  // The page, not the raw album: whoever follows the link gets the story.
+  const shareUrl = copyButton?.dataset.copy || "";
 
-    if (yesEntry && noEntry) {
-      yesEntry.disabled = attendance !== "yes";
-      noEntry.disabled = attendance !== "no";
-      yesEntry.name = attendance === "yes" ? "entry.80277954" : "";
-      noEntry.name = attendance === "no" ? "entry.323787278" : "";
+  const writeToClipboard = async (value: string) => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch {
+        // Fall through to the textarea fallback below.
+      }
     }
 
-    submissionStarted = true;
-    const button = form.querySelector<HTMLButtonElement>("button[type='submit']");
-    if (button) {
-      button.disabled = true;
-      const label = button.querySelector<HTMLElement>(".button-label");
-      if (label) label.textContent = "Sending…";
+    const scratch = document.createElement("textarea");
+    scratch.value = value;
+    scratch.setAttribute("readonly", "");
+    scratch.style.position = "fixed";
+    scratch.style.opacity = "0";
+    document.body.appendChild(scratch);
+    scratch.select();
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
     }
+    document.body.removeChild(scratch);
+    return copied;
+  };
+
+  let resetTimer: number | undefined;
+
+  copyButton?.addEventListener("click", async () => {
+    if (!galleryUrl) return;
+    const label = copyButton.querySelector<HTMLElement>(".copy-label");
+    const copied = await writeToClipboard(galleryUrl);
+
+    if (label) label.textContent = copied ? "Link copied" : "Copy failed";
+    copyButton.classList.toggle("is-copied", copied);
+    if (copyStatus) {
+      copyStatus.textContent = copied
+        ? "Page link copied to your clipboard."
+        : "Copy failed. Long press the link to copy it manually.";
+    }
+
+    if (copied) {
+      window.trackConversion?.("graduation_copy_link", {
+        event_category: "graduation_recap",
+        context: "graduation_share_section",
+      });
+    }
+
+    window.clearTimeout(resetTimer);
+    resetTimer = window.setTimeout(() => {
+      if (label) label.textContent = "Copy";
+      copyButton.classList.remove("is-copied");
+      if (copyStatus) copyStatus.textContent = "";
+    }, 2600);
   });
 
-  responseFrame?.addEventListener("load", () => {
-    if (!submissionStarted || !form || !successCard) return;
-    form.hidden = true;
-    successCard.hidden = false;
-    successCard.focus({ preventScroll: true });
-    window.trackConversion?.("ytt_graduation_rsvp_submit", {
-      event_category: "internal_event",
+  /* Share on social media, best available route first:
+   *   1. the story graphic as a FILE plus the link (iOS/Android share sheets),
+   *   2. link + text only (desktop Safari, Edge, Android browsers),
+   *   3. download the jpg so it can be posted by hand. */
+  shareButton?.addEventListener("click", async () => {
+    const fileUrl = shareButton.dataset.file || "";
+    const fileName = shareButton.dataset.download || "lsp-graduation-2026.jpg";
+    const payload = { title: "LSP Graduation 2026", text: GALLERY_MESSAGE };
+
+    const track = (method: string) =>
+      window.trackConversion?.("graduation_share_native", {
+        event_category: "graduation_recap",
+        context: "graduation_share_section",
+        method,
+      });
+
+    // A dismissed share sheet is a decision, not a failure: stop there rather
+    // than surprising the visitor with a download.
+    const dismissed = (error: unknown) =>
+      error instanceof DOMException && error.name === "AbortError";
+
+    if (typeof navigator.share === "function") {
+      if (fileUrl && typeof navigator.canShare === "function") {
+        try {
+          const response = await fetch(fileUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            const file = new File([blob], fileName, {
+              type: blob.type || "image/jpeg",
+            });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({ ...payload, url: shareUrl, files: [file] });
+              track("file");
+              return;
+            }
+          }
+        } catch (error) {
+          if (dismissed(error)) return;
+          // Fetch blocked or files unsupported: fall through to link sharing.
+        }
+      }
+
+      try {
+        await navigator.share({ ...payload, url: shareUrl });
+        track("link");
+        return;
+      } catch (error) {
+        if (dismissed(error)) return;
+        // Browser refused the payload: fall through to the download.
+      }
+    }
+
+    if (!fileUrl) return;
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.trackConversion?.("graduation_share_download", {
+      event_category: "graduation_recap",
+      context: "graduation_share_section",
+      label: "story",
     });
   });
 
-  sendAnother?.addEventListener("click", () => {
-    if (!form || !successCard) return;
-    form.reset();
-    submissionStarted = false;
-    successCard.hidden = true;
-    form.hidden = false;
-    const button = form.querySelector<HTMLButtonElement>("button[type='submit']");
-    if (button) {
-      button.disabled = false;
-      const label = button.querySelector<HTMLElement>(".button-label");
-      if (label) label.textContent = "Send RSVP";
+  document
+    .querySelectorAll<HTMLImageElement>("[data-share-img]")
+    .forEach((image) => {
+      image.addEventListener("error", () => {
+        const card = image.closest<HTMLElement>("[data-share-card]");
+        if (card) card.hidden = true;
+      });
+    });
+
+  /* ------------------------------------------------------------------ *
+   * Native album: thumbnail wall + lightbox.                           *
+   * ------------------------------------------------------------------ */
+  const wall = document.querySelector<HTMLElement>(".gallery-wall");
+  const lightbox = document.querySelector<HTMLElement>("#lightbox");
+  const lbImage = document.querySelector<HTMLImageElement>("#lb-image");
+  const lbCounter = document.querySelector<HTMLElement>("#lb-counter");
+  const lbPrev = document.querySelector<HTMLButtonElement>("#lb-prev");
+  const lbNext = document.querySelector<HTMLButtonElement>("#lb-next");
+  const lbClose = document.querySelector<HTMLButtonElement>("#lb-close");
+  const expandButton = document.querySelector<HTMLButtonElement>("#gallery-expand");
+
+  if (wall && lightbox && lbImage && lbCounter && lbPrev && lbNext && lbClose) {
+    const cdn = wall.dataset.cdn || "";
+    const thumbs = Array.from(
+      wall.querySelectorAll<HTMLButtonElement>(".thumb"),
+    );
+    const total = thumbs.length;
+    // Stems whose CDN URL is dead, so we never land on them twice.
+    const broken = new Set<number>();
+    // Indices we have already re-pointed at the 1600px rendition, and the
+    // URL that actually worked, so a second visit skips the failed request.
+    const retried = new Set<number>();
+    const resolved = new Map<number, string>();
+    let current = -1;
+    let opener: HTMLButtonElement | null = null;
+    let openTracked = false;
+
+    // Flickr does not serve every photo in this album at the smaller _z/_b
+    // renditions: 22 of them exist only at _h (1600px) and the rest 410.
+    // Rather than hard-coding that list here, anything that fails gets one
+    // retry at _h, which recovers all of them.
+    const highRes = (src: string) =>
+      !src || src.includes("_h.jpg") ? "" : src.replace(/_[a-z]\.jpg$/, "_h.jpg");
+
+    const fullSrc = (index: number) => {
+      const known = resolved.get(index);
+      if (known) return known;
+      const stem = thumbs[index]?.dataset.full;
+      return stem ? `${cdn}${stem}.jpg` : "";
+    };
+
+    // Thumbnails: `error` does not bubble, so catch it on the way down.
+    wall.addEventListener(
+      "error",
+      (event) => {
+        const image = event.target;
+        if (!(image instanceof HTMLImageElement) || image.dataset.retried) {
+          return;
+        }
+        const next = highRes(image.currentSrc || image.src);
+        if (!next) return;
+        image.dataset.retried = "1";
+        image.src = next;
+      },
+      true,
+    );
+
+    // Some engines never kick off `loading="lazy"` fetches for these grid
+    // cells (observed in embedded Chromium): nudge each thumb to eager as it
+    // approaches the viewport, which preserves the bandwidth behaviour and
+    // guarantees the fetch actually starts.
+    if ("IntersectionObserver" in window) {
+      const nudge = new IntersectionObserver(
+        (observations) => {
+          for (const entry of observations) {
+            if (!entry.isIntersecting) continue;
+            const image = entry.target;
+            if (image instanceof HTMLImageElement && !image.complete) {
+              image.loading = "eager";
+            }
+            nudge.unobserve(entry.target);
+          }
+        },
+        { rootMargin: "600px 0px" },
+      );
+      wall
+        .querySelectorAll<HTMLImageElement>("img[loading='lazy']")
+        .forEach((image) => nudge.observe(image));
+    } else {
+      wall
+        .querySelectorAll<HTMLImageElement>("img[loading='lazy']")
+        .forEach((image) => {
+          image.loading = "eager";
+        });
     }
-    form.querySelector<HTMLInputElement>("input")?.focus();
-  });
+
+    const preload = (index: number) => {
+      const src = fullSrc(index);
+      if (!src || broken.has(index)) return;
+      const image = new Image();
+      image.decoding = "async";
+      image.src = src;
+    };
+
+    // `step` is the direction we were travelling, so a dead image keeps the
+    // visitor moving the way they asked rather than bouncing them backwards.
+    const show = (index: number, step = 1) => {
+      if (!total) return;
+      const wrapped = ((index % total) + total) % total;
+
+      if (broken.has(wrapped)) {
+        if (broken.size >= total) return;
+        show(wrapped + step, step);
+        return;
+      }
+
+      current = wrapped;
+      lbImage.src = fullSrc(wrapped);
+      lbImage.alt = `Graduation photo ${wrapped + 1} of ${total}`;
+      lbCounter.textContent = `${wrapped + 1} / ${total}`;
+      preload(wrapped + 1);
+      preload(wrapped - 1);
+    };
+
+    lbImage.addEventListener("error", () => {
+      // Ignore the error the browser may raise when close() drops the src.
+      if (current < 0 || lightbox.hidden) return;
+
+      // One retry at the 1600px rendition before writing the photo off.
+      if (!retried.has(current)) {
+        const next = highRes(lbImage.src);
+        if (next) {
+          retried.add(current);
+          resolved.set(current, next);
+          lbImage.src = next;
+          return;
+        }
+      }
+
+      resolved.delete(current);
+      broken.add(current);
+      if (broken.size >= total) return;
+      show(current + 1, 1);
+    });
+
+    const open = (index: number, trigger: HTMLButtonElement) => {
+      opener = trigger;
+      lightbox.hidden = false;
+      document.body.style.overflow = "hidden";
+      show(index, 1);
+      lbClose.focus();
+
+      if (!openTracked) {
+        openTracked = true;
+        window.trackConversion?.("graduation_gallery_open", {
+          event_category: "graduation_recap",
+          context: "graduation_story_end",
+        });
+      }
+    };
+
+    const close = () => {
+      lightbox.hidden = true;
+      current = -1;
+      document.body.style.overflow = "";
+      lbImage.removeAttribute("src");
+      opener?.focus();
+      opener = null;
+    };
+
+    thumbs.forEach((thumb, index) => {
+      thumb.addEventListener("click", () => open(index, thumb));
+    });
+
+    lbPrev.addEventListener("click", () => show(current - 1, -1));
+    lbNext.addEventListener("click", () => show(current + 1, 1));
+    lbClose.addEventListener("click", close);
+
+    // Backdrop click, but not a click on the photo or the controls.
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox || event.target === lbImage.parentElement) {
+        close();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (lightbox.hidden) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        show(current + 1, 1);
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        show(current - 1, -1);
+      } else if (event.key === "Tab") {
+        // Keep focus inside the dialog while it is open.
+        const focusable = [lbClose, lbPrev, lbNext];
+        const position = focusable.indexOf(
+          document.activeElement as HTMLButtonElement,
+        );
+        event.preventDefault();
+        const offset = event.shiftKey ? -1 : 1;
+        const next =
+          (((position < 0 ? 0 : position + offset) % focusable.length) +
+            focusable.length) %
+          focusable.length;
+        focusable[next].focus();
+      }
+    });
+
+    // Horizontal swipe, ignoring gestures that are mostly vertical.
+    let touchX = 0;
+    let touchY = 0;
+
+    lightbox.addEventListener(
+      "touchstart",
+      (event) => {
+        const touch = event.changedTouches[0];
+        touchX = touch.clientX;
+        touchY = touch.clientY;
+      },
+      { passive: true },
+    );
+
+    lightbox.addEventListener(
+      "touchend",
+      (event) => {
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - touchX;
+        const deltaY = touch.clientY - touchY;
+        if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+        show(current + (deltaX < 0 ? 1 : -1), deltaX < 0 ? 1 : -1);
+      },
+      { passive: true },
+    );
+
+    expandButton?.addEventListener("click", () => {
+      const hiddenCells = Array.from(
+        wall.querySelectorAll<HTMLElement>(".thumb-cell[hidden]"),
+      );
+      hiddenCells.forEach((cell) => {
+        cell.hidden = false;
+      });
+      expandButton.hidden = true;
+      // Send focus to the first newly revealed thumb so keyboard and screen
+      // reader users land where the new content starts.
+      hiddenCells[0]?.querySelector<HTMLButtonElement>(".thumb")?.focus();
+    });
+  }
 </script>
 
 <style>
-  :global(body) {
-    background: #171616;
-  }
-
-  .graduation-page {
-    --ink: #1c1a19;
+  /* ---------------------------------------------------------------------
+     CANDLELIT ROSE. Deep rose ink, orchid-rose glow, soft candle gold, cream
+     type. Fraunces for display, Rubik for body. No hairline rules and no
+     gradient bars: every divider is a candle-bokeh dot row, every container is
+     generously rounded, every accent is a soft glow.
+  --------------------------------------------------------------------- */
+  .grad-page {
+    --ink: #1e1216;
+    --ink-raised: #2b1520;
     --paper: #f6efe3;
+    --paper-soft: rgba(246, 239, 227, 0.74);
+    --paper-faint: rgba(246, 239, 227, 0.46);
     --gold: #d79b47;
     --gold-light: #f0c57c;
+    --rose: #e08cb8;
+    --panel: rgba(246, 239, 227, 0.06);
+    --panel-strong: rgba(246, 239, 227, 0.1);
+
     position: relative;
-    min-height: 100vh;
+    isolation: isolate;
     overflow: hidden;
-    display: grid;
-    place-items: center;
-    padding: clamp(1rem, 4vw, 4rem);
     background:
-      radial-gradient(circle at 15% 20%, rgba(215, 155, 71, 0.12), transparent 30rem),
-      radial-gradient(circle at 85% 85%, rgba(240, 197, 124, 0.1), transparent 28rem),
-      #171616;
+      radial-gradient(
+        70rem 42rem at 10% -6%,
+        rgba(224, 140, 184, 0.18),
+        transparent 70%
+      ),
+      radial-gradient(
+        56rem 38rem at 94% 20%,
+        rgba(224, 140, 184, 0.12),
+        transparent 72%
+      ),
+      radial-gradient(
+        48rem 34rem at 4% 62%,
+        rgba(224, 140, 184, 0.09),
+        transparent 72%
+      ),
+      radial-gradient(
+        62rem 40rem at 52% 106%,
+        rgba(240, 197, 124, 0.1),
+        transparent 70%
+      ),
+      linear-gradient(
+        176deg,
+        var(--ink-raised) 0%,
+        var(--ink) 46%,
+        var(--ink) 100%
+      );
     color: var(--paper);
+    font-family: "Rubik", sans-serif;
   }
 
-  .ambient {
+  /* `.btn` sets display, which would otherwise beat the hidden attribute on
+     expander once the wall is open, and on the share preview if its art is
+     not up yet. */
+  .grad-page [hidden] {
+    display: none !important;
+  }
+
+  .candles {
     position: absolute;
-    width: 22rem;
-    height: 22rem;
-    border: 1px solid rgba(215, 155, 71, 0.12);
-    border-radius: 50%;
+    inset: 0;
+    z-index: -1;
     pointer-events: none;
   }
 
-  .ambient-one {
-    top: -14rem;
-    right: -6rem;
+  .candles span {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(240, 197, 124, 0.95),
+      rgba(215, 155, 71, 0.28) 55%,
+      transparent 72%
+    );
+    opacity: var(--o);
+    filter: blur(5px);
   }
 
-  .ambient-two {
-    bottom: -16rem;
-    left: -7rem;
+  .wrap {
+    width: min(76rem, 100%);
+    margin-inline: auto;
+    padding-inline: clamp(1.1rem, 4vw, 2.5rem);
   }
 
-  .event-shell {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(17rem, 0.8fr) minmax(22rem, 1.2fr);
-    width: min(68rem, 100%);
-    overflow: hidden;
-    border: 1px solid rgba(215, 155, 71, 0.42);
-    border-radius: 1.5rem;
-    background: rgba(28, 26, 25, 0.94);
-    box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.42);
-    backdrop-filter: blur(16px);
-  }
-
-  .invite-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1.25rem;
-    padding: clamp(1.25rem, 3vw, 2.5rem);
-    border-right: 1px solid rgba(215, 155, 71, 0.25);
-    background: #201e1e;
+  /* ------------------------- Type: Fraunces + Rubik -------------------- */
+  .display {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    line-height: 1.06;
   }
 
   .eyebrow {
     margin: 0;
     color: var(--gold-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* --------------------- Ornament: candle-bokeh dot row ---------------- */
+  .sep {
+    width: 122px;
+    height: 12px;
+    margin: 0 auto clamp(2rem, 5vw, 3rem);
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(circle 2.5px at 6px 6px, #f0c57c 0 58%, transparent 70%),
+      radial-gradient(circle 3.5px at 30px 6px, #e08cb8 0 56%, transparent 70%),
+      radial-gradient(circle 5px at 60px 6px, #f0c57c 0 56%, transparent 70%),
+      radial-gradient(circle 3.5px at 90px 6px, #e08cb8 0 56%, transparent 70%),
+      radial-gradient(circle 2.5px at 114px 6px, #f0c57c 0 58%, transparent 70%);
+    filter: drop-shadow(0 0 7px rgba(240, 197, 124, 0.5));
+  }
+
+  .sep--left {
+    margin: 1.4rem 0 0;
+  }
+
+  .sep--wide {
+    margin-block: clamp(2rem, 5vw, 3rem);
+  }
+
+  /* ------------------------------ Buttons ------------------------------ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.95rem 1.7rem;
     font-family: "Rubik", sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      color 180ms ease;
+  }
+
+  .btn--gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #24141a;
+    box-shadow: 0 0.8rem 2rem rgba(215, 155, 71, 0.22);
+  }
+
+  .btn--gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1.1rem 2.6rem rgba(215, 155, 71, 0.32);
+  }
+
+  .btn--ghost {
+    background: var(--panel-strong);
+    color: var(--paper);
+  }
+
+  .btn--ghost:hover {
+    transform: translateY(-2px);
+    background: rgba(240, 197, 124, 0.18);
+  }
+
+  .btn--small {
+    padding: 0.65rem 1.15rem;
+    font-size: 0.78rem;
+  }
+
+  .btn.is-copied {
+    background: linear-gradient(135deg, #f7e3bd, var(--gold-light));
+  }
+
+  .btn:focus-visible,
+  a:focus-visible {
+    outline: 3px solid var(--gold-light);
+    outline-offset: 3px;
+    border-radius: 999px;
+  }
+
+  .btn-arrow,
+  .btn-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .cta-row--tight {
+    margin-top: 1.5rem;
+  }
+
+  /* ------------------------ Rounded cream photo mats ------------------- */
+  .mat {
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: var(--panel);
+    padding: 0.5rem;
+    box-shadow: 0 1.4rem 3.4rem rgba(0, 0, 0, 0.42);
+  }
+
+  .mat--cream {
+    background: var(--paper);
+    padding: 0.75rem;
+    box-shadow: 0 1.6rem 3.8rem rgba(0, 0, 0, 0.5);
+  }
+
+  .mat img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 1.05rem;
+  }
+
+  /* -------------------------------- Hero ------------------------------- */
+  .hero {
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 7vw, 6rem);
+  }
+
+  .hero-grid {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: center;
+  }
+
+  .hero-title {
+    margin: 0.9rem 0 0;
+    font-size: clamp(3rem, 11vw, 6rem);
+  }
+
+  .hero-title-main {
+    display: block;
+    color: var(--paper);
+  }
+
+  .hero-title-year {
+    display: block;
+    color: var(--gold-light);
+    font-style: italic;
+    font-weight: 450;
+  }
+
+  /* --------------------- Commencement: lockup + seal ------------------- */
+  .class-lockup {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 1.3rem 0 0;
+    border-radius: 1.25rem;
+    background: var(--panel);
+    padding: 0.85rem 1.4rem;
+  }
+
+  .class-lockup-label {
+    color: var(--paper-faint);
+    font-size: 0.66rem;
     font-weight: 700;
     letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .class-lockup-name {
+    color: var(--paper);
+    font-size: clamp(1.05rem, 3vw, 1.35rem);
+    font-weight: 560;
+    letter-spacing: 0.02em;
+  }
+
+  .class-lockup-amp {
+    color: var(--gold-light);
+  }
+
+  .hero-figure {
+    position: relative;
+  }
+
+  /* Top-left of the class photo is bare studio wall, so the seal never lands
+     on anyone's face. Keep it there if the hero image is ever swapped. */
+  .seal {
+    position: absolute;
+    left: clamp(-1.1rem, -1.4vw, -0.4rem);
+    top: clamp(-1.1rem, -1.4vw, -0.4rem);
+    width: clamp(5.4rem, 12vw, 7.4rem);
+    height: clamp(5.4rem, 12vw, 7.4rem);
+    rotate: -9deg;
+    filter: drop-shadow(0 0 14px rgba(215, 155, 71, 0.45));
+  }
+
+  .seal-disc {
+    fill: #24141a;
+    fill-opacity: 0.92;
+  }
+
+  .seal-ring {
+    fill: none;
+    stroke: #f0c57c;
+    stroke-opacity: 0.75;
+    stroke-width: 1.1;
+  }
+
+  /* Sized so both arc texts fit their semicircle with room to spare; see the
+     geometry note on the SVG before changing font-size or letter-spacing. */
+  .seal-text {
+    fill: #f0c57c;
+    font-family: "Rubik", sans-serif;
+    font-size: 6.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+  }
+
+  .seal-small {
+    fill: rgba(246, 239, 227, 0.72);
+    font-family: "Rubik", sans-serif;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+  }
+
+  .seal-year {
+    fill: #f6efe3;
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 10.5px;
+    font-weight: 560;
+    letter-spacing: 0.2px;
+  }
+
+  .seal-dot {
+    fill: #f0c57c;
+    fill-opacity: 0.8;
+  }
+
+  .hero-facts {
+    margin: 1.5rem 0 0;
+    color: var(--paper);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.75;
+  }
+
+  .lede {
+    max-width: 34rem;
+    margin: 1.2rem 0 0;
+    color: var(--paper-soft);
+    font-size: 1.06rem;
+    line-height: 1.75;
+  }
+
+  .lede-es,
+  .gallery-band-es {
+    margin: 0.7rem 0 0;
+    color: var(--rose);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.02rem;
+    font-style: italic;
+    font-weight: 450;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1.2rem;
+    margin: 2.4rem 0 0;
+    border-radius: 1.5rem;
+    background: var(--panel);
+    padding: 1.4rem clamp(1.2rem, 3vw, 1.8rem);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat dt {
+    order: 2;
+    color: var(--paper-faint);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .stat dd {
+    order: 1;
+    margin: 0 0 0.3rem;
+    color: var(--gold-light);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.9rem;
+    font-weight: 560;
+    line-height: 1;
+  }
+
+  .hero-figure {
+    margin: 0;
+  }
+
+  .hero-figure figcaption,
+  .shot figcaption {
+    margin-top: 0.8rem;
+    color: var(--paper-faint);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  /* Speaker credit under the mic photos: name in Fraunces, title in small
+     caps beneath it. Full name and title only, never a nickname. */
+  .shot-credit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    margin-top: 0.7rem;
+  }
+
+  .shot-credit-name {
+    color: var(--paper);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 560;
+    line-height: 1.25;
+  }
+
+  .shot-credit-role {
+    color: var(--gold-light);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     line-height: 1.4;
     text-transform: uppercase;
   }
 
-  .invite-art {
-    width: min(100%, 22rem);
-    height: auto;
+  /* ------------------------------- Story ------------------------------- */
+  .story,
+  .program,
+  .voices,
+  .share,
+  .gracias,
+  .next-home,
+  .invite {
+    padding-block: clamp(2.6rem, 6vw, 4.5rem);
+  }
+
+  #story,
+  #share {
+    scroll-margin-top: 8rem;
+  }
+
+  .section-head {
+    max-width: 44rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .section-head--center {
     margin-inline: auto;
-    border: 1px solid rgba(215, 155, 71, 0.35);
-    border-radius: 0.85rem;
-    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.34);
+    text-align: center;
   }
 
-  .event-facts {
-    display: grid;
-    grid-template-columns: 1.45fr 0.65fr 0.85fr;
-    gap: 0.75rem;
+  .section-head h2 {
+    margin: 0.7rem 0 0;
+    font-size: clamp(2rem, 5.5vw, 3.2rem);
   }
 
-  .event-facts div {
-    min-width: 0;
+  .section-lede {
+    margin: 1rem 0 0;
+    color: var(--paper-soft);
+    font-size: 1.02rem;
+    line-height: 1.75;
   }
 
-  .event-facts span,
-  .event-facts strong {
-    display: block;
-    font-family: "Rubik", sans-serif;
+  .chapter {
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
   }
 
-  .event-facts span {
-    margin-bottom: 0.2rem;
-    color: rgba(246, 239, 227, 0.48);
-    font-size: 0.65rem;
+  .chapter:first-of-type {
+    margin-top: 0;
+  }
+
+  /* The guided breathwork: the ceremonial heart of the night, raised onto its
+     own panel and centered, with cream keepsake mats on all three photos. */
+  .chapter--ceremony {
+    border-radius: 2rem;
+    background: linear-gradient(
+      160deg,
+      rgba(224, 140, 184, 0.14),
+      rgba(43, 21, 32, 0.55) 62%
+    );
+    padding: clamp(1.6rem, 4vw, 2.8rem);
+  }
+
+  .chapter--ceremony .chapter-head {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .chapter--ceremony .chapter-step {
+    justify-content: center;
+  }
+
+  .chapter-head {
+    max-width: 40rem;
+    margin-bottom: 1.7rem;
+  }
+
+  .chapter-step {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 0.8rem;
+  }
+
+  .chapter-step-time {
+    border-radius: 999px;
+    background: rgba(240, 197, 124, 0.16);
+    padding: 0.3rem 0.85rem;
+    color: var(--gold-light);
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
-  .event-facts strong {
-    color: var(--paper);
-    font-size: 0.78rem;
-    line-height: 1.4;
+  .chapter-step-label {
+    color: var(--rose);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 
-  .rsvp-panel {
+  .chapter-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+
+  .chapter-body {
+    margin: 0.9rem 0 0;
+    color: var(--paper-soft);
+    font-size: 1.02rem;
+    line-height: 1.8;
+  }
+
+  .mosaic {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .shot {
+    margin: 0;
+  }
+
+  .shot--feature {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 46rem) {
+    .mosaic {
+      grid-template-columns: repeat(3, 1fr);
+      align-items: start;
+      gap: 1.2rem;
+    }
+
+    .mosaic--four {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Slight vertical stagger so the strip reads editorial, not gridded. */
+    .shot:nth-child(even):not(.shot--feature) {
+      transform: translateY(1.7rem);
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .hero-grid {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+
+  /* ----------------------------- Pull quotes --------------------------- */
+  .pull,
+  .voice,
+  .next-home-quote {
+    position: relative;
+    margin: 0;
+    border-radius: 1.75rem;
+    background: linear-gradient(
+      145deg,
+      rgba(224, 140, 184, 0.13),
+      rgba(43, 21, 32, 0.72) 62%
+    );
+    padding: clamp(1.7rem, 4vw, 2.5rem);
+  }
+
+  .pull {
+    max-width: 46rem;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+  }
+
+  .pull p,
+  .voice p,
+  .next-home-quote p {
+    margin: 0;
+    color: var(--paper);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.25rem, 3.2vw, 1.7rem);
+    font-style: italic;
+    font-weight: 450;
+    line-height: 1.45;
+  }
+
+  .pull-mark {
+    display: block;
+    margin-bottom: -0.7rem;
+    color: rgba(224, 140, 184, 0.6);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 3rem;
+    font-weight: 560;
+    line-height: 1;
+  }
+
+  .pull footer,
+  .voice footer,
+  .next-home-quote footer,
+  .voice-closer footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.7rem;
+    margin-top: 1.3rem;
+  }
+
+  .pull-author {
+    color: var(--gold-light);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .pull-role {
+    color: var(--paper-faint);
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ------------------- A training like no other + lineage -------------- */
+  .places {
+    max-width: 46rem;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    text-align: center;
+  }
+
+  .places-label {
+    margin: 0;
+    color: var(--paper-faint);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .places-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .place-chip {
+    border-radius: 999px;
+    background: var(--panel-strong);
+    padding: 0.55rem 1.15rem;
+    color: var(--paper);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .places-quote {
+    margin: 1.4rem 0 0;
+    color: var(--gold-light);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.05rem, 3vw, 1.35rem);
+    font-style: italic;
+    font-weight: 450;
+    line-height: 1.5;
+  }
+
+  .places-cite {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--paper-faint);
+    font-family: "Rubik", sans-serif;
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .lineage {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    border-radius: 2rem;
+    background: var(--panel);
+    padding: clamp(1.6rem, 4vw, 2.6rem);
+    text-align: center;
+  }
+
+  .lineage-label {
+    margin: 0;
+    color: var(--rose);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .lineage-thread {
+    display: none;
+  }
+
+  .lineage-anchor {
+    fill: #f0c57c;
+  }
+
+  .lineage-nodes {
+    display: grid;
+    gap: 1.5rem;
+    margin: 1.6rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lineage-node {
+    position: relative;
+    padding-left: 1.7rem;
+    text-align: left;
+  }
+
+  .lineage-dot {
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      #f0c57c,
+      rgba(215, 155, 71, 0.35) 58%,
+      transparent 72%
+    );
+    filter: drop-shadow(0 0 7px rgba(240, 197, 124, 0.6));
+  }
+
+  /* Mobile: the thread between nodes is a short column of candle dots. */
+  .lineage-node:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 0.22rem;
+    top: 1.5rem;
+    width: 3px;
+    height: calc(100% - 0.6rem);
+    background-image: radial-gradient(
+      circle 1.5px at 1.5px 1.5px,
+      rgba(240, 197, 124, 0.55) 0 60%,
+      transparent 70%
+    );
+    background-size: 3px 9px;
+    background-repeat: repeat-y;
+  }
+
+  .lineage-figure {
+    margin: 0;
+    color: var(--gold-light);
+    font-size: clamp(1.5rem, 4.4vw, 2.1rem);
+    font-weight: 560;
+  }
+
+  .lineage-note {
+    margin: 0.35rem 0 0;
+    color: var(--paper-soft);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .lineage-closer {
+    max-width: 40rem;
+    margin: clamp(1.6rem, 4vw, 2.2rem) auto 0;
+    color: var(--paper);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    font-style: italic;
+    font-weight: 450;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 46rem) {
+    .lineage-thread {
+      display: block;
+      width: 100%;
+      height: 64px;
+      margin: 1.4rem 0 -0.5rem;
+    }
+
+    .lineage-nodes {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 0.4rem;
+    }
+
+    .lineage-node {
+      padding-left: 0;
+      text-align: center;
+    }
+
+    .lineage-dot,
+    .lineage-node:not(:last-child)::after {
+      display: none;
+    }
+  }
+
+  /* ------------------------------- Voices ------------------------------ */
+  .voice-grid {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  @media (min-width: 46rem) {
+    .voice-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .voice-closer {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  .voice-closer p {
+    margin: 0;
+    color: var(--gold-light);
+    font-size: clamp(1.9rem, 6vw, 3.2rem);
+    font-style: italic;
+    font-weight: 560;
+  }
+
+  .voice-closer footer {
+    justify-content: center;
+  }
+
+  /* -------------------------- Gallery CTA band ------------------------- */
+  .gallery-band {
+    position: relative;
+    overflow: hidden;
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 72rem;
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    margin-inline: auto;
+    border-radius: 2rem;
+    background: linear-gradient(
+      120deg,
+      rgba(224, 140, 184, 0.16),
+      rgba(43, 21, 32, 0.68) 58%
+    );
+    padding: clamp(1.6rem, 4vw, 2.4rem);
+  }
+
+  .gallery-band::after {
+    content: "";
+    position: absolute;
+    top: -8rem;
+    right: -5rem;
+    width: 18rem;
+    height: 18rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(240, 197, 124, 0.22),
+      transparent 70%
+    );
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  .gallery-band > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header copy left, the quiet outbound button right on desktop and stacked
+     underneath on phones. */
+  .gallery-band-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .gallery-band-copy {
+    min-width: min(100%, 18rem);
+    flex: 1 1 22rem;
+  }
+
+  .gallery-band-out {
+    flex-shrink: 0;
+  }
+
+  .gallery-band-title {
+    margin: 0.55rem 0 0;
+    font-size: clamp(1.4rem, 3.4vw, 2rem);
+  }
+
+  .gallery-band-note {
+    margin: 0.5rem 0 0;
+    color: var(--paper-soft);
+    font-size: 0.94rem;
+  }
+
+  /* ------------------------- Native album wall ------------------------- */
+  .gallery-wall {
+    width: 100%;
+    margin-top: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  .thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 34rem) {
+    .thumb-grid {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+    }
+  }
+
+  @media (min-width: 52rem) {
+    .thumb-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  .thumb-cell {
+    min-width: 0;
+  }
+
+  .thumb {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 0.5rem;
+    background: rgba(30, 18, 22, 0.08);
+    padding: 0;
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0.4rem 1rem rgba(30, 18, 22, 0.28);
+  }
+
+  .thumb:focus-visible {
+    outline: 3px solid #c07b2a;
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+
+  /* The mat is cream, so this button is inked rather than cream-on-cream. */
+  .gallery-expand {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: clamp(2rem, 5vw, 4.75rem);
-  }
-
-  .rsvp-heading {
-    margin-bottom: 2.25rem;
-  }
-
-  .rsvp-heading h1 {
-    max-width: 10ch;
-    margin: 0.55rem 0 1rem;
-    color: var(--paper);
-    font-family: "Playfair Display", serif;
-    font-size: clamp(2.55rem, 5vw, 4.8rem);
-    font-weight: 600;
-    letter-spacing: -0.045em;
-    line-height: 0.98;
-  }
-
-  .rsvp-heading > p:last-child {
-    max-width: 34rem;
-    margin: 0;
-    color: rgba(246, 239, 227, 0.7);
+    align-items: center;
+    gap: 0.15rem;
+    width: 100%;
+    margin-top: 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(30, 18, 22, 0.07);
+    padding: 0.85rem 1.4rem;
+    color: #2b1520;
+    cursor: pointer;
     font-family: "Rubik", sans-serif;
-    font-size: 0.95rem;
-    line-height: 1.7;
-  }
-
-  .rsvp-form {
-    display: grid;
-    gap: 1.25rem;
-  }
-
-  .field {
-    display: grid;
-    gap: 0.45rem;
-  }
-
-  .field > span,
-  .attendance-fieldset legend {
-    color: rgba(246, 239, 227, 0.82);
-    font-family: "Rubik", sans-serif;
-    font-size: 0.76rem;
+    font-size: 0.86rem;
     font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: background-color 160ms ease;
+  }
+
+  .gallery-expand:hover {
+    background: rgba(30, 18, 22, 0.12);
+  }
+
+  .gallery-expand:focus-visible {
+    outline: 3px solid #c07b2a;
+    outline-offset: 2px;
+  }
+
+  .gallery-expand-es {
+    color: rgba(43, 21, 32, 0.62);
+    font-size: 0.74rem;
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  /* --------------------------- Lightbox viewer ------------------------- */
+  /* z-index 1000 clears the site header (fixed, z-50) and the mobile menu
+     (fixed, z-40). This only works because the dialog sits outside
+     `.grad-page`; see the note on the markup. The palette vars are redeclared
+     here for the same reason. */
+  .lightbox {
+    --paper: #f6efe3;
+    --paper-faint: rgba(246, 239, 227, 0.46);
+    --gold-light: #f0c57c;
+
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    place-items: center;
+    background: rgba(30, 18, 22, 0.96);
+    padding: calc(env(safe-area-inset-top, 0px) + clamp(3.5rem, 9vw, 4.5rem))
+      clamp(0.75rem, 4vw, 3.5rem)
+      calc(env(safe-area-inset-bottom, 0px) + clamp(1rem, 4vw, 2rem));
+  }
+
+  .lightbox[hidden] {
+    display: none !important;
+  }
+
+  .lb-stage {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .lb-image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
+    object-fit: contain;
+  }
+
+  .lb-counter {
+    margin: 0.9rem 0 0;
+    color: var(--paper-faint);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+  }
+
+  /* Controls have to stay legible over a bright photo, so they are inked
+     circles with a cream ring and a shadow, never a faint translucent wash. */
+  .lb-nav,
+  .lb-close {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1.5px solid rgba(246, 239, 227, 0.72);
+    border-radius: 999px;
+    background: rgba(43, 21, 32, 0.82);
+    padding: 0;
+    color: var(--paper);
+    cursor: pointer;
+    box-shadow: 0 0.35rem 1.1rem rgba(0, 0, 0, 0.55);
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 2.9rem;
+    height: 2.9rem;
+    translate: 0 -50%;
+  }
+
+  .lb-nav svg,
+  .lb-close svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .lb-prev {
+    left: clamp(0.5rem, 2vw, 1.5rem);
+  }
+
+  .lb-next {
+    right: clamp(0.5rem, 2vw, 1.5rem);
+  }
+
+  /* Fixed to the viewport (not the padding box) and inset past any notch, so
+     nothing can push it off-screen or under a rounded corner. */
+  .lb-close {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    right: calc(env(safe-area-inset-right, 0px) + 0.85rem);
+    z-index: 3;
+    width: 2.9rem;
+    height: 2.9rem;
+  }
+
+  .lb-nav:hover,
+  .lb-close:hover {
+    border-color: var(--gold-light);
+    background: rgba(215, 155, 71, 0.9);
+  }
+
+  .lb-nav:focus-visible,
+  .lb-close:focus-visible {
+    outline: 3px solid var(--gold-light);
+    outline-offset: 3px;
+  }
+
+  .gallery-embed-note {
+    margin: 1rem 0 0;
+    color: var(--paper-faint);
+    font-size: 0.86rem;
+    text-align: center;
+  }
+
+  .gallery-embed-link {
+    color: var(--gold-light);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  .gallery-embed-link:hover {
+    color: var(--paper);
+  }
+
+  /* -------------------------------- Share ------------------------------ */
+  /* One preview at roughly phone scale, with the controls beside it on wider
+     screens and stacked underneath on phones. */
+  .share-kit {
+    display: grid;
+    justify-items: center;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .share-preview {
+    width: min(15rem, 70vw);
+  }
+
+  .share-preview[hidden] {
+    display: none;
+  }
+
+  .share-controls {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 26rem;
+  }
+
+  .share-primary {
+    width: 100%;
+    padding-block: 1rem;
+  }
+
+  .share-primary-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+
+  .share-primary-es {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-style: italic;
+    opacity: 0.72;
+  }
+
+  .share-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    width: 100%;
+    border-radius: 1rem;
+    background: var(--panel);
+    padding: 0.7rem 0.9rem;
+  }
+
+  .share-link-text {
+    color: var(--paper-soft);
+    font-size: 0.84rem;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+
+  .share-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(240, 197, 124, 0.16);
+    padding: 0.4rem 0.8rem;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-family: "Rubik", sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    transition: background-color 160ms ease;
+  }
+
+  .share-copy:hover {
+    background: rgba(240, 197, 124, 0.28);
+  }
+
+  .share-copy:focus-visible {
+    outline: 3px solid var(--gold-light);
+    outline-offset: 3px;
+  }
+
+  .share-copy.is-copied {
+    background: rgba(240, 197, 124, 0.34);
+    color: var(--paper);
+  }
+
+  .share-more {
+    margin: 0;
+    color: var(--paper-faint);
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .share-more-link {
+    color: var(--paper-soft);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .share-more-link:hover {
+    color: var(--gold-light);
+  }
+
+  @media (min-width: 46rem) {
+    .share-kit {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      justify-items: start;
+    }
+
+    .share-controls {
+      justify-items: start;
+    }
+
+    .share-more {
+      text-align: left;
+    }
+
+    .share-link-row {
+      justify-content: flex-start;
+    }
+  }
+
+  /* ------------------------------- Gracias ----------------------------- */
+  .gracias-inner {
+    max-width: 46rem;
+  }
+
+  .gracias-inner h2 {
+    margin: 0.7rem 0 0;
+    font-size: clamp(2rem, 5.5vw, 3rem);
+  }
+
+  .gracias-body {
+    margin: 1.2rem 0 0;
+    color: var(--paper-soft);
+    font-size: 1.04rem;
+    line-height: 1.85;
+  }
+
+  .leaders {
+    display: grid;
+    gap: 1rem;
+    margin: 2.2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .leader {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 0.7rem;
+    padding-left: 1.5rem;
+  }
+
+  /* A single candle dot in place of the old rule. */
+  .leader::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      #f0c57c,
+      rgba(215, 155, 71, 0.35) 58%,
+      transparent 72%
+    );
+    filter: drop-shadow(0 0 6px rgba(240, 197, 124, 0.55));
+  }
+
+  .leader-name {
+    color: var(--paper);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 560;
+  }
+
+  .leader-role {
+    color: var(--gold-light);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  /* ------------------------------ Next home ---------------------------- */
+  .next-home-inner {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: clamp(1.7rem, 4vw, 2.8rem);
+    border-radius: 2rem;
+    background: linear-gradient(
+      140deg,
+      rgba(224, 140, 184, 0.16),
+      rgba(30, 18, 22, 0.72) 62%
+    );
+    padding: clamp(1.7rem, 4.5vw, 3rem);
+  }
+
+  .next-home-inner::after {
+    content: "";
+    position: absolute;
+    bottom: -9rem;
+    left: -6rem;
+    width: 20rem;
+    height: 20rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(224, 140, 184, 0.22),
+      transparent 70%
+    );
+    filter: blur(44px);
+    pointer-events: none;
+  }
+
+  .next-home-inner > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .next-home-copy h2 {
+    margin: 0.7rem 0 0;
+    font-size: clamp(1.7rem, 4.6vw, 2.5rem);
+  }
+
+  .next-home-copy p {
+    margin: 1rem 0 0;
+    color: var(--paper-soft);
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .next-home-es {
+    color: var(--rose) !important;
+    font-family: "Fraunces", Georgia, serif;
+    font-style: italic;
+    font-weight: 450;
+  }
+
+  .next-home-quote {
+    align-self: center;
+    background: rgba(30, 18, 22, 0.5);
+  }
+
+  @media (min-width: 62rem) {
+    .next-home-inner {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+    }
+  }
+
+  /* -------------------------------- Invite ----------------------------- */
+  .invite-grid {
+    display: grid;
+    gap: 1.3rem;
+  }
+
+  @media (min-width: 52rem) {
+    .invite-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Each card is a small ambassador of its own event, so the two identities
+     below are intentionally NOT the graduation palette. The rose-ink frame
+     around them (section heading, spacing, Fraunces) stays graduation. */
+  .invite-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.9rem;
+    padding: clamp(1.6rem, 4vw, 2.3rem);
+  }
+
+  .invite-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- Sweat Fest: Option F bright daylight (design.md) ---------- */
+  .invite-card--fest {
+    background: linear-gradient(
+      to bottom right,
+      #fff8ef,
+      #ffffff 46%,
+      #ffefe2
+    );
+    color: #1e1e1e;
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.34);
+  }
+
+  /* The sunrise arc, thin accent only: gold to ember to magenta. */
+  .fest-strip {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ffbd59, #ff6b52 52%, #e94f8a);
+  }
+
+  /* Filson Soft, the rounded geometric subhead face of the Sweat Fest kit
+     (self-hosted in global.css), carries everything on this card except the
+     wordmark. Rubik does not appear here. */
+  .fest-eyebrow {
+    margin: 0.35rem 0 0;
+    color: #b23c14;
+    font-family: "Filson Soft", "Rubik", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* Hello Baddie, the handmade distressed display face of the official
+     identity. It ships at a single weight, so no synthetic bolding: the face
+     is already heavy and faux-bold muddies its texture. Deepened stops stay,
+     since the signature sunrise colors are too pale to read on cream. */
+  .fest-wordmark {
+    margin: 0.55rem 0 0;
+    background-image: linear-gradient(100deg, #d47500, #e8452a 52%, #c81e63);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    font-family: "Hello Baddie", "Rubik", sans-serif;
+    font-size: clamp(2.3rem, 6.4vw, 3.1rem);
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .fest-tagline {
+    margin: 0.5rem 0 0;
+    color: #d63d22;
+    font-family: "Filson Soft", "Rubik", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  .field input {
-    width: 100%;
-    border: 1px solid rgba(246, 239, 227, 0.2);
-    border-radius: 0.7rem;
-    outline: none;
-    background: rgba(255, 255, 255, 0.035);
-    padding: 0.9rem 1rem;
-    color: var(--paper);
-    font-family: "Rubik", sans-serif;
-    font-size: 1rem;
-    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
-  }
-
-  .field input::placeholder {
-    color: rgba(246, 239, 227, 0.32);
-  }
-
-  .field input:focus {
-    border-color: var(--gold);
-    background: rgba(255, 255, 255, 0.055);
-    box-shadow: 0 0 0 3px rgba(215, 155, 71, 0.14);
-  }
-
-  .attendance-fieldset {
-    min-width: 0;
-    margin: 0;
-    border: 0;
-    padding: 0;
-  }
-
-  .attendance-fieldset legend {
-    margin-bottom: 0.55rem;
-  }
-
-  .attendance-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  .attendance-option {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .attendance-option input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .attendance-option span {
-    display: grid;
-    gap: 0.15rem;
-    height: 100%;
-    border: 1px solid rgba(246, 239, 227, 0.18);
-    border-radius: 0.75rem;
-    padding: 0.8rem 0.9rem;
-    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-  }
-
-  .attendance-option strong,
-  .attendance-option small {
-    font-family: "Rubik", sans-serif;
-  }
-
-  .attendance-option strong {
-    color: var(--paper);
-    font-size: 0.82rem;
-  }
-
-  .attendance-option small {
-    color: rgba(246, 239, 227, 0.5);
-    font-size: 0.7rem;
-  }
-
-  .attendance-option:hover span,
-  .attendance-option input:focus-visible + span {
-    border-color: rgba(215, 155, 71, 0.72);
-    transform: translateY(-1px);
-  }
-
-  .attendance-option input:checked + span {
-    border-color: var(--gold);
-    background: rgba(215, 155, 71, 0.13);
-    box-shadow: inset 0 0 0 1px rgba(215, 155, 71, 0.25);
-  }
-
-  .submit-button {
+  .fest-chips {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 0.25rem;
-    border: 0;
-    border-radius: 0.75rem;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    padding: 0.95rem 1.1rem;
-    color: #1a1817;
-    cursor: pointer;
-    font-family: "Rubik", sans-serif;
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .submit-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 0.9rem 2rem rgba(215, 155, 71, 0.2);
+  .fest-chip {
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 0.42rem 0.9rem;
+    font-family: "Filson Soft", "Rubik", sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(30, 30, 30, 0.09);
   }
 
-  .submit-button:focus-visible {
-    outline: 3px solid var(--paper);
-    outline-offset: 3px;
+  .fest-chip--gold {
+    border: 1.5px solid #ffbd59;
+    color: #b56400;
   }
 
-  .submit-button:disabled {
-    cursor: wait;
-    opacity: 0.72;
+  .fest-chip--ember {
+    border: 1.5px solid #ff6b52;
+    color: #d63d22;
   }
 
-  .button-arrow {
-    font-size: 1.25rem;
+  .fest-chip--magenta {
+    border: 1.5px solid #e94f8a;
+    color: #c81e63;
   }
 
-  .form-note {
-    margin: -0.2rem 0 0;
-    color: rgba(246, 239, 227, 0.38);
-    font-family: "Rubik", sans-serif;
-    font-size: 0.7rem;
-    line-height: 1.55;
-    text-align: center;
+  .fest-body {
+    margin: 1.1rem 0 0;
+    color: #555555;
+    font-family: "Filson Soft", "Rubik", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 400;
+    line-height: 1.75;
   }
 
-  .form-note a {
-    color: var(--gold-light);
-    text-underline-offset: 0.18em;
-  }
-
-  .success-card {
-    outline: none;
-  }
-
-  .success-mark {
-    display: grid;
-    place-items: center;
-    width: 3.25rem;
-    height: 3.25rem;
-    margin-bottom: 1.25rem;
-    border: 1px solid rgba(215, 155, 71, 0.5);
-    border-radius: 50%;
-    background: rgba(215, 155, 71, 0.12);
-    color: var(--gold-light);
-    font-size: 1.4rem;
-  }
-
-  .success-card h2 {
-    margin: 0.55rem 0 0.75rem;
-    color: var(--paper);
-    font-family: "Playfair Display", serif;
-    font-size: clamp(2.4rem, 5vw, 4rem);
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1;
-  }
-
-  .success-card > p:last-of-type {
-    max-width: 30rem;
-    margin: 0 0 1.5rem;
-    color: rgba(246, 239, 227, 0.68);
-    font-family: "Rubik", sans-serif;
-    line-height: 1.7;
-  }
-
-  .success-card button {
-    border: 0;
-    border-bottom: 1px solid rgba(240, 197, 124, 0.55);
-    background: none;
-    padding: 0.3rem 0;
-    color: var(--gold-light);
-    cursor: pointer;
-    font-family: "Rubik", sans-serif;
-    font-size: 0.78rem;
+  .invite-card--fest .btn {
+    font-family: "Filson Soft", "Rubik", sans-serif;
     font-weight: 700;
   }
 
-  [hidden] {
-    display: none !important;
+  /* Solid deep magenta rather than the arc gradient: white text needs the
+     contrast, and the deepened Party stop is the sanctioned solid. */
+  .invite-card--fest .btn--gold {
+    background: #c81e63;
+    color: #ffffff;
+    box-shadow: 0 0.6rem 1.5rem rgba(200, 30, 99, 0.28);
   }
 
-  @media (max-width: 800px) {
-    .graduation-page {
-      padding: 0;
-    }
-
-    .event-shell {
-      grid-template-columns: 1fr;
-      min-height: 100vh;
-      border: 0;
-      border-radius: 0;
-    }
-
-    .invite-panel {
-      border-right: 0;
-      border-bottom: 1px solid rgba(215, 155, 71, 0.25);
-      padding: 1.5rem;
-    }
-
-    .invite-art {
-      width: min(100%, 20rem);
-    }
-
-    .rsvp-panel {
-      padding: 2.25rem 1.5rem 3rem;
-    }
-
-    .rsvp-heading h1 {
-      max-width: 12ch;
-    }
+  .invite-card--fest .btn--gold:hover {
+    background: #b01a57;
   }
 
-  @media (max-width: 430px) {
-    .event-facts {
-      grid-template-columns: 1fr 0.55fr 0.75fr;
-      gap: 0.55rem;
-    }
-
-    .attendance-options {
-      grid-template-columns: 1fr;
-    }
+  .invite-card--fest .btn--ghost {
+    border: 1.5px solid #ff6b52;
+    background: #ffffff;
+    color: #d63d22;
+    box-shadow: 0 1px 2px rgba(30, 30, 30, 0.09);
   }
 
+  .invite-card--fest .btn--ghost:hover {
+    background: #fff3ec;
+  }
+
+  .invite-card--fest .btn:focus-visible,
+  .invite-card--fest a:focus-visible {
+    outline-color: #c81e63;
+  }
+
+  /* -------------------- The gala: dark luxe (design.md) ---------------- */
+  .invite-card--gala {
+    background: #1e1e1e;
+    color: #ffffff;
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.45);
+  }
+
+  .invite-card--gala::after {
+    content: "";
+    position: absolute;
+    top: -8rem;
+    right: -6rem;
+    width: 18rem;
+    height: 18rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 189, 89, 0.22),
+      transparent 70%
+    );
+    filter: blur(46px);
+    pointer-events: none;
+  }
+
+  .gala-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+  }
+
+  /* Thin gold hairlines are a gala signature and are allowed inside this
+     card only; the rest of the page uses candle-dot ornaments instead. */
+  .gala-eyebrow::before {
+    content: "";
+    height: 1px;
+    width: 2rem;
+    flex-shrink: 0;
+    background: rgba(255, 189, 89, 0.7);
+  }
+
+  .gala-wordmark {
+    margin: 0.75rem 0 0;
+    font-family: "Playfair Display", serif;
+    font-size: clamp(1.9rem, 5.2vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+  }
+
+  .gala-wordmark-rest {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .gala-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+
+  .gala-rule-short {
+    height: 1px;
+    width: 3.5rem;
+    flex-shrink: 0;
+  }
+
+  .gala-rule-long {
+    height: 1px;
+    width: 100%;
+    max-width: 9rem;
+  }
+
+  .gala-diamond {
+    width: 0.4rem;
+    height: 0.4rem;
+    flex-shrink: 0;
+    rotate: 45deg;
+    background: #ffbd59;
+  }
+
+  .gala-meta {
+    margin: 0.9rem 0 0;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .gala-meta--venue {
+    margin-top: 0.25rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+  }
+
+  .gala-body {
+    margin: 0.9rem 0 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  .gala-status {
+    margin: 0.85rem 0 0;
+    color: #ffbd59;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .invite-card--gala .btn--gold {
+    background: linear-gradient(135deg, #ffbd59, #f4a833);
+    color: #1e1e1e;
+    box-shadow: 0 0.6rem 1.5rem rgba(255, 189, 89, 0.22);
+  }
+
+  .invite-card--gala .btn--ghost {
+    border: 1px solid rgba(255, 189, 89, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+  }
+
+  .invite-card--gala .btn--ghost:hover {
+    background: rgba(255, 189, 89, 0.16);
+  }
+
+  .invite-card--gala .btn:focus-visible,
+  .invite-card--gala a:focus-visible {
+    outline-color: #ffbd59;
+  }
+
+  /* --------------------------- Reduced motion -------------------------- */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      scroll-behavior: auto !important;
+    .grad-page *,
+    .grad-page *::before,
+    .grad-page *::after,
+    .lightbox,
+    .lightbox * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .btn:hover,
+    .thumb:hover {
+      transform: none;
     }
   }
 </style>
