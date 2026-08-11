@@ -13,7 +13,7 @@ import {
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
-import { yttTrio } from "@/data/yttTrio";
+import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
@@ -262,7 +262,7 @@ const graduationFlickrUrl =
             light honeydew section still lands directly below the same dark
             room. Compact by design: one keepsake-mat band, gold CTA to
             Zeffy (free tickets, donation encouraged), ghost CTA to
-            /schedule where all 12 session cards live. Same identity rules
+            /schedule where every session card lives. Same identity rules
             as the section: Fraunces display, #f0c57c/#d79b47 gold, orchid
             only in the trio-dot motif, no .gala-foil, no accent-gold. */}
         <div class="reveal relative mt-14 rounded-3xl border border-[#f0c57c]/25 bg-white/[0.04] p-6 sm:p-8" style="transition-delay: 200ms;">
@@ -310,7 +310,7 @@ const graduationFlickrUrl =
                 data-conversion-event="ytt_trio_schedule_click"
                 data-conversion-context="home_ytt_trio"
               >
-                All 12 dates
+                All {yttTrioSessions.length} dates
               </a>
             </div>
           </div>

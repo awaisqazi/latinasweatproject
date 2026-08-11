@@ -100,7 +100,7 @@ export const yttTrioSessions = [
     dateShort: "Aug 20",
     time: "6:00–6:45 PM",
     timeShort: "6 PM",
-    instructors: ["Savannah", "Gisella", "Jianna"],
+    instructors: ["Savannah", "Gisella", "Jiana"],
   },
   {
     id: "aug20-7pm",
@@ -122,7 +122,7 @@ export const yttTrioSessions = [
     dateShort: "Aug 20",
     time: "8:00–8:45 PM",
     timeShort: "8 PM",
-    instructors: ["Jessica", "Giuliana", "Giselle"],
+    instructors: ["Jessica", "Giulianna", "Giselle"],
   },
   {
     id: "aug24-6pm",
@@ -156,6 +156,17 @@ export const yttTrioSessions = [
     time: "6:00–6:45 PM",
     timeShort: "6 PM",
     instructors: ["Efren", "Xochyl", "Javi"],
+  },
+  {
+    id: "aug27-8pm",
+    date: "2026-08-27",
+    day: "Thursday",
+    dayShort: "Thu",
+    dateLabel: "August 27",
+    dateShort: "Aug 27",
+    time: "8:00–8:45 PM",
+    timeShort: "8 PM",
+    instructors: ["Fabiola", "Savannah", "Roberto"],
   },
   {
     id: "aug31-6pm",

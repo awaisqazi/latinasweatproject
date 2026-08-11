@@ -1,6 +1,6 @@
 // Instagram promo suite for the YTT ’26 Trio Community Classes (Aug 11–31,
-// 2026): one feed post (1080x1350) + one story (1080x1920) PER SESSION (12
-// sessions), plus a series-overview post + story listing all 12 dates.
+// 2026): one feed post (1080x1350) + one story (1080x1920) PER SESSION,
+// plus a series-overview post + story listing every date.
 //
 // Identity: "candlelit rose", the Graduation 2026 family (rose-ink ground,
 // cream #f6efe3, gold #f0c57c/#d79b47 foil, orchid #e08cb8 candle-bokeh,
@@ -12,7 +12,7 @@
 // (the source doesn't specify teaching order), only "15 MIN x3".
 //
 // Usage:  node scripts/render-ytt-trio-social.mjs
-// Output: output/ytt-trio-social/*.png  (26 files)
+// Output: output/ytt-trio-social/*.png  (2 per session + 2 overview)
 
 import { mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -182,7 +182,7 @@ const STORY_OPTS = {
 };
 
 // ---------------------------------------------------------------------------
-// Series-overview composition (all 12 dates)
+// Series-overview composition (every date)
 // ---------------------------------------------------------------------------
 
 function composeOverview(W, H, o) {
@@ -191,7 +191,7 @@ function composeOverview(W, H, o) {
   s += bokeh(cx, o.bokehY);
   s += T({ text: "THE LATINA SWEAT PROJECT", x: cx, y: o.eyebrowY, size: o.eyebrowSize, color: P.cream, weight: 900, tracking: 9, opacity: 0.92 });
   s += T({ text: "Trio Community Classes", x: cx, y: o.titleY, size: o.titleSize, color: P.cream, weight: 400, family: SERIF, italic: true });
-  s += T({ text: "YTT ’26 · 12 FREE CLASSES · ONE 45-MINUTE FLOW, THREE NEW TEACHERS", x: cx, y: o.sublineY, size: o.sublineSize, color: P.gold, weight: 900, tracking: 2, opacity: 0.95 });
+  s += T({ text: `YTT ’26 · ${yttTrioSessions.length} FREE CLASSES · ONE 45-MINUTE FLOW, THREE NEW TEACHERS`, x: cx, y: o.sublineY, size: o.sublineSize, color: P.gold, weight: 900, tracking: 2, opacity: 0.95 });
 
   const left = o.rowLeft;
   const right = W - o.rowLeft;
@@ -205,7 +205,7 @@ function composeOverview(W, H, o) {
     s += lsp.txt({ text: sess.instructors.join(" · "), x: right, y: rowY, size: o.nameSize, color: P.cream, weight: 600, anchor: "end", opacity: 0.94 });
   });
 
-  const below = o.rowsY + 11 * o.rowH;
+  const below = o.rowsY + (yttTrioSessions.length - 1) * o.rowH;
   s += lsp.divider(cx, below + o.divGap, o.dividerHalf, 0.3);
   s += T({ text: "LSP STUDIO · 949 W 16TH ST · PILSEN", x: cx, y: below + o.venueGap, size: o.venueSize, color: P.gold, weight: 900, tracking: 3.5, opacity: 0.96 });
   s += T({ text: "FREE · ALL LEVELS · DONATION TO LSP ENCOURAGED", x: cx, y: below + o.freeGap, size: o.freeSize, color: P.cream, weight: 700, tracking: 2, opacity: 0.8 });
@@ -221,7 +221,7 @@ const OVERVIEW_POST_OPTS = {
   eyebrowY: 118, eyebrowSize: 22,
   titleY: 216, titleSize: 76,
   sublineY: 268, sublineSize: 17,
-  rowsY: 350, rowH: 57, rowLeft: 108, whenSize: 20, nameSize: 22,
+  rowsY: 340, rowH: 55, rowLeft: 108, whenSize: 20, nameSize: 22,
   divGap: 46, dividerHalf: 70,
   venueGap: 96, venueSize: 22,
   freeGap: 138, freeSize: 19,
@@ -235,7 +235,7 @@ const OVERVIEW_STORY_OPTS = {
   eyebrowY: 330, eyebrowSize: 24,
   titleY: 436, titleSize: 84,
   sublineY: 492, sublineSize: 18,
-  rowsY: 576, rowH: 64, rowLeft: 96, whenSize: 21, nameSize: 23,
+  rowsY: 576, rowH: 60, rowLeft: 96, whenSize: 21, nameSize: 23,
   divGap: 50, dividerHalf: 76,
   venueGap: 104, venueSize: 23,
   freeGap: 148, freeSize: 20,

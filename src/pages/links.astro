@@ -38,7 +38,7 @@ const sweatFestTierCopy = {
 };
 
 // YTT ’26 Trio schedule rows: Spanish short-day map (Mon/Tue/Thu are the
-// only weekdays in the series) so the 12 ES date labels are derived from
+// only weekdays in the series) so every ES date label is derived from
 // the session data, never hand-written.
 const trioDayEs = { Mon: "Lun", Tue: "Mar", Thu: "Jue" };
 const trioSessionDateEs = (session) => {
@@ -515,7 +515,7 @@ const getLinkConversionProvider = (url = "") => {
       {/* YTT ’26 Trio Featured Card: the graduation story's next chapter
           (the Aug 7 grads lead their first live community classes, Aug 11
           to Aug 31), so it sits directly below the recap card in the same
-          candlelit rose-ink + gold identity, with the full 12-session
+          candlelit rose-ink + gold identity, with the full session
           schedule inline; the script at the bottom of the page gold-washes
           the next upcoming row. */}
       <div
@@ -561,7 +561,7 @@ const getLinkConversionProvider = (url = "") => {
             <span class="lang-es hidden">Clases comunitarias gratuitas de 45 minutos: tres maestras recién graduadas por clase, cada una toma el mat por 15 minutos. Todos los niveles.</span>
           </p>
 
-          {/* All 12 sessions, compact rows: gold date + time, cream trio */}
+          {/* Every session, compact rows: gold date + time, cream trio */}
           <div class="mt-4 overflow-hidden rounded-xl border border-[#f0c57c]/25">
             {
               yttTrioSessions.map((session, i) => (
