@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
@@ -114,231 +115,107 @@ import Header from "@/components/Header.astro";
     >
     </div>
 
-    {/* Free Day Promo Banner — spotlighted below the schedule */}
-    <div class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-yellow-50 to-emerald-50 py-8 px-4">
-      {/* Decorative warm glows */}
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-12 left-[20%] w-[250px] h-[250px] bg-accent-gold/20 rounded-full blur-[80px]"></div>
-        <div class="absolute -bottom-12 right-[20%] w-[200px] h-[200px] bg-emerald-500/15 rounded-full blur-[60px]"></div>
-      </div>
+    {/* YTT ’26 Trio Community Classes: free community classes spotlighted
+        below the schedule (replaces the expired May-to-July free-day
+        promo). Daybreak-rose identity: the light sibling of the Graduation
+        2026 candlelit-rose room, a deliberate family resemblance since
+        these are the teachers who graduated Aug 7 stepping into their
+        first live classes. Warm cream/blush ground, rose-ink #2b1520 text,
+        gold #d79b47/#f0c57c accents, orchid #e08cb8 as a sparing
+        highlight, Fraunces display serif (loaded globally in
+        Layout.astro). Signature motif: the trio, one 45-minute flow split
+        15 + 15 + 15 across three teachers (the tri-color dots beside each
+        instructor name). The next upcoming session gets a NEXT treatment
+        via the script at the bottom of this page. */}
+    <div id="ytt-trio" class="relative overflow-hidden py-12 px-4 sm:py-16" style="background: linear-gradient(to bottom, #fdf7f0, #f9ede6);">
+      {/* Soft daybreak glows: gold rising at the top, a whisper of orchid low */}
+      <div class="pointer-events-none absolute -top-16 left-[18%] h-64 w-64 rounded-full blur-[100px]" style="background: rgba(240, 197, 124, 0.4);" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -top-10 right-[22%] h-48 w-48 rounded-full blur-[90px]" style="background: rgba(215, 155, 71, 0.22);" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-20 left-[55%] h-56 w-56 rounded-full blur-[100px]" style="background: rgba(224, 140, 184, 0.18);" aria-hidden="true"></div>
 
       <div class="relative mx-auto max-w-5xl">
+        {/* Series header */}
         <div class="text-center">
-          {/* Pulsing badge */}
-          <div class="inline-flex items-center gap-2 rounded-full bg-accent-gold/20 border border-accent-gold/40 px-3 py-1.5 mb-3">
-            <span class="relative flex h-2 w-2">
-              <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
-              <span class="relative inline-flex h-2 w-2 rounded-full bg-accent-gold"></span>
+          <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-extrabold uppercase tracking-[0.22em] sm:text-sm" style="color: #a5702c;">
+            <span class="flex items-center gap-1.5" aria-hidden="true">
+              <span class="h-1.5 w-1.5 rounded-full" style="background: #d79b47;"></span>
+              <span class="h-1.5 w-1.5 rounded-full" style="background: #f0c57c;"></span>
+              <span class="h-1.5 w-1.5 rounded-full" style="background: #e08cb8;"></span>
             </span>
-            <span class="text-xs font-bold uppercase tracking-widest text-amber-800">Free · May to July 2026</span>
-          </div>
-
-          <h3 class="font-sans text-xl sm:text-2xl font-extrabold tracking-tight text-off-black">
-            🎉 Free Classes, <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-emerald-500">Two Locations</span>
-          </h3>
-          <p class="mt-1 text-amber-900/70 text-sm font-medium">Clases gratis · No membership needed · Two locations, two ways to register</p>
-        </div>
-
-        <div class="mt-5 grid gap-4 md:grid-cols-2">
-          {/* PILSEN */}
-          <div class="rounded-2xl bg-white border-2 border-accent-gold/40 shadow-md shadow-accent-gold/10 p-5 flex flex-col">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-off-black text-accent-gold font-extrabold text-base">X</span>
-              <div class="text-left flex-1">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-accent-gold leading-none">Location 1</p>
-                <p class="text-base font-extrabold text-off-black leading-tight">Pilsen · LSP Studio</p>
-              </div>
-              <div class="text-right">
-                <p class="text-2xl font-extrabold text-accent-gold leading-none">8</p>
-                <p class="text-[9px] font-bold uppercase tracking-wider text-off-black/55 leading-none mt-0.5">Free Days</p>
-              </div>
-            </div>
-            <p class="text-[11px] text-off-black/70 font-medium mb-3">949 W 16th St, Chicago, IL 60608</p>
-
-            {/* Day rotation insight */}
-            <div class="rounded-lg bg-amber-50 border border-amber-200 px-2.5 py-2 mb-3">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-1.5">Rotates through every day</p>
-              <div class="flex items-center gap-1">
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">FRI</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">SAT</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">SUN</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">MON</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">TUE</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">WED</span>
-                <span class="flex-1 rounded text-center text-[10px] font-extrabold text-amber-900 bg-amber-200/70 py-1">THU</span>
-              </div>
-            </div>
-
-            <p class="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1.5">May 2026</p>
-            <div class="grid grid-cols-2 gap-2 mb-3">
-              <div class="pilsen-date" data-free-date="2026-05-01" data-free-loc="pilsen">
-                <span class="pilsen-date__day">FRI</span>
-                <span class="pilsen-date__num">1</span>
-                <span class="pilsen-date__month">May</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-05-09" data-free-loc="pilsen">
-                <span class="pilsen-date__day">SAT</span>
-                <span class="pilsen-date__num">9</span>
-                <span class="pilsen-date__month">May</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-05-17" data-free-loc="pilsen">
-                <span class="pilsen-date__day">SUN</span>
-                <span class="pilsen-date__num">17</span>
-                <span class="pilsen-date__month">May</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-05-25" data-free-loc="pilsen">
-                <span class="pilsen-date__day">MON</span>
-                <span class="pilsen-date__num">25</span>
-                <span class="pilsen-date__month">May</span>
-              </div>
-            </div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1.5">June 2026</p>
-            <div class="grid grid-cols-2 gap-2">
-              <div class="pilsen-date" data-free-date="2026-06-02" data-free-loc="pilsen">
-                <span class="pilsen-date__day">TUE</span>
-                <span class="pilsen-date__num">2</span>
-                <span class="pilsen-date__month">Jun</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-06-10" data-free-loc="pilsen">
-                <span class="pilsen-date__day">WED</span>
-                <span class="pilsen-date__num">10</span>
-                <span class="pilsen-date__month">Jun</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-06-18" data-free-loc="pilsen">
-                <span class="pilsen-date__day">THU</span>
-                <span class="pilsen-date__num">18</span>
-                <span class="pilsen-date__month">Jun</span>
-              </div>
-              <div class="pilsen-date" data-free-date="2026-06-26" data-free-loc="pilsen">
-                <span class="pilsen-date__day">FRI</span>
-                <span class="pilsen-date__num">26</span>
-                <span class="pilsen-date__month">Jun</span>
-              </div>
-            </div>
-
-            <div class="mt-auto pt-3.5 border-t border-accent-gold/25">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-2">Reserve your spot</p>
-              <div class="flex gap-1.5 mb-2">
-                <a
-                  href="https://apps.apple.com/us/app/lsp-studio/id6755971141"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-off-black px-3 py-2 text-[11px] font-bold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-amber-900"
-                  data-conversion-event="app_download_click"
-                  data-conversion-context="schedule_free_classes"
-                  data-conversion-platform="ios"
-                >
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"></path></svg>
-                  iOS
-                </a>
-                <a
-                  href="https://play.google.com/store/apps/details?id=com.marianatek.latinasweatproject&hl=en_US"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-off-black px-3 py-2 text-[11px] font-bold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-amber-900"
-                  data-conversion-event="app_download_click"
-                  data-conversion-context="schedule_free_classes"
-                  data-conversion-platform="android"
-                >
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"></path></svg>
-                  Android
-                </a>
-                <a
-                  href="#schedule-widget"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-gold px-3 py-2 text-[11px] font-bold text-off-black shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
-                  data-conversion-event="class_booking_start"
-                  data-conversion-context="schedule_widget_jump"
-                  data-conversion-provider="mariana_tek"
-                  data-conversion-booking-path="embedded_schedule"
-                  data-conversion-location-id="48717"
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                  Above
-                </a>
-              </div>
-              <p class="text-[10px] text-off-black/60 font-medium text-center">Book up to <span class="font-bold text-amber-800">7 days ahead</span> in the app or right on this page</p>
-            </div>
-          </div>
-
-          {/* BACK OF THE YARDS */}
-          <div class="rounded-2xl bg-white border-2 border-emerald-500/40 shadow-md shadow-emerald-500/10 p-5 flex flex-col">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-extrabold text-base">X</span>
-              <div class="text-left">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 leading-none">Location 2</p>
-                <p class="text-base font-extrabold text-off-black leading-tight">Back of the Yards</p>
-              </div>
-            </div>
-            <p class="text-[11px] text-off-black/70 font-medium mb-3">Southside Social · 4432 S Ashland Ave, Chicago, IL 60609</p>
-
-            {/* Weekly lineup */}
-            <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3.5 mb-4">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-2">Weekly Lineup</p>
-              <div class="grid grid-cols-2 gap-3 text-[12px] text-off-black/85">
-                <div>
-                  <p class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-700/70 mb-1">Saturday</p>
-                  <p class="font-bold tabular-nums leading-tight">8:00 AM <span class="font-medium text-off-black/65">· Andrea Fuentes</span></p>
-                  <p class="font-bold tabular-nums leading-tight mt-0.5">9:15 AM <span class="font-medium text-off-black/65">· Melissa Salinas</span></p>
-                </div>
-                <div>
-                  <p class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-700/70 mb-1">Sunday</p>
-                  <p class="font-bold tabular-nums leading-tight">9:15 AM <span class="font-medium text-off-black/65">· Lizsandra Heredia</span></p>
-                  <p class="font-bold tabular-nums leading-tight mt-0.5">10:30 AM <span class="font-medium text-off-black/65">· Arturo Zurita</span></p>
-                </div>
-              </div>
-            </div>
-
-            <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-2 text-center">May (Every Sat &amp; Sun)</p>
-            <div class="flex flex-wrap gap-2.5 mb-4 justify-center">
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-09" data-free-loc="boty">Sat 9</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-10" data-free-loc="boty">Sun 10</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-16" data-free-loc="boty">Sat 16</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-17" data-free-loc="boty">Sun 17</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-23" data-free-loc="boty">Sat 23</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-24" data-free-loc="boty">Sun 24</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-30" data-free-loc="boty">Sat 30</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-05-31" data-free-loc="boty">Sun 31</span>
-            </div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-2 text-center">June (Every Sat &amp; Sun)</p>
-            <div class="flex flex-wrap gap-2.5 mb-4 justify-center">
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-06" data-free-loc="boty">Sat 6</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-07" data-free-loc="boty">Sun 7</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-13" data-free-loc="boty">Sat 13</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-14" data-free-loc="boty">Sun 14</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-20" data-free-loc="boty">Sat 20</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-21" data-free-loc="boty">Sun 21</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-27" data-free-loc="boty">Sat 27</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-06-28" data-free-loc="boty">Sun 28</span>
-            </div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-2 text-center">July (Final Weekend)</p>
-            <div class="flex flex-wrap gap-2.5 justify-center">
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-07-04" data-free-loc="boty">Sat 4</span>
-              <span class="sched-pill sched-pill--emerald" data-free-date="2026-07-05" data-free-loc="boty">Sun 5</span>
-            </div>
-
-            <div class="mt-auto pt-3.5 border-t border-emerald-500/25">
-              <a
-                href="https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02]"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="schedule_southside_card"
-                data-conversion-provider="zeffy"
-                data-conversion-booking-path="southside_ticketing"
-                data-conversion-location="southside_social"
-              >
-                Register on Zeffy
-                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-              </a>
-              <p class="mt-1.5 text-[10px] text-off-black/55 font-medium text-center">Not bookable in the LSP app or this page</p>
-            </div>
+            New community series · Fresh from Graduation 2026
+          </p>
+          <h2 class="mt-3 text-3xl leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl" style="font-family: 'Fraunces', serif; font-weight: 650; color: #2b1520;">
+            <span class="italic" style="color: #d79b47;">{yttTrio.cohortLabel}</span> Trio Community Classes
+          </h2>
+          <p class="mt-4 text-base font-bold sm:text-lg" style="color: #2b1520;">
+            {yttTrio.dateRangeLabel} · {yttTrio.timeWindowLabel}
+          </p>
+          <p class="mt-1 text-sm font-semibold" style="color: rgba(43, 21, 32, 0.6);">
+            {yttTrio.venueLine}
+          </p>
+          <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed" style="color: rgba(43, 21, 32, 0.75);">
+            {yttTrio.description}
+          </p>
+          <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+            <span class="rounded-full border px-3.5 py-1.5 text-xs font-bold" style="border-color: rgba(215, 155, 71, 0.45); background: rgba(255, 255, 255, 0.7); color: #2b1520;">
+              {yttTrio.priceLine}
+            </span>
+            <span class="rounded-full border px-3.5 py-1.5 text-xs font-bold" style="border-color: rgba(224, 140, 184, 0.45); background: rgba(255, 255, 255, 0.7); color: #2b1520;">
+              {yttTrio.formatLine}
+            </span>
           </div>
         </div>
 
-        <p class="mt-4 text-center text-[12px] sm:text-sm text-off-black/65 font-medium">
-          <span class="font-bold text-off-black">Pilsen</span> books up to 7 days ahead in the LSP Studio app or this page (iOS &amp; Android). <span class="font-bold text-off-black">Southside Social</span> reservations open at <a href="https://www.zeffy.com/en-US/ticketing/latina-sweat-project-southside-social-free-classes" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-800" data-conversion-event="class_booking_start" data-conversion-context="schedule_southside_text_link" data-conversion-provider="zeffy" data-conversion-booking-path="southside_ticketing" data-conversion-location="southside_social">zeffy.com</a>.
+        {/* All 12 sessions: three names per card, front and center, since
+            attendees come for their teacher. data-trio-date drives the
+            NEXT highlight script below. */}
+        <div class="mt-9 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {yttTrioSessions.map((session) => (
+            <div class="trio-card" data-trio-date={session.date}>
+              <div class="flex items-baseline justify-between gap-2">
+                <p class="text-sm font-extrabold" style="color: #2b1520;">
+                  {session.day} · {session.dateLabel}
+                </p>
+                <p class="text-sm font-extrabold tabular-nums" style="color: #a5702c;">
+                  {session.time}
+                </p>
+              </div>
+              <ul class="mt-3 space-y-1.5">
+                {session.instructors.map((name, i) => (
+                  <li class="flex items-center gap-2.5 text-base font-bold" style="color: #2b1520;">
+                    <span class="h-2 w-2 shrink-0 rounded-full" style={`background: ${["#d79b47", "#f0c57c", "#e08cb8"][i]};`} aria-hidden="true"></span>
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* The emotional throughline */}
+        <p class="mx-auto mt-10 max-w-2xl text-center text-lg italic leading-relaxed" style="font-family: 'Fraunces', serif; font-weight: 450; color: rgba(43, 21, 32, 0.8);">
+          {yttTrio.supportLine}
         </p>
+
+        <div class="mt-7 flex flex-col items-center gap-3">
+          <a
+            href={yttTrio.ticketsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="trio-cta group inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-base font-extrabold transition hover:scale-[1.02]"
+            data-conversion-event="ytt_trio_ticket_click"
+            data-conversion-context="schedule_ytt_trio"
+            data-conversion-provider="zeffy"
+          >
+            {yttTrio.ticketsLabel}
+            <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+          <p class="text-sm font-bold" style="color: rgba(43, 21, 32, 0.65);">
+            Free tickets · Donation to LSP encouraged
+          </p>
+        </div>
       </div>
     </div>
 
@@ -447,126 +324,58 @@ import Header from "@/components/Header.astro";
         padding-top: 0 !important;
       }
 
-      .sched-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 8px;
-        border-radius: 6px;
-        background: #fffbeb;
-        border: 1px solid rgba(255, 189, 89, 0.4);
-        font-size: 11px;
-        font-weight: 700;
-        color: #1e1e1e;
-        line-height: 1.2;
-        transition: all 0.25s ease;
-      }
-      .sched-pill--emerald {
-        background: #ecfdf5;
-        border-color: rgba(110, 231, 183, 1);
-        padding: 12px 20px;
-        font-size: 15px;
-        border-radius: 10px;
-      }
-      .pilsen-date {
+      /* YTT ’26 Trio Community Classes: daybreak-rose session cards */
+      .trio-card {
         position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1px;
-        padding: 6px 6px;
-        border-radius: 8px;
-        background: #fffbeb;
-        border: 1.5px solid rgba(255, 189, 89, 0.45);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1.5px solid rgba(215, 155, 71, 0.35);
+        padding: 1rem 1.15rem;
         transition: all 0.25s ease;
       }
-      .pilsen-date:hover {
-        background: rgba(255, 189, 89, 0.18);
-        border-color: rgba(255, 189, 89, 0.75);
-        transform: scale(1.02);
+      .trio-card:hover {
+        background: #ffffff;
+        border-color: rgba(215, 155, 71, 0.65);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px -10px rgba(43, 21, 32, 0.18);
       }
-      .pilsen-date__day {
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        color: #92400e;
-        line-height: 1;
+      .trio-card[data-trio-next='true'] {
+        background:
+          linear-gradient(135deg, rgba(240, 197, 124, 0.35), rgba(224, 140, 184, 0.16)),
+          #ffffff;
+        border-color: #d79b47;
+        box-shadow: 0 12px 28px -10px rgba(215, 155, 71, 0.5);
+        animation: trio-pulse-gold 2.4s ease-in-out infinite;
       }
-      .pilsen-date__num {
-        font-size: 1.125rem;
-        font-weight: 800;
-        line-height: 1;
-        color: #1e1e1e;
-        margin-top: 1px;
-      }
-      .pilsen-date__month {
-        font-size: 9px;
-        font-weight: 600;
-        color: rgba(30, 30, 30, 0.55);
-        line-height: 1;
-      }
-      .pilsen-date[data-free-next="true"] {
-        background: linear-gradient(135deg, #ffbd59, #ffd28a);
-        border-color: #ffbd59;
-        transform: scale(1.04);
-        box-shadow: 0 8px 20px -4px rgba(255, 189, 89, 0.5);
-        animation: sched-pulse-gold 2.2s ease-in-out infinite;
-      }
-      .pilsen-date[data-free-next="true"]::before {
+      .trio-card[data-trio-next='true']::before {
         content: '↓ NEXT';
         position: absolute;
         top: -10px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         letter-spacing: 0.08em;
-        padding: 2px 6px;
+        padding: 2px 8px;
         border-radius: 4px;
-        background: #b5a18d;
-        color: #fff;
+        background: #2b1520;
+        color: #f0c57c;
         white-space: nowrap;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 2px 6px rgba(43, 21, 32, 0.25);
+      }
+      @keyframes trio-pulse-gold {
+        0%, 100% { box-shadow: 0 12px 28px -10px rgba(215, 155, 71, 0.5), 0 0 0 0 rgba(215, 155, 71, 0.45); }
+        50% { box-shadow: 0 12px 28px -10px rgba(215, 155, 71, 0.5), 0 0 0 8px rgba(215, 155, 71, 0); }
       }
 
-      .sched-pill[data-free-next="true"] {
-        position: relative;
-        background: linear-gradient(135deg, #ffbd59, #ffd28a);
-        border-color: #ffbd59;
-        color: #1e1e1e;
-        transform: none;
-        box-shadow: 0 4px 12px -2px rgba(255, 189, 89, 0.5);
-        animation: sched-pulse-gold 2.2s ease-in-out infinite;
+      /* Gold CTA: deep gold at rest, light gold on hover (rose-ink label) */
+      .trio-cta {
+        background: #d79b47;
+        color: #2b1520;
+        box-shadow: 0 12px 26px -10px rgba(215, 155, 71, 0.6);
       }
-      .sched-pill--emerald[data-free-next="true"] {
-        background: linear-gradient(135deg, #34d399, #6ee7b7);
-        border-color: #34d399;
-        color: #064e3b;
-        box-shadow: 0 4px 12px -2px rgba(52, 211, 153, 0.5);
-        animation: sched-pulse-emerald 2.2s ease-in-out infinite;
-      }
-      .sched-pill[data-free-next="true"]::before {
-        content: '↓ NEXT';
-        position: absolute;
-        top: -11px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        padding: 2px 6px;
-        border-radius: 4px;
-        background: #b5a18d;
-        color: #fff;
-        white-space: nowrap;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-      }
-      @keyframes sched-pulse-gold {
-        0%, 100% { box-shadow: 0 4px 12px -2px rgba(255, 189, 89, 0.5), 0 0 0 0 rgba(255, 189, 89, 0.6); }
-        50% { box-shadow: 0 4px 12px -2px rgba(255, 189, 89, 0.5), 0 0 0 8px rgba(255, 189, 89, 0); }
-      }
-      @keyframes sched-pulse-emerald {
-        0%, 100% { box-shadow: 0 4px 12px -2px rgba(52, 211, 153, 0.5), 0 0 0 0 rgba(52, 211, 153, 0.6); }
-        50% { box-shadow: 0 4px 12px -2px rgba(52, 211, 153, 0.5), 0 0 0 8px rgba(52, 211, 153, 0); }
+      .trio-cta:hover {
+        background: #f0c57c;
       }
     </style>
 
@@ -581,18 +390,18 @@ import Header from "@/components/Header.astro";
           '-' +
           String(today.getDate()).padStart(2, '0');
 
-        const groups = new Map<string, HTMLElement[]>();
-        document.querySelectorAll<HTMLElement>('[data-free-date][data-free-loc]').forEach((el) => {
-          const loc = el.dataset.freeLoc || 'default';
-          if (!groups.has(loc)) groups.set(loc, []);
-          groups.get(loc)!.push(el);
-        });
-
-        groups.forEach((pills) => {
-          pills.sort((a, b) => (a.dataset.freeDate || '').localeCompare(b.dataset.freeDate || ''));
-          const next = pills.find((p) => (p.dataset.freeDate || '') >= todayStr);
-          if (next) next.dataset.freeNext = 'true';
-        });
+        // Highlight the next upcoming YTT ’26 Trio session. Cards render
+        // chronologically and the stable sort keeps same-date sessions in
+        // their 6/7/8 PM DOM order, so the first card whose date is today
+        // or later is the next one up.
+        const cards = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-trio-date]'),
+        );
+        cards.sort((a, b) =>
+          (a.dataset.trioDate || '').localeCompare(b.dataset.trioDate || ''),
+        );
+        const next = cards.find((c) => (c.dataset.trioDate || '') >= todayStr);
+        if (next) next.dataset.trioNext = 'true';
       })();
     </script>
   </main>

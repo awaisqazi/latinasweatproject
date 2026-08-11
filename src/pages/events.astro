@@ -12,6 +12,7 @@ import {
   sweatFestTickets,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
+import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
@@ -34,6 +35,10 @@ const sweatFestFromPrice = Math.min(
 const graduationPageUrl = withBase("graduation");
 const graduationGalleryUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
+// YTT ’26 Trio strip (the recap's next chapter, inside the graduation
+// band): prose form of the data file's "Aug 11 · Aug 31" range so the
+// eyebrow's own " · " separator stays unambiguous.
+const yttTrioDateProse = yttTrio.dateRangeLabel.replace(" · ", " to ");
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice. The
 // summer-renaissance slugs stay excluded even though its featured section
@@ -45,6 +50,10 @@ const featuredSlugs = [
   "monday-miles",
   "summer-renaissance",
   "haus-of-lsp-summer-renaissance",
+  // YTT ’26 Trio lives inside the graduation band above; excluded so the
+  // island never double-renders it if the event lands in Supabase.
+  "ytt-trio-community-classes",
+  "ytt-26-trio-community-classes",
 ];
 ---
 
@@ -154,6 +163,55 @@ const featuredSlugs = [
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                 </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Trio strip: the Aug 7 graduates' first live classes are the
+            recap's next chapter, so they ride inside this band as a quiet
+            hairline sub-band (same candlelit identity, one size smaller)
+            instead of earning a whole section */}
+        <div class="reveal mt-10 border-t border-[#f0c57c]/20 pt-8" style="transition-delay: 200ms;">
+          <div class="flex flex-col items-center gap-6 text-center lg:flex-row lg:justify-between lg:text-left">
+            <div class="max-w-2xl">
+              <p class="flex items-center justify-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.28em] text-[#e08cb8] lg:justify-start">
+                <span class="h-px w-8 bg-[#e08cb8]/60"></span>
+                Next · {yttTrioDateProse}
+              </p>
+              <h3 class="mt-2 text-2xl font-semibold tracking-tight text-[#f6efe3] sm:text-3xl" style="font-family: 'Fraunces', serif;">
+                Now they take <span class="text-[#f0c57c]">the mat</span>
+              </h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-[#f6efe3]/70">
+                The graduates above step into their first live classes:
+                45-minute community flows at {yttTrio.venueName}, each led by
+                three {yttTrio.cohortLabel} teachers, 15 minutes each.
+              </p>
+              <p class="mt-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#f6efe3]/45">
+                {yttTrio.priceLine}
+              </p>
+            </div>
+            <div class="flex flex-col items-center gap-3 sm:flex-row lg:flex-shrink-0">
+              <a
+                href={yttTrio.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-extrabold text-[#2b1520] transition-transform duration-300 hover:-translate-y-0.5"
+                style="background: linear-gradient(100deg, #d79b47, #f0c57c 55%, #d79b47);"
+                data-conversion-event="ytt_trio_ticket_click"
+                data-conversion-context="events_ytt_trio"
+                data-conversion-provider="zeffy"
+              >
+                {yttTrio.ticketsLabel}
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={withBase("schedule")}
+                class="inline-flex items-center gap-2 text-sm font-bold text-[#f6efe3]/60 underline-offset-4 transition-colors duration-300 hover:text-[#f0c57c] hover:underline"
+              >
+                All {yttTrioSessions.length} dates & teachers
               </a>
             </div>
           </div>

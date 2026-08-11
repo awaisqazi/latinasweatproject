@@ -13,6 +13,7 @@ import {
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
+import { yttTrio } from "@/data/yttTrio";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
@@ -248,6 +249,70 @@ const graduationFlickrUrl =
                 <span>Friday, August 7, 2026</span>
               </figcaption>
             </figure>
+          </div>
+        </div>
+
+        {/* Companion band: YTT ’26 Trio Community Classes (Aug 11 to 31).
+            Placement rationale: the trio series is the graduation story's
+            next chapter (the same teachers, now taking the mat for their
+            first live classes), so the promo lives INSIDE this candlelit
+            rose room at the bottom of the spotlight rather than as its own
+            section. That attaches it to the story it belongs to AND keeps
+            the page's strict light/dark alternation intact: Sweat Fest's
+            light honeydew section still lands directly below the same dark
+            room. Compact by design: one keepsake-mat band, gold CTA to
+            Zeffy (free tickets, donation encouraged), ghost CTA to
+            /schedule where all 12 session cards live. Same identity rules
+            as the section: Fraunces display, #f0c57c/#d79b47 gold, orchid
+            only in the trio-dot motif, no .gala-foil, no accent-gold. */}
+        <div class="reveal relative mt-14 rounded-3xl border border-[#f0c57c]/25 bg-white/[0.04] p-6 sm:p-8" style="transition-delay: 200ms;">
+          <div class="flex flex-col items-center gap-7 text-center lg:flex-row lg:justify-between lg:text-left">
+            <div class="max-w-2xl">
+              <p class="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-xs font-extrabold uppercase tracking-[0.2em] text-[#f0c57c] lg:justify-start">
+                <span class="flex items-center gap-1.5" aria-hidden="true">
+                  <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]"></span>
+                  <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]"></span>
+                  <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]"></span>
+                </span>
+                {yttTrio.title}
+              </p>
+              <h3 class="mt-3 text-2xl leading-tight text-[#f6efe3] [font-family:Fraunces,serif] [font-weight:650] sm:text-3xl">
+                They graduated Aug 7.
+                <span class="italic text-[#f0c57c]">Now they take the mat.</span>
+              </h3>
+              <p class="mt-3 text-base leading-relaxed text-[#f6efe3]/70">
+                Free community classes: one 45-minute flow, three new
+                teachers, 15 minutes each. Come be their first room.
+              </p>
+              <p class="mt-2 text-sm font-bold text-[#f6efe3]/85">
+                {yttTrio.dateRangeLabel} · {yttTrio.venueName} · Free tickets
+                · Donation to LSP encouraged
+              </p>
+            </div>
+            <div class="flex shrink-0 flex-col items-center gap-3 sm:flex-row lg:flex-col xl:flex-row">
+              <a
+                href={yttTrio.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center justify-center gap-2.5 rounded-full bg-[#d79b47] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="ytt_trio_ticket_click"
+                data-conversion-context="home_ytt_trio"
+                data-conversion-provider="zeffy"
+              >
+                {yttTrio.ticketsLabel}
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={`${base}schedule`}
+                class="inline-flex items-center justify-center gap-2.5 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-6 py-3.5 text-sm font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                data-conversion-event="ytt_trio_schedule_click"
+                data-conversion-context="home_ytt_trio"
+              >
+                All 12 dates
+              </a>
+            </div>
           </div>
         </div>
       </div>
