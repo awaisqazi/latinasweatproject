@@ -2,12 +2,17 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import PhotoboothApp from "@/components/PhotoboothApp.svelte";
+import { sweatFest } from "@/data/sweatFest.js";
 
 // Reached from a QR code next to the studio's selfie mirror; the mirror
 // signage is the front door, so this stays out of search results like
 // /potluck and /inventory. Frames + geometry live in src/data/photobooth.js
 // (re-render overlays with scripts/render-photobooth-frames.mjs). Guest
 // photos are composited entirely on-device; nothing is uploaded.
+//
+// The Sweat Fest strip matches the frame catalog's sunset (build-time check:
+// it drops out of the page on the first deploy after the fest window).
+const sweatFestLive = new Date() <= new Date("2026-08-29T23:59:59-05:00");
 ---
 
 <Layout
@@ -39,6 +44,56 @@ import PhotoboothApp from "@/components/PhotoboothApp.svelte";
                 </p>
             </div>
         </section>
+
+        {
+            sweatFestLive && (
+                <section
+                    class="py-8 sm:py-10"
+                    style="background: #e2ecac;"
+                >
+                    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
+                        <span
+                            class="rounded-full px-4 py-1.5 font-sans text-xs font-bold uppercase tracking-wider text-white"
+                            style="background: #ee3083;"
+                        >
+                            Sweat Fest · {sweatFest.shortDateLabel}
+                        </span>
+                        <h2
+                            class="mt-4 font-sans text-2xl font-extrabold sm:text-3xl"
+                            style="color: #1e1e1e;"
+                        >
+                            Going to Sweat Fest? Tell your people.
+                        </h2>
+                        <p
+                            class="mx-auto mt-3 max-w-xl font-body text-base leading-relaxed"
+                            style="color: #1e1e1e;"
+                        >
+                            Grab a ticket-holder frame below, add your own
+                            line and stickers, and post it so your crew knows
+                            to meet you there on {sweatFest.dateLabel}.
+                        </p>
+                        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+                            <a
+                                href={sweatFest.ticketsUrl}
+                                target="_blank"
+                                rel="noopener"
+                                class="rounded-full px-6 py-3 font-sans text-sm font-bold text-white transition hover:brightness-110"
+                                style="background: #ee3083;"
+                            >
+                                {sweatFest.ticketsLabel}
+                            </a>
+                            <a
+                                href={sweatFest.pagePath}
+                                class="rounded-full border-2 px-6 py-3 font-sans text-sm font-bold transition hover:bg-black/5"
+                                style="border-color: #1e1e1e; color: #1e1e1e;"
+                            >
+                                See the full day
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            )
+        }
 
         <section class="bg-white py-10 sm:py-14">
             <div class="mx-auto max-w-3xl px-4 sm:px-6">

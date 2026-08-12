@@ -10,10 +10,11 @@
         frameSrc,
         frameTextStyle,
         framePresets,
-        PHOTOBOOTH_STICKERS,
+        activeStickers,
     } from "@/data/photobooth.js";
 
     const frames = activeFrames();
+    const stickers = activeStickers();
     const MAX_ZOOM = 4;
     // Downscale huge phone photos once up front; keeps redraws smooth and
     // memory sane. 2400px comfortably covers a 1080-wide export window.
@@ -802,7 +803,7 @@
                 Stickers
             </p>
             <div class="mt-1.5 flex gap-1.5 overflow-x-auto pb-1">
-                {#each PHOTOBOOTH_STICKERS as s (s.id)}
+                {#each stickers as s (s.id)}
                     <button
                         type="button"
                         onclick={() => addSticker(s)}
