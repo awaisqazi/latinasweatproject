@@ -155,7 +155,7 @@ export const yttTrioSessions = [
     dateShort: "Aug 27",
     time: "6:00–6:45 PM",
     timeShort: "6 PM",
-    instructors: ["Efren", "Xochyl", "Javi"],
+    instructors: ["Efren", "Jimmy", "Javi"],
   },
   {
     id: "aug27-8pm",
@@ -177,6 +177,6 @@ export const yttTrioSessions = [
     dateShort: "Aug 31",
     time: "6:00–6:45 PM",
     timeShort: "6 PM",
-    instructors: ["Ixchel", "Jimmy", "Amanda"],
+    instructors: ["Ixchel", "Xochyl", "Amanda"],
   },
 ];
