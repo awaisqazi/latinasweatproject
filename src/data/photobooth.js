@@ -200,6 +200,22 @@ export const PHOTOBOOTH_FRAMES = [
     accent: "#ffbd59",
     fullBleed: true,
   },
+  // "New chapter" relocation campaign: no sunset until the move lands.
+  {
+    id: "pilsen",
+    name: "Pilsen 💛",
+    tag: "New chapter",
+    backdrop: "#FFBD59",
+    accent: "#1E1E1E",
+  },
+  {
+    id: "pilsen-stamp",
+    name: "Pilsen Stamp",
+    tag: "Full photo",
+    backdrop: "#8a8a8a",
+    accent: "#ffbd59",
+    fullBleed: true,
+  },
   {
     id: "gala",
     name: "Annual Gala",
@@ -235,6 +251,15 @@ const TEXT_STYLES = {
     size: 34,
     color: "#FFFFFF",
     scrim: "rgba(30, 30, 30, 0.82)",
+    tilt: -2,
+  },
+  pilsen: {
+    family: '"Rubik", sans-serif',
+    weight: 800,
+    italic: false,
+    size: 34,
+    color: "#1E1E1E",
+    scrim: "rgba(253, 242, 242, 0.9)",
     tilt: -2,
   },
   sweatfest: {
@@ -326,6 +351,12 @@ const PRESET_LINES = {
     "Getting ready to sweat",
     "Come sweat with me",
     "Movement, culture y comunidad",
+  ],
+  pilsen: [
+    "Keep LSP in Pilsen",
+    "I stand with LSP",
+    "Aquí nos quedamos",
+    "This community is my gym",
   ],
   sweatfest: [
     "Join me at Sweat Fest!",

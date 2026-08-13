@@ -167,6 +167,38 @@ function buildStudio({ W, H, win, ratioId }) {
 }
 
 // ---------------------------------------------------------------------------
+// Pilsen "New chapter" campaign: gold announcement field, ink campaign
+// banner. Turns story shares into visible support while LSP secures its
+// next home (no sunset until the move lands).
+// ---------------------------------------------------------------------------
+function buildPilsen({ W, H, win, ratioId }) {
+  const cx = W / 2;
+  const logo = fileUrl(path.join(root, "public/images/lsp-studio-logo.png"));
+  const logoH = Math.min(win.y - 44, 168);
+  const logoY = (win.y - logoH) / 2;
+  const band = H - (win.y + win.h);
+  const bandTop = win.y + win.h;
+  const story = ratioId === "story";
+  const bannerY = bandTop + band * (story ? 0.36 : 0.38);
+  const bannerW = 560;
+  const bannerH = 68;
+  const banner = `<rect x="${cx - bannerW / 2}" y="${bannerY - bannerH / 2}" width="${bannerW}" height="${bannerH}" rx="18" fill="#1E1E1E"/>
+  ${centered(cx, bannerY + 12, "KEEP LSP IN PILSEN 💛", `font-family="Rubik" font-weight="800" font-size="34" fill="#FFFFFF"`)}`;
+  const pillY = bandTop + band * (story ? 0.66 : 0.62);
+  const pillW = 680;
+  const pillH = 54;
+  return `
+  ${punchedField(W, H, win, 'fill="#FFBD59"')}
+  ${windowStroke(win, "#FDF2F2", 6)}
+  <image href="${logo}" x="${cx - logoH / 2}" y="${logoY}" width="${logoH}" height="${logoH}"/>
+  ${diamond(cx - 330, bannerY, 12, "#1E1E1E")}
+  ${diamond(cx + 330, bannerY, 12, "#1E1E1E")}
+  ${story ? tilted(cx, bannerY, -2, banner) : banner}
+  <rect x="${cx - pillW / 2}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillH / 2}" fill="#FDF2F2"/>
+  ${centered(cx, pillY + pillH / 2 + 9, "@latinasweatproject · latinasweatproject.com", `font-family="Rubik" font-weight="800" font-size="25" fill="#1E1E1E"`)}`;
+}
+
+// ---------------------------------------------------------------------------
 // Sweat Fest: honeydew field, ink checker strips, horizontal lockup.
 // Every fest design's info line carries the campaign call to action.
 // ---------------------------------------------------------------------------
@@ -526,6 +558,27 @@ function buildStudioStamp({ W, H, ratioId }) {
   ${centered(cx, pillY + pillH / 2 + 8, ratioId === "story" ? "COME SWEAT WITH ME · LATINASWEATPROJECT.COM" : "latinasweatproject.com · Pilsen, Chicago", `font-family="Rubik" font-weight="700" font-size="24" fill="#FFFFFF"`)}`;
 }
 
+function buildPilsenStamp({ W, H }) {
+  const cx = W / 2;
+  const logo = fileUrl(path.join(root, "public/images/lsp-studio-logo.png"));
+  const cardW = 520;
+  const cardH = 264;
+  const cardY = 52;
+  const logoH = 104;
+  const pillW = 780;
+  const pillH = 56;
+  const pillY = H - pillH - 40;
+  return `
+  ${scrimCard(cx - cardW / 2, cardY, cardW, cardH, 26, "#FDF2F2", 0.9)}
+  <image href="${logo}" x="${cx - logoH / 2}" y="${cardY + 24}" width="${logoH}" height="${logoH}"/>
+  ${diamond(cx - 210, cardY + 168, 10, "#F0A030")}
+  ${diamond(cx + 210, cardY + 168, 10, "#F0A030")}
+  ${centered(cx, cardY + 180, "KEEP LSP IN PILSEN 💛", `font-family="Rubik" font-weight="800" font-size="32" fill="#1E1E1E"`)}
+  ${centered(cx, cardY + 224, "@latinasweatproject", `font-family="Rubik" font-weight="700" font-size="22" fill="#555555"`)}
+  ${scrimCard(cx - pillW / 2, pillY, pillW, pillH, pillH / 2, "#1E1E1E", 0.62)}
+  ${centered(cx, pillY + pillH / 2 + 8, "Help fund our next home · latinasweatproject.com/donate", `font-family="Rubik" font-weight="700" font-size="24" fill="#FFBD59"`)}`;
+}
+
 function buildSweatfestStamp({ W, H, ratioId }) {
   const cx = W / 2;
   const logoAspect = horizontalLogoSize.width / horizontalLogoSize.height;
@@ -691,6 +744,8 @@ function buildSweatfestCheckerStamp({ W, H, ratioId }) {
 const builders = {
   studio: buildStudio,
   "studio-stamp": buildStudioStamp,
+  pilsen: buildPilsen,
+  "pilsen-stamp": buildPilsenStamp,
   sweatfest: buildSweatfest,
   "sweatfest-stamp": buildSweatfestStamp,
   "sweatfest-ticket": buildSweatfestTicket,
