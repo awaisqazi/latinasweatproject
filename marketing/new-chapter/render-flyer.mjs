@@ -91,7 +91,8 @@ const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
   <text x="352" y="806" text-anchor="middle" font-family="Filson Soft" font-weight="700" font-size="22" fill="${INK}">SAT, AUG 22 · 18TH &amp; PEORIA · 7 AM-9 PM</text>
   <rect x="278" y="842" width="148" height="148" rx="8" fill="#FFFFFF" stroke="${INK}" stroke-width="2"/>
   <image href="${qrFest}" x="282" y="846" width="140" height="140"/>
-  <text x="352" y="1008" text-anchor="middle" font-family="Filson Soft" font-weight="700" font-size="17" fill="${INK}">latinasweatproject.com/sweatfest</text>
+  <rect x="180" y="984" width="344" height="32" rx="16" fill="${FEST_BG}"/>
+  <text x="352" y="1006" text-anchor="middle" font-family="Filson Soft" font-weight="700" font-size="18" fill="${INK}">latinasweatproject.com/sweatfest</text>
 
   <!-- Gala card -->
   <rect x="660" y="630" width="525" height="390" rx="18" fill="${GALA_BG}" stroke="${GOLD}" stroke-width="2"/>
@@ -107,26 +108,26 @@ const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
 
   <!-- Panel 3: more ways -->
   <rect x="46" y="1096" width="${W - 92}" height="380" rx="30" fill="#FFFFFF"/>
-  <text x="90" y="1156" font-family="Rubik" font-weight="800" font-size="34" fill="${INK}">More ways to show up</text>
+  <text x="90" y="1150" font-family="Rubik" font-weight="800" font-size="34" fill="${INK}">More ways to show up</text>
 
-  ${diamond(104, 1202, 12)}
-  <text x="130" y="1210" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Email Ald. Byron Sigcho-Lopez (25th Ward)</text>
-  <text x="130" y="1242" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Ask for support securing LSP's next long-term home in Pilsen,</text>
-  <text x="130" y="1272" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">and share what LSP means to you. ward25@cityofchicago.org</text>
+  ${diamond(104, 1196, 12)}
+  <text x="130" y="1204" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Email Ald. Byron Sigcho-Lopez (25th Ward)</text>
+  <text x="130" y="1236" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Ask for support securing LSP's next long-term home in Pilsen,</text>
+  <text x="130" y="1266" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">and share what LSP means to you. ward25@cityofchicago.org</text>
 
-  ${diamond(104, 1318, 12)}
-  <text x="130" y="1326" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Keep showing up</text>
-  <text x="130" y="1358" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Every class and every check-in is part of the case we're making.</text>
+  ${diamond(104, 1310, 12)}
+  <text x="130" y="1318" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Keep showing up</text>
+  <text x="130" y="1350" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Every class and every check-in is part of the case we're making.</text>
 
-  ${diamond(104, 1402, 12)}
-  <text x="130" y="1410" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story, it builds our case</text>
-  <text x="130" y="1440" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Post what LSP means to you and tag @latinasweatproject.</text>
-  <text x="130" y="1468" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">LSP frames for your photos: latinasweatproject.com/photobooth</text>
+  ${diamond(104, 1390, 12)}
+  <text x="130" y="1398" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story, it builds our case</text>
+  <text x="130" y="1428" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Post what LSP means to you and tag @latinasweatproject.</text>
+  <text x="130" y="1456" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">LSP frames for your photos: latinasweatproject.com/photobooth</text>
 
-  <rect x="884" y="1150" width="256" height="256" rx="10" fill="#FFFFFF" stroke="${GOLD}" stroke-width="4"/>
-  <image href="${qrEmail}" x="892" y="1158" width="240" height="240"/>
-  <text x="1012" y="1438" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">Scan to open a ready-to-send</text>
-  <text x="1012" y="1464" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">email to the alderman</text>
+  <rect x="884" y="1144" width="256" height="256" rx="10" fill="#FFFFFF" stroke="${GOLD}" stroke-width="4"/>
+  <image href="${qrEmail}" x="892" y="1152" width="240" height="240"/>
+  <text x="1012" y="1430" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">Scan to open a ready-to-send</text>
+  <text x="1012" y="1456" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">email to the alderman</text>
 
   <!-- Donate bar -->
   <rect x="46" y="1494" width="${W - 92}" height="122" rx="24" fill="${INK}"/>
