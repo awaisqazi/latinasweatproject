@@ -29,6 +29,7 @@ const logo = site("public/images/lsp-studio-logo.png");
 const qrFest = f(path.join(here, "qr-sweatfest.png"));
 const qrGala = f(path.join(here, "qr-gala.png"));
 const qrEmail = f(path.join(here, "qr-alderman-email.png"));
+const qrDonate = f(path.join(here, "qr-donate.png"));
 
 const GOLD = "#FFBD59";
 const INK = "#1E1E1E";
@@ -105,32 +106,38 @@ const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
   <text x="922" y="1008" text-anchor="middle" font-family="Didot" font-size="18" fill="${GOLD}">latinasweatproject.com/gala</text>
 
   <!-- Panel 3: more ways -->
-  <rect x="46" y="1106" width="${W - 92}" height="400" rx="30" fill="#FFFFFF"/>
-  <text x="90" y="1170" font-family="Rubik" font-weight="800" font-size="34" fill="${INK}">More ways to show up</text>
+  <rect x="46" y="1096" width="${W - 92}" height="380" rx="30" fill="#FFFFFF"/>
+  <text x="90" y="1156" font-family="Rubik" font-weight="800" font-size="34" fill="${INK}">More ways to show up</text>
 
-  ${diamond(104, 1218, 12)}
-  <text x="130" y="1226" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Email Ald. Byron Sigcho-Lopez (25th Ward)</text>
-  <text x="130" y="1258" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Ask for support securing LSP's next long-term home in Pilsen,</text>
-  <text x="130" y="1288" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">and share what LSP means to you. ward25@cityofchicago.org</text>
+  ${diamond(104, 1202, 12)}
+  <text x="130" y="1210" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Email Ald. Byron Sigcho-Lopez (25th Ward)</text>
+  <text x="130" y="1242" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Ask for support securing LSP's next long-term home in Pilsen,</text>
+  <text x="130" y="1272" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">and share what LSP means to you. ward25@cityofchicago.org</text>
 
-  ${diamond(104, 1336, 12)}
-  <text x="130" y="1344" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Keep showing up</text>
-  <text x="130" y="1376" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Every class and every check-in is part of the case we're making.</text>
+  ${diamond(104, 1318, 12)}
+  <text x="130" y="1326" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Keep showing up</text>
+  <text x="130" y="1358" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Every class and every check-in is part of the case we're making.</text>
 
-  ${diamond(104, 1420, 12)}
-  <text x="130" y="1428" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story</text>
-  <text x="130" y="1460" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Post what LSP means to you and tag @latinasweatproject.</text>
-  <text x="130" y="1490" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Public support builds the case.</text>
+  ${diamond(104, 1402, 12)}
+  <text x="130" y="1410" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story</text>
+  <text x="130" y="1440" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Post what LSP means to you and tag @latinasweatproject.</text>
+  <text x="130" y="1468" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Public support builds the case.</text>
 
-  <rect x="884" y="1170" width="256" height="256" rx="10" fill="#FFFFFF" stroke="${GOLD}" stroke-width="4"/>
-  <image href="${qrEmail}" x="892" y="1178" width="240" height="240"/>
-  <text x="1012" y="1460" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">Scan to open a ready-to-send</text>
-  <text x="1012" y="1486" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">email to the alderman</text>
+  <rect x="884" y="1150" width="256" height="256" rx="10" fill="#FFFFFF" stroke="${GOLD}" stroke-width="4"/>
+  <image href="${qrEmail}" x="892" y="1158" width="240" height="240"/>
+  <text x="1012" y="1438" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">Scan to open a ready-to-send</text>
+  <text x="1012" y="1464" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="19" fill="${INK}">email to the alderman</text>
 
-  <!-- Footer -->
-  <rect x="${cx - 350}" y="1534" width="700" height="56" rx="28" fill="${INK}"/>
-  <text x="${cx}" y="1571" text-anchor="middle" font-family="Rubik" font-weight="800" font-size="26" fill="${GOLD}">Rooted in Latina leadership. Built for all.</text>
-  <text x="${cx}" y="1626" text-anchor="middle" font-family="Rubik" font-weight="600" font-size="20" fill="${INK}">@latinasweatproject · full update at latinasweatproject.com</text>
+  <!-- Donate bar -->
+  <rect x="46" y="1494" width="${W - 92}" height="122" rx="24" fill="${INK}"/>
+  <rect x="72" y="1500" width="110" height="110" rx="10" fill="#FFFFFF"/>
+  <image href="${qrDonate}" x="77" y="1505" width="100" height="100"/>
+  <text x="210" y="1546" font-family="Rubik" font-weight="800" font-size="30" fill="#FFFFFF">Help fund our next home</text>
+  <text x="210" y="1586" font-family="Rubik" font-weight="700" font-size="26" fill="${GOLD}">latinasweatproject.com/donate</text>
+  <text x="1180" y="1566" text-anchor="end" font-family="Rubik" font-weight="700" font-size="22" fill="${GOLD}">Rooted in Latina leadership.</text>
+  <text x="1180" y="1594" text-anchor="end" font-family="Rubik" font-weight="700" font-size="22" fill="${GOLD}">Built for all.</text>
+
+  <text x="${cx}" y="1640" text-anchor="middle" font-family="Rubik" font-weight="600" font-size="20" fill="${INK}">@latinasweatproject · full update at latinasweatproject.com</text>
 </svg>`;
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${svg}</body></html>`;
