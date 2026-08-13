@@ -119,9 +119,9 @@ const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
   <text x="130" y="1358" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Every class and every check-in is part of the case we're making.</text>
 
   ${diamond(104, 1402, 12)}
-  <text x="130" y="1410" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story</text>
+  <text x="130" y="1410" font-family="Rubik" font-weight="700" font-size="26" fill="${INK}">Share your story, it builds our case</text>
   <text x="130" y="1440" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Post what LSP means to you and tag @latinasweatproject.</text>
-  <text x="130" y="1468" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">Public support builds the case.</text>
+  <text x="130" y="1468" font-family="Rubik" font-weight="500" font-size="22" fill="${GRAY}">LSP frames for your photos: latinasweatproject.com/photobooth</text>
 
   <rect x="884" y="1150" width="256" height="256" rx="10" fill="#FFFFFF" stroke="${GOLD}" stroke-width="4"/>
   <image href="${qrEmail}" x="892" y="1158" width="240" height="240"/>
