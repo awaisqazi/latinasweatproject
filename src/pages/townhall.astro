@@ -1,0 +1,377 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+// Invite-only RSVP page, shared by direct link only, so it stays out of
+// search results like /potluck and /eventsrequest. Submissions POST to a
+// hidden Google Form (see the CONFIG block in the script below).
+
+const CALENDAR_URL =
+    "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" +
+    encodeURIComponent("LSP Community Town Hall") +
+    "&dates=20260818T003000Z/20260818T020000Z" +
+    "&ctz=America/Chicago" +
+    "&location=" +
+    encodeURIComponent(
+        "The Latina Sweat Project, 1601 S Morgan St, Chicago, IL 60608",
+    ) +
+    "&details=" +
+    encodeURIComponent(
+        "A community conversation about the road ahead for LSP. Light refreshments provided.",
+    );
+---
+
+<Layout
+    title="Community Town Hall RSVP | The Latina Sweat Project"
+    description="RSVP for the LSP Community Town Hall."
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main class="min-h-screen bg-gray-50">
+        <!-- Hero -->
+        <div class="bg-off-black text-white py-16 px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-accent-gold mb-4"
+                >
+                    You're invited
+                </p>
+                <h1 class="text-4xl md:text-5xl font-bold font-rubik mb-4">
+                    Community Town Hall
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    You're part of the heart of this community, and we have some
+                    important updates to share with you in person. Come sit with
+                    us: we'll talk about the road ahead, and most importantly,
+                    we want to hear from you. Light refreshments provided.
+                </p>
+
+                <div class="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-3">
+                    <div class="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-accent-gold"
+                        >
+                            When
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-white">
+                            Monday, August 17
+                        </p>
+                        <p class="mt-1 font-body text-sm text-gray-300">
+                            7:30 PM
+                        </p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-accent-gold"
+                        >
+                            Where
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-white">
+                            The LSP Studio
+                        </p>
+                        <p class="mt-1 font-body text-sm text-gray-300">
+                            1601 S Morgan St, Chicago, IL 60608
+                            <span class="block">(16th &amp; Morgan, Pilsen)</span>
+                        </p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-accent-gold"
+                        >
+                            Good to know
+                        </p>
+                        <p class="mt-2 font-sans font-bold text-white">
+                            Food provided
+                        </p>
+                        <p class="mt-1 font-body text-sm text-gray-300">
+                            Space is limited, so please RSVP below.
+                        </p>
+                    </div>
+                </div>
+
+                <a
+                    href={CALENDAR_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-8 inline-block rounded-full border border-accent-gold px-6 py-2.5 font-sans text-sm font-bold text-accent-gold transition hover:bg-accent-gold hover:text-off-black"
+                >
+                    Add to Google Calendar
+                </a>
+            </div>
+        </div>
+
+        <!-- What this is about -->
+        <section class="bg-white py-12 px-4">
+            <div class="mx-auto max-w-2xl text-center">
+                <h2 class="font-sans text-2xl font-extrabold text-off-black">
+                    Why we're gathering
+                </h2>
+                <p class="mt-4 font-body text-lg leading-relaxed text-medium-gray">
+                    This is a conversation, not a presentation. We'll share
+                    where things stand, answer your questions, and listen to
+                    what this community needs as we plan what comes next. The
+                    full details are in your invitation email.
+                </p>
+            </div>
+        </section>
+
+        <!-- RSVP form -->
+        <section class="py-14 px-4">
+            <div class="mx-auto max-w-xl">
+                <div
+                    id="rsvp-card"
+                    class="rounded-2xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-black/5"
+                >
+                    <h2
+                        class="font-sans text-2xl font-extrabold text-off-black"
+                    >
+                        RSVP
+                    </h2>
+                    <p class="mt-2 font-body text-sm text-medium-gray">
+                        Space is limited and this gathering is just for our
+                        invited supporters, so this helps us plan seating and
+                        food. Whether or not you can make it, we'd love to know.
+                    </p>
+
+                    <form id="rsvp-form" class="mt-6 space-y-5" novalidate>
+                        <div>
+                            <label
+                                for="full-name"
+                                class="block font-sans text-sm font-bold text-off-black"
+                            >
+                                Full name <span class="text-vibrant-pink">*</span>
+                            </label>
+                            <input
+                                id="full-name"
+                                name="fullName"
+                                type="text"
+                                required
+                                autocomplete="name"
+                                class="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 font-body text-off-black focus:border-accent-gold focus:outline-none focus:ring-2 focus:ring-accent-gold/40"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="email"
+                                class="block font-sans text-sm font-bold text-off-black"
+                            >
+                                Email <span class="text-vibrant-pink">*</span>
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                required
+                                autocomplete="email"
+                                class="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 font-body text-off-black focus:border-accent-gold focus:outline-none focus:ring-2 focus:ring-accent-gold/40"
+                            />
+                        </div>
+
+                        <fieldset>
+                            <legend
+                                class="block font-sans text-sm font-bold text-off-black"
+                            >
+                                Will you be attending?
+                                <span class="text-vibrant-pink">*</span>
+                            </legend>
+                            <div class="mt-2 space-y-2">
+                                <label
+                                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-body text-off-black transition hover:border-accent-gold"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="attending"
+                                        value="Yes, I'll be there"
+                                        required
+                                        class="h-4 w-4 accent-vibrant-pink"
+                                    />
+                                    Yes, I'll be there
+                                </label>
+                                <label
+                                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-body text-off-black transition hover:border-accent-gold"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="attending"
+                                        value="I can't make it, keep me in the loop"
+                                        class="h-4 w-4 accent-vibrant-pink"
+                                    />
+                                    I can't make it, keep me in the loop
+                                </label>
+                            </div>
+                        </fieldset>
+
+                        <div>
+                            <label
+                                for="notes"
+                                class="block font-sans text-sm font-bold text-off-black"
+                            >
+                                Anything we should know?
+                            </label>
+                            <p class="mt-1 font-body text-xs text-medium-gray">
+                                Accessibility needs, questions you'd like
+                                addressed, anything else. Optional.
+                            </p>
+                            <textarea
+                                id="notes"
+                                name="notes"
+                                rows="4"
+                                class="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 font-body text-off-black focus:border-accent-gold focus:outline-none focus:ring-2 focus:ring-accent-gold/40"
+                            ></textarea>
+                        </div>
+
+                        <p
+                            id="form-error"
+                            class="hidden rounded-lg bg-red-50 px-4 py-3 font-body text-sm text-red-700"
+                        >
+                        </p>
+
+                        <button
+                            id="submit-btn"
+                            type="submit"
+                            class="w-full rounded-full bg-off-black px-8 py-3 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Send my RSVP
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Success state (attending) -->
+                <div
+                    id="success-yes"
+                    class="hidden rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5"
+                >
+                    <p class="text-4xl" aria-hidden="true">💛</p>
+                    <h2
+                        class="mt-4 font-sans text-2xl font-extrabold text-off-black"
+                    >
+                        Gracias! You're on the list.
+                    </h2>
+                    <p class="mt-3 font-body text-medium-gray">
+                        We'll see you Monday, August 17 at 7:30 PM at the
+                        studio, 1601 S Morgan St. Come as you are, we'll have
+                        food and a seat waiting for you.
+                    </p>
+                    <a
+                        href={CALENDAR_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="mt-6 inline-block rounded-full bg-off-black px-8 py-3 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink"
+                    >
+                        Add to Google Calendar
+                    </a>
+                </div>
+
+                <!-- Success state (can't make it) -->
+                <div
+                    id="success-no"
+                    class="hidden rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5"
+                >
+                    <p class="text-4xl" aria-hidden="true">💌</p>
+                    <h2
+                        class="mt-4 font-sans text-2xl font-extrabold text-off-black"
+                    >
+                        Gracias! We'll keep you in the loop.
+                    </h2>
+                    <p class="mt-3 font-body text-medium-gray">
+                        We'll miss you Monday, but we'll follow up by email with
+                        what was shared and what comes next. You're part of the
+                        heart of this community, near or far.
+                    </p>
+                </div>
+
+                <p class="mt-8 text-center font-body text-xs text-gray-500">
+                    This gathering is invite-only and your invitation is
+                    personal to you. Please don't share this link.
+                </p>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<script>
+    // ============================================================
+    // GOOGLE FORM CONFIG: replace these placeholders with the real
+    // form ID and entry IDs once the Google Form is created.
+    // ============================================================
+    const FORM_ACTION_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSfp4I6JImY-dWzCn40h7gwZ-ahjq0xnIJ8UO_HqRQ2pYwh2OQ/formResponse";
+    const ENTRY_IDS = {
+        fullName: "entry.401801581", // Full Name (text)
+        email: "entry.2067736241", // Email (text)
+        attending: "entry.1879941555", // Will you be attending? (radio)
+        notes: "entry.1759418103", // Anything we should know? (textarea)
+    };
+    // ============================================================
+
+    const form = document.getElementById("rsvp-form") as HTMLFormElement;
+    const card = document.getElementById("rsvp-card") as HTMLElement;
+    const successYes = document.getElementById("success-yes") as HTMLElement;
+    const successNo = document.getElementById("success-no") as HTMLElement;
+    const errorEl = document.getElementById("form-error") as HTMLElement;
+    const submitBtn = document.getElementById(
+        "submit-btn",
+    ) as HTMLButtonElement;
+
+    function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorEl.classList.add("hidden");
+
+        const data = new FormData(form);
+        const fullName = String(data.get("fullName") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const attending = String(data.get("attending") || "");
+        const notes = String(data.get("notes") || "").trim();
+
+        if (!fullName) return showError("Please add your name.");
+        if (!email || !email.includes("@"))
+            return showError("Please add a valid email address.");
+        if (!attending)
+            return showError("Please let us know if you can make it.");
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const params = new URLSearchParams();
+        params.set(ENTRY_IDS.fullName, fullName);
+        params.set(ENTRY_IDS.email, email);
+        params.set(ENTRY_IDS.attending, attending);
+        if (notes) params.set(ENTRY_IDS.notes, notes);
+
+        try {
+            // no-cors: Google doesn't send CORS headers on formResponse, so
+            // the response is opaque. A resolved fetch means it reached
+            // Google; client-side validation above covers required fields.
+            await fetch(FORM_ACTION_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+
+            card.classList.add("hidden");
+            const isAttending = attending.startsWith("Yes");
+            (isAttending ? successYes : successNo).classList.remove("hidden");
+            (isAttending ? successYes : successNo).scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+        } catch (e) {
+            console.error("Town hall RSVP submit failed:", e);
+            showError(
+                "We couldn't send your RSVP. Check your connection and try again.",
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send my RSVP";
+        }
+    });
+</script>
