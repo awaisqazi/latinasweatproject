@@ -90,14 +90,25 @@ const CALENDAR_URL =
                     </div>
                 </div>
 
-                <a
-                    href={CALENDAR_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="mt-8 inline-block rounded-full border border-accent-gold px-6 py-2.5 font-sans text-sm font-bold text-accent-gold transition hover:bg-accent-gold hover:text-off-black"
+                <div
+                    class="mt-8 flex flex-wrap items-center justify-center gap-3"
                 >
-                    Add to Google Calendar
-                </a>
+                    <a
+                        href={CALENDAR_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-block rounded-full border border-accent-gold px-6 py-2.5 font-sans text-sm font-bold text-accent-gold transition hover:bg-accent-gold hover:text-off-black"
+                    >
+                        Add to Google Calendar
+                    </a>
+                    <a
+                        href="/townhall.ics"
+                        download
+                        class="inline-block rounded-full border border-white/40 px-6 py-2.5 font-sans text-sm font-bold text-white transition hover:bg-white hover:text-off-black"
+                    >
+                        Apple / Outlook (.ics)
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -254,14 +265,25 @@ const CALENDAR_URL =
                         studio, 1601 S Morgan St. Come as you are, we'll have
                         food and a seat waiting for you.
                     </p>
-                    <a
-                        href={CALENDAR_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="mt-6 inline-block rounded-full bg-off-black px-8 py-3 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink"
+                    <div
+                        class="mt-6 flex flex-wrap items-center justify-center gap-3"
                     >
-                        Add to Google Calendar
-                    </a>
+                        <a
+                            href={CALENDAR_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-block rounded-full bg-off-black px-8 py-3 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink"
+                        >
+                            Add to Google Calendar
+                        </a>
+                        <a
+                            href="/townhall.ics"
+                            download
+                            class="inline-block rounded-full border border-off-black px-8 py-3 font-sans text-sm font-bold text-off-black transition hover:bg-off-black hover:text-white"
+                        >
+                            Apple / Outlook (.ics)
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Success state (can't make it) -->

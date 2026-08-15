@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Latina Sweat Project//Town Hall//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:townhall-20260817@latinasweatproject.com
+DTSTAMP:20260814T220000Z
+DTSTART:20260818T003000Z
+DTEND:20260818T020000Z
+SUMMARY:LSP Community Town Hall
+LOCATION:The Latina Sweat Project\, 1601 S Morgan St\, Chicago\, IL 60608
+DESCRIPTION:A community conversation about the road ahead for LSP. Light refreshments provided. RSVP: https://latinasweatproject.com/townhall
+URL:https://latinasweatproject.com/townhall
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
