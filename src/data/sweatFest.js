@@ -284,6 +284,12 @@ export const sweatFestPalette = {
 // /sweatfest. Keep option strings character-for-character aligned with Google
 // Forms: checkbox values are matched by their labels when posted.
 export const sweatFestVolunteer = {
+  // Sign-ups closed 2026-08-14. Flip back to true to reopen the form; the
+  // Google Form itself stays live at viewUrl/postUrl either way, so close it
+  // separately at forms.google.com if it must stop accepting responses too.
+  open: false,
+  closedMessage:
+    "Volunteer sign-ups for Sweat Fest are closed. Thank you to everyone who applied: our team is reviewing applications and will follow up with selected volunteers about shifts and training.",
   viewUrl:
     "https://docs.google.com/forms/d/e/1FAIpQLSdtghuy_d7HXOpK9SINHCFg_nKg-a6MomOQd1mDe0eaK-iTeQ/viewform",
   postUrl:

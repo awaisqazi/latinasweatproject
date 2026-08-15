@@ -423,7 +423,11 @@ const eventJsonLd = {
         </div>
 
         <p class="sf-rise mt-7 text-sm font-semibold text-choco/75" style="animation-delay: 0.5s;">
-          Want to help make the day happen? <a href="#volunteer" class="font-extrabold text-choco underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Apply to volunteer</a>. Interested in partnering? <a href="#sponsors" class="font-extrabold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
+          {sweatFestVolunteer.open ? (
+            <>Want to help make the day happen? <a href="#volunteer" class="font-extrabold text-choco underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Apply to volunteer</a>. </>
+          ) : (
+            <>Volunteer sign-ups are closed. </>
+          )} Interested in partnering? <a href="#sponsors" class="font-extrabold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">Explore sponsorships</a>.
         </p>
       </div>
 
@@ -697,6 +701,7 @@ const eventJsonLd = {
           </p>
         </div>
 
+        {sweatFestVolunteer.open ? (
         <div class="reveal mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-3" style="transition-delay: 260ms;">
           {
             [
@@ -714,7 +719,23 @@ const eventJsonLd = {
             ))
           }
         </div>
+        ) : null}
 
+        {!sweatFestVolunteer.open && (
+          <div
+            class="sf-note reveal mx-auto mt-10 max-w-3xl bg-[#f4f7dc] px-6 py-8 text-center sm:px-10"
+            style="transition-delay: 260ms;"
+          >
+            <p class="font-slab text-xl uppercase tracking-wide text-choco sm:text-2xl">
+              Sign-ups are closed
+            </p>
+            <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-choco/75">
+              {sweatFestVolunteer.closedMessage}
+            </p>
+          </div>
+        )}
+
+        {sweatFestVolunteer.open && (
         <details class="sf-volunteer-details reveal mx-auto mt-10 max-w-5xl" style="transition-delay: 320ms;">
           <summary class="sf-btn group flex cursor-pointer items-center justify-between gap-5 bg-choco px-6 py-5 text-left text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)] focus-visible:ring-offset-4 sm:px-8">
             <span>
@@ -965,6 +986,7 @@ const eventJsonLd = {
             </div>
           </div>
         </details>
+        )}
       </div>
     </section>
 
