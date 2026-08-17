@@ -862,38 +862,54 @@ const eventJsonLd = {
                             {stage} Stage
                           </span>
                         </p>
-                        <h3 class="font-slab text-xl uppercase leading-tight tracking-wide text-choco sm:text-2xl">
-                          {entry.title}
-                        </h3>
-                        <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                          <span class="font-extrabold text-choco">
-                            {entry.instructor}
-                          </span>
-                          {entry.lsp ? (
-                            <span class="inline-block rounded bg-choco px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#e2ecac]">
-                              LSP
-                            </span>
-                          ) : (
-                            entry.affiliation && (
-                              <span class="font-semibold text-choco/75">
-                                · {entry.affiliation}
+                        <div class="mb-4 flex items-start gap-3.5">
+                          <img
+                            src={withBase(
+                              `images/sweatfest/instructors/${entry.id}.webp`,
+                            )}
+                            alt={`${entry.instructor}, who leads ${entry.title}`}
+                            width="480"
+                            height="480"
+                            loading="lazy"
+                            decoding="async"
+                            class="h-16 w-16 shrink-0 rounded-xl border-2 border-choco object-cover shadow-[3px_4px_0_rgba(18,63,54,0.12)] sm:h-20 sm:w-20"
+                            style={`transform: rotate(${tiltOf(slotIndex + (stage === "East" ? 1 : 0))}deg);`}
+                          />
+                          <div class="min-w-0">
+                            <h3 class="font-slab text-xl uppercase leading-tight tracking-wide text-choco sm:text-2xl">
+                              {entry.title}
+                            </h3>
+                            <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                              <span class="font-extrabold text-choco">
+                                {entry.instructor}
                               </span>
-                            )
-                          )}
-                        </p>
-                        <p class="mb-4 mt-1 flex flex-wrap gap-x-2.5 gap-y-1 text-sm font-bold">
-                          {entry.handles.map((handle) => (
-                            <a
-                              href={`https://www.instagram.com/${handle.replace(/^@/, "")}/`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="text-choco underline decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
-                              style={`text-decoration-color: ${accent};`}
-                            >
-                              {handle}
-                            </a>
-                          ))}
-                        </p>
+                              {entry.lsp ? (
+                                <span class="inline-block rounded bg-choco px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#e2ecac]">
+                                  LSP
+                                </span>
+                              ) : (
+                                entry.affiliation && (
+                                  <span class="font-semibold text-choco/75">
+                                    · {entry.affiliation}
+                                  </span>
+                                )
+                              )}
+                            </p>
+                            <p class="mt-1 flex flex-wrap gap-x-2.5 gap-y-1 text-sm font-bold">
+                              {entry.handles.map((handle) => (
+                                <a
+                                  href={`https://www.instagram.com/${handle.replace(/^@/, "")}/`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="text-choco underline decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+                                  style={`text-decoration-color: ${accent};`}
+                                >
+                                  {handle}
+                                </a>
+                              ))}
+                            </p>
+                          </div>
+                        </div>
                         <details class="sf-sched-details mt-auto border-t-2 border-dashed border-choco/20 pt-3">
                           <summary class="inline-flex cursor-pointer items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-choco/75 transition-colors hover:text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">
                             About this class
