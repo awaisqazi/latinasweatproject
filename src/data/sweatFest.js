@@ -43,7 +43,7 @@ export const sweatFest = {
 export const sweatFestExpect = [
   {
     title: "Sweat sessions",
-    detail: "45-minute classes all day with LSP instructors.",
+    detail: "45-minute classes all day on two stages with LSP and guest instructors.",
   },
   {
     title: "Sunrise 5K",
@@ -93,6 +93,281 @@ export const sweatFestDay = [
     title: "Pachanga",
     detail:
       "The Pachanga begins at 6:00 PM. Dance and celebrate with your comunidad; the final set ends at 9:00 PM.",
+  },
+];
+
+// Run of show: the two-stage class schedule, transcribed from the team's
+// schedule grid + "Sweat Fest Class Details" doc (2026-08-15). Every class is
+// 45 minutes. `stage` is "West" or "East"; `lsp: true` marks LSP instructors,
+// guests carry their studio in `affiliation`. `handles` are Instagram.
+export const sweatFestLineup = [
+  {
+    id: "jays-power-hour",
+    start: "9:00 AM",
+    timeLabel: "9:00 to 9:45 AM",
+    stage: "West",
+    title: "Jay's Power Hour",
+    instructor: "Julio Peña",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@jaymerazz"],
+    description:
+      "A high-intensity workout focused on building muscular strength and endurance. This class utilizes various equipment and bodyweight exercises to challenge your limits and boost your power.",
+  },
+  {
+    id: "yoga-party",
+    start: "9:00 AM",
+    timeLabel: "9:00 to 9:45 AM",
+    stage: "East",
+    title: "Yoga Party",
+    instructor: "Josh Young",
+    lsp: false,
+    affiliation: "Studio Three",
+    handles: ["@yehme2"],
+    description:
+      "Yoga Party is an energizing, music-driven vinyasa experience designed to make yoga feel a little less serious and more fun. Expect an accessible, all-levels flow set to a mix of high-energy club music, rap/R&B, and soundscapes, with plenty of room to move, breathe, and get creative.",
+  },
+  {
+    id: "slow-grow",
+    start: "10:00 AM",
+    timeLabel: "10:00 to 10:45 AM",
+    stage: "West",
+    title: "Slow + Grow",
+    instructor: "Greg Buford",
+    lsp: false,
+    affiliation: "Train Moment",
+    handles: ["@growthwithgreg"],
+    description:
+      "This class methodically introduces exercises to wake up and develop neuromuscular awareness, followed by higher intensity and compound movements to deliver a great muscular pump.",
+  },
+  {
+    id: "hiit-pilates",
+    start: "10:00 AM",
+    timeLabel: "10:00 to 10:45 AM",
+    stage: "East",
+    title: "HIIT Pilates with LIZLATES",
+    instructor: "LIZLATES",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@lizlates"],
+    description:
+      "High Intensity Interval Training but make it Pilates with LIZLATES. Classically known as Inferno Hot Pilates, get ready for a full body, low impact workout that uses Pilates Principles. Yes, you'll get a core and booty burn and yes, there will be burpees!",
+  },
+  {
+    id: "yoga-sculpt",
+    start: "11:00 AM",
+    timeLabel: "11:00 to 11:45 AM",
+    stage: "West",
+    title: "Yoga Sculpt with Jax",
+    instructor: "Jackie Terrazas",
+    lsp: false,
+    affiliation: "We The People",
+    handles: ["@yogawithjax_"],
+    description:
+      "A high-energy, beginner-friendly Yoga Sculpt class that combines traditional yoga flows, cardio bursts, and strength training. This workout is designed to leave you feeling energized, stronger, and more confident, all while moving to your favorite Latin and Tech House beats!",
+  },
+  {
+    id: "full-body-strength",
+    start: "11:00 AM",
+    timeLabel: "11:00 to 11:45 AM",
+    stage: "East",
+    title: "Full Body Strength & Conditioning",
+    instructor: "Brookie Trinity",
+    lsp: false,
+    affiliation: "In The Yards",
+    handles: ["@brookietrinity"],
+    description:
+      "Join Brookie for a bodyweight strength and conditioning class. Class includes bodyweight movements targeting strength, cardiovascular training and mobility.",
+  },
+  {
+    id: "sound-bath-rhythm",
+    start: "11:45 AM",
+    timeLabel: "11:45 AM to 12:30 PM",
+    stage: "East",
+    title: "Sound Bath to Find Your Rhythm",
+    instructor: "Courtney Olender",
+    lsp: false,
+    affiliation: "Six and Twelfth Sound",
+    handles: ["@courtneythevirgo"],
+    description:
+      "This sound bath is an invitation to slow down, reconnect with your body, and find balance between movement and rest. Through sound, stillness, and a simple grounding practice, you'll explore nervous system care in a way that feels approachable, restorative, and easy to carry with you beyond the session.",
+  },
+  {
+    id: "slow-burn",
+    start: "12:30 PM",
+    timeLabel: "12:30 to 1:15 PM",
+    stage: "West",
+    title: "Slow Burn: A Pilates Flow",
+    instructor: "Dr. Alyssa Perez",
+    lsp: false,
+    affiliation: "Inner Sol Studio Chi",
+    handles: ["@innersolstudiochi"],
+    description:
+      "Don't let the name fool you! This class will challenge you in all the best ways. Experience the Pilates burn through intentional, full body movement that builds deep core strength, improves mobility, and leaves you feeling stronger from the inside out. Expect mindful movement, powerful fundamentals, and a feel good flow that's accessible to all levels.",
+  },
+  {
+    id: "yoga-flow",
+    start: "12:30 PM",
+    timeLabel: "12:30 to 1:15 PM",
+    stage: "East",
+    title: "Yoga Flow",
+    instructor: "Gerald Pinckney",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@pick_a_g"],
+    description:
+      "A smooth, continuous sequence of yoga postures synchronized with breath. This class is designed to build heat, flexibility, and strength, leaving you feeling centered and energized.",
+  },
+  {
+    id: "yoga-para-todos",
+    start: "1:30 PM",
+    timeLabel: "1:30 to 2:15 PM",
+    stage: "West",
+    title: "Yoga para Todos",
+    instructor: "Zoraida Magana",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@zorita_22"],
+    description:
+      "Una práctica accesible, sin importar tu experiencia, que te invita a moverte con intención, respirar profundamente y encontrar un momento de conexión contigo mismo. A través de diferentes opciones y variaciones, cada persona podrá practicar de una forma segura, respetando las necesidades de su cuerpo.",
+  },
+  {
+    id: "mixxedfit",
+    start: "1:30 PM",
+    timeLabel: "1:30 to 2:15 PM",
+    stage: "East",
+    title: "MixxedFit with IL National Trainer",
+    instructor: "Nana Sahagun",
+    lsp: false,
+    affiliation: "Mi Flow Studio",
+    handles: ["@nanasahagun"],
+    description:
+      "A people-inspired fitness program that combines explosive dance moves with body weight toning. A format that brings the people together through fitness while serving our communities!",
+  },
+  {
+    id: "restorative-sound-bath",
+    start: "2:15 PM",
+    timeLabel: "2:15 to 3:00 PM",
+    stage: "East",
+    title: "Restorative Sound Bath",
+    instructor: "Kari Sanchez",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@karilavegana"],
+    description:
+      "A 45-minute heart-centered sound bath inviting you to slow down and enjoy the healing vibrations of crystal singing bowls. Come ready to unwind, reconnect with yourself, and return to self-love and presence.",
+  },
+  {
+    id: "banda-sculpt",
+    start: "3:00 PM",
+    timeLabel: "3:00 to 3:45 PM",
+    stage: "West",
+    title: "Banda Sculpt",
+    instructor: "Veronica Quiñones",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@veroq2"],
+    description:
+      "A dynamic fusion of yoga and strength training, set to the rhythms of banda music. This class tones and sculpts the body while flowing through yoga poses, boosting metabolism and building lean muscle, all with an energy that feels like a celebration.",
+  },
+  {
+    id: "reset-release",
+    start: "3:00 PM",
+    timeLabel: "3:00 to 3:45 PM",
+    stage: "East",
+    title: "Reset & Release",
+    instructor: "Paulo Colby",
+    lsp: false,
+    affiliation: "The Practice Club",
+    handles: ["@pauloinpractice"],
+    description:
+      "A guided mobility session to loosen tight joints and release tension built up from a day of standing, dancing, and travel. We'll move through targeted stretches, joint mobilization, and breathwork to help your body recover and feel ready for what's next. All levels welcome, no experience required.",
+  },
+  {
+    id: "salsa-self-soul",
+    start: "4:00 PM",
+    timeLabel: "4:00 to 4:45 PM",
+    stage: "West",
+    title: "Salsa, Self & Soul",
+    instructor: "Maria Luisa Torres",
+    lsp: false,
+    affiliation: "",
+    handles: ["@marialuisadance"],
+    description:
+      "What makes you, you? What do you love about yourself? Come connect to your body, confidence, and soul through the power of salsa dancing as we move with intention, reconnect with ourselves, and learn some salsa con sabor. No partner necessary, just bring your authentic self, buenas vibras, and an openness to move, express, and celebrate YOU.",
+  },
+  {
+    id: "ring-ready-hiit",
+    start: "4:00 PM",
+    timeLabel: "4:00 to 4:45 PM",
+    stage: "East",
+    title: "Ring Ready HIIT",
+    instructor: "Jeff Williams",
+    lsp: false,
+    affiliation: "Flow Boxing Academy",
+    handles: ["@flawless773", "@flow_boxing_academy"],
+    description:
+      "This action-packed class combines explosive HIIT circuits with boxing basics to deliver a full body workout that challenges both mind and body. Whether you're throwing your first jab or sharpening your skills, you'll leave feeling stronger, faster, and ready for the next round.",
+  },
+  {
+    id: "mat-pilates",
+    start: "5:00 PM",
+    timeLabel: "5:00 to 5:45 PM",
+    stage: "West",
+    title: "Mat Pilates",
+    instructor: "Margarita Quiñones",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@mquino4"],
+    description:
+      "A core focused workout based on the principles of Joseph Pilates. This class strengthens the abdominal muscles, improves posture, and increases overall body awareness and stability, all performed on a mat.",
+  },
+  {
+    id: "wobble-baby-wobble",
+    start: "5:00 PM",
+    timeLabel: "5:00 to 5:45 PM",
+    stage: "East",
+    title: "Wobble Baby Wobble: Balance Flow",
+    instructor: "Krystal Fernandez",
+    lsp: true,
+    affiliation: "LSP",
+    handles: ["@yogawitha_k"],
+    description:
+      "Find focus, centering, and plenty of giggles as we wobble through different poses. We'll flow through balance poses that challenge our bodies until we can't wobble anymore!",
+  },
+];
+
+// The non-class moments that frame the day: the 5K, doors, and the DJ booth.
+// Times come from the same schedule grid. `stage` only where the grid puts
+// the set on a specific stage.
+export const sweatFestMoments = [
+  { timeLabel: "7:00 AM", title: "Kickoff 5K", detail: "All paces welcome." },
+  {
+    timeLabel: "8:00 to 10:00 AM",
+    title: "DJ CamiSoul",
+    stage: "West",
+    dj: true,
+    detail: "Opening set while the 5K wraps and doors open.",
+  },
+  { timeLabel: "8:30 AM", title: "Doors open", detail: "" },
+  {
+    timeLabel: "2:15 to 3:00 PM",
+    title: "DJ Solita",
+    stage: "West",
+    dj: true,
+    detail: "EDM and tech set.",
+  },
+  {
+    timeLabel: "6:00 to 7:30 PM",
+    title: "DJ Boppin",
+    dj: true,
+    detail: "A mix of music as the Pachanga takes over.",
+  },
+  {
+    timeLabel: "7:30 to 9:00 PM",
+    title: "DJ Gonzo",
+    dj: true,
+    detail: "A mix of music through the final set.",
   },
 ];
 

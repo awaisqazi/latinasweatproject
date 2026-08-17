@@ -9,6 +9,8 @@ import {
   sweatFest,
   sweatFestExpect,
   sweatFestDay,
+  sweatFestLineup,
+  sweatFestMoments,
   sweatFestTickets,
   sweatFestSponsorship,
   sweatFestImpactIntro,
@@ -90,6 +92,62 @@ const stubTint = {
   party: sweatFestPalette.naranja,
   "all-day": sweatFestPalette.verde,
 };
+
+// ---------------- Run of show: two stages, one timeline ----------------
+// Stage color coding across the schedule: West = brand magenta, East = teal.
+const stageAccent = {
+  West: sweatFestPalette.magenta,
+  East: sweatFestPalette.teal,
+};
+const stageNames = ["West", "East"];
+
+// Minutes since midnight for a label like "7:00 AM", "8:00 to 10:00 AM", or
+// "11:45 AM to 12:30 PM": read the first clock time and pair it with the
+// first meridiem in the label (ranges state it once, at the relevant end).
+const slotMinutes = (label) => {
+  const time = label.match(/(\d{1,2}):(\d{2})/);
+  const meridiem = label.match(/AM|PM/);
+  if (!time) return 0;
+  const hours = (Number(time[1]) % 12) + (meridiem?.[0] === "PM" ? 12 : 0);
+  return hours * 60 + Number(time[2]);
+};
+
+// Group everything into time-ordered slots: classes land on their stage,
+// staged DJ sets share the row (2:15 PM puts DJ Solita on West beside the
+// East sound bath), and stageless moments (the 5K, doors, the closing DJ
+// sets) run full-width on ink bands. Class time labels win the row chip.
+const slotMap = new Map();
+const slotAt = (minutes, timeLabel) => {
+  if (!slotMap.has(minutes))
+    slotMap.set(minutes, {
+      minutes,
+      timeLabel,
+      West: null,
+      East: null,
+      wide: null,
+    });
+  return slotMap.get(minutes);
+};
+for (const cls of sweatFestLineup)
+  slotAt(slotMinutes(cls.start), cls.timeLabel)[cls.stage] = {
+    kind: "class",
+    ...cls,
+  };
+for (const moment of sweatFestMoments) {
+  const slot = slotAt(slotMinutes(moment.timeLabel), moment.timeLabel);
+  if (moment.stage) slot[moment.stage] = { kind: "moment", ...moment };
+  else slot.wide = moment;
+}
+const runOfShow = [...slotMap.values()].sort((a, b) => a.minutes - b.minutes);
+
+// Checker garnish for the full-width bands, straight off the logo tiles.
+const bandTiles = [
+  sweatFestPalette.magenta,
+  sweatFestPalette.rosa,
+  sweatFestPalette.naranja,
+  sweatFestPalette.teal,
+  sweatFestPalette.verde,
+];
 
 // Paper grain: one fixed noise layer over the whole page so everything reads
 // as printed stock, not backlit glass.
@@ -406,7 +464,7 @@ const eventJsonLd = {
         </div>
 
         <a
-          href="#the-day"
+          href="#lineup"
           class="sf-rise mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-choco underline decoration-[var(--sf-ember)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
           style="animation-delay: 0.4s;"
         >
@@ -659,6 +717,209 @@ const eventJsonLd = {
         <p class="reveal mt-12 text-center text-sm font-bold uppercase tracking-[0.14em] text-choco/75">
           {sweatFest.doorsLine}
         </p>
+
+        <div class="reveal mt-6 flex justify-center">
+          <a
+            href="#lineup"
+            class="inline-flex items-center gap-2 text-sm font-extrabold text-choco underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+          >
+            See the full class lineup
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" set:html={arrowDown} />
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== RUN OF SHOW: THE LINEUP =====================
+        Every class, DJ set, and marker of the day, rendered straight from
+        sweatFestLineup + sweatFestMoments so schedule edits propagate here
+        automatically. West Stage wears brand magenta, East Stage teal;
+        stageless moments run full-width on ink bands like the tickers. */}
+    <section
+      id="lineup"
+      class="relative overflow-hidden bg-[#e2ecac] py-16 scroll-mt-28 sm:py-20 lg:py-24"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal">
+            <span class="sf-stamp rotate-[-1.5deg] px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.ember)};`}>
+              Run of show
+            </span>
+          </p>
+          <h2
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
+            style="transition-delay: 90ms;"
+          >
+            The class lineup
+          </h2>
+          <div class="reveal mx-auto mt-4 h-3 w-32" style="transition-delay: 150ms;" set:html={squiggle(sweatFestColors.dusk)} />
+          <p
+            class="reveal mt-5 text-lg leading-relaxed text-choco/75"
+            style="transition-delay: 210ms;"
+          >
+            Two stages, one day: {sweatFest.dateLabel}. Every class is 45
+            minutes, led by LSP and guest instructors.
+          </p>
+        </div>
+
+        <div class="mt-12 space-y-4 sm:space-y-5">
+          {/* Stage banner row (desktop). Cards keep their own stage labels
+              for small screens and screen readers, so this is decorative. */}
+          <div
+            class="reveal hidden md:grid md:grid-cols-[8.5rem_1fr_1fr] md:gap-4"
+            aria-hidden="true"
+          >
+            <span></span>
+            {
+              stageNames.map((stage) => (
+                <p class="flex items-center justify-center gap-2.5 rounded-md border-2 border-choco bg-[#f4f7dc] py-2.5 font-slab text-lg uppercase tracking-[0.08em] text-choco shadow-[3px_4px_0_rgba(18,63,54,0.12)]">
+                  <span
+                    class="h-2.5 w-2.5 rotate-45"
+                    style={`background: ${stageAccent[stage]};`}
+                  />
+                  {stage} Stage
+                </p>
+              ))
+            }
+          </div>
+
+          {
+            runOfShow.map((slot, slotIndex) =>
+              slot.wide ? (
+                <div class="sf-sched-band reveal relative overflow-hidden bg-choco px-5 py-5 text-center sm:px-8">
+                  <p class="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#e2ecac]/80">
+                    {slot.wide.timeLabel}
+                  </p>
+                  <p class="mt-1.5 font-slab text-2xl uppercase tracking-wide text-[#eaf0c8] sm:text-3xl">
+                    {slot.wide.title}
+                  </p>
+                  {slot.wide.detail && (
+                    <p class="mx-auto mt-1.5 max-w-xl text-sm font-semibold leading-relaxed text-white/70">
+                      {slot.wide.detail}
+                    </p>
+                  )}
+                  <span class="mx-auto mt-3.5 flex w-fit gap-1.5" aria-hidden="true">
+                    {bandTiles.map((tile) => (
+                      <i class="block h-2 w-2" style={`background: ${tile};`} />
+                    ))}
+                  </span>
+                </div>
+              ) : (
+                <div class="reveal grid gap-3 md:grid-cols-[8.5rem_1fr_1fr] md:gap-4">
+                  <div class="flex justify-center md:block">
+                    <span
+                      class="sf-tag inline-flex h-fit px-3 py-1.5 text-center text-xs font-extrabold uppercase tracking-[0.06em] text-choco"
+                      style={`transform: rotate(${tiltOf(slotIndex)}deg);`}
+                    >
+                      {slot.timeLabel}
+                    </span>
+                  </div>
+                  {stageNames.map((stage) => {
+                    const entry = slot[stage];
+                    if (!entry) {
+                      return (
+                        <div
+                          class="hidden rounded-md border-2 border-dashed border-choco/20 md:block"
+                          aria-hidden="true"
+                        />
+                      );
+                    }
+                    const accent = stageAccent[stage];
+                    if (entry.kind === "moment") {
+                      return (
+                        <article class="sf-sched-card sf-sched-dj relative flex h-full flex-col items-center justify-center overflow-hidden p-5 text-center">
+                          <span
+                            class="absolute inset-x-0 top-0 h-1.5"
+                            style={`background: ${accent};`}
+                            aria-hidden="true"
+                          />
+                          <p class="text-[10px] font-extrabold uppercase tracking-[0.24em] text-[#e2ecac]/80">
+                            DJ set<span class="md:sr-only"> · {stage} Stage</span>
+                          </p>
+                          <p class="mt-2 font-slab text-xl uppercase tracking-wide text-[#eaf0c8] sm:text-2xl">
+                            {entry.title}
+                          </p>
+                          {entry.detail && (
+                            <p class="mt-1.5 text-sm font-semibold leading-relaxed text-white/70">
+                              {entry.detail}
+                            </p>
+                          )}
+                        </article>
+                      );
+                    }
+                    return (
+                      <article class="sf-sched-card relative flex h-full flex-col overflow-hidden p-5 pt-6">
+                        <span
+                          class="absolute inset-x-0 top-0 h-1.5"
+                          style={`background: ${accent};`}
+                          aria-hidden="true"
+                        />
+                        <p class="mb-2 md:sr-only">
+                          <span
+                            class="inline-flex items-center rounded-full border-2 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em]"
+                            style={`border-color: ${accent}; color: ${deep(accent)};`}
+                          >
+                            {stage} Stage
+                          </span>
+                        </p>
+                        <h3 class="font-slab text-xl uppercase leading-tight tracking-wide text-choco sm:text-2xl">
+                          {entry.title}
+                        </h3>
+                        <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                          <span class="font-extrabold text-choco">
+                            {entry.instructor}
+                          </span>
+                          {entry.lsp ? (
+                            <span class="inline-block rounded bg-choco px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#e2ecac]">
+                              LSP
+                            </span>
+                          ) : (
+                            entry.affiliation && (
+                              <span class="font-semibold text-choco/75">
+                                · {entry.affiliation}
+                              </span>
+                            )
+                          )}
+                        </p>
+                        <p class="mb-4 mt-1 flex flex-wrap gap-x-2.5 gap-y-1 text-sm font-bold">
+                          {entry.handles.map((handle) => (
+                            <a
+                              href={`https://www.instagram.com/${handle.replace(/^@/, "")}/`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-choco underline decoration-2 underline-offset-4 transition-colors hover:text-[var(--sf-dusk)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]"
+                              style={`text-decoration-color: ${accent};`}
+                            >
+                              {handle}
+                            </a>
+                          ))}
+                        </p>
+                        <details class="sf-sched-details mt-auto border-t-2 border-dashed border-choco/20 pt-3">
+                          <summary class="inline-flex cursor-pointer items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-choco/75 transition-colors hover:text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sf-dusk)]">
+                            About this class
+                            <svg
+                              class="sf-sched-chevron h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="3"
+                              aria-hidden="true"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+                          <p class="mt-2.5 text-sm leading-relaxed text-choco/75">
+                            {entry.description}
+                          </p>
+                        </details>
+                      </article>
+                    );
+                  })}
+                </div>
+              ),
+            )
+          }
+        </div>
       </div>
     </section>
 
@@ -1549,6 +1810,41 @@ const eventJsonLd = {
   .sf-note:hover {
     transform: rotate(0deg) translateY(-2px);
     box-shadow: 6px 8px 0 rgba(18, 63, 54, 0.14);
+  }
+
+  /* Run of show: schedule entries on pale paper, the stage color riding the
+     top edge. DJ sets on stage rows flip to ink, like the ticker tape. */
+  .sf-sched-card {
+    border: 2px solid rgba(18, 63, 54, 0.85);
+    border-radius: 6px;
+    background: #f4f7dc;
+    box-shadow: 4px 5px 0 rgba(18, 63, 54, 0.12);
+  }
+  .sf-sched-dj {
+    background: #123f36;
+  }
+  .sf-sched-band {
+    border-radius: 10px;
+    box-shadow: 5px 6px 0 rgba(18, 63, 54, 0.22);
+  }
+  .sf-sched-details > summary {
+    list-style: none;
+  }
+  .sf-sched-details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .sf-sched-details[open] .sf-sched-chevron {
+    transform: rotate(180deg);
+  }
+  /* Motion-safe: the chevron turns and the description rises in. Under
+     reduced motion the native instant <details> toggle is untouched. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sf-sched-chevron {
+      transition: transform 0.2s ease;
+    }
+    .sf-sched-details[open] > p {
+      animation: sf-rise 0.3s ease both;
+    }
   }
 
   /* Volunteer application: the Google-backed form wears the same paper,
