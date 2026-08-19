@@ -663,7 +663,10 @@ export const sweatFestProgram = {
       "Comfortable clothing",
       "Positive energy",
     ],
-    note: "No outside food permitted.",
+    // Optional footnote rendered under the checklist when present.
+    // "No outside food permitted" was dropped 2026-08-19: not a rule the
+    // team is holding firm on.
+    note: "",
   },
   // `places` power the Google/Apple Maps destination links on each mode:
   // `q` is the search query both map apps receive.
