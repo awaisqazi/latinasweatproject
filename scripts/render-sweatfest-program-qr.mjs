@@ -96,9 +96,7 @@ const card = (h) => {
   s += qrBlock((W - qrPx) / 2, qrY, qrPx);
 
   const yScan = qrY + qrPx + 84;
-  s += sparkle(W / 2 - 300, yScan - 16, 14, p.magenta);
   s += `<text x="${W / 2}" y="${yScan}" text-anchor="middle" font-family="'Hello Baddie', 'Filson Soft', sans-serif" font-size="58" fill="${p.ink}">SCAN FOR THE PROGRAM</text>`;
-  s += sparkle(W / 2 + 300, yScan - 16, 14, p.magenta);
   s += `<text x="${W / 2}" y="${yScan + 56}" text-anchor="middle" font-family="'Filson Soft', Rubik, sans-serif" font-weight="800" font-size="27" fill="${p.ink}">Schedule · Map · Packing list · Getting here</text>`;
   s += `<text x="${W / 2}" y="${yScan + 104}" text-anchor="middle" font-family="Rubik, sans-serif" font-weight="600" font-size="24" fill="${p.ink}" opacity="0.75">latinasweatproject.com/sweatfest/program</text>`;
 
