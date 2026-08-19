@@ -101,22 +101,27 @@ const sections = [
   { id: "getting-here", label: "Getting here" },
 ];
 
-// Numbered map markers: stages get starbursts, everything else gets a
-// numbered chip keyed to the tappable legend. Coordinates live in the
-// 1000x680 map viewBox.
+// The map artwork is the artist's final festival map; interactivity sits on
+// top as invisible hotspots. Coordinates are pixels in the source image
+// (3181x2219), centered on each icon the artist drew.
+const mapImage = {
+  src: "/images/sweatfest/festival-map.webp",
+  width: 3181,
+  height: 2219,
+};
 const mapSpots = {
-  "west-stage": { x: 92, y: 128 },
-  "east-stage": { x: 908, y: 128 },
-  "check-in": { x: 520, y: 478 },
-  entrance: { x: 520, y: 551 },
-  info: { x: 520, y: 340 },
-  rest: { x: 520, y: 420 },
-  "water-west": { x: 300, y: 128 },
-  food: { x: 400, y: 128 },
-  vendors: { x: 690, y: 128 },
-  "water-east": { x: 833, y: 185 },
-  bathrooms: { x: 588, y: 208 },
-  "first-aid": { x: 833, y: 72 },
+  "west-stage": { x: 312, y: 223, r: 190 },
+  "east-stage": { x: 2840, y: 223, r: 190 },
+  "water-west": { x: 959, y: 207, r: 110 },
+  food: { x: 1277, y: 194, r: 110 },
+  vendors: { x: 2107, y: 204, r: 110 },
+  "first-aid": { x: 2584, y: 119, r: 105 },
+  "water-east": { x: 2587, y: 273, r: 105 },
+  bathrooms: { x: 1627, y: 501, r: 150 },
+  info: { x: 1625, y: 1005, r: 110 },
+  rest: { x: 1625, y: 1243, r: 110 },
+  "check-in": { x: 1625, y: 1466, r: 110 },
+  entrance: { x: 1625, y: 1757, r: 150 },
 };
 const numberedPois = sweatFestProgram.map.pois.filter(
   (poi) => poi.kind !== "stage",
@@ -646,126 +651,25 @@ const metaDescription =
 
         <div class="sf-taped mt-6" style="transform: rotate(-0.4deg);">
           <svg
-            viewBox="0 0 1000 680"
+            viewBox={`0 0 ${mapImage.width} ${mapImage.height}`}
             class="h-auto w-full"
             role="img"
             aria-label="Sweat Fest map: stages along W 16th St between Morgan and Halsted, entrance and check-in on S Peoria St at W 18th St"
           >
-            {/* Ground */}
-            <rect width="1000" height="680" fill={p.honeydew} rx="8"></rect>
+            {/* The artist's map artwork as the base layer */}
+            <image
+              href={mapImage.src}
+              width={mapImage.width}
+              height={mapImage.height}
+            />
 
-            {/* Surrounding streets (open to traffic): thin paper lines */}
-            {
-              [
-                { x: 40 }, // S Morgan
-                { x: 760 }, // S Newberry
-                { x: 950 }, // S Halsted
-              ].map((street) => (
-                <rect
-                  x={street.x - 11}
-                  y="20"
-                  width="22"
-                  height="620"
-                  fill={p.paper}
-                  stroke="rgba(18,63,54,0.25)"
-                  stroke-width="2"
-                />
-              ))
-            }
-            <rect
-              x="20"
-              y="617"
-              width="960"
-              height="22"
-              fill={p.paper}
-              stroke="rgba(18,63,54,0.25)"
-              stroke-width="2"></rect>
-
-            {/* Festival footprint: closed W 16th St + S Peoria St */}
-            <rect
-              x="30"
-              y="100"
-              width="940"
-              height="56"
-              rx="10"
-              fill={p.rosa}
-              stroke="#123f36"
-              stroke-width="3"></rect>
-            <rect
-              x="488"
-              y="130"
-              width="64"
-              height="500"
-              rx="10"
-              fill={p.rosa}
-              stroke="#123f36"
-              stroke-width="3"></rect>
-            {/* Re-cover the joint so the two closed streets read as one */}
-            <rect x="492" y="104" width="56" height="49" fill={p.rosa}></rect>
-
-            {/* Entrance arch at 18th & Peoria */}
-            <path
-              d="M494 632 v-36 a26 26 0 0 1 52 0 v36"
-              fill="none"
-              stroke={p.verde}
-              stroke-width="12"
-              stroke-linecap="round"></path>
-
-            {/* Street labels */}
-            <text class="sf-map-street" x="500" y="92" text-anchor="middle"
-              >W 16TH ST</text
-            >
-            <text
-              class="sf-map-street"
-              x="472"
-              y="390"
-              text-anchor="middle"
-              transform="rotate(-90 472 390)">S PEORIA ST</text
-            >
-            <text class="sf-map-street" x="500" y="660" text-anchor="middle"
-              >W 18TH ST</text
-            >
-            <text
-              class="sf-map-street"
-              x="18"
-              y="390"
-              text-anchor="middle"
-              transform="rotate(-90 18 390)">S MORGAN ST</text
-            >
-            <text
-              class="sf-map-street"
-              x="738"
-              y="400"
-              text-anchor="middle"
-              transform="rotate(-90 738 400)">S NEWBERRY AVE</text
-            >
-            <text
-              class="sf-map-street"
-              x="984"
-              y="390"
-              text-anchor="middle"
-              transform="rotate(-90 984 390)">S HALSTED ST</text
-            >
-
-            {/* LSP studio marker (decoration) */}
-            <text
-              x="100"
-              y="215"
-              text-anchor="middle"
-              font-size="34"
-              font-weight="900"
-              fill={p.verde}>X</text
-            >
-            <text class="sf-map-street" x="100" y="238" text-anchor="middle"
-              >LSP STUDIO</text
-            >
-
-            {/* Markers: pictogram chips with integrated numbers */}
+            {/* Invisible tap hotspots over each drawn icon; the pulsing halo
+                appears when a spot is selected from the legend, a marker tap,
+                or a "Find on map" button. */}
             {
               sweatFestProgram.map.pois.map((poi) => {
                 const spot = mapSpots[poi.id];
                 if (!spot) return null;
-                const halo = poi.kind === "stage" ? 52 : 38;
                 return (
                   <g
                     class="sf-map-marker"
@@ -779,12 +683,18 @@ const metaDescription =
                       class="sf-map-halo"
                       cx="0"
                       cy="0"
-                      r={halo}
+                      r={spot.r}
                       fill="none"
                       stroke={poi.kind === "stage" ? p.magenta : p.naranja}
-                      stroke-width="5"
+                      stroke-width="16"
                     />
-                    <g set:html={markerBody(poi)} />
+                    <circle
+                      cx="0"
+                      cy="0"
+                      r={spot.r}
+                      fill="rgba(255,255,255,0.001)"
+                      stroke="none"
+                    />
                   </g>
                 );
               })
