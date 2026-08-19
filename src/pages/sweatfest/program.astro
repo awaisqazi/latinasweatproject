@@ -1,0 +1,1504 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import {
+  sweatFest,
+  sweatFestLineup,
+  sweatFestMoments,
+  sweatFestProgram,
+  sweatFestColors,
+  sweatFestPalette,
+  sweatFestCheckerUri,
+} from "@/data/sweatFest";
+
+// Sweat Fest day-of program: the digital, interactive version of the printed
+// program carousel. This is the page every program QR code opens, so it is
+// built phone-first for someone standing on Peoria St: a live "happening
+// now" strip on event day, the two-stage lineup with tap-open descriptions,
+// a tappable festival map, the packing list, and transportation. Facts render
+// from src/data/sweatFest.js (sweatFestProgram + the shared lineup).
+
+const p = sweatFestPalette;
+const picadoUri = sweatFestCheckerUri;
+
+// Deepened accent for small text on light grounds (same recipe as /sweatfest).
+const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #123f36)`;
+
+const stageAccent = {
+  West: p.magenta,
+  East: p.teal,
+};
+const stageNames = ["West", "East"];
+
+// Minutes since midnight from labels like "7:00 AM", "8:00 to 10:00 AM", or
+// "11:45 AM to 12:30 PM" (same parser as /sweatfest).
+const startMinutes = (label) => {
+  const time = label.match(/(\d{1,2}):(\d{2})/);
+  const meridiem = label.match(/AM|PM/);
+  if (!time) return 0;
+  const hours = (Number(time[1]) % 12) + (meridiem?.[0] === "PM" ? 12 : 0);
+  return hours * 60 + Number(time[2]);
+};
+// End minutes: the last clock time in a range label paired with the final
+// meridiem; single-time labels get null (a moment, not a span).
+const endMinutes = (label) => {
+  const times = [...label.matchAll(/(\d{1,2}):(\d{2})/g)];
+  if (times.length < 2) return null;
+  const last = times[times.length - 1];
+  const meridiems = [...label.matchAll(/AM|PM/g)];
+  const meridiem = meridiems[meridiems.length - 1]?.[0];
+  const hours = (Number(last[1]) % 12) + (meridiem === "PM" ? 12 : 0);
+  return hours * 60 + Number(last[2]);
+};
+
+// Group classes and moments into time-ordered slots, mirroring /sweatfest:
+// classes land on their stage, staged DJ sets share the row, stageless
+// moments run full-width.
+const slotMap = new Map();
+const slotAt = (minutes, timeLabel) => {
+  if (!slotMap.has(minutes))
+    slotMap.set(minutes, {
+      minutes,
+      timeLabel,
+      West: null,
+      East: null,
+      wide: null,
+    });
+  return slotMap.get(minutes);
+};
+for (const cls of sweatFestLineup)
+  slotAt(startMinutes(cls.start), cls.timeLabel)[cls.stage] = {
+    kind: "class",
+    end: endMinutes(cls.timeLabel) ?? startMinutes(cls.start) + 45,
+    ...cls,
+  };
+for (const moment of sweatFestMoments) {
+  const start = startMinutes(moment.timeLabel);
+  const slot = slotAt(start, moment.timeLabel);
+  const entry = {
+    kind: "moment",
+    end: endMinutes(moment.timeLabel),
+    ...moment,
+  };
+  if (moment.stage) slot[moment.stage] = entry;
+  else slot.wide = entry;
+}
+const runOfShow = [...slotMap.values()].sort((a, b) => a.minutes - b.minutes);
+
+// Short time chip for a slot ("9:00 AM" from any label shape).
+const chipTime = (label) => {
+  const time = label.match(/\d{1,2}:\d{2}/)?.[0] ?? label;
+  const meridiem = label.match(/AM|PM/)?.[0] ?? "";
+  return `${time} ${meridiem}`.trim();
+};
+
+// Program sections drive both the sticky tab bar and the section anchors.
+const sections = [
+  { id: "schedule", label: "Schedule" },
+  { id: "lineup", label: "Lineup" },
+  { id: "map", label: "Map" },
+  { id: "pack", label: "Pack" },
+  { id: "getting-here", label: "Getting here" },
+];
+
+// Numbered map markers: stages get starbursts, everything else gets a
+// numbered chip keyed to the tappable legend. Coordinates live in the
+// 1000x680 map viewBox.
+const mapSpots = {
+  "west-stage": { x: 92, y: 128 },
+  "east-stage": { x: 908, y: 128 },
+  "check-in": { x: 520, y: 478 },
+  entrance: { x: 520, y: 551 },
+  info: { x: 520, y: 340 },
+  rest: { x: 520, y: 420 },
+  "water-west": { x: 300, y: 128 },
+  food: { x: 400, y: 128 },
+  vendors: { x: 690, y: 128 },
+  "water-east": { x: 833, y: 185 },
+  bathrooms: { x: 588, y: 208 },
+  "first-aid": { x: 833, y: 72 },
+};
+const numberedPois = sweatFestProgram.map.pois.filter(
+  (poi) => poi.kind !== "stage",
+);
+const poiNumber = (id) => numberedPois.findIndex((poi) => poi.id === id) + 1;
+
+// Marker pictograms, echoing the printed map's white icon chips. Each glyph
+// is drawn in a 24x24 box; `inside: true` glyphs are filled shapes that
+// carry their number inside the graphic (the first-aid plus, the water
+// droplets), everything else gets a corner number badge.
+const ink = "#123f36";
+const stroked = (d, color, width = 2.2) =>
+  `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const poiGlyphs = {
+  "check-in": { svg: stroked("M4.5 13l5 5L19.5 6.5", "#ffffff", 3.4) },
+  entrance: {
+    svg: stroked("M6.5 20.5v-8a5.5 5.5 0 0 1 11 0v8", "#ffffff", 3),
+  },
+  info: {
+    svg:
+      `<circle cx="12" cy="12" r="9.2" fill="none" stroke="${p.verde}" stroke-width="2.4"/>` +
+      stroked("M12 11v5.4", p.verde, 2.6) +
+      `<circle cx="12" cy="7.4" r="1.5" fill="${p.verde}"/>`,
+  },
+  rest: {
+    svg: stroked(
+      "M4 9.5h16M9 9.5l-3.2 9M15 9.5l3.2 9M6.8 14.5h10.4",
+      p.naranja,
+    ),
+  },
+  "water-west": {
+    inside: true,
+    numY: 8,
+    svg: `<path d="M12 2.4C8.5 7.2 5.6 10.8 5.6 14.3a6.4 6.4 0 0 0 12.8 0c0-3.5-2.9-7.1-6.4-11.9z" fill="${p.teal}" stroke="${ink}" stroke-width="1.4"/>`,
+  },
+  food: {
+    svg: stroked(
+      "M7.2 3v4.4a2 2 0 0 0 4 0V3M9.2 3v18M9.2 12h.01M15.8 3c-1.5.9-2.4 2.7-2.4 5 0 2.2.9 3.6 2.4 4V3zm0 9v9",
+      p.naranja,
+    ),
+  },
+  vendors: {
+    svg: stroked(
+      "M4.5 8.6L6 4.5h12l1.5 4.1M4.5 8.6V20h15V8.6M4.5 8.6c0 1.3 1.1 2.4 2.5 2.4s2.5-1.1 2.5-2.4c0 1.3 1.1 2.4 2.5 2.4s2.5-1.1 2.5-2.4c0 1.3 1.1 2.4 2.5 2.4s2.5-1.1 2.5-2.4M9.5 20v-5.5h5V20",
+      p.naranja,
+      2,
+    ),
+  },
+  bathrooms: {
+    svg:
+      `<circle cx="7.6" cy="4.9" r="1.9" fill="${p.naranja}"/>` +
+      stroked("M7.6 8v6.5M5.5 21l2.1-6.5 2.1 6.5M5.4 11.4h4.4", p.naranja, 2) +
+      `<circle cx="16.4" cy="4.9" r="1.9" fill="${p.naranja}"/>` +
+      stroked("M13.8 15l2.6-7 2.6 7zM16.4 15v6", p.naranja, 2),
+  },
+  "first-aid": {
+    inside: true,
+    numY: 5.5,
+    svg: `<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" fill="${p.naranja}" stroke="${ink}" stroke-width="1.4" stroke-linejoin="round"/>`,
+  },
+};
+poiGlyphs["water-east"] = poiGlyphs["water-west"];
+
+// Full marker artwork around the origin: starbursts for the stages, icon
+// chips with integrated numbers for everything else. Reused by the map
+// markers and, shrunk into small <svg> elements, by the legend buttons.
+const starPath =
+  "M 0 -38 l 9 24 25 -15 -15 25 24 9 -24 9 15 25 -25 -15 -9 24 -9 -24 -25 15 15 -25 -24 -9 24 -9 -15 -25 25 15 z";
+const markerBody = (poi) => {
+  if (poi.kind === "stage") {
+    const word = poi.label.split(" ")[0].toUpperCase();
+    return (
+      `<path d="${starPath}" fill="${p.magenta}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>` +
+      `<text x="0" y="-3" text-anchor="middle" font-size="12" font-weight="900" fill="#ffffff">${word}</text>` +
+      `<text x="0" y="11" text-anchor="middle" font-size="12" font-weight="900" fill="#ffffff">STAGE</text>`
+    );
+  }
+  const n = poiNumber(poi.id);
+  const glyph = poiGlyphs[poi.id];
+  const chipFill = poi.kind === "access" ? p.verde : "#ffffff";
+  let s = `<rect x="-24" y="-24" width="48" height="48" rx="11" fill="${chipFill}" stroke="${ink}" stroke-width="3"/>`;
+  if (glyph.inside) {
+    s += `<g transform="translate(-19.2 -20.2) scale(1.6)">${glyph.svg}</g>`;
+    s += `<text x="0" y="${glyph.numY}" text-anchor="middle" font-size="16" font-weight="900" fill="#ffffff">${n}</text>`;
+  } else {
+    s += `<g transform="translate(-15.6 -15.6) scale(1.3)">${glyph.svg}</g>`;
+    s += `<circle cx="19" cy="-19" r="13.5" fill="${ink}" stroke="#ffffff" stroke-width="2.5"/>`;
+    s += `<text x="19" y="-13.4" text-anchor="middle" font-size="16" font-weight="900" fill="#ffffff">${n}</text>`;
+  }
+  return s;
+};
+
+// "Find on map" targets: stage items point at their stage marker; the
+// stageless framing moments map to the spot they actually happen at.
+const stageMarker = { West: "west-stage", East: "east-stage" };
+const wideMarker = { "Kickoff 5K": "entrance", "Doors open": "check-in" };
+const pinGlyph =
+  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-5.4-6.5-10.2a6.5 6.5 0 0 1 13 0C18.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.6" r="2.3"/>';
+
+// Transportation mode icons (24x24 stroke paths), keyed by entry id.
+const transitIcons = {
+  train:
+    '<path stroke-linecap="round" stroke-linejoin="round" d="M7 3h10a2 2 0 012 2v9a3 3 0 01-3 3H8a3 3 0 01-3-3V5a2 2 0 012-2zM5 10h14M9.5 14.5h.01M14.5 14.5h.01M8 17l-2 4m10-4l2 4m-9-1h6" />',
+  bus: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 4h14a1 1 0 011 1v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5a1 1 0 011-1zM4 9.5h16M8.5 14.5h.01M15.5 14.5h.01M7 18v2.5M17 18v2.5" />',
+  bike: '<circle cx="6" cy="16.5" r="3.5" /><circle cx="18" cy="16.5" r="3.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 16.5L9.5 9h6L18 16.5M9.5 9L8.5 6H7m5.5 10.5L15.5 9" />',
+  metra:
+    '<path stroke-linecap="round" stroke-linejoin="round" d="M8 3.5h8a3 3 0 013 3V14a2.5 2.5 0 01-2.5 2.5h-9A2.5 2.5 0 015 14V6.5a3 3 0 013-3zM5 10h14M9.5 13.5h.01M14.5 13.5h.01M8.5 16.5L6 21m12-4.5L20.5 21M9 21h6" />',
+  parking:
+    '<path stroke-linecap="round" stroke-linejoin="round" d="M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2zm4 12v-8h3.25a2.5 2.5 0 010 5H10" />',
+};
+
+// Map-app destination links: both major phone platforms, from one query.
+const gmaps = (q) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const amaps = (q) => `https://maps.apple.com/?q=${encodeURIComponent(q)}`;
+
+const metaDescription =
+  "The Sweat Fest 2026 day-of program: the two-stage class schedule, festival map, packing list, and how to get to 18th & Peoria.";
+---
+
+<Layout
+  title="Sweat Fest Program | The Latina Sweat Project"
+  description={metaDescription}
+  socialImage="/images/sweatfest/sweatfest-social-v4.jpg"
+  socialImageAlt="Sweat Fest: the checkerboard-bordered Sweat Fest logo over August 22, 2026, 7:00 AM to 9:00 PM, 18th & Peoria, Chicago"
+  socialImageWidth={1200}
+  socialImageHeight={675}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  {/* Home-screen shortcut identity: saving this page to a phone gets the
+      checkerboard Sweat Fest tile instead of a generic screenshot. */}
+  <link
+    slot="head"
+    rel="manifest"
+    href="/sweatfest-program.webmanifest"
+  />
+  <link
+    slot="head"
+    rel="apple-touch-icon"
+    sizes="180x180"
+    href="/images/sweatfest/program-icon-180.png"
+  />
+  <Header />
+  <main
+    class="overflow-x-clip bg-[#e2ecac] text-choco"
+    style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
+  >
+    {/* ---------- Program masthead ---------- */}
+    <section class="relative overflow-hidden bg-[#e2ecac] pb-8 pt-10 sm:pt-14">
+      <div
+        class="sf-picado absolute inset-x-0 top-0 h-[26px] opacity-90"
+        style={`background-image: ${picadoUri}; background-size: 104px 34.6px;`}
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative mx-auto max-w-3xl px-4 pt-4 text-center">
+        <p
+          class="text-[11px] font-extrabold uppercase tracking-[0.28em] text-choco/70"
+        >
+          {sweatFest.presentedBy}
+        </p>
+        <h1
+          class="mt-3 font-slab uppercase leading-[0.95] tracking-tight"
+        >
+          <span
+            class="sf-print block text-[3.4rem] sm:text-[4.6rem]"
+            style="--sf-print: #60a444;">Sweat Fest</span
+          >
+          <span
+            class="sf-print block text-[2.5rem] sm:text-[3.4rem]"
+            style="--sf-print: #ee3083;">Program</span
+          >
+        </h1>
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {
+            [
+              sweatFest.dateLabel,
+              sweatFest.venueLine,
+              "7:00 AM to 9:00 PM",
+            ].map((fact) => (
+              <span class="sf-tag inline-flex items-center px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-choco">
+                {fact}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Sticky section tabs ---------- */}
+    <nav
+      class="sf-prog-tabs sticky top-0 z-40 border-y-2 border-choco bg-[#f4f7dc]"
+      aria-label="Program sections"
+    >
+      <div
+        class="mx-auto flex max-w-3xl items-stretch gap-1 overflow-x-auto px-2 py-2"
+      >
+        {
+          sections.map((section) => (
+            <a
+              href={`#${section.id}`}
+              data-prog-tab={section.id}
+              class="sf-prog-tab flex-none whitespace-nowrap rounded-lg px-3.5 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-choco/80 transition-colors"
+            >
+              {section.label}
+            </a>
+          ))
+        }
+      </div>
+    </nav>
+
+    {/* ---------- Happening now (event day only, filled by JS) ---------- */}
+    <section
+      id="now"
+      data-prog-now
+      class="hidden border-b-2 border-choco bg-choco px-4 py-5 text-white"
+    >
+      <div class="mx-auto max-w-3xl">
+        <p
+          class="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.24em] text-white/80"
+        >
+          <span
+            class="sf-prog-live-dot h-2.5 w-2.5 rounded-full"
+            style={`background: ${p.magenta};`}
+            aria-hidden="true"></span>
+          Happening now
+        </p>
+        <div
+          data-prog-now-body
+          class="mt-3 grid gap-2 text-sm font-semibold sm:grid-cols-2"
+        >
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Day at a glance ---------- */}
+    <section id="schedule" class="scroll-mt-24 px-4 py-10 sm:py-12">
+      <div class="mx-auto max-w-3xl">
+        <h2
+          class="font-slab text-3xl uppercase tracking-tight sm:text-4xl"
+        >
+          The day at a glance
+        </h2>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          {
+            sweatFestProgram.glance.map((row, i) => (
+              <div
+                class="sf-note flex items-center gap-4 p-4"
+                style={`transform: rotate(${[-0.7, 0.5, -0.4, 0.6][i % 4]}deg);`}
+              >
+                <span
+                  class="flex-none rounded-lg border-2 border-choco px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.04em]"
+                  style={`background: ${[p.rosa, p.honeydew, "#bfe0e1", "#cfe3b6"][i % 4]};`}
+                >
+                  {row.time}
+                </span>
+                <span class="text-base font-extrabold uppercase tracking-[0.06em]">
+                  {row.title}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Two-stage lineup ---------- */}
+    <section
+      id="lineup"
+      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-3xl">
+        <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+          Sweat schedule
+        </h2>
+        <p class="mt-2 text-sm font-semibold text-choco/75">
+          Every class is 45 minutes. Tap a class for its description.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2" aria-hidden="true">
+          {
+            stageNames.map((stage) => (
+              <span
+                class="inline-flex items-center gap-2 rounded-lg border-2 border-choco bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]"
+                style={`color: ${deep(stageAccent[stage])};`}
+              >
+                <span
+                  class="h-2.5 w-2.5 rounded-full"
+                  style={`background: ${stageAccent[stage]};`}
+                />
+                {stage} Stage
+              </span>
+            ))
+          }
+        </div>
+
+        <div class="mt-6 space-y-3">
+          {
+            runOfShow.map((slot) => (
+              <>
+                {slot.wide && (
+                  <div
+                    class="relative overflow-hidden rounded-xl border-2 border-choco bg-choco px-4 py-3.5 text-white"
+                    data-prog-slot
+                    data-start={slot.minutes}
+                    data-end={slot.wide.end ?? slot.minutes + 30}
+                    data-title={slot.wide.title}
+                    data-where=""
+                  >
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span class="text-xs font-extrabold uppercase tracking-[0.14em] text-white/75">
+                        {slot.wide.timeLabel}
+                      </span>
+                      <span class="font-slab text-xl uppercase tracking-tight">
+                        {slot.wide.title}
+                      </span>
+                      <span
+                        data-prog-badge
+                        class="hidden rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-choco"
+                        style={`background: ${p.honeydew};`}
+                      />
+                    </div>
+                    {slot.wide.detail && (
+                      <p class="mt-1 text-sm font-semibold text-white/80">
+                        {slot.wide.detail}
+                      </p>
+                    )}
+                    {wideMarker[slot.wide.title] && (
+                      <button
+                        type="button"
+                        data-find-on-map={wideMarker[slot.wide.title]}
+                        class="sf-find-map mt-2 inline-flex items-center gap-1.5 rounded-lg border-2 border-white/40 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-white/90 transition-colors hover:border-white hover:bg-white/10"
+                      >
+                        <svg
+                          class="h-3.5 w-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          aria-hidden="true"
+                          set:html={pinGlyph}
+                        />
+                        Find on map
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(slot.West || slot.East) && (
+                  <div class="grid gap-3 sm:grid-cols-[auto_1fr_1fr] sm:items-stretch">
+                    <div class="hidden sm:flex sm:w-24 sm:flex-none sm:items-start sm:justify-center sm:pt-4">
+                      <span class="sf-tag px-2.5 py-1 text-xs font-extrabold uppercase tracking-[0.04em] text-choco">
+                        {chipTime(slot.timeLabel)}
+                      </span>
+                    </div>
+                    {stageNames.map((stage) => {
+                      const entry = slot[stage];
+                      if (!entry)
+                        return (
+                          <div
+                            class="hidden items-center justify-center rounded-xl border-2 border-dashed border-choco/20 sm:flex"
+                            aria-hidden="true"
+                          >
+                            <span class="text-choco/30">~</span>
+                          </div>
+                        );
+                      const accent = stageAccent[stage];
+                      if (entry.kind === "moment")
+                        return (
+                          <article
+                            class="relative overflow-hidden rounded-xl border-2 border-choco bg-white p-4"
+                            data-prog-slot
+                            data-start={slot.minutes}
+                            data-end={entry.end ?? slot.minutes + 45}
+                            data-title={entry.title}
+                            data-where={`${stage} Stage`}
+                          >
+                            <span
+                              class="absolute inset-y-0 left-0 w-1.5"
+                              style={`background: ${accent};`}
+                              aria-hidden="true"
+                            />
+                            <div class="flex flex-wrap items-center gap-2 pl-2">
+                              <span
+                                class="text-[11px] font-extrabold uppercase tracking-[0.12em]"
+                                style={`color: ${deep(accent)};`}
+                              >
+                                {entry.timeLabel} · {stage} Stage
+                              </span>
+                              <span
+                                data-prog-badge
+                                class="hidden rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-white"
+                                style={`background: ${p.magenta};`}
+                              />
+                            </div>
+                            <p class="pl-2 pt-1 font-slab text-xl uppercase tracking-tight">
+                              {entry.title}
+                            </p>
+                            {entry.detail && (
+                              <p class="pl-2 pt-1 text-sm font-semibold text-choco/75">
+                                {entry.detail}
+                              </p>
+                            )}
+                            <button
+                              type="button"
+                              data-find-on-map={stageMarker[stage]}
+                              class="sf-find-map ml-2 mt-2 inline-flex items-center gap-1.5 rounded-lg border-2 border-choco/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-choco/75 transition-colors hover:border-choco hover:bg-[#f4f7dc]"
+                            >
+                              <svg
+                                class="h-3.5 w-3.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                aria-hidden="true"
+                                set:html={pinGlyph}
+                              />
+                              Find on map
+                            </button>
+                          </article>
+                        );
+                      return (
+                        <article
+                          class="relative overflow-hidden rounded-xl border-2 border-choco bg-white p-4"
+                          data-prog-slot
+                          data-start={slot.minutes}
+                          data-end={entry.end}
+                          data-title={`${entry.title} · ${entry.instructor}`}
+                          data-where={`${stage} Stage`}
+                        >
+                          <span
+                            class="absolute inset-y-0 left-0 w-1.5"
+                            style={`background: ${accent};`}
+                            aria-hidden="true"
+                          />
+                          <div class="flex flex-wrap items-center gap-2 pl-2">
+                            <span
+                              class="text-[11px] font-extrabold uppercase tracking-[0.12em]"
+                              style={`color: ${deep(accent)};`}
+                            >
+                              {entry.timeLabel} · {stage} Stage
+                            </span>
+                            <span
+                              data-prog-badge
+                              class="hidden rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-white"
+                              style={`background: ${p.magenta};`}
+                            />
+                          </div>
+                          <h3 class="pl-2 pt-1 font-slab text-xl uppercase leading-tight tracking-tight">
+                            {entry.title}
+                          </h3>
+                          <p class="pl-2 pt-0.5 text-sm font-extrabold text-choco/85">
+                            {entry.instructor}
+                            {entry.affiliation && (
+                              <span class="font-semibold text-choco/60">
+                                {` · ${entry.affiliation}`}
+                              </span>
+                            )}
+                          </p>
+                          <details class="group pl-2 pt-2">
+                            <summary class="flex cursor-pointer list-none items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-choco/70 [&::-webkit-details-marker]:hidden">
+                              About this class
+                              <svg
+                                class="h-3 w-3 transition-transform group-open:rotate-180"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="3"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </summary>
+                            <p class="pt-2 text-sm leading-relaxed text-choco/80">
+                              {entry.description}
+                            </p>
+                            {entry.handles?.length > 0 && (
+                              <p class="pt-2 text-xs font-extrabold text-choco/60">
+                                {entry.handles.join(" · ")}
+                              </p>
+                            )}
+                          </details>
+                          <button
+                            type="button"
+                            data-find-on-map={stageMarker[stage]}
+                            class="sf-find-map ml-2 mt-2.5 inline-flex items-center gap-1.5 rounded-lg border-2 border-choco/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-choco/75 transition-colors hover:border-choco hover:bg-[#f4f7dc]"
+                          >
+                            <svg
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              aria-hidden="true"
+                              set:html={pinGlyph}
+                            />
+                            Find on map
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Festival map ---------- */}
+    <section
+      id="map"
+      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-3xl">
+        <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+          Festival map
+        </h2>
+        <p class="mt-2 text-sm font-semibold text-choco/75">
+          Tap a spot in the list to find it on the map. Enter at 18th &
+          Peoria.
+        </p>
+
+        <div class="sf-taped mt-6" style="transform: rotate(-0.4deg);">
+          <svg
+            viewBox="0 0 1000 680"
+            class="h-auto w-full"
+            role="img"
+            aria-label="Sweat Fest map: stages along W 16th St between Morgan and Halsted, entrance and check-in on S Peoria St at W 18th St"
+          >
+            {/* Ground */}
+            <rect width="1000" height="680" fill={p.honeydew} rx="8"></rect>
+
+            {/* Surrounding streets (open to traffic): thin paper lines */}
+            {
+              [
+                { x: 40 }, // S Morgan
+                { x: 760 }, // S Newberry
+                { x: 950 }, // S Halsted
+              ].map((street) => (
+                <rect
+                  x={street.x - 11}
+                  y="20"
+                  width="22"
+                  height="620"
+                  fill={p.paper}
+                  stroke="rgba(18,63,54,0.25)"
+                  stroke-width="2"
+                />
+              ))
+            }
+            <rect
+              x="20"
+              y="617"
+              width="960"
+              height="22"
+              fill={p.paper}
+              stroke="rgba(18,63,54,0.25)"
+              stroke-width="2"></rect>
+
+            {/* Festival footprint: closed W 16th St + S Peoria St */}
+            <rect
+              x="30"
+              y="100"
+              width="940"
+              height="56"
+              rx="10"
+              fill={p.rosa}
+              stroke="#123f36"
+              stroke-width="3"></rect>
+            <rect
+              x="488"
+              y="130"
+              width="64"
+              height="500"
+              rx="10"
+              fill={p.rosa}
+              stroke="#123f36"
+              stroke-width="3"></rect>
+            {/* Re-cover the joint so the two closed streets read as one */}
+            <rect x="492" y="104" width="56" height="49" fill={p.rosa}></rect>
+
+            {/* Entrance arch at 18th & Peoria */}
+            <path
+              d="M494 632 v-36 a26 26 0 0 1 52 0 v36"
+              fill="none"
+              stroke={p.verde}
+              stroke-width="12"
+              stroke-linecap="round"></path>
+
+            {/* Street labels */}
+            <text class="sf-map-street" x="500" y="92" text-anchor="middle"
+              >W 16TH ST</text
+            >
+            <text
+              class="sf-map-street"
+              x="472"
+              y="390"
+              text-anchor="middle"
+              transform="rotate(-90 472 390)">S PEORIA ST</text
+            >
+            <text class="sf-map-street" x="500" y="660" text-anchor="middle"
+              >W 18TH ST</text
+            >
+            <text
+              class="sf-map-street"
+              x="18"
+              y="390"
+              text-anchor="middle"
+              transform="rotate(-90 18 390)">S MORGAN ST</text
+            >
+            <text
+              class="sf-map-street"
+              x="738"
+              y="400"
+              text-anchor="middle"
+              transform="rotate(-90 738 400)">S NEWBERRY AVE</text
+            >
+            <text
+              class="sf-map-street"
+              x="984"
+              y="390"
+              text-anchor="middle"
+              transform="rotate(-90 984 390)">S HALSTED ST</text
+            >
+
+            {/* LSP studio marker (decoration) */}
+            <text
+              x="100"
+              y="215"
+              text-anchor="middle"
+              font-size="34"
+              font-weight="900"
+              fill={p.verde}>X</text
+            >
+            <text class="sf-map-street" x="100" y="238" text-anchor="middle"
+              >LSP STUDIO</text
+            >
+
+            {/* Markers: pictogram chips with integrated numbers */}
+            {
+              sweatFestProgram.map.pois.map((poi) => {
+                const spot = mapSpots[poi.id];
+                if (!spot) return null;
+                const halo = poi.kind === "stage" ? 52 : 38;
+                return (
+                  <g
+                    class="sf-map-marker"
+                    data-map-marker={poi.id}
+                    tabindex="0"
+                    role="button"
+                    aria-label={poi.label}
+                    transform={`translate(${spot.x} ${spot.y})`}
+                  >
+                    <circle
+                      class="sf-map-halo"
+                      cx="0"
+                      cy="0"
+                      r={halo}
+                      fill="none"
+                      stroke={poi.kind === "stage" ? p.magenta : p.naranja}
+                      stroke-width="5"
+                    />
+                    <g set:html={markerBody(poi)} />
+                  </g>
+                );
+              })
+            }
+          </svg>
+        </div>
+
+        {/* Selected-spot readout */}
+        <div
+          data-map-detail
+          class="sf-note mt-4 hidden p-4 text-sm font-semibold"
+          role="status"
+        >
+        </div>
+
+        {/* Legend */}
+        <div class="mt-5 grid gap-2 sm:grid-cols-2">
+          {
+            sweatFestProgram.map.pois.map((poi) => (
+              <button
+                type="button"
+                data-map-legend={poi.id}
+                data-map-label={poi.label}
+                data-map-detail-text={poi.detail}
+                class="sf-map-legend flex items-center gap-3 rounded-xl border-2 border-choco bg-white px-3.5 py-2.5 text-left text-sm font-extrabold text-choco transition-colors"
+              >
+                <svg
+                  class="h-9 w-9 flex-none"
+                  viewBox={
+                    poi.kind === "stage" ? "-46 -46 92 92" : "-29 -29 58 58"
+                  }
+                  aria-hidden="true"
+                  set:html={markerBody(poi)}
+                />
+                {poi.label}
+              </button>
+            ))
+          }
+        </div>
+
+        {/* Street closures */}
+        <div class="sf-note mt-6 p-4" style="transform: rotate(0.4deg);">
+          <p
+            class="text-[11px] font-extrabold uppercase tracking-[0.18em]"
+            style={`color: ${deep(p.magenta)};`}
+          >
+            {sweatFestProgram.map.closuresHeading}
+          </p>
+          <ul class="mt-2 space-y-1 text-sm font-semibold text-choco/85">
+            {
+              sweatFestProgram.map.closures.map((closure) => (
+                <li>{closure}</li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Packing list ---------- */}
+    <section
+      id="pack"
+      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-3xl">
+        <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+          Packing list
+        </h2>
+        <p class="mt-2 text-sm font-semibold text-choco/75">
+          Tap each item as you pack it.
+        </p>
+        <ul class="mt-6 grid gap-2.5 sm:grid-cols-2">
+          {
+            sweatFestProgram.packing.items.map((item) => (
+              <li>
+                <label class="sf-pack-item flex cursor-pointer items-center gap-3 rounded-xl border-2 border-choco bg-white px-4 py-3 font-extrabold transition-colors">
+                  <input type="checkbox" class="peer sr-only" />
+                  <span
+                    class="flex h-6 w-6 flex-none items-center justify-center rounded-md border-2 border-choco bg-[#f4f7dc] text-transparent transition-colors peer-checked:text-white"
+                    style="background: var(--pack-box, #f4f7dc);"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </span>
+                  <span class="sf-pack-text">{item}</span>
+                </label>
+              </li>
+            ))
+          }
+        </ul>
+        <p
+          class="mt-5 inline-block rounded-lg border-2 border-choco bg-choco px-3.5 py-2 text-xs font-extrabold uppercase tracking-[0.12em] text-white"
+        >
+          {sweatFestProgram.packing.note}
+        </p>
+      </div>
+    </section>
+
+    {/* ---------- Getting here ---------- */}
+    <section
+      id="getting-here"
+      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-3xl">
+        <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+          Getting here
+        </h2>
+        <p class="mt-2 text-sm font-semibold text-choco/75">
+          The festival entrance is at 18th & Peoria in Pilsen. Tap a map link
+          to set your destination.
+        </p>
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border-2 border-choco bg-choco px-4 py-3 text-white"
+        >
+          <span class="text-sm font-extrabold uppercase tracking-[0.08em]">
+            {sweatFestProgram.entrancePlace.label}
+          </span>
+          <span class="flex items-center gap-2 text-sm font-extrabold">
+            <a
+              href={gmaps(sweatFestProgram.entrancePlace.q)}
+              target="_blank"
+              rel="noopener"
+              class="underline decoration-[var(--sf-sunrise)] decoration-2 underline-offset-4 hover:text-[#e2ecac]"
+            >
+              Google Maps
+            </a>
+            <span class="text-white/50" aria-hidden="true">·</span>
+            <a
+              href={amaps(sweatFestProgram.entrancePlace.q)}
+              target="_blank"
+              rel="noopener"
+              class="underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 hover:text-[#e2ecac]"
+            >
+              Apple Maps
+            </a>
+          </span>
+        </div>
+        <div class="mt-4 space-y-3">
+          {
+            sweatFestProgram.transportation.map((mode, i) => (
+              <div
+                class="sf-note flex gap-4 p-4"
+                style={`transform: rotate(${[-0.5, 0.4, -0.3, 0.5, -0.4][i % 5]}deg);`}
+              >
+                <span
+                  class="flex h-11 w-11 flex-none items-center justify-center rounded-xl border-2 border-choco"
+                  style={`background: ${[p.rosa, "#bfe0e1", "#cfe3b6", "#f8c9a8", p.honeydew][i % 5]};`}
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="h-6 w-6 text-choco"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    set:html={transitIcons[mode.id]}
+                  />
+                </span>
+                <div>
+                  <h3 class="font-slab text-xl uppercase tracking-tight">
+                    {mode.title}
+                  </h3>
+                  <ul class="mt-1 space-y-0.5 text-sm font-semibold text-choco/80">
+                    {mode.lines.map((line) => (
+                      <li>{line}</li>
+                    ))}
+                  </ul>
+                  {mode.places?.length > 0 && (
+                    <div class="mt-2.5 space-y-1.5">
+                      {mode.places.map((place) => (
+                        <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-extrabold text-choco/80">
+                          <svg
+                            class="h-3.5 w-3.5 flex-none text-[var(--sf-sunrise)]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            aria-hidden="true"
+                            set:html={pinGlyph}
+                          />
+                          <span>{place.label}:</span>
+                          <a
+                            href={gmaps(place.q)}
+                            target="_blank"
+                            rel="noopener"
+                            class="underline decoration-[var(--sf-sunrise)] decoration-2 underline-offset-2 hover:text-choco"
+                          >
+                            Google Maps
+                          </a>
+                          <span class="text-choco/40" aria-hidden="true">
+                            ·
+                          </span>
+                          <a
+                            href={amaps(place.q)}
+                            target="_blank"
+                            rel="noopener"
+                            class="underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-2 hover:text-choco"
+                          >
+                            Apple Maps
+                          </a>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ---------- Footer CTA ---------- */}
+    <section class="relative overflow-hidden bg-choco px-4 py-12 text-center">
+      <div
+        class="sf-picado absolute inset-x-0 top-0 h-[26px] opacity-90"
+        style={`background-image: ${picadoUri}; background-size: 104px 34.6px;`}
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative mx-auto max-w-3xl pt-4">
+        <p class="font-slab text-2xl uppercase tracking-tight text-white">
+          {sweatFest.tagline}
+        </p>
+        <div
+          class="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
+          {
+            sweatFest.ticketsOnSale && (
+              <a
+                href={sweatFest.ticketsUrl}
+                target="_blank"
+                rel="noopener"
+                class="sf-btn sf-btn-night inline-flex items-center justify-center gap-2 bg-[var(--sf-sunrise)] px-8 py-3.5 text-base font-extrabold text-choco"
+              >
+                {sweatFest.ticketsLabel}
+              </a>
+            )
+          }
+          <a
+            href="/sweat-fest-program-2026.pdf"
+            download="Sweat-Fest-2026-Program.pdf"
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-2 bg-[#e2ecac] px-8 py-3.5 text-base font-extrabold text-choco"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4.5 20.5h15"></path>
+            </svg>
+            Export the program (PDF)
+          </a>
+          <button
+            type="button"
+            data-shortcut-open
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-2 bg-[#e2ecac] px-8 py-3.5 text-base font-extrabold text-choco"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+              aria-hidden="true"
+            >
+              <rect x="5" y="2.5" width="14" height="19" rx="3"></rect>
+              <path stroke-linecap="round" d="M10 5.5h4M12 15v-4.5m-2.25 2.25h4.5"
+              ></path>
+            </svg>
+            Save to your phone
+          </button>
+          <a
+            href="/sweatfest"
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-2 bg-white px-8 py-3.5 text-base font-extrabold text-choco"
+          >
+            Full Sweat Fest page
+          </a>
+        </div>
+        <p
+          class="mt-6 text-[11px] font-bold uppercase tracking-[0.22em] text-white/65"
+        >
+          latinasweatproject.com/sweatfest/program
+        </p>
+      </div>
+    </section>
+
+    {/* Save-to-phone walkthrough: how to pin the program to a home screen
+        (with the Sweat Fest tile icon) on iPhone and Android. */}
+    <dialog
+      data-shortcut-dialog
+      class="sf-shortcut-dialog m-auto w-[min(92vw,30rem)] rounded-2xl border-[3px] border-choco bg-[#f4f7dc] p-0 text-choco backdrop:bg-choco/60"
+    >
+      <div class="p-6 sm:p-7">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <img
+              src="/images/sweatfest/program-icon-180.png"
+              alt=""
+              width="52"
+              height="52"
+              class="h-13 w-13 flex-none rounded-xl border-2 border-choco"
+              style="width: 3.25rem; height: 3.25rem;"
+            />
+            <div>
+              <h2 class="font-slab text-2xl uppercase tracking-tight">
+                Keep it one tap away
+              </h2>
+              <p class="text-xs font-semibold text-choco/70">
+                Save the program to your phone's home screen and it opens
+                like an app on festival day.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            data-shortcut-close
+            aria-label="Close"
+            class="flex h-9 w-9 flex-none items-center justify-center rounded-lg border-2 border-choco bg-white text-choco transition-colors hover:bg-[#e2ecac]"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="3"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-5 space-y-4">
+          <div class="rounded-xl border-2 border-choco bg-white p-4">
+            <p
+              class="text-[11px] font-extrabold uppercase tracking-[0.18em]"
+              style={`color: ${deep(p.magenta)};`}
+            >
+              iPhone · Safari
+            </p>
+            <ol
+              class="mt-2 list-decimal space-y-1.5 pl-5 text-sm font-semibold text-choco/85"
+            >
+              <li>
+                Tap the Share button (the square with the arrow) at the bottom
+                of Safari.
+              </li>
+              <li>Scroll down and tap "Add to Home Screen."</li>
+              <li>Tap "Add." The Sweat Fest tile lands on your home screen.</li>
+            </ol>
+          </div>
+          <div class="rounded-xl border-2 border-choco bg-white p-4">
+            <p
+              class="text-[11px] font-extrabold uppercase tracking-[0.18em]"
+              style={`color: ${deep(p.teal)};`}
+            >
+              Android · Chrome
+            </p>
+            <ol
+              class="mt-2 list-decimal space-y-1.5 pl-5 text-sm font-semibold text-choco/85"
+            >
+              <li>Tap the three-dot menu in the top right of Chrome.</li>
+              <li>Tap "Add to Home screen" (or "Install app").</li>
+              <li>Tap "Add." The Sweat Fest tile lands on your home screen.</li>
+            </ol>
+          </div>
+          <p class="text-xs font-semibold text-choco/65">
+            Want it even closer? On iPhone you can also hold the tile, or on
+            the lock screen use a Safari bookmark widget, but the home-screen
+            shortcut is the quickest route on both platforms.
+          </p>
+        </div>
+      </div>
+    </dialog>
+  </main>
+</Layout>
+
+<style>
+  /* Torn-paper program card, the pale honeydew note shared with /sweatfest. */
+  .sf-note {
+    background: #f4f7dc;
+    border: 2px solid #123f36;
+    border-radius: 12px;
+    box-shadow: 4px 5px 0 rgba(18, 63, 54, 0.18);
+  }
+
+  .sf-prog-tab[aria-current="true"] {
+    background: #123f36;
+    color: #ffffff;
+  }
+
+  .sf-map-street {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    fill: rgba(18, 63, 54, 0.65);
+  }
+
+  .sf-map-marker {
+    cursor: pointer;
+    outline: none;
+  }
+  .sf-map-halo {
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .sf-map-marker.is-active .sf-map-halo {
+    opacity: 1;
+    animation: sf-map-pulse 1.4s ease-out infinite;
+  }
+  .sf-map-marker:focus-visible circle:not(.sf-map-halo),
+  .sf-map-marker:focus-visible path {
+    stroke-width: 5;
+  }
+  @keyframes sf-map-pulse {
+    0% {
+      transform: scale(0.55);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1.15);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sf-map-marker.is-active .sf-map-halo {
+      animation: none;
+      transform: none;
+    }
+  }
+
+  .sf-map-legend.is-active {
+    background: #123f36;
+    color: #ffffff;
+  }
+
+  .sf-pack-item:has(input:checked) {
+    background: #cfe3b6;
+  }
+  .sf-pack-item:has(input:checked) .sf-pack-text {
+    text-decoration: line-through;
+    text-decoration-thickness: 2.5px;
+    opacity: 0.65;
+  }
+  .sf-pack-item:has(input:checked) span[aria-hidden] {
+    background: #60a444 !important;
+  }
+  .sf-pack-item:has(input:focus-visible) {
+    outline: 2px solid #123f36;
+    outline-offset: 2px;
+  }
+
+  .sf-prog-live-dot {
+    animation: sf-live-blink 1.6s ease-in-out infinite;
+  }
+  @keyframes sf-live-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sf-prog-live-dot {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // ---------- Sticky tab bar: highlight the section in view ----------
+  (() => {
+    const tabs = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("[data-prog-tab]"),
+    );
+    if (!tabs.length || !("IntersectionObserver" in window)) return;
+    const byId = new Map(tabs.map((tab) => [tab.dataset.progTab, tab]));
+    const setActive = (id: string | undefined) => {
+      tabs.forEach((tab) =>
+        tab.setAttribute(
+          "aria-current",
+          tab.dataset.progTab === id ? "true" : "false",
+        ),
+      );
+    };
+    const visible = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          visible.set(entry.target.id, entry.intersectionRatio);
+        });
+        let best: string | undefined;
+        let bestRatio = 0;
+        visible.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            best = id;
+          }
+        });
+        if (best) setActive(best);
+      },
+      { rootMargin: "-72px 0px -40% 0px", threshold: [0, 0.15, 0.4, 0.8] },
+    );
+    byId.forEach((_tab, id) => {
+      const section = id && document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+  })();
+
+  // ---------- Map: legend <-> marker highlighting ----------
+  (() => {
+    const legends = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-map-legend]"),
+    );
+    const markers = Array.from(
+      document.querySelectorAll<SVGGElement>("[data-map-marker]"),
+    );
+    const detail = document.querySelector<HTMLElement>("[data-map-detail]");
+    if (!legends.length || !markers.length) return;
+
+    const activate = (id: string | null) => {
+      legends.forEach((legend) =>
+        legend.classList.toggle("is-active", legend.dataset.mapLegend === id),
+      );
+      markers.forEach((marker) =>
+        marker.classList.toggle("is-active", marker.dataset.mapMarker === id),
+      );
+      const legend = legends.find((l) => l.dataset.mapLegend === id);
+      if (detail) {
+        if (legend) {
+          detail.classList.remove("hidden");
+          detail.innerHTML = "";
+          const strong = document.createElement("strong");
+          strong.textContent = legend.dataset.mapLabel || "";
+          const text = document.createElement("span");
+          text.textContent = ` — ${legend.dataset.mapDetailText || ""}`;
+          detail.append(strong, text);
+        } else {
+          detail.classList.add("hidden");
+        }
+      }
+    };
+
+    let current: string | null = null;
+    const toggle = (id: string) => {
+      current = current === id ? null : id;
+      activate(current);
+    };
+    legends.forEach((legend) =>
+      legend.addEventListener("click", () => {
+        toggle(legend.dataset.mapLegend!);
+        if (current)
+          legend
+            .closest("section")
+            ?.querySelector("svg")
+            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }),
+    );
+    markers.forEach((marker) => {
+      marker.addEventListener("click", () => toggle(marker.dataset.mapMarker!));
+      marker.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggle(marker.dataset.mapMarker!);
+        }
+      });
+    });
+
+    // "Find on map" buttons scattered through the schedule: jump to the map
+    // with that spot highlighted.
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-find-on-map]")
+      .forEach((button) =>
+        button.addEventListener("click", () => {
+          current = button.dataset.findOnMap!;
+          activate(current);
+          document
+            .getElementById("map")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }),
+      );
+  })();
+
+  // ---------- Save-to-phone walkthrough dialog ----------
+  (() => {
+    const dialog = document.querySelector<HTMLDialogElement>(
+      "[data-shortcut-dialog]",
+    );
+    const opener = document.querySelector<HTMLButtonElement>(
+      "[data-shortcut-open]",
+    );
+    if (!dialog || !opener) return;
+    opener.addEventListener("click", () => dialog.showModal());
+    dialog
+      .querySelector("[data-shortcut-close]")
+      ?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  })();
+
+  // ---------- Happening now: live badges on event day ----------
+  (() => {
+    const strip = document.querySelector<HTMLElement>("[data-prog-now]");
+    const body = document.querySelector<HTMLElement>("[data-prog-now-body]");
+    const slots = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-prog-slot]"),
+    );
+    if (!strip || !body || !slots.length) return;
+
+    const chicagoNow = () => {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(new Date());
+      const get = (type: string) =>
+        parts.find((part) => part.type === type)?.value ?? "";
+      return {
+        date: `${get("year")}-${get("month")}-${get("day")}`,
+        minutes: Number(get("hour")) * 60 + Number(get("minute")),
+      };
+    };
+
+    const fmt = (minutes: number) => {
+      const h24 = Math.floor(minutes / 60);
+      const h = h24 % 12 === 0 ? 12 : h24 % 12;
+      const m = String(minutes % 60).padStart(2, "0");
+      return `${h}:${m} ${h24 < 12 ? "AM" : "PM"}`;
+    };
+
+    const update = () => {
+      const now = chicagoNow();
+      // Live only on festival day while the day is running.
+      const live = now.date === "2026-08-22" && now.minutes >= 6 * 60 && now.minutes < 21 * 60 + 30;
+      const current: HTMLElement[] = [];
+      let nextStart = Infinity;
+      slots.forEach((slot) => {
+        const start = Number(slot.dataset.start);
+        const end = Number(slot.dataset.end);
+        const badge = slot.querySelector<HTMLElement>("[data-prog-badge]");
+        const isNow = live && now.minutes >= start && now.minutes < end;
+        if (isNow) current.push(slot);
+        if (live && start > now.minutes && start < nextStart) nextStart = start;
+        if (badge) {
+          badge.classList.toggle("hidden", !isNow);
+          if (isNow) badge.textContent = "Now";
+        }
+        slot.classList.toggle("ring-4", isNow);
+        slot.classList.toggle("ring-[var(--sf-sunrise)]", isNow);
+      });
+      if (!live) {
+        strip.classList.add("hidden");
+        return;
+      }
+      strip.classList.remove("hidden");
+      body.innerHTML = "";
+      const add = (label: string, value: string) => {
+        const cell = document.createElement("p");
+        const tag = document.createElement("span");
+        tag.className =
+          "mr-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60";
+        tag.textContent = label;
+        cell.append(tag, document.createTextNode(value));
+        body.append(cell);
+      };
+      if (current.length)
+        current.forEach((slot) =>
+          add(
+            slot.dataset.where || "Now",
+            slot.dataset.title || "",
+          ),
+        );
+      else add("Now", "Between sets. Hydrate, visit the vendors.");
+      if (nextStart < Infinity) {
+        const upNext = slots
+          .filter((slot) => Number(slot.dataset.start) === nextStart)
+          .map((slot) =>
+            slot.dataset.where
+              ? `${slot.dataset.title} (${slot.dataset.where})`
+              : slot.dataset.title,
+          )
+          .join(" · ");
+        add(`Up next · ${fmt(nextStart)}`, upNext || "");
+      }
+    };
+
+    update();
+    window.setInterval(update, 30_000);
+  })();
+</script>

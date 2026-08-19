@@ -1,0 +1,22 @@
+{
+  "name": "Sweat Fest Program",
+  "short_name": "Sweat Fest",
+  "description": "The Sweat Fest 2026 day-of program: schedule, festival map, packing list, and transportation.",
+  "start_url": "/sweatfest/program",
+  "scope": "/sweatfest/",
+  "display": "standalone",
+  "background_color": "#e2ecac",
+  "theme_color": "#e2ecac",
+  "icons": [
+    {
+      "src": "/images/sweatfest/program-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/sweatfest/program-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

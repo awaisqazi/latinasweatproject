@@ -637,6 +637,206 @@ export const sweatFestCheckerUri = `url("data:image/svg+xml,${encodeURIComponent
 export const sweatFestRainbowUri = sweatFestCheckerUri;
 export const sweatFestPicadoUri = sweatFestCheckerUri;
 
+// Day-of program: the digital version of the printed program carousel
+// (schedule summary, festival map, packing list, transportation). Lives at
+// /sweatfest/program, the URL every program QR code points to. Facts come
+// from the team's program graphics (2026-08-19); keep exact.
+export const sweatFestProgram = {
+  path: "/sweatfest/program",
+  canonicalUrl: "https://latinasweatproject.com/sweatfest/program",
+  heading: "Sweat Fest Program",
+  intro:
+    "Everything you need for the day: the schedule, the festival map, what to bring, and how to get here.",
+  // The at-a-glance arc of the day, matching the printed schedule card.
+  glance: [
+    { time: "7:00 AM", title: "Kickoff 5K" },
+    { time: "8:30 AM", title: "Doors open" },
+    { time: "9:00 AM to 6:00 PM", title: "Sweat classes" },
+    { time: "6:00 to 9:00 PM", title: "Pachanga" },
+  ],
+  packing: {
+    items: [
+      "Water bottle",
+      "Yoga mat",
+      "Beach towel",
+      "Sunscreen",
+      "Comfortable clothing",
+      "Positive energy",
+    ],
+    note: "No outside food permitted.",
+  },
+  // `places` power the Google/Apple Maps destination links on each mode:
+  // `q` is the search query both map apps receive.
+  transportation: [
+    {
+      id: "train",
+      title: "Train",
+      lines: [
+        "Pink Line 18th Station (25 minute walk)",
+        "or connect to the 18 Bus at the station",
+      ],
+      places: [
+        {
+          label: "18th Station (Pink Line)",
+          q: "CTA 18th Station, 1710 W 18th St, Chicago, IL",
+        },
+      ],
+    },
+    {
+      id: "bus",
+      title: "Bus",
+      lines: [
+        "18 Bus runs along 18th St, stops at 18th & Peoria (entrance)",
+        "8 Bus runs along Halsted, stops at Halsted & 18th (2 minute walk)",
+      ],
+      places: [
+        {
+          label: "18 Bus stop · 18th & Peoria",
+          q: "W 18th St & S Peoria St, Chicago, IL",
+        },
+        {
+          label: "8 Bus stop · Halsted & 18th",
+          q: "S Halsted St & W 18th St, Chicago, IL",
+        },
+      ],
+    },
+    {
+      id: "bike",
+      title: "Bike",
+      lines: [
+        "Divvy station at 18th & Halsted (2 minute walk)",
+        "Divvy station at 18th & Morgan (2 minute walk)",
+      ],
+      places: [
+        {
+          label: "Divvy · 18th & Halsted",
+          q: "Divvy Station Halsted St & 18th St, Chicago, IL",
+        },
+        {
+          label: "Divvy · 18th & Morgan",
+          q: "Divvy Station Morgan St & 18th St, Chicago, IL",
+        },
+      ],
+    },
+    {
+      id: "metra",
+      title: "Metra",
+      lines: [
+        "Halsted St Metra Station (BNSF)",
+        "Located at 16th & Halsted (5 minute walk)",
+      ],
+      places: [
+        {
+          label: "Halsted St Metra Station",
+          q: "Halsted Metra Station, W 16th St & S Halsted St, Chicago, IL",
+        },
+      ],
+    },
+    {
+      id: "parking",
+      title: "Parking",
+      lines: [
+        "Limited free parking at Jungman School (5 minute walk)",
+        "Free and metered street parking available in the area",
+      ],
+      places: [
+        {
+          label: "Jungman School parking",
+          q: "Jungman Elementary School, 1746 S Miller St, Chicago, IL",
+        },
+      ],
+    },
+  ],
+  // The festival entrance itself, for the "set your destination" card.
+  entrancePlace: {
+    label: "Festival entrance · 18th & Peoria",
+    q: "W 18th St & S Peoria St, Chicago, IL",
+  },
+  map: {
+    closuresHeading: "Street closures · no vehicle access",
+    closures: [
+      "W 16th St between S Morgan St & S Halsted St",
+      "S Peoria St between W 16th St & W 18th St",
+    ],
+    // Points of interest on the festival footprint. `kind` keys the marker
+    // treatment on the interactive map: stage | poi | access.
+    pois: [
+      {
+        id: "west-stage",
+        kind: "stage",
+        label: "West Stage",
+        detail: "Classes and DJ sets on W 16th St toward S Morgan St.",
+      },
+      {
+        id: "east-stage",
+        kind: "stage",
+        label: "East Stage",
+        detail: "Classes and sound baths on W 16th St toward S Halsted St.",
+      },
+      {
+        id: "check-in",
+        kind: "access",
+        label: "Check-in",
+        detail: "Just inside the 18th & Peoria entrance. Start here.",
+      },
+      {
+        id: "entrance",
+        kind: "access",
+        label: "Entrance + exit",
+        detail: "On S Peoria St at W 18th St.",
+      },
+      {
+        id: "info",
+        kind: "poi",
+        label: "Information",
+        detail: "Mid-block on S Peoria St. Questions, lost & found.",
+      },
+      {
+        id: "rest",
+        kind: "poi",
+        label: "Rest area",
+        detail: "Shaded seating on S Peoria St between check-in and info.",
+      },
+      {
+        id: "water-west",
+        kind: "poi",
+        label: "Water station · west",
+        detail: "On W 16th St near the West Stage.",
+      },
+      {
+        id: "water-east",
+        kind: "poi",
+        label: "Water station · east",
+        detail: "On W 16th St near the East Stage.",
+      },
+      {
+        id: "food",
+        kind: "poi",
+        label: "Food + drinks",
+        detail: "On W 16th St west of S Peoria St.",
+      },
+      {
+        id: "vendors",
+        kind: "poi",
+        label: "Vendors + activations",
+        detail: "On W 16th St east of S Peoria St.",
+      },
+      {
+        id: "bathrooms",
+        kind: "poi",
+        label: "Bathrooms + hand washing",
+        detail: "At W 16th St & S Peoria St.",
+      },
+      {
+        id: "first-aid",
+        kind: "poi",
+        label: "First aid",
+        detail: "On W 16th St near the East Stage.",
+      },
+    ],
+  },
+};
+
 // Rendered copies of the flyer (drawn live on the site by
 // SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG
 // cards. Re-render with scripts/render-sweatfest-social.mjs after art or fact

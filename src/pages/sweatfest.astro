@@ -18,6 +18,7 @@ import {
   sweatFestColors,
   sweatFestPalette,
   sweatFestVolunteer,
+  sweatFestProgram,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 
@@ -286,6 +287,49 @@ const eventJsonLd = {
     class="overflow-x-clip bg-[#e2ecac] text-choco"
     style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
   >
+    {/* Above-the-fold banner: straight line to the day-of program so nobody
+        has to scroll for the schedule, map, or packing list. */}
+    <a
+      href="/sweatfest/program"
+      class="group relative z-20 block border-b-[3px] border-choco bg-[var(--sf-sunrise)] px-4 py-3 text-choco transition-colors hover:bg-[#f04a92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-2"
+    >
+      <span
+        class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center"
+      >
+        <svg
+          class="h-4 w-4 flex-none"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"
+          ></path>
+        </svg>
+        <span class="text-sm font-extrabold uppercase tracking-[0.1em]">
+          The day-of program is live
+        </span>
+        <span
+          class="hidden text-sm font-semibold sm:inline"
+        >
+          Schedule · Map · Packing list · Getting here
+        </span>
+        <span
+          class="inline-flex items-center gap-1.5 text-sm font-extrabold underline decoration-2 underline-offset-4"
+        >
+          Open it
+          <svg
+            class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2.5"
+            aria-hidden="true"
+            set:html={arrowRight}
+          />
+        </span>
+      </span>
+    </a>
     {/* Printed-stock grain over the whole page. */}
     <div
       class="sf-grain pointer-events-none fixed inset-0 z-[60]"
@@ -759,6 +803,71 @@ const eventJsonLd = {
           >
             Two stages, one day: {sweatFest.dateLabel}. Every class is 45
             minutes, led by LSP and guest instructors.
+          </p>
+        </div>
+
+        {/* Condensed day-of program: the at-a-glance arc plus jump links
+            into the full interactive program. */}
+        <div
+          class="sf-note reveal mx-auto mt-10 max-w-3xl p-6 sm:p-8"
+          style="transition-delay: 270ms; transform: rotate(-0.4deg); background: #f4f7dc;"
+        >
+          <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg]" aria-hidden="true"></span>
+          <p class="text-center">
+            <span
+              class="sf-stamp px-3 py-1.5 text-[11px]"
+              style={`color: ${deep(sweatFestColors.sunrise)};`}
+            >
+              Day-of program
+            </span>
+          </p>
+          <div class="mt-5 grid gap-2 sm:grid-cols-2">
+            {
+              sweatFestProgram.glance.map((row) => (
+                <p class="flex items-center gap-3 rounded-lg border-2 border-choco bg-white px-3.5 py-2.5 text-left">
+                  <span class="flex-none text-xs font-extrabold uppercase tracking-[0.04em] text-choco/70">
+                    {row.time}
+                  </span>
+                  <span class="text-sm font-extrabold uppercase tracking-[0.05em] text-choco">
+                    {row.title}
+                  </span>
+                </p>
+              ))
+            }
+          </div>
+          <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {
+              [
+                ["Full lineup", "lineup"],
+                ["Festival map", "map"],
+                ["Packing list", "pack"],
+                ["Getting here", "getting-here"],
+              ].map(([label, anchor]) => (
+                <a
+                  href={`/sweatfest/program#${anchor}`}
+                  class="sf-tag inline-flex items-center px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-choco transition-colors hover:bg-white"
+                >
+                  {label}
+                </a>
+              ))
+            }
+          </div>
+          <p class="mt-6 text-center">
+            <a
+              href="/sweatfest/program"
+              class="sf-btn inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-8 py-4 text-base font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-choco focus-visible:ring-offset-4"
+            >
+              Open the full program
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+                set:html={arrowRight}
+              />
+            </a>
           </p>
         </div>
 
