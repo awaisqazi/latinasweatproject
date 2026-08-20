@@ -19,6 +19,7 @@ const graduationPageUrl = withBase("graduation");
 const graduationGalleryUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
 const sweatFestPageUrl = withBase(sweatFest.pagePath);
+const sweatFestProgramUrl = withBase("/sweatfest/program");
 const sweatFestPrimaryUrl =
   sweatFestTickets.onSale && sweatFestTickets.url
     ? sweatFestTickets.url
@@ -747,6 +748,22 @@ const getLinkConversionProvider = (url = "") => {
               <span class="lang-es hidden">{sweatFestTickets.onSale ? "Compra boletos" : "Explora pases y planea tu día"}</span>
             </span>
             <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+
+          {/* Day-of program: the interactive schedule + map + packing list */}
+          <a
+            href={sweatFestProgramUrl}
+            data-conversion-event="sweatfest_program_click"
+            data-conversion-context="links_sweatfest_card"
+            class="sf-btn mt-3 flex items-center justify-between bg-[#e2ecac] px-4 py-3 text-[#123f36] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
+          >
+            <span class="text-sm font-extrabold">
+              <span class="lang-en">Day-of program: schedule, map + more</span>
+              <span class="lang-es hidden">Programa del día: horario, mapa y más</span>
+            </span>
+            <svg class="h-4 w-4 flex-none transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
           </a>

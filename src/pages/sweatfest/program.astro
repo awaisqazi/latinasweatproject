@@ -359,7 +359,7 @@ const metaDescription =
     </section>
 
     {/* ---------- Day at a glance ---------- */}
-    <section id="schedule" class="scroll-mt-24 px-4 py-10 sm:py-12">
+    <section id="schedule" class="scroll-mt-44 px-4 py-10 sm:py-12">
       <div class="mx-auto max-w-3xl">
         <h2
           class="font-slab text-3xl uppercase tracking-tight sm:text-4xl"
@@ -392,33 +392,48 @@ const metaDescription =
     {/* ---------- Two-stage lineup ---------- */}
     <section
       id="lineup"
-      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+      class="scroll-mt-44 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
     >
       <div class="mx-auto max-w-3xl">
         <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
           Sweat schedule
         </h2>
         <p class="mt-2 text-sm font-semibold text-choco/75">
-          Every class is 45 minutes. Tap a class for its description.
+          Every class is 45 minutes. Tap a class for its description, or
+          filter to the stage you're at.
         </p>
-        <div class="mt-4 flex flex-wrap gap-2" aria-hidden="true">
+        <div
+          class="mt-4 flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter the schedule by stage"
+        >
+          <button
+            type="button"
+            data-stage-btn=""
+            class="sf-stage-btn is-active inline-flex items-center gap-2 rounded-lg border-2 border-choco bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-choco transition-colors"
+          >
+            All stages
+          </button>
           {
             stageNames.map((stage) => (
-              <span
-                class="inline-flex items-center gap-2 rounded-lg border-2 border-choco bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]"
+              <button
+                type="button"
+                data-stage-btn={stage}
+                class="sf-stage-btn inline-flex items-center gap-2 rounded-lg border-2 border-choco bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] transition-colors"
                 style={`color: ${deep(stageAccent[stage])};`}
               >
                 <span
                   class="h-2.5 w-2.5 rounded-full"
                   style={`background: ${stageAccent[stage]};`}
+                  aria-hidden="true"
                 />
                 {stage} Stage
-              </span>
+              </button>
             ))
           }
         </div>
 
-        <div class="mt-6 space-y-3">
+        <div class="mt-6 space-y-3" data-lineup-list>
           {
             runOfShow.map((slot) => (
               <>
@@ -470,7 +485,7 @@ const metaDescription =
                   </div>
                 )}
                 {(slot.West || slot.East) && (
-                  <div class="grid gap-3 sm:grid-cols-[auto_1fr_1fr] sm:items-stretch">
+                  <div class="sf-slot-row grid gap-3 sm:grid-cols-[auto_1fr_1fr] sm:items-stretch">
                     <div class="hidden sm:flex sm:w-24 sm:flex-none sm:items-start sm:justify-center sm:pt-4">
                       <span class="sf-tag px-2.5 py-1 text-xs font-extrabold uppercase tracking-[0.04em] text-choco">
                         {chipTime(slot.timeLabel)}
@@ -481,7 +496,7 @@ const metaDescription =
                       if (!entry)
                         return (
                           <div
-                            class="hidden items-center justify-center rounded-xl border-2 border-dashed border-choco/20 sm:flex"
+                            class="sf-slot-empty hidden items-center justify-center rounded-xl border-2 border-dashed border-choco/20 sm:flex"
                             aria-hidden="true"
                           >
                             <span class="text-choco/30">~</span>
@@ -556,30 +571,43 @@ const metaDescription =
                             style={`background: ${accent};`}
                             aria-hidden="true"
                           />
-                          <div class="flex flex-wrap items-center gap-2 pl-2">
-                            <span
-                              class="text-[11px] font-extrabold uppercase tracking-[0.12em]"
-                              style={`color: ${deep(accent)};`}
-                            >
-                              {entry.timeLabel} · {stage} Stage
-                            </span>
-                            <span
-                              data-prog-badge
-                              class="hidden rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-white"
-                              style={`background: ${p.magenta};`}
+                          <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                              <div class="flex flex-wrap items-center gap-2 pl-2">
+                                <span
+                                  class="text-[11px] font-extrabold uppercase tracking-[0.12em]"
+                                  style={`color: ${deep(accent)};`}
+                                >
+                                  {entry.timeLabel} · {stage} Stage
+                                </span>
+                                <span
+                                  data-prog-badge
+                                  class="hidden rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-white"
+                                  style={`background: ${p.magenta};`}
+                                />
+                              </div>
+                              <h3 class="pl-2 pt-1 font-slab text-xl uppercase leading-tight tracking-tight">
+                                {entry.title}
+                              </h3>
+                              <p class="pl-2 pt-0.5 text-sm font-extrabold text-choco/85">
+                                {entry.instructor}
+                                {entry.affiliation && (
+                                  <span class="font-semibold text-choco/60">
+                                    {` · ${entry.affiliation}`}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <img
+                              src={`/images/sweatfest/instructors/${entry.id}.webp`}
+                              alt={`${entry.instructor}, who leads ${entry.title}`}
+                              width="64"
+                              height="64"
+                              loading="lazy"
+                              class="h-16 w-16 flex-none rounded-xl border-2 border-choco object-cover"
+                              style={`box-shadow: 3px 3px 0 ${accent};`}
                             />
                           </div>
-                          <h3 class="pl-2 pt-1 font-slab text-xl uppercase leading-tight tracking-tight">
-                            {entry.title}
-                          </h3>
-                          <p class="pl-2 pt-0.5 text-sm font-extrabold text-choco/85">
-                            {entry.instructor}
-                            {entry.affiliation && (
-                              <span class="font-semibold text-choco/60">
-                                {` · ${entry.affiliation}`}
-                              </span>
-                            )}
-                          </p>
                           <details class="group pl-2 pt-2">
                             <summary class="flex cursor-pointer list-none items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-choco/70 [&::-webkit-details-marker]:hidden">
                               About this class
@@ -638,7 +666,7 @@ const metaDescription =
     {/* ---------- Festival map ---------- */}
     <section
       id="map"
-      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+      class="scroll-mt-44 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
     >
       <div class="mx-auto max-w-3xl">
         <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
@@ -757,7 +785,7 @@ const metaDescription =
     {/* ---------- Packing list ---------- */}
     <section
       id="pack"
-      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+      class="scroll-mt-44 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
     >
       <div class="mx-auto max-w-3xl">
         <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
@@ -810,7 +838,7 @@ const metaDescription =
     {/* ---------- Getting here ---------- */}
     <section
       id="getting-here"
-      class="scroll-mt-24 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+      class="scroll-mt-44 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
     >
       <div class="mx-auto max-w-3xl">
         <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
@@ -1107,6 +1135,29 @@ const metaDescription =
     color: #ffffff;
   }
 
+  /* Applied by script once the bar reaches the fixed site header. */
+  .sf-prog-tabs.sf-tabs-fixed {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    z-index: 40;
+  }
+
+  .sf-stage-btn.is-active {
+    background: #123f36;
+    color: #ffffff !important;
+  }
+
+  /* Filtered to one stage: single class column per row, empty slots gone. */
+  @media (min-width: 640px) {
+    [data-lineup-list].sf-filtered .sf-slot-row {
+      grid-template-columns: auto 1fr;
+    }
+  }
+  [data-lineup-list].sf-filtered .sf-slot-empty {
+    display: none;
+  }
+
   .sf-map-street {
     font-size: 15px;
     font-weight: 800;
@@ -1189,6 +1240,83 @@ const metaDescription =
 </style>
 
 <script>
+  // ---------- Tab bar: pin below the fixed site header while scrolling ----------
+  // position: sticky is dead on this site (html and body both carry
+  // overflow-x-hidden, which makes body a scroll container), so the bar
+  // switches to position: fixed once it reaches the header, with a
+  // placeholder holding its slot in the flow. The header wrapper's height
+  // varies (status banner, breakpoints), so it is re-measured on the fly.
+  (() => {
+    const tabbar = document.querySelector<HTMLElement>(".sf-prog-tabs");
+    if (!tabbar) return;
+    const wrapper = document.getElementById("header-wrapper");
+    const placeholder = document.createElement("div");
+    tabbar.after(placeholder);
+    const update = () => {
+      const headerH = wrapper ? wrapper.offsetHeight : 0;
+      const fixed = tabbar.classList.contains("sf-tabs-fixed");
+      const anchor = fixed ? placeholder : tabbar;
+      const anchorTop = anchor.getBoundingClientRect().top + window.scrollY;
+      const shouldFix = window.scrollY + headerH >= anchorTop;
+      if (shouldFix && !fixed) {
+        placeholder.style.height = `${tabbar.offsetHeight}px`;
+        tabbar.classList.add("sf-tabs-fixed");
+      } else if (!shouldFix && fixed) {
+        tabbar.classList.remove("sf-tabs-fixed");
+        placeholder.style.height = "0px";
+      }
+      tabbar.style.top = tabbar.classList.contains("sf-tabs-fixed")
+        ? `${headerH}px`
+        : "";
+    };
+    update();
+    // Capture-phase listener on document: body is the actual scroll
+    // container here (site-wide overflow-x-hidden), and scroll events
+    // don't bubble, so a plain window listener can miss them.
+    document.addEventListener("scroll", update, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("resize", update);
+    if (wrapper && "ResizeObserver" in window)
+      new ResizeObserver(update).observe(wrapper);
+  })();
+
+  // ---------- Stage filter: show just the stage you're standing at ----------
+  (() => {
+    const buttons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-stage-btn]"),
+    );
+    const list = document.querySelector<HTMLElement>("[data-lineup-list]");
+    if (!buttons.length || !list) return;
+    const apply = (stage: string) => {
+      buttons.forEach((button) =>
+        button.classList.toggle(
+          "is-active",
+          (button.dataset.stageBtn || "") === stage,
+        ),
+      );
+      list.classList.toggle("sf-filtered", stage !== "");
+      list.querySelectorAll<HTMLElement>(".sf-slot-row").forEach((row) => {
+        let visible = 0;
+        row
+          .querySelectorAll<HTMLElement>("[data-prog-slot]")
+          .forEach((card) => {
+            const match =
+              stage === "" || (card.dataset.where || "").startsWith(stage);
+            card.classList.toggle("hidden", !match);
+            if (match) visible += 1;
+          });
+        row.classList.toggle("hidden", visible === 0);
+      });
+    };
+    buttons.forEach((button) =>
+      button.addEventListener("click", () =>
+        apply(button.dataset.stageBtn || ""),
+      ),
+    );
+  })();
+
   // ---------- Sticky tab bar: highlight the section in view ----------
   (() => {
     const tabs = Array.from(
@@ -1220,7 +1348,7 @@ const metaDescription =
         });
         if (best) setActive(best);
       },
-      { rootMargin: "-72px 0px -40% 0px", threshold: [0, 0.15, 0.4, 0.8] },
+      { rootMargin: "-180px 0px -40% 0px", threshold: [0, 0.15, 0.4, 0.8] },
     );
     byId.forEach((_tab, id) => {
       const section = id && document.getElementById(id);
