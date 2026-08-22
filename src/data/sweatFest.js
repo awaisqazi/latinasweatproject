@@ -873,6 +873,164 @@ export const sweatFestPolicies = {
   ],
 };
 
+// Sweat Fest merch drop, photographed 2026-08-21 and sold on site at the
+// festival. Photos are cropped by scripts/render-sweatfest-merch-photos.mjs
+// from the shoot folder into public/images/merch/sweatfest/ (1200x1500,
+// 4:5); garments are then cut out onto transparency. No prices here: pricing is set at the tent, so surfaces never
+// quote a number. Keep garment copy to what the photos show; don't invent
+// fabric or fit specs.
+// Flat-lay garments are background-removed cutouts (transparent webp, see
+// scripts/render-sweatfest-merch-cutouts.mjs); totes and hats keep the mural.
+const merchImg = (name, alt) => ({
+  src: `/images/merch/sweatfest/${name}.webp`,
+  width: 1200,
+  height: 1500,
+  alt,
+  cutout: /-(tee|crewneck|hoodie)-/.test(name),
+});
+
+export const sweatFestMerch = {
+  eyebrow: "New merch drop",
+  heading: "The Sweat Fest drop",
+  intro:
+    "A lineup tee made for the day, plus the first full run of Latina Sweat Project hoodies, crewnecks, totes, and bucket hats. Everything drops at the festival.",
+  whereHeading: "Where to get it",
+  whereLines: [
+    "At the vendors + activations area on W 16th St, all day on August 22",
+    "Sizes and colors while they last, so shop early",
+  ],
+  anchor: "/sweatfest#merch",
+  ctaLabel: "See the full drop",
+  // Swatch colors for the colorway chips, eyeballed from the photos.
+  swatches: {
+    Charcoal: "#45474a",
+    Black: "#1a1a1c",
+    White: "#f3f3f0",
+    "Heather grey": "#d8d8d4",
+    "Forest green": "#434f41",
+    Brown: "#5b3f37",
+    Tan: "#d8c2a2",
+    Camel: "#b9854b",
+    Mustard: "#d4a63a",
+    "Light grey": "#c9ccce",
+    Natural: "#e9dec6",
+  },
+  // The hero: the festival tee, front and back.
+  hero: {
+    id: "lineup-tee",
+    name: "Sweat Fest lineup tee",
+    blurb:
+      "The boxed Sweat Fest logo up front. On the back, the whole day: every DJ and every instructor, printed in festival pink.",
+    colors: ["Charcoal", "Black", "White"],
+    front: merchImg(
+      "sweatfest-tee-charcoal-front",
+      "Charcoal Sweat Fest tee, front: the boxed Sweat Fest logo across the chest",
+    ),
+    back: merchImg(
+      "sweatfest-tee-charcoal-back",
+      "Charcoal Sweat Fest tee, back: the full lineup of DJs and instructors printed in pink",
+    ),
+    variants: [
+      {
+        color: "Charcoal",
+        front: merchImg(
+          "sweatfest-tee-charcoal-front",
+          "Charcoal Sweat Fest tee, front",
+        ),
+        back: merchImg(
+          "sweatfest-tee-charcoal-back",
+          "Charcoal Sweat Fest tee, back with the lineup print",
+        ),
+      },
+      {
+        color: "Black",
+        front: merchImg("sweatfest-tee-black-front", "Black Sweat Fest tee, front"),
+        back: merchImg(
+          "sweatfest-tee-black-back",
+          "Black Sweat Fest tee, back with the lineup print",
+        ),
+      },
+      {
+        color: "White",
+        front: merchImg("sweatfest-tee-white-front", "White Sweat Fest tee, front"),
+        back: merchImg(
+          "sweatfest-tee-white-back",
+          "White Sweat Fest tee, back with the lineup print",
+        ),
+      },
+    ],
+  },
+  // The rest of the drop: one card each, with every photographed colorway.
+  items: [
+    {
+      id: "hoodie",
+      name: "X hoodie",
+      blurb:
+        "The LSP X stitched small on the chest. Pullover in three colors, zip-up in two.",
+      colors: ["Heather grey", "Forest green", "Brown"],
+      note: "Zip-up in heather grey and forest green",
+      image: merchImg(
+        "lsp-hoodie-forest-green",
+        "Forest green pullover hoodie with the small LSP X on the chest",
+      ),
+      gallery: [
+        merchImg("lsp-hoodie-heather-grey", "Heather grey pullover hoodie"),
+        merchImg("lsp-hoodie-brown", "Brown pullover hoodie"),
+        merchImg("lsp-zip-hoodie-heather-grey", "Heather grey zip-up hoodie"),
+        merchImg("lsp-zip-hoodie-forest-green", "Forest green zip-up hoodie"),
+      ],
+    },
+    {
+      id: "crewneck",
+      name: "Latina Sweat Project crewneck",
+      blurb:
+        "The wordmark in script across the chest. Three colors, plus a matching tee in light grey.",
+      colors: ["Heather grey", "Forest green", "Brown"],
+      note: "Tee in light grey",
+      image: merchImg(
+        "lsp-crewneck-brown",
+        "Brown crewneck sweatshirt with The Latina Sweat Project in script across the chest",
+      ),
+      gallery: [
+        merchImg("lsp-crewneck-heather-grey", "Heather grey crewneck"),
+        merchImg("lsp-crewneck-forest-green", "Forest green crewneck"),
+        merchImg("lsp-tee-light-grey", "Light grey Latina Sweat Project tee"),
+      ],
+    },
+    {
+      id: "bucket-hat",
+      name: "X bucket hat",
+      blurb:
+        "Wide brim, chin cord, the X embroidered up front. Four colors for a day in the sun.",
+      colors: ["Tan", "Camel", "Black", "Mustard"],
+      image: merchImg(
+        "lsp-bucket-hat-mustard-2",
+        "Mustard bucket hat with the embroidered LSP X, worn in front of the X mural",
+      ),
+      gallery: [
+        merchImg("lsp-bucket-hat-tan-1", "Tan bucket hat"),
+        merchImg("lsp-bucket-hat-camel-1", "Camel bucket hat"),
+        merchImg("lsp-bucket-hat-black-1", "Black bucket hat"),
+      ],
+    },
+    {
+      id: "tote",
+      name: "Canvas tote",
+      blurb:
+        "Natural canvas with the big X and sun, or the full Latina Sweat Project mark. Big enough for a mat and a towel.",
+      colors: ["Natural"],
+      image: merchImg(
+        "lsp-tote-logo",
+        "Natural canvas tote with the large LSP X and sun logo, held up in front of the X mural",
+      ),
+      gallery: [
+        merchImg("lsp-tote-logo-wordmark", "Canvas tote with the X and wordmark"),
+        merchImg("lsp-tote-wordmark", "Canvas tote with the wordmark"),
+      ],
+    },
+  ],
+};
+
 // Rendered copies of the flyer (drawn live on the site by
 // SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG
 // cards. Re-render with scripts/render-sweatfest-social.mjs after art or fact

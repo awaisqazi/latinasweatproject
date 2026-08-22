@@ -8,9 +8,13 @@ import {
   sweatFestTickets,
   sweatFestColors,
   sweatFestCheckerUri,
+  sweatFestMerch,
 } from "@/data/sweatFest";
 import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
+import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
+// Chicago Reader graduation feature (Aug 21, 2026): the featured press card.
+const readerArticle = pressArticles.find((a) => a.featured);
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
 // Graduation 2026 recap: the internal page is the hub, the Flickr album
@@ -20,6 +24,12 @@ const graduationGalleryUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
 const sweatFestPageUrl = withBase(sweatFest.pagePath);
 const sweatFestProgramUrl = withBase("/sweatfest/program");
+const sweatFestMerchUrl = withBase(sweatFestMerch.anchor);
+// Four-up preview of the drop: the lineup tee, then one shot per item.
+const sweatFestMerchShots = [
+  sweatFestMerch.hero.front,
+  ...sweatFestMerch.items.map((item) => item.image),
+].slice(0, 4);
 const sweatFestPrimaryUrl =
   sweatFestTickets.onSale && sweatFestTickets.url
     ? sweatFestTickets.url
@@ -156,6 +166,17 @@ const links = [
 // recap leads (Aug 7, fresh photos), then Sweat Fest (Aug 22), then the
 // gala (Sep 25), matching the card order below.
 const highlights = [
+  {
+    title: {
+      en: "📰 Reader",
+      es: "📰 Reader"
+    },
+    target: "#reader-card",
+    image: `${base}images/highlights/hl_reader.png`,
+    scale: "scale-[1.0]",
+    hoverScale: "group-hover:scale-[1.12]",
+    color: "amber"
+  },
   {
     title: {
       en: "Grad 2026",
@@ -392,6 +413,90 @@ const getLinkConversionProvider = (url = "") => {
           }
         </div>
       </div>
+
+      {/* Chicago Reader Featured Card: "Más allá del estudio" (Aug 21, 2026),
+          the Reader's own yellow/black newsprint identity with their
+          wordmark, leading because it's the newest story and it's about
+          the graduation directly below. */}
+      {readerArticle && (
+        <div
+          id="reader-card"
+          class="group relative mb-8 scroll-mt-24 overflow-hidden border-[5px] border-[#111111] bg-[#ffd210] shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/60"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms;"
+        >
+          <a
+            href={readerArticle.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block p-4 sm:p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-4 focus-visible:ring-offset-[#ffd210]"
+            data-conversion-event="press_reader_click"
+            data-conversion-context="links_reader_card"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <img
+                src={`${base}${readerArticle.logo.replace(/^\//, "")}`}
+                alt="Chicago Reader"
+                width="848"
+                height="222"
+                class="h-7 w-auto sm:h-8"
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="inline-flex items-center gap-1.5 bg-[#111111] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#ffd210]">
+                <span class="relative flex h-1.5 w-1.5">
+                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ffd210] opacity-70"></span>
+                  <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#ffd210]"></span>
+                </span>
+                <span class="lang-en">In the Press</span>
+                <span class="lang-es hidden">En la Prensa</span>
+              </span>
+            </div>
+            <div class="mt-3 h-1 w-full bg-[#111111]"></div>
+
+            <p class="mt-4 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#111111]/65">
+              <span class="lang-en">{readerArticle.byline}</span>
+              <span class="lang-es hidden">Por Leslie Hurtado · 21 de agosto, 2026</span>
+            </p>
+            <h2 class="mt-1.5 text-3xl font-black leading-[1.0] tracking-tight text-[#111111] sm:text-4xl">
+              “{readerArticle.title}”
+            </h2>
+            <p class="mt-3 text-sm font-semibold leading-relaxed text-[#111111]/80">
+              <span class="lang-en">The Chicago Reader spent graduation night with us: 85 new yoga teachers, full scholarships, monarchs, candlelight, and what comes next.</span>
+              <span class="lang-es hidden">El Chicago Reader pasó la noche de graduación con nosotras: 85 nuevas maestras de yoga, becas completas, monarcas, velas y lo que sigue.</span>
+            </p>
+
+            <div class="relative mt-4">
+              <div class="absolute inset-0 translate-x-2 translate-y-2 bg-[#f79102]" aria-hidden="true"></div>
+              <div class="relative border-[6px] border-[#111111] bg-[#111111]">
+                <img
+                  src={`${base}${readerArticle.image.replace(/^\//, "")}`}
+                  alt={readerArticle.imageAlt}
+                  width="1600"
+                  height="1067"
+                  class="block w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </div>
+
+            <blockquote class="mt-5 border-l-4 border-[#f79102] pl-3">
+              <p class="text-base italic leading-snug text-[#111111]" style="font-family: Georgia, 'Times New Roman', serif;">“{readerArticle.quote}”</p>
+              <cite class="mt-1 block text-[9px] font-extrabold uppercase not-italic tracking-[0.18em] text-[#f79102]">{readerArticle.quoteAttribution}</cite>
+            </blockquote>
+
+            <span class="mt-5 flex items-center justify-between bg-[#111111] px-4 py-3 text-[#ffd210] transition-transform duration-300 group-hover:-translate-y-0.5">
+              <span class="text-sm font-extrabold uppercase tracking-widest">
+                <span class="lang-en">Read the full story</span>
+                <span class="lang-es hidden">Lee la historia completa</span>
+              </span>
+              <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </span>
+          </a>
+        </div>
+      )}
 
       {/* Graduation 2026 Featured Card: the Aug 7 YTT graduation recap,
           leading because the photos just dropped (Fri, Aug 7). Candlelit
@@ -766,6 +871,61 @@ const getLinkConversionProvider = (url = "") => {
             <svg class="h-4 w-4 flex-none transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
+          </a>
+          {/* Merch drop: the lineup tee plus hoodies, hats, and totes, sold
+              at the festival. Photos + copy from sweatFestMerch. */}
+          <a
+            href={sweatFestMerchUrl}
+            data-conversion-event="sweatfest_merch_click"
+            data-conversion-context="links_sweatfest_card"
+            class="mt-4 block rounded-lg border-2 border-[#123f36] bg-[#123f36] p-3 text-white shadow-[3px_3px_0_#00a7ab] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
+          >
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <span class="sf-stamp px-2 py-1 text-[9px]" style="color: #e2ecac;">
+                <span class="lang-en">New merch drop</span>
+                <span class="lang-es hidden">Nueva merch</span>
+              </span>
+              <span class="text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/75">
+                <span class="lang-en">Only at the festival</span>
+                <span class="lang-es hidden">Solo en el festival</span>
+              </span>
+            </div>
+            <div class="mt-3 grid grid-cols-4 gap-2">
+              {
+                sweatFestMerchShots.map((shot, i) => (
+                  <span
+                    class:list={[
+                      "block overflow-hidden rounded-md border-2 border-[#e2ecac]",
+                      shot.cutout ? "bg-[#f4f7dc]" : "bg-[#2b3434]",
+                    ]}
+                    style={`transform: rotate(${[-1, 0.8, -0.6, 1][i % 4]}deg);`}
+                  >
+                    <img
+                      src={withBase(shot.src)}
+                      alt={shot.alt}
+                      width={shot.width}
+                      height={shot.height}
+                      loading="lazy"
+                      decoding="async"
+                      class="block aspect-[4/5] h-auto w-full object-cover"
+                    />
+                  </span>
+                ))
+              }
+            </div>
+            <p class="mt-3 text-sm font-extrabold leading-snug">
+              <span class="lang-en">{sweatFestMerch.heading}: the lineup tee, X hoodies, crewnecks, bucket hats, and totes</span>
+              <span class="lang-es hidden">{sweatFestMerch.heading}: la camiseta del lineup, hoodies X, crewnecks, bucket hats y totes</span>
+            </p>
+            <p class="mt-1 flex items-center justify-between gap-2 text-[11px] font-bold text-[#e2ecac]">
+              <span>
+                <span class="lang-en">See the full drop · sizes while they last</span>
+                <span class="lang-es hidden">Ver toda la colección · tallas hasta agotar</span>
+              </span>
+              <svg class="h-4 w-4 flex-none transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </p>
           </a>
           <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-off-black/65">
             <span class="lang-en">{sweatFestTickets.onSale ? "Tickets are live · Claim your experience" : "Tickets on sale soon · Follow for updates"}</span>

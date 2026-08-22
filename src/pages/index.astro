@@ -11,6 +11,7 @@ import {
   sweatFestDay,
   sweatFestColors,
   sweatFestCheckerUri,
+  sweatFestMerch,
 } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
 import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
@@ -418,6 +419,124 @@ const graduationFlickrUrl =
       </div>
     </section>
     {/* END: Sweat Fest (first event spotlight) */}
+
+    {/* START: Sweat Fest merch drop (ink band straight after the festival
+        spotlight: the lineup tee front/back plus the rest of the drop,
+        photographed 2026-08-21; data in sweatFestMerch) */}
+    <section
+      class="relative overflow-hidden bg-[#123f36] py-16 text-white sm:py-20 lg:py-24"
+      style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
+    >
+      <div
+        class="sf-picado absolute inset-x-0 top-0 h-[52px] opacity-90"
+        style={`background-image: ${sweatFestCheckerUri};`}
+        aria-hidden="true"
+      >
+      </div>
+      <div class="pointer-events-none absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-gradient-to-tr from-[#ee3083]/25 to-[#00a7ab]/15 blur-[110px]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-14">
+          {/* Copy + CTA */}
+          <div class="reveal text-center lg:text-left">
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #e2ecac;">
+              {sweatFestMerch.eyebrow}
+            </span>
+            <h2 class="mt-6 font-slab text-4xl uppercase tracking-tight sm:text-5xl">
+              {sweatFestMerch.heading}
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-white/75">
+              {sweatFestMerch.intro}
+            </p>
+            <ul class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start" aria-label="In the drop">
+              {
+                [sweatFestMerch.hero, ...sweatFestMerch.items].map((item) => (
+                  <li class="sf-tag px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#123f36]">
+                    {item.name}
+                  </li>
+                ))
+              }
+            </ul>
+            <ul class="mt-6 space-y-1.5 text-sm font-semibold text-white/85">
+              {
+                sweatFestMerch.whereLines.map((line) => (
+                  <li class="flex items-start justify-center gap-2.5 lg:justify-start">
+                    <span class="mt-1.5 h-2 w-2 flex-none rotate-45 bg-[var(--sf-sunrise)]" aria-hidden="true" />
+                    <span>{line}</span>
+                  </li>
+                ))
+              }
+            </ul>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <a
+                href={withBase("sweatfest#merch")}
+                class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-4 text-base font-extrabold text-[#123f36] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#123f36]"
+                data-conversion-event="sweatfest_merch_click"
+                data-conversion-context="home_sweatfest_merch"
+              >
+                {sweatFestMerch.ctaLabel}
+              </a>
+              <a
+                href={withBase("sweatfest#tickets")}
+                class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-4 text-base font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#123f36]"
+              >
+                Get a pass
+              </a>
+            </div>
+          </div>
+
+          {/* Photos: the tee front and back on top, the rest of the drop below */}
+          <div class="reveal" style="transition-delay: 120ms;">
+            <div class="grid grid-cols-2 gap-4">
+              {
+                [
+                  { img: sweatFestMerch.hero.front, label: "Front", tilt: -1.2 },
+                  { img: sweatFestMerch.hero.back, label: "Back · the lineup", tilt: 1 },
+                ].map((shot) => (
+                  <figure class:list={["home-merch-photo", shot.img.cutout && "is-cutout"]} style={`--tilt: ${shot.tilt}deg;`}>
+                    <img
+                      src={withBase(shot.img.src)}
+                      alt={shot.img.alt}
+                      width={shot.img.width}
+                      height={shot.img.height}
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full"
+                    />
+                    <figcaption class="sf-tag absolute left-3 top-3 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#123f36]">
+                      {shot.label}
+                    </figcaption>
+                  </figure>
+                ))
+              }
+            </div>
+            <div class="mt-4 grid grid-cols-4 gap-3">
+              {
+                sweatFestMerch.items.map((item, i) => (
+                  <a
+                    href={withBase("sweatfest#merch")}
+                    class:list={["home-merch-photo group block", item.image.cutout && "is-cutout"]}
+                    style={`--tilt: ${[0.8, -0.7, 0.6, -0.9][i % 4]}deg;`}
+                    aria-label={`${item.name}: see the full drop`}
+                  >
+                    <img
+                      src={withBase(item.image.src)}
+                      alt={item.image.alt}
+                      width={item.image.width}
+                      height={item.image.height}
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Sweat Fest merch drop */}
 
     {/* START: Gala Countdown Announcement */}
     <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
@@ -1778,10 +1897,60 @@ const graduationFlickrUrl =
           </p>
         </div>
 
+        {/* Featured clipping: the Chicago Reader graduation feature in the
+            Reader's yellow/black look, spanning both columns */}
+        {
+          pressArticles.filter((a) => a.featured).map((article) => (
+            <a
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group relative mb-5 grid overflow-hidden border-[6px] border-[#111111] bg-[#ffd210] transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:grid-cols-5"
+            >
+              <div class="relative sm:col-span-2">
+                <img
+                  src={`${base}${article.image.replace(/^\//, "")}`}
+                  alt={article.imageAlt}
+                  width="1600"
+                  height="1067"
+                  class="h-56 w-full object-cover sm:h-full"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="p-6 sm:col-span-3 sm:p-8">
+                <div class="flex flex-wrap items-center gap-3">
+                  <img
+                    src={`${base}${article.logo.replace(/^\//, "")}`}
+                    alt="Chicago Reader"
+                    width="848"
+                    height="222"
+                    class="h-8 w-auto"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="bg-[#111111] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#ffd210]">New</span>
+                </div>
+                <p class="mt-4 text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#111111]/65">{article.byline}</p>
+                <h3 class="mt-2 font-sans text-3xl font-black leading-[1.02] tracking-tight text-[#111111] sm:text-4xl">
+                  “{article.title}”
+                </h3>
+                <p class="mt-3 font-body text-base leading-relaxed text-[#111111]/85">{article.snippet}</p>
+                <div class="mt-5 inline-flex items-center gap-2 bg-[#111111] px-5 py-2.5 text-xs font-extrabold uppercase tracking-widest text-[#ffd210] transition-all group-hover:gap-3">
+                  {article.ctaLabel ?? "Read Article"}
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </div>
+            </a>
+          ))
+        }
+
         {/* Press Cards — 2-col grid */}
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {
-            pressArticles.map((article) => (
+            pressArticles.filter((a) => !a.featured).map((article) => (
               <a
                 href={article.isInternal ? `${base}${article.url.replace(/^\//, "")}` : article.url}
                 target={article.isInternal ? undefined : "_blank"}
@@ -1947,7 +2116,27 @@ const graduationFlickrUrl =
       }
 
       /* Monday Miles tee gradient text */
-      .monday-tee-gradient {
+      /* Sweat Fest merch drop photos: paper-bordered prints pinned to the
+     ink band, hard teal offset shadow like the sf-btn-night kit. */
+  .home-merch-photo {
+    position: relative;
+    overflow: hidden;
+    border: 2.5px solid #e2ecac;
+    border-radius: 6px;
+    background: #2b3434;
+    box-shadow: 0.3rem 0.3rem 0 #00a7ab;
+    transform: rotate(var(--tilt, 0deg));
+    transition: transform 0.25s ease;
+  }
+  .home-merch-photo:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+  /* Cutout garments sit on paper, like a print pinned to the board. */
+  .home-merch-photo.is-cutout {
+    background: #f4f7dc;
+  }
+
+  .monday-tee-gradient {
         background: linear-gradient(
           135deg,
           #ffbd59 0%,

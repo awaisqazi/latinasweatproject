@@ -20,6 +20,7 @@ import {
   sweatFestVolunteer,
   sweatFestProgram,
   sweatFestPolicies,
+  sweatFestMerch,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 
@@ -1595,6 +1596,182 @@ const eventJsonLd = {
       </div>
     </div>
 
+    {/* ============================ MERCH ============================ */}
+    <section id="merch" class="relative overflow-hidden bg-choco py-16 text-white scroll-mt-28 sm:py-20 lg:py-24">
+      <div
+        class="sf-picado absolute inset-x-0 top-0 h-[52px] opacity-90"
+        style={`background-image: ${sweatFestCheckerUri};`}
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal">
+            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #e2ecac;">
+              {sweatFestMerch.eyebrow}
+            </span>
+          </p>
+          <h2
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight sm:text-5xl"
+            style="transition-delay: 90ms;"
+          >
+            {sweatFestMerch.heading}
+          </h2>
+          <p
+            class="reveal mt-5 text-lg leading-relaxed text-white/75"
+            style="transition-delay: 180ms;"
+          >
+            {sweatFestMerch.intro}
+          </p>
+        </div>
+
+        {/* The hero: the lineup tee, front and back */}
+        <div class="reveal mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12" style="transition-delay: 240ms;">
+          <div class="grid grid-cols-2 gap-4 sm:gap-5">
+            {
+              [
+                { img: sweatFestMerch.hero.front, label: "Front", tilt: -1.2 },
+                { img: sweatFestMerch.hero.back, label: "Back · the lineup", tilt: 1 },
+              ].map((shot) => (
+                <figure class:list={["sf-merch-photo", shot.img.cutout && "is-cutout"]} style={`--sf-merch-tilt: ${shot.tilt}deg;`}>
+                  <img
+                    src={withBase(shot.img.src)}
+                    alt={shot.img.alt}
+                    width={shot.img.width}
+                    height={shot.img.height}
+                    loading="lazy"
+                    decoding="async"
+                    class="block h-auto w-full"
+                  />
+                  <figcaption class="sf-tag absolute left-3 top-3 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-choco">
+                    {shot.label}
+                  </figcaption>
+                </figure>
+              ))
+            }
+          </div>
+          <div>
+            <p class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-[#e2ecac]">
+              The festival tee
+            </p>
+            <h3 class="mt-2 font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+              {sweatFestMerch.hero.name}
+            </h3>
+            <p class="mt-4 text-base leading-relaxed text-white/80">
+              {sweatFestMerch.hero.blurb}
+            </p>
+            <ul class="mt-5 flex flex-wrap gap-2" aria-label="Colors">
+              {
+                sweatFestMerch.hero.colors.map((color) => (
+                  <li class="inline-flex items-center gap-2 rounded-full border-2 border-white/25 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em]">
+                    <span
+                      class="h-3 w-3 rounded-full border border-white/40"
+                      style={`background: ${sweatFestMerch.swatches[color]};`}
+                      aria-hidden="true"
+                    />
+                    {color}
+                  </li>
+                ))
+              }
+            </ul>
+            <div class="mt-7 rounded-xl border-2 border-[#e2ecac]/60 bg-white/5 p-5">
+              <p class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#e2ecac]">
+                {sweatFestMerch.whereHeading}
+              </p>
+              <ul class="mt-2 space-y-1.5 text-sm font-semibold text-white/85">
+                {
+                  sweatFestMerch.whereLines.map((line) => (
+                    <li class="flex items-start gap-2.5">
+                      <span class="mt-1.5 h-2 w-2 flex-none rotate-45 bg-[var(--sf-sunrise)]" aria-hidden="true" />
+                      <span>{line}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a
+                href={withBase("sweatfest/program#map")}
+                class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-white underline decoration-[var(--sf-dusk)] decoration-2 underline-offset-4 transition-colors hover:text-[#e2ecac] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                Find the vendors on the festival map
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* The rest of the drop */}
+        <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            sweatFestMerch.items.map((item, i) => (
+              <article
+                class="reveal flex flex-col rounded-xl border-2 border-[#e2ecac]/50 bg-white/5 p-3.5"
+                style={`transition-delay: ${120 + i * 90}ms;`}
+              >
+                <figure class:list={["sf-merch-photo", item.image.cutout && "is-cutout"]} style={`--sf-merch-tilt: ${[-0.8, 0.7, -0.6, 0.9][i % 4]}deg;`}>
+                  <img
+                    src={withBase(item.image.src)}
+                    alt={item.image.alt}
+                    width={item.image.width}
+                    height={item.image.height}
+                    loading="lazy"
+                    decoding="async"
+                    class="block h-auto w-full"
+                  />
+                </figure>
+                {item.gallery?.length > 0 && (
+                  <div class="mt-3 grid grid-cols-4 gap-2">
+                    {item.gallery.map((shot) => (
+                      <img
+                        src={withBase(shot.src)}
+                        alt={shot.alt}
+                        width={shot.width}
+                        height={shot.height}
+                        loading="lazy"
+                        decoding="async"
+                        class:list={["block aspect-[4/5] h-auto w-full rounded-md border border-white/25 object-cover", shot.cutout && "bg-[#f4f7dc]"]}
+                      />
+                    ))}
+                  </div>
+                )}
+                <h3 class="mt-4 font-slab text-2xl uppercase tracking-tight">
+                  {item.name}
+                </h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-white/75">
+                  {item.blurb}
+                </p>
+                <ul class="mt-3 flex flex-wrap gap-1.5" aria-label="Colors">
+                  {item.colors.map((color) => (
+                    <li class="inline-flex items-center gap-1.5 rounded-full border border-white/25 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.08em]">
+                      <span
+                        class="h-2.5 w-2.5 rounded-full border border-white/40"
+                        style={`background: ${sweatFestMerch.swatches[color]};`}
+                        aria-hidden="true"
+                      />
+                      {color}
+                    </li>
+                  ))}
+                </ul>
+                {item.note && (
+                  <p class="mt-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#e2ecac]/80">
+                    {item.note}
+                  </p>
+                )}
+              </article>
+            ))
+          }
+        </div>
+
+        <div class="reveal mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row" style="transition-delay: 300ms;">
+          <a
+            href="#tickets"
+            class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-3.5 text-sm font-extrabold text-choco focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-choco"
+          >
+            Get your pass, then grab the tee
+          </a>
+        </div>
+      </div>
+    </section>
+
     {/* ============================ IMPACT ============================ */}
     <section id="impact" class="relative overflow-hidden bg-[#e7eebd] py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -1996,6 +2173,25 @@ const eventJsonLd = {
   .sf-note:hover {
     transform: rotate(0deg) translateY(-2px);
     box-shadow: 6px 8px 0 rgba(18, 63, 54, 0.14);
+  }
+
+  /* Merch drop photos: paper-bordered prints pinned on the dark band. */
+  .sf-merch-photo {
+    position: relative;
+    overflow: hidden;
+    border: 2.5px solid #e2ecac;
+    border-radius: 6px;
+    background: #2b3434;
+    box-shadow: 0.3rem 0.3rem 0 var(--sf-dusk, #00a7ab);
+    transform: rotate(var(--sf-merch-tilt, 0deg));
+    transition: transform 0.25s ease;
+  }
+  .sf-merch-photo:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+  /* Cutout garments sit on paper, like a print pinned to the board. */
+  .sf-merch-photo.is-cutout {
+    background: #f4f7dc;
   }
 
   /* Run of show: schedule entries on pale paper, the stage color riding the
