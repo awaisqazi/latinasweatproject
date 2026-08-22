@@ -840,6 +840,39 @@ export const sweatFestProgram = {
   },
 };
 
+// Entry policy, shown on /sweatfest and the day-of program. Copy is the
+// team's official wording (2026-08-19); keep exact.
+export const sweatFestPolicies = {
+  heading: "Know before you go",
+  intro:
+    "A few rules at the gate keep the day safe and moving for everyone.",
+  groups: [
+    {
+      id: "bags",
+      title: "Bag policy",
+      items: [
+        "Bags are limited to one per person (clear bags are preferred)",
+        "All bags are subject to inspection upon entry",
+        "Lockers will not be provided",
+        "We are not responsible for lost or stolen items",
+      ],
+    },
+    {
+      id: "prohibited",
+      title: "Prohibited items",
+      items: [
+        "Weapons of any kind",
+        "Illegal substances or drugs",
+        "Alcohol",
+        "Outside food and beverages",
+        "Glass containers or bottles",
+        "Skateboards, bicycles, or scooters",
+        "Animals (except service animals)",
+      ],
+    },
+  ],
+};
+
 // Rendered copies of the flyer (drawn live on the site by
 // SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG
 // cards. Re-render with scripts/render-sweatfest-social.mjs after art or fact

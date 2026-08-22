@@ -19,6 +19,7 @@ import {
   sweatFestPalette,
   sweatFestVolunteer,
   sweatFestProgram,
+  sweatFestPolicies,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 
@@ -841,6 +842,7 @@ const eventJsonLd = {
                 ["Full lineup", "lineup"],
                 ["Festival map", "map"],
                 ["Packing list", "pack"],
+                ["Bag policy", "policies"],
                 ["Getting here", "getting-here"],
               ].map(([label, anchor]) => (
                 <a
@@ -1052,6 +1054,65 @@ const eventJsonLd = {
         The Google Form stays as the response store, but its UI is not embedded.
         This native application is collapsed until requested and posts the exact
         Google entry ids into a hidden response frame. */}
+    {/* ---------- Know before you go: bag policy + prohibited items ---------- */}
+    <section
+      id="policies"
+      class="relative overflow-hidden bg-[#e2ecac] py-16 scroll-mt-28 sm:py-20"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal">
+            <span class="sf-stamp rotate-[1deg] px-3 py-1.5 text-[11px]" style={`color: ${deep(sweatFestColors.dusk)};`}>
+              At the gate
+            </span>
+          </p>
+          <h2
+            class="reveal mt-6 font-slab text-4xl uppercase tracking-tight text-choco sm:text-5xl"
+            style="transition-delay: 90ms;"
+          >
+            {sweatFestPolicies.heading}
+          </h2>
+          <div class="reveal mx-auto mt-4 h-3 w-32" style="transition-delay: 150ms;" set:html={squiggle(sweatFestColors.sunrise)} />
+          <p
+            class="reveal mt-5 text-lg leading-relaxed text-choco/75"
+            style="transition-delay: 210ms;"
+          >
+            {sweatFestPolicies.intro}
+          </p>
+        </div>
+        <div class="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+          {
+            sweatFestPolicies.groups.map((group, i) => (
+              <div
+                class="sf-note reveal relative p-6 pt-8 sm:p-7 sm:pt-9"
+                style={`transition-delay: ${260 + i * 80}ms; transform: rotate(${i % 2 === 0 ? -0.6 : 0.6}deg);`}
+              >
+                <span class="sf-tape left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg]" aria-hidden="true" />
+                <h3
+                  class="font-slab text-2xl uppercase tracking-tight"
+                  style={`color: ${deep(i % 2 === 0 ? sweatFestColors.dusk : sweatFestColors.sunrise)};`}
+                >
+                  {group.title}
+                </h3>
+                <ul class="mt-4 space-y-2.5">
+                  {group.items.map((item) => (
+                    <li class="flex items-start gap-3 text-base font-semibold text-choco/85">
+                      <span
+                        class="mt-2 h-2 w-2 flex-none rotate-45"
+                        style={`background: ${i % 2 === 0 ? sweatFestColors.dusk : sweatFestColors.sunrise};`}
+                        aria-hidden="true"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
     <section
       id="volunteer"
       class="relative overflow-hidden bg-[#e7eebd] py-16 scroll-mt-28 sm:py-20 lg:py-24"

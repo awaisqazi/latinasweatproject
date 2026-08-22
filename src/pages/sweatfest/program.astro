@@ -6,6 +6,7 @@ import {
   sweatFestLineup,
   sweatFestMoments,
   sweatFestProgram,
+  sweatFestPolicies,
   sweatFestColors,
   sweatFestPalette,
   sweatFestCheckerUri,
@@ -98,6 +99,7 @@ const sections = [
   { id: "lineup", label: "Lineup" },
   { id: "map", label: "Map" },
   { id: "pack", label: "Pack" },
+  { id: "policies", label: "Bag policy" },
   { id: "getting-here", label: "Getting here" },
 ];
 
@@ -832,6 +834,50 @@ const metaDescription =
             </p>
           )
         }
+      </div>
+    </section>
+
+    {/* ---------- Bag policy + prohibited items ---------- */}
+    <section
+      id="policies"
+      class="scroll-mt-44 border-t-2 border-dashed border-choco/25 px-4 py-10 sm:py-12"
+    >
+      <div class="mx-auto max-w-3xl">
+        <h2 class="font-slab text-3xl uppercase tracking-tight sm:text-4xl">
+          {sweatFestPolicies.heading}
+        </h2>
+        <p class="mt-2 text-sm font-semibold text-choco/75">
+          {sweatFestPolicies.intro}
+        </p>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          {
+            sweatFestPolicies.groups.map((group, i) => (
+              <div
+                class="sf-note p-5"
+                style={`transform: rotate(${i % 2 === 0 ? -0.4 : 0.4}deg);`}
+              >
+                <h3
+                  class="font-slab text-xl uppercase tracking-tight"
+                  style={`color: ${deep(i % 2 === 0 ? p.teal : p.magenta)};`}
+                >
+                  {group.title}
+                </h3>
+                <ul class="mt-3 space-y-2">
+                  {group.items.map((item) => (
+                    <li class="flex items-start gap-2.5 text-sm font-semibold text-choco/85">
+                      <span
+                        class="mt-1.5 h-2 w-2 flex-none rotate-45"
+                        style={`background: ${i % 2 === 0 ? p.teal : p.magenta};`}
+                        aria-hidden="true"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </section>
 
