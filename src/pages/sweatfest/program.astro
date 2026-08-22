@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import MerchLightbox from "@/components/MerchLightbox.astro";
 import {
   sweatFest,
   sweatFestLineup,
@@ -241,6 +242,24 @@ const transitIcons = {
 const gmaps = (q) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 const amaps = (q) => `https://maps.apple.com/?q=${encodeURIComponent(q)}`;
+
+// Merch strip: one card per item, every colorway in the lightbox.
+const merchShot = (img, label) => ({ src: img.src, alt: img.alt, label, cutout: !!img.cutout });
+const merchGroups = [
+  {
+    name: sweatFestMerch.hero.name,
+    sub: `${sweatFestMerch.hero.colors.join(" · ")} · front + back`,
+    shots: sweatFestMerch.hero.variants.flatMap((v) => [
+      merchShot(v.front, `${v.color} · front`),
+      merchShot(v.back, `${v.color} · back, the lineup`),
+    ]),
+  },
+  ...sweatFestMerch.items.map((item) => ({
+    name: item.name,
+    sub: item.colors.length > 1 ? item.colors.join(" · ") : `${item.shots.length} designs`,
+    shots: item.shots.map((shot) => merchShot(shot.img, shot.label)),
+  })),
+];
 
 const metaDescription =
   "The Sweat Fest 2026 day-of program: the two-stage class schedule, festival map, packing list, and how to get to 18th & Peoria.";
@@ -805,35 +824,43 @@ const metaDescription =
         {/* Swipeable strip: the tee front and back, then the rest of the drop */}
         <div class="sf-merch-strip -mx-4 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-pl-4">
           {
-            [
-              { img: sweatFestMerch.hero.front, name: sweatFestMerch.hero.name, sub: "Front" },
-              { img: sweatFestMerch.hero.back, name: sweatFestMerch.hero.name, sub: "Back · the lineup" },
-              ...sweatFestMerch.items.map((item) => ({
-                img: item.image,
-                name: item.name,
-                sub: item.colors.join(" · "),
-              })),
-            ].map((shot) => (
-              <figure class="w-[58%] flex-none snap-start sm:w-[38%]">
-                <div class:list={["overflow-hidden rounded-xl border-2 border-[#e2ecac]", shot.img.cutout ? "bg-[#f4f7dc]" : "bg-[#2b3434]"]} style="box-shadow: 3px 3px 0 var(--sf-dusk);">
+            merchGroups.map((group) => (
+              <figure
+                class="w-[58%] flex-none snap-start sm:w-[38%]"
+                data-merch-group={group.name}
+                data-merch-shots={JSON.stringify(group.shots)}
+              >
+                <button
+                  type="button"
+                  data-merch-zoom="0"
+                  class:list={["relative block w-full overflow-hidden rounded-xl border-2 border-[#e2ecac] text-left", group.shots[0].cutout ? "bg-[#f4f7dc]" : "bg-[#2b3434]"]}
+                  style="box-shadow: 3px 3px 0 var(--sf-dusk); cursor: zoom-in;"
+                  aria-label={`Enlarge ${group.name}: ${group.shots.length} photos`}
+                >
                   <img
-                    src={shot.img.src}
-                    alt={shot.img.alt}
-                    width={shot.img.width}
-                    height={shot.img.height}
+                    src={group.shots[0].src}
+                    alt={group.shots[0].alt}
+                    width="1200"
+                    height="1500"
                     loading="lazy"
                     decoding="async"
                     class="block h-auto w-full"
                   />
-                </div>
+                  <span class="sf-tag absolute bottom-2 right-2 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.1em] text-choco" aria-hidden="true">
+                    {group.shots.length} photos
+                  </span>
+                </button>
                 <figcaption class="mt-2">
-                  <span class="block text-sm font-extrabold uppercase tracking-[0.04em]">{shot.name}</span>
-                  <span class="block text-xs font-semibold text-white/65">{shot.sub}</span>
+                  <span class="block text-sm font-extrabold uppercase tracking-[0.04em]">{group.name}</span>
+                  <span class="block text-xs font-semibold text-white/65">{group.sub}</span>
                 </figcaption>
               </figure>
             ))
           }
         </div>
+        <p class="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
+          Tap a photo to see every color
+        </p>
 
         <div class="mt-4 rounded-xl border-2 border-[#e2ecac]/60 bg-white/5 p-4">
           <p class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#e2ecac]">
@@ -1249,6 +1276,7 @@ const metaDescription =
         </div>
       </div>
     </dialog>
+    <MerchLightbox />
   </main>
 </Layout>
 

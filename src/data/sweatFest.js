@@ -922,14 +922,7 @@ export const sweatFestMerch = {
     blurb:
       "The boxed Sweat Fest logo up front. On the back, the whole day: every DJ and every instructor, printed in festival pink.",
     colors: ["Charcoal", "Black", "White"],
-    front: merchImg(
-      "sweatfest-tee-charcoal-front",
-      "Charcoal Sweat Fest tee, front: the boxed Sweat Fest logo across the chest",
-    ),
-    back: merchImg(
-      "sweatfest-tee-charcoal-back",
-      "Charcoal Sweat Fest tee, back: the full lineup of DJs and instructors printed in pink",
-    ),
+    // Every color, front and back; surfaces render a color picker over these.
     variants: [
       {
         color: "Charcoal",
@@ -960,24 +953,21 @@ export const sweatFestMerch = {
       },
     ],
   },
-  // The rest of the drop: one card each, with every photographed colorway.
+  // The rest of the drop. `shots` lists EVERY photographed colorway (the
+  // site shows them all as selectable swatches, never just one); `image` is
+  // the lead shot for compact surfaces like /links.
   items: [
     {
       id: "hoodie",
       name: "X hoodie",
       blurb:
         "The LSP X stitched small on the chest. Pullover in three colors, zip-up in two.",
-      colors: ["Heather grey", "Forest green", "Brown"],
-      note: "Zip-up in heather grey and forest green",
-      image: merchImg(
-        "lsp-hoodie-forest-green",
-        "Forest green pullover hoodie with the small LSP X on the chest",
-      ),
-      gallery: [
-        merchImg("lsp-hoodie-heather-grey", "Heather grey pullover hoodie"),
-        merchImg("lsp-hoodie-brown", "Brown pullover hoodie"),
-        merchImg("lsp-zip-hoodie-heather-grey", "Heather grey zip-up hoodie"),
-        merchImg("lsp-zip-hoodie-forest-green", "Forest green zip-up hoodie"),
+      shots: [
+        { color: "Forest green", label: "Pullover · Forest green", img: merchImg("lsp-hoodie-forest-green", "Forest green pullover hoodie with the small LSP X on the chest") },
+        { color: "Heather grey", label: "Pullover · Heather grey", img: merchImg("lsp-hoodie-heather-grey", "Heather grey pullover hoodie with the small LSP X on the chest") },
+        { color: "Brown", label: "Pullover · Brown", img: merchImg("lsp-hoodie-brown", "Brown pullover hoodie with the small LSP X on the chest") },
+        { color: "Heather grey", label: "Zip-up · Heather grey", img: merchImg("lsp-zip-hoodie-heather-grey", "Heather grey zip-up hoodie with the small LSP X on the chest") },
+        { color: "Forest green", label: "Zip-up · Forest green", img: merchImg("lsp-zip-hoodie-forest-green", "Forest green zip-up hoodie with the small LSP X on the chest") },
       ],
     },
     {
@@ -985,16 +975,11 @@ export const sweatFestMerch = {
       name: "Latina Sweat Project crewneck",
       blurb:
         "The wordmark in script across the chest. Three colors, plus a matching tee in light grey.",
-      colors: ["Heather grey", "Forest green", "Brown"],
-      note: "Tee in light grey",
-      image: merchImg(
-        "lsp-crewneck-brown",
-        "Brown crewneck sweatshirt with The Latina Sweat Project in script across the chest",
-      ),
-      gallery: [
-        merchImg("lsp-crewneck-heather-grey", "Heather grey crewneck"),
-        merchImg("lsp-crewneck-forest-green", "Forest green crewneck"),
-        merchImg("lsp-tee-light-grey", "Light grey Latina Sweat Project tee"),
+      shots: [
+        { color: "Brown", label: "Crewneck · Brown", img: merchImg("lsp-crewneck-brown", "Brown crewneck sweatshirt with The Latina Sweat Project in script across the chest") },
+        { color: "Heather grey", label: "Crewneck · Heather grey", img: merchImg("lsp-crewneck-heather-grey", "Heather grey crewneck sweatshirt with The Latina Sweat Project in script across the chest") },
+        { color: "Forest green", label: "Crewneck · Forest green", img: merchImg("lsp-crewneck-forest-green", "Forest green crewneck sweatshirt with The Latina Sweat Project in script across the chest") },
+        { color: "Light grey", label: "Tee · Light grey", img: merchImg("lsp-tee-light-grey", "Light grey tee with The Latina Sweat Project across the chest") },
       ],
     },
     {
@@ -1002,15 +987,11 @@ export const sweatFestMerch = {
       name: "X bucket hat",
       blurb:
         "Wide brim, chin cord, the X embroidered up front. Four colors for a day in the sun.",
-      colors: ["Tan", "Camel", "Black", "Mustard"],
-      image: merchImg(
-        "lsp-bucket-hat-mustard-2",
-        "Mustard bucket hat with the embroidered LSP X, worn in front of the X mural",
-      ),
-      gallery: [
-        merchImg("lsp-bucket-hat-tan-1", "Tan bucket hat"),
-        merchImg("lsp-bucket-hat-camel-1", "Camel bucket hat"),
-        merchImg("lsp-bucket-hat-black-1", "Black bucket hat"),
+      shots: [
+        { color: "Mustard", label: "Mustard", img: merchImg("lsp-bucket-hat-mustard-2", "Mustard bucket hat with the embroidered LSP X, worn in front of the X mural") },
+        { color: "Tan", label: "Tan", img: merchImg("lsp-bucket-hat-tan-1", "Tan bucket hat with the embroidered LSP X, worn in front of the X mural") },
+        { color: "Camel", label: "Camel", img: merchImg("lsp-bucket-hat-camel-1", "Camel bucket hat with the embroidered LSP X, worn in front of the X mural") },
+        { color: "Black", label: "Black", img: merchImg("lsp-bucket-hat-black-1", "Black bucket hat with the embroidered LSP X, worn in front of the X mural") },
       ],
     },
     {
@@ -1018,18 +999,22 @@ export const sweatFestMerch = {
       name: "Canvas tote",
       blurb:
         "Natural canvas with the big X and sun, or the full Latina Sweat Project mark. Big enough for a mat and a towel.",
-      colors: ["Natural"],
-      image: merchImg(
-        "lsp-tote-logo",
-        "Natural canvas tote with the large LSP X and sun logo, held up in front of the X mural",
-      ),
-      gallery: [
-        merchImg("lsp-tote-logo-wordmark", "Canvas tote with the X and wordmark"),
-        merchImg("lsp-tote-wordmark", "Canvas tote with the wordmark"),
+      shots: [
+        { color: "Natural", label: "X and sun", img: merchImg("lsp-tote-logo", "Natural canvas tote with the large LSP X and sun logo, held up in front of the X mural") },
+        { color: "Natural", label: "X and wordmark", img: merchImg("lsp-tote-logo-wordmark", "Natural canvas tote with the LSP X and The Latina Sweat Project wordmark") },
+        { color: "Natural", label: "Wordmark", img: merchImg("lsp-tote-wordmark", "Natural canvas tote with The Latina Sweat Project wordmark") },
       ],
     },
-  ],
+  ].map((item) => ({
+    ...item,
+    image: item.shots[0].img,
+    colors: [...new Set(item.shots.map((shot) => shot.color))],
+  })),
 };
+
+// Lead tee shots (first colorway) for compact surfaces.
+sweatFestMerch.hero.front = sweatFestMerch.hero.variants[0].front;
+sweatFestMerch.hero.back = sweatFestMerch.hero.variants[0].back;
 
 // Rendered copies of the flyer (drawn live on the site by
 // SweatFestArtwork.astro from sweatFestPoster.js) for social sharing and OG

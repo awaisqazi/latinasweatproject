@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import SweatFestCountdown from "@/components/SweatFestCountdown.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
+import MerchLightbox from "@/components/MerchLightbox.astro";
 import SweatFestConfetti from "@/components/SweatFestConfetti.astro";
 import { whiteHorizontalLogoSvg } from "@/data/sweatFestLogos";
 import {
@@ -71,6 +72,23 @@ const accentOf = (key) => sweatFestColors[key] ?? sweatFestColors.sunrise;
 // Deepened accent for text on light backgrounds. The stronger ink mix keeps
 // even small labels readable on white and honeydew.
 const deep = (hex) => `color-mix(in oklab, ${hex} 48%, #123f36)`;
+
+// Merch lightbox payloads: every colorway photo, base-prefixed, as JSON on
+// the group container (see MerchLightbox.astro for the contract).
+const merchShot = (img, label) => ({
+  src: withBase(img.src),
+  alt: img.alt,
+  label,
+  cutout: !!img.cutout,
+});
+const teeVariants = sweatFestMerch.hero.variants.map((v) => ({
+  label: v.color,
+  color: v.color,
+  front: merchShot(v.front, `${v.color} · front`),
+  back: merchShot(v.back, `${v.color} · back, the lineup`),
+}));
+const teeShots = teeVariants.flatMap((v) => [v.front, v.back]);
+const itemShots = (item) => item.shots.map((shot) => merchShot(shot.img, shot.label));
 
 // The motto splits into its three arc-colored lines.
 // "Move Together. Celebrate Culture. Build Community."
@@ -1625,28 +1643,45 @@ const eventJsonLd = {
           </p>
         </div>
 
-        {/* The hero: the lineup tee, front and back */}
-        <div class="reveal mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12" style="transition-delay: 240ms;">
+        {/* The hero: the lineup tee. Pick a color, see front and back, tap to enlarge. */}
+        <div
+          class="reveal mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12"
+          style="transition-delay: 240ms;"
+          data-merch-group={sweatFestMerch.hero.name}
+          data-merch-shots={JSON.stringify(teeShots)}
+          data-merch-variants={JSON.stringify(teeVariants)}
+        >
           <div class="grid grid-cols-2 gap-4 sm:gap-5">
             {
               [
-                { img: sweatFestMerch.hero.front, label: "Front", tilt: -1.2 },
-                { img: sweatFestMerch.hero.back, label: "Back · the lineup", tilt: 1 },
+                { which: "front", img: teeShots[0], label: "Front", tilt: -1.2, zoom: 0 },
+                { which: "back", img: teeShots[1], label: "Back · the lineup", tilt: 1, zoom: 1 },
               ].map((shot) => (
-                <figure class:list={["sf-merch-photo", shot.img.cutout && "is-cutout"]} style={`--sf-merch-tilt: ${shot.tilt}deg;`}>
+                <button
+                  type="button"
+                  data-merch-zoom={shot.zoom}
+                  data-merch-main={shot.which}
+                  class:list={["sf-merch-photo sf-merch-zoom block w-full text-left", shot.img.cutout && "is-cutout"]}
+                  style={`--sf-merch-tilt: ${shot.tilt}deg;`}
+                  aria-label={`Enlarge: ${shot.img.alt}`}
+                >
                   <img
-                    src={withBase(shot.img.src)}
+                    src={shot.img.src}
                     alt={shot.img.alt}
-                    width={shot.img.width}
-                    height={shot.img.height}
+                    width="1200"
+                    height="1500"
                     loading="lazy"
                     decoding="async"
                     class="block h-auto w-full"
                   />
-                  <figcaption class="sf-tag absolute left-3 top-3 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-choco">
+                  <span class="sf-tag absolute left-3 top-3 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-choco">
                     {shot.label}
-                  </figcaption>
-                </figure>
+                  </span>
+                  <span class="sf-merch-zoom-hint" aria-hidden="true">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7" /><path stroke-linecap="round" d="M20 20l-3.5-3.5M11 8v6M8 11h6" /></svg>
+                    Enlarge
+                  </span>
+                </button>
               ))
             }
           </div>
@@ -1660,20 +1695,32 @@ const eventJsonLd = {
             <p class="mt-4 text-base leading-relaxed text-white/80">
               {sweatFestMerch.hero.blurb}
             </p>
-            <ul class="mt-5 flex flex-wrap gap-2" aria-label="Colors">
+            <p class="mt-5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-white/60">
+              Pick a color
+              <span class="ml-2 normal-case tracking-normal text-[#e2ecac]" data-merch-current>{teeVariants[0].label}</span>
+            </p>
+            <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Tee colors">
               {
-                sweatFestMerch.hero.colors.map((color) => (
-                  <li class="inline-flex items-center gap-2 rounded-full border-2 border-white/25 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em]">
+                teeVariants.map((v, i) => (
+                  <button
+                    type="button"
+                    data-merch-swatch={i}
+                    aria-pressed={i === 0 ? "true" : "false"}
+                    class="sf-merch-swatch inline-flex items-center gap-2 rounded-lg border-2 border-white/30 bg-white/5 px-2 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] transition-colors hover:border-[#e2ecac]"
+                  >
+                    <span class="block h-9 w-7 overflow-hidden rounded-md border border-white/30 bg-[#f4f7dc]">
+                      <img src={v.front.src} alt="" width="120" height="150" loading="lazy" decoding="async" class="block h-full w-full object-cover" />
+                    </span>
                     <span
                       class="h-3 w-3 rounded-full border border-white/40"
-                      style={`background: ${sweatFestMerch.swatches[color]};`}
+                      style={`background: ${sweatFestMerch.swatches[v.color]};`}
                       aria-hidden="true"
                     />
-                    {color}
-                  </li>
+                    {v.color}
+                  </button>
                 ))
               }
-            </ul>
+            </div>
             <div class="mt-7 rounded-xl border-2 border-[#e2ecac]/60 bg-white/5 p-5">
               <p class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#e2ecac]">
                 {sweatFestMerch.whereHeading}
@@ -1699,65 +1746,72 @@ const eventJsonLd = {
           </div>
         </div>
 
-        {/* The rest of the drop */}
+        {/* The rest of the drop: every colorway as a swatch, tap any photo to enlarge */}
         <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {
-            sweatFestMerch.items.map((item, i) => (
-              <article
-                class="reveal flex flex-col rounded-xl border-2 border-[#e2ecac]/50 bg-white/5 p-3.5"
-                style={`transition-delay: ${120 + i * 90}ms;`}
-              >
-                <figure class:list={["sf-merch-photo", item.image.cutout && "is-cutout"]} style={`--sf-merch-tilt: ${[-0.8, 0.7, -0.6, 0.9][i % 4]}deg;`}>
-                  <img
-                    src={withBase(item.image.src)}
-                    alt={item.image.alt}
-                    width={item.image.width}
-                    height={item.image.height}
-                    loading="lazy"
-                    decoding="async"
-                    class="block h-auto w-full"
-                  />
-                </figure>
-                {item.gallery?.length > 0 && (
-                  <div class="mt-3 grid grid-cols-4 gap-2">
-                    {item.gallery.map((shot) => (
-                      <img
-                        src={withBase(shot.src)}
-                        alt={shot.alt}
-                        width={shot.width}
-                        height={shot.height}
-                        loading="lazy"
-                        decoding="async"
-                        class:list={["block aspect-[4/5] h-auto w-full rounded-md border border-white/25 object-cover", shot.cutout && "bg-[#f4f7dc]"]}
-                      />
+            sweatFestMerch.items.map((item, i) => {
+              const shots = itemShots(item);
+              return (
+                <article
+                  class="reveal flex flex-col rounded-xl border-2 border-[#e2ecac]/50 bg-white/5 p-3.5"
+                  style={`transition-delay: ${120 + i * 90}ms;`}
+                  data-merch-group={item.name}
+                  data-merch-shots={JSON.stringify(shots)}
+                >
+                  <button
+                    type="button"
+                    data-merch-zoom="0"
+                    data-merch-main=""
+                    class:list={["sf-merch-photo sf-merch-zoom block w-full text-left", shots[0].cutout && "is-cutout"]}
+                    style={`--sf-merch-tilt: ${[-0.8, 0.7, -0.6, 0.9][i % 4]}deg;`}
+                    aria-label={`Enlarge: ${shots[0].alt}`}
+                  >
+                    <img
+                      src={shots[0].src}
+                      alt={shots[0].alt}
+                      width="1200"
+                      height="1500"
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full"
+                    />
+                    <span class="sf-merch-zoom-hint" aria-hidden="true">
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7" /><path stroke-linecap="round" d="M20 20l-3.5-3.5M11 8v6M8 11h6" /></svg>
+                      Enlarge
+                    </span>
+                  </button>
+                  <p class="mt-3 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/60">
+                    {item.colors.length > 1 ? "Pick a color" : "Designs"}
+                    <span class="ml-2 normal-case tracking-normal text-[#e2ecac]" data-merch-current>{shots[0].label}</span>
+                  </p>
+                  <div class="mt-2 grid grid-cols-4 gap-2" role="group" aria-label={`${item.name} options`}>
+                    {shots.map((shot, n) => (
+                      <button
+                        type="button"
+                        data-merch-swatch={n}
+                        aria-pressed={n === 0 ? "true" : "false"}
+                        aria-label={shot.label}
+                        title={shot.label}
+                        class="sf-merch-swatch block rounded-md border-2 border-white/25 p-0.5 transition-colors hover:border-[#e2ecac]"
+                      >
+                        <span class:list={["block aspect-[4/5] overflow-hidden rounded", shot.cutout ? "bg-[#f4f7dc]" : "bg-[#2b3434]"]}>
+                          <img src={shot.src} alt="" width="240" height="300" loading="lazy" decoding="async" class="block h-full w-full object-cover" />
+                        </span>
+                        <span class="mt-1 block text-center text-[9px] font-extrabold uppercase leading-tight tracking-[0.04em] text-white/80">
+                          {shot.label}
+                        </span>
+                      </button>
                     ))}
                   </div>
-                )}
-                <h3 class="mt-4 font-slab text-2xl uppercase tracking-tight">
-                  {item.name}
-                </h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-white/75">
-                  {item.blurb}
-                </p>
-                <ul class="mt-3 flex flex-wrap gap-1.5" aria-label="Colors">
-                  {item.colors.map((color) => (
-                    <li class="inline-flex items-center gap-1.5 rounded-full border border-white/25 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.08em]">
-                      <span
-                        class="h-2.5 w-2.5 rounded-full border border-white/40"
-                        style={`background: ${sweatFestMerch.swatches[color]};`}
-                        aria-hidden="true"
-                      />
-                      {color}
-                    </li>
-                  ))}
-                </ul>
-                {item.note && (
-                  <p class="mt-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#e2ecac]/80">
-                    {item.note}
+                  <h3 class="mt-4 font-slab text-2xl uppercase tracking-tight">
+                    {item.name}
+                  </h3>
+                  <p class="mt-1.5 text-sm leading-relaxed text-white/75">
+                    {item.blurb}
                   </p>
-                )}
-              </article>
-            ))
+                </article>
+              );
+            })
           }
         </div>
 
@@ -2140,6 +2194,7 @@ const eventJsonLd = {
         </p>
       </div>
     </section>
+    <MerchLightbox />
   </main>
 </Layout>
 
@@ -2192,6 +2247,36 @@ const eventJsonLd = {
   /* Cutout garments sit on paper, like a print pinned to the board. */
   .sf-merch-photo.is-cutout {
     background: #f4f7dc;
+  }
+  .sf-merch-zoom {
+    cursor: zoom-in;
+  }
+  .sf-merch-zoom:focus-visible {
+    outline: 3px solid #e2ecac;
+    outline-offset: 3px;
+  }
+  .sf-merch-zoom-hint {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 2px solid #123f36;
+    border-radius: 8px;
+    background: #e2ecac;
+    color: #123f36;
+    padding: 0.2rem 0.5rem;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 2px 3px 0 rgba(18, 63, 54, 0.3);
+  }
+  .sf-merch-swatch[aria-pressed="true"] {
+    border-color: #e2ecac;
+    background: rgba(226, 236, 172, 0.16);
+    box-shadow: 0 0 0 2px #00a7ab;
   }
 
   /* Run of show: schedule entries on pale paper, the stage color riding the

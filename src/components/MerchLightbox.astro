@@ -1,0 +1,257 @@
+---
+// Merch photo lightbox, shared by every Sweat Fest merch surface.
+//
+// Markup contract (no props):
+//   <div data-merch-group="X hoodie" data-merch-shots='[{"src","alt","label","cutout"}]'
+//        data-merch-variants='[{"label","front":{…},"back":{…}}]'   (tee only)>
+//     <button data-merch-zoom="2">…</button>      opens shot 2 of that group
+//     <button data-merch-swatch="2" …>…</button>  (optional) color picker, see script
+//   </div>
+// One dialog per page; prev/next cycle through the group's shots, arrow keys
+// and swipe work, and closing syncs the card's swatch selection to the last
+// shot viewed so the page matches what the visitor just looked at.
+---
+
+<dialog
+  data-merch-lightbox
+  class="merch-lightbox m-auto w-[min(96vw,64rem)] rounded-2xl border-[3px] border-[#e2ecac] bg-[#123f36] p-0 text-white backdrop:bg-[#123f36]/85"
+  aria-label="Merch photo"
+>
+  <div class="relative p-3 sm:p-5">
+    <button
+      type="button"
+      data-lb-close
+      aria-label="Close"
+      class="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[#e2ecac] bg-[#123f36] text-white transition-colors hover:bg-[#e2ecac] hover:text-[#123f36] sm:right-5 sm:top-5"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+        <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
+      </svg>
+    </button>
+
+    <div class="relative flex items-center justify-center">
+      <button
+        type="button"
+        data-lb-prev
+        aria-label="Previous photo"
+        class="merch-lightbox-nav absolute left-0 top-1/2 z-10 -translate-y-1/2"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"></path>
+        </svg>
+      </button>
+      <figure class="m-0 w-full">
+        <div
+          data-lb-frame
+          class="merch-lightbox-frame mx-auto flex max-h-[72vh] items-center justify-center overflow-hidden rounded-xl border-2 border-[#e2ecac]"
+        >
+          <img
+            data-lb-img
+            src=""
+            alt=""
+            width="1200"
+            height="1500"
+            decoding="async"
+            class="block h-auto max-h-[72vh] w-auto max-w-full select-none"
+            draggable="false"
+          />
+        </div>
+        <figcaption class="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-1">
+          <span>
+            <span data-lb-group class="font-slab text-xl uppercase tracking-tight"></span>
+            <span data-lb-label class="ml-2 text-sm font-extrabold text-[#e2ecac]"></span>
+          </span>
+          <span data-lb-count class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/60"></span>
+        </figcaption>
+      </figure>
+      <button
+        type="button"
+        data-lb-next
+        aria-label="Next photo"
+        class="merch-lightbox-nav absolute right-0 top-1/2 z-10 -translate-y-1/2"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .merch-lightbox-frame {
+    background: #2b3434;
+  }
+  .merch-lightbox-frame.is-cutout {
+    background: #f4f7dc;
+  }
+  .merch-lightbox-nav {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2ecac;
+    border-radius: 0.6rem;
+    background: rgba(18, 63, 54, 0.9);
+    color: #ffffff;
+    box-shadow: 0.2rem 0.2rem 0 #00a7ab;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .merch-lightbox-nav:hover {
+    background: #e2ecac;
+    color: #123f36;
+  }
+  .merch-lightbox[open] {
+    animation: merch-lb-in 0.18s ease-out;
+  }
+  @keyframes merch-lb-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .merch-lightbox[open] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  type Shot = { src: string; alt: string; label?: string; cutout?: boolean };
+
+  (() => {
+    const dialog = document.querySelector<HTMLDialogElement>("[data-merch-lightbox]");
+    if (!dialog) return;
+    const img = dialog.querySelector<HTMLImageElement>("[data-lb-img]")!;
+    const frame = dialog.querySelector<HTMLElement>("[data-lb-frame]")!;
+    const groupEl = dialog.querySelector<HTMLElement>("[data-lb-group]")!;
+    const labelEl = dialog.querySelector<HTMLElement>("[data-lb-label]")!;
+    const countEl = dialog.querySelector<HTMLElement>("[data-lb-count]")!;
+    const prevBtn = dialog.querySelector<HTMLButtonElement>("[data-lb-prev]")!;
+    const nextBtn = dialog.querySelector<HTMLButtonElement>("[data-lb-next]")!;
+
+    let shots: Shot[] = [];
+    let index = 0;
+    let container: HTMLElement | null = null;
+
+    const readShots = (el: HTMLElement): Shot[] => {
+      try {
+        return JSON.parse(el.dataset.merchShots || "[]");
+      } catch {
+        return [];
+      }
+    };
+
+    const show = (i: number) => {
+      if (!shots.length) return;
+      index = (i + shots.length) % shots.length;
+      const shot = shots[index];
+      img.src = shot.src;
+      img.alt = shot.alt;
+      frame.classList.toggle("is-cutout", !!shot.cutout);
+      labelEl.textContent = shot.label || "";
+      countEl.textContent = `${index + 1} / ${shots.length}`;
+      const single = shots.length < 2;
+      prevBtn.classList.toggle("hidden", single);
+      nextBtn.classList.toggle("hidden", single);
+      // Warm the neighbours so prev/next feel instant.
+      [index + 1, index - 1].forEach((n) => {
+        const s = shots[(n + shots.length) % shots.length];
+        if (s) new Image().src = s.src;
+      });
+    };
+
+    const open = (el: HTMLElement, i: number) => {
+      container = el;
+      shots = readShots(el);
+      groupEl.textContent = el.dataset.merchGroup || "";
+      show(i);
+      dialog.showModal();
+    };
+
+    // ---- Zoom triggers: any [data-merch-zoom] inside a shots container.
+    document.addEventListener("click", (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>("[data-merch-zoom]");
+      if (!target) return;
+      const el = target.closest<HTMLElement>("[data-merch-shots]");
+      if (!el) return;
+      event.preventDefault();
+      open(el, Number(target.dataset.merchZoom || 0));
+    });
+
+    // ---- Swatches: pick a colorway on the card without opening the lightbox.
+    const select = (el: HTMLElement, i: number) => {
+      // Paired groups (the tee: front + back per color) carry a second list
+      // of per-color variants; plain groups select straight from shots.
+      let list: any[] = readShots(el);
+      if (el.dataset.merchVariants) {
+        try { list = JSON.parse(el.dataset.merchVariants); } catch { /* keep shots */ }
+      }
+      const shot = list[i];
+      if (!shot) return;
+      el.querySelectorAll<HTMLElement>("[data-merch-swatch]").forEach((sw) =>
+        sw.setAttribute("aria-pressed", sw.dataset.merchSwatch === String(i) ? "true" : "false"),
+      );
+      el.querySelectorAll<HTMLElement>("[data-merch-main]").forEach((main) => {
+        const which = main.dataset.merchMain || "";
+        // Cards have one main image; the tee hero has "front" + "back"
+        // mains that pull from shot.front/shot.back when present.
+        const pick = (shot as any)[which] || shot;
+        const mi = main.querySelector<HTMLImageElement>("img");
+        if (mi) {
+          mi.src = pick.src;
+          mi.alt = pick.alt;
+        }
+        main.classList.toggle("is-cutout", !!pick.cutout);
+        main.dataset.merchZoom = String(which ? i * 2 + (which === "back" ? 1 : 0) : i);
+      });
+      el.querySelectorAll<HTMLElement>("[data-merch-current]").forEach((c) => {
+        c.textContent = shot.label || "";
+      });
+    };
+    document.addEventListener("click", (event) => {
+      const sw = (event.target as HTMLElement).closest<HTMLElement>("[data-merch-swatch]");
+      if (!sw) return;
+      const el = sw.closest<HTMLElement>("[data-merch-shots]");
+      if (!el) return;
+      event.preventDefault();
+      select(el, Number(sw.dataset.merchSwatch || 0));
+    });
+
+    // ---- Dialog controls
+    prevBtn.addEventListener("click", () => show(index - 1));
+    nextBtn.addEventListener("click", () => show(index + 1));
+    dialog.querySelector("[data-lb-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") show(index + 1);
+      if (event.key === "ArrowLeft") show(index - 1);
+    });
+    // Swipe between shots on touch.
+    let startX: number | null = null;
+    dialog.addEventListener("pointerdown", (e) => {
+      startX = e.clientX;
+    });
+    dialog.addEventListener("pointerup", (e) => {
+      if (startX === null) return;
+      const dx = e.clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 48) show(dx < 0 ? index + 1 : index - 1);
+    });
+    // On close, sync the card to the last shot viewed (tee: shot pairs map
+    // back to a color index).
+    dialog.addEventListener("close", () => {
+      if (!container || !container.querySelector("[data-merch-swatch]")) return;
+      const paired = container.querySelector("[data-merch-main='front']") !== null;
+      select(container, paired ? Math.floor(index / 2) : index);
+    });
+  })();
+</script>
