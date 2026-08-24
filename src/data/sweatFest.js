@@ -29,11 +29,13 @@ export const sweatFest = {
     "Chicago, this is our first-ever all-day movement festival: a sunrise 5K, sweat sessions, wellbeing experiences, local vendors, food, and a closing Pachanga.",
   pagePath: "/sweatfest",
   calendarPath: "/sweat-fest-2026.ics",
-  ticketsOnSale: true,
+  // The festival happened 2026-08-22; every surface now reads recap state.
+  isPast: true,
+  ticketsOnSale: false,
   ticketsUrl:
     "https://www.zeffy.com/en-US/ticketing/sweat-fest-2026-movement-is-ours",
   ticketsLabel: "Get Tickets",
-  statusLabel: "Tickets on sale now",
+  statusLabel: "That's a wrap",
   contactEmail: "rut@latinasweatproject.com",
 };
 
@@ -873,6 +875,25 @@ export const sweatFestPolicies = {
   ],
 };
 
+// Recap state: the festival happened 2026-08-22 and /sweatfest is now the
+// recap page. Copy here is the thank-you of record; the photo album lives
+// in src/data/sweatFestGallery.js (all 376 Flickr-CDN stems).
+export const sweatFestRecap = {
+  eyebrow: "That's a wrap",
+  heading: "Gracias, Chicago",
+  dateLine: "Saturday, August 22, 2026 · 18th & Peoria, Pilsen",
+  // The thank-you of record. EN paragraphs plus one Spanish line.
+  thankYou: [
+    "To every runner who met us at sunrise, every body that moved on 16th Street, and everyone who danced the Pachanga into the night: thank you. Our first Sweat Fest belonged to you.",
+    "Thank you to the instructors and DJs who carried two stages from morning to close, to the volunteers who held the day together, to the vendors and food partners who fed us, to our sponsors, and to the neighbors of Pilsen who welcomed a festival onto their streets.",
+  ],
+  thankYouEs: "Gracias por movernos, Chicago. El movimiento es nuestro.",
+  signoff: "Con amor, The Latina Sweat Project",
+  photosHeading: "The day in photos",
+  photosIntro:
+    "Every photo from the official album, shot across the run, the stages, and the Pachanga. Tap any photo to view it large, or open the full album on Flickr.",
+};
+
 // Sweat Fest merch drop, photographed 2026-08-21 and sold on site at the
 // festival. Photos are cropped by scripts/render-sweatfest-merch-photos.mjs
 // from the shoot folder into public/images/merch/sweatfest/ (1200x1500,
@@ -893,11 +914,11 @@ export const sweatFestMerch = {
   eyebrow: "New merch drop",
   heading: "The Sweat Fest drop",
   intro:
-    "A lineup tee made for the day, plus the first full run of Latina Sweat Project hoodies, crewnecks, totes, and bucket hats. Everything drops at the festival.",
-  whereHeading: "Where to get it",
+    "A lineup tee made for the day, plus the first full run of Latina Sweat Project hoodies, crewnecks, totes, and bucket hats, sold on site at the festival.",
+  whereHeading: "From the festival",
   whereLines: [
-    "At the vendors + activations area on W 16th St, all day on August 22",
-    "Sizes and colors while they last, so shop early",
+    "Sold on site at the vendors + activations area on August 22",
+    "Follow @latinasweatproject for what comes next",
   ],
   anchor: "/sweatfest#merch",
   ctaLabel: "See the full drop",

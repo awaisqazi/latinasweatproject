@@ -5,7 +5,6 @@ import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
 import {
   sweatFest,
-  sweatFestTickets,
   sweatFestColors,
   sweatFestCheckerUri,
   sweatFestMerch,
@@ -30,23 +29,8 @@ const sweatFestMerchShots = [
   sweatFestMerch.hero.front,
   ...sweatFestMerch.items.map((item) => item.image),
 ].slice(0, 4);
-const sweatFestPrimaryUrl =
-  sweatFestTickets.onSale && sweatFestTickets.url
-    ? sweatFestTickets.url
-    : sweatFestPageUrl;
-const sweatFestPrimaryLabel = sweatFestTickets.onSale
-  ? sweatFest.ticketsLabel
-  : "Plan your Sweat Fest day";
-// Bilingual labels for the 2x2 ticket-tier grid, keyed by tier id.
-const sweatFestTierCopy = {
-  "all-day": {
-    en: "All Day",
-    es: "Todo el día",
-  },
-  run: { en: "Sunrise 5K", es: "5K al amanecer" },
-  "sweat-party": { en: "Sweat + Pachanga", es: "Sweat + Pachanga" },
-  party: { en: "Pachanga", es: "Pachanga" },
-};
+// The festival is past: the card is a recap, its primary CTA is the album.
+const sweatFestPrimaryUrl = withBase("/sweatfest#photos");
 
 // YTT ’26 Trio schedule rows: Spanish short-day map (Mon/Tue/Thu are the
 // only weekdays in the series) so every ES date label is derived from
@@ -728,10 +712,10 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Sweat Fest Featured Card: the official checkerboard-logo flyer,
-          the next upcoming event (Aug 22, before the Sep 25 gala), after
+      {/* Sweat Fest Recap Card: the official checkerboard-logo flyer, now
+          the recap of the Aug 22 festival (before the Sep 25 gala), after
           the Graduation 2026 recap card. Checkerboard tile strip, handmade
-          wordmark, honeydew badges, ticket-stub prices. */}
+          wordmark, honeydew badges, photos CTA. */}
       <div
         id="sweatfest-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-xl border-[3px] border-[#123f36] bg-[#f4f7dc] shadow-[6px_7px_0_#ee3083] transition-transform duration-300 hover:-translate-y-0.5"
@@ -763,8 +747,8 @@ const getLinkConversionProvider = (url = "") => {
                   <span class="lang-es hidden">Primer festival</span>
                 </span>
                 <span class="sf-tag rotate-[1.5deg] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.1em] text-off-black">
-                  <span class="lang-en">{sweatFestTickets.onSale ? "Tickets live" : "Tickets soon"}</span>
-                  <span class="lang-es hidden">{sweatFestTickets.onSale ? "Boletos disponibles" : "Boletos muy pronto"}</span>
+                  <span class="lang-en">That's a wrap · Aug 22</span>
+                  <span class="lang-es hidden">Fue un éxito · 22 Ago</span>
                 </span>
               </div>
 
@@ -773,8 +757,8 @@ const getLinkConversionProvider = (url = "") => {
                 <span class="sf-print ml-1" style="--sf-print: #ee3083;">’26</span>
               </h2>
               <p class="mt-2 text-sm font-extrabold leading-relaxed text-off-black/85">
-                <span class="lang-en">Movement Is Ours: wellness, cultura, and connection from sunrise to last set.</span>
-                <span class="lang-es hidden">El movimiento es nuestro: bienestar, cultura y conexión desde el amanecer hasta el último set.</span>
+                <span class="lang-en">Gracias, Chicago: wellness, cultura, and connection from sunrise to last set.</span>
+                <span class="lang-es hidden">Gracias, Chicago: bienestar, cultura y conexión desde el amanecer hasta el último set.</span>
               </p>
 
               <div class="mt-4 grid grid-cols-2 gap-2.5 text-left">
@@ -804,53 +788,21 @@ const getLinkConversionProvider = (url = "") => {
               </div>
 
               <p class="mt-4 text-[13px] font-semibold leading-relaxed text-off-black/65">
-                <span class="lang-en">Start with an all-paces sunrise 5K, move through sweat and wellbeing experiences, then close together at the Pachanga.</span>
-                <span class="lang-es hidden">Comienza con un 5K al amanecer para todos los ritmos, sigue con sweat y bienestar, y cierra en comunidad en la Pachanga.</span>
+                <span class="lang-en">We started with an all-paces sunrise 5K, moved through two stages of sweat and wellbeing, and closed together at the Pachanga. Every photo from the day is in the album.</span>
+                <span class="lang-es hidden">Comenzamos con un 5K al amanecer, seguimos con dos escenarios de sweat y bienestar, y cerramos en comunidad en la Pachanga. Todas las fotos del día están en el álbum.</span>
               </p>
             </div>
           </a>
 
-          <div class="mt-4 grid grid-cols-2 gap-2.5">
-            {
-              sweatFestTickets.tiers.map((tier, i) => (
-                <div
-                  class:list={[
-                    "flex min-w-0 items-center justify-between gap-2 rounded-md border-2 bg-white px-3 py-2.5",
-                    tier.featured
-                      ? "border-[#123f36] shadow-[3px_3px_0_#00a7ab]"
-                      : "border-[#123f36]/75 shadow-[2px_2px_0_rgba(18,63,54,0.18)]",
-                  ]}
-                  style={`transform: rotate(${[-0.7, 0.5, -0.4, 0.6][i % 4]}deg);`}
-                >
-                  <div class="min-w-0">
-                    {tier.featured && (
-                      <p class="mb-0.5 text-[7px] font-extrabold uppercase tracking-[0.14em] text-[#b23c14]">
-                        <span class="lang-en">Best value</span>
-                        <span class="lang-es hidden">Mejor precio</span>
-                      </p>
-                    )}
-                    <p class="text-[8px] font-extrabold uppercase leading-tight tracking-[0.06em] text-off-black/65">
-                      <span class="lang-en">{sweatFestTierCopy[tier.id].en}</span>
-                      <span class="lang-es hidden">{sweatFestTierCopy[tier.id].es}</span>
-                    </p>
-                  </div>
-                  <p class="flex-shrink-0 font-slab text-lg text-[#b23c14]">${tier.price}</p>
-                </div>
-              ))
-            }
-          </div>
-
           <a
             href={sweatFestPrimaryUrl}
-            target={sweatFestTickets.onSale ? "_blank" : undefined}
-            rel={sweatFestTickets.onSale ? "noopener noreferrer" : undefined}
-            data-conversion-event={sweatFestTickets.onSale ? "sweatfest_ticket_click" : "sweatfest_explore_click"}
+            data-conversion-event="sweatfest_gallery_click"
             data-conversion-context="links_sweatfest_card"
             class="sf-btn mt-5 flex items-center justify-between bg-[#ee3083] px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
           >
             <span class="text-sm font-extrabold">
-              <span class="lang-en">{sweatFestPrimaryLabel}</span>
-              <span class="lang-es hidden">{sweatFestTickets.onSale ? "Compra boletos" : "Explora pases y planea tu día"}</span>
+              <span class="lang-en">Relive the day · every photo</span>
+              <span class="lang-es hidden">Revive el día · todas las fotos</span>
             </span>
             <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -886,8 +838,8 @@ const getLinkConversionProvider = (url = "") => {
                 <span class="lang-es hidden">Nueva merch</span>
               </span>
               <span class="text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/75">
-                <span class="lang-en">Only at the festival</span>
-                <span class="lang-es hidden">Solo en el festival</span>
+                <span class="lang-en">Sold at the festival</span>
+                <span class="lang-es hidden">Vendida en el festival</span>
               </span>
             </div>
             <div class="mt-3 grid grid-cols-4 gap-2">
@@ -919,8 +871,8 @@ const getLinkConversionProvider = (url = "") => {
             </p>
             <p class="mt-1 flex items-center justify-between gap-2 text-[11px] font-bold text-[#e2ecac]">
               <span>
-                <span class="lang-en">See the full drop · sizes while they last</span>
-                <span class="lang-es hidden">Ver toda la colección · tallas hasta agotar</span>
+                <span class="lang-en">See the full drop</span>
+                <span class="lang-es hidden">Ver toda la colección</span>
               </span>
               <svg class="h-4 w-4 flex-none transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -928,8 +880,8 @@ const getLinkConversionProvider = (url = "") => {
             </p>
           </a>
           <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-off-black/65">
-            <span class="lang-en">{sweatFestTickets.onSale ? "Tickets are live · Claim your experience" : "Tickets on sale soon · Follow for updates"}</span>
-            <span class="lang-es hidden">{sweatFestTickets.onSale ? "Boletos disponibles · Elige tu experiencia" : "Boletos a la venta muy pronto · Síguenos para novedades"}</span>
+            <span class="lang-en">That's a wrap · Gracias, Chicago</span>
+            <span class="lang-es hidden">Fue un éxito · Gracias, Chicago</span>
           </p>
         </div>
       </div>

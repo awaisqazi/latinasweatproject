@@ -27,9 +27,6 @@ const sweatFestDeepAccents = {
   cielo: "#017277",
   lima: "#43722c",
 };
-const sweatFestFromPrice = Math.min(
-  ...sweatFestTickets.tiers.map((tier) => tier.price),
-);
 // Graduation 2026 recap: the internal page is the hub, the Flickr album
 // holds the full 307-photo gallery.
 const graduationPageUrl = withBase("graduation");
@@ -254,7 +251,7 @@ const featuredSlugs = [
 
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
             <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b23c14;">
-              First-ever · All-day movement festival
+              Recap · Sat, Aug 22
             </span>
             <h2 class="mt-5 font-slab text-4xl uppercase tracking-tight sm:text-5xl lg:text-6xl leading-[0.98]" style="color: #123f36;">
               <span class="sf-print" style="--sf-print: #60a444;">Sweat Fest</span>
@@ -271,7 +268,10 @@ const featuredSlugs = [
             </p>
 
             <p class="mt-5 max-w-2xl text-base leading-relaxed text-off-black/70 mx-auto lg:mx-0">
-              {sweatFest.pageDescription}
+              That's a wrap on our first-ever all-day movement festival: a
+              sunrise 5K, two stages of sweat sessions and wellbeing
+              experiences, local vendors, food, and a closing Pachanga.
+              Gracias, Chicago. Every photo from the day is in the album.
             </p>
 
             {/* The arc of the day: Run / Sweat / Pachanga (mercado tags) */}
@@ -288,18 +288,6 @@ const featuredSlugs = [
                     {phase.title}
                   </p>
                 </div>
-              ))}
-            </div>
-
-            {/* Ticket tiers, priced like the stub wall on /sweatfest */}
-            <div class="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
-              {sweatFestTickets.tiers.map((tier, i) => (
-                <span
-                  class="sf-tag inline-flex items-baseline gap-1.5 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.06em] text-off-black/80"
-                  style={`transform: rotate(${[-0.8, 0.5, -0.4, 0.7][i % 4]}deg);`}
-                >
-                  {tier.name} · <span class="font-slab text-sm normal-case" style="color: #b23c14;">${tier.price}</span>
-                </span>
               ))}
             </div>
 
@@ -332,24 +320,26 @@ const featuredSlugs = [
                 data-conversion-event="sweatfest_explore_click"
                 data-conversion-context="events_sweatfest_feature"
               >
-                Explore Sweat Fest
+                Relive Sweat Fest
                 <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
               <a
-                href={`${withBase("sweatfest")}#sponsors`}
+                href={`${withBase("sweatfest")}#photos`}
                 class="inline-flex items-center gap-3 border-2 border-[#123f36]/25 bg-[#f4f7dc] px-8 py-4 text-base font-bold text-[#123f36] transition-colors duration-300 hover:border-[#00a7ab] hover:bg-[#00a7ab]/10"
                 style="border-radius: 10px;"
+                data-conversion-event="sweatfest_gallery_click"
+                data-conversion-context="events_sweatfest_feature"
               >
-                Become a sponsor
+                Photo gallery
               </a>
             </div>
             <p class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-off-black/70 lg:justify-start">
               <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #b23c14;">
                 {sweatFestTickets.statusLabel}
               </span>
-              Tickets from ${sweatFestFromPrice}
+              Gracias, Chicago
             </p>
           </div>
         </div>

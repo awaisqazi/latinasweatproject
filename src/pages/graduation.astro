@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import { sweatFest, sweatFestTickets } from "@/data/sweatFest";
+import { sweatFest } from "@/data/sweatFest";
 import { galaTeaser } from "@/data/galaTeaser";
 import galleryPhotos, { galleryCdnBase } from "@/data/graduationGallery";
 
@@ -354,19 +354,12 @@ const moreGraphics = [
   { ...shareGraphics.find((g) => g.key === "carousel_3"), short: "carousel 3" },
 ];
 
-// Closing invitations. Both events read from their own single source of truth,
-// so links, prices, and on-sale state never drift from the rest of the site.
-const sweatFestHasTickets = sweatFestTickets.onSale && sweatFestTickets.url;
-const sweatFestPrimaryUrl = sweatFestHasTickets
-  ? sweatFestTickets.url
-  : withBase("sweatfest");
-const sweatFestPrimaryLabel = sweatFestHasTickets
-  ? sweatFest.ticketsLabel
-  : "Learn more";
-const sweatFestPrimaryEvent = sweatFestHasTickets
-  ? "sweatfest_ticket_click"
-  : "sweatfest_explore_click";
-const sweatFestVolunteerUrl = withBase("sweatfest#volunteer");
+// Closing invitations. Sweat Fest happened Aug 22, so its card is now a
+// recap invitation pointing at the photo album on the recap page.
+const sweatFestPrimaryUrl = withBase("sweatfest");
+const sweatFestPrimaryLabel = "Relive the day";
+const sweatFestPrimaryEvent = "sweatfest_explore_click";
+const sweatFestPhotosUrl = withBase("sweatfest#photos");
 const galaPageUrl = withBase(galaTeaser.pagePath);
 
 const pageTitle = "Graduation 2026 | The Latina Sweat Project";
@@ -1089,15 +1082,14 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
               </li>
             </ul>
             <p class="fest-body">
-              {sweatFest.homepageDescription} It is exactly the kind of day
-              these new teachers get to lead.
+              That's a wrap on our first all-day festival: a sunrise 5K, two
+              stages of classes, and a closing Pachanga. Exactly the kind of
+              day these new teachers get to lead, and many of them did.
             </p>
             <div class="cta-row cta-row--tight">
               <a
                 class="btn btn--gold btn--small"
                 href={sweatFestPrimaryUrl}
-                target={sweatFestHasTickets ? "_blank" : undefined}
-                rel={sweatFestHasTickets ? "noopener noreferrer" : undefined}
                 data-conversion-event={sweatFestPrimaryEvent}
                 data-conversion-context="graduation_page"
               >
@@ -1105,11 +1097,11 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
               </a>
               <a
                 class="btn btn--ghost btn--small"
-                href={sweatFestVolunteerUrl}
-                data-conversion-event="sweatfest_explore_click"
-                data-conversion-context="graduation_page_volunteer"
+                href={sweatFestPhotosUrl}
+                data-conversion-event="sweatfest_gallery_click"
+                data-conversion-context="graduation_page_photos"
               >
-                Volunteer with us
+                See the photos
               </a>
             </div>
           </article>

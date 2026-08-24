@@ -36,7 +36,7 @@ const sweatFestDeepAccents = { rosa: "#c21e64", cielo: "#017277", lima: "#43722c
 // Homepage CTAs route to the full Sweat Fest page (the story, itinerary,
 // and ticket stubs live there); /sweatfest owns the jump to Zeffy.
 const sweatFestPrimaryUrl = withBase("sweatfest");
-const sweatFestPrimaryLabel = "Learn More";
+const sweatFestPrimaryLabel = "Relive the day";
 // Graduation 2026 (YTT ceremony, Fri Aug 7, 2026): the homepage spotlight
 // and carousel card route to the /graduation photo-and-story recap page;
 // the full 307-photo album lives on Flickr.
@@ -361,7 +361,7 @@ const graduationFlickrUrl =
           {/* Copy (right) */}
           <div class="reveal text-center lg:text-left" style="transition-delay: 80ms;">
             <span class="sf-stamp px-3 py-1.5 text-[11px] sm:text-xs" style="color: #b23c14;">
-              LSP's first-ever all-day festival · Chicago · August 22
+              Recap · LSP's first-ever all-day festival · Aug 22
             </span>
             <h2 class="mt-6 font-slab text-5xl uppercase leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl" style="color: #123f36;">
               <span class="sf-print" style="--sf-print: #ee3083;">Run.</span>
@@ -391,21 +391,23 @@ const graduationFlickrUrl =
             </div>
 
             <p class="mt-5 max-w-2xl text-lg leading-relaxed text-medium-gray mx-auto lg:mx-0">
-              {sweatFest.homepageDescription}
+              Chicago showed up from the sunrise 5K to the last set of the
+              Pachanga. Gracias to everyone who ran, sweat, and danced our
+              first festival into being.
             </p>
 
             <p class="mt-3 text-sm font-bold text-off-black/70">
-              Passes from $25 · All-day $60 · All levels welcome
+              Every photo from the day is in the album
             </p>
 
             <div class="mt-8 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
               <a
-                href={sweatFestPrimaryUrl}
+                href={withBase("sweatfest#photos")}
                 class="sf-btn group inline-flex items-center justify-center gap-3 bg-[#ee3083] px-7 py-4 text-base font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
-                data-conversion-event="sweatfest_explore_click"
+                data-conversion-event="sweatfest_gallery_click"
                 data-conversion-context="home_sweatfest_band"
               >
-                {sweatFestPrimaryLabel}
+                Relive the day in photos
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
@@ -485,10 +487,10 @@ const graduationFlickrUrl =
                 {sweatFestMerch.ctaLabel}
               </a>
               <a
-                href={withBase("sweatfest#tickets")}
+                href={withBase("sweatfest#photos")}
                 class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-4 text-base font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#123f36]"
               >
-                Get a pass
+                Festival photos
               </a>
             </div>
           </div>
@@ -1546,13 +1548,14 @@ const graduationFlickrUrl =
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
-                  {sweatFest.shortDateLabel} · 7 AM to 9 PM
+                  Recap · {sweatFest.shortDateLabel}
                 </div>
                 <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b23c14]">
                   LSP's first all-day festival
                 </h3>
                 <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  {sweatFest.homepageDescription}
+                  That's a wrap: a sunrise 5K, two stages of classes, and the
+                  closing Pachanga. Relive the day and see every photo.
                 </p>
                 <div class="mt-4 flex flex-wrap gap-2">
                   {sweatFestDay.map((phase, i) => (
