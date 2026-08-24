@@ -166,8 +166,7 @@ async function slideCover() {
   s += lsp.txt({ text: "WE'RE IN THE", x: M, y: 120, size: 54, color: R.ink, weight: 900, tracking: 2, family: COND });
   s += logo(M, 150, W - M * 2);
   s += `<rect x="${M}" y="420" width="${W - M * 2}" height="6" fill="${R.ink}"/>`;
-  s += await framed("hug.jpg", M, 452, W - M * 2 - 20, 448, { extract: { left: 330, top: 420, width: 2000, height: 1022 } });
-  s += lsp.txt({ text: "GRADUATES EMBRACE AT THE AUG 7 CEREMONY", x: M, y: 952, size: 14, color: R.ink, weight: 800, tracking: 2, family: SANS, opacity: 0.7 });
+  s += await framed("hug.jpg", M, 452, W - M * 2 - 20, 470, { extract: { left: 330, top: 420, width: 2000, height: 1022 } });
   s += lsp.txt({ text: "“MÁS ALLÁ DEL ESTUDIO”", x: M, y: 1020, size: 62, color: R.ink, weight: 900, tracking: 0.5, family: COND });
   s += lsp.txt({ text: "THE CHICAGO READER SPENT GRADUATION NIGHT WITH US", x: M, y: 1066, size: 20, color: R.orange, weight: 900, tracking: 2, family: SANS });
   s += lsp.txt({ text: "Story by Leslie Hurtado · 85 new yoga teachers · one Pilsen studio", x: M, y: 1106, size: 22, color: R.ink, weight: 600, family: SANS, opacity: 0.85 });
@@ -176,15 +175,14 @@ async function slideCover() {
   return wrap(s);
 }
 
-// Photo + quote slide: photo top with a who-is-pictured caption (so the
-// photo is never misread as the quoted speaker), quote below in a
-// left-aligned column.
-async function slideQuotePhoto({ n, file, position, extract = null, caption, quote, name, role, size, photoH = 440 }) {
+// Photo + quote slide: photo top, quote below in a left-aligned column.
+// NO captions naming who is pictured: identities must not be guessed
+// (2026-08-24 user correction), the footer photo credit is enough.
+async function slideQuotePhoto({ n, file, position, extract = null, quote, name, role, size, photoH = 440 }) {
   let s = ground();
   s += masthead();
   s += await framed(file, M, 196, W - M * 2 - 20, photoH, { position, extract });
-  s += lsp.txt({ text: caption, x: M, y: 196 + photoH + 54, size: 14, color: R.ink, weight: 800, tracking: 2, family: SANS, opacity: 0.7 });
-  const qTop = 196 + photoH + 84;
+  const qTop = 196 + photoH + 48;
   const q = quoteBlock(quote, { x: M + 96, y: qTop + 78, size, width: W - M * 2 - 96 });
   // Center the quote block in the band between the photo and the footer.
   const blockBottom = q.bottom + 64 + (role ? 32 : 0);
@@ -213,7 +211,6 @@ async function slideNumbers() {
   let s = ground();
   s += masthead();
   s += await framed("xochyl-efren.jpg", M, 196, W - M * 2 - 20, 330, { position: "attention" });
-  s += lsp.txt({ text: "PICTURED: XOCHYL PEREZ AND EFREN RAMÍREZ · 2026 YOGA TEACHER TRAINING CLASS", x: M, y: 580, size: 14, color: R.ink, weight: 800, tracking: 2, family: SANS, opacity: 0.7 });
   s += lsp.txt({ text: "WHAT THE READER REPORTED", x: M, y: 650, size: 34, color: R.ink, weight: 900, tracking: 1, family: COND });
   s += `<rect x="${M}" y="668" width="200" height="5" fill="${R.orange}"/>`;
 
@@ -277,15 +274,14 @@ async function slideClosing() {
 
 const slides = [
   ["01-cover", await slideCover()],
-  ["02-never-these-walls", await slideQuotePhoto({
-    n: 2, file: "margarita.jpg", position: "centre", extract: { left: 330, top: 460, width: 1900, height: 909 },
-    caption: "PICTURED: MARGARITA QUIÑONES-PEÑA ADDRESSES THE ROOM",
+  ["02-never-these-walls", await slideQuoteMonarch({
+    n: 2,
     quote: "Latina Sweat Project was never these walls. It was never an address. It has always been the people standing in this room.",
     name: "MARGARITA QUIÑONES-PEÑA", role: "FOUNDER", size: 46,
+    monarchFile: "monarch-small.png", mBox: { x: 620, y: 200, w: 380, rotate: -10, quoteTop: 620 },
   })],
   ["03-another-piece", await slideQuotePhoto({
     n: 3, file: "hands-on-heart.jpg", position: "attention",
-    caption: "PICTURED: GRADUATES AT THE AUG 7 CEREMONY",
     quote: "Every time one of you teaches a class, another piece of this project exists somewhere else. That is the piece that we have built together, impossible to displace.",
     name: "MARGARITA QUIÑONES-PEÑA", role: "TO THE GRADUATES", size: 40, photoH: 400,
   })],
@@ -298,13 +294,11 @@ const slides = [
   ["05-by-the-numbers", await slideNumbers()],
   ["06-we-are-miracles", await slideQuotePhoto({
     n: 6, file: "yesi.jpg", position: "centre", extract: { left: 0, top: 620, width: 1707, height: 1160 },
-    caption: "PICTURED: YESI PEYRET SPEAKS AT THE CEREMONY",
     quote: "We are miracles, you know, all of us here. The fact that we are all bringing this gift of yoga to our communities, I see that as something beautiful. Migration is beautiful. Healing is beautiful.",
     name: "YESI PEYRET", role: "YOGA TEACHER TRAINING · CLASS OF 2025", size: 38, photoH: 460,
   })],
   ["07-more-than-fitness", await slideQuotePhoto({
     n: 7, file: "applause.jpg", position: "attention",
-    caption: "PICTURED: THE COMMUNITY APPLAUDS THE NEW TEACHERS",
     quote: "Seeing moms and daughters come as well, this is so much more than fitness, it's family. It's about the community and everyone's well-being.",
     name: "JOCELYN VEGA", role: "YOGA TEACHER TRAINING · CLASS OF 2026", size: 44, photoH: 460,
   })],
