@@ -3,6 +3,8 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
+const featured = pressArticles.find((a) => a.featured);
+const rest = pressArticles.filter((a) => !a.featured);
 ---
 
 <Layout title="In the Press | Latina Sweat Project">
@@ -24,11 +26,78 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
 
+    {/* Featured coverage: the Chicago Reader's graduation feature, in the
+        Reader's own yellow/black newsprint look (their wordmark, their
+        pull-quote orange), so it reads as a clipping, not an LSP card. */}
+    {featured && (
+      <section class="bg-[#ffd210] py-12 sm:py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <img
+                src={`${base}${featured.logo.replace(/^\//, "")}`}
+                alt="Chicago Reader"
+                width="848"
+                height="222"
+                class="h-12 w-auto sm:h-14"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="mt-5 h-1.5 w-24 bg-[#111111]"></div>
+              <p class="mt-6 text-xs font-extrabold uppercase tracking-[0.22em] text-[#111111]/70">
+                Featured · {featured.byline}
+              </p>
+              <h2 class="mt-3 font-sans text-4xl font-black leading-[1.02] tracking-tight text-[#111111] sm:text-5xl lg:text-6xl">
+                “{featured.title}”
+              </h2>
+              <p class="mt-5 max-w-xl font-body text-lg leading-relaxed text-[#111111]/85">
+                {featured.snippet}
+              </p>
+              {featured.quote && (
+                <blockquote class="mt-7 border-l-4 border-[#f79102] pl-5">
+                  <p class="font-serif text-2xl italic leading-snug text-[#111111]">“{featured.quote}”</p>
+                  <cite class="mt-2 block text-xs font-extrabold uppercase not-italic tracking-[0.18em] text-[#f79102]">{featured.quoteAttribution}</cite>
+                </blockquote>
+              )}
+              <a
+                href={featured.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mt-8 inline-flex items-center gap-2 bg-[#111111] px-7 py-3.5 text-sm font-extrabold uppercase tracking-widest text-[#ffd210] transition-all duration-300 hover:-translate-y-0.5 hover:bg-black hover:shadow-xl"
+              >
+                {featured.ctaLabel ?? "Read the Story"}
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
+            <div>
+              <div class="relative">
+              <div class="absolute inset-0 translate-x-3 translate-y-3 bg-[#f79102]" aria-hidden="true"></div>
+              <div class="relative border-[10px] border-[#111111] bg-[#111111]">
+                <img
+                  src={`${base}${featured.image.replace(/^\//, "")}`}
+                  alt={featured.imageAlt}
+                  width="1600"
+                  height="1067"
+                  class="block w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              </div>
+              <p class="mt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-[#111111]/60">Photo: Estevan Cruz · Latina Sweat Project</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
     {/* Press Cards */}
     <section class="py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {pressArticles.map((article) => (
+          {rest.map((article) => (
             <div class="group rounded-2xl bg-white p-8 shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-vibrant-pink/20">
               <div class="flex items-center gap-3 mb-4">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-vibrant-pink/10">

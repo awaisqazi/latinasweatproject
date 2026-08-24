@@ -6,9 +6,39 @@ export interface PressArticle {
   isVideo?: boolean;
   isInternal?: boolean;
   ctaLabel?: string;
+  /** Featured coverage gets a hero treatment on /press, the homepage press
+   *  section, and the links page. */
+  featured?: boolean;
+  /** Outlet wordmark (public path, without base). */
+  logo?: string;
+  /** Lead photo (public path, without base) + alt text. */
+  image?: string;
+  imageAlt?: string;
+  /** Byline + date line shown on featured layouts. */
+  byline?: string;
+  /** A pull quote from the piece. */
+  quote?: string;
+  quoteAttribution?: string;
 }
 
 export const pressArticles: PressArticle[] = [
+  {
+    outlet: "Chicago Reader",
+    title: "Más allá del estudio",
+    url: "https://chicagoreader.com/city-life/latina-sweat-project-yoga-teacher-graduation/",
+    snippet:
+      "The Chicago Reader spends graduation night at our Pilsen studio as 85 new yoga teachers from the 2025 and 2026 cohorts are celebrated: full scholarships, monarch butterflies, candlelight, and a community that, in Margarita's words, was never these walls and never an address.",
+    featured: true,
+    logo: "/images/press/chicago-reader-logo.png",
+    image: "/images/press/reader-graduation-2026.jpg",
+    imageAlt:
+      "Two graduates embrace as the room applauds at the 2026 yoga teacher training graduation at LSP Studio in Pilsen",
+    byline: "By Leslie Hurtado · August 21, 2026",
+    quote:
+      "Latina Sweat Project was never these walls. It was never an address. It has always been the people standing in this room.",
+    quoteAttribution: "Margarita Quiñones-Peña, Founder",
+    ctaLabel: "Read the Story",
+  },
   {
     outlet: "WGN9 Chicago (Around Town)",
     title: "Around Town checks out The Latina Sweat Project",

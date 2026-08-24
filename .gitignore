@@ -59,5 +59,15 @@ scripts/migration/node_modules/
 .sweatfest-render-tmp/
 public/images/sweatfest/sweatfest-benevity.png
 
+# Gala local render scratch and Benevity upload (not a site asset)
+.gala-render-tmp/
+public/images/gala/gala-2026-benevity.png
+
+# New-studio funding strategy (confidential internal planning doc, offline only)
+docs/new-home-funding-strategy.html
+
 # Graduation reels are social-media deliverables, never site assets
 public/videos/graduation/
+
+# 990 tax workpapers (donor + financial data, never commit)
+docs/taxes-990-2025/
