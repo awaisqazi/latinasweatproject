@@ -1,0 +1,82 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import ScheduleInterestApp from "@/components/ScheduleInterestApp.svelte";
+import { activeShiftMonth } from "@/data/shiftInterest.js";
+
+// Internal scheduling tool for instructors, shared by link in the team group
+// chat, so it stays out of search results like /potluck and /inventory. The
+// month's open shifts live in src/data/shiftInterest.js; submissions land in
+// Supabase and show up in the admin dashboard's Studio Spaces module under
+// the Shift Interest tab.
+---
+
+<Layout
+    title={`${activeShiftMonth.label} Teaching Shifts | The Latina Sweat Project`}
+    description="Tell the LSP scheduling team which teaching shifts you're interested in."
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main>
+        <section
+            class="bg-gradient-to-br from-light-gray to-pink-50 py-16 sm:py-20"
+        >
+            <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+                <span
+                    class="rounded-full bg-vibrant-pink/10 px-4 py-1.5 font-sans text-sm font-bold uppercase tracking-wider text-vibrant-pink"
+                >
+                    Instructor Scheduling
+                </span>
+                <h1
+                    class="mt-6 font-sans text-4xl font-extrabold tracking-tight text-off-black sm:text-5xl"
+                >
+                    {activeShiftMonth.label} Teaching Shifts
+                </h1>
+                <p
+                    class="mx-auto mt-6 max-w-2xl font-body text-xl leading-relaxed text-medium-gray"
+                >
+                    Tap every shift you'd be interested in teaching, then add
+                    your details below. Picking a shift isn't a commitment yet:
+                    the scheduling team uses your picks to build the
+                    {activeShiftMonth.label} schedule and will confirm with you.
+                </p>
+                <div
+                    class="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2"
+                >
+                    <div
+                        class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                    >
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                        >
+                            Pick as many as you like
+                        </p>
+                        <p class="mt-1.5 font-body text-sm text-medium-gray">
+                            More options help us build a schedule that works
+                            for everyone.
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                    >
+                        <p
+                            class="font-sans text-xs font-bold uppercase tracking-wider text-vibrant-pink"
+                        >
+                            Changed your mind?
+                        </p>
+                        <p class="mt-1.5 font-body text-sm text-medium-gray">
+                            Submit again with the same email and your new picks
+                            replace the old ones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-slate-50 py-12 sm:py-16">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <ScheduleInterestApp client:only="svelte" />
+            </div>
+        </section>
+    </main>
+</Layout>

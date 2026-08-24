@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import {
+    CalendarCheck,
     CalendarDays,
     CalendarRange,
     ChartColumn,
@@ -15,6 +16,7 @@
   import EventRequestsTab from "./EventRequestsTab.svelte";
   import ClassScheduleTab from "./ClassScheduleTab.svelte";
   import PlanningTab from "./PlanningTab.svelte";
+  import ShiftInterestTab from "./ShiftInterestTab.svelte";
   import InsightsTab from "./InsightsTab.svelte";
 
   export let supabase;
@@ -25,10 +27,12 @@
   let requestsVisited = false;
   let scheduleVisited = false;
   let planningVisited = false;
+  let interestVisited = false;
   let insightsVisited = false;
   $: if (activeTab === "requests") requestsVisited = true;
   $: if (activeTab === "schedule") scheduleVisited = true;
   $: if (activeTab === "planning") planningVisited = true;
+  $: if (activeTab === "interest") interestVisited = true;
   $: if (activeTab === "insights") insightsVisited = true;
 
   $: moduleTabs = [
@@ -41,6 +45,7 @@
     },
     { id: "schedule", label: "Class Schedule", icon: GraduationCap },
     { id: "planning", label: "Planning", icon: ClipboardList },
+    { id: "interest", label: "Shift Interest", icon: CalendarCheck },
     { id: "insights", label: "Insights", icon: ChartColumn },
   ];
 
@@ -177,6 +182,17 @@
       class:hidden={activeTab !== "planning"}
     >
       <PlanningTab {supabase} {dataVersion} onChanged={handleDataChanged} />
+    </div>
+  {/if}
+
+  {#if interestVisited}
+    <div
+      id="tabpanel-interest"
+      role="tabpanel"
+      aria-labelledby="tab-interest"
+      class:hidden={activeTab !== "interest"}
+    >
+      <ShiftInterestTab {supabase} {dataVersion} />
     </div>
   {/if}
 
