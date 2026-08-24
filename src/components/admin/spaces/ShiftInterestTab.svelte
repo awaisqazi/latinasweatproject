@@ -12,13 +12,14 @@
   import EmptyState from "../ui/EmptyState.svelte";
   import StatCard from "../ui/StatCard.svelte";
   import {
-    SHIFT_ROOMS,
     shiftInterestMonths,
     activeShiftMonth,
     slotKey,
     formatSlotTime,
     describeSlotKey,
     monthSlotKeys,
+    monthRooms,
+    monthDays,
   } from "../../../data/shiftInterest.js";
 
   export let supabase;
@@ -90,10 +91,12 @@
   $: emptyCount = allKeys.length - coveredCount;
 
   // Per room: the union of that room's times across the week, sorted, so each
-  // room renders as one time-rows x day-columns grid.
-  $: roomTimes = SHIFT_ROOMS.map((room) => {
+  // room renders as one time-rows x day-columns grid. Rooms and days with no
+  // shifts this month are dropped entirely.
+  $: gridDays = monthDays(month);
+  $: roomTimes = monthRooms(month).map((room) => {
     const times = new Set();
-    for (const day of month.days) {
+    for (const day of gridDays) {
       for (const time of day.slots[room.id] || []) times.add(time);
     }
     return { room, times: [...times].sort() };
@@ -231,7 +234,7 @@
           <thead>
             <tr>
               <th class="w-16 text-left text-[10px] font-semibold uppercase tracking-wide text-ink/45"></th>
-              {#each month.days as day (day.id)}
+              {#each gridDays as day (day.id)}
                 <th class="pb-1 text-center text-xs font-bold text-ink/65">{day.short}</th>
               {/each}
             </tr>
@@ -242,7 +245,7 @@
                 <td class="pr-2 text-right text-[11px] font-semibold tabular-nums text-ink/45">
                   {formatSlotTime(time)}
                 </td>
-                {#each month.days as day (day.id)}
+                {#each gridDays as day (day.id)}
                   {#if (day.slots[room.id] || []).includes(time)}
                     {@const key = slotKey(day.id, room.id, time)}
                     {@const count = (bySlot[key] || []).length}

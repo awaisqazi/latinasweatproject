@@ -2,17 +2,21 @@
     import { onMount } from "svelte";
     import { supabase, SUPABASE_CONFIG_ERROR } from "../lib/supabaseClient.js";
     import {
-        SHIFT_ROOMS,
         activeShiftMonth,
         slotKey,
         formatSlotTime,
         describeSlotKey,
         monthSlotKeys,
+        monthRooms,
+        monthDays,
         SERVICE_CLASS_MIN,
         SERVICE_CLASS_MAX,
     } from "../data/shiftInterest.js";
 
     const month = activeShiftMonth;
+    // Only rooms and days that actually offer shifts this month.
+    const rooms = monthRooms(month);
+    const days = monthDays(month);
     const STORAGE_KEY = "lsp-shift-interest";
     const validKeys = new Set(monthSlotKeys(month));
 
@@ -178,7 +182,7 @@
     {:else}
         <!-- Slot picker -->
         <div class="space-y-6">
-            {#each month.days as day (day.id)}
+            {#each days as day (day.id)}
                 <section
                     class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 sm:p-6"
                     aria-label="{day.label} shifts"
@@ -195,8 +199,9 @@
                             </span>
                         {/if}
                     </div>
-                    <div class="mt-4 grid gap-5 sm:grid-cols-2">
-                        {#each SHIFT_ROOMS as room (room.id)}
+                    <div class="mt-4 grid gap-5 {rooms.length > 1 ? 'sm:grid-cols-2' : ''}">
+                        {#each rooms as room (room.id)}
+                            {#if (day.slots[room.id] || []).length}
                             <div>
                                 <p
                                     class="font-sans text-xs font-bold uppercase tracking-wider text-medium-gray"
@@ -218,13 +223,9 @@
                                             {formatSlotTime(time)}
                                         </button>
                                     {/each}
-                                    {#if !(day.slots[room.id] || []).length}
-                                        <p class="font-body text-sm text-gray-400">
-                                            No shifts this day.
-                                        </p>
-                                    {/if}
                                 </div>
                             </div>
+                            {/if}
                         {/each}
                     </div>
                 </section>

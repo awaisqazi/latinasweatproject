@@ -16,10 +16,9 @@ export const SHIFT_ROOMS = [
   { id: "gp", name: "Gage Park Flow Room", short: "Gage Park" },
 ];
 
-// Monday through Friday share the same slot template.
-const WEEKDAY_LV = ["06:00", "07:00", "08:00", "12:00", "17:30", "18:30", "19:30", "20:30"];
-const WEEKDAY_GP = ["06:30", "07:30", "08:30", "17:00", "18:00", "19:00", "20:00"];
-
+// September offers Little Village only; Gage Park has no open shifts this
+// round (leave a room's array out, or empty, and it disappears from the form
+// and the admin grid). Days with no slots are hidden too.
 export const shiftInterestMonths = [
   {
     slug: "2026-09",
@@ -27,29 +26,13 @@ export const shiftInterestMonths = [
     // While true, /scheduleinterest accepts submissions for this month.
     open: true,
     days: [
-      { id: "mon", label: "Monday", short: "Mon", slots: { lv: WEEKDAY_LV, gp: WEEKDAY_GP } },
-      { id: "tue", label: "Tuesday", short: "Tue", slots: { lv: WEEKDAY_LV, gp: WEEKDAY_GP } },
-      { id: "wed", label: "Wednesday", short: "Wed", slots: { lv: WEEKDAY_LV, gp: WEEKDAY_GP } },
-      { id: "thu", label: "Thursday", short: "Thu", slots: { lv: WEEKDAY_LV, gp: WEEKDAY_GP } },
-      { id: "fri", label: "Friday", short: "Fri", slots: { lv: WEEKDAY_LV, gp: WEEKDAY_GP } },
-      {
-        id: "sat",
-        label: "Saturday",
-        short: "Sat",
-        slots: {
-          lv: ["07:00", "08:00", "09:15", "10:30", "11:30"],
-          gp: ["07:15", "08:15", "09:30", "10:45", "11:45"],
-        },
-      },
-      {
-        id: "sun",
-        label: "Sunday",
-        short: "Sun",
-        slots: {
-          lv: ["07:00", "08:00", "09:15", "10:30", "17:30", "18:30"],
-          gp: ["07:15", "08:15", "09:30"],
-        },
-      },
+      { id: "mon", label: "Monday", short: "Mon", slots: { lv: ["08:00"] } },
+      { id: "tue", label: "Tuesday", short: "Tue", slots: { lv: ["07:00"] } },
+      { id: "wed", label: "Wednesday", short: "Wed", slots: { lv: ["07:00", "08:00"] } },
+      { id: "thu", label: "Thursday", short: "Thu", slots: {} },
+      { id: "fri", label: "Friday", short: "Fri", slots: { lv: ["06:00"] } },
+      { id: "sat", label: "Saturday", short: "Sat", slots: {} },
+      { id: "sun", label: "Sunday", short: "Sun", slots: { lv: ["08:00"] } },
     ],
   },
 ];
@@ -70,6 +53,21 @@ export function formatSlotTime(time) {
   const suffix = h >= 12 ? "PM" : "AM";
   const hour12 = h % 12 === 0 ? 12 : h % 12;
   return `${hour12}:${String(m).padStart(2, "0")} ${suffix}`;
+}
+
+// Rooms that actually offer at least one shift in a month; the form and the
+// admin grid only render these.
+export function monthRooms(month) {
+  return SHIFT_ROOMS.filter((room) =>
+    month.days.some((day) => (day.slots[room.id] || []).length > 0),
+  );
+}
+
+// Days that offer at least one shift in a month.
+export function monthDays(month) {
+  return month.days.filter((day) =>
+    SHIFT_ROOMS.some((room) => (day.slots[room.id] || []).length > 0),
+  );
 }
 
 // Every valid slot key for a month, for validating and for the admin grid.
