@@ -286,7 +286,7 @@ const slides = [
   })],
   ["03-another-piece", await slideQuotePhoto({
     n: 3, file: "hands-on-heart.jpg", position: "attention",
-    caption: "PICTURED: GRADUATES AT THE AUG 7 CEREMONY",
+    caption: "PICTURED: ALONDRA ALCAZAR, MARTHA RODRIGUEZ, RUTHIE MALDONADO-DELWICHE · LSP INSTRUCTORS",
     quote: "Every time one of you teaches a class, another piece of this project exists somewhere else. That is the piece that we have built together, impossible to displace.",
     name: "MARGARITA QUIÑONES-PEÑA", role: "TO THE GRADUATES", size: 40, photoH: 400,
   })],
@@ -305,7 +305,7 @@ const slides = [
   })],
   ["07-more-than-fitness", await slideQuotePhoto({
     n: 7, file: "applause.jpg", position: "attention",
-    caption: "PICTURED: THE COMMUNITY APPLAUDS THE NEW TEACHERS",
+    caption: "PICTURED: JADE TUYEN NGUYEN · 2026 YOGA TEACHER TRAINING CLASS",
     quote: "Seeing moms and daughters come as well, this is so much more than fitness, it's family. It's about the community and everyone's well-being.",
     name: "JOCELYN VEGA", role: "YOGA TEACHER TRAINING · CLASS OF 2026", size: 44, photoH: 460,
   })],
