@@ -286,7 +286,7 @@ const slides = [
   })],
   ["03-another-piece", await slideQuotePhoto({
     n: 3, file: "hands-on-heart.jpg", position: "attention",
-    caption: "PICTURED: ALONDRA ALCAZAR, MARTHA RODRIGUEZ, RUTHIE MALDONADO-DELWICHE · LSP INSTRUCTORS",
+    caption: "PICTURED: ALONDRA ALCAZAR, LUZ RODRIGUEZ, RUTHIE MALDONADO-DELWICHE · LSP INSTRUCTORS",
     quote: "Every time one of you teaches a class, another piece of this project exists somewhere else. That is the piece that we have built together, impossible to displace.",
     name: "MARGARITA QUIÑONES-PEÑA", role: "TO THE GRADUATES", size: 40, photoH: 400,
   })],
