@@ -3,31 +3,31 @@
     import { supabase, SUPABASE_CONFIG_ERROR } from "../lib/supabaseClient.js";
     import {
         activeShiftMonth,
-        slotKey,
         formatSlotTime,
         describeSlotKey,
-        monthSlotKeys,
-        monthRooms,
-        monthDays,
+        groupSlots,
         SERVICE_CLASS_MIN,
         SERVICE_CLASS_MAX,
     } from "../data/shiftInterest.js";
 
     const month = activeShiftMonth;
-    // Only rooms and days that actually offer shifts this month.
-    const rooms = monthRooms(month);
-    const days = monthDays(month);
     const STORAGE_KEY = "lsp-shift-interest";
-    const validKeys = new Set(monthSlotKeys(month));
 
     const serviceClasses = Array.from(
         { length: SERVICE_CLASS_MAX - SERVICE_CLASS_MIN + 1 },
         (_, i) => SERVICE_CLASS_MIN + i,
     );
 
+    // Live slot list from Supabase; admins open/fill/add slots in the
+    // dashboard, so this is fetched instead of hardcoded.
+    let slotRows = [];
+    let slotsLoading = true;
+    let slotsError = "";
+
     // Selected slot keys, e.g. "mon-lv-0600". Reassigned on every toggle so
     // legacy-mode reactivity picks it up.
     let selected = [];
+    let savedSelection = [];
 
     let formName = "";
     let formEmail = "";
@@ -36,6 +36,7 @@
 
     let submitting = false;
     let submitError = "";
+    let submitNotice = "";
     let submitted = false;
     let submittedCount = 0;
     let wasUpdate = false;
@@ -50,21 +51,65 @@
         ]);
     }
 
+    $: dayGroups = groupSlots(slotRows);
+    $: openKeys = new Set(
+        slotRows.filter((r) => r.status === "open").map((r) => r.slot_key),
+    );
+
     onMount(() => {
         try {
             const raw = window.localStorage.getItem(STORAGE_KEY);
-            if (!raw) return;
-            const saved = JSON.parse(raw);
-            formName = saved.name || "";
-            formEmail = saved.email || "";
-            formServiceClass = saved.serviceClass || "";
-            if (saved.monthSlug === month.slug && Array.isArray(saved.slots)) {
-                selected = saved.slots.filter((k) => validKeys.has(k));
+            if (raw) {
+                const saved = JSON.parse(raw);
+                formName = saved.name || "";
+                formEmail = saved.email || "";
+                formServiceClass = saved.serviceClass || "";
+                if (saved.monthSlug === month.slug && Array.isArray(saved.slots)) {
+                    savedSelection = saved.slots;
+                }
             }
         } catch {
             // Private mode or corrupt entry: the form just starts blank.
         }
+        loadSlots();
     });
+
+    async function loadSlots() {
+        if (!supabase) {
+            slotsLoading = false;
+            slotsError = SUPABASE_CONFIG_ERROR;
+            return;
+        }
+        slotsLoading = true;
+        slotsError = "";
+
+        const result = await withTimeout(
+            supabase
+                .from("shift_interest_slots")
+                .select("slot_key, status")
+                .eq("month_slug", month.slug),
+            10000,
+        );
+
+        if (result === RPC_TIMEOUT || result.error) {
+            slotsLoading = false;
+            slotsError = "The shift list is taking too long to load. Please retry.";
+            if (result?.error) {
+                console.error("Shift slots load error:", result.error.message);
+            }
+            return;
+        }
+
+        slotRows = result.data || [];
+        slotsLoading = false;
+
+        // Restore this browser's earlier picks, dropping anything that has
+        // been filled or removed since.
+        const open = new Set(
+            slotRows.filter((r) => r.status === "open").map((r) => r.slot_key),
+        );
+        selected = savedSelection.filter((k) => open.has(k));
+    }
 
     function rememberSubmission() {
         try {
@@ -84,6 +129,7 @@
     }
 
     function toggleSlot(key) {
+        if (!openKeys.has(key)) return;
         submitted = false;
         selected = selected.includes(key)
             ? selected.filter((k) => k !== key)
@@ -123,6 +169,7 @@
 
         submitting = true;
         submitError = "";
+        submitNotice = "";
 
         const result = await withTimeout(
             supabase.rpc("submit_shift_interest", {
@@ -150,15 +197,32 @@
         }
         const data = result.data;
         if (!data?.ok) {
-            submitError =
-                data?.reason === "month_full"
-                    ? "This form isn't accepting more responses. Please reach out to the team directly."
-                    : "Something in the form looks off. Double-check your email and picks, then try again.";
+            if (data?.reason === "slots_unavailable") {
+                submitError =
+                    "Those shifts were just filled. Refresh your picks and choose from what's still open.";
+                loadSlots();
+            } else if (data?.reason === "month_full") {
+                submitError =
+                    "This form isn't accepting more responses. Please reach out to the team directly.";
+            } else {
+                submitError =
+                    "Something in the form looks off. Double-check your email and picks, then try again.";
+            }
             return;
         }
 
+        // The RPC drops any pick that got filled between page load and
+        // submit; mirror what it actually kept.
+        const accepted = Array.isArray(data.accepted) ? data.accepted : selected;
+        if (accepted.length < selected.length) {
+            submitNotice =
+                "Heads up: some of your picks were filled while you were deciding, so they weren't included.";
+            selected = accepted;
+            loadSlots();
+        }
+
         rememberSubmission();
-        submittedCount = selected.length;
+        submittedCount = accepted.length;
         wasUpdate = data.result === "updated";
         submitted = true;
         submitError = "";
@@ -179,29 +243,54 @@
                 Keep an eye on the team group chat for next month's form.
             </p>
         </div>
+    {:else if slotsLoading}
+        <div class="space-y-6" aria-hidden="true">
+            {#each [0, 1, 2] as i (i)}
+                <div class="h-40 animate-pulse rounded-2xl bg-white/70 shadow-sm ring-1 ring-black/5"></div>
+            {/each}
+        </div>
+    {:else if slotsError}
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-center" role="alert">
+            <p class="font-body text-sm text-red-700">{slotsError}</p>
+            <button
+                type="button"
+                class="mt-4 rounded-full bg-off-black px-6 py-2.5 font-sans text-sm font-bold text-white transition hover:bg-vibrant-pink"
+                on:click={loadSlots}
+            >
+                Retry
+            </button>
+        </div>
+    {:else if dayGroups.length === 0}
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+            <p class="font-sans font-bold text-amber-800">
+                Every {month.label} shift is spoken for.
+            </p>
+            <p class="mt-2 font-body text-sm text-amber-700">
+                Check back soon: new shifts show up here as they open.
+            </p>
+        </div>
     {:else}
         <!-- Slot picker -->
         <div class="space-y-6">
-            {#each days as day (day.id)}
+            {#each dayGroups as group (group.day.id)}
                 <section
                     class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 sm:p-6"
-                    aria-label="{day.label} shifts"
+                    aria-label="{group.day.label} shifts"
                 >
                     <div class="flex items-baseline justify-between gap-3">
                         <h3 class="font-sans text-lg font-extrabold text-off-black">
-                            {day.label}
+                            {group.day.label}
                         </h3>
-                        {#if daySelectedCount(day, selected) > 0}
+                        {#if daySelectedCount(group.day, selected) > 0}
                             <span
                                 class="rounded-full bg-vibrant-pink/10 px-3 py-1 font-sans text-xs font-bold text-vibrant-pink"
                             >
-                                {daySelectedCount(day, selected)} picked
+                                {daySelectedCount(group.day, selected)} picked
                             </span>
                         {/if}
                     </div>
-                    <div class="mt-4 grid gap-5 {rooms.length > 1 ? 'sm:grid-cols-2' : ''}">
-                        {#each rooms as room (room.id)}
-                            {#if (day.slots[room.id] || []).length}
+                    <div class="mt-4 grid gap-5 {group.rooms.length > 1 ? 'sm:grid-cols-2' : ''}">
+                        {#each group.rooms as { room, slots } (room.id)}
                             <div>
                                 <p
                                     class="font-sans text-xs font-bold uppercase tracking-wider text-medium-gray"
@@ -209,23 +298,32 @@
                                     {room.name}
                                 </p>
                                 <div class="mt-2 flex flex-wrap gap-2">
-                                    {#each day.slots[room.id] || [] as time (time)}
-                                        {@const key = slotKey(day.id, room.id, time)}
-                                        {@const isOn = selected.includes(key)}
-                                        <button
-                                            type="button"
-                                            aria-pressed={isOn}
-                                            class="min-h-10 rounded-full px-4 py-1.5 font-sans text-sm font-bold transition {isOn
-                                                ? 'bg-vibrant-pink text-white shadow-sm'
-                                                : 'bg-light-gray text-off-black hover:bg-vibrant-pink/15'}"
-                                            on:click={() => toggleSlot(key)}
-                                        >
-                                            {formatSlotTime(time)}
-                                        </button>
+                                    {#each slots as slot (slot.key)}
+                                        {#if slot.status === "open"}
+                                            {@const isOn = selected.includes(slot.key)}
+                                            <button
+                                                type="button"
+                                                aria-pressed={isOn}
+                                                class="min-h-10 rounded-full px-4 py-1.5 font-sans text-sm font-bold transition {isOn
+                                                    ? 'bg-vibrant-pink text-white shadow-sm'
+                                                    : 'bg-light-gray text-off-black hover:bg-vibrant-pink/15'}"
+                                                on:click={() => toggleSlot(slot.key)}
+                                            >
+                                                {formatSlotTime(slot.time)}
+                                            </button>
+                                        {:else}
+                                            <span
+                                                class="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-gray-100 px-4 py-1.5 font-sans text-sm font-bold text-gray-400 line-through decoration-gray-300"
+                                            >
+                                                {formatSlotTime(slot.time)}
+                                                <span class="font-sans text-[10px] font-bold uppercase tracking-wide no-underline">
+                                                    Filled
+                                                </span>
+                                            </span>
+                                        {/if}
                                     {/each}
                                 </div>
                             </div>
-                            {/if}
                         {/each}
                     </div>
                 </section>
@@ -281,7 +379,7 @@
                             title="Remove this shift"
                             on:click={() => toggleSlot(key)}
                         >
-                            {describeSlotKey(key, month)}
+                            {describeSlotKey(key)}
                             <span aria-hidden="true" class="text-vibrant-pink/60 group-hover:text-vibrant-pink">✕</span>
                         </button>
                     {/each}
@@ -369,6 +467,11 @@
                             and submit again with the same email, it replaces
                             your earlier response.
                         </p>
+                        {#if submitNotice}
+                            <p class="mt-2 font-body text-sm text-emerald-700">
+                                {submitNotice}
+                            </p>
+                        {/if}
                     </div>
                 {:else}
                     <div class="sm:col-span-2">

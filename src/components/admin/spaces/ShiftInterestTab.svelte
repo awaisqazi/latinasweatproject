@@ -1,25 +1,35 @@
 <script>
   // Shift Interest: who wants which teaching shifts next month.
-  // Reads shift_interest_submissions (fed by the public /scheduleinterest
-  // form); the slot layout comes from src/data/shiftInterest.js so this grid
-  // always mirrors what the form offered. Click a slot to see everyone who
+  // Slots live in shift_interest_slots (managed right here: mark filled,
+  // reopen, add, remove), submissions in shift_interest_submissions (fed by
+  // the public /scheduleinterest form). Click a slot to see everyone who
   // raised their hand for it.
   import { onMount } from "svelte";
-  import { CalendarCheck, Copy, ExternalLink, RefreshCw, Trash2, Users } from "@lucide/svelte";
+  import {
+    CalendarCheck,
+    CalendarPlus,
+    Copy,
+    ExternalLink,
+    Lock,
+    LockOpen,
+    RefreshCw,
+    Trash2,
+    Users,
+  } from "@lucide/svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
   import ConfirmDialog from "../ui/ConfirmDialog.svelte";
   import EmptyState from "../ui/EmptyState.svelte";
   import StatCard from "../ui/StatCard.svelte";
   import {
+    SHIFT_ROOMS,
+    SHIFT_DAYS,
     shiftInterestMonths,
     activeShiftMonth,
     slotKey,
     formatSlotTime,
     describeSlotKey,
-    monthSlotKeys,
-    monthRooms,
-    monthDays,
+    parseSlotKey,
   } from "../../../data/shiftInterest.js";
 
   export let supabase;
@@ -29,14 +39,22 @@
   $: month =
     shiftInterestMonths.find((m) => m.slug === monthSlug) || activeShiftMonth;
 
+  let slots = [];
   let submissions = [];
   let isLoading = true;
   let errorMessage = "";
   let selectedKey = null;
   let deleting = null; // submission pending delete confirmation
+  let removingSlot = null; // slot pending delete confirmation
   let isDeleting = false;
+  let slotBusy = ""; // slot_key with an in-flight status change
   let flash = "";
   let flashTimer = null;
+
+  // Add-shift form state, one per room (keyed by room id).
+  let addDay = {};
+  let addTime = {};
+  let addBusy = "";
 
   let lastVersion = dataVersion;
   $: if (dataVersion !== lastVersion) {
@@ -57,19 +75,26 @@
     isLoading = true;
     errorMessage = "";
 
-    const { data, error } = await supabase
-      .from("shift_interest_submissions")
-      .select("id, name, email, service_class, slot_keys, notes, created_at, updated_at")
-      .eq("month_slug", monthSlug)
-      .order("created_at", { ascending: true });
+    const [slotsRes, subsRes] = await Promise.all([
+      supabase
+        .from("shift_interest_slots")
+        .select("id, slot_key, status")
+        .eq("month_slug", monthSlug),
+      supabase
+        .from("shift_interest_submissions")
+        .select("id, name, email, service_class, slot_keys, notes, created_at, updated_at")
+        .eq("month_slug", monthSlug)
+        .order("created_at", { ascending: true }),
+    ]);
 
-    if (error) {
-      errorMessage = error.message;
+    if (slotsRes.error || subsRes.error) {
+      errorMessage = slotsRes.error?.message || subsRes.error?.message;
       isLoading = false;
       return;
     }
 
-    submissions = data || [];
+    slots = slotsRes.data || [];
+    submissions = subsRes.data || [];
     isLoading = false;
   }
 
@@ -82,30 +107,40 @@
     return acc;
   }, {});
 
+  $: slotByKey = slots.reduce((acc, s) => {
+    acc[s.slot_key] = s;
+    return acc;
+  }, {});
+
   $: totalPicks = submissions.reduce(
     (sum, s) => sum + (s.slot_keys?.length || 0),
     0,
   );
-  $: allKeys = monthSlotKeys(month);
-  $: coveredCount = allKeys.filter((k) => (bySlot[k] || []).length > 0).length;
-  $: emptyCount = allKeys.length - coveredCount;
+  $: openSlots = slots.filter((s) => s.status === "open");
+  $: filledSlots = slots.filter((s) => s.status === "filled");
+  $: openNoInterest = openSlots.filter(
+    (s) => (bySlot[s.slot_key] || []).length === 0,
+  ).length;
 
-  // Per room: the union of that room's times across the week, sorted, so each
-  // room renders as one time-rows x day-columns grid. Rooms and days with no
-  // shifts this month are dropped entirely.
-  $: gridDays = monthDays(month);
-  $: roomTimes = monthRooms(month).map((room) => {
+  // Per room: the union of that room's times across the week (sorted), so
+  // each room renders as one time-rows x day-columns grid. Every room from
+  // the catalog renders, even empty, so shifts can be added anywhere.
+  $: roomGrids = SHIFT_ROOMS.map((room) => {
     const times = new Set();
-    for (const day of gridDays) {
-      for (const time of day.slots[room.id] || []) times.add(time);
+    for (const slot of slots) {
+      const parts = parseSlotKey(slot.slot_key);
+      if (parts.roomId === room.id) times.add(parts.time);
     }
     return { room, times: [...times].sort() };
   });
 
+  $: selectedSlot = selectedKey ? slotByKey[selectedKey] || null : null;
   $: selectedPeople = selectedKey ? bySlot[selectedKey] || [] : [];
 
-  function cellClass(count, isSelected) {
+  function cellClass(count, status, isSelected) {
     const ring = isSelected ? " ring-2 ring-accent ring-offset-1" : "";
+    if (status === "filled")
+      return "bg-ink/10 text-ink/45 line-through decoration-ink/30 hover:bg-ink/15" + ring;
     if (count === 0)
       return "bg-white text-ink/25 hover:bg-ink/[0.04] hover:text-ink/50" + ring;
     if (count === 1) return "bg-accent/15 text-ink hover:bg-accent/25" + ring;
@@ -119,11 +154,76 @@
     flashTimer = setTimeout(() => (flash = ""), 2500);
   }
 
+  async function setSlotStatus(slot, status) {
+    slotBusy = slot.slot_key;
+    const { error } = await supabase
+      .from("shift_interest_slots")
+      .update({ status })
+      .eq("id", slot.id);
+    slotBusy = "";
+
+    if (error) {
+      errorMessage = error.message;
+      return;
+    }
+    slots = slots.map((s) => (s.id === slot.id ? { ...s, status } : s));
+    showFlash(
+      status === "filled"
+        ? `${describeSlotKey(slot.slot_key)} marked filled`
+        : `${describeSlotKey(slot.slot_key)} reopened`,
+    );
+  }
+
+  async function removeSlot() {
+    if (!removingSlot) return;
+    isDeleting = true;
+    const { error } = await supabase
+      .from("shift_interest_slots")
+      .delete()
+      .eq("id", removingSlot.id);
+    isDeleting = false;
+
+    if (error) {
+      errorMessage = error.message;
+    } else {
+      slots = slots.filter((s) => s.id !== removingSlot.id);
+      if (selectedKey === removingSlot.slot_key) selectedKey = null;
+      showFlash(`Removed ${describeSlotKey(removingSlot.slot_key)}`);
+    }
+    removingSlot = null;
+  }
+
+  async function addSlot(room) {
+    const dayId = addDay[room.id];
+    const time = addTime[room.id];
+    if (!dayId || !time) return;
+
+    const key = slotKey(dayId, room.id, time);
+    addBusy = room.id;
+    const { data, error } = await supabase
+      .from("shift_interest_slots")
+      .insert({ month_slug: monthSlug, slot_key: key })
+      .select("id, slot_key, status")
+      .single();
+    addBusy = "";
+
+    if (error) {
+      errorMessage =
+        error.code === "23505"
+          ? `${describeSlotKey(key)} already exists.`
+          : error.message;
+      return;
+    }
+    slots = [...slots, data];
+    addTime = { ...addTime, [room.id]: "" };
+    showFlash(`Added ${describeSlotKey(key)}`);
+  }
+
   async function copyEmails(people) {
-    const emails = [...new Set(people.map((p) => p.email))].join(", ");
+    const unique = [...new Set(people.map((p) => p.email))];
     try {
-      await navigator.clipboard.writeText(emails);
-      showFlash(`Copied ${people.length === 1 ? "1 email" : `${new Set(people.map((p) => p.email)).size} emails`}`);
+      await navigator.clipboard.writeText(unique.join(", "));
+      showFlash(`Copied ${unique.length === 1 ? "1 email" : `${unique.length} emails`}`);
     } catch {
       showFlash("Couldn't copy. Select and copy manually.");
     }
@@ -159,7 +259,7 @@
 
 <div class="space-y-4">
   {#if errorMessage}
-    <Banner tone="error" message={errorMessage} onRetry={load} />
+    <Banner tone="error" message={errorMessage} onDismiss={() => (errorMessage = "")} />
   {/if}
   {#if flash}
     <Banner tone="success" message={flash} />
@@ -209,11 +309,13 @@
   <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <StatCard label="Responses" value={submissions.length} icon={Users} tone="teal" loading={isLoading} />
     <StatCard label="Total shift picks" value={totalPicks} icon={CalendarCheck} tone="gold" loading={isLoading} />
-    <StatCard label="Slots with interest" value={`${coveredCount}/${allKeys.length}`} tone="neutral" loading={isLoading} />
+    <StatCard label="Open shifts" value={openSlots.length} icon={LockOpen} tone="neutral" loading={isLoading} />
     <StatCard
-      label="Slots with no interest"
-      value={emptyCount}
-      tone={emptyCount > 0 && !isLoading ? "rose" : "neutral"}
+      label="Open with no interest"
+      value={openNoInterest}
+      icon={Lock}
+      tone={openNoInterest > 0 && !isLoading ? "rose" : "neutral"}
+      hint={filledSlots.length ? `${filledSlots.length} filled` : ""}
       loading={isLoading}
     />
   </div>
@@ -225,66 +327,140 @@
     />
   {/if}
 
-  <!-- One grid per room: time rows x day columns. Click a cell for names. -->
-  {#each roomTimes as { room, times } (room.id)}
+  <!-- One grid per room: time rows x day columns. Click a slot for names and
+       fill/reopen/remove controls; add new shifts with the row below. -->
+  {#each roomGrids as { room, times } (room.id)}
     <section class="rounded-card border border-ink/8 bg-white p-4 shadow-card">
       <h4 class="text-sm font-bold text-ink">{room.name}</h4>
-      <div class="thin-scroll mt-3 overflow-x-auto">
-        <table class="w-full min-w-[40rem] border-separate" style="border-spacing: 3px;">
-          <thead>
-            <tr>
-              <th class="w-16 text-left text-[10px] font-semibold uppercase tracking-wide text-ink/45"></th>
-              {#each gridDays as day (day.id)}
-                <th class="pb-1 text-center text-xs font-bold text-ink/65">{day.short}</th>
-              {/each}
-            </tr>
-          </thead>
-          <tbody>
-            {#each times as time (time)}
+
+      {#if times.length === 0}
+        <p class="mt-2 text-sm text-ink/55">No shifts in {month.label} yet.</p>
+      {:else}
+        <div class="thin-scroll mt-3 overflow-x-auto">
+          <table class="w-full min-w-[40rem] border-separate" style="border-spacing: 3px;">
+            <thead>
               <tr>
-                <td class="pr-2 text-right text-[11px] font-semibold tabular-nums text-ink/45">
-                  {formatSlotTime(time)}
-                </td>
-                {#each gridDays as day (day.id)}
-                  {#if (day.slots[room.id] || []).includes(time)}
-                    {@const key = slotKey(day.id, room.id, time)}
-                    {@const count = (bySlot[key] || []).length}
-                    <td class="p-0">
-                      <button
-                        type="button"
-                        class="flex h-9 w-full items-center justify-center rounded-md border border-ink/8 text-sm font-bold tabular-nums transition {cellClass(count, selectedKey === key)}"
-                        title="{describeSlotKey(key, month)}: {count} interested"
-                        aria-pressed={selectedKey === key}
-                        onclick={() => (selectedKey = selectedKey === key ? null : key)}
-                      >
-                        {count || ""}
-                      </button>
-                    </td>
-                  {:else}
-                    <td class="p-0">
-                      <div class="h-9 rounded-md bg-ink/[0.06]" aria-hidden="true"></div>
-                    </td>
-                  {/if}
+                <th class="w-16 text-left text-[10px] font-semibold uppercase tracking-wide text-ink/45"></th>
+                {#each SHIFT_DAYS as day (day.id)}
+                  <th class="pb-1 text-center text-xs font-bold text-ink/65">{day.short}</th>
                 {/each}
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#each times as time (time)}
+                <tr>
+                  <td class="pr-2 text-right text-[11px] font-semibold tabular-nums text-ink/45">
+                    {formatSlotTime(time)}
+                  </td>
+                  {#each SHIFT_DAYS as day (day.id)}
+                    {@const key = slotKey(day.id, room.id, time)}
+                    {@const slot = slotByKey[key]}
+                    {#if slot}
+                      {@const count = (bySlot[key] || []).length}
+                      <td class="p-0">
+                        <button
+                          type="button"
+                          class="flex h-9 w-full items-center justify-center gap-1 rounded-md border border-ink/8 text-sm font-bold tabular-nums transition {cellClass(count, slot.status, selectedKey === key)}"
+                          title="{describeSlotKey(key)}: {slot.status === 'filled' ? 'filled' : `${count} interested`}"
+                          aria-pressed={selectedKey === key}
+                          onclick={() => (selectedKey = selectedKey === key ? null : key)}
+                        >
+                          {#if slot.status === "filled"}
+                            <Lock class="h-3 w-3 shrink-0" aria-hidden="true" />
+                          {/if}
+                          {count || ""}
+                        </button>
+                      </td>
+                    {:else}
+                      <td class="p-0">
+                        <div class="h-9 rounded-md bg-ink/[0.06]" aria-hidden="true"></div>
+                      </td>
+                    {/if}
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+
+      <!-- Add a shift to this room -->
+      <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-ink/6 pt-3">
+        <CalendarPlus class="h-4 w-4 text-ink/45" aria-hidden="true" />
+        <select
+          bind:value={addDay[room.id]}
+          class="rounded-control border border-ink/12 bg-white px-2.5 py-1.5 text-sm font-semibold text-ink"
+          aria-label="Day for the new shift"
+        >
+          <option value={undefined} disabled>Day</option>
+          {#each SHIFT_DAYS as day (day.id)}
+            <option value={day.id}>{day.label}</option>
+          {/each}
+        </select>
+        <input
+          type="time"
+          bind:value={addTime[room.id]}
+          class="rounded-control border border-ink/12 bg-white px-2.5 py-1.5 text-sm font-semibold text-ink"
+          aria-label="Time for the new shift"
+        />
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={addBusy === room.id}
+          disabled={!addDay[room.id] || !addTime[room.id]}
+          onclick={() => addSlot(room)}
+        >
+          Add shift
+        </Button>
       </div>
     </section>
   {/each}
 
-  <!-- Slot detail: everyone who picked the selected slot -->
-  {#if selectedKey}
+  <!-- Slot detail: people + manage controls for the selected slot -->
+  {#if selectedKey && selectedSlot}
     <section class="rounded-card border border-accent/40 bg-accent-soft/20 p-4 shadow-card">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h4 class="text-sm font-bold text-ink">
-          {describeSlotKey(selectedKey, month)}
+          {describeSlotKey(selectedKey)}
+          {#if selectedSlot.status === "filled"}
+            <span class="ml-2 rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-bold text-ink/60">
+              Filled
+            </span>
+          {/if}
           <span class="ml-2 font-semibold text-ink/55">
             {selectedPeople.length} interested
           </span>
         </h4>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          {#if selectedSlot.status === "open"}
+            <Button
+              variant="dark"
+              size="sm"
+              icon={Lock}
+              loading={slotBusy === selectedKey}
+              onclick={() => setSlotStatus(selectedSlot, "filled")}
+            >
+              Mark filled
+            </Button>
+          {:else}
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={LockOpen}
+              loading={slotBusy === selectedKey}
+              onclick={() => setSlotStatus(selectedSlot, "open")}
+            >
+              Reopen
+            </Button>
+          {/if}
+          <Button
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onclick={() => (removingSlot = selectedSlot)}
+          >
+            Remove shift
+          </Button>
           {#if selectedPeople.length > 0}
             <Button variant="secondary" size="sm" icon={Copy} onclick={() => copyEmails(selectedPeople)}>
               Copy emails
@@ -359,7 +535,7 @@
                     : 'bg-ink/[0.05] text-ink/70 hover:bg-accent/20'}"
                   onclick={() => (selectedKey = key)}
                 >
-                  {describeSlotKey(key, month)}
+                  {describeSlotKey(key)}{slotByKey[key] ? "" : " (removed)"}
                 </button>
               {/each}
             </div>
@@ -386,4 +562,17 @@
   busy={isDeleting}
   onConfirm={deleteSubmission}
   onCancel={() => (deleting = null)}
+/>
+
+<ConfirmDialog
+  open={Boolean(removingSlot)}
+  title="Remove this shift?"
+  message={removingSlot
+    ? `${describeSlotKey(removingSlot.slot_key)} disappears from the form entirely. ${(bySlot[removingSlot.slot_key] || []).length ? `${(bySlot[removingSlot.slot_key] || []).length} ${(bySlot[removingSlot.slot_key] || []).length === 1 ? "person keeps" : "people keep"} it in their submitted picks for reference.` : "Nobody has picked it yet."} If the shift is just taken, use Mark filled instead.`
+    : ""}
+  confirmLabel="Remove shift"
+  tone="danger"
+  busy={isDeleting}
+  onConfirm={removeSlot}
+  onCancel={() => (removingSlot = null)}
 />
