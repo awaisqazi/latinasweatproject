@@ -10,12 +10,12 @@
 //   5. Monday Miles Tee merch [L]
 //   6. 40 Under 40 [D]
 //   7. Monday Miles community runs [L]
-//   8. Grand Opening [D]
+//   8. A New Chapter (relocation) [D]
 //   9. Events carousel [L]
 //  10. Instagram [D]
 //  11. In The Press [L]
 // Desktop media zig-zag: Gala photo LEFT -> WGN9 video RIGHT -> Tee LEFT ->
-// 40 Under 40 flyer RIGHT -> Monday Miles visual LEFT -> Grand Opening RIGHT.
+// 40 Under 40 flyer RIGHT -> Monday Miles visual LEFT -> A New Chapter RIGHT.
 // (Recap band, carousel, Instagram, and Press sit outside the zig-zag.)
 // Retired from this page in Sep 2026: the YTT '26 Trio companion band (series
 // ended Aug 31), the standalone Graduation 2026 and Sweat Fest spotlights
@@ -1110,7 +1110,7 @@ const graduationFlickrUrl =
         >
           {/* Content (right on desktop via lg:order-2, Sep 2026 reorder:
               the visual stays LEFT, zig-zagging with the 40 Under 40 flyer
-              right above and the Grand Opening photo right below; DOM order
+              right above and the A New Chapter photo right below; DOM order
               copy-first preserved for mobile) */}
           <div class="text-center lg:order-2 lg:text-left">
             {/* Badge */}
@@ -1311,7 +1311,7 @@ const graduationFlickrUrl =
     </section>
     {/* END: Monday Miles — Community Runs Section */}
 
-    {/* START: Grand Opening Section */}
+    {/* START: A New Chapter Section (former Grand Opening) */}
     <section class="bg-off-black py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
@@ -1324,27 +1324,39 @@ const graduationFlickrUrl =
             <p
               class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
             >
-              We&apos;re Open!
+              A New Chapter
             </p>
             <h2
               class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
             >
-              Our New Studio Is Here
+              One more month on 16th Street. Then we go pop-up.
             </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-white/65">
-              <p>The wait is over! Our brand new studio is officially open.</p>
               <p>
-                Experience the energy, meet our incredible teaching team, and
-                see firsthand what makes LSP more than just a place to move. We
-                are a community, a safe space, and a celebration of wellness in
-                our neighborhoods.
+                Daily classes at 949 W 16th St run through September 25, the
+                night of our gala. Come move with us while this room is still
+                ours.
               </p>
               <p>
-                Come join a class and be part of our vibrant community. We can't
-                wait to welcome you!
+                After that, LSP goes pop-up: classes and programming around the
+                neighborhood while we build our new home in Pilsen, opening
+                early 2027.
               </p>
             </div>
-            <div class="mt-8 text-center">
+            <blockquote
+              class="mt-6 border-l-2 border-accent-gold/60 pl-4 font-body italic text-white/80"
+            >
+              <p>
+                The Latina Sweat Project was never these walls. It has always
+                been the people.
+              </p>
+              <footer class="mt-1 text-sm not-italic text-white/50">
+                Margarita Quiñones-Peña, Founder
+              </footer>
+            </blockquote>
+            <div
+              class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
+            >
               <a
                 href={`${base}schedule`}
                 class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
@@ -1352,21 +1364,33 @@ const graduationFlickrUrl =
                 data-conversion-context="home_studio_section"
                 data-conversion-booking-path="schedule_page"
               >
-                View Class Schedule
+                Book a class
+              </a>
+              <a
+                href={`${base}donate`}
+                class="btn rounded-full border border-accent-gold/50 bg-white/[0.04] px-8 py-3 text-base font-bold text-accent-gold transition hover:border-accent-gold hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-accent-gold focus:ring-offset-2 focus:ring-offset-off-black"
+                data-conversion-event="donation_click"
+                data-conversion-context="home_new_chapter"
+              >
+                Support the next studio
               </a>
             </div>
+            <p class="mt-4 text-center text-sm text-white/45 lg:text-left">
+              Special classes and community programming continue after
+              September 25.
+            </p>
           </div>
           <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
             <img
               src={`${base}images/studio.png`}
-              alt="The brand new Latina Sweat Project yoga studio"
+              alt="Inside the Latina Sweat Project studio at 949 W 16th St in Pilsen"
               class="h-full w-full object-cover"
             />
           </div>
         </div>
       </div>
     </section>
-    {/* END: Grand Opening Section */}
+    {/* END: A New Chapter Section */}
 
     {/* START: Events Section */}
     <section class="bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-12 sm:py-16">
