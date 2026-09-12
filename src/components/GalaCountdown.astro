@@ -5,19 +5,23 @@ interface Props {
   target?: string;
   variant?: "hero" | "compact" | "card";
   className?: string;
+  label?: string;
+  bilingual?: boolean;
 }
 
 const {
   target = galaTeaser.startsAtISO,
   variant = "hero",
   className = "",
+  label = `Countdown to ${galaTeaser.title}`,
+  bilingual = false,
 } = Astro.props;
 
 const items = [
-  { key: "days", label: "Days" },
-  { key: "hours", label: "Hours" },
-  { key: "minutes", label: "Minutes" },
-  { key: "seconds", label: "Seconds" },
+  { key: "days", label: "Days", es: "Días" },
+  { key: "hours", label: "Hours", es: "Horas" },
+  { key: "minutes", label: "Minutes", es: "Minutos" },
+  { key: "seconds", label: "Seconds", es: "Segundos" },
 ];
 
 const wrapperClass =
@@ -44,24 +48,32 @@ const numberClass =
   class:list={["gala-countdown", wrapperClass, className]}
   data-gala-countdown
   data-target={target}
-  aria-label={`Countdown to ${galaTeaser.title}`}
+  role="timer"
+  aria-live="off"
+  aria-label={label}
 >
   {
     items.map((item) => (
       <div class={itemClass}>
         <span class={numberClass} data-countdown-value={item.key}>--</span>
-        <span class="mt-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-accent-gold/90 sm:text-xs">
-          {item.label}
+        <span class="countdown-unit mt-1 block font-bold uppercase text-accent-gold/90">
+          <span class:list={[bilingual && "lang-en"]}>{item.label}</span>
+          {bilingual && <span class="lang-es hidden">{item.es}</span>}
         </span>
       </div>
     ))
   }
 </div>
 
+<style>
+  .gala-countdown { container-type: inline-size; }
+  .countdown-unit { font-size: clamp(7px, 2.2cqi, 11px); letter-spacing: 0.04em; }
+</style>
+
 <script>
   (() => {
     const countdowns = Array.from(
-      document.querySelectorAll("[data-gala-countdown]"),
+      document.querySelectorAll<HTMLElement>("[data-gala-countdown]"),
     );
     if (!countdowns.length) return;
 
@@ -69,10 +81,10 @@ const numberClass =
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    const pad = (value) => String(Math.max(0, value)).padStart(2, "0");
+    const pad = (value: number) => String(Math.max(0, value)).padStart(2, "0");
 
     // Soft tick: gently slide the digit into place whenever it changes.
-    const tick = (element) => {
+    const tick = (element: Element) => {
       if (reduceMotion || typeof element.animate !== "function") return;
       element.animate(
         [
@@ -112,6 +124,7 @@ const numberClass =
     };
 
     update();
-    window.setInterval(update, reduceMotion ? 60000 : 1000);
+    // Reduced motion suppresses animation, but the displayed time stays accurate.
+    window.setInterval(update, 1000);
   })();
 </script>

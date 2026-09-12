@@ -15,7 +15,7 @@ export const galaTeaser = {
   venueAddress: "220 E Chicago Ave, Chicago, IL",
   venueLine: "Museum of Contemporary Art Chicago · 220 E Chicago Ave",
   attire: "Black tie",
-  statusLabel: "Tickets and sponsorships are on sale now",
+  statusLabel: "Full-night ticket sales close September 15",
   pagePath: "/gala",
   saveDatePath: "/gala#save-the-date",
   // Live Zeffy ticketing form (tickets AND sponsorships). CTAs across the site
@@ -30,7 +30,7 @@ export const galaTeaser = {
     "https://www.zeffy.com/en-US/ticketing/noche-inolvidable-gala-interest-list",
   interestLabel: "Join the Interest List",
   homepageDescription:
-    "A black-tie evening for art, movement, and community.",
+    "Cocktails, a three-course dinner, art, fashion, and dancing. Be there for the full night and help bring accessible wellness to Chicago.",
   pageDescription:
     "This next chapter brings our community into one of Chicago's most striking contemporary art spaces.",
   venueDescription:
@@ -88,6 +88,14 @@ export const galaTickets = {
     { name: "Community Sponsor", amount: 2500, seats: "5 tickets" },
   ],
   sponsorshipsCloseLabel: "Sponsorships close September 15, 2026",
+};
+
+// Sales stay open through September 15 in Chicago (CDT, UTC−05:00).
+// Use an exclusive midnight boundary so every second of September 15 counts.
+export const galaTicketDeadline = {
+  closesAtISO: "2026-09-16T00:00:00-05:00",
+  label: "September 15, 2026 · 11:59 PM Chicago time",
+  fullNightPrice: galaTickets.tiers.find((tier) => tier.id === "benefactor").regular,
 };
 
 // The evening, hour by hour, mirroring the printed two-pager's timeline.

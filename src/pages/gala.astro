@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import GalaCountdown from "@/components/GalaCountdown.astro";
+import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import GalaImpactStats from "@/components/GalaImpactStats.astro";
 import {
@@ -96,7 +96,7 @@ const sponsorLogos2025 = [
 
 <Layout
   title={`${galaTeaser.title} | The Latina Sweat Project`}
-  description={`${galaTeaser.title} at ${galaTeaser.venueName} on ${galaTeaser.dateTimeLabel}. Tickets and sponsorships are on sale now for a black-tie evening of art, movement, and community, our signature fundraising event.`}
+  description={`${galaTeaser.title} at ${galaTeaser.venueName} on ${galaTeaser.dateTimeLabel}. Full-night Benefactor tickets are $375. Sales close September 15 at 11:59 PM Chicago time. Reserve cocktails, dinner, art, fashion, and dancing for a cause.`}
 >
   <Header />
   <main class="bg-off-black text-white">
@@ -211,13 +211,15 @@ const sponsorLogos2025 = [
               class="hero-rise mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl"
               style="animation-delay: 0.28s;"
             >
-              {galaTeaser.homepageDescription}
+              One unforgettable night of art, movement, and community care at
+              MCA Chicago. Reserve the Full Evening while Benefactor tickets
+              are still available.
             </p>
             <p
               class="hero-rise mt-3 text-base font-semibold text-accent-gold"
               style="animation-delay: 0.32s;"
             >
-              {galaTeaser.statusLabel}.
+              Full Evening tickets are $375 and close September 15, 2026.
             </p>
 
             <div
@@ -225,12 +227,15 @@ const sponsorLogos2025 = [
               style="animation-delay: 0.38s;"
             >
               <a
-                href="#tickets"
+                href={galaTeaser.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
                 data-conversion-event="gala_ticket_click"
                 data-conversion-context="gala_page_hero"
+                data-gala-full-night-cta="true"
               >
-                <span class="relative z-[1]">Get Tickets</span>
+                <span class="relative z-[1]">Reserve the Full Evening</span>
                 <svg
                   class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
                   fill="none"
@@ -302,28 +307,8 @@ const sponsorLogos2025 = [
           </div>
         </div>
 
-        {/* Glowing glass countdown panel — the live focal point. */}
-        <div
-          class="gala-countdown-panel reveal mt-12 rounded-3xl border border-accent-gold/40 bg-black/30 p-4 shadow-xl shadow-black/30 backdrop-blur-md sm:p-5 lg:p-6"
-        >
-          <div class="grid items-center gap-5 lg:grid-cols-[0.9fr_1.6fr_0.9fr]">
-            <div class="text-center lg:text-left">
-              <p
-                class="text-[11px] font-bold uppercase tracking-[0.22em] text-white/55"
-              >
-                Countdown to
-              </p>
-              <p class="mt-1 font-display text-xl font-bold text-accent-gold">
-                {galaTeaser.title}
-              </p>
-            </div>
-            <GalaCountdown variant="compact" />
-            <p
-              class="text-center text-sm font-semibold text-white/70 lg:text-right"
-            >
-              A night to move our future, together.
-            </p>
-          </div>
+        <div class="reveal mt-12">
+          <GalaTicketDeadline context="gala_page_deadline" />
         </div>
 
         <div class="reveal mt-12 flex justify-center">
@@ -570,9 +555,17 @@ const sponsorLogos2025 = [
               class="inline-flex items-center gap-2 rounded-full border border-accent-gold/40 bg-accent-gold/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-accent-gold"
             >
               <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
-              {galaTickets.earlyBirdLabel}
+              Full night. One unforgettable experience.
             </span>
           </div>
+          <p
+            class="reveal mt-4 text-center text-sm font-semibold text-white/60"
+            style="transition-delay: 190ms;"
+          >
+            Full Evening tickets close September 15, 2026 · Supporter tickets
+            remain
+            on sale through event day
+          </p>
         </div>
 
         {/* ============ The evening, hour by hour (desktop track) ============ */}
@@ -816,14 +809,16 @@ const sponsorLogos2025 = [
 
                   <div class="mt-5 flex items-end gap-3">
                     <span class="font-display text-5xl font-bold leading-none text-accent-gold">
-                      ${tier.earlyBird}
+                      ${tier.regular}
                     </span>
                     <span class="pb-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/55">
-                      Early bird
+                      Regular price
                     </span>
                   </div>
                   <p class="mt-2 text-sm font-semibold text-white/60">
-                    Regular ${tier.regular} · from Aug 1
+                    {tier.id === "benefactor"
+                      ? "Full evening · dinner + afterparty"
+                      : "Late night access · from 9 PM"}
                   </p>
 
                   <p class="mt-5 text-base leading-relaxed text-white/70">
@@ -842,8 +837,15 @@ const sponsorLogos2025 = [
                       class="gala-btn gala-btn--gold gala-sheen group/btn inline-flex w-full items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
                       data-conversion-event="gala_ticket_click"
                       data-conversion-context={`gala_page_tickets_${tier.id}`}
+                      data-gala-full-night-cta={
+                        tier.id === "benefactor" ? "true" : undefined
+                      }
                     >
-                      <span class="relative z-[1]">Get Tickets</span>
+                      <span class="relative z-[1]">
+                        {tier.id === "benefactor"
+                          ? "Reserve the Full Evening"
+                          : "Get Tickets"}
+                      </span>
                       <svg
                         class="relative z-[1] h-4 w-4 transition-transform group-hover/btn:translate-x-1"
                         fill="none"
@@ -1130,13 +1132,13 @@ const sponsorLogos2025 = [
               You're invited
             </p>
             <h2 class="mt-5 font-display text-3xl font-semibold italic leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem]">
-              Be part of a night that moves our future.
+              Reserve the full evening before September 15, 2026.
             </h2>
             <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-medium-gray sm:text-lg">
-              Tickets and sponsorships are on sale now. Your seat helps us reach
-              more people: more accessible classes, more nonprofit
-              partnerships, and more of our comunidad leading together. Reserve
-              your place tonight.
+              Your $375 Benefactor seat includes cocktail hour, a three-course
+              seated dinner, live bidding, museum garden access, and the full
+              late-night celebration. Every seat helps us reach more people
+              through accessible classes and nonprofit partnerships.
             </p>
 
             {/* Formal detail lines, set like engraved stationery. */}
@@ -1160,8 +1162,9 @@ const sponsorLogos2025 = [
                 class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-extrabold"
                 data-conversion-event="gala_ticket_click"
                 data-conversion-context="gala_page_closing"
+                data-gala-full-night-cta="true"
               >
-                <span class="relative z-[1]">Get Tickets</span>
+                <span class="relative z-[1]">Reserve the Full Evening</span>
                 <svg
                   class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
                   fill="none"
@@ -1367,22 +1370,6 @@ const sponsorLogos2025 = [
   /* Soft spotlight breathing behind the framed hero photo. */
   .gala-spotlight {
     opacity: 0.7;
-  }
-
-  /* Glowing countdown panel: a subtle continuous border glow so it reads as
-     the live focal point. Motion-safe only. */
-  @media (prefers-reduced-motion: no-preference) {
-    .gala-countdown-panel {
-      animation: gala-panel-glow 4.5s ease-in-out infinite;
-    }
-  }
-  @keyframes gala-panel-glow {
-    0%, 100% {
-      box-shadow: 0 0 0 1px rgba(255, 189, 89, 0.08), 0 20px 50px -20px rgba(0, 0, 0, 0.5);
-    }
-    50% {
-      box-shadow: 0 0 0 1px rgba(255, 189, 89, 0.22), 0 20px 60px -18px rgba(255, 189, 89, 0.18);
-    }
   }
 
   /* Venue frame hover-lift wrapper (pairs with GalaPhotoFrame's own zoom). */

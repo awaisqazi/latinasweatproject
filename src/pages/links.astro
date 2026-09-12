@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
@@ -359,6 +360,10 @@ const getLinkConversionProvider = (url = "") => {
             ES
           </button>
         </div>
+      </div>
+
+      <div class="mb-8">
+        <GalaTicketDeadline context="links" bilingual={true} />
       </div>
 
       {/* Horizontal scrolling Highlight Stories bar */}
@@ -966,10 +971,10 @@ const getLinkConversionProvider = (url = "") => {
                     <span class="lang-es hidden">{tier.id === "benefactor" ? "Velada completa" : "Acceso nocturno"}</span>
                   </p>
                   <p class="mt-0.5 text-sm font-extrabold text-[#ffbd59]">
-                    ${tier.earlyBird}
+                    ${tier.regular}
                     <span class="text-[10px] font-bold uppercase tracking-wide text-white/70">
-                      <span class="lang-en">early bird</span>
-                      <span class="lang-es hidden">early bird</span>
+                      <span class="lang-en">regular</span>
+                      <span class="lang-es hidden">regular</span>
                     </span>
                   </p>
                 </div>
@@ -977,8 +982,8 @@ const getLinkConversionProvider = (url = "") => {
             }
           </div>
           <p class="mt-2 text-center text-[10px] font-semibold text-white/70">
-            <span class="lang-en">{galaTickets.earlyBirdLabel}</span>
-            <span class="lang-es hidden">Precio early bird hasta el 31 de julio</span>
+            <span class="lang-en">Benefactor includes the full evening from 6 PM · Supporter joins at 9 PM</span>
+            <span class="lang-es hidden">Benefactor incluye la velada completa desde las 6 PM · Supporter se une a las 9 PM</span>
           </p>
 
           <a
@@ -987,11 +992,12 @@ const getLinkConversionProvider = (url = "") => {
             rel="noopener noreferrer"
             data-conversion-event="gala_ticket_click"
             data-conversion-context="links_gala_card"
+            data-gala-full-night-cta
             class="gala-btn gala-btn--gold gala-sheen mt-4 flex items-center justify-between px-4 py-3"
           >
-            <span class="relative z-[1] text-sm font-extrabold">
-              <span class="lang-en">Get Tickets</span>
-              <span class="lang-es hidden">Compra Boletos</span>
+            <span class="relative z-[1] text-sm font-extrabold" data-gala-cta-label>
+              <span class="lang-en">Get Your Full-Night Gala Ticket</span>
+              <span class="lang-es hidden">Compra Tu Boleto para la Gala Completa</span>
             </span>
             <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -999,7 +1005,7 @@ const getLinkConversionProvider = (url = "") => {
           </a>
           <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
             <span class="lang-en">{galaTeaser.statusLabel}</span>
-            <span class="lang-es hidden">Boletos y patrocinios a la venta</span>
+            <span class="lang-es hidden">Boletos para la noche completa hasta el 15 de septiembre</span>
           </p>
         </div>
       </div>

@@ -1,12 +1,19 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
   <Header />
   <main>
+    <div class="mt-6 px-4">
+      <div class="mx-auto max-w-5xl">
+        <GalaTicketDeadline context="schedule" />
+      </div>
+    </div>
+
     {/* Compact policy strip */}
     <div class="mt-6 mb-4 px-4">
       <div class="mx-auto max-w-5xl">

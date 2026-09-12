@@ -1,12 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import GalaCountdown from "@/components/GalaCountdown.astro";
+import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
-import GalaImpactStats from "@/components/GalaImpactStats.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import MerchLightbox from "@/components/MerchLightbox.astro";
-import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
+import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestDay,
@@ -25,11 +24,6 @@ const teeShots = sweatFestMerch.hero.variants.flatMap((v) => [
   merchShot(v.back, `${v.color} · back, the lineup`),
 ]);
 const itemShots = (item) => item.shots.map((shot) => merchShot(shot.img, shot.label));
-const galaPageUrl = withBase(galaTeaser.pagePath);
-// Lowest live ticket price, for the early-bird note near the gala CTAs.
-const galaFromPrice = Math.min(
-  ...galaTickets.tiers.map((tier) => tier.earlyBird),
-);
 // Deepened arc stops (deep gold -> ember -> magenta) so day-phase labels
 // stay legible on the cream lead spotlight and the light carousel card.
 const sweatFestDeepAccents = { rosa: "#c21e64", cielo: "#017277", lima: "#43722c" };
@@ -73,16 +67,19 @@ const graduationFlickrUrl =
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
         <a
-          href={withBase("sweatfest")}
+          href={galaTeaser.ticketsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-gala-full-night-cta
           class="group mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-accent-gold hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
-          data-conversion-event="sweatfest_explore_click"
+          data-conversion-event="gala_ticket_click"
           data-conversion-context="home_hero_announcement"
         >
           <span class="relative flex h-2 w-2" aria-hidden="true">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-accent-gold"></span>
           </span>
-          First-ever Sweat Fest · {sweatFest.shortDateLabel}
+          <span data-gala-cta-label>Gala · Full-night tickets close September 15</span>
           <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
@@ -108,6 +105,14 @@ const graduationFlickrUrl =
       </div>
     </section>
     {/* END: Hero Section */}
+
+    {/* The full-evening ticket deadline is the homepage's first message
+        after the hero while the September 15 sales window is still open. */}
+    <section class="bg-[#f7efe3] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div class="mx-auto max-w-7xl">
+        <GalaTicketDeadline context="home_top" />
+      </div>
+    </section>
 
     {/* START: Graduation 2026 (LEAD dark celebration spotlight; the
         "candlelit rose" identity, consistent with /graduation: deep
@@ -568,74 +573,6 @@ const graduationFlickrUrl =
     </section>
     <MerchLightbox />
     {/* END: Sweat Fest merch drop */}
-
-    {/* START: Gala Countdown Announcement */}
-    <section class="relative overflow-hidden bg-off-black py-14 text-white sm:py-16 lg:py-20">
-      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
-      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
-      <div class="gala-ambient absolute -left-24 top-0 h-64 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
-      <div class="gala-ambient absolute -right-24 bottom-0 h-64 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal rounded-3xl border border-accent-gold/30 bg-white/[0.04] p-5 shadow-2xl shadow-black/25 sm:p-7 lg:p-8">
-          <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
-              <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold sm:text-sm">
-                <span>Annual Gala</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.shortDateTimeLabel}</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                <span>{galaTeaser.attire}</span>
-              </div>
-              <h2 class="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-                <span class="gala-foil">{galaTeaser.shortTitle}</span>
-                <span class="text-white/90"> Gala</span>
-              </h2>
-              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
-                {galaTeaser.homepageDescription} Join us at {galaTeaser.venueName}.
-              </p>
-              <div class="mt-6">
-                <GalaImpactStats variant="strip" class="justify-start" />
-              </div>
-              <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href={galaTeaser.ticketsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-                  data-conversion-event="gala_ticket_click"
-                  data-conversion-context="home_gala_band"
-                >
-                  <span class="relative z-[1]">{galaTeaser.ticketsLabel}</span>
-                  <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </a>
-                <a
-                  href={galaPageUrl}
-                  class="gala-btn gala-btn--ghost inline-flex items-center justify-center px-7 py-4 text-base font-extrabold"
-                >
-                  Explore the Gala
-                </a>
-              </div>
-              <p class="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-accent-gold/90">
-                <span class="inline-flex items-center gap-2 rounded-[3px] border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
-                  <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-                  On sale now
-                </span>
-                {galaTickets.earlyBirdLabel} · from ${galaFromPrice}
-              </p>
-            </div>
-
-            <div class="group space-y-4">
-              <GalaPhotoFrame slot={galaPhotos.facade} variant="promo" corners />
-              <GalaCountdown variant="compact" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Gala Countdown Announcement */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
@@ -1580,10 +1517,13 @@ const graduationFlickrUrl =
 
           {/* Annual Gala event card */}
           <a
-            href={galaPageUrl}
+            href={galaTeaser.ticketsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
             data-conversion-event="gala_ticket_click"
             data-conversion-context="home_events_carousel_gala"
+            data-gala-full-night-cta
           >
             <div
               class="relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent-gold/35 bg-off-black text-white shadow-xl shadow-off-black/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent-gold/20"
@@ -1603,7 +1543,7 @@ const graduationFlickrUrl =
                   </span>
                   <span class="inline-flex items-center gap-1.5 rounded-[3px] border border-accent-gold/50 bg-off-black/70 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold backdrop-blur-sm shadow-md">
                     <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-                    On Sale Now
+                    Full evening closes Sep 15
                   </span>
                 </div>
               </div>
@@ -1621,11 +1561,11 @@ const graduationFlickrUrl =
                   {galaTeaser.venueName}
                 </p>
                 <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
-                  {galaTeaser.statusLabel}. Claim your seat for a black-tie
-                  night of art, movement, and community.
+                  Your $375 Benefactor ticket opens the full night from 6 PM:
+                  cocktails, dinner, live bidding, galleries, fashion, and dancing.
                 </p>
                 <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
-                  Get Tickets
+                  <span data-gala-cta-label>Buy the Full-Evening Ticket · $375</span>
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>
