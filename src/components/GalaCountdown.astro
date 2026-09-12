@@ -1,12 +1,16 @@
 ---
 import { galaTeaser } from "@/data/galaTeaser";
 
+type Unit = "days" | "hours" | "minutes" | "seconds";
+
 interface Props {
   target?: string;
   variant?: "hero" | "compact" | "card";
   className?: string;
   label?: string;
   bilingual?: boolean;
+  /** Which units to show, in order. Drop "seconds" for a calmer module. */
+  units?: Unit[];
 }
 
 const {
@@ -15,21 +19,45 @@ const {
   className = "",
   label = `Countdown to ${galaTeaser.title}`,
   bilingual = false,
+  units = ["days", "hours", "minutes", "seconds"],
 } = Astro.props;
 
-const items = [
+const allItems = [
   { key: "days", label: "Days", es: "Días" },
   { key: "hours", label: "Hours", es: "Horas" },
   { key: "minutes", label: "Minutes", es: "Minutos" },
   { key: "seconds", label: "Seconds", es: "Segundos" },
 ];
 
+const items = allItems.filter((item) => units.includes(item.key as Unit));
+const count = items.length || 4;
+
+// Literal class names so Tailwind's scanner sees every variant it must build.
+const colsClass =
+  count === 1
+    ? "grid-cols-1"
+    : count === 2
+      ? "grid-cols-2"
+      : count === 3
+        ? "grid-cols-3"
+        : "grid-cols-4";
+const smColsClass =
+  count === 1
+    ? "sm:grid-cols-1"
+    : count === 2
+      ? "sm:grid-cols-2"
+      : count === 3
+        ? "sm:grid-cols-3"
+        : "sm:grid-cols-4";
+// Wide variants stack two-up on small screens only when there are four units.
+const stackedBaseClass = count === 4 ? "grid-cols-2" : colsClass;
+
 const wrapperClass =
   variant === "compact"
-    ? "grid grid-cols-4 gap-2 sm:gap-3"
+    ? `grid ${colsClass} gap-2 sm:gap-3`
     : variant === "card"
-      ? "grid grid-cols-2 gap-2 sm:grid-cols-4"
-      : "grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4";
+      ? `grid ${stackedBaseClass} gap-2 ${smColsClass}`
+      : `grid ${stackedBaseClass} gap-3 ${smColsClass} sm:gap-4`;
 
 const itemClass =
   variant === "compact"

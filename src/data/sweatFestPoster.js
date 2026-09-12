@@ -9,7 +9,7 @@
 // script (scripts/render-sweatfest-social.mjs) so the flyer only exists in
 // one place. The facts match src/data/sweatFest.js; venue announced
 // 2026-07-27: 18th & Peoria.
-import { sweatFestPalette as p } from "./sweatFest.js";
+import { sweatFestPalette as p, sweatFest } from "./sweatFest.js";
 import {
   stackedLogoSvg,
   horizontalLogoSvg,
@@ -45,9 +45,13 @@ const chipRow = (cx, y, widths, gap, h, fontSize) => {
     .join("");
 };
 
-// Ticket line: plain Rubik ink, the URL underlined beneath it.
+// Ticket line: plain Rubik ink, the URL underlined beneath it. Once the
+// festival has passed (sweatFest.isPast) the line invites people to the recap
+// instead of promising tickets; read at call time so the flag is never stale.
+const ticketHeadline = () =>
+  sweatFest.isPast ? "Relive the day on our website" : "Tickets available on our website";
 const ticketLines = (cx, y, size) =>
-  `<text x="${cx}" y="${y}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="${size}" font-weight="600" fill="${p.ink}">Tickets available on our website</text>
+  `<text x="${cx}" y="${y}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="${size}" font-weight="600" fill="${p.ink}">${ticketHeadline()}</text>
    <text x="${cx}" y="${y + size * 1.42}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="${size * 0.88}" font-weight="500" fill="${p.ink}" text-decoration="underline">latinasweatproject.com/sweatfest</text>`;
 
 // Solid lockups: their honeydew field matches the poster grounds exactly, so

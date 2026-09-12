@@ -3,14 +3,18 @@ import Layout from "@/layouts/Layout.astro";
 import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
-import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
+import {
+  galaPhotos,
+  galaTeaser,
+  galaTicketDeadline,
+  galaTickets,
+} from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestColors,
   sweatFestCheckerUri,
   sweatFestMerch,
 } from "@/data/sweatFest";
-import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 // Chicago Reader graduation feature (Aug 21, 2026): the featured press card.
@@ -33,15 +37,25 @@ const sweatFestMerchShots = [
 // The festival is past: the card is a recap, its primary CTA is the album.
 const sweatFestPrimaryUrl = withBase("/sweatfest#photos");
 
-// YTT ’26 Trio schedule rows: Spanish short-day map (Mon/Tue/Thu are the
-// only weekdays in the series) so every ES date label is derived from
-// the session data, never hand-written.
-const trioDayEs = { Mon: "Lun", Tue: "Mar", Thu: "Jue" };
-const trioSessionDateEs = (session) => {
-  const [month, day] = session.dateShort.split(" ");
-  const monthEs = month === "Aug" ? "Ago" : month;
-  return `${trioDayEs[session.dayShort] ?? session.dayShort} · ${day} ${monthEs} · ${session.timeShort}`;
-};
+// Server-rendered fallback for the gold days-left chip on the gala
+// card. GalaTicketDeadline's script recomputes it on load and every
+// 30 s, and relabels it once the full-evening window closes, so this
+// mirrors that formula exactly.
+const galaHoursLeft =
+  (new Date(galaTicketDeadline.closesAtISO).getTime() - Date.now()) / 3.6e6;
+const galaDaysLeft = Math.floor(galaHoursLeft / 24);
+const galaDaysLeftEn =
+  galaDaysLeft >= 2
+    ? `${galaDaysLeft} days left`
+    : galaDaysLeft === 1
+      ? "1 day left"
+      : "Closes tonight";
+const galaDaysLeftEs =
+  galaDaysLeft >= 2
+    ? `Quedan ${galaDaysLeft} días`
+    : galaDaysLeft === 1
+      ? "Queda 1 día"
+      : "Cierra esta noche";
 
 // Define links data with English and Spanish translations
 const links = [
@@ -147,10 +161,22 @@ const links = [
   },
 ];
 
-// Highlight Stories Bar configuration. Chronological: the Graduation 2026
-// recap leads (Aug 7, fresh photos), then Sweat Fest (Aug 22), then the
-// gala (Sep 25), matching the card order below.
+// Highlight Stories Bar configuration. The gala leads (Sep 25, the only
+// live ticket sale), then the recaps in reverse-chronological order:
+// Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22). Matches
+// the feature-card order below.
 const highlights = [
+  {
+    title: {
+      en: "Gala 2026",
+      es: "Gala 2026"
+    },
+    target: "#gala-card",
+    image: `${base}logo2.png`,
+    scale: "scale-[1.08]",
+    hoverScale: "group-hover:scale-[1.2]",
+    color: "amber"
+  },
   {
     title: {
       en: "📰 Reader",
@@ -182,17 +208,6 @@ const highlights = [
     image: `${base}images/highlights/hl_sweatfest.png`,
     scale: "scale-[1.05]",
     hoverScale: "group-hover:scale-[1.18]",
-    color: "amber"
-  },
-  {
-    title: {
-      en: "Gala 2026",
-      es: "Gala 2026"
-    },
-    target: "#gala-card",
-    image: `${base}logo2.png`,
-    scale: "scale-[1.08]",
-    hoverScale: "group-hover:scale-[1.2]",
     color: "amber"
   },
   {
@@ -258,9 +273,6 @@ const getLinkConversionEvent = (url = "") => {
   if (url.includes("/feedback")) return "feedback_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
-  // YTT ’26 Trio tickets: the Zeffy slug reads "annual-gala-6420" but it IS
-  // the live trio form (see src/data/yttTrio.js), so match the exact URL.
-  if (url === yttTrio.ticketsUrl) return "ytt_trio_ticket_click";
   return undefined;
 };
 
@@ -362,10 +374,6 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      <div class="mb-8">
-        <GalaTicketDeadline context="links" bilingual={true} />
-      </div>
-
       {/* Horizontal scrolling Highlight Stories bar */}
       <div class="highlights-container-wrap mb-8 relative" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 70ms;">
         <div class="flex items-start gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none px-2 snap-x select-none" id="highlights-bar">
@@ -403,15 +411,129 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
+      {/* Gala Featured Card: black-tie stationery, leading the page
+          while full-evening tickets are on sale. The inline
+          GalaTicketDeadline module under the price tiles carries the only
+          ticket CTA on this card, so nothing here repeats the ask. */}
+      <div
+        id="gala-card"
+        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms;"
+      >
+        <div class="gala-lattice absolute inset-0 opacity-[0.10]"></div>
+        <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
+          <a href={galaPageUrl} class="block">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#fbf6ea] p-1 shadow-lg shadow-[#ffbd59]/10">
+                  <img
+                    src={`${base}logo.png`}
+                    width="1000"
+                    height="1000"
+                    alt="The Latina Sweat Project"
+                    class="h-full w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
+                      <span class="lang-en">Featured</span>
+                      <span class="lang-es hidden">Destacado</span>
+                    </p>
+                    <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-[#ffbd59] px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
+                      <span class="h-1 w-1 rotate-45 bg-[#1E1E1E]" aria-hidden="true" />
+                      <span class="lang-en" data-gala-days-left data-lang="en">{galaDaysLeftEn}</span>
+                      <span class="lang-es hidden" data-gala-days-left data-lang="es">{galaDaysLeftEs}</span>
+                    </span>
+                  </div>
+                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+                    <span class="lang-en">{galaTeaser.shortDateTimeLabel}</span>
+                    <span class="lang-es hidden">25 Sep · 6 PM CT</span>
+                  </p>
+                </div>
+              </div>
+              <span class="rounded-[3px] border border-[#ffbd59]/60 bg-[#ffbd59]/10 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59] whitespace-nowrap shrink-0">
+                <span class="lang-en">{galaTeaser.attire}</span>
+                <span class="lang-es hidden">Etiqueta formal</span>
+              </span>
+            </div>
+
+            <div class="grid gap-4">
+              <div>
+                <h2 class="font-display text-3xl font-bold leading-[1.0] tracking-tight text-white">
+                  <span class="lang-en"
+                    ><span class="gala-foil">{galaTeaser.shortTitle}</span> Gala</span
+                  >
+                  <span class="lang-es hidden"
+                    >Gala <span class="gala-foil">Anual</span></span
+                  >
+                </h2>
+                <p class="mt-3 text-[13px] font-semibold leading-relaxed text-white/65">
+                  <span class="lang-en">
+                    Black-tie evening for art, movement, and community at {galaTeaser.venueName}.
+                  </span>
+                  <span class="lang-es hidden">
+                    Una noche de gala formal para arte, movimiento y comunidad en el Museo de Arte Contemporáneo de Chicago.
+                  </span>
+                </p>
+              </div>
+
+              <GalaPhotoFrame slot={galaPhotos.facade} variant="links" corners />
+            </div>
+          </a>
+
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            {
+              galaTickets.tiers.map((tier) => (
+                <div class="relative rounded-[3px] border border-[#ffbd59]/30 bg-black/40 px-3 py-2 before:pointer-events-none before:absolute before:inset-[3px] before:rounded-[1px] before:border before:border-[#ffbd59]/15">
+                  <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/70">
+                    <span class="lang-en">{tier.id === "benefactor" ? "Full Evening" : "Late Night"}</span>
+                    <span class="lang-es hidden">{tier.id === "benefactor" ? "Velada completa" : "Acceso nocturno"}</span>
+                  </p>
+                  <p class="mt-0.5 text-sm font-extrabold text-[#ffbd59]">
+                    ${tier.regular}
+                    <span class="text-[10px] font-bold uppercase tracking-wide text-white/70">
+                      <span class="lang-en">regular</span>
+                      <span class="lang-es hidden">regular</span>
+                    </span>
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+          <p class="mt-2 text-center text-[10px] font-semibold text-white/70">
+            <span class="lang-en">Benefactor includes the full evening from 6 PM · Supporter joins at 9 PM</span>
+            <span class="lang-es hidden">Benefactor incluye la velada completa desde las 6 PM · Supporter se une a las 9 PM</span>
+          </p>
+
+          {/* The one ask on this card: days left, a three-tile
+              countdown, the gold full-evening CTA, the checkout hint, and
+              the quiet late-night alternative. Stays clean at 320px. */}
+          <div class="mt-4">
+            <GalaTicketDeadline
+              context="links_gala_card"
+              variant="inline"
+              bilingual={true}
+            />
+          </div>
+          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+            <span class="lang-en">{galaTeaser.statusLabel}</span>
+            <span class="lang-es hidden">Boletos para la noche completa hasta el 15 de septiembre</span>
+          </p>
+        </div>
+      </div>
+
       {/* Chicago Reader Featured Card: "Más allá del estudio" (Aug 21, 2026),
           the Reader's own yellow/black newsprint identity with their
-          wordmark, leading because it's the newest story and it's about
-          the graduation directly below. */}
+          wordmark. It follows the gala card and leads the recaps, since
+          it's the newest story and it's about the graduation below. */}
       {readerArticle && (
         <div
           id="reader-card"
           class="group relative mb-8 scroll-mt-24 overflow-hidden border-[5px] border-[#111111] bg-[#ffd210] shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/60"
-          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms;"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;"
         >
           <a
             href={readerArticle.url}
@@ -488,14 +610,14 @@ const getLinkConversionProvider = (url = "") => {
       )}
 
       {/* Graduation 2026 Featured Card: the Aug 7 YTT graduation recap,
-          leading because the photos just dropped (Fri, Aug 7). Candlelit
+          directly under the Reader story that covered it. Candlelit
           rose-ink + gold + cream keepsake treatment: Fraunces display over
           Rubik, cream photo mat, candle-bokeh dots (no gala foil or
           Playfair, no sunrise gradient, no marker handwriting). */}
       <div
         id="graduation-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#f0c57c]/40 shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f0c57c]/70 hover:shadow-[#e08cb8]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 85ms; background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 115ms; background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
       >
         {/* Candle-bokeh dots along the top edge: gold + rose, varying
             size and opacity */}
@@ -516,12 +638,8 @@ const getLinkConversionProvider = (url = "") => {
           >
             <div class="flex flex-wrap items-center gap-2">
               <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f0c57c] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#2b1520]">
-                <span class="relative flex h-1.5 w-1.5">
-                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2b1520] opacity-60"></span>
-                  <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#2b1520]"></span>
-                </span>
-                <span class="lang-en">New Photos</span>
-                <span class="lang-es hidden">Fotos Nuevas</span>
+                <span class="lang-en">Recap</span>
+                <span class="lang-es hidden">Resumen</span>
               </span>
               <span class="rounded-full border border-[#f0c57c]/50 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#f0c57c]">
                 <span class="lang-en">Fri · Aug 7</span>
@@ -607,124 +725,14 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* YTT ’26 Trio Featured Card: the graduation story's next chapter
-          (the Aug 7 grads lead their first live community classes, Aug 11
-          to Aug 31), so it sits directly below the recap card in the same
-          candlelit rose-ink + gold identity, with the full session
-          schedule inline; the script at the bottom of the page gold-washes
-          the next upcoming row. */}
-      <div
-        id="trio-card"
-        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#f0c57c]/40 shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f0c57c]/70 hover:shadow-[#e08cb8]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 92ms; background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
-      >
-        {/* Candle-bokeh dots along the top edge: gold + rose, varying
-            size and opacity */}
-        <div class="pointer-events-none absolute inset-x-0 top-2 flex items-center justify-center gap-2.5" aria-hidden="true">
-          <span class="h-1 w-1 rounded-full bg-[#f0c57c]/50 shadow-[0_0_6px_2px_rgba(240,197,124,0.35)]"></span>
-          <span class="h-2 w-2 rounded-full bg-[#f0c57c]/85 shadow-[0_0_10px_4px_rgba(240,197,124,0.45)]"></span>
-          <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/60 shadow-[0_0_8px_3px_rgba(224,140,184,0.4)]"></span>
-          <span class="h-1 w-1 rounded-full bg-[#f0c57c]/40 shadow-[0_0_6px_2px_rgba(240,197,124,0.3)]"></span>
-          <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/45 shadow-[0_0_7px_3px_rgba(224,140,184,0.3)]"></span>
-        </div>
-        <div class="relative p-4 pt-5 sm:p-5 sm:pt-6">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f0c57c] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#2b1520]">
-              <span class="relative flex h-1.5 w-1.5">
-                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2b1520] opacity-60"></span>
-                <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#2b1520]"></span>
-              </span>
-              <span class="lang-en">Starts Aug 11</span>
-              <span class="lang-es hidden">Empieza 11 Ago</span>
-            </span>
-            <span class="rounded-full border border-[#f0c57c]/50 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#f0c57c]">
-              <span class="lang-en">Free · Donation encouraged</span>
-              <span class="lang-es hidden">Gratis · Donación bienvenida</span>
-            </span>
-          </div>
-
-          <p class="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#f6efe3]/50">
-            <span class="lang-en">LSP Community Yoga</span>
-            <span class="lang-es hidden">Yoga Comunitario LSP</span>
-          </p>
-          <h2 class="mt-1 text-3xl font-semibold leading-[1.05] tracking-tight text-[#f6efe3] sm:text-4xl" style="font-family: 'Fraunces', serif;">
-            <span class="lang-en">YTT ’26 <span class="text-[#f0c57c]">Trio Classes</span></span>
-            <span class="lang-es hidden">Clases <span class="text-[#f0c57c]">Trío</span> del YTT ’26</span>
-          </h2>
-          <p class="mt-3 text-sm font-semibold leading-relaxed text-[#f6efe3]/70">
-            <span class="lang-en">Free 45-minute community flows: three brand-new teachers per class, each taking the mat for 15 minutes. All levels welcome.</span>
-            <span class="lang-es hidden">Clases comunitarias gratuitas de 45 minutos: tres maestras recién graduadas por clase, cada una toma el mat por 15 minutos. Todos los niveles.</span>
-          </p>
-
-          {/* Every session, compact rows: gold date + time, cream trio */}
-          <div class="mt-4 overflow-hidden rounded-xl border border-[#f0c57c]/25">
-            {
-              yttTrioSessions.map((session, i) => (
-                <div
-                  class:list={[
-                    "trio-row flex items-center justify-between gap-3 px-3 py-2",
-                    i % 2 === 1 && "bg-[#f6efe3]/[0.04]",
-                    i > 0 && "border-t border-[#f0c57c]/10",
-                  ]}
-                  data-trio-date={session.date}
-                >
-                  <p class="flex flex-shrink-0 items-center gap-1.5 text-[11px] font-extrabold text-[#f0c57c]">
-                    <span class="lang-en whitespace-nowrap">{session.dayShort} · {session.dateShort} · {session.timeShort}</span>
-                    <span class="lang-es hidden whitespace-nowrap">{trioSessionDateEs(session)}</span>
-                    <span class="trio-next-tag rounded-[3px] bg-[#f0c57c] px-1.5 py-[1px] text-[8px] font-extrabold uppercase tracking-widest text-[#2b1520]">
-                      <span class="lang-en">Next</span>
-                      <span class="lang-es hidden">Sigue</span>
-                    </span>
-                  </p>
-                  <p class="trio-names min-w-0 truncate text-right text-[12px] font-semibold text-[#f6efe3]/75">
-                    {session.instructors.join(" · ")}
-                  </p>
-                </div>
-              ))
-            }
-          </div>
-
-          <a
-            href={yttTrio.ticketsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-conversion-event="ytt_trio_ticket_click"
-            data-conversion-context="links_trio_card"
-            data-conversion-provider="zeffy"
-            class="mt-5 flex items-center justify-between rounded-lg px-4 py-3 text-[#2b1520] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f6efe3] focus-visible:ring-offset-4 focus-visible:ring-offset-[#2b1520]"
-            style="background: linear-gradient(100deg, #d79b47, #f0c57c 55%, #d79b47);"
-          >
-            <span class="text-sm font-extrabold">
-              <span class="lang-en">Reserve Free Tickets</span>
-              <span class="lang-es hidden">Reserva Boletos Gratis</span>
-            </span>
-            <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </a>
-          <a
-            href="https://latinasweatproject.com/schedule/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#f0c57c]/80 underline-offset-4 transition-colors duration-300 hover:text-[#f0c57c] hover:underline"
-          >
-            <span class="lang-en">Full details on the schedule page</span>
-            <span class="lang-es hidden">Todos los detalles en el horario</span>
-            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-            </svg>
-          </a>
-        </div>
-      </div>
-
-      {/* Sweat Fest Recap Card: the official checkerboard-logo flyer, now
-          the recap of the Aug 22 festival (before the Sep 25 gala), after
-          the Graduation 2026 recap card. Checkerboard tile strip, handmade
+      {/* Sweat Fest Recap Card: the official checkerboard-logo flyer,
+          the recap of the Aug 22 festival, closing the recap run under
+          the Graduation 2026 card. Checkerboard tile strip, handmade
           wordmark, honeydew badges, photos CTA. */}
       <div
         id="sweatfest-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-xl border-[3px] border-[#123f36] bg-[#f4f7dc] shadow-[6px_7px_0_#ee3083] transition-transform duration-300 hover:-translate-y-0.5"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 100ms;"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 130ms;"
       >
         {/* Checkerboard tile strip inside the top edge */}
         <div
@@ -891,127 +899,8 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Gala Featured Card: black-tie stationery, the dark counterpart
-          directly below the bright Sweat Fest flyer. */}
-      <div
-        id="gala-card"
-        class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 115ms;"
-      >
-        <div class="gala-lattice absolute inset-0 opacity-[0.10]"></div>
-        <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
-          <a href={galaPageUrl} class="block">
-            <div class="mb-4 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#fbf6ea] p-1 shadow-lg shadow-[#ffbd59]/10">
-                  <img
-                    src={`${base}logo.png`}
-                    width="1000"
-                    height="1000"
-                    alt="The Latina Sweat Project"
-                    class="h-full w-full object-contain"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-                <div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
-                      <span class="lang-en">Featured</span>
-                      <span class="lang-es hidden">Destacado</span>
-                    </p>
-                    <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-[#ffbd59] px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
-                      <span class="h-1 w-1 rotate-45 bg-[#1E1E1E]" aria-hidden="true" />
-                      <span class="lang-en">On Sale Now</span>
-                      <span class="lang-es hidden">A la Venta</span>
-                    </span>
-                  </div>
-                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-                    <span class="lang-en">{galaTeaser.shortDateTimeLabel}</span>
-                    <span class="lang-es hidden">25 Sep · 6 PM CT</span>
-                  </p>
-                </div>
-              </div>
-              <span class="rounded-[3px] border border-[#ffbd59]/60 bg-[#ffbd59]/10 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59]">
-                <span class="lang-en">{galaTeaser.attire}</span>
-                <span class="lang-es hidden">Etiqueta formal</span>
-              </span>
-            </div>
-
-            <div class="grid gap-4">
-              <div>
-                <h2 class="font-display text-3xl font-bold leading-[1.0] tracking-tight text-white">
-                  <span class="lang-en"
-                    ><span class="gala-foil">{galaTeaser.shortTitle}</span> Gala</span
-                  >
-                  <span class="lang-es hidden"
-                    >Gala <span class="gala-foil">Anual</span></span
-                  >
-                </h2>
-                <p class="mt-3 text-[13px] font-semibold leading-relaxed text-white/65">
-                  <span class="lang-en">
-                    Black-tie evening for art, movement, and community at {galaTeaser.venueName}.
-                  </span>
-                  <span class="lang-es hidden">
-                    Una noche de gala formal para arte, movimiento y comunidad en el Museo de Arte Contemporáneo de Chicago.
-                  </span>
-                </p>
-              </div>
-
-              <GalaPhotoFrame slot={galaPhotos.facade} variant="links" corners />
-            </div>
-          </a>
-
-          <div class="mt-4 grid grid-cols-2 gap-2">
-            {
-              galaTickets.tiers.map((tier) => (
-                <div class="relative rounded-[3px] border border-[#ffbd59]/30 bg-black/40 px-3 py-2 before:pointer-events-none before:absolute before:inset-[3px] before:rounded-[1px] before:border before:border-[#ffbd59]/15">
-                  <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/70">
-                    <span class="lang-en">{tier.id === "benefactor" ? "Full Evening" : "Late Night"}</span>
-                    <span class="lang-es hidden">{tier.id === "benefactor" ? "Velada completa" : "Acceso nocturno"}</span>
-                  </p>
-                  <p class="mt-0.5 text-sm font-extrabold text-[#ffbd59]">
-                    ${tier.regular}
-                    <span class="text-[10px] font-bold uppercase tracking-wide text-white/70">
-                      <span class="lang-en">regular</span>
-                      <span class="lang-es hidden">regular</span>
-                    </span>
-                  </p>
-                </div>
-              ))
-            }
-          </div>
-          <p class="mt-2 text-center text-[10px] font-semibold text-white/70">
-            <span class="lang-en">Benefactor includes the full evening from 6 PM · Supporter joins at 9 PM</span>
-            <span class="lang-es hidden">Benefactor incluye la velada completa desde las 6 PM · Supporter se une a las 9 PM</span>
-          </p>
-
-          <a
-            href={galaTeaser.ticketsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-conversion-event="gala_ticket_click"
-            data-conversion-context="links_gala_card"
-            data-gala-full-night-cta
-            class="gala-btn gala-btn--gold gala-sheen mt-4 flex items-center justify-between px-4 py-3"
-          >
-            <span class="relative z-[1] text-sm font-extrabold" data-gala-cta-label>
-              <span class="lang-en">Get Your Full-Night Gala Ticket</span>
-              <span class="lang-es hidden">Compra Tu Boleto para la Gala Completa</span>
-            </span>
-            <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </a>
-          <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
-            <span class="lang-en">{galaTeaser.statusLabel}</span>
-            <span class="lang-es hidden">Boletos para la noche completa hasta el 15 de septiembre</span>
-          </p>
-        </div>
-      </div>
-
       {/* Quick Links Section Divider */}
-      <div class="flex items-center gap-3 mb-6" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 130ms;">
+      <div class="flex items-center gap-3 mb-6" style="animation: links-slide-up 0.5s ease backwards; animation-delay: 145ms;">
         <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/15"></div>
         <span class="text-[9px] font-extrabold uppercase tracking-[0.2em] text-white/45">
           <span class="lang-en">Quick Links</span>
@@ -1623,21 +1512,6 @@ const getLinkConversionProvider = (url = "") => {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  /* YTT ’26 Trio card: the script below flags the next upcoming session
-     row (data-trio-next); gold-wash it, brighten the trio, show the tag */
-  .trio-next-tag {
-    display: none;
-  }
-  .trio-row[data-trio-next="true"] {
-    background: rgba(240, 197, 124, 0.14);
-  }
-  .trio-row[data-trio-next="true"] .trio-names {
-    color: rgba(246, 239, 227, 0.95);
-  }
-  .trio-row[data-trio-next="true"] .trio-next-tag {
-    display: inline-flex;
-  }
 </style>
 
 <script>
@@ -1718,24 +1592,5 @@ const getLinkConversionProvider = (url = "") => {
       });
     });
   })();
-
-  // 3. YTT ’26 TRIO CARD: FLAG THE NEXT UPCOMING SESSION ROW
-  (function () {
-    const rows = document.querySelectorAll<HTMLElement>("[data-trio-date]");
-    if (!rows.length) return;
-    // Local calendar date as YYYY-MM-DD; session dates are ISO strings,
-    // so plain string comparison orders correctly.
-    const now = new Date();
-    const today = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, "0"),
-      String(now.getDate()).padStart(2, "0"),
-    ].join("-");
-    for (let i = 0; i < rows.length; i++) {
-      if ((rows[i].dataset.trioDate || "") >= today) {
-        rows[i].dataset.trioNext = "true";
-        break;
-      }
-    }
-  })();
 </script>
+

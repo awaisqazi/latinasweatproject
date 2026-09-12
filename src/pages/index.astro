@@ -1,38 +1,91 @@
 ---
+// Homepage section order (Sep 2026 gala-forward refresh). Theme in brackets;
+// below the crafted hero -> gala seam the light/dark cadence strictly
+// alternates:
+//   1. Hero [D]
+//   2. Annual Gala lead spotlight [D]  <- crafted gold seam, the page's one
+//      deliberate dark/dark junction (documented exception)
+//   3. "Relive the summer" recap band [L] (Graduation 2026 + Sweat Fest '26)
+//   4. WGN9 spotlight [D]
+//   5. Monday Miles Tee merch [L]
+//   6. 40 Under 40 [D]
+//   7. Monday Miles community runs [L]
+//   8. Grand Opening [D]
+//   9. Events carousel [L]
+//  10. Instagram [D]
+//  11. In The Press [L]
+// Desktop media zig-zag: Gala photo LEFT -> WGN9 video RIGHT -> Tee LEFT ->
+// 40 Under 40 flyer RIGHT -> Monday Miles visual LEFT -> Grand Opening RIGHT.
+// (Recap band, carousel, Instagram, and Press sit outside the zig-zag.)
+// Retired from this page in Sep 2026: the YTT '26 Trio companion band (series
+// ended Aug 31), the standalone Graduation 2026 and Sweat Fest spotlights
+// (both now ride in the recap band and the carousel), the Sweat Fest merch
+// drop section (sold in person on Aug 22 only), and the light-band copy of
+// GalaTicketDeadline (the spotlight carries the inline module instead).
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
+import GalaImpactStats from "@/components/GalaImpactStats.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
-import MerchLightbox from "@/components/MerchLightbox.astro";
-import { galaPhotos, galaTeaser } from "@/data/galaTeaser";
 import {
-  sweatFest,
-  sweatFestDay,
-  sweatFestColors,
-  sweatFestCheckerUri,
-  sweatFestMerch,
-} from "@/data/sweatFest";
+  galaEvening,
+  galaPhotos,
+  galaTeaser,
+  galaTicketDeadline,
+  galaTickets,
+} from "@/data/galaTeaser";
+import { sweatFest, sweatFestDay, sweatFestCheckerUri } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
-import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
-// Merch lightbox payloads (every colorway; see MerchLightbox.astro).
-const merchShot = (img, label) => ({ src: withBase(img.src), alt: img.alt, label, cutout: !!img.cutout });
-const teeShots = sweatFestMerch.hero.variants.flatMap((v) => [
-  merchShot(v.front, `${v.color} · front`),
-  merchShot(v.back, `${v.color} · back, the lineup`),
-]);
-const itemShots = (item) => item.shots.map((shot) => merchShot(shot.img, shot.label));
+
+// Gala: every price, date, and time is read from src/data/galaTeaser.js so the
+// site never drifts from the Zeffy form or the printed collateral.
+const galaPageUrl = withBase(galaTeaser.pagePath);
+const benefactorPrice = galaTickets.tiers.find(
+  (tier) => tier.id === "benefactor",
+).regular;
+// "Friday, September 25, 2026" -> "Friday, September 25" for the eyebrow.
+const galaDateNoYear = galaTeaser.dateLabel.replace(/,\s*\d{4}\s*$/, "");
+// Server-rendered fallbacks for the site-wide deadline hooks. The
+// GalaTicketDeadline script recomputes both on load and every 30 seconds, so
+// these only have to be right at build/request time.
+const galaHoursLeft =
+  (new Date(galaTicketDeadline.closesAtISO).getTime() - Date.now()) / 3.6e6;
+const galaDaysLeft = Math.floor(galaHoursLeft / 24);
+const galaDaysLeftLabel =
+  galaDaysLeft >= 2
+    ? `${galaDaysLeft} days left`
+    : galaDaysLeft === 1
+      ? "1 day left"
+      : "Closes tonight";
+const galaClosesInLabel =
+  galaDaysLeft >= 2
+    ? `closes in ${galaDaysLeft} days`
+    : galaDaysLeft === 1
+      ? "closes in 1 day"
+      : "closes tonight";
+// Floating gold motes over the gala spotlight (desktop only, motion-safe;
+// same idea as the /gala hero particle field, kept deliberately sparse).
+const galaMotes = Array.from({ length: 12 }, (_, i) => ({
+  left: (i * 41 + 6) % 100,
+  size: i % 4 === 0 ? 5 : 3,
+  duration: 13 + (i % 5) * 2.5,
+  delay: (i % 6) * 2.1,
+  drift: (i % 2 === 0 ? 1 : -1) * (10 + (i % 3) * 8),
+  opacity: 0.16 + (i % 3) * 0.08,
+}));
+
 // Deepened arc stops (deep gold -> ember -> magenta) so day-phase labels
-// stay legible on the cream lead spotlight and the light carousel card.
+// stay legible on the light recap card and the light carousel card.
 const sweatFestDeepAccents = { rosa: "#c21e64", cielo: "#017277", lima: "#43722c" };
 // Homepage CTAs route to the full Sweat Fest page (the story, itinerary,
 // and ticket stubs live there); /sweatfest owns the jump to Zeffy.
 const sweatFestPrimaryUrl = withBase("sweatfest");
 const sweatFestPrimaryLabel = "Relive the day";
-// Graduation 2026 (YTT ceremony, Fri Aug 7, 2026): the homepage spotlight
-// and carousel card route to the /graduation photo-and-story recap page;
+// Graduation 2026 (YTT ceremony, Fri Aug 7, 2026): the recap band and
+// carousel card route to the /graduation photo-and-story recap page;
 // the full 307-photo album lives on Flickr.
 const graduationPageUrl = withBase("graduation");
 const graduationFlickrUrl =
@@ -75,11 +128,11 @@ const graduationFlickrUrl =
           data-conversion-event="gala_ticket_click"
           data-conversion-context="home_hero_announcement"
         >
-          <span class="relative flex h-2 w-2" aria-hidden="true">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-gold opacity-75"></span>
-            <span class="relative inline-flex h-2 w-2 rounded-full bg-accent-gold"></span>
-          </span>
-          <span data-gala-cta-label>Gala · Full-night tickets close September 15</span>
+          <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
+          <span data-gala-cta-label
+            >{galaTeaser.title} · {galaTeaser.shortDateLabel} ·
+            <span data-gala-closes-in>{galaClosesInLabel}</span></span
+          >
           <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
@@ -106,116 +159,275 @@ const graduationFlickrUrl =
     </section>
     {/* END: Hero Section */}
 
-    {/* The full-evening ticket deadline is the homepage's first message
-        after the hero while the September 15 sales window is still open. */}
-    <section class="bg-[#f7efe3] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div class="mx-auto max-w-7xl">
-        <GalaTicketDeadline context="home_top" />
-      </div>
-    </section>
-
-    {/* START: Graduation 2026 (LEAD dark celebration spotlight; the
-        "candlelit rose" identity, consistent with /graduation: deep
-        rose-ink #2b1520/#1e1216 room, cream #f6efe3 text, gold #f0c57c
-        accents with #d79b47 CTA fill, orchid #e08cb8 + gold glows,
-        Fraunces display serif (450/560/650, loaded in Layout.astro), Rubik
-        body. Keepsake framing: generous radii, dark gold-washed mat,
-        candle-bokeh dots, no hairline rules or gradient bands. Leads
-        directly after the dark hero: that dark/dark junction is the page's
-        one deliberate chapter break, crafted via the candlelit-horizon
-        seam treatment below (the hero's overlay is neutral black, this
-        room is warm rose-ink, and gold + orchid candlelight bleeds across
-        the top edge). Strict light/dark alternation holds at every
-        junction below this seam. Media sits RIGHT in the zig-zag so the
-        Sweat Fest poster swings left directly below. Not a gala surface:
-        no .gala-foil, no accent-gold.) */}
+    {/* START: Annual Gala lead spotlight (the marquee for the next two
+        weeks). Gala identity per design.md 8B: off-black room, gold #ffbd59
+        foil, mauve ambient, Playfair via `font-display`, sharp .gala-btn
+        keylines. This hero -> gala junction is the page's one deliberate
+        dark/dark adjacency (it replaces the retired Graduation seam) and is
+        carried by the crafted gold seam: a .gala-foil-rule hairline on the
+        very top edge, a static gold wash pooling up into the hero, two
+        slow-breathing .gala-ambient blobs, the diamond lattice at 5%, and a
+        sparse desktop-only mote field. Media sits LEFT so the WGN9 video
+        swings right directly below. One ask only: the inline
+        GalaTicketDeadline module carries the primary CTA, so nothing else
+        here competes with it. */}
     <section
-      class="relative overflow-hidden py-16 text-[#f6efe3] sm:py-20"
-      style="background:
-        radial-gradient(44rem 24rem at 86% -6rem, rgba(215, 155, 71, 0.16), transparent 62%),
-        radial-gradient(36rem 20rem at -8% 104%, rgba(224, 140, 184, 0.12), transparent 60%),
-        linear-gradient(to bottom, #2b1520, #1e1216);"
+      id="gala"
+      class="relative overflow-hidden bg-off-black py-16 text-white scroll-mt-28 sm:py-20 lg:py-24"
     >
-      {/* Seam treatment: the candlelit horizon. Where the neutral-black
-          hero ends, warm candle light spills over the sill of the rose-ink
-          room: a full-width static wash of gold + orchid pooling at the top
-          edge, two slow-breathing light pools hugging the seam, and a few
-          candle-bokeh dots rising into it. Photosensitivity-safe: only
-          gala-ambient's ~8s breathing, staggered; no flicker, no strobe. */}
+      {/* Seam: foil hairline, then a static gold wash pooling at the top edge */}
+      <div class="gala-foil-rule pointer-events-none absolute inset-x-0 top-0 h-px" aria-hidden="true"></div>
       <div
-        class="pointer-events-none absolute inset-x-0 top-0 h-44"
-        style="background:
-          radial-gradient(58% 130% at 26% 0%, rgba(215, 155, 71, 0.26), transparent 72%),
-          radial-gradient(50% 115% at 72% 0%, rgba(224, 140, 184, 0.22), transparent 70%),
-          linear-gradient(to bottom, rgba(240, 197, 124, 0.12), transparent 55%);"
+        class="pointer-events-none absolute inset-x-0 top-0 h-40"
+        style="background: radial-gradient(62% 130% at 50% 0%, rgba(255, 189, 89, 0.18), transparent 72%);"
         aria-hidden="true"
       >
       </div>
-      <div class="gala-ambient pointer-events-none absolute -top-14 left-[10%] h-36 w-72 rounded-full blur-[80px]" style="background: rgba(215, 155, 71, 0.3);" aria-hidden="true"></div>
-      <div class="gala-ambient pointer-events-none absolute -top-16 right-[14%] h-40 w-80 rounded-full blur-[90px]" style="background: rgba(224, 140, 184, 0.26); animation-delay: 4s;" aria-hidden="true"></div>
-      <div class="pointer-events-none absolute inset-x-0 top-0 h-24" aria-hidden="true">
-        <span class="gala-ambient absolute left-[16%] top-7 h-2 w-2 rounded-full bg-[#f0c57c]/70 blur-[1.5px]"></span>
-        <span class="gala-ambient absolute left-[31%] top-3 h-1.5 w-1.5 rounded-full bg-[#d79b47]/60 blur-[1px]" style="animation-delay: 2s;"></span>
-        <span class="gala-ambient absolute left-[55%] top-9 h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]" style="animation-delay: 5s;"></span>
-        <span class="gala-ambient absolute left-[68%] top-4 h-2.5 w-2.5 rounded-full bg-[#e08cb8]/50 blur-[2px]" style="animation-delay: 3s;"></span>
-        <span class="gala-ambient absolute left-[84%] top-8 h-1.5 w-1.5 rounded-full bg-[#f0c57c]/55 blur-[1.5px]" style="animation-delay: 6.5s;"></span>
+      <div class="gala-lattice pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true"></div>
+      <div
+        class="gala-ambient pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full blur-[120px]"
+        style="background: rgba(255, 189, 89, 0.18);"
+        aria-hidden="true"
+      >
+      </div>
+      <div
+        class="gala-ambient pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full blur-[130px]"
+        style="background: rgba(181, 161, 141, 0.16); animation-delay: 3.5s;"
+        aria-hidden="true"
+      >
       </div>
 
-      {/* Slow-breathing candlelight glows (gala-ambient pulse: ~8s
-          scale/opacity drift, nothing close to a flash) */}
-      <div class="gala-ambient pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full blur-[110px]" style="background: rgba(215, 155, 71, 0.2);" aria-hidden="true"></div>
-      <div class="gala-ambient pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(224, 140, 184, 0.16); animation-delay: 2.5s;" aria-hidden="true"></div>
+      {/* Floating gold motes: desktop only, static (invisible) under
+          prefers-reduced-motion, see .home-gala-mote below. */}
+      <div
+        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
+        aria-hidden="true"
+      >
+        {
+          galaMotes.map((mote) => (
+            <span
+              class="home-gala-mote absolute bottom-0 rounded-full bg-accent-gold"
+              style={`left: ${mote.left}%; width: ${mote.size}px; height: ${mote.size}px; --drift: ${mote.drift}px; --peak: ${mote.opacity}; animation-duration: ${mote.duration}s; animation-delay: ${mote.delay}s;`}
+            />
+          ))
+        }
+      </div>
 
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Copy (left on desktop; DOM order copy-first preserved for
-              mobile) */}
-          <div class="reveal text-center lg:order-1 lg:text-left">
-            <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-[#f0c57c] sm:text-sm">
-              A night that lives forever
+        <div class="grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
+          {/* Media (LEFT on desktop, first in DOM order) */}
+          <div class="reveal group relative mx-auto w-full max-w-md lg:col-span-2 lg:max-w-none">
+            <div
+              class="gala-ambient pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-accent-gold/25 via-vibrant-pink/10 to-transparent blur-2xl"
+              aria-hidden="true"
+            >
+            </div>
+            <div class="relative">
+              <GalaPhotoFrame slot={galaPhotos.atrium} variant="hero" corners />
+              <span class="absolute -top-3 right-5 z-20 rounded-full border border-accent-gold/40 bg-off-black/85 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-accent-gold shadow-lg backdrop-blur-sm">
+                Fri · Sep 25 · 6 PM
+              </span>
+            </div>
+            <p class="relative mt-4 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 lg:text-left">
+              {galaTeaser.venueLine}
             </p>
-            <h2 class="mt-3 text-4xl leading-[1.05] tracking-tight [font-family:Fraunces,serif] [font-weight:650] sm:text-5xl">
-              <span class="text-[#f6efe3]">Graduation</span>
-              <span class="italic text-[#f0c57c]">2026</span>
-            </h2>
-            <p class="mt-4 text-lg font-bold text-[#f6efe3]">
-              Friday, August 7, 2026 · LSP Studio, Pilsen
-            </p>
-            <p class="mt-1 text-base font-semibold text-[#f6efe3]/60">
-              The YTT cohorts of 2025 and 2026 received their certificates together
+          </div>
+
+          {/* Copy (RIGHT on desktop) */}
+          <div class="reveal text-center lg:col-span-3 lg:text-left" style="transition-delay: 120ms;">
+            <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs font-extrabold uppercase tracking-[0.24em] text-white/60 lg:justify-start">
+              <span class="gala-foil-rule h-px w-8" aria-hidden="true"></span>
+              {galaTeaser.title} · {galaTeaser.attire} · {galaDateNoYear}
             </p>
 
-            <p class="mt-6 text-2xl text-[#f0c57c] [font-family:Fraunces,serif] [font-weight:560] sm:text-3xl">
+            <h2 class="mt-5 font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+              <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala
+            </h2>
+            <p class="mt-3 font-display text-2xl italic leading-snug text-white/90 sm:text-3xl">
+              One night that funds the movement.
+            </p>
+
+            <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg lg:mx-0">
+              {galaTeaser.homepageDescription}
+            </p>
+
+            {/* The evening at a glance (desktop): a foil-rule track with a
+                rotated gold square at each stop's `at` position, labels
+                alternating above and below the line. */}
+            <div class="mt-10 hidden lg:block">
+              <p class="text-[11px] font-extrabold uppercase tracking-[0.28em] text-accent-gold">
+                The evening · 6 PM to midnight
+              </p>
+              <div class="relative mt-9 h-[128px]">
+                <div class="gala-foil-rule absolute inset-x-0 top-1/2 h-px -translate-y-1/2" aria-hidden="true"></div>
+                {
+                  galaEvening.map((stop, i) => {
+                    const above = i % 2 === 1;
+                    const pct = stop.at * 100;
+                    const align =
+                      stop.at === 0 ? "start" : stop.at === 1 ? "end" : "center";
+                    const fullOnly = stop.tiers.length === 1;
+                    return (
+                      <div>
+                        <span
+                          class="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-accent-gold shadow-[0_0_12px_rgba(255,189,89,0.5)]"
+                          style={`left: ${pct}%;`}
+                          aria-hidden="true"
+                        />
+                        <div
+                          class:list={[
+                            "absolute w-[158px]",
+                            above ? "bottom-[calc(50%+14px)]" : "top-[calc(50%+14px)]",
+                            align === "center" && "-translate-x-1/2 text-center",
+                            align === "end" && "-translate-x-full text-right",
+                          ]}
+                          style={`left: ${pct}%;`}
+                        >
+                          <p class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-accent-gold">
+                            {stop.time}
+                          </p>
+                          <p class="mt-1 font-display text-lg font-bold leading-tight text-white">
+                            {stop.title}
+                          </p>
+                          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+                            {fullOnly ? "Full evening" : "All tickets"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+                }
+              </div>
+            </div>
+
+            {/* The evening at a glance (mobile): a compact chip grid */}
+            <div class="mt-8 grid grid-cols-2 gap-2.5 lg:hidden">
+              {
+                galaEvening.map((stop, i) => (
+                  <div
+                    class:list={[
+                      "rounded-[3px] border border-accent-gold/25 bg-accent-gold/[0.07] px-3 py-2.5 text-left",
+                      i === galaEvening.length - 1 && "col-span-2",
+                    ]}
+                  >
+                    <p class="text-[10px] font-extrabold uppercase tracking-[0.18em] text-accent-gold">
+                      {stop.time}
+                    </p>
+                    <p class="mt-0.5 text-sm font-bold text-white">{stop.title}</p>
+                  </div>
+                ))
+              }
+            </div>
+
+            {/* The single ask: days left, countdown, gold CTA, checkout hint,
+                and the quiet late-night alternative all live in here. */}
+            <div class="mt-9">
+              <GalaTicketDeadline context="home_gala_spotlight" variant="inline" />
+            </div>
+
+            <div class="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap lg:justify-start">
+              <a
+                href={galaPageUrl}
+                class="gala-btn gala-btn--ghost group inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
+              >
+                Explore the Gala
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+              <a
+                href={`${galaPageUrl}#tickets`}
+                class="text-sm font-semibold text-white/60 underline-offset-4 transition hover:text-accent-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
+                data-conversion-event="gala_ticket_click"
+                data-conversion-context="home_gala_sponsor_tease"
+              >
+                Sponsorship packages
+              </a>
+            </div>
+
+            <p class="mt-9 text-sm text-white/60">
+              Every seat expands free and discounted wellness across Chicago.
+            </p>
+            <GalaImpactStats variant="strip" class="mt-4 justify-center lg:justify-start" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Annual Gala lead spotlight */}
+
+    {/* START: Relive the summer recap band (light). Both summer events were
+        demoted from full spotlights to this one compact band on Sep 2026.
+        Per the design.md Option H exception, each card is an ambassador of
+        its OWN identity: Graduation keeps the candlelit-rose room (Fraunces,
+        #f0c57c gold, candle-bokeh dots, cream keepsake mat, never .gala-foil
+        or accent-gold) and Sweat Fest keeps the v4 checkerboard print kit
+        (honeydew field, #123f36 ink, hard offset shadow, sf-* utilities). */}
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-14 sm:py-18">
+      <div
+        class="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-accent-gold/15 blur-[120px]"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold">
+            Recaps · Summer 2026
+          </p>
+          <h2 class="mt-2 font-sans text-3xl font-extrabold tracking-tight text-off-black sm:text-4xl">
+            Relive the summer
+          </h2>
+          <p class="mt-3 text-medium-gray">
+            Graduation night and our first festival, in photos.
+          </p>
+        </div>
+
+        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+          {/* Graduation 2026 (Option H: candlelit rose) */}
+          <article
+            class="reveal flex h-full flex-col rounded-[1.75rem] p-6 text-[#f6efe3] shadow-xl shadow-[#2b1520]/20 sm:p-8"
+            style="background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
+          >
+            {/* Candle-bokeh dot row (this identity's divider: no hairlines) */}
+            <div class="flex items-center gap-2" aria-hidden="true">
+              <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]/70 blur-[1px]"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-[#f0c57c]/80 blur-[1.5px]"></span>
+              <span class="h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]"></span>
+              <span class="h-2 w-2 rounded-full bg-[#d79b47]/50 blur-[2px]"></span>
+              <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]/45 blur-[1.5px]"></span>
+            </div>
+
+            <p class="mt-4 text-xs font-extrabold uppercase tracking-[0.2em] text-[#f0c57c]">
+              Recap · Friday, August 7 · LSP Studio
+            </p>
+            <h3 class="mt-3 text-3xl leading-tight [font-family:Fraunces,serif] [font-weight:650] sm:text-4xl">
+              Graduation <span class="italic text-[#f0c57c]">2026</span>
+            </h3>
+            <p class="mt-4 text-xl text-[#f0c57c] [font-family:Fraunces,serif] [font-weight:560] sm:text-2xl">
               Nearly 100 teachers strong.
             </p>
             <p class="mt-1 text-base italic text-[#f0c57c]/90 [font-family:Fraunces,serif] [font-weight:560]">
               Casi 100 maestras y contando.
             </p>
 
-            <blockquote class="mx-auto mt-6 max-w-xl text-left lg:mx-0">
-              {/* Candle-bokeh dot row (replaces the hairline quote rule) */}
-              <div class="flex items-center gap-2" aria-hidden="true">
-                <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]/70 blur-[1px]"></span>
-                <span class="h-2.5 w-2.5 rounded-full bg-[#f0c57c]/80 blur-[1.5px]"></span>
-                <span class="h-1 w-1 rounded-full bg-[#e08cb8]/60 blur-[1px]"></span>
-                <span class="h-2 w-2 rounded-full bg-[#d79b47]/50 blur-[2px]"></span>
-                <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]/45 blur-[1.5px]"></span>
-              </div>
-              <p class="mt-3 text-lg italic leading-relaxed text-[#f6efe3]/80 [font-family:Fraunces,serif] [font-weight:450]">
-                &ldquo;The Latina Sweat Project was never these walls. It has
-                always been the people.&rdquo;
-              </p>
-              <footer class="mt-2 text-sm font-semibold text-[#f6efe3]/50">
-                Margarita Quiñones-Peña, Founder
-              </footer>
-            </blockquote>
+            <figure class="mt-6 rounded-[1.6rem] bg-[#f6efe3] p-2.5 shadow-lg shadow-black/30">
+              <img
+                src={`${base}images/graduation/g15.jpg`}
+                width="1024"
+                height="683"
+                alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
+                class="w-full rounded-[1.15rem] object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
 
-            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+            <div class="mt-auto flex flex-col items-start gap-4 pt-7 sm:flex-row sm:items-center">
               <a
                 href={graduationPageUrl}
-                class="group inline-flex items-center justify-center gap-3 rounded-full bg-[#d79b47] px-7 py-4 text-base font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                class="group inline-flex items-center gap-2.5 rounded-full bg-[#d79b47] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
                 data-conversion-event="graduation_spotlight_click"
-                data-conversion-context="home_graduation"
+                data-conversion-context="home_summer_recap"
               >
                 Relive the night
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -226,353 +438,263 @@ const graduationFlickrUrl =
                 href={graduationFlickrUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group inline-flex items-center justify-center gap-3 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-7 py-4 text-base font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
+                class="text-sm font-extrabold text-[#f0c57c] underline-offset-4 transition hover:text-[#f6efe3] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
                 data-conversion-event="graduation_gallery_click"
-                data-conversion-context="home_graduation"
+                data-conversion-context="home_summer_recap"
               >
-                View the full gallery
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
+                Photo gallery
               </a>
             </div>
-            <p class="mt-5 text-center text-xs font-extrabold uppercase tracking-[0.2em] text-[#f6efe3]/45 lg:text-left">
-              Photos and the full story on the recap page
-            </p>
-          </div>
+          </article>
 
-          {/* Media (right on desktop): the class photo on a dark
-              gold-washed keepsake mat */}
-          <div class="reveal relative mx-auto w-full max-w-xl lg:order-2" style="transition-delay: 120ms;">
-            <div class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#d79b47]/25 via-[#e08cb8]/12 to-transparent opacity-80 blur-2xl" aria-hidden="true"></div>
-            <figure class="relative">
-              <div class="rounded-[2rem] bg-gradient-to-br from-[#d79b47]/20 via-[#2b1520] to-[#1e1216] p-2.5 shadow-2xl shadow-black/40 sm:p-3">
-                <img
-                  src={`${base}images/graduation/hero.jpg`}
-                  width="1024"
-                  height="683"
-                  alt="The 2025 and 2026 YTT cohorts holding their certificates at LSP Studio"
-                  class="w-full rounded-[1.4rem]"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <figcaption class="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-xs font-bold uppercase tracking-[0.18em] text-[#f6efe3]/45 lg:justify-end">
-                <span class="text-[#f0c57c]">Graduation night</span>
-                <span aria-hidden="true">·</span>
-                <span>Friday, August 7, 2026</span>
-              </figcaption>
-            </figure>
-          </div>
-        </div>
+          {/* Sweat Fest '26 (Option F v4: official checkerboard-logo kit) */}
+          <article
+            class="reveal flex h-full flex-col overflow-hidden rounded-xl border-[3px] border-[#123f36] bg-[#f4f7dc] shadow-[6px_7px_0_#ee3083]"
+            style="transition-delay: 110ms;"
+          >
+            <div
+              class="sf-picado h-[26px]"
+              style={`background-image: ${sweatFestCheckerUri}; background-size: 78px 26px;`}
+              aria-hidden="true"
+            >
+            </div>
 
-        {/* Companion band: YTT ’26 Trio Community Classes (Aug 11 to 31).
-            Placement rationale: the trio series is the graduation story's
-            next chapter (the same teachers, now taking the mat for their
-            first live classes), so the promo lives INSIDE this candlelit
-            rose room at the bottom of the spotlight rather than as its own
-            section. That attaches it to the story it belongs to AND keeps
-            the page's strict light/dark alternation intact: Sweat Fest's
-            light honeydew section still lands directly below the same dark
-            room. Compact by design: one keepsake-mat band, gold CTA to
-            Zeffy (free tickets, donation encouraged), ghost CTA to
-            /schedule where every session card lives. Same identity rules
-            as the section: Fraunces display, #f0c57c/#d79b47 gold, orchid
-            only in the trio-dot motif, no .gala-foil, no accent-gold. */}
-        <div class="reveal relative mt-14 rounded-3xl border border-[#f0c57c]/25 bg-white/[0.04] p-6 sm:p-8" style="transition-delay: 200ms;">
-          <div class="flex flex-col items-center gap-7 text-center lg:flex-row lg:justify-between lg:text-left">
-            <div class="max-w-2xl">
-              <p class="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-xs font-extrabold uppercase tracking-[0.2em] text-[#f0c57c] lg:justify-start">
-                <span class="flex items-center gap-1.5" aria-hidden="true">
-                  <span class="h-1.5 w-1.5 rounded-full bg-[#d79b47]"></span>
-                  <span class="h-1.5 w-1.5 rounded-full bg-[#f0c57c]"></span>
-                  <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]"></span>
-                </span>
-                {yttTrio.title}
-              </p>
-              <h3 class="mt-3 text-2xl leading-tight text-[#f6efe3] [font-family:Fraunces,serif] [font-weight:650] sm:text-3xl">
-                They graduated Aug 7.
-                <span class="italic text-[#f0c57c]">Now they take the mat.</span>
+            <div class="flex flex-1 flex-col p-5 sm:p-7">
+              <SweatFestArtwork variant="landscape" className="rounded-md ring-1 ring-off-black/15" />
+
+              <span class="sf-stamp mt-6 self-start px-3 py-1.5 text-[11px]" style="color: #b23c14;">
+                Recap · Sat, Aug 22
+              </span>
+              <h3 class="mt-4 font-slab text-3xl uppercase leading-[0.98] tracking-tight sm:text-4xl" style="color: #123f36;">
+                <span class="sf-print" style="--sf-print: #60a444;">Sweat Fest</span>
+                <span class="sf-print" style="--sf-print: #ee3083;">&rsquo;26</span>
               </h3>
-              <p class="mt-3 text-base leading-relaxed text-[#f6efe3]/70">
-                Free community classes: one 45-minute flow, three new
-                teachers, 15 minutes each. Come be their first room.
+              <p class="mt-4 text-base leading-relaxed text-medium-gray">
+                Gracias, Chicago: a sunrise 5K, two stages, and the closing
+                Pachanga.
               </p>
-              <p class="mt-2 text-sm font-bold text-[#f6efe3]/85">
-                {yttTrio.dateRangeLabel} · {yttTrio.venueName} · Free tickets
-                · Donation to LSP encouraged
-              </p>
+
+              <div class="mt-5 flex flex-wrap gap-2">
+                {sweatFestDay.map((phase, i) => (
+                  <span
+                    class="sf-tag inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-off-black"
+                    style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
+                  >
+                    <span class="inline-block h-2 w-2 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
+                    {phase.title}
+                  </span>
+                ))}
+              </div>
+
+              <div class="mt-auto flex flex-wrap items-center gap-4 pt-7">
+                <a
+                  href={withBase("sweatfest#photos")}
+                  class="sf-btn inline-flex items-center justify-center gap-2.5 bg-[#ee3083] px-6 py-3.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
+                  data-conversion-event="sweatfest_gallery_click"
+                  data-conversion-context="home_summer_recap"
+                >
+                  Every photo
+                </a>
+                <a
+                  href={withBase("sweatfest#merch")}
+                  class="sf-btn inline-flex items-center justify-center gap-2.5 bg-white px-6 py-3.5 text-sm font-extrabold text-[#123f36] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
+                  data-conversion-event="sweatfest_merch_click"
+                  data-conversion-context="home_summer_recap"
+                >
+                  The merch drop
+                </a>
+                <a
+                  href={withBase("sweatfest/program")}
+                  class="text-sm font-extrabold text-[#b23c14] underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-2"
+                  data-conversion-event="sweatfest_program_click"
+                  data-conversion-context="home_summer_recap"
+                >
+                  Day-of program
+                </a>
+              </div>
             </div>
-            <div class="flex shrink-0 flex-col items-center gap-3 sm:flex-row lg:flex-col xl:flex-row">
-              <a
-                href={yttTrio.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center justify-center gap-2.5 rounded-full bg-[#d79b47] px-6 py-3.5 text-sm font-extrabold text-off-black shadow-lg shadow-[#d79b47]/25 transition hover:bg-[#f0c57c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
-                data-conversion-event="ytt_trio_ticket_click"
-                data-conversion-context="home_ytt_trio"
-                data-conversion-provider="zeffy"
-              >
-                {yttTrio.ticketsLabel}
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-              <a
-                href={`${base}schedule`}
-                class="inline-flex items-center justify-center gap-2.5 rounded-full border border-[#f0c57c]/45 bg-white/[0.04] px-6 py-3.5 text-sm font-extrabold text-[#f0c57c] backdrop-blur-sm transition hover:border-[#f0c57c] hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c57c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b1520]"
-                data-conversion-event="ytt_trio_schedule_click"
-                data-conversion-context="home_ytt_trio"
-              >
-                All {yttTrioSessions.length} dates
-              </a>
-            </div>
-          </div>
+          </article>
         </div>
       </div>
     </section>
-    {/* END: Graduation 2026 */}
+    {/* END: Relive the summer recap band */}
 
-    {/* START: Sweat Fest (first event spotlight, official checkerboard-logo
-        identity: checkerboard tile strip, taped-up poster, handmade
-        wordmark over honeydew. First light section, directly after the
-        dark Graduation lead) */}
-    <section class="relative overflow-hidden py-16 sm:py-20 lg:py-24" style="background: linear-gradient(to bottom, #eaf0c8, #e2ecac 45%, #dde8a8);">
-      {/* Checkerboard tile strip along the top */}
+    {/* START: WGN9 Spotlight Section */}
+    <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
+      {/* Background pattern */}
       <div
-        class="sf-picado absolute inset-x-0 top-0 h-[52px]"
-        style={`background-image: ${sweatFestCheckerUri};`}
-        aria-hidden="true"
+        class="absolute inset-0 opacity-[0.05]"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
       >
       </div>
-      {/* Soft magenta-to-teal glow behind the poster */}
-      <div class="pointer-events-none absolute -top-24 -right-16 h-80 w-80 rounded-full bg-gradient-to-br from-[#ee3083]/25 to-[#00a7ab]/15 blur-[110px]" aria-hidden="true"></div>
 
-      <div class="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 text-off-black">
-        <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14">
-          {/* Media (left): the campaign poster taped to the wall. The official
-              logo and event copy are real DOM, never baked into generated art. */}
-          <div class="reveal relative mx-auto w-full max-w-md lg:max-w-none">
-            <div class="sf-taped -rotate-[1.3deg]">
-              <span class="sf-tape -left-4 -top-3 rotate-[-38deg]" aria-hidden="true"></span>
-              <span class="sf-tape -right-4 -top-3 rotate-[34deg]" aria-hidden="true"></span>
-              <SweatFestArtwork variant="portrait" className="rounded-[3px]" />
-              <p class="mt-3 text-center font-slab text-sm uppercase tracking-[0.2em] text-off-black/70">
-                {sweatFest.tagline}
+      {/* Top accent line */}
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
+      >
+      </div>
+
+      {/* Decorative glows */}
+      <div
+        class="absolute -top-32 -left-20 w-[400px] h-[400px] bg-vibrant-pink/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="absolute -bottom-32 -right-20 w-[400px] h-[400px] bg-accent-gold/15 rounded-full blur-[120px] pointer-events-none"
+      >
+      </div>
+
+      <div
+        class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+      >
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
+          {/* Copy + CTAs (left on desktop: the gala photo sits on the left
+              directly above, so the video swings right here, natural DOM
+              order) */}
+          <div class="lg:col-span-5 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
+                ></span>
+              </span>
+              <p
+                class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
+              >
+                As Seen On WGN9 Chicago
               </p>
             </div>
-          </div>
 
-          {/* Copy (right) */}
-          <div class="reveal text-center lg:text-left" style="transition-delay: 80ms;">
-            <span class="sf-stamp px-3 py-1.5 text-[11px] sm:text-xs" style="color: #b23c14;">
-              Recap · LSP's first-ever all-day festival · Aug 22
-            </span>
-            <h2 class="mt-6 font-slab text-5xl uppercase leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl" style="color: #123f36;">
-              <span class="sf-print" style="--sf-print: #ee3083;">Run.</span>
-              <span class="sf-print" style="--sf-print: #00a7ab;">Sweat.</span>
-              <span class="sf-print whitespace-nowrap" style="--sf-print: #60a444;">Pachanga.</span>
+            <h2
+              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.05]"
+            >
+              Around Town<br />checks out{" "}
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
+                >The Latina<br class="hidden sm:block" /> Sweat Project</span
+              >
             </h2>
-            <p class="mt-5 text-lg font-bold text-off-black">
-              {sweatFest.dateLabel} · {sweatFest.timeLabel}
-            </p>
-            <p class="mt-1 text-base font-semibold text-medium-gray">
-              {sweatFest.venueLine}
-            </p>
-            <p class="mt-3 text-base font-semibold text-off-black/70">
-              {sweatFest.taglineSub}
+            <p
+              class="mt-5 font-body text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0"
+            >
+              WGN9's Ana Belaval spent the morning with us in Pilsen. Four
+              segments: a Spanish yoga flow, our community art gallery, the
+              workout, and a conversation with our founder Margarita.
             </p>
 
-            <div class="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
-              {sweatFestDay.map((phase, i) => (
-                <span
-                  class="sf-tag inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-off-black"
-                  style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
+            <div
+              class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3"
+            >
+              <a
+                href={`${base}wgn9-around-town`}
+                class="btn group inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <span class="inline-block h-2 w-2 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
-                  {phase.title} · {phase.time}
-                </span>
-              ))}
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Watch all 4 segments
+              </a>
+              <a
+                href="https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
+              >
+                Read on WGN9
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+              </a>
             </div>
 
-            <p class="mt-5 max-w-2xl text-lg leading-relaxed text-medium-gray mx-auto lg:mx-0">
-              Chicago showed up from the sunrise 5K to the last set of the
-              Pachanga. Gracias to everyone who ran, sweat, and danced our
-              first festival into being.
-            </p>
-
-            <p class="mt-3 text-sm font-bold text-off-black/70">
-              Every photo from the day is in the album
-            </p>
-
-            <div class="mt-8 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
-              <a
-                href={withBase("sweatfest#photos")}
-                class="sf-btn group inline-flex items-center justify-center gap-3 bg-[#ee3083] px-7 py-4 text-base font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
-                data-conversion-event="sweatfest_gallery_click"
-                data-conversion-context="home_sweatfest_band"
+            {/* Segment chips */}
+            <div
+              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2"
+            >
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
               >
-                Relive the day in photos
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-              <a
-                href={withBase("sweatfest/program")}
-                class="sf-btn inline-flex items-center justify-center gap-3 bg-white px-7 py-4 text-base font-extrabold text-[#123f36] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123f36] focus-visible:ring-offset-4"
-                data-conversion-event="sweatfest_program_click"
-                data-conversion-context="home_sweatfest_band"
+                <span class="text-accent-gold">01</span> The Workout
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
               >
-                Day-of program
-              </a>
-              <span class="sf-stamp rotate-[1.5deg] px-3.5 py-1.5 text-[11px]" style="color: #b23c14;">
-                {sweatFest.statusLabel}
+                <span class="text-accent-gold">02</span> Meet the Founder
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">03</span> Spanish Yoga Flow
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
+              >
+                <span class="text-accent-gold">04</span> Community & Art
               </span>
             </div>
           </div>
+
+          {/* Featured video (right on desktop) */}
+          <div class="lg:col-span-7">
+            <div
+              class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
+            >
+              {/* Gradient halo */}
+              <div
+                class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/40 via-transparent to-accent-gold/40 opacity-60 pointer-events-none"
+                aria-hidden="true"
+              >
+              </div>
+
+              <div class="relative aspect-video w-full">
+                <iframe
+                  id="nxs-video-iframe-home"
+                  frameborder="0"
+                  allowfullscreen
+                  loading="lazy"
+                  title="WGN9 Around Town: Ana tries the workout at The Latina Sweat Project"
+                  src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584"
+                  rel="nofollow"
+                  class="absolute inset-0 w-full h-full"
+                ></iframe>
+              </div>
+            </div>
+
+            <p
+              class="mt-3 text-center lg:text-right text-xs font-medium text-white/40 italic"
+            >
+              Featured segment: Ana tries the workout · 3 more on the feature
+              page
+            </p>
+          </div>
         </div>
       </div>
-    </section>
-    {/* END: Sweat Fest (first event spotlight) */}
 
-    {/* START: Sweat Fest merch drop (ink band straight after the festival
-        spotlight: the lineup tee front/back plus the rest of the drop,
-        photographed 2026-08-21; data in sweatFestMerch) */}
-    <section
-      class="relative overflow-hidden bg-[#123f36] py-16 text-white sm:py-20 lg:py-24"
-      style={`--sf-sunrise: ${sweatFestColors.sunrise}; --sf-ember: ${sweatFestColors.ember}; --sf-dusk: ${sweatFestColors.dusk};`}
-    >
+      {/* Bottom accent line */}
       <div
-        class="sf-picado absolute inset-x-0 top-0 h-[52px] opacity-90"
-        style={`background-image: ${sweatFestCheckerUri};`}
-        aria-hidden="true"
+        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
       >
       </div>
-      <div class="pointer-events-none absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-gradient-to-tr from-[#ee3083]/25 to-[#00a7ab]/15 blur-[110px]" aria-hidden="true"></div>
-
-      <div class="relative mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-14">
-          {/* Copy + CTA */}
-          <div class="reveal text-center lg:text-left">
-            <span class="sf-stamp px-3 py-1.5 text-[11px]" style="color: #e2ecac;">
-              {sweatFestMerch.eyebrow}
-            </span>
-            <h2 class="mt-6 font-slab text-4xl uppercase tracking-tight sm:text-5xl">
-              {sweatFestMerch.heading}
-            </h2>
-            <p class="mt-5 text-lg leading-relaxed text-white/75">
-              {sweatFestMerch.intro}
-            </p>
-            <ul class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start" aria-label="In the drop">
-              {
-                [sweatFestMerch.hero, ...sweatFestMerch.items].map((item) => (
-                  <li class="sf-tag px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#123f36]">
-                    {item.name}
-                  </li>
-                ))
-              }
-            </ul>
-            <ul class="mt-6 space-y-1.5 text-sm font-semibold text-white/85">
-              {
-                sweatFestMerch.whereLines.map((line) => (
-                  <li class="flex items-start justify-center gap-2.5 lg:justify-start">
-                    <span class="mt-1.5 h-2 w-2 flex-none rotate-45 bg-[var(--sf-sunrise)]" aria-hidden="true" />
-                    <span>{line}</span>
-                  </li>
-                ))
-              }
-            </ul>
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-              <a
-                href={withBase("sweatfest#merch")}
-                class="sf-btn sf-btn-night inline-flex items-center justify-center gap-3 bg-[var(--sf-sunrise)] px-7 py-4 text-base font-extrabold text-[#123f36] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#123f36]"
-                data-conversion-event="sweatfest_merch_click"
-                data-conversion-context="home_sweatfest_merch"
-              >
-                {sweatFestMerch.ctaLabel}
-              </a>
-              <a
-                href={withBase("sweatfest#photos")}
-                class="inline-flex items-center justify-center gap-3 border-2 border-white/30 px-7 py-4 text-base font-extrabold text-white transition-colors duration-300 hover:border-[var(--sf-ember)] hover:bg-[var(--sf-ember)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#123f36]"
-              >
-                Festival photos
-              </a>
-            </div>
-          </div>
-
-          {/* Photos: tap any to enlarge and flip through every colorway */}
-          <div class="reveal" style="transition-delay: 120ms;">
-            <div
-              class="grid grid-cols-2 gap-4"
-              data-merch-group={sweatFestMerch.hero.name}
-              data-merch-shots={JSON.stringify(teeShots)}
-            >
-              {
-                [
-                  { img: teeShots[0], label: "Front", tilt: -1.2, zoom: 0 },
-                  { img: teeShots[1], label: "Back · the lineup", tilt: 1, zoom: 1 },
-                ].map((shot) => (
-                  <button
-                    type="button"
-                    data-merch-zoom={shot.zoom}
-                    class:list={["home-merch-photo block w-full text-left", shot.img.cutout && "is-cutout"]}
-                    style={`--tilt: ${shot.tilt}deg;`}
-                    aria-label={`Enlarge: ${shot.img.alt}`}
-                  >
-                    <img
-                      src={shot.img.src}
-                      alt={shot.img.alt}
-                      width="1200"
-                      height="1500"
-                      loading="lazy"
-                      decoding="async"
-                      class="block h-auto w-full"
-                    />
-                    <span class="sf-tag absolute left-3 top-3 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#123f36]">
-                      {shot.label}
-                    </span>
-                    <span class="home-merch-hint" aria-hidden="true">3 colors · tap to enlarge</span>
-                  </button>
-                ))
-              }
-            </div>
-            <div class="mt-4 grid grid-cols-4 gap-3">
-              {
-                sweatFestMerch.items.map((item, i) => {
-                  const shots = itemShots(item);
-                  return (
-                    <div data-merch-group={item.name} data-merch-shots={JSON.stringify(shots)}>
-                      <button
-                        type="button"
-                        data-merch-zoom="0"
-                        class:list={["home-merch-photo group block w-full", shots[0].cutout && "is-cutout"]}
-                        style={`--tilt: ${[0.8, -0.7, 0.6, -0.9][i % 4]}deg;`}
-                        aria-label={`Enlarge ${item.name}: ${shots.length} photos`}
-                      >
-                        <img
-                          src={shots[0].src}
-                          alt={shots[0].alt}
-                          width="1200"
-                          height="1500"
-                          loading="lazy"
-                          decoding="async"
-                          class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.04]"
-                        />
-                        <span class="home-merch-hint" aria-hidden="true">
-                          {item.colors.length > 1 ? `${item.colors.length} colors` : `${shots.length} designs`}
-                        </span>
-                      </button>
-                    </div>
-                  );
-                })
-              }
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
-    <MerchLightbox />
-    {/* END: Sweat Fest merch drop */}
+    {/* END: WGN9 Spotlight Section */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
     <section
@@ -870,182 +992,104 @@ const graduationFlickrUrl =
     </section>
     {/* END: Merch Drop — Monday Miles Tee Section */}
 
-    {/* START: WGN9 Spotlight Section */}
-    <section class="relative overflow-hidden bg-off-black py-14 sm:py-20">
-      {/* Background pattern */}
-      <div
-        class="absolute inset-0 opacity-[0.05]"
-        style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M30 0L60 30L30 60L0 30z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%221%22/%3E%3C/svg%3E'); background-size: 60px 60px;"
-      >
-      </div>
-
-      {/* Top accent line */}
-      <div
-        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vibrant-pink to-transparent opacity-80"
-      >
-      </div>
-
-      {/* Decorative glows */}
-      <div
-        class="absolute -top-32 -left-20 w-[400px] h-[400px] bg-vibrant-pink/15 rounded-full blur-[120px] pointer-events-none"
-      >
-      </div>
-      <div
-        class="absolute -bottom-32 -right-20 w-[400px] h-[400px] bg-accent-gold/15 rounded-full blur-[120px] pointer-events-none"
-      >
-      </div>
-
-      <div
-        class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-      >
-        <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
-          {/* Copy + CTAs (left on desktop: the Merch tee sits on the left
-              directly above, so the video swings right here, natural DOM
-              order) */}
-          <div class="lg:col-span-5 text-center lg:text-left">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border border-vibrant-pink/40 bg-vibrant-pink/10 px-4 py-1.5"
-            >
-              <span class="relative flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-vibrant-pink opacity-75"
-                ></span>
-                <span
-                  class="relative inline-flex h-2 w-2 rounded-full bg-vibrant-pink"
-                ></span>
-              </span>
-              <p
-                class="text-vibrant-pink text-xs font-bold uppercase tracking-[0.25em]"
-              >
-                As Seen On WGN9 Chicago
-              </p>
-            </div>
-
-            <h2
-              class="mt-5 font-sans text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.05]"
-            >
-              Around Town<br />checks out{" "}
-              <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-pink to-accent-gold"
-                >The Latina<br class="hidden sm:block" /> Sweat Project</span
-              >
-            </h2>
-            <p
-              class="mt-5 font-body text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0"
-            >
-              WGN9's Ana Belaval spent the morning with us in Pilsen. Four
-              segments: a Spanish yoga flow, our community art gallery, the
-              workout, and a conversation with our founder Margarita.
-            </p>
-
-            <div
-              class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3"
-            >
-              <a
-                href={`${base}wgn9-around-town`}
-                class="btn group inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-vibrant-pink/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                Watch all 4 segments
-              </a>
-              <a
-                href="https://wgntv.com/morning-news/around-town/around-town-checks-out-the-latina-sweat-project/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:border-accent-gold/60 hover:bg-white/10"
-              >
-                Read on WGN9
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  ></path></svg
-                >
-              </a>
-            </div>
-
-            {/* Segment chips */}
-            <div
-              class="mt-6 flex flex-wrap justify-center lg:justify-start gap-2"
-            >
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">01</span> The Workout
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">02</span> Meet the Founder
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">03</span> Spanish Yoga Flow
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/70"
-              >
-                <span class="text-accent-gold">04</span> Community & Art
-              </span>
-            </div>
-          </div>
-
-          {/* Featured video (left on desktop) */}
-          <div class="lg:col-span-7">
-            <div
-              class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black"
-            >
-              {/* Gradient halo */}
-              <div
-                class="absolute -inset-px rounded-2xl bg-gradient-to-br from-vibrant-pink/40 via-transparent to-accent-gold/40 opacity-60 pointer-events-none"
-                aria-hidden="true"
-              >
-              </div>
-
-              <div class="relative aspect-video w-full">
-                <iframe
-                  id="nxs-video-iframe-home"
-                  frameborder="0"
-                  allowfullscreen
-                  loading="lazy"
-                  title="WGN9 Around Town: Ana tries the workout at The Latina Sweat Project"
-                  src="https://redir1.wgntv.com/nxs-video/vid-anvato-11802590/embed/?injected_via=embed&post_id=3976584"
-                  rel="nofollow"
-                  class="absolute inset-0 w-full h-full"
-                ></iframe>
-              </div>
-            </div>
-
-            <p
-              class="mt-3 text-center lg:text-right text-xs font-medium text-white/40 italic"
-            >
-              Featured segment: Ana tries the workout · 3 more on the feature
-              page
-            </p>
-          </div>
+    {/* START: 40 Under 40 Spotlight */}
+    <section
+      class="relative overflow-hidden bg-off-black py-10 sm:py-14"
+    >
+      <div class="absolute inset-0 opacity-[0.12]">
+        <div
+          class="absolute inset-0"
+          style="background-image: radial-gradient(circle at 30% 50%, #b8860b 0%, transparent 50%), radial-gradient(circle at 70% 50%, #daa520 0%, transparent 50%);"
+        >
         </div>
       </div>
 
-      {/* Bottom accent line */}
-      <div
-        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-40"
-      >
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* md:flex-row-reverse: the flyer sits on the RIGHT (Sep 2026
+            reorder) so it zig-zags with the Monday Miles tee on the left
+            directly above and the Monday Miles runs visual on the left
+            directly below */}
+        <div class="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
+          {/* Photo */}
+          <div class="flex-shrink-0 mx-auto md:mx-0">
+            <div class="relative">
+              <div
+                class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-amber-400/30 via-yellow-300/20 to-orange-400/30 blur-lg"
+              >
+              </div>
+              <img
+                src={`${base}images/40under40.png`}
+                alt="Margarita Quiñones Peña · Negocios Now 40 Under 40 Chicago 2025"
+                class="relative w-48 sm:w-56 rounded-2xl object-contain border-2 border-amber-200/60 shadow-lg"
+              />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div class="text-center md:text-left flex-1">
+              <div
+              class="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-300/30 px-4 py-2 mb-4"
+            >
+              <svg
+                class="h-4 w-4 text-accent-gold"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                ></path>
+              </svg>
+              <span
+                class="text-sm font-bold uppercase tracking-widest text-accent-gold"
+                >40 Under 40 &middot; Chicago 2025</span
+              >
+            </div>
+
+            <h2
+              class="font-sans text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl"
+            >
+              Our Founder, Recognized
+            </h2>
+            <p
+              class="mt-3 text-base text-white/65 sm:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0"
+            >
+              Margarita Qui&ntilde;ones Pe&ntilde;a has been named to the
+              <strong class="text-accent-gold">Negocios Now 40 Under 40</strong>
+              list, honoring emerging leaders making an impact in Chicago. From building
+              a grassroots wellness movement in Pilsen to certifying over 50 yoga
+              instructors from underrepresented communities, her work continues to
+              transform lives.
+            </p>
+
+            <div
+              class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start"
+            >
+              <a
+                href="https://negociosnow.com/margarita-quinones-pena-advocate-for-holistic-community-empowerment/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:bg-amber-300 hover:shadow-xl"
+              >
+                Read the Feature
+                <svg
+                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
-    {/* END: WGN9 Spotlight Section */}
+    {/* END: 40 Under 40 Spotlight */}
 
     {/* START: Monday Miles — Community Runs Section */}
     <section
@@ -1064,9 +1108,10 @@ const graduationFlickrUrl =
         <div
           class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16"
         >
-          {/* Content (right on desktop via lg:order-2, Aug 2026 reorder:
-              zig-zags with the WGN9 video right above and the 40 Under 40
-              flyer right below; DOM order copy-first preserved for mobile) */}
+          {/* Content (right on desktop via lg:order-2, Sep 2026 reorder:
+              the visual stays LEFT, zig-zagging with the 40 Under 40 flyer
+              right above and the Grand Opening photo right below; DOM order
+              copy-first preserved for mobile) */}
           <div class="text-center lg:order-2 lg:text-left">
             {/* Badge */}
             <div
@@ -1266,103 +1311,62 @@ const graduationFlickrUrl =
     </section>
     {/* END: Monday Miles — Community Runs Section */}
 
-    {/* START: 40 Under 40 Spotlight */}
-    <section
-      class="relative overflow-hidden bg-off-black py-10 sm:py-14"
-    >
-      <div class="absolute inset-0 opacity-[0.12]">
+    {/* START: Grand Opening Section */}
+    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          class="absolute inset-0"
-          style="background-image: radial-gradient(circle at 30% 50%, #b8860b 0%, transparent 50%), radial-gradient(circle at 70% 50%, #daa520 0%, transparent 50%);"
+          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
         >
-        </div>
-      </div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* md:flex-row-reverse: flyer flipped to the RIGHT (Aug 2026
-            reorder) so it zig-zags with the Monday Miles visual left above
-            and the Grand Opening image left below the events carousel */}
-        <div class="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
-          {/* Photo */}
-          <div class="flex-shrink-0 mx-auto md:mx-0">
-            <div class="relative">
-              <div
-                class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-amber-400/30 via-yellow-300/20 to-orange-400/30 blur-lg"
-              >
-              </div>
-              <img
-                src={`${base}images/40under40.png`}
-                alt="Margarita Quiñones Peña · Negocios Now 40 Under 40 Chicago 2025"
-                class="relative w-48 sm:w-56 rounded-2xl object-contain border-2 border-amber-200/60 shadow-lg"
-              />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div class="text-center md:text-left flex-1">
-              <div
-              class="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-300/30 px-4 py-2 mb-4"
-            >
-              <svg
-                class="h-4 w-4 text-accent-gold"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                ></path>
-              </svg>
-              <span
-                class="text-sm font-bold uppercase tracking-widest text-accent-gold"
-                >40 Under 40 &middot; Chicago 2025</span
-              >
-            </div>
-
-            <h2
-              class="font-sans text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl"
-            >
-              Our Founder, Recognized
-            </h2>
+          {/* Copy left / image RIGHT on desktop (Sep 2026 reorder): the
+              photo swings right so it zig-zags with the Monday Miles runs
+              visual on the left directly above */}
+          <div class="lg:order-1">
             <p
-              class="mt-3 text-base text-white/65 sm:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0"
+              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
             >
-              Margarita Qui&ntilde;ones Pe&ntilde;a has been named to the
-              <strong class="text-accent-gold">Negocios Now 40 Under 40</strong>
-              list, honoring emerging leaders making an impact in Chicago. From building
-              a grassroots wellness movement in Pilsen to certifying over 50 yoga
-              instructors from underrepresented communities, her work continues to
-              transform lives.
+              We&apos;re Open!
             </p>
-
-            <div
-              class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start"
+            <h2
+              class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
             >
+              Our New Studio Is Here
+            </h2>
+            <div class="mt-6 space-y-4 font-body text-lg text-white/65">
+              <p>The wait is over! Our brand new studio is officially open.</p>
+              <p>
+                Experience the energy, meet our incredible teaching team, and
+                see firsthand what makes LSP more than just a place to move. We
+                are a community, a safe space, and a celebration of wellness in
+                our neighborhoods.
+              </p>
+              <p>
+                Come join a class and be part of our vibrant community. We can't
+                wait to welcome you!
+              </p>
+            </div>
+            <div class="mt-8 text-center">
               <a
-                href="https://negociosnow.com/margarita-quinones-pena-advocate-for-holistic-community-empowerment/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn group inline-flex items-center gap-3 rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black shadow-lg shadow-accent-gold/25 transition-all duration-300 hover:scale-105 hover:bg-amber-300 hover:shadow-xl"
+                href={`${base}schedule`}
+                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
+                data-conversion-event="class_booking_start"
+                data-conversion-context="home_studio_section"
+                data-conversion-booking-path="schedule_page"
               >
-                Read the Feature
-                <svg
-                  class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
+                View Class Schedule
               </a>
             </div>
+          </div>
+          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
+            <img
+              src={`${base}images/studio.png`}
+              alt="The brand new Latina Sweat Project yoga studio"
+              class="h-full w-full object-cover"
+            />
           </div>
         </div>
       </div>
     </section>
-    {/* END: 40 Under 40 Spotlight */}
+    {/* END: Grand Opening Section */}
 
     {/* START: Events Section */}
     <section class="bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-12 sm:py-16">
@@ -1377,7 +1381,7 @@ const graduationFlickrUrl =
             <h2
               class="mt-1 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
             >
-              Upcoming Events
+              Events at LSP
             </h2>
           </div>
           <a
@@ -1413,109 +1417,9 @@ const graduationFlickrUrl =
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
-          {/* Graduation 2026 Gallery card (leads: fresh photos from the
-              Aug 7 YTT ceremony; graduation candlelit-rose identity) */}
-          <a
-            href={graduationPageUrl}
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="graduation_spotlight_click"
-            data-conversion-context="home_events_carousel_graduation"
-          >
-            <div
-              class="relative h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2b1520] to-[#1e1216] text-[#f6efe3] shadow-lg shadow-[#d79b47]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#d79b47]/20"
-            >
-              <div class="relative h-52 overflow-hidden">
-                <img
-                  src={`${base}images/graduation/g15.jpg`}
-                  width="1024"
-                  height="683"
-                  alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-[#2b1520] via-[#2b1520]/25 to-transparent"></div>
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                  <span class="rounded-full bg-[#d79b47] px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
-                    New Photos
-                  </span>
-                  <span class="rounded-full bg-[#2b1520]/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#f6efe3] backdrop-blur-sm">
-                    Fotos Nuevas
-                  </span>
-                </div>
-              </div>
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-sm font-semibold text-[#f0c57c]">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Fri, Aug 7 · LSP Studio, Pilsen
-                </div>
-                <h3 class="mt-2 text-2xl leading-tight transition-colors [font-family:Fraunces,serif] [font-weight:650] group-hover:text-[#f0c57c]">
-                  Graduation <span class="italic text-[#f0c57c]">2026</span> Gallery
-                </h3>
-                <p class="mt-2 text-sm leading-relaxed text-[#f6efe3]/60">
-                  The YTT 2025 and 2026 cohorts received their certificates.
-                  Nearly 100 teachers strong, casi 100 maestras: relive
-                  graduation night with us.
-                </p>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#f0c57c] transition-all group-hover:gap-2">
-                  Relive the night
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Sweat Fest event card */}
-          <a
-            href={sweatFestPrimaryUrl}
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="sweatfest_explore_click"
-            data-conversion-context="home_events_carousel"
-          >
-            <div
-              class="relative overflow-hidden rounded-2xl bg-[#f4f7dc] text-[#123f36] shadow-lg ring-1 ring-[#123f36]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ee3083]/25 h-full"
-            >
-              <SweatFestArtwork variant="lockup" className="h-52 w-full" />
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b23c14]">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Recap · {sweatFest.shortDateLabel}
-                </div>
-                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b23c14]">
-                  LSP's first all-day festival
-                </h3>
-                <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  That's a wrap: a sunrise 5K, two stages of classes, and the
-                  closing Pachanga. Relive the day and see every photo.
-                </p>
-                <div class="mt-4 flex flex-wrap gap-2">
-                  {sweatFestDay.map((phase, i) => (
-                    <span
-                      class="sf-tag inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-off-black"
-                      style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
-                    >
-                      <span class="inline-block h-1.5 w-1.5 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
-                      {phase.title}
-                    </span>
-                  ))}
-                </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b23c14] transition-all group-hover:gap-2">
-                  {sweatFestPrimaryLabel}
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Annual Gala event card */}
+          {/* Annual Gala event card (leads the carousel: the only ticketed
+              event on sale. The days-left chip and the CTA label are driven
+              by the GalaTicketDeadline script's site-wide hooks.) */}
           <a
             href={galaTeaser.ticketsUrl}
             target="_blank"
@@ -1535,15 +1439,12 @@ const graduationFlickrUrl =
                   label={false}
                 />
                 <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                  <span class="rounded-[3px] bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
-                    Gala
-                  </span>
                   <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                    Black tie
+                    {galaTeaser.attire}
                   </span>
-                  <span class="inline-flex items-center gap-1.5 rounded-[3px] border border-accent-gold/50 bg-off-black/70 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold backdrop-blur-sm shadow-md">
-                    <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-                    Full evening closes Sep 15
+                  <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
+                    <span class="h-1.5 w-1.5 rotate-45 bg-off-black" aria-hidden="true"></span>
+                    <span data-gala-days-left>{galaDaysLeftLabel}</span>
                   </span>
                 </div>
               </div>
@@ -1554,18 +1455,19 @@ const graduationFlickrUrl =
                   </svg>
                   {galaTeaser.shortDateTimeLabel}
                 </div>
-                <h3 class="mt-2 text-2xl font-extrabold leading-tight transition-colors group-hover:text-accent-gold">
-                  {galaTeaser.title}
+                <h3 class="mt-2 font-display text-2xl font-bold leading-tight">
+                  <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala
                 </h3>
                 <p class="mt-2 text-sm font-semibold text-white/70">
                   {galaTeaser.venueName}
                 </p>
                 <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
-                  Your $375 Benefactor ticket opens the full night from 6 PM:
-                  cocktails, dinner, live bidding, galleries, fashion, and dancing.
+                  Cocktails, a three-course dinner, live bidding, museum
+                  galleries, the fashion show, and dancing until midnight.
+                  Reserve the full evening from 6 PM.
                 </p>
                 <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
-                  <span data-gala-cta-label>Buy the Full-Evening Ticket · $375</span>
+                  <span data-gala-cta-label>Reserve the Full Evening · ${benefactorPrice}</span>
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>
@@ -1649,6 +1551,108 @@ const graduationFlickrUrl =
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Graduation 2026 Gallery card (recap: photos from the Aug 7 YTT
+              ceremony; graduation candlelit-rose identity) */}
+          <a
+            href={graduationPageUrl}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event="graduation_spotlight_click"
+            data-conversion-context="home_events_carousel_graduation"
+          >
+            <div
+              class="relative h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2b1520] to-[#1e1216] text-[#f6efe3] shadow-lg shadow-[#d79b47]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#d79b47]/20"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/graduation/g15.jpg`}
+                  width="1024"
+                  height="683"
+                  alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#2b1520] via-[#2b1520]/25 to-transparent"></div>
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span class="rounded-full bg-[#d79b47] px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
+                    Recap
+                  </span>
+                  <span class="rounded-full bg-[#2b1520]/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#f6efe3] backdrop-blur-sm">
+                    Fri, Aug 7
+                  </span>
+                </div>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-sm font-semibold text-[#f0c57c]">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  Fri, Aug 7 · LSP Studio, Pilsen
+                </div>
+                <h3 class="mt-2 text-2xl leading-tight transition-colors [font-family:Fraunces,serif] [font-weight:650] group-hover:text-[#f0c57c]">
+                  Graduation <span class="italic text-[#f0c57c]">2026</span> Gallery
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-[#f6efe3]/60">
+                  The YTT 2025 and 2026 cohorts received their certificates.
+                  Nearly 100 teachers strong, casi 100 maestras: relive
+                  graduation night with us.
+                </p>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#f0c57c] transition-all group-hover:gap-2">
+                  Relive the night
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Sweat Fest event card */}
+          <a
+            href={sweatFestPrimaryUrl}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event="sweatfest_explore_click"
+            data-conversion-context="home_events_carousel"
+          >
+            <div
+              class="relative overflow-hidden rounded-2xl bg-[#f4f7dc] text-[#123f36] shadow-lg ring-1 ring-[#123f36]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ee3083]/25 h-full"
+            >
+              <SweatFestArtwork variant="lockup" className="h-52 w-full" />
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b23c14]">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  Recap · {sweatFest.shortDateLabel}
+                </div>
+                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b23c14]">
+                  LSP's first all-day festival
+                </h3>
+                <p class="mt-2 text-sm text-medium-gray leading-relaxed">
+                  That's a wrap: a sunrise 5K, two stages of classes, and the
+                  closing Pachanga. Relive the day and see every photo.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {sweatFestDay.map((phase, i) => (
+                    <span
+                      class="sf-tag inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-off-black"
+                      style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
+                    >
+                      <span class="inline-block h-1.5 w-1.5 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
+                      {phase.title}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b23c14] transition-all group-hover:gap-2">
+                  {sweatFestPrimaryLabel}
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>
                 </div>
               </div>
@@ -1775,62 +1779,42 @@ const graduationFlickrUrl =
       })();
     </script>
 
-    {/* START: Grand Opening Section */}
+    {/* START: Instagram Section */}
     <section class="bg-off-black py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
-        >
-          {/* Copy right / image left on desktop (Aug 2026 reorder):
-              zig-zags with the 40 Under 40 flyer on the right above the
-              events carousel */}
-          <div class="lg:order-2">
-            <p
-              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
+        <div class="mx-auto max-w-2xl text-center">
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            Join Our Community Online
+          </h2>
+          <p class="mt-4 font-body text-lg text-white/65">
+            See our community in action! Follow us on Instagram for daily
+            inspiration, class updates, and behind-the-scenes moments that
+            celebrate our culture and movement.
+          </p>
+          <div class="mt-8">
+            <a
+              href="https://www.instagram.com/latinasweatproject/"
+              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
             >
-              We&apos;re Open!
-            </p>
-            <h2
-              class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
-            >
-              Our New Studio Is Here
-            </h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-white/65">
-              <p>The wait is over! Our brand new studio is officially open.</p>
-              <p>
-                Experience the energy, meet our incredible teaching team, and
-                see firsthand what makes LSP more than just a place to move. We
-                are a community, a safe space, and a celebration of wellness in
-                our neighborhoods.
-              </p>
-              <p>
-                Come join a class and be part of our vibrant community. We can't
-                wait to welcome you!
-              </p>
-            </div>
-            <div class="mt-8 text-center">
-              <a
-                href={`${base}schedule`}
-                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="home_studio_section"
-                data-conversion-booking-path="schedule_page"
+              <svg
+                class="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                ><path
+                  fill-rule="evenodd"
+                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+                  clip-rule="evenodd"></path></svg
               >
-                View Class Schedule
-              </a>
-            </div>
-          </div>
-          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-1">
-            <img
-              src={`${base}images/studio.png`}
-              alt="The brand new Latina Sweat Project yoga studio"
-              class="h-full w-full object-cover"
-            />
+              Follow @LatinaSweatProject
+            </a>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Grand Opening Section */}
+    {/* END: Instagram Section */}
 
     {/* START: In The Press Section */}
     <section class="bg-gradient-to-br from-white via-[#f8f1e7] to-white py-16 sm:py-20 lg:py-24">
@@ -1981,42 +1965,6 @@ const graduationFlickrUrl =
     </section>
     {/* END: In The Press Section */}
 
-    {/* START: Instagram Section */}
-    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2
-            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
-          >
-            Join Our Community Online
-          </h2>
-          <p class="mt-4 font-body text-lg text-white/65">
-            See our community in action! Follow us on Instagram for daily
-            inspiration, class updates, and behind-the-scenes moments that
-            celebrate our culture and movement.
-          </p>
-          <div class="mt-8">
-            <a
-              href="https://www.instagram.com/latinasweatproject/"
-              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
-            >
-              <svg
-                class="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                ><path
-                  fill-rule="evenodd"
-                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
-                  clip-rule="evenodd"></path></svg
-              >
-              Follow @LatinaSweatProject
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-    {/* END: Instagram Section */}
 
 
     {
@@ -2087,50 +2035,40 @@ const graduationFlickrUrl =
         -webkit-overflow-scrolling: touch;
       }
 
-      /* Monday Miles tee gradient text */
-      /* Sweat Fest merch drop photos: paper-bordered prints pinned to the
-     ink band, hard teal offset shadow like the sf-btn-night kit. */
-  .home-merch-photo {
-    position: relative;
-    overflow: hidden;
-    border: 2.5px solid #e2ecac;
-    border-radius: 6px;
-    background: #2b3434;
-    box-shadow: 0.3rem 0.3rem 0 #00a7ab;
-    transform: rotate(var(--tilt, 0deg));
-    transition: transform 0.25s ease;
-  }
-  .home-merch-photo:hover {
-    transform: rotate(0deg) translateY(-2px);
-  }
-  /* Cutout garments sit on paper, like a print pinned to the board. */
-  .home-merch-photo.is-cutout {
-    background: #f4f7dc;
-  }
-  button.home-merch-photo {
-    cursor: zoom-in;
-  }
-  button.home-merch-photo:focus-visible {
-    outline: 3px solid #e2ecac;
-    outline-offset: 3px;
-  }
-  .home-merch-hint {
-    position: absolute;
-    right: 0.45rem;
-    bottom: 0.45rem;
-    border: 2px solid #123f36;
-    border-radius: 6px;
-    background: #e2ecac;
-    color: #123f36;
-    padding: 0.15rem 0.4rem;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
+      /* Floating gold motes over the gala lead spotlight. Static
+         (invisible) unless motion is allowed, desktop-only in the markup. */
+      .home-gala-mote {
+        opacity: 0;
+        box-shadow: 0 0 6px rgba(255, 189, 89, 0.45);
+      }
 
-  .monday-tee-gradient {
+      @media (prefers-reduced-motion: no-preference) {
+        .home-gala-mote {
+          animation-name: home-gala-float;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+      }
+
+      @keyframes home-gala-float {
+        0% {
+          transform: translate(0, 0);
+          opacity: 0;
+        }
+        14% {
+          opacity: var(--peak, 0.3);
+        }
+        86% {
+          opacity: var(--peak, 0.3);
+        }
+        100% {
+          transform: translate(var(--drift, 0px), -320px);
+          opacity: 0;
+        }
+      }
+
+      /* Monday Miles tee gradient text */
+      .monday-tee-gradient {
         background: linear-gradient(
           135deg,
           #ffbd59 0%,

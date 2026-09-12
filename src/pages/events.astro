@@ -5,19 +5,20 @@ import EventsList from "@/components/EventsList.svelte";
 import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
-import { galaPhotos, galaTeaser, galaTickets } from "@/data/galaTeaser";
+import { galaEvening, galaPhotos, galaTeaser } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestDay,
   sweatFestTickets,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
-import { yttTrio, yttTrioSessions } from "@/data/yttTrio";
+// Section order (light/dark cadence): light page header -> dark Annual
+// Gala featured section (it leads the page while full-evening tickets
+// are on sale) -> light Sweat Fest recap -> dark Graduation 2026 recap
+// -> the Supabase-driven events list -> Monday Miles -> Stay Connected.
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 const galaPageUrl = withBase(galaTeaser.pagePath);
-const benefactorTicket = galaTickets.tiers.find((tier) => tier.id === "benefactor");
-const benefactorPrice = benefactorTicket?.regular ?? 375;
 // Deepened phase accents legible on the light mini-cards (official logo
 // identity: Run magenta, Sweat teal, Pachanga green).
 const sweatFestDeepAccents = {
@@ -30,10 +31,6 @@ const sweatFestDeepAccents = {
 const graduationPageUrl = withBase("graduation");
 const graduationGalleryUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
-// YTT ’26 Trio strip (the recap's next chapter, inside the graduation
-// band): prose form of the data file's "Aug 11 · Aug 31" range so the
-// eyebrow's own " · " separator stays unambiguous.
-const yttTrioDateProse = yttTrio.dateRangeLabel.replace(" · ", " to ");
 // Events already featured in the hand-designed sections below; the
 // Supabase-driven list skips these so they don't appear twice. The
 // summer-renaissance slugs stay excluded even though its featured section
@@ -45,8 +42,8 @@ const featuredSlugs = [
   "monday-miles",
   "summer-renaissance",
   "haus-of-lsp-summer-renaissance",
-  // YTT ’26 Trio lives inside the graduation band above; excluded so the
-  // island never double-renders it if the event lands in Supabase.
+  // YTT ’26 Trio community classes are retired (they ran Aug 11 to Aug
+  // 31, 2026); the slugs stay excluded so the island never resurfaces them.
   "ytt-trio-community-classes",
   "ytt-26-trio-community-classes",
 ];
@@ -71,160 +68,87 @@ const featuredSlugs = [
     </section>
     {/* END: Page Header Section */}
 
-    <section class="bg-[#f7efe3] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div class="mx-auto max-w-7xl">
-        <GalaTicketDeadline context="events_top" />
-      </div>
-    </section>
-
-    {/* START: Graduation 2026 Recap Band (candlelit rose-ink + gold
-        keepsake treatment; deliberately quieter than the upcoming-event
-        sections because it is a recap, not a promo. Fills the dark slot
-        left by the retired Summer Renaissance section (passed Aug 1, 2026)
-        so the header -> Sweat Fest light/light adjacency does not return) */}
+    {/* START: Annual Gala Featured Section (leads the page: the Sep 25
+        gala is the site's front-and-center story while full-evening
+        tickets are still on sale. The deadline module below carries the
+        only ticket CTA here, so nothing else on the page repeats the ask) */}
     <section
-      id="graduation-2026"
-      class="relative overflow-hidden py-12 text-[#f6efe3] md:py-14 scroll-mt-28"
-      style="background: linear-gradient(to bottom, #2b1520, #1e1216);"
+      id="noche-inolvidable-gala"
+      class="relative overflow-hidden bg-off-black py-16 text-white md:py-20 scroll-mt-28"
     >
-      {/* Candle-bokeh dots along the top edge: gold + rose, varying size
-          and opacity */}
-      <div class="pointer-events-none absolute inset-x-0 top-4 flex items-center justify-center gap-3" aria-hidden="true">
-        <span class="h-1 w-1 rounded-full bg-[#f0c57c]/50 shadow-[0_0_6px_2px_rgba(240,197,124,0.35)]"></span>
-        <span class="h-2 w-2 rounded-full bg-[#f0c57c]/85 shadow-[0_0_10px_4px_rgba(240,197,124,0.45)]"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/60 shadow-[0_0_8px_3px_rgba(224,140,184,0.4)]"></span>
-        <span class="h-1 w-1 rounded-full bg-[#f0c57c]/40 shadow-[0_0_6px_2px_rgba(240,197,124,0.3)]"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/45 shadow-[0_0_7px_3px_rgba(224,140,184,0.3)]"></span>
-      </div>
-      {/* One soft, static orchid-rose glow: no ambient animation on the recap */}
-      <div
-        class="pointer-events-none absolute -top-24 right-[8%] h-64 w-64 rounded-full blur-[110px]"
-        style="background: rgba(224, 140, 184, 0.14);"
-        aria-hidden="true"
-      >
-      </div>
+      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+      <div class="gala-ambient absolute -left-20 top-0 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
+      <div class="gala-ambient absolute -right-20 bottom-0 h-72 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
 
       <div class="relative mx-auto max-w-7xl px-4">
-        <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-10">
-          {/* Media (left, matching the page's media column rhythm): the
-              full class photo, certificates in hand */}
-          <div class="reveal mx-auto w-full max-w-sm lg:col-span-2 lg:max-w-none">
-            <div class="overflow-hidden rounded-2xl border border-[#f0c57c]/25 shadow-lg shadow-black/40">
-              <img
-                src={`${base}images/graduation/g15.jpg`}
-                width="1024"
-                height="683"
-                alt="The 2025 and 2026 Yoga Teacher Training graduating classes holding their certificates at LSP Studio in Pilsen"
-                class="h-full w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
+          <div class="reveal group relative lg:col-span-2">
+            <div class="gala-ambient absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-xl"></div>
+            <GalaPhotoFrame slot={galaPhotos.atrium} variant="event" corners />
           </div>
 
-          {/* Copy (right) */}
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
-            <p class="flex items-center justify-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.28em] text-[#f0c57c] lg:justify-start">
-              <span class="h-px w-8 bg-[#f0c57c]/60"></span>
-              Recap · Fri, Aug 7
+            <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs font-extrabold uppercase tracking-[0.22em] text-accent-gold lg:justify-start">
+              <span class="h-px w-8 bg-accent-gold/70"></span>
+              Featured · {galaTeaser.title} · {galaTeaser.attire}
             </p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight text-[#f6efe3] sm:text-4xl" style="font-family: 'Fraunces', serif;">
-              Graduation <span class="text-[#f0c57c]">2026</span>
+            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]">
+              <span class="gala-foil">{galaTeaser.shortTitle}</span>
+              <span class="text-white/90"> Gala</span>
             </h2>
-            <p class="mt-3 max-w-2xl text-base leading-relaxed text-[#f6efe3]/75 mx-auto lg:mx-0">
-              We graduated our 2025 and 2026 YTT cohorts: nearly 100 teachers
-              strong.
+            <p class="mt-4 text-lg font-semibold text-accent-gold">
+              {galaTeaser.dateLabel} · {galaTeaser.timeLabel}
             </p>
-            <p class="mt-1.5 max-w-2xl text-sm italic leading-relaxed text-[#f6efe3]/50 mx-auto lg:mx-0" style="font-family: 'Fraunces', serif; font-weight: 450;">
-              Graduamos nuestras cohortes de YTT 2025 y 2026: casi 100 maestras
-              y contando.
+            <p class="mt-2 text-base font-semibold text-white/80">
+              {galaTeaser.venueLine}
             </p>
 
-            <div class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
-              <a
-                href={graduationPageUrl}
-                class="group inline-flex items-center gap-2.5 rounded-full border border-[#f0c57c]/40 bg-[#d79b47]/10 px-6 py-3 text-sm font-extrabold text-[#f0c57c] transition-colors duration-300 hover:border-[#f0c57c]/70 hover:bg-[#d79b47]/20"
-                data-conversion-event="graduation_explore_click"
-                data-conversion-context="events_graduation"
-              >
-                Relive the Night
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-              <a
-                href={graduationGalleryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 text-sm font-bold text-[#f6efe3]/60 underline-offset-4 transition-colors duration-300 hover:text-[#f0c57c] hover:underline"
-                data-conversion-event="graduation_gallery_click"
-                data-conversion-context="events_graduation"
-              >
-                Photo gallery
-                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
+            <p class="mt-5 max-w-2xl text-base leading-relaxed text-white/70 mx-auto lg:mx-0">
+              {galaTeaser.homepageDescription}
+            </p>
 
-        {/* Trio strip: the Aug 7 graduates' first live classes are the
-            recap's next chapter, so they ride inside this band as a quiet
-            hairline sub-band (same candlelit identity, one size smaller)
-            instead of earning a whole section */}
-        <div class="reveal mt-10 border-t border-[#f0c57c]/20 pt-8" style="transition-delay: 200ms;">
-          <div class="flex flex-col items-center gap-6 text-center lg:flex-row lg:justify-between lg:text-left">
-            <div class="max-w-2xl">
-              <p class="flex items-center justify-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.28em] text-[#e08cb8] lg:justify-start">
-                <span class="h-px w-8 bg-[#e08cb8]/60"></span>
-                Next · {yttTrioDateProse}
-              </p>
-              <h3 class="mt-2 text-2xl font-semibold tracking-tight text-[#f6efe3] sm:text-3xl" style="font-family: 'Fraunces', serif;">
-                Now they take <span class="text-[#f0c57c]">the mat</span>
-              </h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-[#f6efe3]/70">
-                The graduates above step into their first live classes:
-                45-minute community flows at {yttTrio.venueName}, each led by
-                three {yttTrio.cohortLabel} teachers, 15 minutes each.
-              </p>
-              <p class="mt-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#f6efe3]/45">
-                {yttTrio.priceLine}
-              </p>
+            {/* The evening at a glance, straight from galaEvening */}
+            <div class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {galaEvening.map((stop) => (
+                <span class="rounded-full border border-accent-gold/25 bg-accent-gold/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-gold">
+                  {stop.time} · {stop.title}
+                </span>
+              ))}
             </div>
-            <div class="flex flex-col items-center gap-3 sm:flex-row lg:flex-shrink-0">
+
+            {/* The one ask on this page: days left, countdown, gold CTA,
+                and the quiet late-night alternative */}
+            <div class="mt-8">
+              <GalaTicketDeadline context="events_featured_gala" variant="inline" />
+            </div>
+
+            <div class="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
               <a
-                href={yttTrio.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-extrabold text-[#2b1520] transition-transform duration-300 hover:-translate-y-0.5"
-                style="background: linear-gradient(100deg, #d79b47, #f0c57c 55%, #d79b47);"
-                data-conversion-event="ytt_trio_ticket_click"
-                data-conversion-context="events_ytt_trio"
-                data-conversion-provider="zeffy"
+                href={galaPageUrl}
+                class="gala-btn gala-btn--ghost inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold"
               >
-                {yttTrio.ticketsLabel}
-                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
+                Explore the Gala
               </a>
               <a
-                href={withBase("schedule")}
-                class="inline-flex items-center gap-2 text-sm font-bold text-[#f6efe3]/60 underline-offset-4 transition-colors duration-300 hover:text-[#f0c57c] hover:underline"
+                href={`${galaPageUrl}#tickets`}
+                class="text-sm font-bold text-white/60 underline-offset-4 transition-colors duration-300 hover:text-accent-gold hover:underline"
+                data-conversion-event="gala_ticket_click"
+                data-conversion-context="events_gala_sponsor_tease"
               >
-                All {yttTrioSessions.length} dates & teachers
+                Sponsorship packages
               </a>
             </div>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Graduation 2026 Recap Band */}
+    {/* END: Annual Gala Featured Section */}
 
     {/* START: Sweat Fest Featured Section (official checkerboard-logo
         identity: honeydew ground, deep teal-green ink, checkerboard tile
-        strip along the top; light, follows the dark Graduation 2026 recap
-        band above) */}
+        strip along the top; light, so it breaks up the dark Annual Gala
+        section above and the dark Graduation 2026 recap below) */}
     <section
       id="sweat-fest"
       class="relative overflow-hidden py-16 md:py-20 scroll-mt-28"
@@ -351,96 +275,105 @@ const featuredSlugs = [
     </section>
     {/* END: Sweat Fest Featured Section */}
 
-    {/* START: Annual Gala Featured Section */}
+    {/* START: Graduation 2026 Recap Band (candlelit rose-ink + gold
+        keepsake treatment; deliberately quieter than the gala section
+        above because it is a recap, not a promo. Dark, so it keeps the
+        alternation going after the light Sweat Fest recap. The community
+        class strip that used to close this band retired with the series
+        on Aug 31, 2026) */}
     <section
-      id="noche-inolvidable-gala"
-      class="relative overflow-hidden bg-off-black py-16 text-white md:py-20 scroll-mt-28"
+      id="graduation-2026"
+      class="relative overflow-hidden py-12 text-[#f6efe3] md:py-14 scroll-mt-28"
+      style="background: linear-gradient(to bottom, #2b1520, #1e1216);"
     >
-      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
-      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
-      <div class="gala-ambient absolute -left-20 top-0 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"></div>
-      <div class="gala-ambient absolute -right-20 bottom-0 h-72 w-1/2 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl" style="animation-delay: 2.5s;"></div>
+      {/* Candle-bokeh dots along the top edge: gold + rose, varying size
+          and opacity */}
+      <div class="pointer-events-none absolute inset-x-0 top-4 flex items-center justify-center gap-3" aria-hidden="true">
+        <span class="h-1 w-1 rounded-full bg-[#f0c57c]/50 shadow-[0_0_6px_2px_rgba(240,197,124,0.35)]"></span>
+        <span class="h-2 w-2 rounded-full bg-[#f0c57c]/85 shadow-[0_0_10px_4px_rgba(240,197,124,0.45)]"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/60 shadow-[0_0_8px_3px_rgba(224,140,184,0.4)]"></span>
+        <span class="h-1 w-1 rounded-full bg-[#f0c57c]/40 shadow-[0_0_6px_2px_rgba(240,197,124,0.3)]"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-[#e08cb8]/45 shadow-[0_0_7px_3px_rgba(224,140,184,0.3)]"></span>
+      </div>
+      {/* One soft, static orchid-rose glow: no ambient animation on the recap */}
+      <div
+        class="pointer-events-none absolute -top-24 right-[8%] h-64 w-64 rounded-full blur-[110px]"
+        style="background: rgba(224, 140, 184, 0.14);"
+        aria-hidden="true"
+      >
+      </div>
 
       <div class="relative mx-auto max-w-7xl px-4">
-        <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-12">
-          <div class="reveal group relative lg:col-span-2">
-            <div class="gala-ambient absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-xl"></div>
-            <GalaPhotoFrame slot={galaPhotos.atrium} variant="event" corners />
+        <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-10">
+          {/* Media (left, matching the page's media column rhythm): the
+              full class photo, certificates in hand */}
+          <div class="reveal mx-auto w-full max-w-sm lg:col-span-2 lg:max-w-none">
+            <div class="overflow-hidden rounded-2xl border border-[#f0c57c]/25 shadow-lg shadow-black/40">
+              <img
+                src={`${base}images/graduation/g15.jpg`}
+                width="1024"
+                height="683"
+                alt="The 2025 and 2026 Yoga Teacher Training graduating classes holding their certificates at LSP Studio in Pilsen"
+                class="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
 
+          {/* Copy (right) */}
           <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
-            <p class="flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold lg:justify-start">
-              <span class="h-px w-8 bg-accent-gold/70"></span>
-              Featured · Annual Gala
+            <p class="flex items-center justify-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.28em] text-[#f0c57c] lg:justify-start">
+              <span class="h-px w-8 bg-[#f0c57c]/60"></span>
+              Recap · Fri, Aug 7
             </p>
-            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]">
-              <span class="gala-foil">{galaTeaser.shortTitle}</span>
-              <span class="text-white/90"> Gala</span>
+            <h2 class="mt-2 text-3xl font-semibold tracking-tight text-[#f6efe3] sm:text-4xl" style="font-family: 'Fraunces', serif;">
+              Graduation <span class="text-[#f0c57c]">2026</span>
             </h2>
-            <p class="mt-4 text-lg font-semibold text-accent-gold">
-              {galaTeaser.dateLabel} · {galaTeaser.timeLabel}
+            <p class="mt-3 max-w-2xl text-base leading-relaxed text-[#f6efe3]/75 mx-auto lg:mx-0">
+              We graduated our 2025 and 2026 YTT cohorts: nearly 100 teachers
+              strong.
             </p>
-            <p class="mt-2 text-base font-semibold text-white/80">
-              {galaTeaser.venueLine}
-            </p>
-
-            <p class="mt-5 max-w-2xl text-base leading-relaxed text-white/65 mx-auto lg:mx-0">
-              Make the whole night yours. The Benefactor ticket begins at 6 PM
-              with cocktails and live music, followed by a three-course dinner,
-              live bidding, museum access, the fashion show, and dancing until midnight.
-            </p>
-            <p class="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-white/75 mx-auto lg:mx-0">
-              Full-evening ticket sales close September 15. Every $375 seat
-              expands free and discounted wellness access across Chicago.
+            <p class="mt-1.5 max-w-2xl text-sm italic leading-relaxed text-[#f6efe3]/50 mx-auto lg:mx-0" style="font-family: 'Fraunces', serif; font-weight: 450;">
+              Graduamos nuestras cohortes de YTT 2025 y 2026: casi 100 maestras
+              y contando.
             </p>
 
-            <div class="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start">
-              {[galaTeaser.attire, "Downtown Chicago", "MCA Chicago"].map((item) => (
-                <span class="rounded-full border border-accent-gold/25 bg-accent-gold/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-gold">
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
+            <div class="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap justify-center lg:justify-start">
               <a
-                href={galaTeaser.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold"
-                data-conversion-event="gala_ticket_click"
-                data-conversion-context="events_featured_gala"
-                data-gala-full-night-cta
+                href={graduationPageUrl}
+                class="group inline-flex items-center gap-2.5 rounded-full border border-[#f0c57c]/40 bg-[#d79b47]/10 px-6 py-3 text-sm font-extrabold text-[#f0c57c] transition-colors duration-300 hover:border-[#f0c57c]/70 hover:bg-[#d79b47]/20"
+                data-conversion-event="graduation_explore_click"
+                data-conversion-context="events_graduation"
               >
-                <span data-gala-cta-label class="relative z-[1]">Buy Full-Evening Ticket · ${benefactorPrice}</span>
-                <svg class="relative z-[1] h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                Relive the Night
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
               <a
-                href={galaPageUrl}
-                class="gala-btn gala-btn--ghost inline-flex items-center gap-3 px-8 py-4 text-base font-extrabold"
+                href={graduationGalleryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-sm font-bold text-[#f6efe3]/60 underline-offset-4 transition-colors duration-300 hover:text-[#f0c57c] hover:underline"
+                data-conversion-event="graduation_gallery_click"
+                data-conversion-context="events_graduation"
               >
-                Explore the Gala
+                Photo gallery
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
               </a>
             </div>
-            <p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-accent-gold/90 lg:justify-start">
-              <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/30 bg-accent-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-gold">
-                <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-                Last chance
-              </span>
-              Benefactor · The Full Evening · 6 PM–midnight · ${benefactorPrice} · closes Sep 15
-            </p>
           </div>
         </div>
       </div>
     </section>
-    {/* END: Annual Gala Featured Section */}
+    {/* END: Graduation 2026 Recap Band */}
 
-    {/* START: Dashboard-managed events (Supabase). Placed here (between
-        the dark gala and dark Monday Miles sections) so the light-themed
-        island keeps the alternation rhythm intact now that Pride's two
-        light slots are retired. */}
+    {/* START: Dashboard-managed events (Supabase). Placed here, right
+        after the dark Graduation 2026 recap, so the light-themed island
+        keeps the alternation rhythm intact. */}
     <EventsList client:load excludeSlugs={featuredSlugs} />
     {/* END: Dashboard-managed events */}
 

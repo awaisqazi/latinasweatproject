@@ -15,7 +15,8 @@ export const galaTeaser = {
   venueAddress: "220 E Chicago Ave, Chicago, IL",
   venueLine: "Museum of Contemporary Art Chicago · 220 E Chicago Ave",
   attire: "Black tie",
-  statusLabel: "Full-night ticket sales close September 15",
+  statusLabel: "Full-evening tickets close September 15",
+  lateNightStatusLabel: "Late-night access on sale through September 25",
   pagePath: "/gala",
   saveDatePath: "/gala#save-the-date",
   // Live Zeffy ticketing form (tickets AND sponsorships). CTAs across the site
@@ -92,10 +93,22 @@ export const galaTickets = {
 
 // Sales stay open through September 15 in Chicago (CDT, UTC−05:00).
 // Use an exclusive midnight boundary so every second of September 15 counts.
+// `eventEndsAtISO` is the exclusive end of gala day: after it every gala CTA
+// falls back to the details page. Prices are derived from `galaTickets` so the
+// Zeffy form and the printed collateral can never drift apart.
 export const galaTicketDeadline = {
   closesAtISO: "2026-09-16T00:00:00-05:00",
+  closesDateLabel: "Tuesday, September 15",
+  closesDateLabelEs: "martes 15 de septiembre",
+  closesTimeLabel: "11:59 PM Chicago time",
+  closesTimeLabelEs: "11:59 p. m., hora de Chicago",
   label: "September 15, 2026 · 11:59 PM Chicago time",
-  fullNightPrice: galaTickets.tiers.find((tier) => tier.id === "benefactor").regular,
+  fullNightPrice: galaTickets.tiers.find((tier) => tier.id === "benefactor")
+    .regular,
+  lateNightPrice: galaTickets.tiers.find((tier) => tier.id === "supporter")
+    .regular,
+  lateNightAccessLabel: "From 9 PM",
+  eventEndsAtISO: "2026-09-26T00:00:00-05:00",
 };
 
 // The evening, hour by hour, mirroring the printed two-pager's timeline.
