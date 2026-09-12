@@ -657,36 +657,49 @@ const boards = [
     </section>
     {/* END: Leadership & Governance Section - Dynamic Filter Grid */}
 
-    {/* START: Our Studio Is Open Section */}
+    {/* START: A New Chapter Section */}
     <section class="py-16 sm:py-24 bg-white">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <p
           class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
         >
-          We're Open!
+          A New Chapter
         </p>
         <h2
           class="mt-2 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
         >
-          Our New Studio Is Now Open
+          From 16th Street to our next home
         </h2>
         <p class="mx-auto mt-6 max-w-3xl font-body text-lg text-medium-gray">
-          We're thrilled to announce our new dedicated studio is now open! This
-          milestone follows a year of rapid growth and community demand, with
-          over <strong>250,000 registrations</strong> for our accessible wellness programming.
-          Come experience our new home, built to welcome neighbors and longtime supporters.
+          Our studio at 949 W 16th St opened after a year of rapid growth and
+          community demand, with over <strong>250,000 registrations</strong> for our
+          accessible wellness programming. Daily classes there run through September 25,
+          the night of our gala. Then LSP goes pop-up around the neighborhood while we
+          build our new home in Pilsen, opening early 2027.
         </p>
-        <div class="mt-12">
+        <div class="mt-12 flex flex-wrap items-center justify-center gap-3">
           <a
             href={`${base}schedule`}
             class="btn inline-block rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
+            data-conversion-event="class_booking_start"
+            data-conversion-context="about_new_chapter"
+            data-conversion-booking-path="schedule_page"
           >
-            View Class Schedule
+            Book a class
+          </a>
+          <a
+            href={`${base}donate`}
+            class="btn inline-block rounded-full border-2 border-off-black/20 bg-white px-8 py-3 text-base font-bold text-off-black shadow-sm transition hover:border-accent-gold hover:text-accent-gold focus:outline-none focus:ring-2 focus:ring-accent-gold focus:ring-offset-2"
+            data-conversion-event="donation_click"
+            data-conversion-context="about_new_chapter"
+          >
+            Support the next studio
           </a>
         </div>
+        <p class="mt-4 text-sm text-medium-gray">Special classes and community programming continue after September 25.</p>
       </div>
     </section>
-    {/* END: Our Studio Is Open Section */}
+    {/* END: A New Chapter Section */}
 
     {/* START: Our Story Section */}
     <section class="bg-light-gray py-16 sm:py-24">
@@ -801,7 +814,7 @@ const boards = [
     </section>
     {/* END: A Year of Growth Section */}
 
-    {/* START: Our New Home Section */}
+    {/* START: Our Next Home Section */}
     <section class="bg-light-gray py-16 sm:py-24">
       <div
         class="mx-auto max-w-5xl items-center grid grid-cols-1 gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8"
@@ -810,14 +823,14 @@ const boards = [
           <h2
             class="font-sans text-3xl font-bold tracking-tight text-off-black"
           >
-            Our New Home
+            Our Next Home
           </h2>
           <p class="mt-6 font-body text-lg text-medium-gray">
-            Our new studio represents not only a space for yoga, but a home for
+            The next studio will be more than a space for yoga: a home for
             community healing, leadership, and cultural celebration. Programming
-            will include daily yoga classes, a 200-hour teacher training
-            program, restorative sessions for community partners such as run
-            clubs, food pantries, and ongoing mutual aid initiatives.
+            will include daily yoga and fitness classes, our 200-hour teacher
+            training, restorative sessions for community partners such as run
+            clubs and food pantries, and ongoing mutual aid.
           </p>
           <p class="mt-4 font-body text-lg text-medium-gray">
             Latina Sweat's impact has been made possible by its community, from
@@ -829,14 +842,14 @@ const boards = [
         </div>
         <div class="mt-12 lg:mt-0">
           <img
-            alt="The brand new Latina Sweat Project yoga studio"
+            alt="Inside the Latina Sweat Project studio at 949 W 16th St in Pilsen"
             class="rounded-lg shadow-xl"
             src={`${base}images/studio.png`}
           />
         </div>
       </div>
     </section>
-    {/* END: Our New Home Section */}
+    {/* END: Our Next Home Section */}
 
     {/* START: About Section */}
     <section class="bg-off-black py-16 sm:py-24">
