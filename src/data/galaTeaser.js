@@ -15,7 +15,7 @@ export const galaTeaser = {
   venueAddress: "220 E Chicago Ave, Chicago, IL",
   venueLine: "Museum of Contemporary Art Chicago · 220 E Chicago Ave",
   attire: "Black tie",
-  statusLabel: "Full-evening tickets close September 15",
+  statusLabel: "Full-evening tickets close September 18",
   lateNightStatusLabel: "Late-night access on sale through September 25",
   pagePath: "/gala",
   saveDatePath: "/gala#save-the-date",
@@ -42,7 +42,7 @@ export const galaTeaser = {
 
 // Ticket + sponsorship pricing for the live 2026 sale. Facts match the Zeffy
 // form and the printed two-pager: early bird July 1-31, regular from August 1,
-// Benefactor and all sponsorships close September 15, Supporter sells through
+// Benefactor and all sponsorships close September 18, Supporter sells through
 // event day. Keep these exact; they appear on printed material too.
 export const galaTickets = {
   ticketsUrl: galaTeaser.ticketsUrl,
@@ -58,7 +58,7 @@ export const galaTickets = {
       accessLabel: "From 6 PM",
       description:
         "Cocktail hour with live music, a three-course seated dinner, live bidding, museum garden access, then the full late-night celebration.",
-      closesLabel: "Ticket sales close September 15, 2026",
+      closesLabel: "Ticket sales close September 18, 2026",
     },
     {
       id: "supporter",
@@ -88,21 +88,21 @@ export const galaTickets = {
     { name: "Gold Sponsor", amount: 5000, seats: "Table of 10" },
     { name: "Community Sponsor", amount: 2500, seats: "5 tickets" },
   ],
-  sponsorshipsCloseLabel: "Sponsorships close September 15, 2026",
+  sponsorshipsCloseLabel: "Sponsorships close September 18, 2026",
 };
 
-// Sales stay open through September 15 in Chicago (CDT, UTC−05:00).
-// Use an exclusive midnight boundary so every second of September 15 counts.
+// Sales stay open through September 18 in Chicago (CDT, UTC−05:00).
+// Use an exclusive midnight boundary so every second of September 18 counts.
 // `eventEndsAtISO` is the exclusive end of gala day: after it every gala CTA
 // falls back to the details page. Prices are derived from `galaTickets` so the
 // Zeffy form and the printed collateral can never drift apart.
 export const galaTicketDeadline = {
-  closesAtISO: "2026-09-16T00:00:00-05:00",
-  closesDateLabel: "Tuesday, September 15",
-  closesDateLabelEs: "martes 15 de septiembre",
+  closesAtISO: "2026-09-19T00:00:00-05:00",
+  closesDateLabel: "Friday, September 18",
+  closesDateLabelEs: "viernes 18 de septiembre",
   closesTimeLabel: "11:59 PM Chicago time",
   closesTimeLabelEs: "11:59 p. m., hora de Chicago",
-  label: "September 15, 2026 · 11:59 PM Chicago time",
+  label: "September 18, 2026 · 11:59 PM Chicago time",
   fullNightPrice: galaTickets.tiers.find((tier) => tier.id === "benefactor")
     .regular,
   lateNightPrice: galaTickets.tiers.find((tier) => tier.id === "supporter")

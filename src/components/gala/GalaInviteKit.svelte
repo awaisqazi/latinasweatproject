@@ -18,7 +18,7 @@ The evening begins with cocktails and live music as the galleries glow around us
 
 Your support is part of how we got here. [Add a personal line about their giving or connection to LSP.] Every seat and every sponsorship funds accessible wellness across Chicago, along with the 200-hour teacher training scholarships that turn our own participants into certified instructors and community leaders.
 
-Seats are limited and sponsorships close on September 15. Reserve your evening at latinasweatproject.com/gala. I would be honored to welcome you to the museum this fall, and prouder still to have you standing beside us as we build what comes next.
+Seats are limited and sponsorships close on September 18. Reserve your evening at latinasweatproject.com/gala. I would be honored to welcome you to the museum this fall, and prouder still to have you standing beside us as we build what comes next.
 
 Con luz y amor,
 [Your Name]

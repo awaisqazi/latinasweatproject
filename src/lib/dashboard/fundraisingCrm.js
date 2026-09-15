@@ -68,7 +68,7 @@ export const DONOR_TASK_PRESETS = [
     templateTitle: null,
     title: (donorLabel) => `Gala sponsorship conversation with ${donorLabel}`,
     note: () =>
-      'Reach out about sponsoring the Annual Gala (tiers from $2,500 to $25,000; sponsorships close September 15). The "Gala sponsorship packages" reference in the Templates tab has the tier details, and the sponsorship one-pager image is at /images/gala/gala-2026-sponsorship.png for attaching.',
+      'Reach out about sponsoring the Annual Gala (tiers from $2,500 to $25,000; sponsorships close September 18). The "Gala sponsorship packages" reference in the Templates tab has the tier details, and the sponsorship one-pager image is at /images/gala/gala-2026-sponsorship.png for attaching.',
   },
   {
     id: "thank_you",
