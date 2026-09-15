@@ -1,0 +1,431 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const googleFormId =
+  "1FAIpQLSdDIzBgIx2v5nxUTpOFruRMpyuGyJahYgoUOKCE1oOEMjRiQg";
+const googleFormAction = `https://docs.google.com/forms/d/e/${googleFormId}/formResponse`;
+const googleFormView = `https://docs.google.com/forms/d/e/${googleFormId}/viewform`;
+
+const entryIds = {
+  guestName: "entry.302278779",
+  purchaserName: "entry.425445723",
+  email: "entry.1795408641",
+  phone: "entry.1899807029",
+  dinner: "entry.1533588322",
+};
+
+const dinnerOptions = [
+  {
+    value: "Whitefish à la Plancha",
+    title: "Whitefish à la Plancha",
+    description: "A bright, composed seafood entrée.",
+  },
+  {
+    value: "Asparagus Artichoke Ravioli (V)",
+    title: "Asparagus Artichoke Ravioli",
+    description: "The vegetarian selection and default after the deadline.",
+    vegetarian: true,
+  },
+  {
+    value: "Cherry Braised Short Rib",
+    title: "Cherry Braised Short Rib",
+    description: "A rich, slow-braised dinner selection.",
+  },
+];
+---
+
+<Layout
+  title="Gala Dinner Selection | The Latina Sweat Project"
+  description="Choose your dinner entrée for The Latina Sweat Project 2026 Gala by September 15 at 5:00 PM CT."
+>
+  <Header />
+
+  <main class="relative min-h-screen overflow-hidden bg-off-black text-white">
+    <div class="gala-lattice pointer-events-none absolute inset-0 opacity-[0.055]" aria-hidden="true"></div>
+    <div
+      class="gala-ambient pointer-events-none absolute -left-28 top-20 h-96 w-[34rem] rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="gala-ambient pointer-events-none absolute -right-24 top-[30rem] h-96 w-[34rem] rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl"
+      style="animation-delay: 2.5s;"
+      aria-hidden="true"
+    ></div>
+
+    <section class="relative mx-auto max-w-6xl px-4 pb-20 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">
+      <div class="mx-auto max-w-3xl text-center">
+        <a
+          href="/gala"
+          class="inline-flex items-center gap-2 text-sm font-bold text-white/65 transition-colors hover:text-accent-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6 6-6-6 6-6" />
+          </svg>
+          Return to the Gala
+        </a>
+
+        <h1 class="mt-7 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          Select your <span class="gala-foil">Gala dinner</span>
+        </h1>
+        <div class="mt-5 flex items-center justify-center gap-3" aria-hidden="true">
+          <span class="h-px w-16 gala-foil-rule sm:w-24"></span>
+          <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+          <span class="h-px w-16 gala-foil-rule sm:w-24"></span>
+        </div>
+        <p class="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
+          Please submit one form for each ticket. If you purchased tickets for
+          other guests, complete another response for each ticket or send this
+          page to your guests so they can choose their own entrée.
+        </p>
+        <p class="mt-4 font-bold text-accent-gold">
+          Selections close September 15, 2026 at 5:00 PM CT.
+        </p>
+        <p class="mt-2 text-sm leading-6 text-white/60">
+          Guests without a selection by the deadline will receive the vegetarian entrée.
+        </p>
+      </div>
+
+      <div class="relative mx-auto mt-10 max-w-3xl sm:mt-14">
+        <div class="absolute -inset-3 border border-accent-gold/20 sm:-inset-4" aria-hidden="true"></div>
+        <div class="absolute -left-[0.95rem] -top-[0.95rem] h-3 w-3 rotate-45 bg-accent-gold sm:-left-[1.2rem] sm:-top-[1.2rem]" aria-hidden="true"></div>
+        <div class="absolute -right-[0.95rem] -top-[0.95rem] h-3 w-3 rotate-45 bg-accent-gold sm:-right-[1.2rem] sm:-top-[1.2rem]" aria-hidden="true"></div>
+
+        <div class="relative border border-accent-gold/55 bg-[#fdf2f2] px-5 py-8 text-off-black shadow-2xl shadow-black/35 sm:px-10 sm:py-11 lg:px-14">
+          <form
+            id="gala-meal-form"
+            action={googleFormAction}
+            method="POST"
+            target="gala-meal-submission-frame"
+          >
+            <input type="hidden" name="fvv" value="1" />
+            <input type="hidden" name="pageHistory" value="0" />
+
+            <div class="grid gap-6 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label for="guest-name" class="gala-meal-label">
+                  Guest name <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="guest-name"
+                  name={entryIds.guestName}
+                  type="text"
+                  autocomplete="name"
+                  required
+                  placeholder="Name of the person whose meal this is"
+                  class="gala-meal-field"
+                />
+                <p class="mt-2 text-xs leading-5 text-medium-gray">
+                  Enter the guest who will use this ticket and receive this meal.
+                </p>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="purchaser-name" class="gala-meal-label">
+                  Purchaser's name <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="purchaser-name"
+                  name={entryIds.purchaserName}
+                  type="text"
+                  autocomplete="name"
+                  required
+                  placeholder="Name on the ticket purchase"
+                  class="gala-meal-field"
+                />
+                <p class="mt-2 text-xs leading-5 text-medium-gray">
+                  We use this name to verify the guest has a Gala ticket.
+                </p>
+              </div>
+
+              <div>
+                <label for="email" class="gala-meal-label">
+                  Email address <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="email"
+                  name={entryIds.email}
+                  type="email"
+                  autocomplete="email"
+                  inputmode="email"
+                  required
+                  placeholder="you@example.com"
+                  class="gala-meal-field"
+                />
+              </div>
+
+              <div>
+                <label for="phone" class="gala-meal-label">
+                  Phone number <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="phone"
+                  name={entryIds.phone}
+                  type="tel"
+                  autocomplete="tel"
+                  inputmode="tel"
+                  required
+                  placeholder="(312) 555-0123"
+                  class="gala-meal-field"
+                />
+                <p class="mt-2 text-xs leading-5 text-medium-gray">
+                  We will only text if we need to clarify this selection.
+                </p>
+              </div>
+            </div>
+
+            <fieldset class="mt-9">
+              <legend class="font-display text-2xl font-bold text-off-black sm:text-3xl">
+                Dinner selection <span class="text-[#8a5700]" aria-hidden="true">*</span>
+              </legend>
+              <p class="mt-2 text-sm leading-6 text-medium-gray">
+                Choose one entrée for this guest.
+              </p>
+
+              <div class="mt-5 grid gap-3">
+                {
+                  dinnerOptions.map((option) => (
+                    <label class="group relative cursor-pointer">
+                      <input
+                        class="peer sr-only"
+                        type="radio"
+                        name={entryIds.dinner}
+                        value={option.value}
+                        required
+                      />
+                      <span class="flex min-h-24 items-center gap-4 border border-off-black/20 bg-white px-4 py-4 transition duration-200 group-hover:border-[#b8860b] group-hover:bg-[#fffaf0] peer-checked:border-[#8a5700] peer-checked:bg-[#fff3d8] peer-focus-visible:ring-2 peer-focus-visible:ring-[#8a5700] peer-focus-visible:ring-offset-2 sm:px-5">
+                        <span class="flex h-6 w-6 flex-none items-center justify-center rounded-full border-2 border-off-black/30 bg-white transition peer-checked:border-[#8a5700]" aria-hidden="true">
+                          <span class="h-2.5 w-2.5 rounded-full bg-[#8a5700] opacity-0 transition peer-checked:opacity-100"></span>
+                        </span>
+                        <span class="min-w-0">
+                          <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span class="font-display text-lg font-bold text-off-black sm:text-xl">
+                              {option.title}
+                            </span>
+                            {option.vegetarian ? (
+                              <span class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8a5700]">
+                                Vegetarian
+                              </span>
+                            ) : null}
+                          </span>
+                          <span class="mt-1 block text-sm leading-6 text-medium-gray">
+                            {option.description}
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+                  ))
+                }
+              </div>
+            </fieldset>
+
+            <label class="mt-7 flex cursor-pointer items-start gap-3 border-l-2 border-[#b8860b] bg-[#fffaf0] px-4 py-3 text-sm leading-6 text-medium-gray">
+              <input
+                id="one-ticket-confirmation"
+                type="checkbox"
+                required
+                class="mt-1 h-4 w-4 flex-none accent-[#8a5700]"
+              />
+              <span>
+                I understand this response is for one ticket only. I will submit
+                a separate form for every additional ticket.
+              </span>
+            </label>
+
+            <div
+              id="gala-meal-status"
+              class="mt-7 hidden border px-4 py-3 text-sm font-bold"
+              role="status"
+              aria-live="polite"
+            ></div>
+
+            <div id="deadline-notice" class="mt-7 hidden border border-[#8a5700]/30 bg-[#fff3d8] px-5 py-4 text-sm leading-6 text-[#694300]" role="alert">
+              The dinner-selection window has closed. The vegetarian entrée will
+              be used when no selection was received by the deadline.
+            </div>
+
+            <div id="gala-meal-actions" class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <button
+                id="gala-meal-submit"
+                type="submit"
+                class="gala-btn gala-btn--night inline-flex w-full items-center justify-center px-7 py-4 text-base font-extrabold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8a5700] focus-visible:ring-offset-2 sm:w-auto"
+              >
+                <span id="gala-meal-submit-text" class="relative z-[1]">Submit dinner selection</span>
+              </button>
+              <p class="text-xs leading-5 text-medium-gray sm:max-w-xs">
+                Your contact details and meal choice are sent securely to the LSP Google Form.
+              </p>
+            </div>
+          </form>
+
+          <div id="gala-meal-success" class="hidden py-5 text-center" tabindex="-1">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#8a5700]/30 bg-[#fff3d8] text-[#8a5700]" aria-hidden="true">
+              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+              </svg>
+            </div>
+            <h2 class="mt-5 font-display text-3xl font-bold">Your selection is recorded.</h2>
+            <p class="mx-auto mt-3 max-w-lg leading-7 text-medium-gray">
+              Thank you. If you purchased another ticket, submit one additional
+              response for that ticket. You can also send this page to the guest
+              using that ticket so they can make their own selection.
+            </p>
+            <button
+              id="gala-meal-again"
+              type="button"
+              class="gala-btn gala-btn--night mt-7 inline-flex items-center justify-center px-7 py-4 text-base font-extrabold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8a5700] focus-visible:ring-offset-2"
+            >
+              <span class="relative z-[1]">Submit another selection</span>
+            </button>
+          </div>
+
+          <noscript>
+            <p class="mt-7 border border-[#8a5700]/30 bg-[#fff3d8] px-4 py-3 text-sm font-bold text-[#694300]">
+              JavaScript is needed for the custom confirmation screen. You can also
+              <a class="underline decoration-2 underline-offset-4" href={googleFormView}>open the Google Form directly</a>.
+            </p>
+          </noscript>
+        </div>
+      </div>
+
+      <p class="mx-auto mt-10 max-w-2xl text-center text-xs leading-5 text-white/45">
+        Please do not submit passwords or payment information. We will use your
+        phone number only to text if the Gala team needs to resolve confusion
+        about this ticket or its dinner selection. We will not call.
+      </p>
+    </section>
+  </main>
+
+  <iframe
+    name="gala-meal-submission-frame"
+    title="Gala dinner selection submission"
+    class="hidden"
+  ></iframe>
+</Layout>
+
+<script>
+  const deadline = new Date("2026-09-15T17:00:00-05:00");
+  const form = document.getElementById("gala-meal-form");
+  const submitButton = document.getElementById("gala-meal-submit");
+  const submitText = document.getElementById("gala-meal-submit-text");
+  const status = document.getElementById("gala-meal-status");
+  const actions = document.getElementById("gala-meal-actions");
+  const deadlineNotice = document.getElementById("deadline-notice");
+  const success = document.getElementById("gala-meal-success");
+  const submitAgain = document.getElementById("gala-meal-again");
+  const submissionFrame = document.querySelector(
+    'iframe[name="gala-meal-submission-frame"]',
+  );
+  let submitted = false;
+
+  function showStatus(message: string, tone: "success" | "warning") {
+    if (!status) return;
+    status.textContent = message;
+    status.className =
+      tone === "success"
+        ? "mt-7 border border-teal-700/25 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800"
+        : "mt-7 border border-[#8a5700]/30 bg-[#fff3d8] px-4 py-3 text-sm font-bold text-[#694300]";
+  }
+
+  function applyDeadline() {
+    if (!(form instanceof HTMLFormElement) || Date.now() < deadline.getTime()) return;
+
+    const controls = form.querySelectorAll("input, button");
+    controls.forEach((control) => {
+      if (control instanceof HTMLInputElement || control instanceof HTMLButtonElement) {
+        control.disabled = true;
+      }
+    });
+    actions?.classList.add("hidden");
+    deadlineNotice?.classList.remove("hidden");
+  }
+
+  form?.addEventListener("submit", () => {
+    submitted = true;
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-70");
+    }
+    if (submitText) submitText.textContent = "Submitting...";
+    showStatus("Sending your dinner selection...", "warning");
+  });
+
+  submissionFrame?.addEventListener("load", () => {
+    if (!submitted || !(form instanceof HTMLFormElement)) return;
+
+    form.classList.add("hidden");
+    success?.classList.remove("hidden");
+    success?.focus();
+    submitted = false;
+  });
+
+  submitAgain?.addEventListener("click", () => {
+    if (!(form instanceof HTMLFormElement)) return;
+
+    form.reset();
+    status?.classList.add("hidden");
+    success?.classList.add("hidden");
+    form.classList.remove("hidden");
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = false;
+      submitButton.classList.remove("opacity-70");
+    }
+    if (submitText) submitText.textContent = "Submit dinner selection";
+    applyDeadline();
+    document.getElementById("guest-name")?.focus();
+  });
+
+  applyDeadline();
+</script>
+
+<style>
+  .gala-meal-label {
+    display: block;
+    margin-bottom: 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    line-height: 1.25rem;
+    text-transform: uppercase;
+    color: #694300;
+  }
+
+  .gala-meal-field {
+    width: 100%;
+    border: 1px solid rgba(30, 30, 30, 0.25);
+    border-radius: 2px;
+    background: #ffffff;
+    padding: 0.9rem 1rem;
+    color: #1e1e1e;
+    font-family: "Rubik", sans-serif;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  }
+
+  .gala-meal-field::placeholder {
+    color: rgba(85, 85, 85, 0.68);
+  }
+
+  .gala-meal-field:hover {
+    border-color: rgba(138, 87, 0, 0.6);
+  }
+
+  .gala-meal-field:focus {
+    border-color: #8a5700;
+    box-shadow: 0 0 0 3px rgba(255, 189, 89, 0.3);
+    background: #fffaf0;
+  }
+
+  .gala-meal-field:user-invalid {
+    border-color: #9f1239;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gala-meal-field,
+    label span {
+      transition: none;
+    }
+  }
+</style>
