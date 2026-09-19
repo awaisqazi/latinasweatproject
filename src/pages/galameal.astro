@@ -37,7 +37,7 @@ const dinnerOptions = [
 
 <Layout
   title="Gala Dinner Selection | The Latina Sweat Project"
-  description="Choose your dinner entrée for The Latina Sweat Project 2026 Gala by September 25 at 11:59 PM CT."
+  description="Choose your dinner entrée for The Latina Sweat Project 2026 Gala by September 20 at midnight CT."
 >
   <Header />
 
@@ -79,7 +79,7 @@ const dinnerOptions = [
           page to your guests so they can choose their own entrée.
         </p>
         <p class="mt-4 font-bold text-accent-gold">
-          Selections close Friday, September 25, 2026 at 11:59 PM CT.
+          Selections close Sunday, September 20, 2026 at midnight CT.
         </p>
         <p class="mt-2 text-sm leading-6 text-white/60">
           Guests without a selection by the deadline will receive the vegetarian entrée.
@@ -240,8 +240,8 @@ const dinnerOptions = [
             ></div>
 
             <div id="deadline-notice" class="mt-7 hidden border border-[#8a5700]/30 bg-[#fff3d8] px-5 py-4 text-sm leading-6 text-[#694300]" role="alert">
-              The dinner-selection window has closed. The vegetarian entrée will
-              be used when no selection was received by the deadline.
+              The selection deadline has passed. You can still submit this form,
+              but late selections may not be accommodated.
             </div>
 
             <div id="gala-meal-actions" class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -304,12 +304,14 @@ const dinnerOptions = [
 </Layout>
 
 <script>
-  const deadline = new Date("2026-09-25T23:59:00-05:00");
+  // Midnight at the end of Sunday, September 20. This deadline is advisory:
+  // the form keeps accepting submissions afterwards and only warns that a late
+  // selection may not be accommodated.
+  const deadline = new Date("2026-09-21T00:00:00-05:00");
   const form = document.getElementById("gala-meal-form");
   const submitButton = document.getElementById("gala-meal-submit");
   const submitText = document.getElementById("gala-meal-submit-text");
   const status = document.getElementById("gala-meal-status");
-  const actions = document.getElementById("gala-meal-actions");
   const deadlineNotice = document.getElementById("deadline-notice");
   const success = document.getElementById("gala-meal-success");
   const submitAgain = document.getElementById("gala-meal-again");
@@ -330,13 +332,6 @@ const dinnerOptions = [
   function applyDeadline() {
     if (!(form instanceof HTMLFormElement) || Date.now() < deadline.getTime()) return;
 
-    const controls = form.querySelectorAll("input, button");
-    controls.forEach((control) => {
-      if (control instanceof HTMLInputElement || control instanceof HTMLButtonElement) {
-        control.disabled = true;
-      }
-    });
-    actions?.classList.add("hidden");
     deadlineNotice?.classList.remove("hidden");
   }
 
