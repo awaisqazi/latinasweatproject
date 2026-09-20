@@ -122,7 +122,6 @@
     const pad = r.width < 640 ? 10 : 36;
     const whole = Math.min((r.width - pad * 2) / room.width, (r.height - pad * 2) / room.height);
     let k = Math.max(MIN_K, Math.min(MAX_K, whole));
-    let anchorFront = false;
 
     if (mobile && !opts.whole && TABLE_R * 2 * k < LEGIBLE_TABLE_PX) {
       // A portrait phone cannot show the whole room AND readable tables. Show
@@ -130,14 +129,15 @@
       // which is a normal map gesture, where squinting at a 6px table number
       // is not.
       k = Math.max(k, Math.min(MAX_K, LEGIBLE_TABLE_PX / (TABLE_R * 2)));
-      anchorFront = true;
     }
 
     view.k = k;
     view.x = (r.width - room.width * k) / 2;
-    // Anchored on the front of the room, so the slack ends up at the bottom
-    // where the floating controls and the toast lane already live.
-    view.y = anchorFront ? pad : (r.height - room.height * k) / 2;
+    // Centred when the room still fits top to bottom, which it usually does on
+    // a portrait phone even after coming in. When it does not, anchor the front
+    // of the room: the podium is the landmark everything else is read against.
+    const fitsVertically = room.height * k <= r.height - pad * 2;
+    view.y = fitsVertically ? (r.height - room.height * k) / 2 : pad;
   }
 
   function zoomBy(factor, cx = null, cy = null) {

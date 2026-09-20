@@ -51,12 +51,15 @@
   let unlocked = $state(false);
   let gateChecked = $state(false);
   let gateEl = $state(null);
+  // Bound in the template, not only set from JS: a `[data-keyboard]` attribute
+  // that never appears in the markup gets its CSS pruned as unused.
+  let gateKeyboard = $state(false);
 
   // The gate is sized to the visible viewport, exactly like the app shell.
   $effect(() => {
     const el = gateEl;
     if (!el || unlocked) return;
-    return bindVisualViewport(el);
+    return bindVisualViewport(el, (info) => (gateKeyboard = info.keyboard));
   });
   // Development builds only: `?plan=sandbox-abc` points the page at a rehearsal plan so realtime can be
   // tested without touching the real one. Read synchronously, because the gate tries a remembered
@@ -180,7 +183,7 @@
       scrolling, and the intro and the footnotes fold away so the title, the
       field being typed in and Unlock all stay on screen.
     -->
-    <div class="gs-gatewrap" bind:this={gateEl}>
+    <div class="gs-gatewrap" bind:this={gateEl} data-keyboard={gateKeyboard ? "on" : "off"}>
       <div class="gs-gatecard">
         <p class="gs-eyebrow">The Latina Sweat Project</p>
         <h1 class="gs-gatetitle">Gala <span class="gala-foil">Seating</span></h1>
@@ -361,15 +364,21 @@
     .gs-gatewrap[data-keyboard="on"] .gs-privacy {
       display: none;
     }
+    .gs-gatewrap[data-keyboard="on"] {
+      padding-top: calc(6px + env(safe-area-inset-top));
+      padding-bottom: 6px;
+      align-items: flex-start;
+    }
     .gs-gatewrap[data-keyboard="on"] .gs-gatecard {
-      padding-top: 14px;
+      padding: 10px 12px 12px;
     }
     .gs-gatewrap[data-keyboard="on"] .gs-gatetitle {
-      font-size: 24px;
-      margin: 0 0 8px;
+      font-size: 22px;
+      margin: 0 0 6px;
     }
     .gs-gatewrap[data-keyboard="on"] .gs-gateslot {
-      margin-top: 0.75rem;
+      margin-top: 0;
+      padding: 0.9rem 0.9rem 1rem;
     }
   }
   .gs-gatecard {

@@ -59,6 +59,9 @@
   let floor = $state(null);
   let syncOpen = $state(false);
   let sheetInsets = $state({ bottom: 0, right: 0 });
+  // Bound in the template so Svelte keeps the `[data-keyboard]` rules: an
+  // attribute only ever written from JS gets its CSS pruned as unused.
+  let keyboardUp = $state(false);
 
   const plan = $derived(store.plan);
   const top = $derived(nav.topLayer);
@@ -84,7 +87,7 @@
     // it publishes --m-vh / --m-top for every surface inside it. If the gate
     // handed over while the page was still magnified, snap back first.
     resetPageZoom();
-    const stopViewport = bindVisualViewport(rootEl);
+    const stopViewport = bindVisualViewport(rootEl, (info) => (keyboardUp = info.keyboard));
     const stopNav = nav.start();
 
     // Every path that used to set `openGuestId` now pushes a surface onto the
@@ -172,7 +175,7 @@
   }
 </script>
 
-<div class="m-root" bind:this={rootEl}>
+<div class="m-root" bind:this={rootEl} data-keyboard={keyboardUp ? "on" : "off"}>
   <div class="m-col">
     <MTopBar
       {store}
