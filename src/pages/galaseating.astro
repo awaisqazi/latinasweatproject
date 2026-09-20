@@ -1,0 +1,48 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import GalaSeatingApp from "@/components/galaseating/GalaSeatingApp.svelte";
+
+// Unlisted planning tool for the Annual Gala dinner seating at the Museum of
+// Contemporary Art Chicago. Not in the nav, noindex, excluded from the sitemap
+// in astro.config.mjs and disallowed in public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships empty. Guest data is seeded
+// into LSP's passcode-protected database by the maintainer and cached in the
+// planner's browser. Nothing about a guest is ever committed here, and guest
+// data never goes in a URL.
+//
+// No site Header or Footer: the tool needs the full viewport, and the app
+// renders its own slim header.
+---
+
+<Layout
+  title="Gala Seating | The Latina Sweat Project"
+  description="Internal seating planner for the Annual Gala dinner."
+  robots="noindex, nofollow"
+  hideFooter
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#0B1320" />
+    <meta name="referrer" content="same-origin" />
+    <style is:inline>
+      /* The planner owns the viewport: no page scroll, no rubber banding. */
+      html,
+      body {
+        height: 100%;
+        overscroll-behavior: none;
+      }
+      body {
+        background: #0b1320;
+        margin: 0;
+      }
+    </style>
+  </Fragment>
+
+  <GalaSeatingApp client:only="svelte" />
+
+  <noscript>
+    <p style="color:#fff8ef;font-family:Arial,sans-serif;padding:24px;">
+      The seating planner needs JavaScript. Turn it on and reload this page.
+    </p>
+  </noscript>
+</Layout>
