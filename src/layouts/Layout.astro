@@ -16,6 +16,13 @@ interface Props {
   socialImageHeight?: number;
   socialImageType?: string;
   twitterCard?: "summary" | "summary_large_image";
+  /**
+   * Viewport meta content. Left alone for every marketing page; full-viewport
+   * app pages (the gala seating planner) pass an initial scale and
+   * `viewport-fit=cover` so safe-area insets resolve on a notched iPhone.
+   * Never disable user scaling here: pinch zoom is an accessibility feature.
+   */
+  viewport?: string;
 }
 
 const {
@@ -29,6 +36,7 @@ const {
   socialImageHeight = 500,
   socialImageType = "image/png",
   twitterCard = "summary",
+  viewport = "width=device-width",
 } = Astro.props;
 const siteName = "The Latina Sweat Project";
 const description =
@@ -73,7 +81,7 @@ const GOOGLE_ADS_ID = "AW-17990206229";
       document.documentElement.classList.add("js");
     </script>
     <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content={viewport} />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.ico`} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>

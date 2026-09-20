@@ -20,6 +20,7 @@ import GalaSeatingApp from "@/components/galaseating/GalaSeatingApp.svelte";
   description="Internal seating planner for the Annual Gala dinner."
   robots="noindex, nofollow"
   hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
 >
   <Fragment slot="head">
     <meta name="theme-color" content="#0B1320" />
@@ -34,6 +35,20 @@ import GalaSeatingApp from "@/components/galaseating/GalaSeatingApp.svelte";
       body {
         background: #0b1320;
         margin: 0;
+      }
+      /* Phones and tablets: the app is fixed to the viewport so nothing
+         rubber-bands, nothing scrolls behind an open sheet, and the page can
+         never scroll sideways past a tab bar. */
+      @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+        html,
+        body {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          overflow: hidden;
+          overscroll-behavior: none;
+          -webkit-text-size-adjust: 100%;
+        }
       }
     </style>
   </Fragment>

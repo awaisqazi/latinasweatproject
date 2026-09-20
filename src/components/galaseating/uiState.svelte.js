@@ -5,7 +5,19 @@
 // Drag and drop is Pointer Events end to end (mouse, touch, pen). The HTML5
 // drag-and-drop API is not used: it does not exist on touch devices.
 
-import { SEAT_R, SEAT_RING_R, TABLE_R } from "../../lib/galaSeating/model.js";
+import { SEAT_R, SEAT_RING_R, TABLE_R, seatPosition } from "../../lib/galaSeating/model.js";
+
+/**
+ * Camera manners.
+ *
+ * A seat drawn smaller than this is not readable, so locating somebody is
+ * allowed to zoom. Anything at or above it is already legible and the camera
+ * must not move: a room that jumps under your thumb every time you tap a name
+ * is the single most disorienting thing a plan view can do.
+ */
+const LEGIBLE_SEAT_PX = 24;
+/** When a zoom IS warranted, stop here: readable, still most of the room. */
+const COMFORTABLE_SEAT_PX = 36;
 
 const isTouchDevice =
   typeof window !== "undefined" &&
@@ -24,6 +36,11 @@ export function createUiState(store) {
   let listSort = $state("last");
   let listOpen = $state(false);
   let focusSearchTick = $state(0);
+  // Phone list only: the segmented control and the chips from the filter sheet
+  // are two separate questions, so they are two separate pieces of state. The
+  // desktop sidebar keeps using the single `listFilter`.
+  let listSegment = $state(/** @type {"all"|"unseated"|"seated"} */ ("all"));
+  let listChips = $state(/** @type {string[]} */ ([]));
   /** Beacon on a located seat: a few expanding rings, then gone. */
   let locate = $state(/** @type {{guestId:string, tableId:string, at:number}|null} */ (null));
 
@@ -31,6 +48,24 @@ export function createUiState(store) {
   let view = $state({ x: 0, y: 0, k: 1 });
   let layoutLocked = $state(isTouchDevice);
   let floorEl = null; // plain ref, never read in a template
+  /**
+   * What is currently sitting on top of the floor: a sheet docked at the
+   * bottom on a phone, the details drawer on the right on desktop. The camera
+   * aims at the part of the room that is actually visible.
+   */
+  let viewInsets = $state({ top: 0, right: 0, bottom: 0, left: 0 });
+  function setViewInsets(next) {
+    const merged = { top: 0, right: 0, bottom: 0, left: 0, ...(next || {}) };
+    if (
+      merged.top === viewInsets.top &&
+      merged.right === viewInsets.right &&
+      merged.bottom === viewInsets.bottom &&
+      merged.left === viewInsets.left
+    ) {
+      return;
+    }
+    viewInsets = merged;
+  }
 
   // ---- drag ---------------------------------------------------------------
   let drag = $state(/** @type {any} */ (null));
@@ -39,6 +74,19 @@ export function createUiState(store) {
 
   const reducedMotion =
     typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  /**
+   * The phone shell installs a router so that "open this guest" means "push a
+   * guest card onto the navigation stack" instead of "set openGuestId". Every
+   * existing caller (the floor plan, the warnings list, a collision toast)
+   * keeps calling the same three functions and lands in the right place.
+   * On desktop the router stays null and nothing below changes.
+   * @type {null | {openGuest?:Function, openTable?:Function, closeSheets?:Function, pickGuest?:Function, revealInList?:Function, showOnMap?:Function}}
+   */
+  let router = null;
+  function setRouter(next) {
+    router = next;
+  }
 
   function setFloorEl(el) {
     floorEl = el;
@@ -320,69 +368,140 @@ export function createUiState(store) {
   }
 
   function openGuest(id) {
-    openGuestId = id;
-    openTableId = null;
     if (id) store.setPresence({ guestId: id });
     else store.setPresence(null);
+    if (router?.openGuest) {
+      router.openGuest(id);
+      return;
+    }
+    openGuestId = id;
+    openTableId = null;
   }
 
   function openTable(id) {
-    openTableId = id;
-    openGuestId = null;
     if (id) store.setPresence({ tableId: id });
     else store.setPresence(null);
+    if (router?.openTable) {
+      router.openTable(id);
+      return;
+    }
+    openTableId = id;
+    openGuestId = null;
   }
 
   function closeSheets() {
+    store.setPresence(null);
+    if (router?.closeSheets) {
+      router.closeSheets();
+      return;
+    }
     openGuestId = null;
     openTableId = null;
-    store.setPresence(null);
   }
 
   let panRaf = 0;
 
   /**
-   * Pan (and optionally zoom) so a room point sits in the clear part of the
-   * viewport: the guest list covers the left on desktop, the details drawer the
-   * right, and the selected card the bottom on a phone. With reduced motion
-   * this jumps instead of gliding.
+   * The part of the floor nobody is standing on, in floor-local coordinates
+   * (0,0 is the top-left of the floor element, not of the page).
    */
-  function centerOn(rx, ry, { pulseGuest = null, zoom = null, animate = true } = {}) {
+  function clearArea() {
     const r = floorRect();
-    if (!r.width) return;
-    const narrow = typeof window !== "undefined" && window.innerWidth < 1024;
-    const padRight = !narrow && (openGuestId || openTableId) ? 400 : 0;
-    const padBottom = narrow && selectedGuestId ? 132 : 0;
-    const k = zoom ? Math.max(0.25, Math.min(2.6, zoom)) : view.k;
-    const targetX = (r.width - padRight) / 2 - rx * k;
-    const targetY = (r.height - padBottom) / 2 - ry * k;
+    const left = viewInsets.left;
+    const top = viewInsets.top;
+    const width = Math.max(80, r.width - viewInsets.left - viewInsets.right);
+    const height = Math.max(80, r.height - viewInsets.top - viewInsets.bottom);
+    return { left, top, width, height, cx: left + width / 2, cy: top + height / 2 };
+  }
 
-    if (pulseGuest) {
-      focusPulse = pulseGuest;
-      setTimeout(() => {
-        if (focusPulse === pulseGuest) focusPulse = null;
-      }, 1800);
-    }
+  /** Where a room point currently lands inside the floor element. */
+  function roomToFloor(rx, ry) {
+    return { x: rx * view.k + view.x, y: ry * view.k + view.y };
+  }
 
+  function animateView(targetX, targetY, targetK, animate) {
     if (panRaf) cancelAnimationFrame(panRaf);
     if (!animate || reducedMotion) {
       view.x = targetX;
       view.y = targetY;
-      view.k = k;
+      view.k = targetK;
       return;
     }
     const from = { x: view.x, y: view.y, k: view.k };
     const start = performance.now();
-    const dur = 420;
+    const dur = 350;
     const step = (t) => {
       const p = Math.min(1, (t - start) / dur);
       const e = 1 - Math.pow(1 - p, 3);
       view.x = from.x + (targetX - from.x) * e;
       view.y = from.y + (targetY - from.y) * e;
-      view.k = from.k + (k - from.k) * e;
+      view.k = from.k + (targetK - from.k) * e;
       panRaf = p < 1 ? requestAnimationFrame(step) : 0;
     };
     panRaf = requestAnimationFrame(step);
+  }
+
+  function pulse(guestId) {
+    if (!guestId) return;
+    focusPulse = guestId;
+    setTimeout(() => {
+      if (focusPulse === guestId) focusPulse = null;
+    }, 1800);
+  }
+
+  /**
+   * Put a room point in the middle of the clear area, optionally at a new zoom.
+   * This is the deliberate move, used by "Show on map" and by the warnings
+   * list. Nothing else is allowed to call it.
+   */
+  function centerOn(rx, ry, { pulseGuest = null, zoom = null, animate = true } = {}) {
+    const r = floorRect();
+    if (!r.width) return;
+    const area = clearArea();
+    const k = zoom ? Math.max(0.12, Math.min(2.6, zoom)) : view.k;
+    pulse(pulseGuest);
+    animateView(area.cx - rx * k, area.cy - ry * k, k, animate);
+  }
+
+  /**
+   * Pan the least amount that brings a room point inside the clear area, and
+   * not one pixel more. Zoom is never touched. If the point is already in
+   * sight, nothing moves at all: a tap on something you can see should never
+   * rearrange the room.
+   * @returns {boolean} true when the camera moved
+   */
+  function nudgeIntoView(rx, ry, { margin = 56, animate = true } = {}) {
+    const r = floorRect();
+    if (!r.width) return false;
+    const area = clearArea();
+    const p = roomToFloor(rx, ry);
+    const minX = area.left + margin;
+    const maxX = area.left + area.width - margin;
+    const minY = area.top + margin;
+    const maxY = area.top + area.height - margin;
+    let dx = 0;
+    let dy = 0;
+    if (p.x < minX) dx = minX - p.x;
+    else if (p.x > maxX) dx = maxX - p.x;
+    if (p.y < minY) dy = minY - p.y;
+    else if (p.y > maxY) dy = maxY - p.y;
+    if (!dx && !dy) return false;
+    animateView(view.x + dx, view.y + dy, view.k, animate);
+    return true;
+  }
+
+  /** Is this room point inside the clear area right now? */
+  function isInClearView(rx, ry, margin = 8) {
+    const r = floorRect();
+    if (!r.width) return false;
+    const area = clearArea();
+    const p = roomToFloor(rx, ry);
+    return (
+      p.x >= area.left + margin &&
+      p.x <= area.left + area.width - margin &&
+      p.y >= area.top + margin &&
+      p.y <= area.top + area.height - margin
+    );
   }
 
   /** Select a guest and scroll the list to them (used by collision notices). */
@@ -390,6 +509,9 @@ export function createUiState(store) {
     selectedGuestId = guestId;
     listFilter = "all";
     listQuery = "";
+    listSegment = "all";
+    listChips = [];
+    if (router?.revealInList) router.revealInList(guestId);
     requestAnimationFrame(() => {
       const row = document.querySelector(`[data-guest-row][data-id="${guestId}"]`);
       row?.scrollIntoView?.({ block: "center", behavior: reducedMotion ? "auto" : "smooth" });
@@ -397,14 +519,36 @@ export function createUiState(store) {
     });
   }
 
-  /** Pan to a guest's seat and play the locate beacon on it. */
-  function findOnFloor(guestId, { zoom = true } = {}) {
+  /**
+   * Find a guest's seat, with the lightest camera move that does the job.
+   *
+   *   - already legible and in sight  ->  nothing moves, just the beacon
+   *   - legible but hidden or covered ->  the smallest pan that uncovers it
+   *   - too small to read             ->  centre it and zoom exactly to
+   *                                       readable, never further
+   *
+   * `reveal: false` is the passive form used when a tap already put the guest
+   * on screen: it will nudge a covered seat out from under a sheet but will
+   * never zoom.
+   */
+  function findOnFloor(guestId, { reveal = true } = {}) {
     const plan = store.plan;
     const s = plan.seating[guestId];
     if (!s) return false;
     const t = plan.tables.find((x) => x.id === s.tableId);
     if (!t) return false;
-    centerOn(t.x, t.y, { zoom: zoom ? Math.max(view.k, 1.15) : null });
+
+    const seatAt = seatPosition(t, s.seat);
+    const seatPx = SEAT_R * 2 * view.k;
+
+    if (seatPx >= LEGIBLE_SEAT_PX || !reveal) {
+      // Readable already: at most slide it out from under whatever is docked.
+      nudgeIntoView(seatAt.x, seatAt.y, { margin: Math.max(48, SEAT_RING_R * view.k) });
+    } else {
+      const k = Math.min(2.6, COMFORTABLE_SEAT_PX / (SEAT_R * 2));
+      centerOn(t.x, t.y, { zoom: k });
+    }
+
     locate = { guestId, tableId: t.id, at: Date.now() };
     setTimeout(() => {
       if (locate?.guestId === guestId) locate = null;
@@ -419,24 +563,30 @@ export function createUiState(store) {
    */
   function pickGuest(guestId) {
     selectedGuestId = guestId;
-    const narrow = typeof window !== "undefined" && window.innerWidth < 1024;
-    if (narrow) {
-      listOpen = false;
-      openGuestId = null;
-      openTableId = null;
-    } else {
-      openGuest(guestId);
+    if (router?.pickGuest) {
+      // The phone opens the guest card over whatever list they came from and
+      // leaves the map alone: jumping the room under a sheet is disorienting.
+      store.setPresence({ guestId });
+      router.pickGuest(guestId);
+      return;
     }
+    openGuest(guestId);
     store.setPresence({ guestId });
+    // Desktop: opening the drawer can cover the seat, so uncover it. It does
+    // not zoom unless the seat is too small to read.
     requestAnimationFrame(() => findOnFloor(guestId));
   }
 
   /** The reverse: a tap on a seat selects the guest and finds their row. */
   function pickFromFloor(guestId) {
     selectedGuestId = guestId;
+    if (router?.openGuest) {
+      store.setPresence({ guestId });
+      router.openGuest(guestId);
+      return;
+    }
     revealInList(guestId);
-    const narrow = typeof window !== "undefined" && window.innerWidth < 1024;
-    if (!narrow) openGuest(guestId);
+    openGuest(guestId);
   }
 
   function focusSearch() {
@@ -474,6 +624,12 @@ export function createUiState(store) {
     get view() {
       return view;
     },
+    get viewInsets() {
+      return viewInsets;
+    },
+    setViewInsets,
+    nudgeIntoView,
+    isInClearView,
     get layoutLocked() {
       return layoutLocked;
     },
@@ -520,6 +676,18 @@ export function createUiState(store) {
       listOpen = v;
       if (v) focusSearchTick += 1;
     },
+    get listSegment() {
+      return listSegment;
+    },
+    set listSegment(v) {
+      listSegment = v;
+    },
+    get listChips() {
+      return listChips;
+    },
+    set listChips(v) {
+      listChips = Array.isArray(v) ? v : [];
+    },
     get focusSearchTick() {
       return focusSearchTick;
     },
@@ -529,6 +697,7 @@ export function createUiState(store) {
     get reducedMotion() {
       return reducedMotion;
     },
+    setRouter,
     setFloorEl,
     floorRect,
     clientToRoom,

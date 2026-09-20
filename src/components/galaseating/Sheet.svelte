@@ -81,14 +81,28 @@
       width: 460px;
     }
   }
-  @media (max-width: 1023px) {
+  /* On a phone this rides inside the app shell, which is sized to the VISIBLE
+     viewport. `position: fixed` would size it to the layout viewport instead,
+     and with Safari's toolbar collapsed or the keyboard up that is a taller
+     box, which is exactly how a header ends up above the top of the screen. */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .sh-scrim {
+      position: absolute;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+    }
     .sh {
+      position: absolute;
       left: 0;
       right: 0;
-      bottom: 0;
-      max-height: 86dvh;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+      max-height: calc(100% - 56px - env(safe-area-inset-bottom) - 8px);
       border-top: 3px solid var(--gs-gold);
       border-radius: 6px 6px 0 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .sh-close {
+      width: 44px;
+      height: 44px;
     }
   }
   .sh-head {

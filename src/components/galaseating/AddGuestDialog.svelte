@@ -378,4 +378,25 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* The phone shell is sized to the visible viewport and this dialog lives
+     inside it, so it anchors to the shell rather than to the layout viewport
+     that Safari keeps changing under it. */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .ag-scrim,
+    .ag {
+      position: absolute;
+    }
+    .ag {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: auto;
+      transform: none;
+      width: auto;
+      max-height: 92%;
+      border-radius: 6px 6px 0 0;
+      padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    }
+  }
 </style>

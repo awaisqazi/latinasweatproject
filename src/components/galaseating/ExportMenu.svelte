@@ -538,4 +538,65 @@
       background: rgba(4, 7, 13, 0.6);
     }
   }
+
+  /* Phone: the menu is a sheet at the bottom of the app shell, not a dropdown
+     hanging off the corner of a 360px screen. `.wrap` goes static so the menu
+     anchors to the shell. */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .wrap {
+      display: block;
+      position: static;
+      width: 100%;
+    }
+    .trigger {
+      width: 100%;
+    }
+    .scrim {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+      z-index: 83;
+      background: rgba(4, 8, 14, 0.58);
+    }
+    .menu {
+      position: absolute;
+      z-index: 84;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+      width: auto;
+      max-height: calc(100% - 56px - env(safe-area-inset-bottom) - 8px);
+      border-radius: 6px 6px 0 0;
+      border-top: 3px solid #b9842f;
+      padding-bottom: env(safe-area-inset-bottom);
+      overscroll-behavior: contain;
+    }
+    .item {
+      min-height: 54px;
+      padding: 0.7rem 0.6rem;
+    }
+    .item-label {
+      font-size: 0.95rem;
+    }
+    .item-hint {
+      font-size: 0.8rem;
+    }
+    /* 16px or iOS Safari zooms the page on focus. See GalaSeatingApp. */
+    .version-form input {
+      font-size: 16px;
+      min-height: 46px;
+    }
+    .version-form {
+      flex-wrap: wrap;
+    }
+    .floating-status {
+      position: absolute;
+      bottom: calc(56px + env(safe-area-inset-bottom) + 10px);
+      max-width: calc(100% - 2rem);
+      font-size: 0.85rem;
+    }
+  }
 </style>

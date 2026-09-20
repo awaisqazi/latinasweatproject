@@ -424,4 +424,17 @@
     30%, 50%, 70% { transform: translateX(-4px); }
     40%, 60% { transform: translateX(4px); }
   }
+
+  /* Phones: 16px or iOS Safari zooms the page the moment the field is tapped,
+     which on the gate would push Unlock off the bottom of the screen. */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .gg-input {
+      font-size: 16px;
+      min-height: 48px;
+    }
+    .gg-check input {
+      width: 22px;
+      height: 22px;
+    }
+  }
 </style>

@@ -71,3 +71,6 @@ public/videos/graduation/
 
 # 990 tax workpapers (donor + financial data, never commit)
 docs/taxes-990-2025/
+
+# Gala 2026 planning docs (local only, may reference guest data)
+docs/gala-2026/

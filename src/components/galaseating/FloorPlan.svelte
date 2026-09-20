@@ -10,14 +10,27 @@
 -->
 <script>
   import { getContext, onMount } from "svelte";
-  import { ROOM } from "../../lib/galaSeating/model.js";
+  import { ROOM, SEAT_R } from "../../lib/galaSeating/model.js";
   import TableNode from "./TableNode.svelte";
 
   const { store, ui } = getContext("gala-seating");
 
+  /**
+   * `mobile` swaps the desktop chrome (zoom buttons, the placing banner, the
+   * lock hint that used to render underneath the Guests button) for the phone
+   * shell's own controls, and changes what a tap means: see SEAT_TAP_PX.
+   */
+  let { mobile = false, moveGuestId = null, onmovepick = null } = $props();
+
   const GRID = 10;
   const MIN_K = 0.12;
   const MAX_K = 2.6;
+  /**
+   * A seat has to be drawn at least this big before a fingertip can pick one
+   * out of a ring of ten. Below it, the whole table is the target and a tap
+   * opens its roster, where every chair is a full-width row.
+   */
+  const SEAT_TAP_PX = 32;
 
   let settled = false;
   let hostEl = $state(null);
@@ -51,6 +64,9 @@
   });
   const view = ui.view;
   const showNames = $derived(view.k >= 1.15);
+  /** True once a single seat is big enough to aim a thumb at. */
+  const seatsAreTappable = $derived(SEAT_R * 2 * view.k >= SEAT_TAP_PX);
+  const inMoveMode = $derived(Boolean(moveGuestId));
 
   /** guestId -> seat, plus a quick tableId -> [guests] map for the nodes. */
   const seatsByTable = $derived.by(() => {
@@ -166,7 +182,7 @@
     const kind = target?.getAttribute("data-drag");
     settled = true;
 
-    if (kind === "guest") {
+    if (kind === "guest" && !inMoveMode) {
       const guestId = target.getAttribute("data-guest");
       const guest = plan.guests[guestId];
       if (guest) {
@@ -209,7 +225,7 @@
     try { svgEl?.setPointerCapture?.(event.pointerId); } catch { /* pointer already released: the drag still works without capture */ }
 
     // A long press on empty floor offers to drop a table right there.
-    if (!ui.layoutLocked && !hitHere(event.clientX, event.clientY)) {
+    if (!ui.layoutLocked && !inMoveMode && !hitHere(event.clientX, event.clientY)) {
       const at = ui.clientToRoom(event.clientX, event.clientY);
       const sx = event.clientX;
       const sy = event.clientY;
@@ -385,8 +401,17 @@
       const moved = Math.hypot(event.clientX - panStart.x, event.clientY - panStart.y);
       panStart = null;
       mode = null;
-      // A tap on empty floor cancels a pending selection.
-      if (moved < 5 && ui.selectedGuestId && event.target === svgEl) ui.clearSelection();
+      if (moved < 6) {
+        // Activate from pointerup, not from the child's click.
+        //
+        // Panning takes pointer capture on the <svg>, and a captured pointer
+        // sends the follow-up click to the capture target, not to the table
+        // disc under the finger. So a tap on a table used to reach nothing at
+        // all. Hit testing here is the same test the drop code already uses.
+        if (activateAt(event.clientX, event.clientY)) return;
+        // A tap on empty floor cancels a pending selection.
+        if (ui.selectedGuestId && event.target === svgEl) ui.clearSelection();
+      }
       return;
     }
     mode = null;
@@ -427,8 +452,42 @@
   });
 
   // ---------- tap to place / keyboard -------------------------------------
+  /** When the last tap was handled from pointerup, so a late click is ignored. */
+  let lastActivateAt = 0;
+
+  /** Hit test a tap and open whatever is under it. @returns true if it hit. */
+  function activateAt(cx, cy) {
+    const hit = ui.hitTest(cx, cy);
+    if (!hit) return false;
+    lastActivateAt = Date.now();
+    if (hit.seat != null) onSeatActivate(hit.tableId, hit.seat);
+    else onTableActivate(hit.tableId);
+    return true;
+  }
+
+  /** Browsers that do deliver the click after a capture must not act twice. */
+  function fromClick(fn) {
+    if (Date.now() - lastActivateAt < 400) return;
+    fn();
+  }
+
   function onSeatActivate(tableId, seat) {
-    const selected = ui.selectedGuestId;
+    // Move mode owns every tap on the room while it is running.
+    if (inMoveMode) {
+      onmovepick?.(tableId, seatsAreTappable ? seat : null);
+      return;
+    }
+    // Zoomed out on a phone, ten seats share the space of one fingertip, so
+    // the table takes the tap and hands over a roster of full-width rows.
+    if (mobile && !seatsAreTappable) {
+      ui.openTable(tableId);
+      return;
+    }
+    // Desktop arms a selected guest for placement on the next tap. A phone
+    // must not: the selection is only a highlight there, and a planner who
+    // looked someone up half a minute ago will not expect the next tap on the
+    // room to move them. Move mode is the phone's explicit version of this.
+    const selected = mobile ? null : ui.selectedGuestId;
     const occupant = seatsByTable[tableId]?.[seat] || null;
     if (selected) {
       ui.place({ tableId, seat }, { kind: "guest", guestId: selected });
@@ -440,7 +499,11 @@
   }
 
   function onTableActivate(tableId) {
-    const selected = ui.selectedGuestId;
+    if (inMoveMode) {
+      onmovepick?.(tableId, null);
+      return;
+    }
+    const selected = mobile ? null : ui.selectedGuestId;
     if (selected) {
       ui.place({ tableId, seat: null }, { kind: "guest", guestId: selected });
       ui.clearSelection();
@@ -494,7 +557,26 @@
   }
 
   function onSeatHover(info) {
+    // A finger has no hover. On a phone the tooltip only ever appeared as a
+    // sticky label after a tap, so it does not appear at all.
+    if (mobile) return;
     hoverSeat = info;
+  }
+
+  /** Free chairs per table, for the move-mode glow. */
+  const freeByTable = $derived.by(() => {
+    const map = {};
+    for (const t of plan.tables) map[t.id] = t.seats;
+    for (const s of Object.values(plan.seating)) {
+      if (map[s.tableId] != null) map[s.tableId] -= 1;
+    }
+    return map;
+  });
+
+  export function fitRoom() {
+    settled = false;
+    fit();
+    settled = true;
   }
 
 </script>
@@ -631,7 +713,7 @@
           byGuest={store.warnings.byGuest || {}}
           dragOver={dragOver?.tableId === table.id ? dragOver : null}
           dragLevel={ui.drag?.level || "ok"}
-          dragActive={Boolean(ui.drag)}
+          dragActive={Boolean(ui.drag) || (inMoveMode && freeByTable[table.id] > 0)}
           {showNames}
           layoutLocked={ui.layoutLocked}
           ghostBad={moving?.id === table.id && ghostBad}
@@ -641,10 +723,11 @@
           focusPulse={ui.focusPulse}
           selectedGuestId={ui.selectedGuestId}
           locate={ui.locate}
-          dim={Boolean(ui.locate) && ui.locate.tableId !== table.id}
+          dim={(Boolean(ui.locate) && ui.locate.tableId !== table.id) ||
+            (inMoveMode && freeByTable[table.id] <= 0)}
           reducedMotion={ui.reducedMotion}
-          onseat={onSeatActivate}
-          ontable={onTableActivate}
+          onseat={(t, s) => fromClick(() => onSeatActivate(t, s))}
+          ontable={(t) => fromClick(() => onTableActivate(t))}
           onseatkeydown={onSeatKeydown}
           ontablekeydown={onTableKeydown}
           onhover={onSeatHover}
@@ -674,23 +757,26 @@
     </div>
   {/if}
 
-  <!-- Zoom controls -->
-  <div class="fp-zoom">
-    <button type="button" class="gs-btn" onclick={() => zoomBy(1.2)} aria-label="Zoom in">+</button>
-    <button type="button" class="gs-btn" onclick={() => zoomBy(1 / 1.2)} aria-label="Zoom out">&minus;</button>
-    <button type="button" class="gs-btn" onclick={fit} aria-label="Fit the room to the screen">Fit</button>
-  </div>
-
-  {#if ui.selectedGuestId && plan.guests[ui.selectedGuestId]}
-    <div class="fp-placing" role="status">
-      <span class="fp-placingname">{plan.guests[ui.selectedGuestId].name}</span>
-      <span class="gs-dim">selected · tap a seat or a table to place</span>
-      <button type="button" class="gs-linkbtn" onclick={() => ui.clearSelection()}>Cancel</button>
+  {#if !mobile}
+    <!-- Desktop chrome. The phone shell draws its own, above the tab bar, so
+         nothing ever lands underneath another control. -->
+    <div class="fp-zoom">
+      <button type="button" class="gs-btn" onclick={() => zoomBy(1.2)} aria-label="Zoom in">+</button>
+      <button type="button" class="gs-btn" onclick={() => zoomBy(1 / 1.2)} aria-label="Zoom out">&minus;</button>
+      <button type="button" class="gs-btn" onclick={fit} aria-label="Fit the room to the screen">Fit</button>
     </div>
-  {/if}
 
-  {#if ui.layoutLocked}
-    <p class="fp-lockhint">Layout locked · guests still drag freely</p>
+    {#if ui.selectedGuestId && plan.guests[ui.selectedGuestId]}
+      <div class="fp-placing" role="status">
+        <span class="fp-placingname">{plan.guests[ui.selectedGuestId].name}</span>
+        <span class="gs-dim">selected · tap a seat or a table to place</span>
+        <button type="button" class="gs-linkbtn" onclick={() => ui.clearSelection()}>Cancel</button>
+      </div>
+    {/if}
+
+    {#if ui.layoutLocked}
+      <p class="fp-lockhint">Layout locked · guests still drag freely</p>
+    {/if}
   {/if}
 </div>
 

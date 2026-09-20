@@ -24,12 +24,28 @@
   import HelpPopover from "./HelpPopover.svelte";
   import AutoSeatDialog from "./AutoSeatDialog.svelte";
   import Toasts from "./Toasts.svelte";
-  import SelectedCard from "./SelectedCard.svelte";
   import ConfirmDialog from "./ConfirmDialog.svelte";
+  import MShell from "./MShell.svelte";
 
   const store = createSeatingStore();
   const ui = createUiState(store);
   setContext("gala-seating", { store, ui });
+
+  /**
+   * Phone and tablet get a different information architecture, not a squeezed
+   * copy of the desktop one: full-screen tabs and a bottom bar instead of a
+   * slide-over list and a toolbar that scrolls sideways.
+   *
+   * Computed synchronously, because children mount before this component's
+   * onMount and a phone must never render the desktop layout first.
+   */
+  const MOBILE_QUERY = "(max-width: 1023px), (pointer: coarse) and (max-height: 599px)";
+  function measureMobile() {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia?.(MOBILE_QUERY).matches ?? window.innerWidth < 1024;
+  }
+  let mobile = $state(measureMobile());
+  const wide = $derived(!mobile);
 
   let unlocked = $state(false);
   let gateChecked = $state(false);
@@ -42,7 +58,6 @@
     return /^[a-z0-9-]{3,40}$/.test(v) ? v : "";
   })();
   let showAutoSeat = $state(false);
-  let wide = $state(true);
 
   const guestCount = $derived(Object.keys(store.plan.guests).length);
   const isEmpty = $derived(guestCount === 0);
@@ -99,14 +114,23 @@
     }
     if (event.key === "/") {
       event.preventDefault();
-      if (!wide) ui.listOpen = true;
       ui.focusSearch();
     }
   }
 
   function onResize() {
-    wide = window.innerWidth >= 1024;
+    mobile = measureMobile();
   }
+
+  /**
+   * Desktop only: the details drawer covers 400px of the right-hand wall, so
+   * the camera aims at what is left. The phone shell reports its own insets.
+   */
+  $effect(() => {
+    if (mobile) return;
+    const covered = Boolean(ui.openGuestId || ui.openTableId || ui.panel !== "none");
+    ui.setViewInsets(covered ? { right: 400 } : {});
+  });
 
   onMount(() => {
     store.start();
@@ -159,10 +183,14 @@
         </p>
       </div>
     </div>
+  {:else if mobile && !isEmpty}
+    <MShell />
   {:else}
     <div class="gs-shell">
-      <Toolbar onautoseat={() => (showAutoSeat = true)} />
-      <StatsBar />
+      {#if !mobile}
+        <Toolbar onautoseat={() => (showAutoSeat = true)} />
+        <StatsBar />
+      {/if}
 
       {#if store.saveError}
         <p class="gs-banner gs-banner--bad" role="status">{store.saveError}</p>
@@ -201,31 +229,12 @@
           </div>
         </div>
       {:else}
+        <!-- Desktop workspace. The phone never reaches here: MShell owns it. -->
         <main class="gs-workspace">
-          {#if wide}
-            <aside class="gs-sidebar"><GuestList mode="sidebar" /></aside>
-          {/if}
+          <aside class="gs-sidebar"><GuestList mode="sidebar" /></aside>
           <div class="gs-floorwrap">
             <FloorPlan />
-            {#if !wide}
-              <button type="button" class="gs-guestsbtn" onclick={() => (ui.listOpen = true)}>
-                <svg class="gs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round" />
-                </svg>
-                Guests
-                <span class="gs-guestsn">{store.stats.unseated} unseated</span>
-              </button>
-              <SelectedCard />
-            {/if}
           </div>
-          {#if !wide && ui.listOpen}
-            <div
-              class="gs-drawerscrim"
-              role="presentation"
-              onpointerdown={() => (ui.listOpen = false)}
-            ></div>
-            <GuestList mode="drawer" />
-          {/if}
         </main>
       {/if}
 
@@ -655,7 +664,12 @@
     border: 0;
     margin: 14px 0;
   }
-  @media (max-width: 1023px) {
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    :global(.gs-root) {
+      /* No double-tap zoom anywhere in the app. Pinch zoom is untouched:
+         taking it away would fail WCAG and the floor needs it. */
+      touch-action: manipulation;
+    }
     :global(.gs-root button),
     :global(.gs-root [role="button"]) {
       min-height: 44px;
@@ -663,6 +677,31 @@
     :global(.gs-root .gs-btn) {
       min-height: 44px;
       padding: 0 12px;
+    }
+
+    /*
+     * THE 16px RULE, and it is a rule.
+     *
+     * iOS Safari zooms the whole page when a focused form control is smaller
+     * than 16px, and a zoomed page pushes the controls that close the current
+     * screen out of the viewport. That is how the guest drawer became a trap:
+     * a 13px search box, one tap, and the Close button was somewhere above the
+     * status bar. Every control in every dialog is held at 16px here so no
+     * component can reintroduce it by forgetting.
+     */
+    :global(.gs-root input),
+    :global(.gs-root select),
+    :global(.gs-root textarea) {
+      font-size: 16px;
+    }
+    :global(.gs-root input[type="checkbox"]),
+    :global(.gs-root input[type="radio"]) {
+      width: 22px;
+      height: 22px;
+    }
+    /* Roomier hit targets inside the cream dialogs. */
+    :global(.gs-root .gs-input) {
+      min-height: 46px;
     }
   }
 </style>

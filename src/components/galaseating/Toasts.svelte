@@ -164,12 +164,33 @@
     color: #d8c49a;
   }
 
-  @media (max-width: 1023px) {
+  /*
+   * On a phone the toast lane is the ONLY place a transient message may land.
+   * It sits inside the app shell, just above the tab bar, so nothing is ever
+   * printed underneath another control.
+   */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
     .tt {
+      position: absolute;
       left: 10px;
       right: 10px;
-      bottom: 74px;
+      bottom: calc(56px + env(safe-area-inset-bottom) + 10px);
       max-width: none;
+    }
+    .tt-body p {
+      font-size: 14px;
+    }
+    .tt-x {
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+    }
+  }
+  @media (orientation: landscape) and (max-height: 559px) {
+    .tt {
+      left: calc(82px + env(safe-area-inset-left));
+      right: 10px;
+      bottom: 10px;
     }
   }
 </style>

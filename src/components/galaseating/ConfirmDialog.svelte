@@ -49,4 +49,17 @@
     gap: 8px;
     flex-wrap: wrap;
   }
+  /* Inside the phone shell, which is the visible viewport. See Sheet.svelte. */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .cf-scrim,
+    .cf {
+      position: absolute;
+    }
+    .cf {
+      width: calc(100% - 24px);
+    }
+    .cf-msg {
+      font-size: 15px;
+    }
+  }
 </style>

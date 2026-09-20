@@ -12,9 +12,12 @@
 <script>
   import { forgetPasscode } from "../../lib/galaSeating/remote.js";
 
-  let { store, remote = null } = $props();
-
-  let open = $state(false);
+  // `compact` is the phone dressing: a status dot and the number of planners
+  // in the room, because a top bar on a 360px screen has no room for a
+  // sentence. `hideTrigger` lets the phone's top bar own the button and drive
+  // `open` itself, so the status line there is a single 44px target instead of
+  // a pill nested inside another control. The drawer is unchanged either way.
+  let { store, remote = null, compact = false, hideTrigger = false, open = $bindable(false) } = $props();
   let versions = $state([]);
   let loadingVersions = $state(false);
   let versionError = $state("");
@@ -90,14 +93,22 @@
     return "";
   }
 
-  async function toggle() {
+  function toggle() {
     open = !open;
-    if (open) {
-      labelDraft = "";
-      await loadVersions();
-      queueMicrotask(() => panel?.focus());
-    }
   }
+
+  // Opening is the trigger, wherever it came from: the pill here, or the phone
+  // top bar driving `open` from outside.
+  let wasOpen = false;
+  $effect(() => {
+    const isOpen = open;
+    if (isOpen === wasOpen) return;
+    wasOpen = isOpen;
+    if (!isOpen) return;
+    labelDraft = "";
+    loadVersions();
+    queueMicrotask(() => panel?.focus());
+  });
 
   async function loadVersions() {
     if (!link?.history) {
@@ -167,20 +178,27 @@
   }
 </script>
 
-<div class="sb-wrap">
+<div class="sb-wrap" class:sb-wrap--bare={hideTrigger}>
+  {#if !hideTrigger}
   <button
     type="button"
     class="sb-pill sb-pill--{tone}"
+    class:sb-pill--compact={compact}
     onclick={toggle}
     aria-expanded={open}
     aria-haspopup="dialog"
+    aria-label={compact ? `${label}. Open version history.` : undefined}
     title="Sync status, who is online, and version history"
   >
     <span class="sb-dot" class:sb-dot--pulse={sync.status === "saving" || sync.status === "loading"} aria-hidden="true"
     ></span>
-    <span class="sb-label">{label}</span>
+    {#if compact}
+      <span class="sb-count" aria-hidden="true">{Math.max(people.length, 1)}</span>
+    {:else}
+      <span class="sb-label">{label}</span>
+    {/if}
 
-    {#if people.length}
+    {#if people.length && !compact}
       <span class="sb-faces" aria-hidden="true">
         {#each people.slice(0, 4) as person (person.client)}
           <span class="sb-face" style="background:{person.color}" title={person.editor}>{initials(person.editor)}</span>
@@ -191,12 +209,16 @@
       </span>
     {/if}
   </button>
+  {/if}
 
-  {#if sync.status === "error"}
+  {#if sync.status === "error" && !hideTrigger}
     <button type="button" class="sb-retry" onclick={retry}>Retry</button>
   {/if}
 
   {#if open}
+    <!-- Phones only (see the media query): a sheet needs something to tap
+         beside it, or the only way out is one small button. -->
+    <div class="sb-scrim" role="presentation" onpointerdown={() => (open = false)}></div>
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
       class="sb-drawer"
@@ -625,5 +647,76 @@
   }
   .sb-foot .sb-fine {
     margin: 0;
+  }
+
+  /* ---- phone dressing ---------------------------------------------------- */
+  .sb-pill--compact {
+    gap: 0.3rem;
+    max-width: none;
+    min-height: 44px;
+    padding: 0 0.6rem;
+    border-radius: 3px;
+  }
+  .sb-count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: rgb(255 248 239 / 0.92);
+  }
+
+  /* The drawer becomes a sheet: anchored to the corner of a 360px screen it
+     would hang off the edge, and its close button with it. */
+  .sb-wrap--bare {
+    display: contents;
+  }
+  .sb-scrim {
+    display: none;
+  }
+
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .sb-scrim {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+      z-index: 81;
+      background: rgba(4, 8, 14, 0.58);
+    }
+    .sb-drawer {
+      position: absolute;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: calc(56px + env(safe-area-inset-bottom));
+      z-index: 82;
+      width: auto;
+      max-height: calc(100% - 56px - env(safe-area-inset-bottom) - 8px);
+      border-radius: 6px 6px 0 0;
+      border: 0;
+      border-top: 3px solid #b9842f;
+      padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+      overscroll-behavior: contain;
+    }
+    .sb-head {
+      align-items: center;
+    }
+    .sb-x,
+    .sb-btn,
+    .sb-lock,
+    .sb-retry {
+      min-height: 44px;
+      padding-left: 0.85rem;
+      padding-right: 0.85rem;
+      font-size: 0.85rem;
+    }
+    .sb-input {
+      font-size: 16px;
+      min-height: 44px;
+    }
+    .sb-saverow {
+      flex-wrap: wrap;
+    }
   }
 </style>
