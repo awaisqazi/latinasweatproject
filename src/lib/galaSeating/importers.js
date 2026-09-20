@@ -237,10 +237,36 @@ const IMPORTED_FIELDS = [
   "placeholder", "placeholderIndex", "unmatched", "prefs",
 ];
 
+// What a claimed guest keeps from the dinner form, because that is still the only place
+// those answers come from. Everything else about them is the planner's decision.
+const CLAIM_REFRESHABLE = ["phone", "email"];
+
 function placeholderNumber(guest) {
   if (typeof guest.placeholderIndex === "number") return guest.placeholderIndex;
   const m = /\((\d+)\)\s*$/.exec(guest.name || "");
   return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+/** Imported fields the planner has taken ownership of by editing them in the app. */
+function lockedFields(guest) {
+  const locked = new Set(Array.isArray(guest.editedFields) ? guest.editedFields.filter((f) => typeof f === "string") : []);
+  if (guest.nameEdited) locked.add("name");
+  // Picking an entrée by hand owns the text that goes with it.
+  if (locked.has("meal")) locked.add("mealRaw");
+  return locked;
+}
+
+function isEmptyValue(value) {
+  return value == null || value === "" || (Array.isArray(value) && value.length === 0);
+}
+
+/**
+ * The planner reconciled this person: they were a dinner response with no ticket, and a
+ * human gave them a real seat. The spreadsheet still does not know that, so a re-import
+ * must not drag them back to "no matching ticket".
+ */
+function isClaimed(existing, incoming) {
+  return !existing.unmatched && incoming.unmatched === true;
 }
 
 /**
@@ -260,28 +286,75 @@ export function mergeGuestsIntoPlan(plan, guests) {
   const incomingIds = new Set(incoming.map((g) => g.id));
   let added = 0;
   let updated = 0;
+  let suppressedPlaceholders = 0;
   const freshlyNamed = [];
+  const claimedIds = new Set();
 
-  for (const g of incoming) {
-    const existing = nextGuests[g.id];
-    if (!existing) {
-      nextGuests[g.id] = { ...g };
-      added++;
-      if (!g.placeholder && !g.unmatched) freshlyNamed.push(g);
-      continue;
-    }
+  // One seat per ticket, so the number of incoming guests in a party IS that party's
+  // capacity. Used below to stop a deleted placeholder coming back to life.
+  const capacity = new Map();
+  for (const g of incoming) capacity.set(g.partyId, (capacity.get(g.partyId) || 0) + 1);
+  const headcount = (partyId) => {
+    let n = 0;
+    for (const g of Object.values(nextGuests)) if (g.partyId === partyId) n++;
+    return n;
+  };
+
+  const updateExisting = (existing, g) => {
+    const locked = lockedFields(existing);
     const merged = { ...existing };
-    for (const key of IMPORTED_FIELDS) {
-      if (key in g) merged[key] = g[key];
-      else delete merged[key];
+
+    if (isClaimed(existing, g)) {
+      // Keep every party and ticket field the planner gave them; take only the answers
+      // that still come from the dinner form, and only when the form actually has one.
+      for (const key of CLAIM_REFRESHABLE) {
+        if (!locked.has(key) && !isEmptyValue(g[key])) merged[key] = g[key];
+      }
+      if (!locked.has("meal") && g.meal != null) {
+        merged.meal = g.meal;
+        merged.mealRaw = g.mealRaw;
+      }
+      merged.unmatched = false;
+      merged.placeholder = false;
+      claimedIds.add(existing.id);
+    } else {
+      for (const key of IMPORTED_FIELDS) {
+        if (locked.has(key)) continue;
+        // An empty sheet cell never erases an entrée the planner already has.
+        if ((key === "meal" || key === "mealRaw") && g.meal == null && existing.meal != null) continue;
+        if (key in g) merged[key] = g[key];
+        else delete merged[key];
+      }
+      if (!locked.has("name")) merged.name = g.name;
     }
-    // A name the planner corrected by hand outranks the spreadsheet.
-    if (!existing.nameEdited) merged.name = g.name;
+
     merged.tags = Array.isArray(existing.tags) ? existing.tags : [];
     merged.plannerNote = existing.plannerNote || "";
     merged.source = existing.source === "manual" ? "manual" : "import";
     if (existing.nameEdited) merged.nameEdited = true;
-    nextGuests[g.id] = merged;
+    if (Array.isArray(existing.editedFields) && existing.editedFields.length) {
+      merged.editedFields = [...existing.editedFields];
+    }
+    return merged;
+  };
+
+  // Named guests first, so real names take the seats before any placeholder asks for one.
+  const incomingNamed = incoming.filter((g) => !g.placeholder);
+  const incomingPlaceholders = incoming.filter((g) => g.placeholder)
+    .sort((a, b) =>
+      (a.partyId < b.partyId ? -1 : a.partyId > b.partyId ? 1 : 0) ||
+      placeholderNumber(a) - placeholderNumber(b) ||
+      (a.id < b.id ? -1 : 1));
+
+  for (const g of incomingNamed) {
+    const existing = nextGuests[g.id];
+    if (!existing) {
+      nextGuests[g.id] = { ...g };
+      added++;
+      if (!g.unmatched) freshlyNamed.push(g);
+      continue;
+    }
+    nextGuests[g.id] = updateExisting(existing, g);
     updated++;
   }
 
@@ -309,6 +382,30 @@ export function mergeGuestsIntoPlan(plan, guests) {
     migrated.add(ph.id);
   }
 
+  // Placeholders last, and only into seats the party actually still has. A placeholder
+  // the planner deleted because a real diner claimed that seat must not reappear and give
+  // the party an extra head; the highest-numbered ones are the first to be dropped.
+  for (const g of incomingPlaceholders) {
+    const existing = nextGuests[g.id];
+    if (existing) {
+      nextGuests[g.id] = updateExisting(existing, g);
+      updated++;
+      continue;
+    }
+    const seats = capacity.get(g.partyId) || 0;
+    if (headcount(g.partyId) >= seats) { suppressedPlaceholders++; continue; }
+    nextGuests[g.id] = { ...g };
+    added++;
+  }
+
+  // A claimed guest keeps the seating note that came with the ticket, so their
+  // preferences are re-read from it. Nobody else's prefs are touched here.
+  if (claimedIds.size) {
+    for (const g of resolvePreferences(Object.values(nextGuests))) {
+      if (claimedIds.has(g.id)) nextGuests[g.id] = { ...nextGuests[g.id], prefs: g.prefs };
+    }
+  }
+
   const missing = Object.values(nextGuests).filter(
     (g) => !incomingIds.has(g.id) && g.source !== "manual" && !migrated.has(g.id)
   );
@@ -322,6 +419,6 @@ export function mergeGuestsIntoPlan(plan, guests) {
       guests: nextGuests,
       seating: nextSeating,
     },
-    summary: { added, updated, kept, missing },
+    summary: { added, updated, kept, missing, suppressedPlaceholders },
   };
 }

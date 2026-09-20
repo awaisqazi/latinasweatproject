@@ -954,9 +954,19 @@ export function createSeatingStore() {
   }
 
   // ---- guest actions ------------------------------------------------------
-  function updateGuest(id, patch) {
-    const g = plan.guests[id];
-    if (!g) return;
+  // Fields that come from the spreadsheets. When a planner changes one by hand we record it in
+  // `editedFields`, and `mergeGuestsIntoPlan` then refuses to overwrite it on the next re-import
+  // (a late-night ticket switched to Comp, a corrected entrée, a guest moved to another party).
+  const SHEET_FIELDS = ["name", "ticketType", "hasDinner", "meal", "partyId", "partyLabel", "buyerName", "buyerEmail", "phone", "email", "seatingNote", "heardAbout"];
+
+  function updateGuest(id, rawPatch) {
+    const current = plan.guests[id];
+    if (!current || !rawPatch) return;
+    const g = { ...current, editedFields: Array.isArray(current.editedFields) ? current.editedFields : [] };
+    const touched = SHEET_FIELDS.filter((k) => k in rawPatch && JSON.stringify(rawPatch[k]) !== JSON.stringify(current[k]));
+    const patch = touched.length
+      ? { ...rawPatch, editedFields: [...new Set([...g.editedFields, ...touched])] }
+      : rawPatch;
     commit(
       "Edit guest",
       [{ op: "guest_patch", g: id, patch }],

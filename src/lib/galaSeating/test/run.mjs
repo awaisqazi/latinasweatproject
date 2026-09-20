@@ -584,6 +584,245 @@ describe("mergeGuestsIntoPlan", () => {
 });
 
 /* ------------------------------------------------------------------ *
+ * re-import after the planner has reconciled by hand
+ * ------------------------------------------------------------------ */
+
+describe("mergeGuestsIntoPlan · claimed seats", () => {
+  /** Exactly what the store's claimTicketSeat does, so the test tracks the real flow. */
+  function claimSeat(plan, unmatchedId, placeholderId) {
+    const guest = plan.guests[unmatchedId];
+    const ph = plan.guests[placeholderId];
+    ok(guest && ph, "claim needs both guests");
+    const next = { ...plan, guests: { ...plan.guests }, seating: { ...plan.seating } };
+    next.guests[unmatchedId] = {
+      ...guest,
+      partyId: ph.partyId,
+      partyLabel: ph.partyLabel,
+      buyerName: ph.buyerName,
+      buyerEmail: ph.buyerEmail,
+      ticketType: ph.ticketType,
+      ticketNumbers: [...(ph.ticketNumbers || [])],
+      hasDinner: ph.hasDinner,
+      seatingNote: ph.seatingNote || guest.seatingNote,
+      heardAbout: ph.heardAbout || guest.heardAbout,
+      unmatched: false,
+    };
+    const seat = next.seating[placeholderId];
+    if (seat) {
+      next.seating[unmatchedId] = { ...seat };
+      delete next.seating[placeholderId];
+    }
+    delete next.guests[placeholderId];
+    return next;
+  }
+
+  const findBy = (plan, name) => Object.values(plan.guests).find((g) => g.name === name);
+  const partySize = (plan, partyId) => Object.values(plan.guests).filter((g) => g.partyId === partyId).length;
+
+  function importedPlan() {
+    const { guests } = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    return mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), guests).plan;
+  }
+
+  it("keeps a claimed diner claimed when the same sheets are imported again", () => {
+    let plan = importedPlan();
+    const renata = findBy(plan, "Renata Ocampo");
+    const placeholder = findBy(plan, "Guest of Ana Perez (3)");
+    eq(renata.unmatched, true, "she starts with no ticket");
+    plan.seating[placeholder.id] = { tableId: "t2", seat: 4 };
+    plan = claimSeat(plan, renata.id, placeholder.id);
+    eq(partySize(plan, "ana@example.org"), 3, "the party is whole right after the claim");
+
+    const second = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    const { plan: merged, summary } = mergeGuestsIntoPlan(plan, second.guests);
+    const after = merged.guests[renata.id];
+
+    ok(after, "she is still in the plan under the same id");
+    eq(after.unmatched, false, "she was not dragged back to 'no matching ticket'");
+    eq(after.partyId, "ana@example.org", "she kept the ticketed party");
+    eq(after.partyLabel, "Ana Perez");
+    eq(after.buyerEmail, "ana@example.org");
+    eq(after.ticketType, "benefactor", "and the ticket type that came with the seat");
+    eq(after.hasDinner, true);
+    eq(after.placeholder, false);
+    eq(after.meal, "ravioli", "her entrée still comes from the dinner form");
+    deepEq(merged.seating[renata.id], { tableId: "t2", seat: 4 }, "her seat did not move");
+    ok(!merged.guests[placeholder.id], "the placeholder did not come back");
+    eq(partySize(merged, "ana@example.org"), 3, "the party still has exactly its 3 tickets");
+    eq(summary.suppressedPlaceholders, 1, "and the merge says it held one back");
+  });
+
+  it("survives a second and third re-import", () => {
+    let plan = importedPlan();
+    const renata = findBy(plan, "Renata Ocampo");
+    plan = claimSeat(plan, renata.id, findBy(plan, "Guest of Ana Perez (3)").id);
+    for (let i = 0; i < 3; i++) {
+      const fresh = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+      plan = mergeGuestsIntoPlan(plan, fresh.guests).plan;
+    }
+    eq(plan.guests[renata.id].unmatched, false);
+    eq(partySize(plan, "ana@example.org"), 3, "it does not drift by one on every import");
+  });
+
+  it("holds a whole organizer group inside a sponsor's ten seats", () => {
+    const tickets = [TICKET_HEADERS];
+    for (let i = 0; i < 10; i++) {
+      tickets.push(ticketRow("Sofia", "Lane", "sofia@goldco.example", `3${i}`, GOLD));
+    }
+    const diners = ["Adela Roque", "Bruno Cifuentes", "Carla Otero", "Dario Ponce", "Eva Marquez",
+      "Fidel Arregui", "Gala Pineda", "Hector Salcedo", "Iris Montano", "Julio Bastida"];
+    const meals = [MEAL_HEADERS];
+    diners.forEach((name, i) => meals.push(
+      mealRow(`2026-09-0${(i % 9) + 1}T09:00:00Z`, name, "Community Table", `d${i}@example.org`, "", SHORT_RIB)));
+
+    const first = buildGuestsFromRows({ ticketRows: tickets, mealRows: meals });
+    let plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 2, seats: 10 }), first.guests).plan;
+    eq(partySize(plan, "sofia@goldco.example"), 10, "ten gold seats");
+    eq(Object.values(plan.guests).filter((g) => g.unmatched).length, 10, "ten diners with no ticket");
+
+    // Claim the nine unnamed seats; the tenth diner has nowhere to go.
+    const placeholders = Object.values(plan.guests)
+      .filter((g) => g.placeholder)
+      .sort((a, b) => a.placeholderIndex - b.placeholderIndex);
+    eq(placeholders.length, 9, "Sofia holds the first seat herself");
+    const claimedNames = [];
+    for (const ph of placeholders) {
+      const diner = Object.values(plan.guests).find((g) => g.unmatched && diners.includes(g.name) && !claimedNames.includes(g.name));
+      claimedNames.push(diner.name);
+      plan = claimSeat(plan, diner.id, ph.id);
+    }
+    eq(partySize(plan, "sofia@goldco.example"), 10);
+
+    const { plan: merged, summary } = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: tickets, mealRows: meals }).guests);
+    eq(partySize(merged, "sofia@goldco.example"), 10, "still exactly ten, not nineteen");
+    eq(summary.suppressedPlaceholders, 9);
+    eq(Object.values(merged.guests).filter((g) => g.placeholder).length, 0, "no placeholder came back");
+    eq(Object.values(merged.guests).filter((g) => g.unmatched).length, 1, "the diner with no seat is still unmatched");
+    for (const name of claimedNames) {
+      const g = Object.values(merged.guests).find((x) => x.name === name);
+      eq(g.ticketType, "gold", `${name} kept the sponsor ticket`);
+      eq(g.unmatched, false);
+    }
+  });
+
+  it("still adds the guest for a ticket that was bought later", () => {
+    const plan = importedPlan();
+    const before = partySize(plan, "ana@example.org");
+    const rows = ticketRows();
+    rows.push(ticketRow("Ana", "Perez", "ana@example.org", "121", BENEFACTOR));
+    const { plan: merged, summary } = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: rows, mealRows: mealRows() }).guests);
+    eq(partySize(merged, "ana@example.org"), before + 1, "the new seat appeared");
+    eq(summary.added, 1);
+    eq(summary.suppressedPlaceholders, 0);
+    ok(Object.values(merged.guests).some((g) => g.name === "Guest of Ana Perez (4)"));
+  });
+
+  it("counts a manual guest against the party's tickets", () => {
+    let plan = importedPlan();
+    const placeholder = findBy(plan, "Guest of Ana Perez (3)");
+    delete plan.guests[placeholder.id];
+    plan.guests["manual-1"] = mkGuest({
+      id: "manual-1", name: "Pilar Arroyo", partyId: "ana@example.org",
+      partyLabel: "Ana Perez", source: "manual",
+    });
+    const { plan: merged, summary } = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() }).guests);
+    eq(partySize(merged, "ana@example.org"), 3, "the manual guest took the third seat");
+    ok(!merged.guests[placeholder.id], "so the placeholder stayed away");
+    eq(summary.suppressedPlaceholders, 1);
+    ok(merged.guests["manual-1"], "and the manual guest is untouched");
+  });
+
+  it("still migrates a seated placeholder to the guest who finally has a name", () => {
+    const tRows = ticketRows();
+    let plan = importedPlan();
+    const placeholder = findBy(plan, "Guest of Ana Perez (3)");
+    plan.seating[placeholder.id] = { tableId: "t3", seat: 6 };
+
+    const rows = mealRows();
+    rows.push(mealRow("2026-09-06T09:00:00Z", "Pilar Arroyo", "Ana Perez", "pilar@example.org", "", SHORT_RIB));
+    const { plan: merged, summary } = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: tRows, mealRows: rows }).guests);
+    const pilar = Object.values(merged.guests).find((g) => g.name === "Pilar Arroyo");
+    deepEq(merged.seating[pilar.id], { tableId: "t3", seat: 6 }, "she inherited the seat");
+    ok(!merged.guests[placeholder.id], "the placeholder retired");
+    eq(partySize(merged, "ana@example.org"), 3, "and migration did not cost the party a seat");
+    eq(summary.suppressedPlaceholders, 0, "there was no placeholder left to suppress");
+  });
+});
+
+describe("mergeGuestsIntoPlan · planner edits", () => {
+  it("never erases an entrée the planner chose when the sheet is blank", () => {
+    const first = buildGuestsFromRows({ ticketRows: ticketRows() });   // tickets only: no meals
+    let plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), first.guests).plan;
+    const guest = Object.values(plan.guests).find((g) => g.name === "Ana Perez");
+    eq(guest.meal, null, "the sheet had no entrée");
+    plan.guests[guest.id] = { ...plan.guests[guest.id], meal: "ravioli", mealRaw: "Asked at the door" };
+
+    const merged = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows() }).guests).plan;
+    eq(merged.guests[guest.id].meal, "ravioli", "the planner's entrée survived");
+    eq(merged.guests[guest.id].mealRaw, "Asked at the door");
+  });
+
+  it("lets a newer sheet answer replace an older sheet answer", () => {
+    const first = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    const plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), first.guests).plan;
+    const guest = Object.values(plan.guests).find((g) => g.name === "Ana Perez");
+    eq(guest.meal, "short-rib");
+
+    const rows = mealRows();
+    rows[1][5] = WHITEFISH;
+    const merged = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: rows }).guests).plan;
+    eq(merged.guests[guest.id].meal, "whitefish", "the dinner form is still the source of truth");
+  });
+
+  it("honours editedFields on a ticket type the planner corrected", () => {
+    const first = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    const base = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), first.guests).plan;
+    const tomas = Object.values(base.guests).find((g) => g.name === "Tomas Rivas");
+    eq(tomas.ticketType, "supporter");
+    eq(tomas.hasDinner, false);
+
+    // The planner comped him a dinner seat and recorded both edits.
+    const plan = { ...base, guests: { ...base.guests } };
+    plan.guests[tomas.id] = {
+      ...tomas, ticketType: "comp", hasDinner: true, editedFields: ["ticketType", "hasDinner"],
+    };
+    const merged = mergeGuestsIntoPlan(plan, first.guests).plan;
+    eq(merged.guests[tomas.id].ticketType, "comp", "the correction stuck");
+    eq(merged.guests[tomas.id].hasDinner, true);
+    deepEq(merged.guests[tomas.id].editedFields, ["ticketType", "hasDinner"], "and is remembered for next time");
+
+    // Only what was recorded is protected.
+    const partial = { ...base, guests: { ...base.guests } };
+    partial.guests[tomas.id] = { ...tomas, ticketType: "comp", hasDinner: true, editedFields: ["ticketType"] };
+    const merged2 = mergeGuestsIntoPlan(partial, first.guests).plan;
+    eq(merged2.guests[tomas.id].ticketType, "comp");
+    eq(merged2.guests[tomas.id].hasDinner, false, "hasDinner was not listed, so the sheet wins");
+  });
+
+  it("protects an entrée listed in editedFields even from a real sheet answer", () => {
+    const first = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    const base = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), first.guests).plan;
+    const ana = Object.values(base.guests).find((g) => g.name === "Ana Perez");
+    const plan = { ...base, guests: { ...base.guests } };
+    plan.guests[ana.id] = { ...ana, meal: "ravioli", mealRaw: "Allergy, swapped by phone", editedFields: ["meal"] };
+
+    const rows = mealRows();
+    rows[1][5] = WHITEFISH;
+    const merged = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: rows }).guests).plan;
+    eq(merged.guests[ana.id].meal, "ravioli", "the planner outranks the form once they have said so");
+    eq(merged.guests[ana.id].mealRaw, "Allergy, swapped by phone", "and the note that goes with it");
+  });
+
+  it("does not mutate the plan it was given", () => {
+    const first = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    const plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), first.guests).plan;
+    const before = JSON.stringify(plan);
+    mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() }).guests);
+    eq(JSON.stringify(plan), before);
+  });
+});
+
+/* ------------------------------------------------------------------ *
  * preferences
  * ------------------------------------------------------------------ */
 
