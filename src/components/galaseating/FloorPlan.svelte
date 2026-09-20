@@ -10,7 +10,7 @@
 -->
 <script>
   import { getContext, onMount } from "svelte";
-  import { ROOM, SEAT_R } from "../../lib/galaSeating/model.js";
+  import { ROOM, SEAT_R, TABLE_R } from "../../lib/galaSeating/model.js";
   import TableNode from "./TableNode.svelte";
 
   const { store, ui } = getContext("gala-seating");
@@ -31,6 +31,14 @@
    * opens its roster, where every chair is a full-width row.
    */
   const SEAT_TAP_PX = 32;
+  /**
+   * A table drawn smaller than this cannot carry its own number and its "7/10"
+   * legibly, whatever we do with the type. A portrait phone is too narrow to
+   * show all 1800 units of room at that size, so the opening view comes in
+   * until the tables can be read and lets the room run off the sides. "Fit" is
+   * one tap away; an unreadable room is not.
+   */
+  const LEGIBLE_TABLE_PX = 34;
 
   let settled = false;
   let hostEl = $state(null);
@@ -103,15 +111,33 @@
   const dragOver = $derived(ui.drag?.over || null);
 
   // ---------- view helpers -------------------------------------------------
-  function fit() {
+  /**
+   * @param {{whole?: boolean}} [opts] `whole: true` is the Fit button: show
+   *   every table however small. The opening view instead prefers legibility.
+   */
+  function fit(opts = {}) {
     const r = ui.floorRect();
     if (!r.width || !r.height) return;
     // Phones get a tighter margin so the whole room fits a 360px-wide screen.
     const pad = r.width < 640 ? 10 : 36;
-    const k = Math.min((r.width - pad * 2) / room.width, (r.height - pad * 2) / room.height);
-    view.k = Math.max(MIN_K, Math.min(MAX_K, k));
-    view.x = (r.width - room.width * view.k) / 2;
-    view.y = (r.height - room.height * view.k) / 2;
+    const whole = Math.min((r.width - pad * 2) / room.width, (r.height - pad * 2) / room.height);
+    let k = Math.max(MIN_K, Math.min(MAX_K, whole));
+    let anchorFront = false;
+
+    if (mobile && !opts.whole && TABLE_R * 2 * k < LEGIBLE_TABLE_PX) {
+      // A portrait phone cannot show the whole room AND readable tables. Show
+      // readable tables: the room runs off the sides and the planner drags it,
+      // which is a normal map gesture, where squinting at a 6px table number
+      // is not.
+      k = Math.max(k, Math.min(MAX_K, LEGIBLE_TABLE_PX / (TABLE_R * 2)));
+      anchorFront = true;
+    }
+
+    view.k = k;
+    view.x = (r.width - room.width * k) / 2;
+    // Anchored on the front of the room, so the slack ends up at the bottom
+    // where the floating controls and the toast lane already live.
+    view.y = anchorFront ? pad : (r.height - room.height * k) / 2;
   }
 
   function zoomBy(factor, cx = null, cy = null) {
@@ -573,10 +599,10 @@
     return map;
   });
 
+  /** The Fit button: the whole room, every table, however small. */
   export function fitRoom() {
-    settled = false;
-    fit();
     settled = true;
+    fit({ whole: true });
   }
 
 </script>

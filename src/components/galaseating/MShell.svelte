@@ -22,6 +22,7 @@
   import { tableLabel } from "../../lib/galaSeating/model.js";
   import { bestSeatFor, unseatedDinnerCount } from "../../lib/galaSeating/seatHelpers.js";
   import { createMobileNav } from "./mobileNav.svelte.js";
+  import { bindVisualViewport, resetPageZoom } from "./viewport.js";
 
   import FloorPlan from "./FloorPlan.svelte";
   import MTopBar from "./MTopBar.svelte";
@@ -78,27 +79,13 @@
     }`;
   });
 
-  // ---- the visible viewport ------------------------------------------------
-  // iOS Safari has two viewports and they disagree whenever the toolbar
-  // collapses or the keyboard is up. Everything in here is measured against the
-  // one the planner can actually see.
-  function syncViewport() {
-    if (!rootEl) return;
-    const vv = window.visualViewport;
-    const h = Math.round(vv?.height || window.innerHeight || 0);
-    const offset = Math.round(vv?.offsetTop || 0);
-    rootEl.style.setProperty("--m-vh", `${h}px`);
-    rootEl.style.setProperty("--m-top", `${offset}px`);
-  }
-
   onMount(() => {
-    syncViewport();
+    // The shell is sized to the VISIBLE viewport, not the layout viewport, and
+    // it publishes --m-vh / --m-top for every surface inside it. If the gate
+    // handed over while the page was still magnified, snap back first.
+    resetPageZoom();
+    const stopViewport = bindVisualViewport(rootEl);
     const stopNav = nav.start();
-    const vv = window.visualViewport;
-    window.addEventListener("resize", syncViewport);
-    window.addEventListener("orientationchange", syncViewport);
-    vv?.addEventListener("resize", syncViewport);
-    vv?.addEventListener("scroll", syncViewport);
 
     // Every path that used to set `openGuestId` now pushes a surface onto the
     // navigation stack, so the floor plan, the warnings list and the collision
@@ -125,10 +112,7 @@
 
     return () => {
       stopNav();
-      window.removeEventListener("resize", syncViewport);
-      window.removeEventListener("orientationchange", syncViewport);
-      vv?.removeEventListener("resize", syncViewport);
-      vv?.removeEventListener("scroll", syncViewport);
+      stopViewport();
       ui.setRouter(null);
     };
   });
@@ -362,6 +346,12 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+  }
+  /* Keyboard up: the A to Z rail has nowhere near enough height left for 26
+     letters and collapses into an illegible smear. It is a shortcut, not a
+     control, so it steps out until the keyboard does. */
+  .m-root[data-keyboard="on"] :global(.mgl-rail) {
+    display: none;
   }
   .m-main {
     flex: 1 1 auto;

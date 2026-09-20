@@ -16,6 +16,7 @@
 -->
 <script>
   import { onMount } from "svelte";
+  import { isCoarsePointer, settleViewport } from "./viewport.js";
   import {
     createRemote,
     DEFAULT_SLUG,
@@ -68,7 +69,11 @@
     }
 
     state = "idle";
-    queueMicrotask(() => (saved && !name.trim() ? nameInput : passInput)?.focus());
+    // Never on a touch device. An unasked-for keyboard covers half the gate the
+    // instant it loads, and on iOS it used to take the page with it.
+    if (!isCoarsePointer()) {
+      queueMicrotask(() => (saved && !name.trim() ? nameInput : passInput)?.focus());
+    }
   });
 
   /** @returns {Promise<boolean>} true when the gate opened. */
@@ -82,6 +87,12 @@
     if (res.ok) {
       rememberPasscode(candidate, persist);
       rememberEditor(editor);
+      // Put the keyboard away, undo any scroll or zoom, and only then hand over.
+      // The app mounts into a fixed, viewport-sized shell; if the page were
+      // still magnified or scrolled when it appeared, every fixed element in it
+      // would be offset and the planner's first impression would be a broken
+      // layout.
+      settleViewport();
       onunlock({ remote, editor });
       return true;
     }
@@ -120,6 +131,7 @@
   }
 
   function workOffline() {
+    settleViewport();
     onunlock({ remote: null, editor: name.trim().slice(0, 60) || "This device" });
   }
 </script>
@@ -137,6 +149,7 @@
           autocapitalize="off"
           autocorrect="off"
           spellcheck="false"
+          enterkeyhint="next"
           bind:value={pass}
           bind:this={passInput}
           disabled={busy}
@@ -162,8 +175,18 @@
         class="gg-input"
         type="text"
         autocomplete="name"
+        autocapitalize="words"
+        autocorrect="off"
+        spellcheck="false"
+        enterkeyhint="go"
         placeholder="So the team sees who moved a table"
         maxlength="60"
+        onkeydown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            submit(e);
+          }
+        }}
         bind:value={name}
         bind:this={nameInput}
         disabled={busy}

@@ -26,6 +26,7 @@
   import Toasts from "./Toasts.svelte";
   import ConfirmDialog from "./ConfirmDialog.svelte";
   import MShell from "./MShell.svelte";
+  import { bindVisualViewport, settleViewport } from "./viewport.js";
 
   const store = createSeatingStore();
   const ui = createUiState(store);
@@ -49,6 +50,14 @@
 
   let unlocked = $state(false);
   let gateChecked = $state(false);
+  let gateEl = $state(null);
+
+  // The gate is sized to the visible viewport, exactly like the app shell.
+  $effect(() => {
+    const el = gateEl;
+    if (!el || unlocked) return;
+    return bindVisualViewport(el);
+  });
   // Development builds only: `?plan=sandbox-abc` points the page at a rehearsal plan so realtime can be
   // tested without touching the real one. Read synchronously, because the gate tries a remembered
   // passcode as soon as it mounts. The DEV guard strips this from production.
@@ -65,12 +74,16 @@
   function handleUnlock(detail) {
     const remote = detail?.remote || null;
     const editor = detail?.editor || "";
+    // Belt and braces with the gate's own call: keyboard away, page at 0,0,
+    // zoom back at 1, before the fixed app shell measures anything.
+    settleViewport();
     unlocked = true;
     if (remote) store.attachRemote(remote, editor);
     else store.startLocalOnly();
   }
 
   function workLocally() {
+    settleViewport();
     store.startLocalOnly();
     unlocked = true;
   }
@@ -161,7 +174,13 @@
   <div class="gs-lattice gala-lattice" aria-hidden="true"></div>
 
   {#if !unlocked}
-    <div class="gs-gatewrap">
+    <!--
+      The gate lives in the same fixed, visible-viewport-sized shell as the app.
+      When the keyboard comes up the shell shortens instead of the document
+      scrolling, and the intro and the footnotes fold away so the title, the
+      field being typed in and Unlock all stay on screen.
+    -->
+    <div class="gs-gatewrap" bind:this={gateEl}>
       <div class="gs-gatecard">
         <p class="gs-eyebrow">The Latina Sweat Project</p>
         <h1 class="gs-gatetitle">Gala <span class="gala-foil">Seating</span></h1>
@@ -305,6 +324,53 @@
     min-height: 100vh;
     min-height: 100dvh;
     padding: 24px 16px;
+  }
+  /*
+   * Phones and tablets: the gate is pinned to the VISIBLE viewport, so the
+   * document never scrolls and the card never jumps under the status bar when
+   * the keyboard opens. Only the card area scrolls, and only if it has to.
+   */
+  @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+    .gs-gatewrap {
+      position: fixed;
+      top: var(--m-top, 0px);
+      left: 0;
+      right: 0;
+      height: 100dvh;
+      height: var(--m-vh, 100dvh);
+      min-height: 0;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      padding-top: calc(12px + env(safe-area-inset-top));
+      overflow: hidden;
+      z-index: 5;
+    }
+    .gs-gatecard {
+      max-height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding: 22px 18px 20px;
+    }
+    .gs-gatetitle {
+      font-size: 32px;
+    }
+    /* Keyboard up: fold away everything that is not the question being asked. */
+    .gs-gatewrap[data-keyboard="on"] .gs-eyebrow,
+    .gs-gatewrap[data-keyboard="on"] .gs-gatesub,
+    .gs-gatewrap[data-keyboard="on"] .gs-gatefoot,
+    .gs-gatewrap[data-keyboard="on"] .gs-privacy {
+      display: none;
+    }
+    .gs-gatewrap[data-keyboard="on"] .gs-gatecard {
+      padding-top: 14px;
+    }
+    .gs-gatewrap[data-keyboard="on"] .gs-gatetitle {
+      font-size: 24px;
+      margin: 0 0 8px;
+    }
+    .gs-gatewrap[data-keyboard="on"] .gs-gateslot {
+      margin-top: 0.75rem;
+    }
   }
   .gs-gatecard {
     width: 100%;
