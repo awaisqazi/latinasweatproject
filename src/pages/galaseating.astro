@@ -25,6 +25,19 @@ import GalaSeatingApp from "@/components/galaseating/GalaSeatingApp.svelte";
   <Fragment slot="head">
     <meta name="theme-color" content="#0B1320" />
     <meta name="referrer" content="same-origin" />
+    <!-- iPhone and iPad only: stop Safari magnifying the page every time a field is focused.
+         iOS ignores maximum-scale for a planner's own pinch gesture, so manual zoom (an
+         accessibility feature) still works; it only switches off the automatic focus zoom.
+         Not applied on Android or desktop, where it WOULD block pinch zoom. Runs before paint. -->
+    <script is:inline>
+      (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        if (!ios) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      })();
+    </script>
     <style is:inline>
       /* The planner owns the viewport: no page scroll, no rubber banding. */
       html,

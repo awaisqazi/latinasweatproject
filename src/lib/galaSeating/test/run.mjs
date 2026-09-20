@@ -1436,7 +1436,7 @@ describe("rankTables", () => {
     const front = ranked.slice(0, 2).map((r) => numberOf(r.tableId)).sort((a, b) => a - b);
     deepEq(front, [2, 3], "tables 2 and 3 flank the dance floor");
     const back = numberOf(ranked[ranked.length - 1].tableId);
-    ok([1, 4, 5, 8, 9, 13].includes(back), `the worst table is an outside one, got ${back}`);
+    ok([1, 4, 5, 8, 9, 13, 14, 15].includes(back), `the worst table is an outside or rearmost one, got ${back}`);
   });
 
   it("breaks an exact tie on table number", () => {

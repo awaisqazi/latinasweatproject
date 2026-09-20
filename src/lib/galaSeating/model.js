@@ -9,10 +9,10 @@ export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY = "lsp.galaSeating.v1";
 export const BACKUPS_KEY = "lsp.galaSeating.v1.backups";
 export const SEATS_PER_TABLE = 10;
-export const DEFAULT_TABLE_COUNT = 13;
+export const DEFAULT_TABLE_COUNT = 15;
 
 /** Room coordinate space (arbitrary units, rendered with a viewBox and pan/zoom). */
-export const ROOM = { width: 1800, height: 1060 };
+export const ROOM = { width: 1800, height: 1340 };
 /** Table disc radius, and the radius of the ring the seats sit on. */
 export const TABLE_R = 68;
 export const SEAT_RING_R = 104;
@@ -148,18 +148,22 @@ export function defaultFixtures() {
   ];
 }
 
-/** Slots for the default rounds: two columns flanking the dance floor on each side, five across the back. */
+/** Slots for the default rounds: two columns flanking the dance floor on each side, five across the
+ *  back, and two more staggered behind them. */
 const TABLE_SPOTS = [
   [190, 300], [470, 300], [1330, 300], [1610, 300],
   [190, 590], [470, 590], [1330, 590], [1610, 590],
   [250, 890], [575, 890], [900, 890], [1225, 890], [1550, 890],
+  [737, 1180], [1062, 1180],
 ];
 
-/** Where table number `index + 1` sits by default. Tables past the 13 slots start a new back row. */
+/** Where table number `index + 1` sits by default. Tables past the 15 slots continue the back rows. */
 export function defaultTableSpot(index) {
   if (TABLE_SPOTS[index]) return TABLE_SPOTS[index];
   const k = index - TABLE_SPOTS.length;
-  return [250 + (k % 5) * 325, 1180 + Math.floor(k / 5) * 290];
+  const extra = [[412, 1180], [1387, 1180], [1712, 1180]];
+  if (extra[k]) return extra[k];
+  return [250 + ((k - extra.length) % 5) * 325, 1470 + Math.floor((k - extra.length) / 5) * 290];
 }
 
 export function defaultTables(count = DEFAULT_TABLE_COUNT) {
