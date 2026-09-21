@@ -156,6 +156,84 @@ export const galaEvening = [
   },
 ];
 
+// Brands featured in the gala fashion show. Single source of truth for the
+// runway lineup on /gala. Logos live in /public/images/gala/fashion/.
+// `tile` picks the card treatment: 'light' = cream garment tag (dark artwork),
+// 'dark' = off-black tag with a gold hairline (white artwork). `url` (primary
+// link for the whole tag) and `socials` ([{ type: 'website' | 'instagram' |
+// 'tiktok' | 'facebook', url }]) are optional; only set them when the link is
+// confirmed to be this brand. Keep this to names, logos, and links only: we do
+// not publish descriptions, locations, or other claims about these brands.
+export const galaFashionShow = {
+  eyebrow: "The Fashion Show",
+  heading: "On the runway.",
+  body: "Six brands take the runway at the Annual Gala fashion show.",
+  brands: [
+    {
+      name: "Sosa",
+      logo: "sosa.png",
+      tile: "light",
+      url: "https://sosacollective.com/",
+      socials: [
+        { type: "website", url: "https://sosacollective.com/" },
+        { type: "instagram", url: "https://www.instagram.com/sosa_collective/" },
+      ],
+    },
+    {
+      name: "@dennise._.dennise",
+      logo: "monogram-cactus.webp",
+      tile: "light",
+      url: "https://www.instagram.com/dennise._.dennise/",
+      socials: [
+        { type: "instagram", url: "https://www.instagram.com/dennise._.dennise/" },
+      ],
+    },
+    {
+      name: "Gente Fina",
+      logo: "gente-fina.webp",
+      tile: "light",
+      url: "https://gente-fina.com/",
+      socials: [
+        { type: "website", url: "https://gente-fina.com/" },
+        { type: "instagram", url: "https://www.instagram.com/gentefinachi/" },
+        { type: "tiktok", url: "https://www.tiktok.com/@gentefinachi" },
+        { type: "facebook", url: "https://www.facebook.com/GenteFinaChi/" },
+      ],
+    },
+    {
+      name: "Fiera",
+      logo: "fiera.webp",
+      tile: "light",
+      url: "https://www.instagram.com/fiera_fiera_fiera/",
+      socials: [
+        { type: "instagram", url: "https://www.instagram.com/fiera_fiera_fiera/" },
+      ],
+    },
+    {
+      name: "Definitive Selection",
+      logo: "definitive-selection.png",
+      tile: "light",
+      url: "https://definitiveselection.com/",
+      socials: [
+        { type: "website", url: "https://definitiveselection.com/" },
+        { type: "instagram", url: "https://www.instagram.com/definitiveselection/" },
+        { type: "facebook", url: "https://www.facebook.com/definitive.selection" },
+      ],
+    },
+    {
+      name: "We Will Win",
+      logo: "we-will-win.png",
+      tile: "dark",
+      url: "https://wewillwin3w.com/",
+      socials: [
+        { type: "website", url: "https://wewillwin3w.com/" },
+        { type: "instagram", url: "https://www.instagram.com/3wwewillwin/" },
+        { type: "facebook", url: "https://www.facebook.com/@3wwewillwin" },
+      ],
+    },
+  ],
+};
+
 export const galaDetails = [
   {
     label: "When",
