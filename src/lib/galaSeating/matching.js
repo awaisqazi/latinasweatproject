@@ -370,6 +370,12 @@ export function parseTickets(values) {
   return out;
 }
 
+/** A placeholder-style name that does not identify one person: "Guest of CPA", "Guest", "+1". */
+export function isGenericGuestName(name) {
+  const n = normName(name);
+  return /^(guest|guests|plus one|plus 1|tbd|tba|companion|date)( |$)/.test(n) || /^\+ ?1\b/.test(String(name || "").trim());
+}
+
 /**
  * Dinner-form responses -> response objects, deduped by normalized guest name with the
  * latest Timestamp winning. `rawCount` carries the pre-dedupe count.
@@ -420,10 +426,24 @@ export function parseResponses(values) {
   }
 
   // Dedupe: same normalized guest name -> latest timestamp (then latest row) wins.
+  // EXCEPT generic names ("Guest of CPA", "Guest", "Plus one", "+1", "TBD"): two rows that read
+  // "Guest of CPA" are usually two different people, so every such row is kept, and repeats get a
+  // numbered display name ("Guest of CPA (2)") so planners can tell them apart.
   const byName = new Map();
   const keepBlank = [];
+  const genericSeen = new Map();
   for (const resp of all) {
     if (!resp.guestNorm) { keepBlank.push(resp); continue; }
+    if (isGenericGuestName(resp.guestName)) {
+      const n = (genericSeen.get(resp.guestNorm) || 0) + 1;
+      genericSeen.set(resp.guestNorm, n);
+      if (n > 1) {
+        resp.guestName = `${resp.guestName} (${n})`;
+        resp.guestNorm = normName(resp.guestName);
+      }
+      keepBlank.push(resp);
+      continue;
+    }
     const existing = byName.get(resp.guestNorm);
     if (!existing) { byName.set(resp.guestNorm, resp); continue; }
     const newer = resp.time > existing.time || (resp.time === existing.time && resp.order > existing.order);

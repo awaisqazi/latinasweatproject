@@ -8,7 +8,8 @@ import {
   ROOM, emptyPrefs, guestList, SEATS_PER_TABLE, DEFAULT_TABLE_COUNT,
 } from "../model.js";
 import {
-  normName, namesMatch, parseTickets, parseResponses, matchSelections, stableId,
+  normName, namesMatch, parseTickets, parseResponses,
+  isGenericGuestName, matchSelections, stableId,
   repairMojibake,
 } from "../matching.js";
 import { buildGuestsFromRows, mergeGuestsIntoPlan } from "../importers.js";
@@ -1842,6 +1843,24 @@ describe("exporters", () => {
     deepEq(errors, []);
     deepEq(back.seating, seated.plan.seating, "every seat survived the round trip");
     eq(guestList(back).length, guestList(seated.plan).length);
+  });
+});
+
+describe("generic guest names are never merged", () => {
+  it("keeps two 'Guest of' rows as two people and numbers the second", () => {
+    const rows = [
+      ["Timestamp", "Guest Name", "Purchaser’s name", "Email address", "Phone number", "Dinner selection"],
+      ["2026-09-20 19:49", "Guest of Pat Lee", "Pat Lee", "pat@example.com", "555", "Cherry Braised Short Rib"],
+      ["2026-09-20 19:50", "Guest of Pat Lee", "Pat Lee", "pat@example.com", "555", "Whitefish à la Plancha"],
+      ["2026-09-20 19:51", "Ana Ruiz", "Pat Lee", "ana@example.com", "556", "Cherry Braised Short Rib"],
+      ["2026-09-20 19:52", "Ana Ruiz", "Pat Lee", "ana@example.com", "556", "Asparagus Artichoke Ravioli (V)"],
+    ];
+    const out = parseResponses(rows);
+    eq(out.rawCount, 4);
+    eq(out.responses.length, 3, "two Guest-of rows kept, the named repeat merged");
+    deepEq(out.responses.map((r) => r.guestName).sort(), ["Ana Ruiz", "Guest of Pat Lee", "Guest of Pat Lee (2)"]);
+    eq(out.responses.find((r) => r.guestName === "Ana Ruiz").selection, "Asparagus Artichoke Ravioli (V)", "a named repeat still takes the latest answer");
+    ok(isGenericGuestName("Guest of CPA") && isGenericGuestName("+1") && isGenericGuestName("Plus one") && !isGenericGuestName("Guestina Ortiz"), "generic-name detection");
   });
 });
 
