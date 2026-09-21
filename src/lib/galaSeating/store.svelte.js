@@ -868,7 +868,9 @@ export function createSeatingStore() {
     const fresh = defaultTables(Math.max(plan.tables.length, 1));
     const ops = [];
     const inverse = [];
-    plan.tables.forEach((t, i) => {
+    // Spots go out in TABLE NUMBER order (Table 1 takes the first spot), not array order, so a
+    // room that was renumbered by position resets to the same sensible arrangement.
+    [...plan.tables].sort((a, b) => a.number - b.number).forEach((t, i) => {
       const spot = fresh[i];
       if (!spot || (t.x === spot.x && t.y === spot.y)) return;
       ops.push({ op: "item_patch", coll: "tables", id: t.id, patch: { x: spot.x, y: spot.y } });

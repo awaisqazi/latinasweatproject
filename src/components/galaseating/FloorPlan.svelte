@@ -58,8 +58,11 @@
    * alone, it is the model's fixed room size.
    */
   const room = $derived.by(() => {
-    let w = baseRoom.width;
-    let h = baseRoom.height;
+    // The wall hugs what is in the room (a long hall should read as a long hall), and only
+    // falls back to the model's room size when the floor is empty.
+    const empty = plan.tables.length === 0 && plan.fixtures.length === 0;
+    let w = empty ? baseRoom.width : 0;
+    let h = empty ? baseRoom.height : 0;
     for (const t of plan.tables) {
       w = Math.max(w, t.x + 190);
       h = Math.max(h, t.y + 190);

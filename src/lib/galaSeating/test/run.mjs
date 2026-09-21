@@ -4,7 +4,8 @@
 // never enters the repo, not in fixtures, not in comments, not in output.
 
 import {
-  createDefaultPlan, emptyPrefs, guestList, SEATS_PER_TABLE, DEFAULT_TABLE_COUNT,
+  createDefaultPlan,
+  ROOM, emptyPrefs, guestList, SEATS_PER_TABLE, DEFAULT_TABLE_COUNT,
 } from "../model.js";
 import {
   normName, namesMatch, parseTickets, parseResponses, matchSelections, stableId,
@@ -1425,18 +1426,19 @@ describe("autoSeat", () => {
  * ------------------------------------------------------------------ */
 
 describe("rankTables", () => {
-  it("ranks the default room by closeness to the dance floor and the podium", () => {
+  it("ranks the default room by closeness to the podium", () => {
     const plan = createDefaultPlan();
     const ranked = rankTables(plan);
     eq(ranked.length, plan.tables.length);
     deepEq(ranked.map((r) => r.rank), ranked.map((_, i) => i + 1), "ranks run 1..n with no gaps");
     ok(ranked.every((r, i) => i === 0 || r.score >= ranked[i - 1].score), "scores never go backwards");
     const numberOf = (tableId) => plan.tables.find((t) => t.id === tableId).number;
-    // The two columns hugging the dance floor beat the far outside columns.
+    // The default room is a long hall: two rows, the podium in a gap in the front row. The two
+    // front-row tables flanking the podium beat everything, and a far corner comes last.
     const front = ranked.slice(0, 2).map((r) => numberOf(r.tableId)).sort((a, b) => a - b);
-    deepEq(front, [2, 3], "tables 2 and 3 flank the dance floor");
+    deepEq(front, [3, 4], "tables 3 and 4 flank the podium");
     const back = numberOf(ranked[ranked.length - 1].tableId);
-    ok([1, 4, 5, 8, 9, 13, 14, 15].includes(back), `the worst table is an outside or rearmost one, got ${back}`);
+    ok([1, 7, 8, 15].includes(back), `the worst table is a far corner, got ${back}`);
   });
 
   it("breaks an exact tie on table number", () => {
@@ -1449,8 +1451,16 @@ describe("rankTables", () => {
           "the lower table number comes first");
       }
     }
-    // The default room is symmetric, so there is at least one exact tie to check.
-    ok(ranked.some((r, i) => i > 0 && r.score === ranked[i - 1].score), "the symmetric room does tie");
+    // Force an exact tie: two tables mirrored around a centred podium.
+    const tied = createDefaultPlan();
+    tied.fixtures = [{ id: "podium", type: "podium", label: "", x: tied.room.width / 2, y: 100, w: 190, h: 64 }];
+    tied.tables = [
+      { id: "right", number: 2, name: "", x: tied.room.width / 2 + 300, y: 300, seats: 10, locked: false, note: "" },
+      { id: "left", number: 1, name: "", x: tied.room.width / 2 - 300, y: 300, seats: 10, locked: false, note: "" },
+    ];
+    const tr = rankTables(tied);
+    eq(tr[0].score, tr[1].score, "mirrored tables tie exactly");
+    eq(tr[0].tableId, "left", "the lower table number wins the tie");
   });
 
   it("measures to the nearest edge of the dance floor, not its centre", () => {
@@ -1488,6 +1498,8 @@ describe("rankTables", () => {
 
   it("re-ranks when the planner moves the dance floor", () => {
     const plan = createDefaultPlan();
+    // The default hall has no dance floor, so give this room one at the front first.
+    plan.fixtures = [...plan.fixtures, { id: "dancefloor", type: "dancefloor", label: "", x: plan.room.width / 2, y: 120, w: 400, h: 200 }];
     const before = rankTables(plan)[0].tableId;
     const moved = {
       ...plan,
@@ -1761,7 +1773,7 @@ describe("exporters", () => {
     deepEq(fixed.guests[ana.id].tags, [], "tags became an array again");
     eq(fixed.guests[ana.id].meal, null, "an unknown entrée became 'not chosen'");
     deepEq(fixed.constraints, [], "a rule about guests who are gone was dropped");
-    eq(fixed.room.width, 1800);
+    eq(fixed.room.width, ROOM.width);
     ok(fixed.meta.name);
   });
 

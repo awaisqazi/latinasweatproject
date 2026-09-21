@@ -12,7 +12,7 @@ export const SEATS_PER_TABLE = 10;
 export const DEFAULT_TABLE_COUNT = 15;
 
 /** Room coordinate space (arbitrary units, rendered with a viewBox and pan/zoom). */
-export const ROOM = { width: 1800, height: 1340 };
+export const ROOM = { width: 2430, height: 830 };
 /** Table disc radius, and the radius of the ring the seats sit on. */
 export const TABLE_R = 68;
 export const SEAT_RING_R = 104;
@@ -141,29 +141,31 @@ export function emptyPrefs() {
   return { status: "none", withGuestIds: [], withPartyIds: [], groups: [], unresolved: [] };
 }
 
+/** Column centres shared by both rows of the corridor, left to right. */
+const SLOT_X = [200, 490, 780, 1070, 1360, 1650, 1940, 2230];
+const FRONT_Y = 300;
+const BACK_Y = 640;
+/** The front row leaves this column open for the podium. */
+const PODIUM_SLOT = 3;
+
+// The dinner is in the museum's long central hall, which is wider than it is deep: two rows of
+// tables, eight across the back and seven across the front with a gap in the middle for the
+// podium. There is no dance floor in this room (dancing is in a separate space).
 export function defaultFixtures() {
-  return [
-    { id: "podium", type: "podium", label: "Podium", x: 900, y: 84, w: 190, h: 64 },
-    { id: "dancefloor", type: "dancefloor", label: "Dance floor", x: 900, y: 430, w: 470, h: 430 },
-  ];
+  return [{ id: "podium", type: "podium", label: "Podium", x: SLOT_X[PODIUM_SLOT], y: FRONT_Y, w: 190, h: 64 }];
 }
 
-/** Slots for the default rounds: two columns flanking the dance floor on each side, five across the
- *  back, and two more staggered behind them. */
+/** Tables 1 to 7 run along the front row (skipping the podium column), 8 to 15 along the back row. */
 const TABLE_SPOTS = [
-  [190, 300], [470, 300], [1330, 300], [1610, 300],
-  [190, 590], [470, 590], [1330, 590], [1610, 590],
-  [250, 890], [575, 890], [900, 890], [1225, 890], [1550, 890],
-  [737, 1180], [1062, 1180],
+  ...SLOT_X.filter((_, i) => i !== PODIUM_SLOT).map((x) => [x, FRONT_Y]),
+  ...SLOT_X.map((x) => [x, BACK_Y]),
 ];
 
-/** Where table number `index + 1` sits by default. Tables past the 15 slots continue the back rows. */
+/** Where table number `index + 1` sits by default. Tables past the 15 slots start a third row. */
 export function defaultTableSpot(index) {
   if (TABLE_SPOTS[index]) return TABLE_SPOTS[index];
   const k = index - TABLE_SPOTS.length;
-  const extra = [[412, 1180], [1387, 1180], [1712, 1180]];
-  if (extra[k]) return extra[k];
-  return [250 + ((k - extra.length) % 5) * 325, 1470 + Math.floor((k - extra.length) / 5) * 290];
+  return [SLOT_X[k % SLOT_X.length], BACK_Y + 340 * (1 + Math.floor(k / SLOT_X.length))];
 }
 
 export function defaultTables(count = DEFAULT_TABLE_COUNT) {
