@@ -158,7 +158,7 @@ export const galaEvening = [
 
 // Brands featured in the gala fashion show. Single source of truth for the
 // runway lineup on /gala. Logos live in /public/images/gala/fashion/.
-// `tile` picks the card treatment: 'light' = cream garment tag (dark artwork),
+// `tile` picks the card treatment: 'light' = white garment tag (dark artwork),
 // 'dark' = off-black tag with a gold hairline (white artwork). `url` (primary
 // link for the whole tag) and `socials` ([{ type: 'website' | 'instagram' |
 // 'tiktok' | 'facebook', url }]) are optional; only set them when the link is
