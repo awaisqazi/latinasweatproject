@@ -26,6 +26,8 @@
     locate = null,
     dim = false,
     reducedMotion = false,
+    /** Current view scale, so the centre plate can stay readable when zoomed out. */
+    k = 1,
     onseat = () => {},
     ontable = () => {},
     onseatkeydown = () => {},
@@ -53,6 +55,40 @@
   const free = $derived(table.seats - filled);
   const isTarget = $derived(Boolean(dragOver));
   const locatedHere = $derived(locate?.tableId === table.id);
+
+  /*
+   * The centre plate, drawn at a size a person can read.
+   *
+   * Everything on the floor is in room units and scales with the view, which is
+   * right for the furniture and wrong for the label: zoomed out to see the
+   * whole room, a 30-unit number renders at six pixels. The number is given a
+   * floor in SCREEN pixels and converted back into room units, so it grows as
+   * the room shrinks and is untouched at any normal working zoom.
+   */
+  const unit = $derived(1 / Math.max(k, 0.01));
+  /** Screen size of the number: never below 12.5px, never above its natural 30. */
+  const numPx = $derived(Math.min(30, Math.max(12.5, 30 * k)));
+  /**
+   * "7/10" is five characters; below about five pixels a character it is noise
+   * inside a small disc, and no amount of scaling fits it there. At that point
+   * the rim arc carries how full the table is, which reads at any size.
+   */
+  const countIsLegible = $derived(12 * k >= 5);
+  const fillArc = $derived.by(() => {
+    if (countIsLegible || !table.seats) return null;
+    const r = TABLE_R - 6;
+    const frac = Math.max(0, Math.min(1, filled / table.seats));
+    if (frac <= 0) return { path: "", frac: 0, r };
+    if (frac >= 1) return { path: "full", frac: 1, r };
+    const a0 = -Math.PI / 2;
+    const a1 = a0 + frac * Math.PI * 2;
+    const x0 = table.x + Math.cos(a0) * r;
+    const y0 = table.y + Math.sin(a0) * r;
+    const x1 = table.x + Math.cos(a1) * r;
+    const y1 = table.y + Math.sin(a1) * r;
+    const large = frac > 0.5 ? 1 : 0;
+    return { path: `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`, frac, r };
+  });
 
   function initials(name) {
     const parts = String(name || "")
@@ -208,11 +244,42 @@
     >
       <circle class="tn-linen" cx={table.x} cy={table.y} r={TABLE_R} />
       <circle class="tn-rim" cx={table.x} cy={table.y} r={TABLE_R - 7} />
-      <text class="tn-num" x={table.x} y={table.y - (table.name ? 8 : 2)}>{table.number}</text>
-      {#if table.name}
-        <text class="tn-name" x={table.x} y={table.y + 12}>{table.name.slice(0, 16)}</text>
+
+      {#if countIsLegible}
+        <text class="tn-num" x={table.x} y={table.y - (table.name ? 8 : 2)}>{table.number}</text>
+        {#if table.name}
+          <text class="tn-name" x={table.x} y={table.y + 12}>{table.name.slice(0, 16)}</text>
+        {/if}
+        <text class="tn-count" x={table.x} y={table.y + (table.name ? 28 : 22)}>{filled}/{table.seats}</text>
+      {:else}
+        <!-- Zoomed out: the number, held at a readable size, and a rim gauge
+             instead of a "7/10" too small to be anything but grey mush. -->
+        <text
+          class="tn-num"
+          x={table.x}
+          y={table.y + numPx * 0.34 * unit}
+          style={`font-size:${numPx * unit}px`}>{table.number}</text>
+        {#if fillArc}
+          <circle
+            class="tn-gaugetrack"
+            cx={table.x}
+            cy={table.y}
+            r={fillArc.r}
+            style={`stroke-width:${Math.max(4, 3 * unit)}px`}
+          />
+          {#if fillArc.frac >= 1}
+            <circle
+              class="tn-gauge"
+              cx={table.x}
+              cy={table.y}
+              r={fillArc.r}
+              style={`stroke-width:${Math.max(4, 3 * unit)}px`}
+            />
+          {:else if fillArc.path}
+            <path class="tn-gauge" d={fillArc.path} style={`stroke-width:${Math.max(4, 3 * unit)}px`} />
+          {/if}
+        {/if}
       {/if}
-      <text class="tn-count" x={table.x} y={table.y + (table.name ? 28 : 22)}>{filled}/{table.seats}</text>
       {#if table.locked}
         <path
           class="tn-lock"
@@ -295,6 +362,18 @@
   }
   .tn-lock {
     fill: rgba(90, 100, 115, 0.55);
+    pointer-events: none;
+  }
+  /* The rim gauge: how full this table is, at a size that survives any zoom. */
+  .tn-gaugetrack {
+    fill: none;
+    stroke: rgba(42, 52, 68, 0.18);
+    pointer-events: none;
+  }
+  .tn-gauge {
+    fill: none;
+    stroke: var(--gs-gold);
+    stroke-linecap: round;
     pointer-events: none;
   }
   .tn-badge circle {

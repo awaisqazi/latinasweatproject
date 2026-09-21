@@ -201,7 +201,7 @@
     </div>
   </div>
 
-  <div class="mgl-bodywrap">
+  <div class="mgl-bodywrap" class:mgl-bodywrap--rail={letters.length > 1}>
     <div class="mgl-body gs-scroll" bind:this={bodyEl}>
       {#if !rows.length}
         <p class="mgl-none">No guests match that.</p>
@@ -397,6 +397,7 @@
   }
 
   .mgl-bodywrap {
+    position: relative;
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
@@ -407,6 +408,10 @@
     padding: 0;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
+  }
+  /* Keep the table chip clear of the floating rail. */
+  .mgl-bodywrap--rail .mgl-body {
+    padding-right: 34px;
   }
   .mgl-tailpad {
     height: 24px;
@@ -455,25 +460,39 @@
     color: var(--gs-gold-soft);
   }
 
+  /*
+   * The A to Z rail floats over the right edge rather than taking a column, so
+   * a 56px row keeps its full width. Each letter gets a 44px-wide touch strip
+   * even though the glyph is small.
+   *
+   * The one deliberate exception to the 44px rule: an index of 26 letters
+   * cannot give each one 44px of HEIGHT on any phone, and the same rows are
+   * always reachable by scrolling. This is what iOS's own index bars do.
+   */
   .mgl-rail {
-    flex: 0 0 auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 1px;
-    padding: 4px 1px;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 0;
+    background: linear-gradient(90deg, transparent, rgba(8, 14, 24, 0.75) 40%);
   }
   .mgl-rail button {
-    width: 28px;
+    width: 44px;
     min-height: 0;
-    padding: 1px 0;
+    padding: 2px 8px 2px 0;
     background: none;
     border: none;
     color: var(--gs-gold-soft);
     font: inherit;
     font-size: 11px;
     font-variant-numeric: tabular-nums;
+    text-align: right;
     cursor: pointer;
   }
   .mgl-rail button:active {

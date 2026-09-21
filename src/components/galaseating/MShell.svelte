@@ -380,7 +380,7 @@
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 14px 0 calc(14px + env(safe-area-inset-left));
     border: none;
     border-bottom: 1px solid rgba(228, 201, 138, 0.14);

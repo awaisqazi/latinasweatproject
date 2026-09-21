@@ -66,7 +66,8 @@
       </span>
       <span class="mt-lbl">{item.label}</span>
       {#if n > 0}
-        <span class="mt-badge" data-kind={item.id}>{badgeText(n)}</span>
+        <!-- The number is decoration; the sentence after it is what is read. -->
+        <span class="mt-badge" data-kind={item.id} aria-hidden="true">{badgeText(n)}</span>
         <span class="gs-sr">{n} {item.id === "alerts" ? "to review" : "unseated"}</span>
       {/if}
     </button>

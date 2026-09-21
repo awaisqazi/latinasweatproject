@@ -373,8 +373,11 @@
       padding: 10px 12px 12px;
     }
     .gs-gatewrap[data-keyboard="on"] .gs-gatetitle {
-      font-size: 22px;
-      margin: 0 0 6px;
+      /* Room for the descenders of the italic serif: at 22px with a 6px margin
+         the tail of the "g" was resting on the top edge of the card. */
+      font-size: 21px;
+      line-height: 1.3;
+      margin: 0 0 11px;
     }
     .gs-gatewrap[data-keyboard="on"] .gs-gateslot {
       margin-top: 0;

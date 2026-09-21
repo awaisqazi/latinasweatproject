@@ -10,7 +10,7 @@
 -->
 <script>
   import { getContext, onMount } from "svelte";
-  import { ROOM, SEAT_R, TABLE_R } from "../../lib/galaSeating/model.js";
+  import { ROOM, SEAT_R, SEAT_RING_R, TABLE_R } from "../../lib/galaSeating/model.js";
   import TableNode from "./TableNode.svelte";
 
   const { store, ui } = getContext("gala-seating");
@@ -70,6 +70,33 @@
     }
     return { width: Math.round(w), height: Math.round(h) };
   });
+  /**
+   * What is actually in the room, as opposed to the room rectangle, which is
+   * mostly empty floor along the walls. Fitting to this uses the screen the
+   * planner has instead of framing the skirting board.
+   */
+  const content = $derived.by(() => {
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    const reach = SEAT_RING_R + SEAT_R + 8;
+    for (const t of plan.tables) {
+      x0 = Math.min(x0, t.x - reach);
+      y0 = Math.min(y0, t.y - reach);
+      x1 = Math.max(x1, t.x + reach);
+      y1 = Math.max(y1, t.y + reach);
+    }
+    for (const f of plan.fixtures) {
+      x0 = Math.min(x0, f.x - f.w / 2);
+      y0 = Math.min(y0, f.y - f.h / 2);
+      x1 = Math.max(x1, f.x + f.w / 2);
+      y1 = Math.max(y1, f.y + f.h / 2);
+    }
+    if (!Number.isFinite(x0)) return { x: 0, y: 0, width: room.width, height: room.height };
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+  });
+
   const view = ui.view;
   const showNames = $derived(view.k >= 1.15);
   /** True once a single seat is big enough to aim a thumb at. */
@@ -124,20 +151,29 @@
     let k = Math.max(MIN_K, Math.min(MAX_K, whole));
 
     if (mobile && !opts.whole && TABLE_R * 2 * k < LEGIBLE_TABLE_PX) {
-      // A portrait phone cannot show the whole room AND readable tables. Show
-      // readable tables: the room runs off the sides and the planner drags it,
-      // which is a normal map gesture, where squinting at a 6px table number
-      // is not.
-      k = Math.max(k, Math.min(MAX_K, LEGIBLE_TABLE_PX / (TABLE_R * 2)));
+      // A portrait phone cannot show the whole ROOM RECTANGLE and readable
+      // tables, but most of that rectangle is empty floor. Come in to fill the
+      // screen with what is actually in the room, never past the point where
+      // an outer table would be cut in half: a row of sliced tables along both
+      // edges reads as broken, not as "there is more this way".
+      const fill = Math.min(
+        (r.width - pad * 2) / Math.max(1, content.width),
+        (r.height - pad * 2) / Math.max(1, content.height),
+      );
+      k = Math.max(k, Math.min(MAX_K, LEGIBLE_TABLE_PX / (TABLE_R * 2), fill));
     }
 
+    // Frame the room rectangle at the whole-room zoom, and the contents of the
+    // room once we have come in past it: at that point the walls are off screen
+    // anyway and the tables are what wants centring.
+    const box = k > whole + 0.0001 ? content : { x: 0, y: 0, width: room.width, height: room.height };
     view.k = k;
-    view.x = (r.width - room.width * k) / 2;
-    // Centred when the room still fits top to bottom, which it usually does on
-    // a portrait phone even after coming in. When it does not, anchor the front
-    // of the room: the podium is the landmark everything else is read against.
-    const fitsVertically = room.height * k <= r.height - pad * 2;
-    view.y = fitsVertically ? (r.height - room.height * k) / 2 : pad;
+    view.x = (r.width - box.width * k) / 2 - box.x * k;
+    // Centred when it still fits top to bottom, which it usually does on a
+    // portrait phone. When it does not, anchor the front of the room: the
+    // podium is the landmark everything else is read against.
+    const fitsVertically = box.height * k <= r.height - pad * 2;
+    view.y = fitsVertically ? (r.height - box.height * k) / 2 - box.y * k : pad - box.y * k;
   }
 
   function zoomBy(factor, cx = null, cy = null) {
@@ -741,6 +777,7 @@
           dragLevel={ui.drag?.level || "ok"}
           dragActive={Boolean(ui.drag) || (inMoveMode && freeByTable[table.id] > 0)}
           {showNames}
+          k={view.k}
           layoutLocked={ui.layoutLocked}
           ghostBad={moving?.id === table.id && ghostBad}
           people={focusByTable[table.id] || []}
