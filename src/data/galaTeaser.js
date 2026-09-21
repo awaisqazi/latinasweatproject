@@ -170,22 +170,14 @@ export const galaFashionShow = {
   body: "Six brands take the runway at the Annual Gala fashion show.",
   brands: [
     {
-      name: "Sosa",
-      logo: "sosa.png",
-      tile: "light",
-      url: "https://sosacollective.com/",
+      name: "We Will Win",
+      logo: "we-will-win.png",
+      tile: "dark",
+      url: "https://wewillwin3w.com/",
       socials: [
-        { type: "website", url: "https://sosacollective.com/" },
-        { type: "instagram", url: "https://www.instagram.com/sosa_collective/" },
-      ],
-    },
-    {
-      name: "@dennise._.dennise",
-      logo: "monogram-cactus.webp",
-      tile: "light",
-      url: "https://www.instagram.com/dennise._.dennise/",
-      socials: [
-        { type: "instagram", url: "https://www.instagram.com/dennise._.dennise/" },
+        { type: "website", url: "https://wewillwin3w.com/" },
+        { type: "instagram", url: "https://www.instagram.com/3wwewillwin/" },
+        { type: "facebook", url: "https://www.facebook.com/@3wwewillwin" },
       ],
     },
     {
@@ -201,15 +193,6 @@ export const galaFashionShow = {
       ],
     },
     {
-      name: "Fiera",
-      logo: "fiera.webp",
-      tile: "light",
-      url: "https://www.instagram.com/fiera_fiera_fiera/",
-      socials: [
-        { type: "instagram", url: "https://www.instagram.com/fiera_fiera_fiera/" },
-      ],
-    },
-    {
       name: "Definitive Selection",
       logo: "definitive-selection.png",
       tile: "light",
@@ -221,14 +204,31 @@ export const galaFashionShow = {
       ],
     },
     {
-      name: "We Will Win",
-      logo: "we-will-win.png",
-      tile: "dark",
-      url: "https://wewillwin3w.com/",
+      name: "Sosa",
+      logo: "sosa.png",
+      tile: "light",
+      url: "https://sosacollective.com/",
       socials: [
-        { type: "website", url: "https://wewillwin3w.com/" },
-        { type: "instagram", url: "https://www.instagram.com/3wwewillwin/" },
-        { type: "facebook", url: "https://www.facebook.com/@3wwewillwin" },
+        { type: "website", url: "https://sosacollective.com/" },
+        { type: "instagram", url: "https://www.instagram.com/sosa_collective/" },
+      ],
+    },
+    {
+      name: "Fiera",
+      logo: "fiera.webp",
+      tile: "light",
+      url: "https://www.instagram.com/fiera_fiera_fiera/",
+      socials: [
+        { type: "instagram", url: "https://www.instagram.com/fiera_fiera_fiera/" },
+      ],
+    },
+    {
+      name: "@dennise._.dennise",
+      logo: "monogram-cactus.webp",
+      tile: "light",
+      url: "https://www.instagram.com/dennise._.dennise/",
+      socials: [
+        { type: "instagram", url: "https://www.instagram.com/dennise._.dennise/" },
       ],
     },
   ],
