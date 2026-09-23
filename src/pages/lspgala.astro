@@ -1,12 +1,434 @@
 ---
+// /lspgala: the Annual Gala day-of hub.
+//
+// latinasweatproject.com/lspgala is PRINTED on the paper program and on 150 bid
+// paddles as "scan to give", so this path must keep working and the Give
+// button is the first thing a phone sees. Everything except the live total is
+// server-rendered plain anchors, so Give and every link work without
+// JavaScript.
+//
+// Standalone document (like /gala/live), not Layout.astro: no site chrome, no
+// web fonts, no analytics. The analytics tags would report the full page URL,
+// and a team member may open this page as /lspgala#k=<display key>; that key
+// must never leave the device. It also keeps the page light on venue Wi-Fi.
+//
+// Unindexed: robots noindex here, and /lspgala is excluded from the sitemap in
+// astro.config.mjs. Not disallowed in robots.txt on purpose: a crawler has to
+// be able to fetch the page to see the noindex.
+//
+// Live total: src/components/gala/hub/HubLive.svelte (client only), which
+// reuses the projector's transport and polls at the server's poll_ms.
+//
+// Printed program: public/gala-program-2026.pdf is a COPY of
+// output/gala-2026/final/Gala-2026-Program-Modern-Print.pdf (gitignored, still
+// being revised). Re-copy it before every deploy until the program is final.
+import HubLive from "../components/gala/hub/HubLive.svelte";
+import { galaTeaser } from "../data/galaTeaser.js";
 
+const giveUrl = galaTeaser.galaGiveUrl;
+
+// The run of show, as printed on the program. Keep in step with the PDF.
+const tonight = [
+  { time: "6:00", title: "Welcome & Cocktail Hour" },
+  { time: "6:30", title: "Mariachi" },
+  { time: "7:00", title: "Dinner Is Served" },
+  { time: "7:30", title: "Ballet Folklórico" },
+  { time: "7:45", title: "Awards" },
+  { time: "8:15", title: "Live Bidding" },
+  { time: "9:00", title: "Gallery & Open Bar" },
+  { time: "10:00", title: "Fashion Show" },
+  { time: "10:30", title: "DJ & Open Bar Until Midnight" },
+];
 ---
 
-<meta
-    http-equiv="refresh"
-    content="0;url=https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising"
-/>
-<script>
-    window.location.href =
-        "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising";
-</script>
+<html lang="en" class="g26-hub-root">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="generator" content={Astro.generator} />
+        <meta name="theme-color" content="#0B1320" />
+        <meta name="color-scheme" content="dark" />
+        <meta
+            name="description"
+            content="Give tonight, follow the live total, and see the program for The Latina Sweat Project Annual Gala at MCA Chicago."
+        />
+        <link rel="icon" href="/favicon.ico" />
+        <title>LSP at the MCA · Annual Gala 2026</title>
+        <style is:global>
+            /* Design tokens, scoped to this page (same values as /gala/live).
+               global.css is untouched. */
+            .g26 {
+                --g26-ink: #05070c;
+                --g26-night: #0b1320;
+                --g26-navy: #111a27;
+                --g26-navy-2: #16212f;
+                --g26-navy-3: #1b2a40;
+                --g26-cream: #fff8ef;
+                --g26-warm: #f2e4d2;
+                --g26-text: #f3ece1;
+                --g26-muted: #c3ccd8;
+                --g26-dim: #a9b4c2;
+                --g26-taupe: #b5a18d;
+                --g26-gold: #ffbd59;
+                --g26-gold-strong: #f4a833;
+                --g26-gold-deep: #b9842f;
+                --g26-gold-soft: #e4c98a;
+                --g26-gold-hi: #fff1be;
+                --g26-ok: #5fd4b8;
+                --g26-serif:
+                    "Didot", "Bodoni 72", "Bodoni Moda", "Playfair Display",
+                    Georgia, serif;
+                --g26-sans:
+                    "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial,
+                    sans-serif;
+                --g26-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+                color: var(--g26-text);
+                font-family: var(--g26-sans);
+            }
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #0b1320;
+                color: #f3ece1;
+                -webkit-font-smoothing: antialiased;
+                -webkit-text-size-adjust: 100%;
+            }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="g26 hub">
+            <main class="col">
+                <header class="mast">
+                    <!-- The site's X mark (lsp-studio-logo.png), turned white in
+                         CSS and cropped above its small wordmark. -->
+                    <div class="mark">
+                        <img
+                            src="/images/lsp-studio-logo.png"
+                            alt="The Latina Sweat Project"
+                            width="80"
+                            height="80"
+                        />
+                    </div>
+                    <p class="eyebrow">
+                        <span>The Latina Sweat Project ·</span>
+                        <span>Annual Gala 2026</span>
+                    </p>
+                    <h1>LSP at the MCA</h1>
+                    <p class="when">
+                        <span>{galaTeaser.dateLabel} ·</span>
+                        <span>{galaTeaser.venueName}</span>
+                    </p>
+                </header>
+
+                <section class="give" aria-label="Give">
+                    <a
+                        class="btn btn-gold"
+                        href={giveUrl}
+                        target="_blank"
+                        rel="noopener"
+                        data-gala-give
+                    >
+                        Give now
+                    </a>
+                    <p class="charity">
+                        Latina Sweat Cares is a 501(c)(3) public charity ·
+                        <span class="nw">EIN 99-1616122</span>
+                    </p>
+                </section>
+
+                <HubLive client:only="svelte" fallbackGiveUrl={giveUrl} />
+                <noscript>
+                    <p class="noscript">
+                        The live total needs JavaScript. Giving works either
+                        way.
+                    </p>
+                </noscript>
+
+                <a class="btn btn-line" href="/gala/live" data-gala-watch>
+                    Watch it live
+                </a>
+
+                <section class="tonight" aria-labelledby="tonight-h">
+                    <h2 id="tonight-h">Tonight</h2>
+                    <ol class="run">
+                        {
+                            tonight.map((row) => (
+                                <li>
+                                    <span class="t">
+                                        {row.time}
+                                        <span class="pm">PM</span>
+                                    </span>
+                                    <span class="what">{row.title}</span>
+                                </li>
+                            ))
+                        }
+                    </ol>
+                    <div class="stack">
+                        <a class="btn btn-line" href="/gala-program-2026.pdf">
+                            Open the printed program (PDF)
+                        </a>
+                        <a
+                            class="btn btn-line"
+                            href="/silentauction"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            Silent auction: bid now
+                        </a>
+                    </div>
+                </section>
+
+                <footer class="foot">
+                    <a href="/">latinasweatproject.com</a>
+                    <p>Raise your paddle at 8:15 PM · or give any time from this page</p>
+                </footer>
+            </main>
+        </div>
+
+        <style>
+            .hub {
+                min-height: 100vh;
+                min-height: 100dvh;
+                background:
+                    radial-gradient(
+                        90vw 60vh at 50% -10%,
+                        rgba(255, 189, 89, 0.14),
+                        transparent 70%
+                    ),
+                    linear-gradient(180deg, #080b11 0%, #0b1320 40%, #03050a 100%);
+            }
+            .col {
+                width: 100%;
+                max-width: 480px;
+                margin: 0 auto;
+                padding: calc(28px + env(safe-area-inset-top, 0px))
+                    calc(18px + env(safe-area-inset-right, 0px))
+                    calc(36px + env(safe-area-inset-bottom, 0px))
+                    calc(18px + env(safe-area-inset-left, 0px));
+                display: flex;
+                flex-direction: column;
+                gap: 22px;
+                font-size: 17px;
+                line-height: 1.45;
+            }
+
+            /* Masthead */
+            .mast {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+            }
+            .mark {
+                width: 80px;
+                height: 68px;
+                overflow: hidden;
+                filter: drop-shadow(0 0 16px rgba(255, 189, 89, 0.35));
+            }
+            .mark img {
+                display: block;
+                width: 80px;
+                height: 80px;
+                filter: brightness(0) invert(1);
+            }
+            .when span,
+            .eyebrow span {
+                white-space: nowrap;
+            }
+            .nw {
+                white-space: nowrap;
+            }
+            .eyebrow {
+                margin: 6px 0 0;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.22em;
+                text-transform: uppercase;
+                color: var(--g26-gold-soft);
+            }
+            h1 {
+                margin: 0;
+                font-family: var(--g26-serif);
+                font-weight: 400;
+                font-size: clamp(40px, 12vw, 54px);
+                line-height: 1.05;
+                color: var(--g26-cream);
+            }
+            .when {
+                margin: 0;
+                font-size: 16px;
+                color: var(--g26-warm);
+            }
+
+            /* Buttons: plain anchors, 56px tall, full width. */
+            .btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                min-height: 56px;
+                padding: 12px 18px;
+                border-radius: 4px;
+                text-align: center;
+                text-decoration: none;
+                font-weight: 800;
+                font-size: 16px;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                -webkit-tap-highlight-color: transparent;
+                transition:
+                    transform 0.15s var(--g26-ease),
+                    background-color 0.2s var(--g26-ease),
+                    box-shadow 0.2s var(--g26-ease);
+            }
+            .btn:active {
+                transform: scale(0.985);
+            }
+            .btn:focus-visible {
+                outline: 2px solid var(--g26-gold-hi);
+                outline-offset: 3px;
+            }
+            .btn-gold {
+                min-height: 68px;
+                font-size: 20px;
+                letter-spacing: 0.2em;
+                color: #05070c;
+                background: linear-gradient(180deg, #ffd083 0%, #ffbd59 55%, #f4a833 100%);
+                box-shadow:
+                    0 0 0 1px rgba(255, 241, 190, 0.5) inset,
+                    0 10px 40px rgba(255, 189, 89, 0.28);
+            }
+            .btn-gold:hover {
+                box-shadow:
+                    0 0 0 1px rgba(255, 241, 190, 0.7) inset,
+                    0 12px 48px rgba(255, 189, 89, 0.42);
+            }
+            .btn-line {
+                color: var(--g26-gold);
+                border: 1px solid rgba(255, 189, 89, 0.7);
+                background: rgba(255, 189, 89, 0.04);
+                letter-spacing: 0.12em;
+            }
+            .btn-line:hover {
+                background: rgba(255, 189, 89, 0.1);
+            }
+
+            .give {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+            .charity {
+                margin: 0;
+                font-size: 13px;
+                line-height: 1.4;
+                text-align: center;
+                color: var(--g26-dim);
+            }
+            .noscript {
+                margin: 0;
+                text-align: center;
+                font-size: 15px;
+                color: var(--g26-muted);
+            }
+
+            /* Tonight */
+            .tonight {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                margin-top: 6px;
+            }
+            h2 {
+                margin: 0;
+                font-family: var(--g26-serif);
+                font-weight: 400;
+                font-style: italic;
+                font-size: 32px;
+                color: var(--g26-cream);
+                text-align: center;
+            }
+            .run {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                border-top: 1px solid rgba(255, 189, 89, 0.35);
+            }
+            .run li {
+                display: grid;
+                grid-template-columns: 5.2em 1fr;
+                align-items: baseline;
+                gap: 12px;
+                padding: 12px 2px;
+                border-bottom: 1px solid rgba(255, 248, 239, 0.1);
+            }
+            .t {
+                font-weight: 700;
+                color: var(--g26-gold);
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+            }
+            .pm {
+                font-size: 12px;
+                letter-spacing: 0.08em;
+                color: var(--g26-gold-soft);
+            }
+            .what {
+                color: var(--g26-cream);
+            }
+            .stack {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            /* Footer */
+            .foot {
+                margin-top: 8px;
+                padding-top: 18px;
+                border-top: 1px solid rgba(255, 248, 239, 0.1);
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                align-items: center;
+            }
+            .foot a {
+                display: inline-flex;
+                align-items: center;
+                min-height: 44px;
+                padding: 0 8px;
+                color: var(--g26-warm);
+                font-size: 16px;
+                text-decoration: none;
+                letter-spacing: 0.04em;
+            }
+            .foot p {
+                margin: 0;
+                font-size: 14px;
+                color: var(--g26-dim);
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .btn {
+                    transition: none;
+                }
+                .btn:active {
+                    transform: none;
+                }
+            }
+        </style>
+    </body>
+</html>

@@ -24,6 +24,14 @@ export const galaTeaser = {
   ticketsUrl:
     "https://www.zeffy.com/en-US/ticketing/lsp-museum-of-contemporary-art-chicago-2026-gala",
   ticketsLabel: "Get Tickets",
+  // Gala-night donation form behind latinasweatproject.com/lspgala, the "scan
+  // to give" URL printed on the program and the bid paddles. This is last
+  // year's form; the team is replacing it with a new form for 2026. On the
+  // night the operator can also swap it without a deploy by setting
+  // config.donate_url in the live display state (the /lspgala hub prefers that
+  // runtime value when present and falls back to this one).
+  galaGiveUrl:
+    "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising",
   // Legacy pre-sales interest list, kept for reference; no live CTA should
   // point here anymore.
   interestUrl: "#gala-interest",
