@@ -87,9 +87,9 @@ function ticketRows() {
     ticketRow("Delia", "Zamora", "dz@example.com", "108", COMMUNITY, "", ""),
     ticketRow("Delia", "Zamora", "dz@example.com", "109", COMMUNITY, "", ""),
     ticketRow("Delia", "Zamora", "dz@example.com", "110", COMMUNITY, "", ""),
-    ticketRow("Marcos", "Diaz", "marcos@chubb.example", "111", BENEFACTOR, "no preference but seat with the Chubb people.", "I work at Chubb"),
-    ticketRow("Marcos", "Diaz", "marcos@chubb.example", "112", BENEFACTOR, "", "I work at Chubb"),
-    ticketRow("Paula", "Nieto", "paula@chubb.example", "113", BENEFACTOR, "", "A Chubb colleague invited me"),
+    ticketRow("Marcos", "Diaz", "marcos@acme.example", "111", BENEFACTOR, "no preference but seat with the Acme people.", "I work at Acme"),
+    ticketRow("Marcos", "Diaz", "marcos@acme.example", "112", BENEFACTOR, "", "I work at Acme"),
+    ticketRow("Paula", "Nieto", "paula@acme.example", "113", BENEFACTOR, "", "A Acme colleague invited me"),
     ticketRow("Edgar", "Gonzalez", "edgar@example.org", "114", BENEFACTOR, "", ""),
     ticketRow("Tomas", "Rivas", "tomas@example.org", "115", LATE_NIGHT, "", ""),
     ticketRow("Tomas", "Rivas", "tomas@example.org", "116", LATE_NIGHT, "", ""),
@@ -129,8 +129,8 @@ function mealRows() {
     mealRow("2026-09-02T09:04:00Z", "Jessica Nava", "Delia Zamora", "jess@example.org", "", SHORT_RIB),
     mealRow("2026-09-02T09:05:00Z", "Xochitl Barron", "Delia Zamora", "xochitl@example.org", "", WHITEFISH),
     // Duplicate submissions: the later timestamp wins.
-    mealRow("2026-09-03T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@chubb.example", "", SHORT_RIB),
-    mealRow("2026-09-04T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@chubb.example", "", RAVIOLI),
+    mealRow("2026-09-03T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@acme.example", "", SHORT_RIB),
+    mealRow("2026-09-04T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@acme.example", "", RAVIOLI),
     mealRow("2026-09-03T08:10:00Z", "Edgar Gonzalez", "Edgar Gonzalez", "edgar@example.org", "", WHITEFISH),
     // Nobody's ticket: a comped honoree who filled the form in anyway.
     mealRow("2026-09-05T08:00:00Z", "Renata Ocampo", "Community Table", "renata@example.org", "", RAVIOLI),
@@ -235,9 +235,9 @@ describe("matching", () => {
     const tickets = parseTickets(ticketRows()).tickets;
     const responses = parseResponses(mealRows()).responses;
     const result = matchSelections(tickets, responses);
-    const dinorah = result.buyers.find((b) => b.buyerEmail === "dz@example.com");
-    eq(dinorah.tickets.length, 5);
-    eq(dinorah.attributed.length, 5, "six answered, five seats");
+    const delia = result.buyers.find((b) => b.buyerEmail === "dz@example.com");
+    eq(delia.tickets.length, 5);
+    eq(delia.attributed.length, 5, "six answered, five seats");
     ok(result.stats.unattributed >= 1, "the surplus stays unattributed for a human");
   });
 
@@ -844,18 +844,18 @@ describe("preferences", () => {
       ["Xochitl Barron"], ["Brad Johnson"], ["Ana Lima"],
     ].map(([name], i) => mkGuest({ id: `t${i}`, name }));
 
-    const dinorah = mkGuest({
+    const delia = mkGuest({
       id: "dz", name: "Delia Zamora", partyId: DZ, partyLabel: "Delia Zamora",
       buyerName: "Delia Zamora", buyerEmail: DZ,
     });
     const paula = mkGuest({
-      id: "chubb-other", name: "Paula Nieto", buyerEmail: "paula@chubb.example",
-      heardAbout: "A Chubb colleague invited me",
+      id: "acme-other", name: "Paula Nieto", buyerEmail: "paula@acme.example",
+      heardAbout: "A Acme colleague invited me",
     });
 
     const askers = [
       mkGuest({ id: "a1", name: "Ana Perez", seatingNote: "State Representative Edgar Gonzalez, Jr." }),
-      mkGuest({ id: "a2", name: "Marcos Diaz", buyerEmail: "marcos@chubb.example", heardAbout: "I work at Chubb", seatingNote: "no preference but seat with the Chubb people." }),
+      mkGuest({ id: "a2", name: "Marcos Diaz", buyerEmail: "marcos@acme.example", heardAbout: "I work at Acme", seatingNote: "no preference but seat with the Acme people." }),
       mkGuest({ id: "a3", name: "Sofia Lane", seatingNote: "Mariana Soto & Juan Pablo del Rincon" }),
       mkGuest({ id: "a4", name: "Nadia Cruz", seatingNote: "YTT '26 cohort people" }),
       mkGuest({ id: "a5", name: "Omar Vela", seatingNote: "With or near any LSP YTT 26' Peers :D" }),
@@ -873,7 +873,7 @@ describe("preferences", () => {
       mkGuest({ id: "a17", name: "Dora Nunez", seatingNote: "Brad Johnson and Whoever Nobodyknows" }),
       mkGuest({ id: "a18", name: "Elsa Prieto", seatingNote: "" }),
     ];
-    return resolvePreferences([...targets, dinorah, paula, ...askers]);
+    return resolvePreferences([...targets, delia, paula, ...askers]);
   }
 
   const world = prefWorld();
@@ -892,10 +892,10 @@ describe("preferences", () => {
   });
 
   it("turns an organization mentioned by other guests into a group", () => {
-    deepEq(by("a2").prefs.groups, ["chubb"]);
+    deepEq(by("a2").prefs.groups, ["acme"]);
     eq(by("a2").prefs.unresolved.length, 0, "'no preference but' is filler, not an unresolved fragment");
-    const members = groupMembers(world, "chubb").map((g) => g.id).sort();
-    deepEq(members, ["a2", "chubb-other"], "membership follows the domain and the 'how did you hear' answer");
+    const members = groupMembers(world, "acme").map((g) => g.id).sort();
+    deepEq(members, ["a2", "acme-other"], "membership follows the domain and the 'how did you hear' answer");
   });
 
   it("recognises YTT in all its spellings", () => {
@@ -992,9 +992,9 @@ describe("preferences", () => {
     const sofia = guests.find((g) => g.name === "Sofia Lane");
     deepEq(sofia.prefs.withPartyIds, ["dz@example.com"]);
     const marcos = guests.find((g) => g.name === "Marcos Diaz");
-    deepEq(marcos.prefs.groups, ["chubb"]);
-    const dinorah = guests.find((g) => g.name === "Delia Zamora");
-    deepEq(dinorah.prefs.groups, ["ytt26"]);
+    deepEq(marcos.prefs.groups, ["acme"]);
+    const delia = guests.find((g) => g.name === "Delia Zamora");
+    deepEq(delia.prefs.groups, ["ytt26"]);
   });
 });
 
