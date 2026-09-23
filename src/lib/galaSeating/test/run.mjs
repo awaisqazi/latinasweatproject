@@ -279,7 +279,7 @@ describe("repairMojibake", () => {
   });
 
   it("fixes names in place without touching the rest", () => {
-    eq(repairMojibake(mangle("Beatriz Mardueño")), "Beatriz Mardueño");
+    eq(repairMojibake(mangle("Beatriz Ibáñez")), "Beatriz Ibáñez");
     eq(repairMojibake(mangle("Sofía Saldaña-Rincón")), "Sofía Saldaña-Rincón");
     eq(repairMojibake(mangle("Señor Álvarez")), "Señor Álvarez");
     eq(repairMojibake(mangle("she said “yes” – it’s on")), "she said “yes” – it’s on");
@@ -287,7 +287,7 @@ describe("repairMojibake", () => {
 
   it("leaves clean text, plain ASCII and blanks alone", () => {
     eq(repairMojibake("Ana Perez"), "Ana Perez");
-    eq(repairMojibake("Beatriz Mardueño"), "Beatriz Mardueño", "already correct text is untouched");
+    eq(repairMojibake("Beatriz Ibáñez"), "Beatriz Ibáñez", "already correct text is untouched");
     eq(repairMojibake(""), "");
     eq(repairMojibake(null), "");
     eq(repairMojibake(undefined), "");
@@ -300,43 +300,43 @@ describe("repairMojibake", () => {
   });
 
   it("normalizes a mangled name to the same key as a clean one", () => {
-    eq(normName(mangle("Beatriz Mardueño")), normName("Beatriz Mardueño"));
-    eq(normName(mangle("Beatriz Mardueño")), "beatriz mardueno");
-    ok(namesMatch(mangle("Beatriz Mardueño"), "Beatriz Mardueño"),
+    eq(normName(mangle("Beatriz Ibáñez")), normName("Beatriz Ibáñez"));
+    eq(normName(mangle("Beatriz Ibáñez")), "beatriz ibanez");
+    ok(namesMatch(mangle("Beatriz Ibáñez"), "Beatriz Ibáñez"),
       "a mangled ticket name matches the clean form on the dinner sheet");
   });
 
   it("repairs ticket cells, response cells and override cells at parse time", () => {
     const tickets = [
       TICKET_HEADERS,
-      ticketRow("Beatriz", mangle("Mardueño"), "bea@example.org", "201", BENEFACTOR,
+      ticketRow("Beatriz", mangle("Ibáñez"), "bea@example.org", "201", BENEFACTOR,
         mangle("Sentar con Sofía Saldaña"), mangle("Una amiga me invitó")),
     ];
     const parsed = parseTickets(tickets);
-    eq(parsed.tickets[0].buyerName, "Beatriz Mardueño");
+    eq(parsed.tickets[0].buyerName, "Beatriz Ibáñez");
     eq(parsed.tickets[0].seatingNote, "Sentar con Sofía Saldaña");
     eq(parsed.tickets[0].heardAbout, "Una amiga me invitó");
 
     const meals = [
       MEAL_HEADERS,
-      mealRow("2026-09-01T10:00:00Z", mangle("Sofía Saldaña"), mangle("Beatriz Mardueño"),
+      mealRow("2026-09-01T10:00:00Z", mangle("Sofía Saldaña"), mangle("Beatriz Ibáñez"),
         "sofia@example.org", "", RAVIOLI),
     ];
     const responses = parseResponses(meals).responses;
     eq(responses[0].guestName, "Sofía Saldaña");
-    eq(responses[0].purchaserName, "Beatriz Mardueño");
+    eq(responses[0].purchaserName, "Beatriz Ibáñez");
 
     const built = buildGuestsFromRows({
       ticketRows: tickets,
       mealRows: meals,
       overrideRows: [
         ["Purchaser name (as typed on form)", "Buyer email", "Skip buyer email", "Note"],
-        [mangle("Beatriz Mardueño"), "bea@example.org", "", mangle("Confirmado por teléfono")],
+        [mangle("Beatriz Ibáñez"), "bea@example.org", "", mangle("Confirmado por teléfono")],
       ],
     });
     const sofia = built.guests.find((g) => g.name === "Sofía Saldaña");
     ok(sofia, "the dinner guest came through with her accents");
-    eq(sofia.buyerName, "Beatriz Mardueño");
+    eq(sofia.buyerName, "Beatriz Ibáñez");
     ok(!built.guests.some((g) => /[√‚¬]/.test(`${g.name}${g.buyerName}${g.seatingNote}${g.heardAbout}`)),
       "no mangled sequence survives anywhere in the guest list");
   });
@@ -344,13 +344,13 @@ describe("repairMojibake", () => {
   it("gives the same guest ids whether the sheet arrives mangled or clean", () => {
     const rows = (mangler) => [
       TICKET_HEADERS,
-      ticketRow("Beatriz", mangler("Mardueño"), "bea@example.org", "201", BENEFACTOR),
-      ticketRow("Beatriz", mangler("Mardueño"), "bea@example.org", "202", BENEFACTOR),
+      ticketRow("Beatriz", mangler("Ibáñez"), "bea@example.org", "201", BENEFACTOR),
+      ticketRow("Beatriz", mangler("Ibáñez"), "bea@example.org", "202", BENEFACTOR),
       ticketRow(mangler("Rocío"), mangler("Núñez"), "rocio@example.org", "203", BENEFACTOR),
     ];
     const mealsFor = (mangler) => [
       MEAL_HEADERS,
-      mealRow("2026-09-01T10:00:00Z", mangler("Sofía Saldaña"), mangler("Beatriz Mardueño"), "sofia@example.org", "", RAVIOLI),
+      mealRow("2026-09-01T10:00:00Z", mangler("Sofía Saldaña"), mangler("Beatriz Ibáñez"), "sofia@example.org", "", RAVIOLI),
     ];
     const dirty = buildGuestsFromRows({ ticketRows: rows(mangle), mealRows: mealsFor(mangle) });
     const clean = buildGuestsFromRows({ ticketRows: rows((s) => s), mealRows: mealsFor((s) => s) });
@@ -363,13 +363,13 @@ describe("repairMojibake", () => {
 
   it("writes the repaired name into the CSV", () => {
     const built = buildGuestsFromRows({
-      ticketRows: [TICKET_HEADERS, ticketRow("Beatriz", mangle("Mardueño"), "bea@example.org", "201", BENEFACTOR)],
+      ticketRows: [TICKET_HEADERS, ticketRow("Beatriz", mangle("Ibáñez"), "bea@example.org", "201", BENEFACTOR)],
     });
     const plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 1, seats: 4 }), built.guests).plan;
     const guest = Object.values(plan.guests)[0];
     plan.seating[guest.id] = { tableId: "t1", seat: 0 };
     const csv = seatingCsv(plan);
-    ok(csv.includes("Beatriz Mardueño"), "the accent reaches the spreadsheet");
+    ok(csv.includes("Beatriz Ibáñez"), "the accent reaches the spreadsheet");
     ok(!/[√‚¬]/.test(csv), "and the mangled form does not");
   });
 });
