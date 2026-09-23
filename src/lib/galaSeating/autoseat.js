@@ -191,6 +191,11 @@ export function autoSeat(plan, options = {}) {
       skipped.push({ guestId: g.id, reason: "Late Night Access ticket, no dinner seat" });
       continue;
     }
+    // Nobody has confirmed this seat: the team is reaching out first.
+    if ((g.tags || []).includes("outreach")) {
+      skipped.push({ guestId: g.id, reason: "needs outreach" });
+      continue;
+    }
     candidates.push(g);
   }
 

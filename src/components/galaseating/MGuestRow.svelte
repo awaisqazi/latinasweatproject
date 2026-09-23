@@ -55,6 +55,9 @@
       <span class="mgr-ticket" data-sponsor={ticket.sponsor ? "1" : null}>
         {guest.hasDinner === false ? "Late night" : ticket.short}
       </span>
+      {#if (guest.tags || []).includes("outreach")}
+        <span class="mgr-outreach">Outreach</span>
+      {/if}
       {#if guest.seatingNote || guest.plannerNote}
         <svg class="mgr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Has a note">
           <path d="M5 4h14v16l-7-4-7 4z" stroke-linejoin="round" />
@@ -159,6 +162,18 @@
   .mgr-ticket[data-sponsor] {
     color: var(--gs-gold-soft);
     border-color: rgba(228, 201, 138, 0.55);
+  }
+  .mgr-outreach {
+    flex: 0 0 auto;
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #1d1405;
+    background: var(--gs-warn);
+    border-radius: 2px;
+    padding: 1px 4px;
+    white-space: nowrap;
+    font-weight: 700;
   }
   .mgr-ic {
     flex: 0 0 auto;

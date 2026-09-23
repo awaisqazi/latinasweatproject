@@ -11,6 +11,7 @@
 <script>
   import { getContext } from "svelte";
   import { MEALS, ticketTypeById, tableLabel, seatPosition } from "../../lib/galaSeating/model.js";
+  import { needsTicketResolution } from "../../lib/galaSeating/ticketResolution.js";
   import MSheet from "./MSheet.svelte";
 
   let { guestId, nav, onshowonmap = () => {}, onmeasure = () => {} } = $props();
@@ -128,9 +129,13 @@
           <blockquote class="mgc-note">{noteSnippet}</blockquote>
         {/if}
 
-        {#if guest.placeholder || guest.unmatched}
+        {#if guest.placeholder || guest.unmatched || needsTicketResolution(guest)}
           <p class="mgc-recon">
-            {guest.placeholder ? "This seat has no name yet." : "No ticket matched this dinner response."}
+            {guest.placeholder
+              ? "This seat has no name yet."
+              : guest.unmatched
+                ? "No ticket matched this dinner response."
+                : "No ticket on record."}
             <button
               type="button"
               class="gs-linkbtn"

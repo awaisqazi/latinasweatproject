@@ -35,6 +35,13 @@ import { computeWarnings, indexWarnings, previewPlacement } from "./warnings.js"
 import { mergeGuestsIntoPlan } from "./importers.js";
 import { resolvePreferences } from "./preferences.js";
 import { autoSeat } from "./autoseat.js";
+import {
+  hasNoZeffyTicket,
+  needsOutreach,
+  needsTicketResolution,
+  resolutionById,
+  resolutionPatch,
+} from "./ticketResolution.js";
 
 const UNDO_LIMIT = 160;
 const BACKUP_CAP = 20;
@@ -170,6 +177,11 @@ export function createSeatingStore() {
       tables: plan.tables.length,
       placeholders: guests.filter((g) => g.placeholder).length,
       unmatched: guests.filter((g) => g.unmatched).length,
+      // "No ticket on record": no Zeffy ticket and nobody has decided yet, and those the
+      // team is still reaching out to.
+      noTicket: guests.filter((g) => hasNoZeffyTicket(g)).length,
+      noTicketOpen: guests.filter((g) => needsTicketResolution(g)).length,
+      outreach: guests.filter((g) => needsOutreach(g)).length,
     };
   });
 
@@ -1218,6 +1230,46 @@ export function createSeatingStore() {
   }
 
   /**
+   * Record what the team decided for a guest with no Zeffy ticket: comped, paid another
+   * way, or unseat and reach out. One undo step; never coalesced with a note edit.
+   * @param {string} guestId
+   * @param {"comped"|"paid-other"|"outreach"} resolutionId
+   * @param {string} [note]
+   */
+  function resolveNoTicket(guestId, resolutionId, note = "") {
+    const guest = plan.guests[guestId];
+    const resolution = resolutionById(resolutionId);
+    if (!guest || !resolution) return false;
+    const built = resolutionPatch(guest, resolutionId, { editor, when: new Date(), note });
+    if (!built) return false;
+
+    const ops = [];
+    const inverse = [];
+    if (built.unseat && plan.seating[guestId]) {
+      ops.push({ op: "unseat", g: guestId });
+      inverse.push(seatOpFor(guestId));
+    }
+    ops.push({ op: "guest_patch", g: guestId, patch: built.patch });
+    // Explicit empties rather than undefined: undefined keys vanish on the wire.
+    const back = patchInverse(guest, built.patch);
+    if ("tags" in back) back.tags = Array.isArray(guest.tags) ? [...guest.tags] : [];
+    if ("editedFields" in back) back.editedFields = Array.isArray(guest.editedFields) ? [...guest.editedFields] : [];
+    if ("plannerNote" in back) back.plannerNote = guest.plannerNote || "";
+    inverse.unshift({ op: "guest_patch", g: guestId, patch: back });
+
+    commit(`${resolution.label}: ${guest.name}`, ops, inverse);
+    pushToast({
+      kind: "ok",
+      message:
+        resolutionId === "outreach"
+          ? `${guest.name} is unseated and waiting on outreach.`
+          : `${guest.name}: ${resolution.label.toLowerCase()}.`,
+      action: { label: "Undo", run: () => undo() },
+    });
+    return true;
+  }
+
+  /**
    * Reconcile a dinner-form response that never matched a ticket with the
    * unnamed placeholder seat it almost certainly belongs to.
    *
@@ -1996,6 +2048,7 @@ export function createSeatingStore() {
     renamePlan,
     importGuests,
     claimTicketSeat,
+    resolveNoTicket,
     claimGroupSeats,
     placeholdersOf,
     nameSeat,

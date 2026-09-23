@@ -12,10 +12,17 @@
   import {
     GUEST_TAGS,
     MEALS,
+    TICKET_RESOLUTIONS,
     TICKET_TYPES,
     ticketTypeById,
     tableLabel,
   } from "../../lib/galaSeating/model.js";
+  import {
+    RESOLUTION_STATUS,
+    resolutionAttribution,
+    showsTicketResolution,
+    ticketResolutionOf,
+  } from "../../lib/galaSeating/ticketResolution.js";
 
   let { guestId = "" } = $props();
   const { store, ui } = getContext("gala-seating");
@@ -37,6 +44,9 @@
   let claimQuery = $state("");
   let nameOpen = $state(false);
   let nameDraft = $state("");
+  let resChoice = $state(/** @type {string|null} */ (null));
+  let resNote = $state("");
+  let resEditing = $state(false);
 
   // Reset the transient bits when the sheet moves to another guest.
   $effect(() => {
@@ -49,7 +59,23 @@
     claimQuery = "";
     nameOpen = false;
     nameDraft = "";
+    resChoice = null;
+    resNote = "";
+    resEditing = false;
   });
+
+  /** "No ticket on record": the decision recorded so far, if any, and who made it. */
+  const showResolution = $derived(showsTicketResolution(guest));
+  const resolution = $derived(guest ? ticketResolutionOf(guest) : null);
+  const resolutionBy = $derived(resolution ? resolutionAttribution(guest, resolution) : "");
+
+  function confirmResolution() {
+    if (!guest || !resChoice) return;
+    store.resolveNoTicket(guest.id, resChoice, resNote);
+    resChoice = null;
+    resNote = "";
+    resEditing = false;
+  }
 
   /** Normalised name, for the "did they mean this buyer?" suggestion. */
   function normal(v) {
@@ -410,6 +436,85 @@
         </div>
       {/if}
     </section>
+  {/if}
+
+  <!-- no Zeffy ticket: record what the team decided -->
+  {#if showResolution}
+    {#if resolution && !resEditing}
+      <div class="gsh-resline" data-res={resolution}>
+        <span class="gsh-resmark" aria-hidden="true"></span>
+        <span class="gsh-restext">
+          <strong>{RESOLUTION_STATUS[resolution]}</strong>{#if resolutionBy}<span>{` · ${resolutionBy}`}</span>{/if}
+        </span>
+        <button
+          type="button"
+          class="gs-linkbtn"
+          onclick={() => {
+            resChoice = resolution;
+            resEditing = true;
+          }}
+        >
+          Change
+        </button>
+      </div>
+    {:else}
+      <section class="gsh-sec gsh-sec--noticket" aria-labelledby={`gsh-nt-${guest.id}`}>
+        <h3 id={`gsh-nt-${guest.id}`}>No ticket on record</h3>
+        <p class="gsh-reconbody">
+          Zeffy has no ticket for this guest. Record what the team decided so everyone sees it.
+        </p>
+        <div class="gsh-resopts" role="radiogroup" aria-labelledby={`gsh-nt-${guest.id}`}>
+          {#each TICKET_RESOLUTIONS as r (r.id)}
+            <button
+              type="button"
+              role="radio"
+              class="gsh-resopt"
+              class:gsh-resopt--on={resChoice === r.id}
+              data-res={r.id}
+              aria-checked={resChoice === r.id}
+              onclick={() => (resChoice = r.id)}
+            >
+              <span class="gsh-resradio" aria-hidden="true"></span>
+              <span class="gsh-reslabel">
+                <strong>{r.label}</strong>
+                <small>{r.description}</small>
+              </span>
+            </button>
+          {/each}
+        </div>
+        <label class="gsh-field gsh-resnote">
+          <span>Note (optional)</span>
+          <input
+            class="gs-input"
+            maxlength="200"
+            placeholder="Who confirmed it, how it was paid, who is following up"
+            value={resNote}
+            oninput={(e) => (resNote = e.currentTarget.value)}
+            onkeydown={(e) => {
+              if (e.key === "Enter" && resChoice) confirmResolution();
+            }}
+          />
+        </label>
+        <div class="gsh-actions">
+          <button type="button" class="gs-btn gs-btn--gold gsh-resgo" disabled={!resChoice} onclick={confirmResolution}>
+            Confirm
+          </button>
+          {#if resolution}
+            <button
+              type="button"
+              class="gs-btn"
+              onclick={() => {
+                resEditing = false;
+                resChoice = null;
+                resNote = "";
+              }}
+            >
+              Cancel
+            </button>
+          {/if}
+        </div>
+      </section>
+    {/if}
   {/if}
 
   <!-- editable -->
@@ -947,6 +1052,111 @@
     border: 1px solid #3f8c5c;
     border-radius: 2px;
     padding: 1px 4px;
+  }
+  .gsh-sec--noticket {
+    padding: 12px;
+    background: rgba(226, 163, 60, 0.13);
+    border: 1px solid rgba(185, 132, 47, 0.6);
+    border-left-width: 4px;
+  }
+  .gsh-resopts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .gsh-resopt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    padding: 8px 12px;
+    border: 1px solid rgba(23, 32, 44, 0.26);
+    border-radius: 3px;
+    background: #fffdf9;
+    color: var(--gs-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gsh-resopt:hover {
+    background: rgba(255, 189, 89, 0.22);
+  }
+  .gsh-resopt--on {
+    background: rgba(255, 189, 89, 0.4);
+    border-color: var(--gs-gold);
+    box-shadow: inset 0 0 0 1px var(--gs-gold);
+  }
+  .gsh-resradio {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(23, 32, 44, 0.45);
+    background: #fffdf9;
+  }
+  .gsh-resopt--on .gsh-resradio {
+    border-color: #6b4a12;
+    background: radial-gradient(circle, #6b4a12 0 4px, #fffdf9 5px);
+  }
+  .gsh-reslabel {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .gsh-reslabel strong {
+    font-size: 14px;
+  }
+  .gsh-reslabel small {
+    font-size: 12px;
+    line-height: 1.35;
+    color: #5f6875;
+  }
+  .gsh-resnote {
+    margin-bottom: 10px;
+  }
+  .gsh-resgo {
+    min-width: 110px;
+  }
+  .gsh-resline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 10px;
+    border: 1px solid rgba(23, 32, 44, 0.16);
+    border-left: 3px solid #3f8c5c;
+    background: rgba(63, 140, 92, 0.08);
+    font-size: 12.5px;
+  }
+  .gsh-resline[data-res="outreach"] {
+    border-left-color: var(--gs-warn);
+    background: rgba(226, 163, 60, 0.14);
+  }
+  .gsh-resmark {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3f8c5c;
+  }
+  .gsh-resline[data-res="outreach"] .gsh-resmark {
+    background: #b9772f;
+  }
+  .gsh-restext {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .gsh-restext span {
+    color: #5f6875;
+  }
+  .gsh-resline :global(.gs-linkbtn) {
+    flex: 0 0 auto;
+    color: #7a5312;
+    font-size: 12px;
   }
   .gsh-confirm {
     margin: 0 0 8px;

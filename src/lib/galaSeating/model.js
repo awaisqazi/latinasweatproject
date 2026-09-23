@@ -42,6 +42,18 @@ export const GUEST_TAGS = [
   { id: "accessible", label: "Accessible seating" },
   { id: "staff", label: "LSP team" },
   { id: "allergy", label: "Allergy / dietary" },
+  { id: "outreach", label: "Needs outreach" },
+];
+
+/**
+ * What the team decided about a guest with no Zeffy ticket on record. Recorded on the guest
+ * through ordinary fields (ticketType, editedFields, tags, plannerNote), so a re-import keeps
+ * it. See ticketResolution.js for how each choice is written and read back.
+ */
+export const TICKET_RESOLUTIONS = [
+  { id: "comped", label: "Comped", description: "LSP is covering this seat." },
+  { id: "paid-other", label: "Paid another way", description: "Paid outside Zeffy (invoice, cash, sponsor, etc.)." },
+  { id: "outreach", label: "Unseat + needs outreach", description: "Nobody has confirmed this seat. Unseat and follow up." },
 ];
 
 /**
@@ -135,6 +147,7 @@ export const WARNING_TYPES = {
   "together-violated": "Marked keep together, but seated apart",
   "duplicate-name": "Possible duplicate guest",
   "unmatched-guest": "Dinner response with no matching ticket",
+  "needs-outreach": "Waiting on outreach before this guest can be seated",
 };
 
 export function emptyPrefs() {

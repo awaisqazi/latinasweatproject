@@ -43,6 +43,15 @@ function warn(key, severity, type, guestIds, tableIds, message, detail) {
   return w;
 }
 
+/** Tagged "Needs outreach": nobody has confirmed this seat yet. Advice only, like every warning. */
+function outreachWarning(guest, tableId) {
+  return warn(
+    `needs-outreach:${guest.id}`, "info", "needs-outreach",
+    [guest.id], tableId ? [tableId] : [],
+    `${guest.name} is waiting on outreach; not seated until confirmed.`
+  );
+}
+
 /**
  * Indices shared by every rule, built once per computation so a hover preview stays cheap.
  */
@@ -95,6 +104,10 @@ function guestWarnings(ctx, guest) {
       [guest.id], [myTable],
       `${shortName(guest)} is seated for dinner with no entrée selection.`
     ));
+  }
+
+  if ((guest.tags || []).includes("outreach")) {
+    out.push(outreachWarning(guest, myTable));
   }
 
   if (guest.unmatched) {
@@ -337,6 +350,12 @@ export function previewPlacement(plan, guestId, tableId) {
   };
   for (const w of warningsAbout(hypothetical, guestId)) {
     if (!before.has(w.key)) out.push(w);
+  }
+  // Already true before the drop, so the diff above drops it; the planner still needs to see
+  // it while dragging someone who is waiting on outreach. Never blocks the drop.
+  const guest = plan.guests[guestId];
+  if ((guest.tags || []).includes("outreach") && !alreadyHere && !out.some((w) => w.type === "needs-outreach")) {
+    out.push(outreachWarning(guest, tableId));
   }
   return out;
 }

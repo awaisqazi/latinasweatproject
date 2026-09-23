@@ -20,6 +20,7 @@ Zeffy export and the dinner-selection responses **in the browser**; state lives 
 | `preferences.js` | logic | turn free-text seating notes into `guest.prefs` |
 | `warnings.js` | logic | `computeWarnings`, `previewPlacement`, `indexWarnings` |
 | `autoseat.js` | logic | fill empty seats while honoring parties, notes, locks |
+| `ticketResolution.js` | logic | "No ticket on record": comped / paid another way / needs outreach, written into protected guest fields |
 | `exporters.js` | logic | plan JSON in/out with validation, CSV, meal counts, print data |
 | `test/run.mjs` | logic | `node src/lib/galaSeating/test/run.mjs`, synthetic fixtures only |
 | `store.svelte.js` | UI | runes store: plan state, actions, undo/redo, autosave, backups |
@@ -77,6 +78,10 @@ unseatGuest(guestId) ; seatParty(partyId, tableId) ; clearTable(tableId) ; clear
 moveTable(id, x, y) ; updateTable(id, patch) ; addTable() ; removeTable(id) ; resetLayout()
 moveFixture(id, x, y) ; updateFixture(id, patch) ; addFixture(type) ; removeFixture(id)
 updateGuest(id, patch) ; addGuest(partial) ; removeGuest(id)
+resolveNoTicket(guestId, "comped"|"paid-other"|"outreach", note?)   // one undo step; outreach also unseats
+//   comped/paid-other: ticketType comp/benefactor, hasDinner, unmatched false, editedFields += ticketType,hasDinner,
+//   tag "outreach" removed. outreach: tag "outreach" (warning needs-outreach, skipped by auto-seat).
+//   All three prefix plannerNote with "<Label> (<editor>, <Mon D>). " on the America/Chicago clock.
 addConstraint(type, guestIds, note) ; removeConstraint(id)
 dismissWarning(key) ; restoreWarning(key)
 importGuests(guests, sourceLabel)    // uses mergeGuestsIntoPlan; returns its summary

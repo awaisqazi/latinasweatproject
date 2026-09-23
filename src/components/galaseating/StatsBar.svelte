@@ -47,19 +47,33 @@
       {/if}
     </span>
 
-    {#if s.placeholders || s.unmatched}
+    {#if s.placeholders}
       <span class="sb-sep">·</span>
       <button
         type="button"
         class="sb-recon"
         onclick={() => {
-          ui.listFilter = "reconcile";
+          ui.listFilter = "placeholder";
           ui.listOpen = true;
         }}
-        title="Unnamed ticket seats and dinner responses with no ticket"
+        title="Ticket seats the buyer has not named yet"
       >
-        {s.placeholders} unnamed {s.placeholders === 1 ? "seat" : "seats"} · {s.unmatched} unmatched
-        {s.unmatched === 1 ? "diner" : "diners"}
+        {s.placeholders} unnamed {s.placeholders === 1 ? "seat" : "seats"}
+      </button>
+    {/if}
+
+    {#if s.noTicketOpen || s.outreach}
+      <span class="sb-sep">·</span>
+      <button
+        type="button"
+        class="sb-recon"
+        onclick={() => {
+          ui.listFilter = s.noTicketOpen ? "noticket" : "outreach";
+          ui.listOpen = true;
+        }}
+        title="Guests with no Zeffy ticket that nobody has resolved yet, and those waiting on outreach"
+      >
+        {s.noTicketOpen} no-ticket {s.noTicketOpen === 1 ? "seat" : "seats"} to resolve · {s.outreach} waiting on outreach
       </button>
     {/if}
 

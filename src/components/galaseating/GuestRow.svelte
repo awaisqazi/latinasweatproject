@@ -86,6 +86,9 @@
     {:else}
       <span class="gr-ticket" data-sponsor={ticket.sponsor ? "1" : null}>{ticket.short}</span>
     {/if}
+    {#if (guest.tags || []).includes("outreach")}
+      <span class="gr-outreach" title="Waiting on outreach before this guest can be seated">Outreach</span>
+    {/if}
     {#if guest.seatingNote || guest.plannerNote}
       <svg class="gr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Has a note">
         <path d="M5 4h14v16l-7-4-7 4z" stroke-linejoin="round" />
@@ -188,6 +191,17 @@
   .gr-ticket[data-sponsor] {
     color: var(--gs-gold-soft);
     border-color: rgba(228, 201, 138, 0.55);
+  }
+  .gr-outreach {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1d1405;
+    background: var(--gs-warn);
+    border-radius: 2px;
+    padding: 1px 4px;
+    white-space: nowrap;
+    font-weight: 700;
   }
   .gr-ic {
     width: 13px;

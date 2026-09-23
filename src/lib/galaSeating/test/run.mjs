@@ -19,6 +19,11 @@ import { autoSeat, rankTables } from "../autoseat.js";
 import {
   serializePlan, parsePlanFile, seatingCsv, mealCounts, alphaList, tableCards,
 } from "../exporters.js";
+import { applyOps } from "../ops.js";
+import {
+  resolutionPatch, ticketResolutionOf, needsTicketResolution, hasNoZeffyTicket,
+  resolutionAttribution, chicagoShortDate, showsTicketResolution,
+} from "../ticketResolution.js";
 
 /* ------------------------------------------------------------------ *
  * tiny harness
@@ -77,18 +82,18 @@ function ticketRows() {
     [],                                   // blank row in the middle of the sheet
     ticketRow("Luis", "Ramos", "luis@example.net", "104", BENEFACTOR, "Ana Perez", ""),
     ticketRow("Luis", "Ramos", "luis@example.net", "105", BENEFACTOR, "", ""),
-    ticketRow("Dinorah", "Zubieta", "dz@example.com", "106", COMMUNITY, "YTT '26 cohort people", ""),
-    ticketRow("Dinorah", "Zubieta", "dz@example.com", "107", COMMUNITY, "", ""),
-    ticketRow("Dinorah", "Zubieta", "dz@example.com", "108", COMMUNITY, "", ""),
-    ticketRow("Dinorah", "Zubieta", "dz@example.com", "109", COMMUNITY, "", ""),
-    ticketRow("Dinorah", "Zubieta", "dz@example.com", "110", COMMUNITY, "", ""),
+    ticketRow("Delia", "Zamora", "dz@example.com", "106", COMMUNITY, "YTT '26 cohort people", ""),
+    ticketRow("Delia", "Zamora", "dz@example.com", "107", COMMUNITY, "", ""),
+    ticketRow("Delia", "Zamora", "dz@example.com", "108", COMMUNITY, "", ""),
+    ticketRow("Delia", "Zamora", "dz@example.com", "109", COMMUNITY, "", ""),
+    ticketRow("Delia", "Zamora", "dz@example.com", "110", COMMUNITY, "", ""),
     ticketRow("Marcos", "Diaz", "marcos@chubb.example", "111", BENEFACTOR, "no preference but seat with the Chubb people.", "I work at Chubb"),
     ticketRow("Marcos", "Diaz", "marcos@chubb.example", "112", BENEFACTOR, "", "I work at Chubb"),
     ticketRow("Paula", "Nieto", "paula@chubb.example", "113", BENEFACTOR, "", "A Chubb colleague invited me"),
     ticketRow("Edgar", "Gonzalez", "edgar@example.org", "114", BENEFACTOR, "", ""),
     ticketRow("Tomas", "Rivas", "tomas@example.org", "115", LATE_NIGHT, "", ""),
     ticketRow("Tomas", "Rivas", "tomas@example.org", "116", LATE_NIGHT, "", ""),
-    ticketRow("Sofia", "Lane", "sofia@goldco.example", "117", GOLD, "seat with tickets Dinorah Zubieta purchased.", ""),
+    ticketRow("Sofia", "Lane", "sofia@goldco.example", "117", GOLD, "seat with tickets Delia Zamora purchased.", ""),
     ticketRow("Sofia", "Lane", "sofia@goldco.example", "118", GOLD, "", ""),
     ticketRow("Refunded", "Person", "refund@example.org", "119", BENEFACTOR, "", ""),
   ];
@@ -116,13 +121,13 @@ function mealRows() {
     mealRow("2026-09-01T10:05:00Z", "Brenda Cruz", "Ana Perez", "brenda@example.org", "555-0101", RAVIOLI),
     mealRow("2026-09-01T11:00:00Z", "Luis Ramos", "Luis Ramos", "luis@example.net", "", SHORT_RIB),
     mealRow("2026-09-01T11:02:00Z", "Elena Ramos", "Luis Ramos", "luis@example.net", "", WHITEFISH),
-    // Dinorah bought 5 seats but six people answered under her name: capacity wins.
-    mealRow("2026-09-02T09:00:00Z", "Dinorah Zubieta", "Dinorah Zubieta", "dz@example.com", "", SHORT_RIB),
-    mealRow("2026-09-02T09:01:00Z", "Veronica Salas", "Dinorah Zubieta", "vero@example.org", "", WHITEFISH),
-    mealRow("2026-09-02T09:02:00Z", "Elizabeth Fuentes", "Dinorah Zubieta", "liz@example.org", "", RAVIOLI),
-    mealRow("2026-09-02T09:03:00Z", "Giselle Mora", "Dinorah Zubieta", "gigi@example.org", "", SHORT_RIB),
-    mealRow("2026-09-02T09:04:00Z", "Jessica Nava", "Dinorah Zubieta", "jess@example.org", "", SHORT_RIB),
-    mealRow("2026-09-02T09:05:00Z", "Xochitl Barron", "Dinorah Zubieta", "xochitl@example.org", "", WHITEFISH),
+    // Delia bought 5 seats but six people answered under her name: capacity wins.
+    mealRow("2026-09-02T09:00:00Z", "Delia Zamora", "Delia Zamora", "dz@example.com", "", SHORT_RIB),
+    mealRow("2026-09-02T09:01:00Z", "Veronica Salas", "Delia Zamora", "vero@example.org", "", WHITEFISH),
+    mealRow("2026-09-02T09:02:00Z", "Elizabeth Fuentes", "Delia Zamora", "liz@example.org", "", RAVIOLI),
+    mealRow("2026-09-02T09:03:00Z", "Giselle Mora", "Delia Zamora", "gigi@example.org", "", SHORT_RIB),
+    mealRow("2026-09-02T09:04:00Z", "Jessica Nava", "Delia Zamora", "jess@example.org", "", SHORT_RIB),
+    mealRow("2026-09-02T09:05:00Z", "Xochitl Barron", "Delia Zamora", "xochitl@example.org", "", WHITEFISH),
     // Duplicate submissions: the later timestamp wins.
     mealRow("2026-09-03T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@chubb.example", "", SHORT_RIB),
     mealRow("2026-09-04T08:00:00Z", "Marcos Diaz", "Marcos Diaz", "marcos@chubb.example", "", RAVIOLI),
@@ -840,8 +845,8 @@ describe("preferences", () => {
     ].map(([name], i) => mkGuest({ id: `t${i}`, name }));
 
     const dinorah = mkGuest({
-      id: "dz", name: "Dinorah Zubieta", partyId: DZ, partyLabel: "Dinorah Zubieta",
-      buyerName: "Dinorah Zubieta", buyerEmail: DZ,
+      id: "dz", name: "Delia Zamora", partyId: DZ, partyLabel: "Delia Zamora",
+      buyerName: "Delia Zamora", buyerEmail: DZ,
     });
     const paula = mkGuest({
       id: "chubb-other", name: "Paula Nieto", buyerEmail: "paula@chubb.example",
@@ -860,7 +865,7 @@ describe("preferences", () => {
       mkGuest({ id: "a9", name: "Ulises Paz", seatingNote: "Viviana Navarro, Evelyn Cortes" }),
       mkGuest({ id: "a10", name: "Vera Lugo", seatingNote: "Ideally, Brenda, Liz, Vero, Margarita ✨" }),
       mkGuest({ id: "a11", name: "Wendy Sosa", seatingNote: "Estevan, Gigi, Jess, Anabel, Xochyl" }),
-      mkGuest({ id: "a12", name: "Yara Toledo", seatingNote: "seat with tickets Dinorah Zubieta purchased." }),
+      mkGuest({ id: "a12", name: "Yara Toledo", seatingNote: "seat with tickets Delia Zamora purchased." }),
       mkGuest({ id: "a13", name: "Zeta Mendez", seatingNote: "Same as number one!" }),
       mkGuest({ id: "a14", name: "Abel Quinn", seatingNote: "Brad Johnson" }),
       mkGuest({ id: "a15", name: "Bea Solis", seatingNote: "Whoever Nobodyknows" }),
@@ -988,7 +993,7 @@ describe("preferences", () => {
     deepEq(sofia.prefs.withPartyIds, ["dz@example.com"]);
     const marcos = guests.find((g) => g.name === "Marcos Diaz");
     deepEq(marcos.prefs.groups, ["chubb"]);
-    const dinorah = guests.find((g) => g.name === "Dinorah Zubieta");
+    const dinorah = guests.find((g) => g.name === "Delia Zamora");
     deepEq(dinorah.prefs.groups, ["ytt26"]);
   });
 });
@@ -1578,7 +1583,7 @@ describe("autoSeat · prominence", () => {
 
   it("keeps someone at the front when they asked for a whole party there", () => {
     const host = Array.from({ length: 4 }, (_, i) =>
-      mkGuest({ name: `Host seat ${i}`, partyId: "host@example.org", partyLabel: "Dinorah Zubieta", ticketType: "community" }));
+      mkGuest({ name: `Host seat ${i}`, partyId: "host@example.org", partyLabel: "Delia Zamora", ticketType: "community" }));
     const asker = mkGuest({ name: "Yara Toledo", prefs: { ...emptyPrefs(), status: "resolved", withPartyIds: ["host@example.org"] } });
     const crowd = Array.from({ length: 20 }, (_, i) => mkGuest({ name: `Guest ${i}` }));
     const plan = frontPlan([...crowd, ...host, asker]);
@@ -1861,6 +1866,151 @@ describe("generic guest names are never merged", () => {
     deepEq(out.responses.map((r) => r.guestName).sort(), ["Ana Ruiz", "Guest of Pat Lee", "Guest of Pat Lee (2)"]);
     eq(out.responses.find((r) => r.guestName === "Ana Ruiz").selection, "Asparagus Artichoke Ravioli (V)", "a named repeat still takes the latest answer");
     ok(isGenericGuestName("Guest of CPA") && isGenericGuestName("+1") && isGenericGuestName("Plus one") && !isGenericGuestName("Guestina Ortiz"), "generic-name detection");
+  });
+});
+
+describe("no ticket on record", () => {
+  // 03:00 UTC on Sep 24 is still the evening of Sep 23 in Chicago.
+  const WHEN = new Date("2026-09-24T03:00:00Z");
+
+  /** The same ops the store's resolveNoTicket emits, applied through ops.js. */
+  function resolve(plan, guestId, resolutionId, note = "", editor = "Marisol") {
+    const built = resolutionPatch(plan.guests[guestId], resolutionId, { editor, when: WHEN, note });
+    const ops = [];
+    if (built.unseat && plan.seating[guestId]) ops.push({ op: "unseat", g: guestId });
+    ops.push({ op: "guest_patch", g: guestId, patch: built.patch });
+    return applyOps(plan, ops);
+  }
+
+  function diner(over = {}) {
+    return mkGuest({ ticketType: "unknown", unmatched: true, plannerNote: "Met at the open house.", ...over });
+  }
+
+  it("dates the stamp on the Chicago clock", () => {
+    eq(chicagoShortDate(WHEN), "Sep 23");
+  });
+
+  it("comped: comp ticket, dinner, matched, locked fields, stamped note", () => {
+    const g = diner({ id: "nt-comp", name: "Paloma Ibarra", tags: ["outreach", "vip"] });
+    const plan = resolve(makePlan([g]), g.id, "comped", "Board guest");
+    const after = plan.guests[g.id];
+    eq(after.ticketType, "comp");
+    eq(after.hasDinner, true);
+    eq(after.unmatched, false);
+    deepEq(after.tags, ["vip"], "outreach tag removed, other tags kept");
+    deepEq(after.editedFields, ["ticketType", "hasDinner"]);
+    eq(after.plannerNote, "Comped (Marisol, Sep 23). Board guest. Met at the open house.");
+    eq(ticketResolutionOf(after), "comped");
+    eq(resolutionAttribution(after, "comped"), "Marisol, Sep 23");
+    ok(!needsTicketResolution(after) && showsTicketResolution(after), "resolved, status line still shown");
+  });
+
+  it("the status line survives on a diner who carries a stray ticket number", () => {
+    const g = diner({ id: "nt-num", name: "Celia Robles", ticketNumbers: ["X-1"] });
+    const after = resolve(makePlan([g]), g.id, "comped").guests[g.id];
+    ok(showsTicketResolution(after), "stamped in the note, so still shown");
+    const handSet = { ...mkGuest({ id: "nt-hand", name: "Irma Vela", ticketType: "comp", ticketNumbers: ["X-2"] }), editedFields: ["ticketType"] };
+    ok(!showsTicketResolution(handSet), "a ticketed guest switched to Comp by hand is not a no-ticket case");
+  });
+
+  it("paid another way: benefactor ticket with ticketType locked", () => {
+    const g = { ...diner({ id: "nt-paid", name: "Teodoro Villa" }), editedFields: ["meal"] };
+    const plan = resolve(makePlan([g]), g.id, "paid-other");
+    const after = plan.guests[g.id];
+    eq(after.ticketType, "benefactor");
+    eq(after.hasDinner, true);
+    eq(after.unmatched, false);
+    deepEq(after.editedFields, ["meal", "ticketType", "hasDinner"]);
+    eq(after.plannerNote, "Paid another way (Marisol, Sep 23). Met at the open house.");
+    eq(ticketResolutionOf(after), "paid-other");
+  });
+
+  it("outreach: unseats, tags, stamps, and leaves the ticket fields alone", () => {
+    const g = diner({ id: "nt-out", name: "Graciela Otero" });
+    let plan = seatAt(makePlan([g]), g.id, "t1", 2);
+    plan = resolve(plan, g.id, "outreach", "Call her Friday");
+    const after = plan.guests[g.id];
+    ok(!plan.seating[g.id], "unseated");
+    deepEq(after.tags, ["outreach"]);
+    eq(after.ticketType, "unknown");
+    eq(after.unmatched, true);
+    ok(!("editedFields" in after), "no ticket fields claimed");
+    eq(after.plannerNote, "Needs outreach (Marisol, Sep 23). Call her Friday. Met at the open house.");
+    eq(ticketResolutionOf(after), "outreach");
+    ok(hasNoZeffyTicket(after) && !needsTicketResolution(after), "still no ticket, but decided");
+  });
+
+  it("a hand-added guest with no ticket number counts as no ticket until resolved", () => {
+    const g = mkGuest({ id: "nt-man", name: "Oscar Lemus", ticketType: "unknown", source: "manual" });
+    ok(hasNoZeffyTicket(g) && needsTicketResolution(g));
+    const withTicket = mkGuest({ id: "nt-man2", name: "Ines Cordero", source: "manual", ticketNumbers: ["900"] });
+    ok(!hasNoZeffyTicket(withTicket), "a ticket number is a ticket");
+    ok(!needsTicketResolution(resolve(makePlan([g]), g.id, "paid-other").guests[g.id]));
+  });
+
+  it("outreach warning appears for the tag and clears once the seat is comped", () => {
+    const g = diner({ id: "nt-warn", name: "Rocio Anaya" });
+    let plan = resolve(makePlan([g]), g.id, "outreach");
+    const w = computeWarnings(plan).find((x) => x.type === "needs-outreach");
+    ok(w, "needs-outreach emitted");
+    eq(w.key, "needs-outreach:nt-warn");
+    eq(w.severity, "info");
+    eq(w.message, "Rocio Anaya is waiting on outreach; not seated until confirmed.");
+    plan = resolve(plan, g.id, "comped");
+    ok(!typesOf(computeWarnings(plan)).includes("needs-outreach"), "cleared");
+  });
+
+  it("previewPlacement still shows the outreach warning on a drop, without blocking it", () => {
+    const g = diner({ id: "nt-drag", name: "Beatriz Solano" });
+    const plan = resolve(makePlan([g]), g.id, "outreach");
+    const preview = previewPlacement(plan, g.id, "t2");
+    has(typesOf(preview), "needs-outreach");
+    ok(!preview.some((x) => x.severity === "error"), "advice only");
+  });
+
+  it("auto-seat skips guests waiting on outreach", () => {
+    const a = diner({ id: "nt-as1", name: "Leonel Aguirre" });
+    const b = mkGuest({ id: "nt-as2", name: "Mariela Pineda" });
+    const plan = resolve(makePlan([a, b], { tableCount: 2, seats: 4 }), a.id, "outreach");
+    const res = autoSeat(plan, {});
+    ok(!res.plan.seating[a.id], "not seated");
+    ok(res.plan.seating[b.id], "everyone else still seated");
+    deepEq(res.skipped.filter((s) => s.guestId === a.id), [{ guestId: a.id, reason: "needs outreach" }]);
+    const all = autoSeat(plan, { onlyUnseated: false });
+    ok(!all.plan.seating[a.id], "not seated on a full reshuffle either");
+  });
+
+  it("a fresh import keeps all three resolutions", () => {
+    const { guests } = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    let plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), guests).plan;
+    const unmatched = Object.values(plan.guests).filter((g) => g.unmatched);
+    ok(unmatched.length >= 2, "fixture has unmatched diners");
+    const [first, second] = unmatched;
+    const walkIn = mkGuest({ id: "nt-walkin", name: "Amparo Quiroz", ticketType: "unknown", source: "manual" });
+    plan = { ...plan, guests: { ...plan.guests, [walkIn.id]: walkIn } };
+
+    plan = resolve(plan, first.id, "comped");
+    plan = resolve(plan, second.id, "paid-other");
+    plan = resolve(plan, walkIn.id, "outreach");
+
+    const fresh = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() }).guests;
+    const merged = mergeGuestsIntoPlan(plan, fresh).plan;
+    eq(ticketResolutionOf(merged.guests[first.id]), "comped");
+    eq(merged.guests[first.id].unmatched, false);
+    eq(ticketResolutionOf(merged.guests[second.id]), "paid-other");
+    eq(merged.guests[second.id].ticketType, "benefactor");
+    eq(ticketResolutionOf(merged.guests[walkIn.id]), "outreach");
+    ok(merged.guests[first.id].plannerNote.startsWith("Comped (Marisol, Sep 23)."), "note kept");
+  });
+
+  it("outreach on an imported diner survives a re-import too", () => {
+    const { guests } = buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() });
+    let plan = mergeGuestsIntoPlan(makePlan([], { tableCount: 4, seats: 10 }), guests).plan;
+    const target = Object.values(plan.guests).find((g) => g.unmatched);
+    plan = resolve(plan, target.id, "outreach");
+    const merged = mergeGuestsIntoPlan(plan, buildGuestsFromRows({ ticketRows: ticketRows(), mealRows: mealRows() }).guests).plan;
+    eq(ticketResolutionOf(merged.guests[target.id]), "outreach");
+    has(merged.guests[target.id].tags, "outreach");
   });
 });
 

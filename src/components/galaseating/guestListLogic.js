@@ -9,6 +9,7 @@
 // stored, logged or sent.
 
 import { GUEST_TAGS, MEALS, TICKET_TYPES, guestList, ticketTypeById } from "../../lib/galaSeating/model.js";
+import { needsOutreach, needsTicketResolution } from "../../lib/galaSeating/ticketResolution.js";
 
 export const SORTS = [
   { id: "last", label: "Last name A to Z" },
@@ -83,6 +84,10 @@ export function passesFilter(plan, warningsByGuest, g, key) {
       return Boolean(g.unmatched);
     case "reconcile":
       return Boolean(g.placeholder || g.unmatched);
+    case "noticket":
+      return needsTicketResolution(g);
+    case "outreach":
+      return needsOutreach(g);
     default:
       if (key.startsWith("meal:")) return g.meal === key.slice(5);
       if (key.startsWith("ticket:")) return g.ticketType === key.slice(7);
@@ -102,13 +107,15 @@ export function filterChips(plan, warningsByGuest, searched) {
     { key: "placeholder", label: "Unnamed seats" },
     { key: "unmatched", label: "No ticket match" },
     { key: "reconcile", label: "To reconcile" },
+    { key: "noticket", label: "No ticket to resolve" },
+    { key: "outreach", label: "Needs outreach" },
   ];
   const meals = MEALS.map((m) => ({ key: `meal:${m.id}`, label: m.short }));
   const tickets = TICKET_TYPES.filter((t) => all.some((g) => g.ticketType === t.id)).map((t) => ({
     key: `ticket:${t.id}`,
     label: t.short,
   }));
-  const tags = GUEST_TAGS.filter((t) => all.some((g) => (g.tags || []).includes(t.id))).map((t) => ({
+  const tags = GUEST_TAGS.filter((t) => t.id !== "outreach" && all.some((g) => (g.tags || []).includes(t.id))).map((t) => ({
     key: `tag:${t.id}`,
     label: t.label,
   }));

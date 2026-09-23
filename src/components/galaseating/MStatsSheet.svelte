@@ -23,8 +23,8 @@
     ravioli: "var(--gs-meal-ravioli)",
   };
 
-  function reconcile() {
-    ui.listChips = ["reconcile"];
+  function reconcile(chip = "reconcile") {
+    ui.listChips = [chip];
     ui.listSegment = "all";
     nav.closeTop();
     queueMicrotask(() => nav.selectTab("guests"));
@@ -72,13 +72,32 @@
         {/if}
       </ul>
 
-      {#if s.placeholders || s.unmatched}
+      {#if s.placeholders || s.noTicketOpen || s.outreach}
         <h3 class="mss-h">Still to reconcile</h3>
-        <p class="mss-recon">
-          {s.placeholders} unnamed {s.placeholders === 1 ? "seat" : "seats"} · {s.unmatched} unmatched
-          {s.unmatched === 1 ? "diner" : "diners"}
-        </p>
-        <button type="button" class="mss-btn" onclick={reconcile}>Show them in the guest list</button>
+        {#if s.placeholders}
+          <p class="mss-recon">{s.placeholders} unnamed {s.placeholders === 1 ? "seat" : "seats"}</p>
+        {/if}
+        {#if s.noTicketOpen || s.outreach}
+          <p class="mss-recon">
+            {s.noTicketOpen} no-ticket {s.noTicketOpen === 1 ? "seat" : "seats"} to resolve · {s.outreach} waiting on
+            outreach
+          </p>
+        {/if}
+        <div class="mss-btns">
+          {#if s.noTicketOpen}
+            <button type="button" class="mss-btn" onclick={() => reconcile("noticket")}>Show no-ticket guests</button>
+          {/if}
+          {#if s.outreach}
+            <button type="button" class="mss-btn mss-btn--plain" onclick={() => reconcile("outreach")}>
+              Show who needs outreach
+            </button>
+          {/if}
+          {#if s.placeholders}
+            <button type="button" class="mss-btn mss-btn--plain" onclick={() => reconcile("placeholder")}>
+              Show unnamed seats
+            </button>
+          {/if}
+        </div>
       {/if}
     </div>
   {/snippet}
@@ -167,5 +186,13 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
+  }
+  .mss-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mss-btn--plain {
+    background: #fffdf9;
   }
 </style>
