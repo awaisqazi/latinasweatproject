@@ -74,7 +74,7 @@
           {#if table && seat}
             <span class="mgc-seatnow">{tableLabel(table)} · seat {seat.seat + 1}</span>
           {:else if guest.hasDinner === false}
-            <span class="mgc-seatnow mgc-seatnow--none">Late night, no dinner seat</span>
+            <span class="mgc-seatnow mgc-seatnow--none">Late night · arrives 9 PM · no dinner seat</span>
           {:else}
             <span class="mgc-seatnow mgc-seatnow--none">Not seated</span>
           {/if}

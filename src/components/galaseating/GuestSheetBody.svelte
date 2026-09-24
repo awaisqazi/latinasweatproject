@@ -245,6 +245,8 @@
   <div class="gsh-seatline">
     {#if table && seat}
       <span class="gsh-seatnow">{tableLabel(table)} · seat {seat.seat + 1}</span>
+    {:else if guest.hasDinner === false}
+      <span class="gsh-seatnow gsh-seatnow--none">Late night · arrives 9 PM · no dinner seat</span>
     {:else}
       <span class="gsh-seatnow gsh-seatnow--none">Not seated</span>
     {/if}

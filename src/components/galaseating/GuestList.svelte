@@ -194,7 +194,8 @@
     const sectionOf = (g) => {
       if (sort === "table") {
         const t = tableOf(g);
-        return t ? (t.name ? `Table ${t.number} · ${t.name}` : `Table ${t.number}`) : "Unseated";
+        if (t) return t.name ? `Table ${t.number} · ${t.name}` : `Table ${t.number}`;
+        return g.hasDinner === false ? "Late night · 9 PM · no dinner seat" : "Unseated";
       }
       if (sort === "party") return g.partyLabel;
       if (sort === "ticket") return ticketTypeById(g.ticketType).label;

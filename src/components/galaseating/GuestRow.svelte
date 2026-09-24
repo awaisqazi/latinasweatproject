@@ -63,7 +63,7 @@
   role="button"
   tabindex="0"
   aria-pressed={selected}
-  aria-label={`${guest.name}${seat && table ? `, seated at table ${table.number}` : ", unseated"}`}
+  aria-label={`${guest.name}${seat && table ? `, seated at table ${table.number}` : guest.hasDinner === false ? ", late night access, no dinner seat" : ", unseated"}`}
   onpointerdown={onPointerDown}
   onkeydown={onKeydown}
   style={watcher ? `--gs-watch:${watcher.color}` : ""}

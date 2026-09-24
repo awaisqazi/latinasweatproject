@@ -297,7 +297,7 @@
         const table = spot ? plan.tables.find((t) => t.id === spot.tableId) : null;
         return {
           name: lastFirst(g.name),
-          table: table ? `Table ${table.number}` : "Not seated",
+          table: table ? `Table ${table.number}` : g.hasDinner === false ? "Late night · 9 PM" : "Not seated",
           meal: mealShort(g.meal),
           sortKey: lastFirst(g.name).toLowerCase(),
         };

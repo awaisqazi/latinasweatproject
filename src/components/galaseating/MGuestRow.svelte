@@ -82,7 +82,7 @@
   {#if seat && table}
     <span class="mgr-chip">T{table.number}</span>
   {:else if guest.hasDinner === false}
-    <span class="mgr-chip mgr-chip--none">No seat</span>
+    <span class="mgr-chip mgr-chip--none">Late night · 9 PM</span>
   {:else}
     <span class="mgr-chip mgr-chip--open">Unseated</span>
   {/if}

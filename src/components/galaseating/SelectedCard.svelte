@@ -47,6 +47,8 @@
       <p class="sc-meta">
         {#if table && seat}
           <span class="sc-where">{tableLabel(table)} · seat {seat.seat + 1}</span>
+        {:else if guest.hasDinner === false}
+          <span class="sc-where sc-where--none">Late night · arrives 9 PM · no dinner seat</span>
         {:else}
           <span class="sc-where sc-where--none">Not seated yet</span>
         {/if}
