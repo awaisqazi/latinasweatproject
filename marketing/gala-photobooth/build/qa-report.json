@@ -1,0 +1,450 @@
+[
+  {
+    "frame": "gala-mca",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 60,
+      "y": 400,
+      "w": 960,
+      "h": 1270,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 60,
+      "y": 300,
+      "w": 960,
+      "h": 880,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 160,
+      "y": 667,
+      "w": 2080,
+      "h": 1956,
+      "r": 62
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 111,
+      "y": 111,
+      "w": 1929,
+      "h": 1778,
+      "r": 52
+    },
+    "minText1080": 26,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 60,
+      "y": 240,
+      "w": 960,
+      "h": 1430,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 60,
+      "y": 180,
+      "w": 960,
+      "h": 980,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 160,
+      "y": 400,
+      "w": 2080,
+      "h": 2178,
+      "r": 62
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 111,
+      "y": 111,
+      "w": 1929,
+      "h": 1778,
+      "r": 52
+    },
+    "minText1080": 24.68,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-plaque",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 60,
+      "y": 440,
+      "w": 960,
+      "h": 1250,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-plaque",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 60,
+      "y": 330,
+      "w": 960,
+      "h": 860,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-plaque",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 160,
+      "y": 733,
+      "w": 2080,
+      "h": 1911,
+      "r": 62
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-plaque",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 111,
+      "y": 111,
+      "w": 1929,
+      "h": 1778,
+      "r": 52
+    },
+    "minText1080": 25.29,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-paddle",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 60,
+      "y": 190,
+      "w": 960,
+      "h": 1440,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-paddle",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 60,
+      "y": 150,
+      "w": 960,
+      "h": 970,
+      "r": 28
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-paddle",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 160,
+      "y": 333,
+      "w": 2080,
+      "h": 2156,
+      "r": 62
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-paddle",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 111,
+      "y": 111,
+      "w": 1929,
+      "h": 1778,
+      "r": 52
+    },
+    "minText1080": 26,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca-stamp",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca-stamp",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca-stamp",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 2400,
+      "h": 3000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-mca-stamp",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 3000,
+      "h": 2000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night-stamp",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night-stamp",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night-stamp",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 2400,
+      "h": 3000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-night-stamp",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 3000,
+      "h": 2000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-somos-stamp",
+    "file": "ig-story-1080x1920.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1920",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-somos-stamp",
+    "file": "ig-post-1080x1350.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "1080x1350",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-somos-stamp",
+    "file": "portrait-2400x3000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 2400,
+      "h": 3000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "2400x3000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  },
+  {
+    "frame": "gala-somos-stamp",
+    "file": "landscape-3000x2000.png",
+    "win": {
+      "x": 0,
+      "y": 0,
+      "w": 3000,
+      "h": 2000,
+      "r": 0
+    },
+    "minText1080": 26,
+    "size": "3000x2000",
+    "leak": 0,
+    "hole": 0,
+    "midInk": 0
+  }
+]

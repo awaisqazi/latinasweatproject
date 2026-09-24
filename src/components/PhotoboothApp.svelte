@@ -246,15 +246,17 @@
             const st = frameTextStyle(frameId);
             const fontOf = (px) =>
                 `${st.italic ? "italic " : ""}${st.weight} ${px}px ${st.family}`;
+            // Some designs (the gala set) set guest text in caps.
+            const label = st.caps ? el.text.toUpperCase() : el.text;
             let fontPx = st.size * el.scale;
             ctx.font = fontOf(fontPx);
-            let textW = ctx.measureText(el.text).width;
+            let textW = ctx.measureText(label).width;
             // Never let a line run off the canvas, whatever its length/scale.
             const maxW = ratio.width * 0.94 - fontPx;
             if (textW > maxW) {
                 fontPx *= maxW / textW;
                 ctx.font = fontOf(fontPx);
-                textW = ctx.measureText(el.text).width;
+                textW = ctx.measureText(label).width;
             }
             const padX = fontPx * 0.55;
             const w = textW + padX * 2;
@@ -265,7 +267,7 @@
             ctx.fillStyle = st.color;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(el.text, 0, fontPx * 0.06);
+            ctx.fillText(label, 0, fontPx * 0.06);
             bboxes.set(el.id, { w, h });
         } else if (el.kind === "emoji") {
             const px = 120 * el.scale;
@@ -769,7 +771,7 @@
                 Say something
             </p>
             <div class="mt-2 flex flex-wrap gap-1.5">
-                {#each framePresets(frameId) as line (line)}
+                {#each framePresets(frameId, ratioId) as line (line)}
                     <button
                         type="button"
                         onclick={() => addText(line, "preset")}

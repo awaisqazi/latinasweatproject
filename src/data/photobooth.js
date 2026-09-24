@@ -69,6 +69,25 @@ export const WINDOW_OVERRIDES = {
     portrait: { x: 70, y: 250, w: 940, h: 750, r: 22 },
     square: { x: 70, y: 230, w: 940, h: 560, r: 22 },
   },
+  // Gala 2026 modernist set: the headline band carries a circle X badge that
+  // breaks its bottom edge, so the window starts below the badge.
+  "gala-mca": {
+    story: { x: 60, y: 400, w: 960, h: 1270, r: 28 },
+    portrait: { x: 60, y: 300, w: 960, h: 880, r: 28 },
+    square: { x: 60, y: 276, w: 960, h: 654, r: 28 },
+  },
+  "gala-plaque": {
+    story: { x: 60, y: 440, w: 960, h: 1250, r: 28 },
+    portrait: { x: 60, y: 330, w: 960, h: 860, r: 28 },
+    square: { x: 60, y: 300, w: 960, h: 640, r: 28 },
+  },
+  // One mono line up top, the paddle + RAISE YOUR PADDLE along the bottom:
+  // the window shifts up so the bottom band has room.
+  "gala-paddle": {
+    story: { x: 60, y: 190, w: 960, h: 1440, r: 28 },
+    portrait: { x: 60, y: 150, w: 960, h: 970, r: 28 },
+    square: { x: 60, y: 140, w: 960, h: 730, r: 28 },
+  },
 };
 
 export const photoWindow = (frameId, ratioId) => {
@@ -86,6 +105,76 @@ export const photoWindow = (frameId, ratioId) => {
 // picker thumbnails (the photo always covers the canvas), so they use a
 // neutral gray that keeps the translucent stamps readable there.
 export const PHOTOBOOTH_FRAMES = [
+  // Annual Gala 2026 (Fri Sep 25, MCA Chicago) in the program's black-and-
+  // white modernist identity. Leads the catalog (and is the landing default)
+  // through gala week; the sunset retires the block. `textStyle` points guest
+  // text at a shared style key (see TEXT_STYLES).
+  {
+    id: "gala-mca",
+    name: "LSP at the MCA",
+    tag: "Fri, Sep 25",
+    backdrop: "#FFFFFF",
+    accent: "#FFBD59",
+    textStyle: "gala26",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-night",
+    name: "One Night",
+    tag: "Fri, Sep 25",
+    backdrop: "#000000",
+    accent: "#FFBD59",
+    textStyle: "gala26-night",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-plaque",
+    name: "Gala Plaque",
+    tag: "Annual Gala 2026",
+    backdrop: "#FFFFFF",
+    accent: "#FFBD59",
+    textStyle: "gala26",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-paddle",
+    name: "Raise Your Paddle",
+    tag: "Paddle 26",
+    backdrop: "#FFFFFF",
+    accent: "#FFBD59",
+    textStyle: "gala26",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-mca-stamp",
+    name: "MCA Stamp",
+    tag: "Full photo",
+    backdrop: "#8a8a8a",
+    accent: "#FFBD59",
+    fullBleed: true,
+    textStyle: "gala26-night",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-night-stamp",
+    name: "Night Stamp",
+    tag: "Full photo",
+    backdrop: "#8a8a8a",
+    accent: "#FFBD59",
+    fullBleed: true,
+    textStyle: "gala26-night",
+    sunset: "2026-10-02",
+  },
+  {
+    id: "gala-somos-stamp",
+    name: "Somos LSP",
+    tag: "Full photo",
+    backdrop: "#8a8a8a",
+    accent: "#FFBD59",
+    fullBleed: true,
+    textStyle: "gala26-night",
+    sunset: "2026-10-02",
+  },
   // The Sweat Fest family leads the catalog through the festival window (the
   // "meet me there" campaign wants a fest frame as the landing default);
   // sunset dates retire the whole block and studio takes over again.
@@ -343,6 +432,30 @@ const TEXT_STYLES = {
     scrim: "rgba(5, 7, 12, 0.68)",
     tilt: 0,
   },
+  // Gala 2026 modernist set. The print faces (Archivo Expanded Black, Space
+  // Mono) aren't shipped to the browser, so guest text uses the closest
+  // system stack in heavy caps (`caps` uppercases on-canvas). Black on white
+  // for the white-framed designs, white on black for the night + stamps.
+  gala26: {
+    family: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    weight: 800,
+    italic: false,
+    caps: true,
+    size: 34,
+    color: "#000000",
+    scrim: "rgba(255, 255, 255, 0.92)",
+    tilt: 0,
+  },
+  "gala26-night": {
+    family: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    weight: 800,
+    italic: false,
+    caps: true,
+    size: 34,
+    color: "#FFFFFF",
+    scrim: "rgba(0, 0, 0, 0.82)",
+    tilt: 0,
+  },
 };
 
 const PRESET_LINES = {
@@ -404,17 +517,39 @@ const PRESET_LINES = {
     "See you Sept 25",
   ],
 };
+// Per-ratio presets: stories speak first person, feed formats keep timeless
+// brand lines (framePresets picks by ratio when a design lists both).
+const GALA26_PRESETS = {
+  story: [
+    "Meet me at the MCA tonight",
+    "Dressed up for a reason",
+    "Raising my paddle for LSP",
+  ],
+  feed: ["One night at the MCA", "Para la comunidad", "Somos LSP"],
+};
+PRESET_LINES.gala26 = GALA26_PRESETS;
+PRESET_LINES["gala26-night"] = GALA26_PRESETS;
 
-const baseDesign = (frameId) => frameId.replace(/-stamp$/, "");
+const baseDesign = (frameId) =>
+  PHOTOBOOTH_FRAMES.find((f) => f.id === frameId)?.textStyle ??
+  frameId.replace(/-stamp$/, "");
 export const frameTextStyle = (frameId) => TEXT_STYLES[baseDesign(frameId)];
-export const framePresets = (frameId) => PRESET_LINES[baseDesign(frameId)];
+export const framePresets = (frameId, ratioId) => {
+  const lines = PRESET_LINES[baseDesign(frameId)];
+  if (Array.isArray(lines)) return lines;
+  return ratioId === "story" ? lines.story : lines.feed;
+};
 
 // Sticker tray: brand marks (PNGs with real transparency; the small ones are
 // rendered by scripts/render-photobooth-frames.mjs) plus a curated emoji set.
 // Event stickers carry `sunset` like frames do; resolve via activeStickers().
 const FEST_SUNSET = "2026-08-29";
+const GALA_SUNSET = "2026-10-02";
 const stickerSrc = (name) => `/images/photobooth/stickers/${name}.png`;
 export const PHOTOBOOTH_STICKERS = [
+  // Annual Gala 2026 die-cuts, from the printed sticker sheet.
+  { id: "gala-facade", kind: "image", src: stickerSrc("gala-facade"), label: "MCA facade badge", sunset: GALA_SUNSET },
+  { id: "gala-somos", kind: "image", src: stickerSrc("gala-somos"), label: "Somos LSP", sunset: GALA_SUNSET },
   // Sweat Fest campaign set: "I'm going, come with me" props, retired with
   // the fest frames.
   { id: "fest-ticket", kind: "image", src: stickerSrc("fest-ticket"), label: "Fest ticket", sunset: FEST_SUNSET },

@@ -26,6 +26,14 @@ import {
   whiteHorizontalLogoSvg,
   whiteHorizontalLogoSize,
 } from "../src/data/sweatFestLogos.js";
+// Annual Gala 2026 modernist set (shared with the client PNG export in
+// marketing/gala-photobooth/export-frames.mjs).
+import {
+  gala26Builders,
+  gala26FontCss,
+  gala26Prepare,
+  gala26Stickers,
+} from "./photobooth-gala26.mjs";
 
 // Sweat Fest logo palette (see sweatFestPalette in src/data/sweatFest.js);
 // ink stays #1e1e1e to match the original fest frame in the same tray.
@@ -69,6 +77,7 @@ const css = `
   ${fontFace("Filson Soft", siteFont("filson-soft-700.woff2"), "woff2", 700)}
   ${fontFace("Filson Soft", siteFont("filson-soft-800.woff2"), "woff2", 800)}
   ${fontFace("Rubik", path.join(root, "tools/renderfonts/Rubik.ttf"), "truetype")}
+  ${gala26FontCss}
   html, body { margin: 0; padding: 0; background: transparent; }
   svg { display: block; width: 100vw; height: 100vh; }
 `;
@@ -759,7 +768,21 @@ const builders = {
   "sweatfest-pachanga": buildSweatfestPachanga,
   gala: buildGala,
   "gala-stamp": buildGalaStamp,
+  ...gala26Builders,
 };
+
+// The gala set fits and aligns text by Chrome-measured widths: dry-run its
+// builders (and stickers) once so every string is measured before rendering.
+await gala26Prepare(() => {
+  for (const frame of PHOTOBOOTH_FRAMES) {
+    if (!gala26Builders[frame.id]) continue;
+    for (const ratio of PHOTOBOOTH_RATIOS) {
+      const { width: W, height: H } = ratio;
+      gala26Builders[frame.id]({ W, H, win: photoWindow(frame.id, ratio.id), ratioId: ratio.id });
+    }
+  }
+  gala26Stickers("");
+});
 
 for (const frame of PHOTOBOOTH_FRAMES) {
   const build = builders[frame.id];
@@ -827,6 +850,7 @@ const festW = Math.round(
 );
 const festPad = 18;
 const stickers = [
+  ...gala26Stickers(dieCut),
   {
     // The lockup already reads as a card; a white die-cut ring + shadow
     // makes it sit on photos like a real sticker.
