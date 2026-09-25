@@ -1,11 +1,13 @@
 <script>
   // "Find my table" on a guest's phone (/gala/live, the phone view). Asked once,
-  // softly: the guest types their name (or skips), picks themselves if several
-  // people match, and from then on the first card on the page is their table
-  // and seat with the corridor map, in every segment of the night. The answer
-  // is re-checked every few minutes in case the planners move someone.
-  // Server: gala_display_find_seat. Storage: this browser's localStorage only.
-  import { onMount } from "svelte";
+  // softly: the guest starts typing their name (or skips) and matching guests
+  // appear under the field as they type; tapping one shows their table and
+  // seat with the corridor map. From then on that is the first card on the
+  // page, in every segment of the night, re-checked every few minutes in case
+  // the planners move someone. Server: gala_display_find_seat (prefix search,
+  // at most 8 rows of name / table / seat / late night). Storage: this
+  // browser's localStorage only.
+  import { onMount, tick } from "svelte";
   import { TABLE_ROWS } from "../../../lib/galaLive/program.js";
   import {
     readFindSeat, writeFindSeat, findSeat, sameMatch, FIND_SEAT_REFRESH_MS,
@@ -14,94 +16,138 @@
 
   let { event = "gala-2026" } = $props();
 
+  const DEBOUNCE_MS = 250;
+  const letters = (q) => String(q || "").replace(/[^\p{L}]/gu, "").length;
+
   // Read synchronously so the first paint is already the right card.
   const saved = readFindSeat();
-  let query = $state(saved.query);
+  let query = $state(saved.query); // the name the pick was found with
   let pick = $state(saved.pick);
   let skipped = $state(saved.skipped);
-  let input = $state(saved.pick ? "" : saved.query);
+  let input = $state("");
+  let inputEl = $state(null);
+  let results = $state([]);
+  let searched = $state(""); // the text the current results answer
   let busy = $state(false);
-  let candidates = $state([]);
-  let note = $state(""); // "", "none", "short", "offline"
-  let open = $state(false); // the skipped guest reopened the prompt
+  let failed = $state(false);
+  let open = $state(false); // the skipped guest reopened the search
 
-  const view = $derived(
-    pick ? "result" : candidates.length ? "choose" : skipped && !open ? "collapsed" : "ask",
+  const view = $derived(pick ? "result" : skipped && !open ? "collapsed" : "ask");
+  const typed = $derived(input.trim());
+  const status = $derived(
+    !typed
+      ? ""
+      : letters(typed) < 2
+        ? "short"
+        : busy && !results.length
+          ? "busy"
+          : failed
+            ? "offline"
+            : searched === typed && !results.length
+              ? letters(typed) >= 3 ? "none" : "short"
+              : "",
   );
 
   function save() {
     writeFindSeat({ query, pick, skipped });
   }
 
-  async function submit(e) {
-    e?.preventDefault();
+  // Search as the guest types: debounced, and a newer keystroke aborts the
+  // request still in flight so a slow answer never overwrites a newer one.
+  let debounce = 0;
+  let inflight = null;
+  function onType() {
+    clearTimeout(debounce);
+    failed = false;
     const q = input.trim();
-    note = "";
-    if (q.replace(/[^\p{L}]/gu, "").length < 3) {
-      note = "short";
+    if (letters(q) < 2) {
+      inflight?.abort();
+      inflight = null;
+      busy = false;
+      results = [];
+      searched = "";
       return;
     }
+    debounce = setTimeout(() => run(q), DEBOUNCE_MS);
+  }
+  async function run(q) {
+    inflight?.abort();
+    const ctl = new AbortController();
+    inflight = ctl;
     busy = true;
-    const res = await findSeat(event, q);
+    const res = await findSeat(event, q, { signal: ctl.signal });
+    if (ctl.signal.aborted || inflight !== ctl) return;
+    inflight = null;
     busy = false;
     if (!res.ok) {
-      note = res.reason === "short" ? "short" : res.reason === "offline" ? "offline" : "none";
+      if (res.reason === "short") {
+        results = [];
+        searched = q;
+      } else failed = true;
       return;
     }
-    query = q;
-    if (!res.matches.length) {
-      note = "none";
-      save();
-      return;
-    }
-    if (res.matches.length === 1) {
-      choose(res.matches[0]);
-      return;
-    }
-    candidates = res.matches;
+    results = res.matches;
+    searched = q;
+  }
+
+  function submit(e) {
+    e?.preventDefault();
+    clearTimeout(debounce);
+    const q = input.trim();
+    if (letters(q) >= 2) run(q);
   }
 
   function choose(m) {
     pick = m;
-    candidates = [];
+    query = m.name;
+    results = [];
+    searched = "";
+    input = "";
     skipped = false;
     open = false;
-    note = "";
     save();
   }
 
-  function change() {
+  async function change() {
     pick = null;
-    candidates = [];
+    results = [];
+    searched = "";
     input = "";
-    note = "";
     query = "";
     skipped = false;
     open = true;
     save();
+    await tick();
+    inputEl?.focus();
+  }
+
+  async function reopen() {
+    open = true;
+    await tick();
+    inputEl?.focus();
   }
 
   function skip() {
+    clearTimeout(debounce);
+    inflight?.abort();
     skipped = true;
     open = false;
-    candidates = [];
-    note = "";
+    results = [];
+    input = "";
     save();
   }
 
-  // Planners can move people: re-ask the server now and then with the same
+  // Planners can move people: re-ask the server now and then with the picked
   // name and keep the guest's pick in step. Never flaps to "not found": a name
   // that stops matching keeps the last answer on screen.
   let lastCheck = 0;
   async function recheck() {
-    if (!pick || !query || busy) return;
+    if (!pick) return;
     lastCheck = Date.now();
-    const res = await findSeat(event, query);
+    const res = await findSeat(event, query || pick.name);
     if (!res.ok || !pick) return;
     const same = res.matches.filter((m) => m.name === pick.name);
-    const next =
-      same.find((m) => sameMatch(m, pick)) ||
-      (same.length === 1 ? same[0] : null);
+    const next = same.find((m) => sameMatch(m, pick)) || (same.length === 1 ? same[0] : null);
     if (next && !sameMatch(next, pick)) {
       pick = next;
       save();
@@ -116,6 +162,8 @@
     document.addEventListener("visibilitychange", onVis);
     return () => {
       clearInterval(t);
+      clearTimeout(debounce);
+      inflight?.abort();
       document.removeEventListener("visibilitychange", onVis);
     };
   });
@@ -146,50 +194,53 @@
       <span class="nm">{pick.name}</span>
       <button type="button" class="link" onclick={change}>Not you? Change name</button>
     </p>
-  {:else if view === "choose"}
-    <div class="eyebrow">Find my table</div>
-    <h2 class="serif">Which one is you?</h2>
-    <ul class="cands">
-      {#each candidates as c, i (i)}
-        <li>
-          <button type="button" class="cand" onclick={() => choose(c)}>
-            <span class="cn">{c.name}</span>
-            <span class="cw">{where(c)}</span>
-          </button>
-        </li>
-      {/each}
-    </ul>
-    <button type="button" class="link" onclick={change}>None of these, try another name</button>
   {:else if view === "collapsed"}
-    <button type="button" class="reopen" onclick={() => (open = true)}>
+    <button type="button" class="reopen" onclick={reopen}>
       <span class="eyebrow">Find my table</span>
       <span class="arrow" aria-hidden="true">&#8250;</span>
     </button>
   {:else}
     <div class="eyebrow">Find my table</div>
     <h2 class="serif">Find your table tonight.</h2>
-    <form onsubmit={submit}>
+    <form onsubmit={submit} role="search">
       <label for="fmt-name">What’s your name?</label>
-      <input
-        id="fmt-name"
-        type="text"
-        autocomplete="name"
-        autocapitalize="words"
-        spellcheck="false"
-        enterkeyhint="search"
-        maxlength="120"
-        placeholder="First and last name"
-        bind:value={input}
-        oninput={() => (note = "")}
-      />
-      {#if note === "none"}
-        <p class="msg">We could not find that name. Ask any host.</p>
-      {:else if note === "short"}
-        <p class="msg">Type at least three letters of your name.</p>
-      {:else if note === "offline"}
-        <p class="msg">No connection right now. Try again in a moment.</p>
+      <div class="field">
+        <input
+          id="fmt-name"
+          type="search"
+          autocomplete="off"
+          autocapitalize="words"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          maxlength="120"
+          placeholder="Start typing your name"
+          aria-controls="fmt-results"
+          bind:this={inputEl}
+          bind:value={input}
+          oninput={onType}
+        />
+        <span class="spin" class:on={busy} aria-hidden="true"></span>
+      </div>
+      <p class="msg" class:soft={status === "short"} aria-live="polite">
+        {#if status === "short"}No matches yet, keep typing
+        {:else if status === "none"}We could not find that name. Ask any host.
+        {:else if status === "offline"}No connection right now. Keep typing to try again.
+        {:else if status === "busy"}Looking…
+        {/if}
+      </p>
+      {#if results.length}
+        <ul class="cands" id="fmt-results">
+          {#each results as c, i (i)}
+            <li>
+              <button type="button" class="cand" onclick={() => choose(c)}>
+                <span class="cn">{c.name}</span>
+                <span class="cw">{where(c)}</span>
+              </button>
+            </li>
+          {/each}
+        </ul>
       {/if}
-      <button type="submit" class="go" disabled={busy}>{busy ? "Looking…" : "Find my table"}</button>
       <button type="button" class="link" onclick={skip}>Skip</button>
     </form>
   {/if}
@@ -278,11 +329,16 @@
     font-weight: 700;
     color: var(--g26-muted, #c3ccd8);
   }
+  .field {
+    position: relative;
+  }
   input {
     width: 100%;
     box-sizing: border-box;
     min-height: 50px;
-    padding: 0 14px;
+    padding: 0 40px;
+    -webkit-appearance: none;
+    appearance: none;
     border-radius: 4px;
     border: 1px solid rgba(228, 201, 138, 0.4);
     background: var(--g26-ink, #05070c);
@@ -300,24 +356,48 @@
     color: var(--g26-dim, #a9b4c2);
     font-weight: 500;
   }
+  input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  .spin {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 189, 89, 0.25);
+    border-top-color: var(--g26-gold, #ffbd59);
+    opacity: 0;
+    transition: opacity 150ms ease;
+    animation: fmtspin 800ms linear infinite;
+  }
+  .spin.on {
+    opacity: 1;
+  }
+  @keyframes fmtspin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spin {
+      animation: none;
+    }
+  }
+  /* One line reserved, so a message appearing never moves the list. */
   .msg {
     margin: 0;
+    min-height: 20px;
     font-size: 14px;
+    line-height: 20px;
     font-weight: 700;
     color: var(--g26-alert, #ff8a7a);
   }
-  .go {
-    min-height: 50px;
-    border: 0;
-    border-radius: 4px;
-    background: var(--g26-gold, #ffbd59);
-    color: var(--g26-ink, #05070c);
-    font: 800 15px var(--g26-sans, sans-serif);
-    letter-spacing: 0.06em;
-    cursor: pointer;
-  }
-  .go:disabled {
-    opacity: 0.6;
+  .msg.soft {
+    color: var(--g26-dim, #a9b4c2);
+    font-weight: 600;
   }
   .link {
     align-self: center;
@@ -345,7 +425,8 @@
     min-height: 56px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    text-align: left;
     justify-content: center;
     gap: 2px;
     padding: 8px 12px;
@@ -356,7 +437,8 @@
     cursor: pointer;
   }
   .cn {
-    font: 700 16px var(--g26-sans, sans-serif);
+    font: 700 18px var(--g26-sans, sans-serif);
+    overflow-wrap: anywhere;
   }
   .cw {
     font: 800 12px var(--g26-sans, sans-serif);

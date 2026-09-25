@@ -1,9 +1,9 @@
 // src/lib/galaLive/findSeat.js
 //
-// "Find my table" for guests' phones on /gala/live. The guest types their name
-// once; gala_display_find_seat (supabase/migrations/20260925160000_...) answers
-// with at most five candidates, each only {name, table_number, seat,
-// late_night}. The typed name and the chosen answer live in this browser's
+// "Find my table" for guests' phones on /gala/live, searched as the guest
+// types. gala_display_find_seat (supabase/migrations/20260925170000_..._v2)
+// prefix-matches every typed word and answers with at most eight rows, each
+// only {name, table_number, seat, late_night}. The typed name and the chosen answer live in this browser's
 // localStorage and nowhere else, so the next open is instant.
 
 import { supabase as sharedClient } from "../supabaseClient.js";
@@ -50,24 +50,38 @@ function cleanMatch(m) {
 }
 
 /**
- * -> {ok: true, matches: [...]} | {ok: false, reason: 'short' | 'no-plan' | 'offline' | 'rpc'}
+ * -> {ok: true, matches: [...]} | {ok: false, reason: 'short' | 'no-plan' | 'offline' | 'rpc' | 'aborted'}
+ * `signal` lets the caller drop a stale request when the guest keeps typing.
  */
-export async function findSeat(event, query, client = sharedClient) {
+export async function findSeat(event, query, { signal = null, client = sharedClient } = {}) {
   if (!client) return { ok: false, reason: "offline" };
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12_000);
+  const onAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) return { ok: false, reason: "aborted" };
+    signal.addEventListener("abort", onAbort, { once: true });
+  }
   try {
     const { data, error } = await client
       .rpc("gala_display_find_seat", { p_event: event, p_query: String(query || "").slice(0, 120) })
       .abortSignal(controller.signal);
+    if (signal?.aborted) return { ok: false, reason: "aborted" };
     if (error) return { ok: false, reason: "rpc" };
     if (!data || typeof data !== "object") return { ok: false, reason: "rpc" };
     if (!data.ok) return { ok: false, reason: data.reason || "rpc" };
-    return { ok: true, matches: (Array.isArray(data.matches) ? data.matches : []).map(cleanMatch).filter(Boolean).slice(0, 5) };
+    const rows = (Array.isArray(data.matches) ? data.matches : []).map(cleanMatch).filter(Boolean);
+    // A guest who holds a dinner seat and also a late-night record shows once:
+    // the seated row wins, the late-night twin is dropped.
+    const norm = (n) => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+    const seated = new Set(rows.filter((r) => !r.late_night).map((r) => norm(r.name)));
+    const matches = rows.filter((r) => !(r.late_night && seated.has(norm(r.name)))).slice(0, 8);
+    return { ok: true, matches };
   } catch {
-    return { ok: false, reason: "offline" };
+    return { ok: false, reason: signal?.aborted ? "aborted" : "offline" };
   } finally {
     clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
   }
 }
 
