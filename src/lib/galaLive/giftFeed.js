@@ -29,7 +29,7 @@ const CURSOR_KEY = "lsp.galaLive.cursor.v1";
 /* ---------------------------------------------------------------------- */
 
 /**
- * Read `#k=<32 hex>` from the fragment. The fragment is left in place so an
+ * Read `#k=<key>` (8 to 128 letters, digits, - or _) from the fragment. The fragment is left in place so an
  * operator reload keeps working, and mirrored into sessionStorage so a cue that
  * reloads the page cannot lose it. It is never printed and never logged.
  */
@@ -42,7 +42,7 @@ export function readDisplayKey() {
   } catch {
     key = "";
   }
-  if (!/^[0-9a-fA-F]{8,128}$/.test(key)) key = "";
+  if (!/^[A-Za-z0-9_-]{8,128}$/.test(key)) key = "";
   try {
     if (key) window.sessionStorage.setItem(KEY_SESSION, key);
     else key = window.sessionStorage.getItem(KEY_SESSION) || "";
