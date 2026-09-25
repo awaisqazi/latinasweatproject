@@ -1,298 +1,148 @@
 ---
-import Thermometer from "../../components/gala/Thermometer.svelte";
-import TopDonors from "../../components/gala/TopDonors.svelte";
-import DonationTicker from "../../components/gala/DonationTicker.svelte";
-import DonationPopup from "../../components/gala/DonationPopup.svelte";
-import { Image } from "astro:assets";
-import "@/styles/global.css";
+// /gala/live — the 2026 Annual Gala big screen.
+//
+// Concept "Constelacion": every gift is a gold comet that flies into the
+// glowing X and becomes permanent stars. The X fills bottom to top, so it is
+// the thermometer. Ported from docs/gala-2026/prototypes/live-3d-proto.html.
+//
+// Specs: 05-live-3d-concept.md (canvas and choreography),
+//        04-theme-design-spec.md sections 2 and 3 (tokens, projector rules),
+//        10-display-rpc-contract.md (data).
+//
+// The projector opens this as  /gala/live#k=<display key>
+// Guests opening the plain URL get totals only, no names.
+//
+// No fonts are fetched from the network: venue Wi-Fi is not on the critical
+// path, and Didot and Avenir Next are system faces on the projector Mac.
+//
+// Last year's components (Thermometer, TopDonors, DonationTicker,
+// DonationPopup) and src/lib/galaUtils.js still exist on disk. This page no
+// longer imports them.
+import LiveStage from "../../components/gala/live/LiveStage.svelte";
 ---
 
-<html lang="en">
+<html lang="en" class="g26-root">
     <head>
         <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <meta name="viewport" content="width=device-width" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
         <meta name="generator" content={Astro.generator} />
-        <title>Annual Gala - Live Fundraising</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
-            rel="stylesheet"
-        />
-        <style>
-            /* Floating particles animation */
-            @keyframes float-up {
-                0% {
-                    transform: translateY(100vh) scale(0);
-                    opacity: 0;
-                }
-                10% {
-                    opacity: 1;
-                }
-                90% {
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(-100vh) scale(1);
-                    opacity: 0;
-                }
+        <meta name="theme-color" content="#0B1320" />
+        <link rel="icon" href="/favicon.ico" />
+        <title>Annual Gala · Live</title>
+        <style is:global>
+            /* Design tokens, scoped to this page. Nothing leaks into the site
+               and global.css is untouched. Source: 04 section 2.6. */
+            .g26 {
+                --g26-ink: #05070c;
+                --g26-night: #0b1320;
+                --g26-navy: #111a27;
+                --g26-navy-2: #16212f;
+                --g26-navy-3: #1b2a40;
+                --g26-bg-top: #080b11;
+                --g26-bg-mid: #121c2a;
+                --g26-bg-bot: #03050a;
+                --g26-cream: #fff8ef;
+                --g26-warm: #f2e4d2;
+                --g26-text: #f3ece1;
+                --g26-muted: #c3ccd8;
+                --g26-dim: #a9b4c2;
+                --g26-taupe: #b5a18d;
+                --g26-gold: #ffbd59;
+                --g26-gold-strong: #f4a833;
+                --g26-gold-deep: #b9842f;
+                --g26-gold-soft: #e4c98a;
+                --g26-gold-hi: #fff1be;
+                --g26-ok: #5fd4b8;
+                --g26-alert: #ff8a7a;
+                --g26-info: #8cc4ec;
+                --g26-serif:
+                    "Didot", "Bodoni 72", "Bodoni Moda", "Playfair Display",
+                    Georgia, serif;
+                --g26-sans:
+                    "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial,
+                    sans-serif;
+                --g26-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+                --g26-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+                --g26-glow-sm: 0 0 14px rgba(255, 189, 89, 0.6);
+                --g26-glow-md: 0 0 50px rgba(255, 189, 89, 0.35);
+                --g26-glow-lg: 0 0 140px rgba(255, 189, 89, 0.35);
+                color: var(--g26-text);
+                font-family: var(--g26-sans);
+            }
+            /* The 1920 x 1080 stage unit (04 section 3.1). At 1080p 1u = 1px,
+               at 4K 1u = 2px, and any non 16:9 output letterboxes on black. */
+            .g26-live {
+                --u: min(calc(100vw / 1920), calc(100vh / 1080));
+                --g26-halo-gain: 1;
+            }
+            /* Boost mode (Shift+B or ?boost=1): decided at sound check. */
+            .g26-live.boost {
+                --g26-bg-mid: #1b2a40;
+                --g26-bg-top: #0e1522;
+                --g26-halo-gain: 1.45;
             }
 
-            @keyframes float-diagonal {
-                0% {
-                    transform: translate(0, 100vh) rotate(0deg);
-                    opacity: 0;
-                }
-                10% {
-                    opacity: 0.7;
-                }
-                90% {
-                    opacity: 0.7;
-                }
-                100% {
-                    transform: translate(100px, -100vh) rotate(360deg);
-                    opacity: 0;
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: #03050a;
+                color: #f3ece1;
+                -webkit-font-smoothing: antialiased;
+            }
+            html.g26-root,
+            body.g26-body {
+                overflow: hidden;
+            }
+            @media (max-width: 899px), (orientation: portrait) {
+                /* Phones: a normal scrolling document, not a fitted stage. */
+                html.g26-root,
+                body.g26-body {
+                    overflow: auto;
+                    height: auto;
+                    min-height: 100%;
                 }
             }
-
-            .particle {
-                position: absolute;
-                pointer-events: none;
-                border-radius: 50%;
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
             }
-
-            .particle-gold {
-                background: radial-gradient(
-                    circle,
-                    rgba(255, 189, 89, 0.8) 0%,
-                    rgba(255, 189, 89, 0) 70%
-                );
-                animation: float-up linear infinite;
+            /* The canvas is a plain block. No backdrop-filter anywhere on this
+               page: it would force a full-screen readback blur every frame. */
+            canvas.g26-fx {
+                position: fixed;
+                inset: 0;
+                width: 100vw;
+                height: 100vh;
+                display: block;
             }
-
-            .particle-pink {
-                background: radial-gradient(
-                    circle,
-                    rgba(181, 161, 141, 0.6) 0%,
-                    rgba(181, 161, 141, 0) 70%
-                );
-                animation: float-diagonal linear infinite;
-            }
-
-            /* Ambient pulse effect */
-            @keyframes ambient-pulse {
-                0%,
-                100% {
-                    opacity: 0.15;
-                    transform: scale(1);
-                }
-                50% {
-                    opacity: 0.25;
-                    transform: scale(1.05);
-                }
-            }
-
-            .ambient-glow {
-                animation: ambient-pulse 8s ease-in-out infinite;
-            }
-
-            /* Shimmer across page */
-            @keyframes page-shimmer {
-                0% {
-                    background-position: -200% center;
-                }
-                100% {
-                    background-position: 200% center;
-                }
+            /* Before the island hydrates, the page is already the right colour. */
+            .g26-preboot {
+                position: fixed;
+                inset: 0;
+                z-index: -2;
+                background:
+                    radial-gradient(
+                        60vw 60vh at 28% 46%,
+                        rgba(255, 189, 89, 0.15),
+                        transparent 70%
+                    ),
+                    linear-gradient(180deg, #080b11 0%, #121c2a 45%, #03050a 100%);
             }
         </style>
     </head>
-    <body
-        class="bg-off-black text-white font-['Rubik'] min-h-screen flex flex-col lg:h-screen lg:overflow-hidden"
-    >
-        <!-- Header (10% on Desktop) -->
-        <header
-            class="flex-none py-3 px-4 md:px-8 lg:h-[10vh] lg:py-0 flex items-center justify-between bg-off-black z-20 relative border-b border-white/10"
-        >
-            <div class="flex items-center gap-3 md:gap-6">
-                <img
-                    src="/logo3.png"
-                    alt="Logo"
-                    class="h-10 md:h-16 w-auto object-contain"
-                />
-                <h1
-                    class="text-xl md:text-3xl lg:text-5xl font-bold tracking-wider text-vibrant-pink uppercase drop-shadow-lg"
-                >
-                    Annual Gala
-                </h1>
-            </div>
-            <div class="hidden md:block text-right">
-                <p
-                    class="text-sm md:text-lg text-gray-400 uppercase tracking-[0.2em] font-light"
-                >
-                    Live Fundraising
-                </p>
-            </div>
-        </header>
-
-        <!-- Main Stage (80% on Desktop, with bottom padding for ticker) -->
-        <main
-            class="flex-grow flex flex-col px-4 md:px-8 lg:px-16 py-4 lg:py-2 relative z-10 overflow-y-auto lg:overflow-hidden pb-32 lg:pb-[12vh] lg:h-[80vh]"
-        >
-            <!-- Thermometer Section -->
-            <div
-                class="flex-none mb-4 md:mb-8 lg:mb-2 lg:h-[20%] flex items-center justify-center w-full"
+    <body class="g26-body">
+        <div class="g26-preboot"></div>
+        <LiveStage client:only="svelte" />
+        <noscript>
+            <p
+                style="color:#FFF8EF;font-family:Georgia,serif;padding:40px;text-align:center"
             >
-                <Thermometer client:only="svelte" />
-            </div>
-
-            <!-- Split View -->
-            <div
-                class="flex-grow flex flex-col-reverse lg:grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-start lg:h-full lg:overflow-hidden"
-            >
-                <!-- Top Donors (Left on Desktop, Bottom on Mobile) -->
-                <div
-                    class="w-full lg:h-full lg:max-h-[calc(100%-1rem)] pr-0 lg:pr-4"
-                >
-                    <TopDonors client:only="svelte" />
-                </div>
-
-                <!-- CTA / QR Code (Right on Desktop, Top on Mobile) -->
-                <div
-                    class="w-full flex-shrink-0 flex flex-col items-center justify-center lg:h-full lg:min-h-0 pb-2"
-                >
-                    <div class="relative group">
-                        <!-- Enhanced glow effect -->
-                        <div
-                            class="absolute -inset-2 bg-gradient-to-r from-vibrant-pink via-accent-gold to-vibrant-pink rounded-2xl blur-lg opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200 animate-pulse"
-                        >
-                        </div>
-                        <div
-                            class="relative bg-white p-2 md:p-3 rounded-xl shadow-2xl"
-                        >
-                            <div
-                                class="absolute -top-6 md:-top-8 left-0 right-0 text-center"
-                            >
-                                <span
-                                    class="text-vibrant-pink font-bold text-sm md:text-lg animate-pulse uppercase tracking-widest"
-                                    >Scan Me</span
-                                >
-                            </div>
-                            <!-- QR Code -->
-                            <div
-                                class="w-36 h-36 md:w-56 md:h-56 bg-white flex items-center justify-center overflow-hidden"
-                            >
-                                <img
-                                    src="/images/galalogos/galaqr.png"
-                                    alt="Donate QR Code"
-                                    class="w-full h-full object-contain"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-3 md:mt-4 text-center">
-                        <h3
-                            class="text-lg md:text-2xl font-bold text-accent-gold mb-0"
-                        >
-                            Donate Now
-                        </h3>
-                        <p class="text-sm md:text-lg text-gray-300">
-                            latinasweatproject.com/LSPGala
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Donation Popup Notification -->
-        <DonationPopup client:only="svelte" />
-
-        <!-- Footer Ticker (10% on Desktop) -->
-        <footer
-            class="fixed bottom-0 left-0 right-0 h-[8vh] md:h-[10vh] z-30 bg-gray-900/95 border-t border-gray-800 flex items-center backdrop-blur-sm"
-        >
-            <DonationTicker client:only="svelte" />
-        </footer>
-
-        <!-- Background Elements - Enhanced -->
-        <div
-            class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden bg-off-black"
-        >
-            <!-- Main ambient gradients -->
-            <div
-                class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-vibrant-pink/15 rounded-full blur-[150px] ambient-glow"
-            >
-            </div>
-            <div
-                class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent-gold/15 rounded-full blur-[150px] ambient-glow"
-                style="animation-delay: 4s;"
-            >
-            </div>
-
-            <!-- Center glow -->
-            <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-vibrant-pink/5 rounded-full blur-[200px] ambient-glow"
-                style="animation-delay: 2s;"
-            >
-            </div>
-
-            <!-- Floating particles (desktop only for performance) -->
-            <div class="hidden lg:block">
-                <!-- Gold particles -->
-                <div
-                    class="particle particle-gold w-4 h-4 left-[10%]"
-                    style="animation-duration: 15s;"
-                >
-                </div>
-                <div
-                    class="particle particle-gold w-6 h-6 left-[25%]"
-                    style="animation-duration: 18s; animation-delay: 2s;"
-                >
-                </div>
-                <div
-                    class="particle particle-gold w-3 h-3 left-[45%]"
-                    style="animation-duration: 12s; animation-delay: 5s;"
-                >
-                </div>
-                <div
-                    class="particle particle-gold w-5 h-5 left-[65%]"
-                    style="animation-duration: 20s; animation-delay: 8s;"
-                >
-                </div>
-                <div
-                    class="particle particle-gold w-4 h-4 left-[85%]"
-                    style="animation-duration: 16s; animation-delay: 3s;"
-                >
-                </div>
-
-                <!-- Pink particles -->
-                <div
-                    class="particle particle-pink w-5 h-5 left-[15%]"
-                    style="animation-duration: 22s; animation-delay: 1s;"
-                >
-                </div>
-                <div
-                    class="particle particle-pink w-4 h-4 left-[35%]"
-                    style="animation-duration: 17s; animation-delay: 6s;"
-                >
-                </div>
-                <div
-                    class="particle particle-pink w-6 h-6 left-[55%]"
-                    style="animation-duration: 14s; animation-delay: 4s;"
-                >
-                </div>
-                <div
-                    class="particle particle-pink w-3 h-3 left-[75%]"
-                    style="animation-duration: 19s; animation-delay: 7s;"
-                >
-                </div>
-                <div
-                    class="particle particle-pink w-5 h-5 left-[90%]"
-                    style="animation-duration: 21s; animation-delay: 9s;"
-                >
-                </div>
-            </div>
-        </div>
+                The live gala display needs JavaScript.
+            </p>
+        </noscript>
     </body>
 </html>

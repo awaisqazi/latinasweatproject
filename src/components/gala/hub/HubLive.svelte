@@ -27,6 +27,7 @@
   import { onMount } from "svelte";
   import { createGiftFeed, readDisplayKey } from "../../../lib/galaLive/giftFeed.js";
   import { DEFAULT_EVENT, COPY, money } from "../../../lib/galaLive/config.js";
+  import { statusLine, programStarted } from "../../../lib/galaLive/program.js";
 
   let { fallbackGiveUrl = "" } = $props();
 
@@ -71,6 +72,13 @@
     )?.impact_line || "",
   );
   const message = $derived(live ? String(snap?.message || "").trim() : "");
+  // "Now: Honors · Community Impact". Same catalogue as the big screen, and it
+  // never names an awardee before the reveal.
+  const nowLine = $derived(
+    live && snap?.scene !== "blackout" && (programStarted(snap?.program) || (snap?.scene && snap.scene !== "ambient"))
+      ? statusLine(snap?.program, snap?.scene)
+      : "",
+  );
   const showRoll = $derived(live && named && rollRows.length > 0);
 
   const agoS = $derived(lastOkAt ? Math.max(0, Math.round((now - lastOkAt) / 1000)) : 0);
@@ -143,6 +151,8 @@
 
   onMount(() => {
     const key = readDisplayKey();
+    // DEV only, for rehearsing against a sandbox event.
+    const devEvent = import.meta.env.DEV ? new URLSearchParams(window.location.search).get("event") : "";
 
     if (key) {
       for (const a of document.querySelectorAll("a[data-gala-watch]")) {
@@ -158,7 +168,7 @@
       if (feed) return;
       fresh = true;
       feed = createGiftFeed({
-        event: DEFAULT_EVENT,
+        event: devEvent || DEFAULT_EVENT,
         key,
         director: inertDirector,
         persist: false,
@@ -208,6 +218,9 @@
 </script>
 
 <section class="hub-live" aria-live="polite" aria-busy={snap === null}>
+  {#if nowLine}
+    <a class="nowline" href="/gala/live"><span>Now</span> {nowLine}</a>
+  {/if}
   {#if snap === null}
     <div class="calm">
       <div class="eyebrow">{COPY.raisedTonight}</div>
@@ -272,6 +285,26 @@
       var(--g26-navy);
     text-align: center;
     min-height: 168px;
+  }
+  .nowline {
+    display: block;
+    width: 100%;
+    margin: -8px 0 6px;
+    padding: 0 0 12px;
+    border-bottom: 1px solid rgba(255, 248, 239, 0.12);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--g26-cream);
+    text-decoration: none;
+    line-height: 1.35;
+  }
+  .nowline span {
+    margin-right: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--g26-gold);
   }
   .eyebrow,
   .level-eyebrow {
@@ -378,9 +411,8 @@
   }
   .who {
     color: var(--g26-cream);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .amt {
     color: var(--g26-gold);

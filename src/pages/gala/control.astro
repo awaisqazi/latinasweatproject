@@ -1,0 +1,41 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ProgramControl from "@/components/gala/control/ProgramControl.svelte";
+
+// /gala/control: the Annual Gala run of show from a phone. Next / Back walk
+// the program on the big screen (/gala/live) and every guest phone that
+// mirrors it; honors reveal one tap at a time. Unlisted: not in the nav,
+// noindex, excluded from the sitemap in astro.config.mjs and disallowed in
+// public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships EMPTY. It unlocks with the
+// event's ADMIN passcode (exchanged once for a session token; the passcode is
+// never stored and never in a URL) and only ever reads the public display
+// aggregate. No guest data reaches this page.
+---
+
+<Layout
+  title="Show Control | The Latina Sweat Project"
+  description="Internal run-of-show control for the Annual Gala."
+  robots="noindex, nofollow"
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#0B1320" />
+    <meta name="referrer" content="same-origin" />
+    <style is:inline>
+      html,
+      body {
+        margin: 0;
+        background: #0b1320;
+      }
+    </style>
+  </Fragment>
+  <ProgramControl client:only="svelte" />
+  <noscript>
+    <p style="color:#fff8ef;font-family:Arial,sans-serif;padding:24px;">
+      The show control needs JavaScript. Turn it on and reload this page.
+    </p>
+  </noscript>
+</Layout>

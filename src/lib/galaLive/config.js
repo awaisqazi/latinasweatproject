@@ -6,7 +6,7 @@
 // publicly the "Annual Gala"; no other event name is ever printed.
 
 /** Bumped by hand. Compared against state.min_client_version. */
-export const CLIENT_VERSION = "2026.09.20";
+export const CLIENT_VERSION = "2026.09.25";
 
 /** The slug the page reads unless a DEV-only ?event= override says otherwise. */
 export const DEFAULT_EVENT = "gala-2026";
@@ -49,6 +49,9 @@ export const STATE_DEFAULTS = Object.freeze({
   cue: null,
   cue_seq: 0,
   config: {},
+  // Run of show pointer (20260925090000): {segment_id, step, honoree_overrides,
+  // updated_at}. {} = never started; the program scene then opens on seating.
+  program: {},
   version: 0,
 });
 
@@ -79,6 +82,7 @@ export function mergeState(snapshot) {
     out.tier_cents = STATE_DEFAULTS.tier_cents;
   }
   if (!Array.isArray(out.levels)) out.levels = [];
+  if (!out.program || typeof out.program !== "object" || Array.isArray(out.program)) out.program = {};
   if (!(out.goal_cents > 0)) out.goal_cents = STATE_DEFAULTS.goal_cents;
   const poll = Number(out.poll_ms);
   out.poll_ms = Number.isFinite(poll) ? Math.min(120000, Math.max(1000, poll)) : STATE_DEFAULTS.poll_ms;
@@ -220,7 +224,7 @@ export const COPY = Object.freeze({
 
 /** Fake donor names. Demo mode only, never the network (05 section 5.9). */
 export const DEMO_NAMES = Object.freeze([
-  "Marisol Vega", "Tomas Arriaga", "Lucia Benavides", "Rafa Quintero", "Ines Calloway",
+  "Marisol Vega", "Tomas Arriaga", "Lucia Benavides", "Rafa Quintanilla", "Ines Calloway",
   "The Okafor Family", "Dolores Pruitt", "Anonymous", "Table 12", "Paloma Estrada",
   "Beto Landry", "Ximena Duarte", "Nadia Farouk", "Gus Pellegrino", "Carmen Ibarra",
   "Wen Zhao", "Priya Raman", "Oscar Tillman", "Familia Cordero", "Yesenia Roldan",

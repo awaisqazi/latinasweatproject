@@ -41,6 +41,9 @@ export function createOperator({ director, actions = {} }) {
     toggleQrSpotlight: () => {},
     fullscreen: () => {},
     cycleFx: () => {},
+    programNext: () => {},
+    programPrev: () => {},
+    programHome: () => {},
     reloadPage: () => {},
     setLocalFlag: () => {},
     setStale: () => {},
@@ -120,8 +123,28 @@ export function createOperator({ director, actions = {} }) {
       return;
     }
 
+    // The run of show (program segments). Right, Space, Page Down (what a
+    // presentation clicker sends) = next; Left, Page Up = back; Home = the
+    // seating loop.
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      act.programNext();
+      e.preventDefault();
+      return;
+    }
+    if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      act.programPrev();
+      e.preventDefault();
+      return;
+    }
+    if (e.key === "Home") {
+      act.programHome();
+      e.preventDefault();
+      return;
+    }
+
     switch (e.key) {
-      case " ":
+      // Hold moved from Space to H on 2026-09-25: Space now advances the program.
+      case "h":
         hold = !hold;
         director.setHold(hold);
         act.setHold(hold);
