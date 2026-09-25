@@ -31,7 +31,7 @@ export const galaTeaser = {
   // config.donate_url in the live display state (the /lspgala hub prefers that
   // runtime value when present and falls back to this one).
   galaGiveUrl:
-    "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising",
+    "https://www.zeffy.com/en-US/donation-form/lsp-2026-annual-gala-give-tonight",
   // Legacy pre-sales interest list, kept for reference; no live CTA should
   // point here anymore.
   interestUrl: "#gala-interest",
