@@ -78,12 +78,13 @@ import Header from "../components/Header.astro";
         window.location.replace(
             "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",
         );
+    } else if (path.includes("gala/live")) {
+        // Any-case /gala/live, keeping the projector's #k= fragment.
+        window.location.replace("/gala/live" + window.location.hash);
     } else if (path.includes("lspgala")) {
-        window.location.href =
-            "https://www.zeffy.com/en-US/donation-form/latina-sweat-project-gala-fundraising";
+        window.location.replace("/lspgala");
     } else if (path.includes("silentauction")) {
-        window.location.href =
-            "https://www.zeffy.com/en-US/ticketing/latina-sweat-project-gala-silent-auction";
+        window.location.replace("/silentauction");
     } else if (path.includes("galaraffle")) {
         window.location.href =
             "https://www.zeffy.com/en-US/ticketing/latina-sweat-project-gala-raffle";

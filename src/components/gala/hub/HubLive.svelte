@@ -257,7 +257,7 @@
     {#if showRoll}
       <ul class="roll" aria-label="Latest gifts">
         {#each rollRows as row (row.seq)}
-          <li><span class="who">{row.name}</span><span class="amt">{money(row.cents)}</span></li>
+          <li><span class="who">{row.name}</span><span class="amt">{levelMoney(row.cents)}</span></li>
         {/each}
       </ul>
     {/if}

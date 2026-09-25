@@ -38,6 +38,7 @@
   import Hud from "./Hud.svelte";
   import ProgramStage from "./ProgramStage.svelte";
   import ProgramMirror from "./ProgramMirror.svelte";
+  import FindMyTable from "./FindMyTable.svelte";
   import FollowStrip from "./FollowStrip.svelte";
   import PaddleLadder from "./PaddleLadder.svelte";
   import {
@@ -88,6 +89,14 @@
   const effScene = $derived(baseScene === "auction" && !auctionLive ? "appeal" : baseScene);
   // The program stage owns the frame in the program and thanks scenes.
   const programOn = $derived(effScene === "program" || effScene === "thanks");
+  // The Thanks override (control phone, ops console) must show the Gracias
+  // view wherever the program pointer is, as the guest phones already do.
+  const stagePos = $derived(effScene === "thanks" ? { seg: "thanks", step: 0 } : pos);
+  // A live-auction lot title shrinks to fit its band instead of ellipsizing.
+  const aucTitleSize = $derived.by(() => {
+    const n = String($liveState.auction?.title || "").length;
+    return n <= 12 ? 96 : n <= 18 ? 64 : n <= 26 ? 48 : 38;
+  });
   const layout = $derived(
     effScene === "blackout" ? "dark" : named && (effScene === "appeal" || effScene === "auction") ? "hero" : "center",
   );
@@ -455,9 +464,9 @@
 
     level = decideLevel(startState.fx_mode);
 
-    // Seating names: only with BOTH a display key and the seating passcode in
-    // the fragment (#k=...&seat=...). Guests have neither; their phones show the
-    // numbers-only map.
+    // Seating names: the display key in the fragment (#k=...) is enough; the
+    // board comes from gala_display_seating_board, which checks the key server
+    // side. Guests have no key; their phones show the numbers-only map.
     let seatingSrc = null;
     const seatPass = readSeatingPass();
     if (demoMode || (import.meta.env.DEV && Q.get("seatdemo") === "1")) {
@@ -649,6 +658,7 @@
     void programOn;
     void ladderOn;
     void pos.seg;
+    void stagePos.seg;
     void pos.step;
     if (!sc) return;
     requestAnimationFrame(() => sc?.resize());
@@ -698,6 +708,9 @@
         <h1>{COPY.ambientTitle}</h1>
       </header>
 
+      <!-- First card, every segment: the guest's own table (asked once). -->
+      <FindMyTable event={eventSlug} />
+
       {#if $liveState.live && effScene !== "ambient"}
         <ProgramMirror
           program={$liveState.program}
@@ -746,7 +759,7 @@
       >
         {#if programOn}
           <ProgramStage
-            {pos}
+            pos={stagePos}
             overrides={programOverrides}
             {board}
             {totalText}
@@ -832,8 +845,8 @@
             </div>
             <div class="levelrow">
               {#if auctionLive}
-                <div class="levelnum">{$liveState.auction.title}</div>
-                <div class="impact">
+                <div class="levelnum" style={`font-size: calc(var(--u) * ${aucTitleSize})`}>{$liveState.auction.title}</div>
+                <div class="impact status">
                   {$liveState.auction.status === "once"
                     ? COPY.goingOnce
                     : $liveState.auction.status === "twice"
@@ -843,7 +856,7 @@
                         : ""}
                 </div>
               {:else if levelCents}
-                <div class="levelnum">{money(levelCents)}</div>
+                <div class="levelnum">{levelMoney(levelCents)}</div>
                 <div class="impact">{impactLine}</div>
               {:else}
                 <div class="impact wide">{$liveState.message}</div>
@@ -1268,7 +1281,7 @@
     text-align: center;
     background: rgba(5, 7, 12, 0.68);
     border-radius: calc(var(--u) * 6);
-    padding: calc(var(--u) * 28) calc(var(--u) * 64);
+    padding: calc(var(--u) * 22) calc(var(--u) * 64);
     overflow: hidden;
   }
   .cthanks {
@@ -1395,6 +1408,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .impact.status {
+    flex: 0 0 auto;
+    overflow: visible;
   }
   .impact.wide {
     white-space: normal;

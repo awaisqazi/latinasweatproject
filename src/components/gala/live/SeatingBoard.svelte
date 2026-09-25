@@ -18,7 +18,8 @@
   // covers the stage and places everything in stage coordinates.
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
-  import { SEATING_BOARDS, SEATING_BOARD_MS } from "../../../lib/galaLive/program.js";
+  import QRCode from "qrcode";
+  import { SEATING_BOARDS, SEATING_BOARD_MS, FOLLOW_URL, FOLLOW_LABEL } from "../../../lib/galaLive/program.js";
   import { fitName, measure100 } from "../../../lib/galaLive/fitName.js";
   import SeatMiniMap from "./SeatMiniMap.svelte";
 
@@ -36,6 +37,23 @@
     return () => clearTimeout(t);
   });
 
+  // The follow-along QR, compact, in the title strip's top right: the corner
+  // FollowStrip steps aside while the seating boards own the stage. Same code,
+  // same look, rendered here (no network, no image file).
+  const AUCTION_LABEL = "latinasweatproject.com/lspgala";
+  let followQr = $state("");
+  $effect(() => {
+    let alive = true;
+    QRCode.toDataURL(FOLLOW_URL, { errorCorrectionLevel: "M", margin: 1, width: 360, color: { dark: "#05070C", light: "#FFF8EF" } })
+      .then((d) => {
+        if (alive) followQr = d;
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  });
+
   const current = $derived(SEATING_BOARDS[idx] || SEATING_BOARDS[0]);
   const whole = $derived(current.id === "all");
   const numbersOnly = $derived(!board || !!board.numbersOnly);
@@ -43,14 +61,16 @@
   const rows = $derived(board?.rows || []);
 
   /* ---------------- geometry (stage units) ---------------- */
-  // Whole room: the boxes fill this rectangle.
+  // Every board shares the head (title, board label) and uses the stage below
+  // it. Whole room: the boxes fill WROOM. Zoomed: the board area ZAREA holds
+  // the corridor-ends strip and the boxes on the left and the mini-map column
+  // on the right.
   const WROOM = { left: 24, top: 148, w: 1872, h: 918 };
-  // Zoomed boards: the board area, the mini-map column on its right.
-  const ZAREA = { left: 96, top: 180, w: 1728, h: 700 };
+  const ZAREA = { left: 24, top: 108, w: 1872, h: 958 };
   const SIDE_W = 300;
   const SIDE_GAP = 30;
   const MINI_H = 140;
-  const ZROOM = { top: 52, w: ZAREA.w - SIDE_W - SIDE_GAP, h: ZAREA.h - 52 };
+  const ZROOM = { top: 40, w: ZAREA.w - SIDE_W - SIDE_GAP, h: ZAREA.h - 40 };
 
   const BORDER = 2;
   const GAP_SEAT = 8;
@@ -157,9 +177,9 @@
     const rowGap = 26;
     const padX = 12;
     const padV = 8;
-    const hdSize = numbersOnly ? 44 : single ? 34 : 28;
-    const hdH = numbersOnly ? 0 : Math.round(hdSize * 1.5);
-    const nameSize = single ? 34 : 28;
+    const hdSize = numbersOnly ? 48 : single ? 38 : 30;
+    const hdH = numbersOnly ? 0 : Math.round(hdSize * 1.45);
+    const nameSize = single ? 40 : 32;
     const maxSeats = Math.max(...picked.flat().map((t) => t.seats));
     const chromeV = hdH + padV + 2 * BORDER;
 
@@ -245,17 +265,25 @@
 {/snippet}
 
 <div class="sb">
+  <div class="follow" data-fx-quiet data-seat-follow style={pos(1264, 4, 560, 102)}>
+    <div class="ftxt">
+      <div class="l1">Follow along on your phone</div>
+      <div class="l2">at <b>{FOLLOW_LABEL}</b></div>
+      <div class="l3">Silent auction all night · <b>{AUCTION_LABEL}</b></div>
+    </div>
+    <div class="qr">{#if followQr}<img src={followQr} alt="QR code for {FOLLOW_LABEL}" />{/if}</div>
+  </div>
   {#key idx}
     <div class="layer" in:fade={{ duration: reduced ? 0 : 700, delay: reduced ? 0 : 250 }} out:fade={{ duration: reduced ? 0 : 450 }}>
+      <div class="w-head" style={pos(96, 14, 560, 100)}>
+        {#if eyebrow}<div class="eyebrow">{eyebrow}</div>{/if}
+        <h1 class="w-title">Find your table</h1>
+      </div>
+      <div class="w-label" style={pos(650, 30, 524, 60)}>
+        <span>{current.label}</span>
+        {@render dots()}
+      </div>
       {#if whole}
-        <div class="w-head" style={pos(24, 14, 1100, 100)}>
-          {#if eyebrow}<div class="eyebrow">{eyebrow}</div>{/if}
-          <h1 class="w-title">Find your table</h1>
-        </div>
-        <div class="w-label" style={pos(1000, 30, 720, 60)}>
-          <span>{current.label}</span>
-          {@render dots()}
-        </div>
         <div class="front w-front" style={pos(WROOM.left, 108, WROOM.w, 34)}>
           <span>&#9664; Coat check end</span>
           <span class="mid">
@@ -284,9 +312,14 @@
             <div class="mini" data-seat-mini style={`height: calc(var(--u) * ${MINI_H})`}>
               <SeatMiniMap {rows} highlight={groupTables} vw={SIDE_W} vh={MINI_H} label={`Where ${current.label.toLowerCase()} sits in the room`} />
             </div>
-            <div class="z-label">{current.label}</div>
             <div class="legend"><i></i><span>Gold: the tables on this board</span></div>
-            {@render dots()}
+            <p class="side-note">
+              {#if board && !numbersOnly}
+                {board.tables} tables · {board.seated} dinner guests. Seat 1 is on the coat check side, seats count clockwise.
+              {:else}
+                Your table number is on your place card. Ask any host for help.
+              {/if}
+            </p>
           </div>
         </div>
       {/if}
@@ -342,9 +375,78 @@
     gap: calc(var(--u) * 16);
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.22em;
-    font-size: calc(var(--u) * 20);
+    letter-spacing: 0.16em;
+    font-size: calc(var(--u) * 16);
     color: var(--g26-gold);
+    white-space: nowrap;
+    /* room for the rotated diamonds of the last dot */
+    padding-right: calc(var(--u) * 8);
+    box-sizing: border-box;
+  }
+
+  /* ---------- follow-along plate (FollowStrip's look, compact) ---------- */
+  .follow {
+    position: absolute;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 14);
+    padding: calc(var(--u) * 2) calc(var(--u) * 2) calc(var(--u) * 2) calc(var(--u) * 16);
+    box-sizing: border-box;
+    background: rgba(5, 7, 12, 0.88);
+    border: calc(var(--u) * 2) solid rgba(255, 189, 89, 0.35);
+    border-radius: calc(var(--u) * 6);
+  }
+  .ftxt {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    line-height: 1.15;
+  }
+  .l1 {
+    font-family: var(--g26-serif);
+    font-style: italic;
+    font-size: calc(var(--u) * 24);
+    color: var(--g26-cream);
+    white-space: nowrap;
+  }
+  .l2 {
+    margin-top: calc(var(--u) * 2);
+    font-weight: 700;
+    font-size: calc(var(--u) * 17);
+    letter-spacing: 0.02em;
+    color: var(--g26-warm);
+    white-space: nowrap;
+  }
+  .l3 {
+    margin-top: calc(var(--u) * 3);
+    padding-top: calc(var(--u) * 3);
+    border-top: calc(var(--u) * 1) solid rgba(255, 189, 89, 0.28);
+    font-weight: 600;
+    font-size: calc(var(--u) * 14);
+    letter-spacing: 0.02em;
+    color: var(--g26-warm);
+    white-space: nowrap;
+  }
+  .l2 b,
+  .l3 b {
+    color: var(--g26-gold);
+    font-weight: 800;
+  }
+  .qr {
+    flex: 0 0 auto;
+    height: 100%;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    background: var(--g26-cream);
+    border-radius: calc(var(--u) * 3);
+    padding: calc(var(--u) * 3);
+  }
+  .qr img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
   }
 
   /* ---------- the corridor ends ---------- */
@@ -466,14 +568,12 @@
     width: 100%;
     padding: 0;
   }
-  .z-label {
-    margin-top: calc(var(--u) * 6);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: calc(var(--u) * 22);
-    line-height: 1.35;
-    color: var(--g26-gold);
+  .side-note {
+    margin: 0;
+    font-weight: 700;
+    font-size: calc(var(--u) * 20);
+    line-height: 1.4;
+    color: var(--g26-muted);
   }
   .legend {
     display: flex;

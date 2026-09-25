@@ -3,7 +3,7 @@
   // it won a hero card, and the grid widens to two or three columns as the
   // room speeds up (05 section 4.3).
   import { fly, fade } from "svelte/transition";
-  import { money } from "../../../lib/galaLive/config.js";
+  import { levelMoney } from "../../../lib/galaLive/config.js";
   import { fitWidth } from "../../../lib/galaLive/fitName.js";
 
   let { rows = [], overflow = 0, reduced = false } = $props();
@@ -24,7 +24,7 @@
       out:fade={{ duration: dur }}
     >
       <span class="nwrap"><span class="n" use:fitWidth={{ min: 0.45, wrap: false }}>{row.name}</span></span>
-      <span class="a">{money(row.cents)}</span>
+      <span class="a">{levelMoney(row.cents)}</span>
     </div>
   {/each}
 </div>

@@ -110,32 +110,9 @@
   let mintedKey = $state("");
   let copied = $state("");
 
-  // The seating passcode for the projector link. Kept in this browser's
-  // localStorage only (so the organizer types it once per device), never sent
-  // anywhere: it only ever lands in the copied link's #fragment, which the
-  // browser does not send to a server either.
-  const SEAT_PASS_KEY = "lsp.gala.admin.seatPass";
-  let seatPass = $state(readSeatPass());
-  function readSeatPass() {
-    try {
-      return window.localStorage.getItem(SEAT_PASS_KEY) || "";
-    } catch {
-      return "";
-    }
-  }
-  function saveSeatPass() {
-    try {
-      const v = seatPass.trim();
-      if (v) window.localStorage.setItem(SEAT_PASS_KEY, v);
-      else window.localStorage.removeItem(SEAT_PASS_KEY);
-    } catch {
-      /* private mode: the field still works for this visit */
-    }
-  }
-  const seatPassTrim = $derived(seatPass.trim());
-  const projectorUrl = $derived(
-    mintedKey ? `${SITE}/gala/live#k=${mintedKey}${seatPassTrim ? `&seat=${encodeURIComponent(seatPassTrim)}` : ""}` : "",
-  );
+  // The display key alone unlocks names on the projector: gifts AND the
+  // "Find your table" board (gala_display_seating_board). No second secret.
+  const projectorUrl = $derived(mintedKey ? `${SITE}/gala/live#k=${mintedKey}` : "");
 
   async function rotate() {
     keyErr = "";
@@ -231,25 +208,9 @@
   <section class="panel">
     <div class="eyebrow">Projector display key</div>
     <p class="muted small">
-      The key is shown once and never stored. Rotating signs the current projector out: open the new link on the
-      projector laptop.
+      The key is shown once and never stored. The link alone unlocks names on the projector: gifts and the
+      "Find your table" board. Rotating signs the current projector out: open the new link on the projector laptop.
     </p>
-    <label class="seatpass">
-      <span class="lab">Seating passcode (for names on the "Find your table" screen)</span>
-      <input
-        type="text"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="The /galaseating passcode"
-        bind:value={seatPass}
-        oninput={saveSeatPass}
-      />
-      <span class="muted small">Remembered on this device only. It goes into the projector link, nowhere else.</span>
-    </label>
-    {#if !seatPassTrim}
-      <p class="warnline">Without the seating passcode the screen shows table numbers only.</p>
-    {/if}
     <button class="btn" class:arm={keyArm} disabled={keyBusy} onclick={rotate}>
       {keyBusy ? "Rotating…" : keyArm ? "Tap again: the projector must reopen the link" : mintedKey ? "Rotate again" : "Rotate and show the key"}
     </button>
@@ -444,21 +405,6 @@
     margin: 0;
     color: var(--g26-alert, #ff8a7a);
     font-size: 14px;
-  }
-  .seatpass {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .warnline {
-    margin: 0;
-    padding: 8px 10px;
-    border-radius: 3px;
-    border: 1px solid var(--g26-alert, #ff8a7a);
-    color: var(--g26-alert, #ff8a7a);
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 1.4;
   }
   .ok {
     margin: 0;

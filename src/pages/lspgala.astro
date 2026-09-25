@@ -32,7 +32,6 @@ const tonight = [
   { time: "6:00", title: "Welcome & Cocktail Hour" },
   { time: "6:30", title: "Mariachi" },
   { time: "7:00", title: "Dinner Is Served" },
-  { time: "7:30", title: "Ballet Folklórico" },
   { time: "7:45", title: "Awards" },
   { time: "8:15", title: "Live Bidding" },
   { time: "9:00", title: "Gallery & Open Bar" },
@@ -140,6 +139,19 @@ const tonight = [
                     >
                         Give now
                     </a>
+                    <a
+                        class="btn btn-gold btn-auction"
+                        href="/silentauction"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <span>Silent auction · Bid now</span>
+                        <span class="btn-sub">Open all night · last call before the fashion show</span>
+                    </a>
+                    <a class="btn btn-line btn-live" href="/gala/live" data-gala-watch>
+                        <span>Follow along live</span>
+                        <span class="btn-sub">latinasweatproject.com/gala/live</span>
+                    </a>
                     <p class="charity">
                         Latina Sweat Cares is a 501(c)(3) public charity ·
                         <span class="nw">EIN 99-1616122</span>
@@ -153,10 +165,6 @@ const tonight = [
                         way.
                     </p>
                 </noscript>
-
-                <a class="btn btn-line" href="/gala/live" data-gala-watch>
-                    Watch it live
-                </a>
 
                 <section class="tonight" aria-labelledby="tonight-h">
                     <h2 id="tonight-h">Tonight</h2>
@@ -176,14 +184,6 @@ const tonight = [
                     <div class="stack">
                         <a class="btn btn-line" href="/gala-program-2026.pdf">
                             Open the printed program (PDF)
-                        </a>
-                        <a
-                            class="btn btn-line"
-                            href="/silentauction"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            Silent auction: bid now
                         </a>
                     </div>
                 </section>
@@ -329,6 +329,27 @@ const tonight = [
                 flex-direction: column;
                 gap: 10px;
                 align-items: center;
+            }
+            .btn-auction,
+            .btn-live {
+                flex-direction: column;
+                gap: 3px;
+                line-height: 1.15;
+            }
+            .btn-auction {
+                min-height: 72px;
+                font-size: 17px;
+                letter-spacing: 0.14em;
+            }
+            .btn-live {
+                min-height: 64px;
+            }
+            .btn-sub {
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                text-transform: none;
+                opacity: 0.85;
             }
             .charity {
                 margin: 0;

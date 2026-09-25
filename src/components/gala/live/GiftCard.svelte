@@ -4,7 +4,7 @@
   // (05 section 3.3). It is also a quiet rect: dust dims inside it.
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-  import { money } from "../../../lib/galaLive/config.js";
+  import { levelMoney } from "../../../lib/galaLive/config.js";
   import { fitWidth } from "../../../lib/galaLive/fitName.js";
 
   let { card = null, compact = false, reduced = false } = $props();
@@ -31,7 +31,7 @@
     >
       <div class="eyebrow">{card.eyebrow}</div>
       <div class="namewrap"><div class="name" use:fitWidth={0.5} style={`font-size: calc(var(--u) * ${nameSize} * var(--fit, 1))`}>{card.name}</div></div>
-      <div class="amt">{money(card.cents)}</div>
+      <div class="amt">{levelMoney(card.cents)}</div>
     </div>
   {/key}
 {/if}

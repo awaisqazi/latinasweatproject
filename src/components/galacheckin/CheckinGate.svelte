@@ -259,7 +259,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(30 30 30 / 0.55);
+    color: rgb(30 30 30 / 0.74);
   }
 
   .cg-row {
@@ -271,7 +271,7 @@
     font-weight: 800;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(30 30 30 / 0.6);
+    color: rgb(30 30 30 / 0.74);
   }
   .cg-wrap {
     position: relative;
@@ -304,7 +304,7 @@
     border-color: #a3341f;
   }
   .cg-input::placeholder {
-    color: rgb(30 30 30 / 0.38);
+    color: rgb(30 30 30 / 0.62);
   }
 
   .cg-reveal {
@@ -363,7 +363,7 @@
     margin: 0;
     font-size: 0.82rem;
     line-height: 1.4;
-    color: rgb(30 30 30 / 0.6);
+    color: rgb(30 30 30 / 0.74);
   }
   .cg-status--bad {
     color: #a3341f;
@@ -371,7 +371,7 @@
   .cg-fine {
     margin: 0;
     font-size: 0.72rem;
-    color: rgb(30 30 30 / 0.5);
+    color: rgb(30 30 30 / 0.72);
   }
 
   @media (prefers-reduced-motion: no-preference) {

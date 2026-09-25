@@ -266,8 +266,8 @@ export const SEGMENTS = Object.freeze([
 ]);
 
 /** The silent auction bidding page (the printed program's second QR). */
-export const SILENT_AUCTION_URL = "https://latinasweatproject.com/silentauction";
-export const SILENT_AUCTION_LABEL = "latinasweatproject.com/silentauction";
+export const SILENT_AUCTION_URL = "https://latinasweatproject.com/lspgala";
+export const SILENT_AUCTION_LABEL = "latinasweatproject.com/lspgala";
 
 const BY_ID = new Map(SEGMENTS.map((s, i) => [s.id, { ...s, index: i }]));
 

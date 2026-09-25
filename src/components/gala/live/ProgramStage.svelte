@@ -15,7 +15,7 @@
   import { fade } from "svelte/transition";
   import {
     SEGMENTS, HONOREES, VOICES, MENU, MCS, FASHION, PERFORMERS, REMARKS, SPONSOR_ROWS,
-    SILENT_AUCTION_URL, SILENT_AUCTION_LABEL, SEATING_BOARDS,
+    SILENT_AUCTION_URL, SILENT_AUCTION_LABEL,
     segmentById, honorAt, voiceAt, resolveHonoree, monogram, logoStyle,
   } from "../../../lib/galaLive/program.js";
   import { COPY } from "../../../lib/galaLive/config.js";
@@ -61,10 +61,10 @@
 
   // Where the X sits, per view (stage units: left, top, width, height).
   const ANCHORS = {
-    // Top right, clear of both seating layouts (the whole room owns the stage
-    // below y 100). One spot for every seating board: the scene reads the
-    // anchor only when the program step changes.
-    seating: [1760, 12, 120, 96],
+    // A small X in the seating title strip, between the board label and the
+    // follow-along QR plate (SeatingBoard). One spot for every seating board:
+    // the scene reads the anchor only when the program step changes.
+    seating: [1186, 18, 60, 78],
     welcome: [680, 70, 560, 430],
     hosts: [1380, 110, 440, 180],
     sponsors: [810, 40, 300, 200],
@@ -77,7 +77,10 @@
     "honors-r": [130, 140, 660, 760],
     gallery: [610, 96, 700, 520],
     "fashion-show": [810, 56, 300, 220],
-    dj: [610, 96, 700, 520],
+    // Smaller and higher than the gallery X: the DJ stack is tall, and at
+    // [610, 96, 700, 520] the eyebrow sat on the X and the follow strip hid
+    // "Midnight".
+    dj: [760, 96, 400, 300],
     thanks: [780, 36, 360, 280],
   };
   const anchor = $derived(
@@ -90,11 +93,9 @@
 
   const dur = $derived(reduced ? 0 : 1);
 
-  // Which seating board is up (SeatingBoard cycles it). The whole-room board
-  // owns the stage, so the page title, the footer and the follow strip step
-  // aside while it shows.
-  let seatIdx = $state(0);
-  const seatWhole = $derived(seg.id === "seating" && SEATING_BOARDS[seatIdx]?.id === "all");
+  // The seating boards own the whole stage (SeatingBoard draws its own title,
+  // corridor ends and mini-map), so the follow strip steps aside for them.
+  const seatingOn = $derived(seg.id === "seating");
   const showRoll = $derived(named && rows.length > 0 && seg.id !== "seating");
 
   /** Svelte action: ask the page for a light moment once this node is laid out. */
@@ -117,7 +118,7 @@
 
 <!-- The follow strip comes first in the DOM so it is always one of the scene's
      quiet rects. -->
-<div class="follow-wrap" class:gone={seatWhole}><FollowStrip variant="corner" /></div>
+<div class="follow-wrap" class:gone={seatingOn}><FollowStrip variant="corner" /></div>
 
 {#if seg.id !== "seating"}
   <header class="hdr" transition:fade={{ duration: 400 * dur }}>
@@ -143,25 +144,7 @@
       <!-- Quiet for the dust in every seating layout (the scene re-reads quiet
            rects only on a program step, so this one never moves). -->
       <div class="seat-quiet" data-fx-quiet aria-hidden="true"></div>
-      {#if !seatWhole}
-        <div class="seat-chrome" transition:fade={{ duration: 450 * dur }}>
-          <div class="seat-head">
-            <div class="eyebrow">{seg.eyebrow} · {seg.time}</div>
-            <h1 class="serif h-seat">Find your table</h1>
-          </div>
-          <div class="seat-meta">MCA Chicago<br />Friday, September 25, 2026</div>
-          <div class="seat-foot">
-            {#if board?.demo}
-              Invented names for rehearsal only. The real plan loads only with the seating passcode.
-            {:else if board && !board.numbersOnly}
-              {board.tables} tables · {board.seated} dinner guests · Seat 1 is on the coat check side, seats count clockwise
-            {:else}
-              Your table number is on your place card. Ask any host for help.
-            {/if}
-          </div>
-        </div>
-      {/if}
-      <SeatingBoard {board} {reduced} eyebrow={`${seg.eyebrow} · ${seg.time}`} bind:idx={seatIdx} />
+      <SeatingBoard {board} {reduced} eyebrow={`${seg.eyebrow} · ${seg.time}`} />
       {#if board?.demo}
         <div class="demo-plate" role="note">DEMO DATA · not the real seating</div>
       {/if}
@@ -289,7 +272,7 @@
         {/each}
       </div>
     {:else if seg.id === "dj"}
-      <div class="center-stack" style="top: calc(var(--u) * 540)">
+      <div class="center-stack" style="top: calc(var(--u) * 420)">
         <div class="eyebrow rise" style="--d: 150ms">{seg.time} · After party</div>
         <div class="mark djmark rise-scale" style="--d: 350ms"><img src={PERFORMERS.dj.logo} alt={PERFORMERS.dj.name} style={logoStyle(PERFORMERS.dj)} /></div>
         <div class="rule draw" style="--d: 800ms"></div>
@@ -494,10 +477,15 @@
     transform: scaleX(0);
     animation: g26draw 700ms var(--g26-ease) var(--d, 0ms) forwards;
   }
+  /* The clip for the slide-up entrance. Its padding is in stage units, not
+     em: the mask itself carries the page's small body size, so an em padding
+     was about a pixel and cut every descender (the y in Cynthia, the Q in
+     Qazi). The negative margin gives the layout its old height back. */
   .mask {
     display: block;
     overflow: hidden;
-    padding: 0 0.12em 0.08em 0.02em;
+    padding: 0 calc(var(--u) * 20) calc(var(--u) * 48) calc(var(--u) * 4);
+    margin-bottom: calc(var(--u) * -46);
   }
   .mask > * {
     display: inline-block;
@@ -585,40 +573,12 @@
   }
 
   /* ---------- seating ---------- */
-  .seat-head {
-    position: absolute;
-    left: calc(var(--u) * 96);
-    top: calc(var(--u) * 40);
-  }
-  .h-seat {
-    margin: calc(var(--u) * 2) 0 0;
-    font-size: calc(var(--u) * 92);
-    line-height: 1;
-    color: var(--g26-cream);
-  }
-  .seat-meta {
-    position: absolute;
-    right: calc(var(--u) * 290);
-    top: calc(var(--u) * 70);
-    text-align: right;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: calc(var(--u) * 22);
-    line-height: 1.5;
-    color: var(--g26-warm);
-  }
   .seat-quiet {
     position: absolute;
     left: 0;
     top: calc(var(--u) * 140);
     width: calc(var(--u) * 1920);
     height: calc(var(--u) * 930);
-    pointer-events: none;
-  }
-  .seat-chrome {
-    position: absolute;
-    inset: 0;
     pointer-events: none;
   }
   .follow-wrap {
@@ -629,16 +589,6 @@
   }
   .follow-wrap.gone {
     opacity: 0;
-  }
-  .seat-foot {
-    position: absolute;
-    left: calc(var(--u) * 96);
-    width: calc(var(--u) * 1060);
-    top: calc(var(--u) * 948);
-    font-weight: 700;
-    font-size: calc(var(--u) * 24);
-    color: var(--g26-muted);
-    line-height: 1.35;
   }
 
   .demo-plate {
@@ -1022,7 +972,8 @@
     border-radius: calc(var(--u) * 6);
   }
   .mask.tall {
-    padding-bottom: 0.14em;
+    padding-bottom: calc(var(--u) * 52);
+    margin-bottom: calc(var(--u) * -48);
   }
   .nm-honoree {
     font-size: calc(var(--u) * 132 * var(--fit, 1));

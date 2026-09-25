@@ -3,29 +3,93 @@
 // "Find your table" boards for the projector's seating loop, built AT RUNTIME
 // from the live seating plan so no guest name ever ships in this public repo.
 //
-// Where the names come from: the projector URL carries the seating passcode in
-// its fragment (#k=<display key>&seat=<passcode>). This module calls the
-// passcode-gated gala_seating_load RPC (src/lib/galaSeating/remote.js) and keeps
-// only table numbers, seat numbers and display names in memory. Nothing is
-// persisted, logged, or sent anywhere else. Guest phones never call this: the
-// page only loads it when BOTH a display key and a seating passcode are present.
+// Where the names come from: the DISPLAY KEY alone (#k=<display key> in the
+// projector's URL fragment). The keyed gala_display_seating_board RPC
+// (supabase/migrations/20260925150000_gala_display_seating_board.sql) checks the
+// key exactly like the keyed gift feed and returns only table numbers, seats,
+// plan x/y and seated guests' names. Nothing is persisted, logged, or sent
+// anywhere else. Guest phones have no key, so they never call it and only ever
+// get the numbers-only map.
+//
+// Old links that still carry the seating passcode (#k=...&seat=<passcode>) keep
+// working: if the keyed RPC refuses, the passcode-gated gala_seating_load path
+// (src/lib/galaSeating/remote.js) is tried once, silently.
 //
 // Layout: the same corridor as the printed seating slides (a podium row of
 // three at the north / coat check end, then rows of two toward the entrance):
 // tables are clustered into rows by their y position in the plan, each row
 // becomes one screen column, and within a row tables sort by x.
 
+import { supabase as sharedClient } from "../supabaseClient.js";
 import { createRemote } from "../galaSeating/remote.js";
+import { readDisplayKey } from "./giftFeed.js";
 import { TABLE_ROWS } from "./program.js";
 
-/** Read `seat=` from the fragment. Never from the query string. */
-export function readSeatingPass() {
+/** Stands in for "no passcode, use the display key" (see readSeatingPass). */
+export const KEYED = "@display-key";
+
+/** The legacy `seat=` passcode from the fragment. Never from the query string. */
+function readSeatParam() {
   try {
     const params = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
     const v = (params.get("seat") || "").trim();
     return v.length >= 4 && v.length <= 200 ? v : "";
   } catch {
     return "";
+  }
+}
+
+/**
+ * What the projector unlocks the seating board with. The display key is
+ * enough: with a key and no `seat=` this returns KEYED, so the page's
+ * "seating credential AND display key" gate opens on the key alone. A legacy
+ * `seat=` passcode is returned as is and only used as a fallback.
+ */
+export function readSeatingPass() {
+  const seat = readSeatParam();
+  if (seat) return seat;
+  try {
+    return readDisplayKey() ? KEYED : "";
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * The keyed RPC's answer -> the Plan shape boardFromPlan reads, so both paths
+ * lay the board out identically. Ids are made up here: the server sends none.
+ */
+export function planFromKeyedBoard(res) {
+  const tables = [];
+  const seating = {};
+  const guests = {};
+  let k = 0;
+  (Array.isArray(res?.tables) ? res.tables : []).forEach((t, i) => {
+    const id = `k${i}`;
+    tables.push({ id, number: t.number, seats: t.seats, x: t.x, y: t.y });
+    for (const g of Array.isArray(t.guests) ? t.guests : []) {
+      const gid = `g${k++}`;
+      seating[gid] = { tableId: id, seat: g.seat };
+      guests[gid] = { name: g.name };
+    }
+  });
+  const fixtures = res?.podium ? [{ type: "podium", x: res.podium.x, y: res.podium.y }] : [];
+  return { tables, seating, guests, fixtures };
+}
+
+async function callBoard(db, args) {
+  if (!db) return { ok: false, reason: "offline" };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const { data, error } = await db.rpc("gala_display_seating_board", args).abortSignal(controller.signal);
+    if (error) return { ok: false, reason: "rpc" };
+    if (!data || typeof data !== "object") return { ok: false, reason: "shape" };
+    return data;
+  } catch {
+    return { ok: false, reason: "offline" };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -107,34 +171,84 @@ export function numbersOnlyBoard() {
 }
 
 /**
- * Load the plan once, then re-check every `refreshMs` (cheap version check) so
- * a late seat change made in /galaseating reaches the screen within a minute.
- * `onBoard(board | null, reason)` is called on every change.
+ * Load the board once, then re-check every `refreshMs` so a late seat change
+ * made in /galaseating reaches the screen within a minute. The keyed RPC takes
+ * the version already on screen and answers "unchanged" without names when
+ * nothing moved. `onBoard(board | null, reason)` is called on every change.
+ *
+ * `passcode` is what readSeatingPass() returned: KEYED (display key only) or a
+ * legacy seat= passcode, which is tried only if the keyed RPC refuses.
  */
-export function createSeatingSource({ slug, passcode, onBoard, refreshMs = 60_000 }) {
+export function createSeatingSource({ slug, passcode, onBoard, refreshMs = 60_000, client = sharedClient }) {
   let stopped = false;
   let timer = 0;
   let version = -1;
-  const remote = createRemote({ slug, passcode });
+  let mode = "key"; // "key" | "pass"
+  let key = "";
+  try {
+    key = readDisplayKey();
+  } catch {
+    key = "";
+  }
+  const pass = passcode && passcode !== KEYED ? passcode : "";
+  if (!key) mode = "pass";
+  let remote = null;
+
+  async function pullKeyed() {
+    const res = await callBoard(client, {
+      p_event: slug,
+      p_display_key: key,
+      p_version: version >= 0 ? version : null,
+    });
+    if (res.ok) {
+      if (!res.unchanged) {
+        version = Number(res.version) || 0;
+        onBoard(boardFromPlan(planFromKeyedBoard(res)), "ok");
+      }
+      return true;
+    }
+    if (res.reason === "offline") return true; // keep what we have, try again later
+    // Refused (wrong or rotated key), no plan for this event, or the RPC is
+    // missing: fall back to a legacy seat= passcode when there is one,
+    // otherwise stop quietly. The numbers-only board is the expected default
+    // there, so nothing is reported (the page would only log it).
+    if (pass) {
+      mode = "pass";
+      version = -1;
+      return pullPass();
+    }
+    return false;
+  }
+
+  async function pullPass() {
+    if (!pass) {
+      onBoard(null, "no-key");
+      return false;
+    }
+    if (!remote) remote = createRemote({ slug, passcode: pass });
+    const chk = version >= 0 ? await remote.check() : { ok: true, version: -2 };
+    if (chk.ok && chk.version !== version) {
+      const res = await remote.load();
+      if (res.ok && res.plan) {
+        version = res.version;
+        onBoard(boardFromPlan(res.plan), "ok");
+      } else if (!res.ok && res.reason !== "offline") {
+        onBoard(null, res.reason || "refused");
+        return false; // a wrong passcode does not get retried every minute
+      }
+    }
+    return true;
+  }
 
   async function pull() {
     if (stopped) return;
+    let again = true;
     try {
-      const chk = version >= 0 ? await remote.check() : { ok: true, version: -2 };
-      if (chk.ok && chk.version !== version) {
-        const res = await remote.load();
-        if (res.ok && res.plan) {
-          version = res.version;
-          onBoard(boardFromPlan(res.plan), "ok");
-        } else if (!res.ok && res.reason !== "offline") {
-          onBoard(null, res.reason || "refused");
-          stopped = true; // a wrong passcode does not get retried every minute
-          return;
-        }
-      }
+      again = mode === "key" ? await pullKeyed() : await pullPass();
     } catch {
       /* offline: keep what we have */
     }
+    if (!again) stopped = true;
     if (!stopped) timer = setTimeout(pull, refreshMs);
   }
   pull();
