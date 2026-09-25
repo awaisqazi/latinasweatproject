@@ -294,7 +294,7 @@
     <div class="bs-levels">
       {#each levels as level, i (i)}
         <div class="bs-level-row">
-          <input class="bs-input bs-input--sm" type="text" inputmode="decimal" value={dollars(level.amount_cents).toFixed(0)}
+          <input class="bs-input bs-input--sm" type="text" inputmode="decimal" value={Number.isInteger(dollars(level.amount_cents)) ? String(dollars(level.amount_cents)) : dollars(level.amount_cents).toFixed(2)}
             oninput={(e) => { levels = levels.map((l, idx) => idx === i ? { ...l, amount_cents: centsOf(e.currentTarget.value) } : l); }} />
           <input class="bs-input" type="text" placeholder="Impact line" value={level.impact_line}
             oninput={(e) => { levels = levels.map((l, idx) => idx === i ? { ...l, impact_line: e.currentTarget.value.slice(0, 120) } : l); }} />

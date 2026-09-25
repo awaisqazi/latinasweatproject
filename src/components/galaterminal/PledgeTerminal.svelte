@@ -14,8 +14,9 @@
     · a paddle nobody holds is ACCEPTED, tagged red, and fixed later. There is
       no dialog in this file that can steal the keyboard mid-appeal (10 s6)
     · "the other clerk got there first" is a grey line, not an error (08 s7.2)
-    · an amount at or above the operator's threshold takes a second Enter, in
-      the line, not in a modal (09 R5)
+    · the entry is the shared gift panel (gala/control/GiftPanel.svelte):
+      paddle, amount, Record. The name is a glance-only hint and a free amount
+      is spelled out in words under its field (09 R5); nothing asks twice
     · the undo window is the operator's `publish_delay_ms`, and inside it a
       killed gift never reaches the room at all (10 s2, rule 8)
 
@@ -25,12 +26,14 @@
 -->
 <script>
   import { getContext, onMount, setContext } from "svelte";
-  import { AlertTriangle, CircleDollarSign, Filter, Plus, Undo2, WifiOff } from "@lucide/svelte";
+  import { CircleDollarSign, Filter, Plus, WifiOff } from "@lucide/svelte";
 
   import { createCheckinUi } from "../galacheckin/uiState.svelte.js";
   import NoticeStack from "../galacheckin/NoticeStack.svelte";
   import SyncPill from "../galacheckin/SyncPill.svelte";
-  import { agoLabel, amountWords, levelByKey, money, parseEntry, stepLevel } from "../../lib/galaTerminal/derive.js";
+  import { levelByKey, money, stepLevel } from "../../lib/galaTerminal/derive.js";
+  import { normalizeLevels } from "../../lib/galaLive/config.js";
+  import GiftPanel from "../gala/control/GiftPanel.svelte";
 
   import FixSheet from "./FixSheet.svelte";
   import HelpStrip from "./HelpStrip.svelte";
@@ -46,15 +49,14 @@
   const inherited = getContext("gala-checkin");
   if (!inherited) setContext("gala-checkin", { store: store.checkin, ui: createCheckinUi(store.checkin) });
 
-  let text = $state("");
-  let error = $state("");
-  /** null | { kind: "confirm" | "duplicate", text } . A strip, never a modal. */
-  let gate = $state(null);
   let filter = $state("all");
   let helpOpen = $state(false);
   let fixRow = $state(null);
   let otherOpen = $state(false);
-  let inputEl = $state(null);
+  // The primary screen is the shared gift panel (paddle, amount, Record); the
+  // tape, "Other gift", "Needs review" and the fix sheet sit underneath it.
+  let panel = $state(null);
+  const panelLevels = $derived(normalizeLevels(store.levels));
   let now = $state(Date.now());
 
   const sheetOpen = $derived(Boolean(fixRow) || otherOpen);
@@ -62,7 +64,6 @@
   const queued = $derived(store.queued);
   const levelTally = $derived(store.byLevel.find((b) => b.amount_cents === store.levelCents) || null);
   const undo = $derived(store.undoSlot);
-  const undoLeft = $derived(undo ? Math.max(0, undo.until - now) : 0);
 
   // A 250 ms tick only while there is a countdown to draw.
   $effect(() => {
@@ -75,7 +76,7 @@
 
   function focusInput() {
     // Focus on the next frame so a sheet's own focus restore does not win.
-    requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
+    requestAnimationFrame(() => panel?.focus());
   }
 
   /* ---- the tape ---------------------------------------------------------- */
@@ -104,62 +105,6 @@
     ...store.needsReview.map((r) => r.id),
   ]));
 
-  /* ---- entry ------------------------------------------------------------- */
-
-  const PARSE_MESSAGE = {
-    "bad-token": (r) => `"${r.token}" is not a paddle. Digits, and then * for a custom amount, a for anonymous, ! to key it twice.`,
-    "bad-paddle": () => "Paddle 0 is not a paddle.",
-    "no-amount": () => "Pick a giving level first, or type an amount like 45*750.",
-    "too-large": () => "That amount is too large to be real.",
-    empty: () => "",
-  };
-
-  function gateFor(items) {
-    const big = items.find((i) => store.needsConfirm(i.cents));
-    if (big) {
-      const words = amountWords(big.cents);
-      return {
-        kind: "confirm",
-        text: `${money(big.cents)}${words ? ` · ${words}` : ""} from paddle ${big.paddle}. Enter again to record it, Esc to drop it.`,
-      };
-    }
-    for (const i of items) {
-      if (i.force) continue;
-      const dup = store.duplicateFor(i.paddle, i.cents);
-      if (dup) {
-        return {
-          kind: "duplicate",
-          text: `Paddle ${i.paddle} already has ${money(dup.amount_cents)} at this level (${dup.entered_by}, ${agoLabel(dup.created_at, Date.now())}). Enter again to keep both, Esc to drop it.`,
-        };
-      }
-    }
-    return null;
-  }
-
-  function commit() {
-    const parsed = parseEntry(text, store.levelCents);
-    if (!parsed.ok) {
-      error = (PARSE_MESSAGE[parsed.reason] || (() => "That line did not parse."))(parsed);
-      return;
-    }
-    if (!gate) {
-      const g = gateFor(parsed.items);
-      if (g) { gate = g; error = ""; return; }
-    }
-    // Clear FIRST: the next paddle is already being shouted.
-    text = "";
-    gate = null;
-    error = "";
-    for (const item of parsed.items) store.submit(item);
-    focusInput();
-  }
-
-  function onInput() {
-    // The line changed, so whatever the clerk was being asked about is stale.
-    gate = null;
-    error = "";
-  }
-
   /* ---- keyboard ---------------------------------------------------------- */
 
   const LEVEL_STEP = { "]": +1, "[": -1, ArrowDown: +1, ArrowUp: -1 };
@@ -172,7 +117,8 @@
   function onKeydown(event) {
     if (sheetOpen) return;                       // the sheet owns the keyboard
     const target = event.target;
-    const inOtherField = target !== inputEl
+    const inPaddle = target?.dataset?.giftPaddle !== undefined;
+    const inOtherField = !inPaddle
       && (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.tagName === "SELECT");
     if (inOtherField) return;
 
@@ -192,12 +138,13 @@
 
     if (key in LEVEL_STEP) { event.preventDefault(); step(LEVEL_STEP[key]); return; }
 
-    if (key === "Enter") { event.preventDefault(); commit(); return; }
+    // Enter belongs to the gift panel's form (Record).
+    if (key === "Enter") return;
 
+    // A half-typed number is cleared by the panel itself; an empty field here
+    // means Esc is "undo the last gift", as it always was.
     if (key === "Escape") {
       event.preventDefault();
-      if (gate) { gate = null; text = ""; focusInput(); return; }
-      if (text) { text = ""; error = ""; focusInput(); return; }
       void store.undoLast();
       return;
     }
@@ -211,7 +158,7 @@
     if (key === "?" || key === "F1") { event.preventDefault(); helpOpen = !helpOpen; return; }
 
     // Anything the clerk types belongs in the field, wherever the focus drifted.
-    if (/^[0-9a!*]$/i.test(key) && target !== inputEl) inputEl?.focus({ preventScroll: true });
+    if (/^[0-9a!*]$/i.test(key) && !inPaddle) panel?.focus();
   }
 
   function closeSheet() {
@@ -250,66 +197,7 @@
     </div>
   {/if}
 
-  <LevelBar {store} />
-
-  <section class="gt-entry">
-    <label class="gt-lab" for="gt-paddle">Paddle</label>
-    <input
-      id="gt-paddle"
-      class="gt-input"
-      class:gt-input--gate={Boolean(gate)}
-      type="text"
-      inputmode="numeric"
-      autocomplete="off"
-      autocapitalize="off"
-      autocorrect="off"
-      spellcheck="false"
-      enterkeyhint="done"
-      placeholder={store.levelCents ? `Number, then Enter, at ${money(store.levelCents)}` : "Pick a giving level"}
-      bind:value={text}
-      bind:this={inputEl}
-      oninput={onInput}
-      aria-describedby="gt-say"
-    />
-    <p class="gt-tally">
-      {#if levelTally}
-        <span class="gt-tally-n">{levelTally.paddles}</span> paddles at {money(store.levelCents)}
-        · {money(levelTally.total_cents)}
-      {:else if store.levelCents}
-        Nobody at {money(store.levelCents)} yet
-      {/if}
-    </p>
-  </section>
-
-  <p
-    id="gt-say"
-    class="gt-say"
-    class:gt-say--gate={Boolean(gate)}
-    class:gt-say--bad={Boolean(error)}
-    role="status"
-    aria-live="polite"
-  >
-    {#if gate}
-      <AlertTriangle size={16} strokeWidth={2.4} />{gate.text}
-    {:else if error}
-      {error}
-    {:else}
-      Type a number and press Enter. A paddle nobody holds is still recorded, in red, and fixed later.
-    {/if}
-  </p>
-
-  {#if undo && undoLeft > 0}
-    <div class="gt-undo" role="status">
-      <button type="button" class="gt-undo-btn" onclick={() => store.undoLast()}>
-        <Undo2 size={17} strokeWidth={2.4} />
-        Undo {money(undo.cents)}{undo.paddle ? ` · paddle ${undo.paddle}` : ""}
-      </button>
-      <span class="gt-undo-word">
-        {undo.published ? "Already on the screen. Esc pulls it back." : "Esc, before the room sees it."}
-      </span>
-      <span class="gt-undo-left">{Math.ceil(undoLeft / 1000)}s</span>
-    </div>
-  {/if}
+  <GiftPanel bind:this={panel} terminal={store} levels={panelLevels} callingCents={store.levelCents} flat autofocus />
 
   <div class="gt-tools">
     <button type="button" class="gt-tool" onclick={() => (otherOpen = true)}>
@@ -330,6 +218,8 @@
       {store.totals.pending_publish} about to show · {store.totals.retracted} pulled back · {store.totals.voided} voided
     </p>
   </div>
+
+  <LevelBar {store} />
 
   <!-- The emcee says "I count nine at a thousand": this is the row the clerk
        checks it against, every level at once (08 s7.2). -->
@@ -513,123 +403,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .gt-entry {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-  }
-  .gt-lab {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--g26-gold-soft);
-  }
-  /* Big enough to read from a laptop on a dark ballroom table, and 16px or more
-     on a phone so iOS does not magnify the page the moment it is tapped. */
-  .gt-input {
-    width: 100%;
-    min-height: 72px;
-    padding: 0 16px;
-    font-family: var(--g26-sans);
-    font-size: 40px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    font-variant-numeric: tabular-nums lining-nums;
-    color: var(--g26-cream);
-    background: var(--g26-surface-1);
-    border: 2px solid var(--g26-line-strong);
-    border-radius: var(--g26-r-ctl);
-  }
-  .gt-input::placeholder {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: rgb(169 180 194 / 0.7);
-  }
-  .gt-input:focus-visible {
-    outline: none;
-    border-color: var(--g26-gold);
-    box-shadow: 0 0 0 3px rgb(255 189 89 / 0.25);
-  }
-  .gt-input--gate {
-    border-color: var(--g26-alert);
-  }
-  .gt-tally {
-    margin: 0;
-    text-align: right;
-    font-size: 13px;
-    color: var(--g26-dim);
-    white-space: nowrap;
-  }
-  .gt-tally-n {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--g26-cream);
-  }
 
-  .gt-say {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 34px;
-    margin: 0;
-    padding: 0 12px 8px;
-    font-size: 13px;
-    line-height: 1.35;
-    color: var(--g26-dim);
-  }
-  .gt-say--gate {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--g26-gold);
-  }
-  .gt-say--bad {
-    font-weight: 700;
-    color: var(--g26-alert);
-  }
 
-  .gt-undo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 12px;
-    background: var(--g26-surface-2);
-    border-top: 1px solid var(--g26-line);
-    border-bottom: 1px solid var(--g26-line);
-  }
-  .gt-undo-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    min-height: 44px;
-    padding: 0 14px;
-    font-family: var(--g26-sans);
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--g26-ink);
-    background: var(--g26-gold);
-    border: 0;
-    border-radius: var(--g26-r-ctl);
-    cursor: pointer;
-  }
-  .gt-undo-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--g26-focus);
-  }
-  .gt-undo-word {
-    flex: 1;
-    font-size: 12px;
-    color: var(--g26-dim);
-  }
-  .gt-undo-left {
-    font-size: 15px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    color: var(--g26-gold-soft);
-  }
 
   .gt-tools {
     display: flex;
@@ -742,7 +517,21 @@
 
   /* A volunteer's own phone. The header stacks, the field stays enormous, and
      every target keeps its 56px. */
+  /* A phone: the gift panel is the screen, so the whole terminal scrolls
+     (the page itself is pinned) and the tape keeps a readable height below. */
   @media (max-width: 720px) {
+    .gt {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .gt > :global(*) {
+      flex-shrink: 0;
+    }
+    .gt-tape {
+      flex: 1 0 auto;
+      min-height: 320px;
+      overflow: visible;
+    }
     .gt-bar {
       flex-wrap: wrap;
       gap: 8px;
@@ -757,26 +546,11 @@
     .gt-totals dd {
       font-size: 18px;
     }
-    .gt-entry {
-      grid-template-columns: 1fr;
-      gap: 6px;
-      padding: 10px 12px 4px;
-    }
-    .gt-input {
-      min-height: 64px;
-      font-size: 32px;
-    }
-    .gt-tally {
-      text-align: left;
-    }
     .gt-tool {
       min-height: 56px;
     }
     .gt-legend {
       display: none;
-    }
-    .gt-undo-btn {
-      min-height: 56px;
     }
   }
 </style>

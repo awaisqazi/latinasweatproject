@@ -145,13 +145,13 @@
   .fx {
     display: grid;
     gap: 12px;
-    color: #1e1e1e;
+    color: var(--g26-text);
   }
   .fx-state {
     margin: 0;
     font-size: 13px;
     line-height: 1.45;
-    color: rgb(30 30 30 / 0.7);
+    color: var(--g26-muted);
   }
   .fx-grid {
     display: grid;
@@ -170,7 +170,7 @@
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgb(30 30 30 / 0.6);
+    color: var(--g26-gold-soft);
   }
   .fx-field input,
   .fx-field select {
@@ -178,9 +178,10 @@
     padding: 0 10px;
     font: inherit;
     font-size: 16px;
-    color: #1e1e1e;
-    background: rgb(255 255 255 / 0.78);
-    border: 1px solid rgb(30 30 30 / 0.28);
+    color: var(--g26-text);
+    background: var(--g26-surface-3);
+    color-scheme: dark;
+    border: 1px solid var(--g26-line-strong);
     border-radius: 2px;
   }
   .fx-field input:focus-visible,
@@ -208,14 +209,14 @@
     margin: 0;
     font-size: 13px;
     font-weight: 700;
-    color: #a3341f;
+    color: var(--g26-alert);
   }
 
   .fx-danger {
     display: grid;
     gap: 8px;
     padding: 12px;
-    background: rgb(163 52 31 / 0.06);
+    background: rgb(255 138 122 / 0.12);
     border: 1px solid rgb(163 52 31 / 0.22);
     border-radius: var(--g26-r-ctl);
   }
@@ -225,23 +226,23 @@
     font-weight: 800;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(30 30 30 / 0.6);
+    color: var(--g26-gold-soft);
   }
   .fx-btn {
     min-height: 56px;
     font-family: var(--g26-sans);
     font-size: 13px;
     font-weight: 800;
-    color: #1e1e1e;
+    color: var(--g26-text);
     background: transparent;
-    border: 1px solid rgb(30 30 30 / 0.3);
+    border: 1px solid var(--g26-line-strong);
     border-radius: var(--g26-r-ctl);
     cursor: pointer;
   }
   .fx-btn--bad {
     color: #fff8ef;
     background: #a3341f;
-    border-color: #a3341f;
+    border-color: var(--g26-alert);
   }
   .fx-btn:disabled,
   .fx-save:disabled {
@@ -268,4 +269,5 @@
       grid-template-columns: 1fr;
     }
   }
+  input::placeholder { color: var(--g26-dim); opacity: 1; }
 </style>

@@ -199,14 +199,20 @@ export const TABLE_ROWS = Object.freeze([
   [17, 16],
 ]);
 
-/** The seating loop's four boards: [label, row indexes]. Cycles every 10 s. */
+/**
+ * The seating loop's four boards, in order. "all" is the whole room with every
+ * name (every row of the plan, whatever `rows` says); the others are zoomed
+ * groups of plan rows (index 0 = the podium row at the coat check end), each
+ * with a mini-map of the corridor. `ms` is how long each board stays up.
+ */
 export const SEATING_BOARDS = Object.freeze([
-  { id: "all", label: "The whole dinner corridor", rows: [0, 1, 2, 3, 4, 5, 6, 7] },
-  { id: "north", label: "North end, by the coat check", rows: [0] },
-  { id: "mid", label: "Rows 1 to 3 from the north end", rows: [1, 2, 3] },
-  { id: "south", label: "Rows 4 to 7, toward the entrance", rows: [4, 5, 6, 7] },
+  { id: "all", label: "The whole dinner corridor", rows: [0, 1, 2, 3, 4, 5, 6, 7], ms: 30_000 },
+  { id: "north", label: "North end, by the coat check", rows: [0], ms: 12_000 },
+  { id: "mid", label: "Rows 1 to 3 from the north end", rows: [1, 2, 3], ms: 12_000 },
+  { id: "south", label: "Rows 4 to 7, toward the entrance", rows: [4, 5, 6, 7], ms: 12_000 },
 ]);
-export const SEATING_BOARD_MS = 10_000;
+/** Fallback for a board without its own `ms`. */
+export const SEATING_BOARD_MS = 12_000;
 
 /**
  * The honors block, one entry per Next press. Each honor is two steps (title

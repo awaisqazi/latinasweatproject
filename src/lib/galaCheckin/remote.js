@@ -192,6 +192,15 @@ export function createCheckinRemote({ event = DEFAULT_EVENT, client: db = shared
   // and the caller must never persist it (web storage or otherwise).
   const displayRotateKey = () => callRpc(db, "gala_display_rotate_key", auth());
 
+  // ADDED for the /gala/admin Tools tab. Existing admin-only RPCs
+  // (gala_checkin_pool_init / gala_checkin_pool_mark), additive: nothing above
+  // changed. pool_init only ever ADDS numbers (on conflict do nothing);
+  // pool_mark moves unassigned paddles between free, held and void.
+  const poolInit = (lo, hi, held = []) =>
+    callRpc(db, "gala_checkin_pool_init", { ...auth(), p_lo: lo, p_hi: hi, p_held: held });
+  const poolMark = (numbers, status) =>
+    callRpc(db, "gala_checkin_pool_mark", { ...auth(), p_numbers: numbers, p_status: status });
+
   // --- realtime ------------------------------------------------------------
   function people(raw) {
     const out = [];
@@ -256,6 +265,6 @@ export function createCheckinRemote({ event = DEFAULT_EVENT, client: db = shared
     checkIn, undo, walkIn, updateGuest, paddleAssign, paddleSwap, paddleRelease, groupSet,
     subscribe, ping, setFocus,
     donationAdd, donationRecord, donationList, donationUpdate, donationRetract, donationUnretract,
-    donationVoid, displaySet, displayRotateKey,
+    donationVoid, displaySet, displayRotateKey, poolInit, poolMark,
   };
 }

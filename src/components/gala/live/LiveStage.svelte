@@ -18,8 +18,9 @@
   } from "../../../lib/galaLive/stores.js";
   import {
     COPY, DEFAULT_EVENT, DEFAULT_SEED, CLIENT_VERSION, PROJECTOR,
-    mergeState, money,
+    mergeState, money, levelMoney, levelFor,
   } from "../../../lib/galaLive/config.js";
+  import { fitBox } from "../../../lib/galaLive/fitName.js";
   import { createDirector } from "../../../lib/galaLive/director.js";
   import { createGiftFeed, readDisplayKey } from "../../../lib/galaLive/giftFeed.js";
   import { createOperator } from "../../../lib/galaLive/operator.js";
@@ -38,6 +39,7 @@
   import ProgramStage from "./ProgramStage.svelte";
   import ProgramMirror from "./ProgramMirror.svelte";
   import FollowStrip from "./FollowStrip.svelte";
+  import PaddleLadder from "./PaddleLadder.svelte";
   import {
     normalizePos, nextPos, prevPos, patchFor, sceneFor,
   } from "../../../lib/galaLive/program.js";
@@ -106,14 +108,26 @@
   const centerSize = $derived(Math.round(totalSize * 0.86));
   const goalLine = $derived(COPY.ofGoal.replace("GOAL", money(goalCents)));
 
-  const donateUrl = $derived(String($liveState.config?.donate_url || galaTeaser.ticketsUrl || ""));
-  const donateShort = $derived(String($liveState.config?.donate_short || ""));
+  // Give link: the printed program and the paddle cards say latinasweatproject.com/lspgala,
+  // so the screen says the same unless the ops console sets donate_url explicitly.
+  const GIVE_URL = "https://latinasweatproject.com/lspgala";
+  const donateUrl = $derived(String($liveState.config?.donate_url || GIVE_URL));
+  const donateShort = $derived(
+    String($liveState.config?.donate_short || (donateUrl === GIVE_URL ? "latinasweatproject.com/lspgala" : "")),
+  );
   const sponsors = $derived(Array.isArray($liveState.config?.sponsors) ? $liveState.config.sponsors : []);
   const programOverrides = $derived($liveState.program?.honoree_overrides || {});
   const levelCents = $derived($liveState.current_level_cents);
-  const impactLine = $derived(
-    ($liveState.levels || []).find((l) => Number(l?.amount_cents) === Number(levelCents))?.impact_line || "",
-  );
+  const levels = $derived($liveState.levels || []);
+  const currentLevel = $derived(levelFor(levels, levelCents));
+  const impactLine = $derived(currentLevel?.impact || currentLevel?.label || "");
+  const calling = $derived(Number(levelCents) > 0);
+  // The paddle raise with a ladder configured: the X steps up and shares the
+  // left column with the ladder, the ask becomes a hero card on the right.
+  const ladderOn = $derived(layout === "hero" && !programOn && !auctionLive && levels.length > 0);
+  let failedPhotos = $state({});
+  const askPhoto = $derived(currentLevel?.photo && !failedPhotos[currentLevel.photo] ? currentLevel.photo : "");
+  const askKey = $derived(`${levelCents}|${impactLine}|${goalCents}|${askPhoto}|${$liveState.message || ""}`);
   const matchOn = $derived(!!$liveState.match?.active);
 
   /* ---------------- imperative wiring ---------------- */
@@ -633,6 +647,7 @@
     void layout;
     void qrSpot;
     void programOn;
+    void ladderOn;
     void pos.seg;
     void pos.step;
     if (!sc) return;
@@ -689,6 +704,8 @@
           scene={effScene}
           {levelCents}
           {impactLine}
+          {levels}
+          {goalCents}
           {reduced}
           demo={demoMode}
         />
@@ -705,6 +722,10 @@
       {#if donateUrl}
         <a class="ph-give" href={donateUrl} rel="noopener" target="_blank">{COPY.giveNow}</a>
       {/if}
+      <a class="ph-auction" href="https://latinasweatproject.com/lspgala" rel="noopener" target="_blank">
+        <span class="ph-auction-l1">Silent auction open all night</span>
+        <span class="ph-auction-l2">Bid at latinasweatproject.com/lspgala</span>
+      </a>
 
       {#if $liveState.message}<p class="ph-msg">{$liveState.message}</p>{/if}
       {#if !named}<p class="ph-note">{COPY.noNamesNote}</p>{/if}
@@ -721,6 +742,7 @@
         class:hero={!programOn && layout === "hero"}
         class:center={!programOn && layout === "center"}
         class:program={programOn}
+        class:ladder={ladderOn}
       >
         {#if programOn}
           <ProgramStage
@@ -761,13 +783,44 @@
         {#if layout === "hero"}
           <section class="zone-totals" data-fx-quiet>
             <div class="eyebrow">{auctionLive ? COPY.currentBid : COPY.raisedTonight}</div>
-            <div class="total" class:bump={bumping} style={`font-size: calc(var(--u) * ${totalSize})`}>
+            <div class="total" class:bump={bumping} style={`font-size: calc(var(--u) * ${ladderOn ? Math.min(totalSize, 140) : totalSize})`}>
               {#each totalText.split("") as ch, i (i)}<span class={slotClass(ch)}>{ch}</span>{/each}
             </div>
             <div class="rule"></div>
             <div class="goalline">{goalLine} · <b>{pctLabel}%</b></div>
           </section>
 
+          {#if ladderOn}
+          <section class="zone-ladder">
+            <PaddleLadder {levels} currentCents={levelCents} />
+          </section>
+
+          <section class="zone-ask" class:photo={calling && !!askPhoto}>
+            {#if calling && askPhoto}
+              {#key askPhoto}
+                <div class="askphoto" in:fade={{ duration: reduced ? 0 : 500 }}>
+                  <img src={askPhoto} alt="" onerror={() => (failedPhotos = { ...failedPhotos, [askPhoto]: true })} />
+                </div>
+              {/key}
+            {/if}
+            <div class="asktext" use:fitBox={{ min: 0.5, key: askKey }}>
+              <div class="eyerow">
+                <div class="eyebrow">{calling ? COPY.askLevel : COPY.goalEyebrow}</div>
+                {#if matchOn && $liveState.match?.label}
+                  <div class="matchchip">{COPY.matchEyebrow} · {$liveState.match.label}</div>
+                {/if}
+              </div>
+              {#if calling}
+                <div class="asknum">{levelMoney(levelCents)}</div>
+                {#if impactLine}<div class="askimpact">{impactLine}</div>{/if}
+              {:else}
+                <div class="asknum">{money(goalCents)}</div>
+                <div class="askimpact">{COPY.anyAmountLine}</div>
+              {/if}
+              {#if $liveState.message}<div class="askmsg">{$liveState.message}</div>{/if}
+            </div>
+          </section>
+          {:else}
           <section class="zone-level">
             <div class="eyerow">
               <div class="eyebrow">
@@ -797,9 +850,10 @@
               {/if}
             </div>
           </section>
+          {/if}
 
           <section class="zone-card" data-fx-quiet>
-            <GiftCard card={$heroCard} reduced={reduced} />
+            <GiftCard card={$heroCard} compact={ladderOn} reduced={reduced} />
           </section>
 
           <section class="zone-roll" data-fx-quiet>
@@ -971,6 +1025,8 @@
   .zone-x,
   .zone-totals,
   .zone-level,
+  .zone-ladder,
+  .zone-ask,
   .zone-card,
   .zone-roll,
   .zone-bottomleft,
@@ -1050,6 +1106,109 @@
     height: calc(var(--u) * 176);
   }
 
+  /* --- zones: hero with the paddle ladder (appeal, levels configured) ---
+     Left: the X steps up, the ask card (photo, amount, impact) sits under it,
+     the QR keeps its corner. Right: a tighter total, the ladder, then the gift
+     card and the roll. */
+  .frame.hero.ladder .zone-x {
+    top: calc(var(--u) * 110);
+    height: calc(var(--u) * 360);
+  }
+  .frame.hero.ladder .zone-ask {
+    left: calc(var(--u) * 96);
+    width: calc(var(--u) * 880);
+    top: calc(var(--u) * 484);
+    height: calc(var(--u) * 352);
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(5, 7, 12, 0.84), rgba(5, 7, 12, 0.7));
+    border-left: calc(var(--u) * 5) solid var(--g26-gold);
+    border-radius: calc(var(--u) * 4);
+  }
+  .askphoto {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 40%;
+  }
+  .askphoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+  /* The photo sinks into the stage: ink over its right third and its edges. */
+  .askphoto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(5, 7, 12, 0) 45%, rgba(5, 7, 12, 0.72) 80%, rgba(5, 7, 12, 0.96) 100%),
+      linear-gradient(180deg, rgba(5, 7, 12, 0.25) 0%, rgba(5, 7, 12, 0) 22%, rgba(5, 7, 12, 0) 72%, rgba(5, 7, 12, 0.45) 100%);
+  }
+  .asktext {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: calc(var(--u) * 6 * var(--k, 1));
+    padding: calc(var(--u) * 16) calc(var(--u) * 30);
+    overflow: hidden;
+  }
+  .zone-ask.photo .asktext {
+    left: 38%;
+    padding-left: calc(var(--u) * 20);
+  }
+  .frame.hero.ladder .zone-totals {
+    top: calc(var(--u) * 120);
+    height: calc(var(--u) * 262);
+  }
+  .frame.hero.ladder .zone-ladder {
+    left: calc(var(--u) * 1000);
+    width: calc(var(--u) * 824);
+    top: calc(var(--u) * 392);
+    height: calc(var(--u) * 274);
+  }
+  .frame.hero.ladder .zone-card {
+    top: calc(var(--u) * 680);
+    height: calc(var(--u) * 180);
+  }
+  .frame.hero.ladder .zone-roll {
+    top: calc(var(--u) * 874);
+    height: calc(var(--u) * 152);
+  }
+  .asktext .eyebrow {
+    font-size: calc(var(--u) * 24 * var(--k, 1));
+  }
+  .asknum {
+    font-family: var(--g26-serif);
+    font-style: italic;
+    font-size: calc(var(--u) * 116 * var(--k, 1));
+    line-height: 1.02;
+    color: var(--g26-cream);
+    white-space: nowrap;
+    font-variant-numeric: lining-nums;
+    text-shadow: 0 0 calc(var(--u) * 26) rgba(255, 189, 89, 0.28);
+  }
+  .askimpact {
+    font-family: var(--g26-serif);
+    font-style: italic;
+    font-size: calc(var(--u) * 42 * var(--k, 1));
+    line-height: 1.16;
+    color: var(--g26-warm);
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+  .askmsg {
+    margin-top: calc(var(--u) * 4);
+    font-size: calc(var(--u) * 26 * var(--k, 1));
+    font-weight: 700;
+    color: var(--g26-gold-soft);
+    overflow-wrap: break-word;
+  }
+
   /* --- zones: centered (ambient, program, finale, thanks, public) --- */
   .frame.center .zone-x {
     left: calc(var(--u) * 660);
@@ -1073,9 +1232,13 @@
     gap: calc(var(--u) * 40);
   }
   .br-left,
+  .br-left {
+    position: relative;
+    flex: 0 0 58%;
+  }
   .br-right {
     position: relative;
-    flex: 1 1 50%;
+    flex: 1 1 42%;
   }
   .brnote {
     position: absolute;
@@ -1092,6 +1255,11 @@
   .ctext {
     position: absolute;
     inset: 0;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    max-width: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1100,7 +1268,7 @@
     text-align: center;
     background: rgba(5, 7, 12, 0.68);
     border-radius: calc(var(--u) * 6);
-    padding: calc(var(--u) * 12) calc(var(--u) * 28);
+    padding: calc(var(--u) * 28) calc(var(--u) * 64);
     overflow: hidden;
   }
   .cthanks {
@@ -1357,6 +1525,30 @@
     text-transform: uppercase;
     text-decoration: none;
     font-size: 15px;
+  }
+  .ph-auction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 189, 89, 0.45);
+    border-radius: 3px;
+    text-decoration: none;
+    text-align: center;
+  }
+  .ph-auction-l1 {
+    font-family: var(--g26-serif);
+    font-style: italic;
+    font-size: 19px;
+    color: var(--g26-cream);
+  }
+  .ph-auction-l2 {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--g26-gold);
   }
   .ph-msg {
     margin: 0;

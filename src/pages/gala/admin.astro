@@ -1,0 +1,52 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import GalaAdminApp from "@/components/gala/admin/GalaAdminApp.svelte";
+
+// /gala/admin: the Annual Gala organizer's phone page. Tabs pinned at the
+// top: Control (run of show + Record a gift), Pledges (the pledge terminal),
+// Tools (paddle pool, projector display key, check-in numbers, links).
+// Unlisted: not in the nav, noindex, excluded from the sitemap in
+// astro.config.mjs and disallowed in public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships EMPTY. It unlocks with the
+// event's ADMIN passcode (exchanged once for a session token; the passcode is
+// never stored and never in a URL). Guests and gifts come from the
+// passcode-protected RPCs at run time.
+---
+
+<Layout
+  title="Gala Admin | The Latina Sweat Project"
+  description="Internal night-of admin for the Annual Gala."
+  robots="noindex, nofollow"
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#0B1320" />
+    <meta name="referrer" content="same-origin" />
+    <!-- iPhone and iPad only: no page magnify when the paddle field is
+         focused (same rule as /gala/pledges). A manual pinch still zooms. -->
+    <script is:inline>
+      (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        if (!ios) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      })();
+    </script>
+    <style is:inline>
+      html,
+      body {
+        margin: 0;
+        background: #0b1320;
+      }
+    </style>
+  </Fragment>
+  <GalaAdminApp client:only="svelte" />
+  <noscript>
+    <p style="color:#fff8ef;font-family:Arial,sans-serif;padding:24px;">
+      The gala admin needs JavaScript. Turn it on and reload this page.
+    </p>
+  </noscript>
+</Layout>

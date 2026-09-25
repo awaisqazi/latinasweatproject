@@ -9,6 +9,7 @@
   //                   corners are already the donate QR and the roll call.
   import QRCode from "qrcode";
   import { FOLLOW_URL, FOLLOW_LABEL } from "../../../lib/galaLive/program.js";
+  const AUCTION_LABEL = "latinasweatproject.com/lspgala";
 
   let { variant = "corner" } = $props();
 
@@ -35,6 +36,7 @@
   <div class="txt">
     <div class="l1">Follow along on your phone</div>
     <div class="l2">at <b>{FOLLOW_LABEL}</b></div>
+    <div class="l3">Silent auction all night · <b>{AUCTION_LABEL}</b></div>
   </div>
   <div class="qr">{#if dataUrl}<img src={dataUrl} alt="QR code for {FOLLOW_LABEL}" />{/if}</div>
 </div>
@@ -55,6 +57,9 @@
     right: calc(var(--u) * 96);
     bottom: calc(var(--u) * 54);
     height: calc(var(--u) * 132);
+    width: calc(var(--u) * 640);
+    justify-content: flex-end;
+    box-sizing: border-box;
   }
   .top {
     right: calc(var(--u) * 96);
@@ -65,18 +70,21 @@
   .txt {
     text-align: right;
     line-height: 1.15;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
   }
   .l1 {
     font-family: var(--g26-serif);
     font-style: italic;
-    font-size: calc(var(--u) * 34);
+    font-size: calc(var(--u) * 28);
     color: var(--g26-cream);
     white-space: nowrap;
   }
   .l2 {
-    margin-top: calc(var(--u) * 4);
+    margin-top: calc(var(--u) * 2);
     font-weight: 700;
-    font-size: calc(var(--u) * 22);
+    font-size: calc(var(--u) * 21);
     letter-spacing: 0.02em;
     color: var(--g26-warm);
     white-space: nowrap;
@@ -85,11 +93,31 @@
     color: var(--g26-gold);
     font-weight: 800;
   }
+  .l3 {
+    margin-top: calc(var(--u) * 6);
+    padding-top: calc(var(--u) * 5);
+    border-top: calc(var(--u) * 1) solid rgba(255, 189, 89, 0.28);
+    font-weight: 600;
+    font-size: calc(var(--u) * 15.5);
+    line-height: 1.12;
+    letter-spacing: 0.02em;
+    color: var(--g26-warm);
+    white-space: normal;
+  }
+  .l3 b {
+    color: var(--g26-gold);
+    font-weight: 800;
+  }
   .top .l1 {
-    font-size: calc(var(--u) * 28);
+    font-size: calc(var(--u) * 24);
   }
   .top .l2 {
-    font-size: calc(var(--u) * 19);
+    font-size: calc(var(--u) * 17);
+  }
+  .top .l3 {
+    margin-top: calc(var(--u) * 3);
+    padding-top: calc(var(--u) * 3);
+    font-size: calc(var(--u) * 14);
   }
   .qr {
     flex: 0 0 auto;

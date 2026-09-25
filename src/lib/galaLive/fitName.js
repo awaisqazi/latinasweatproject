@@ -159,3 +159,42 @@ export function fitWidth(node, opts = 0.62) {
     },
   };
 }
+
+/**
+ * Svelte action for a fixed-size box of wrapping copy (the paddle-raise ask
+ * card and ladder): shrinks `--k` on the node, one step at a time down to
+ * `min`, until nothing overflows the box. Text wraps rather than truncating;
+ * this only buys the room for the wrap. Children size themselves with
+ * calc(var(--u) * N * var(--k, 1)). Pass anything that changes the copy as
+ * `key` so a new level re-fits.
+ */
+export function fitBox(node, opts = {}) {
+  let min = opts?.min ?? 0.55;
+  let raf = 0;
+  const fits = () => node.scrollHeight <= node.clientHeight + 1 && node.scrollWidth <= node.clientWidth + 1;
+  function run() {
+    let k = 1;
+    node.style.setProperty("--k", "1");
+    for (let i = 0; i < 24 && !fits() && k > min; i++) {
+      k = Math.max(min, k * 0.95);
+      node.style.setProperty("--k", k.toFixed(3));
+    }
+  }
+  const schedule = () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(run);
+  };
+  schedule();
+  document.fonts?.ready?.then(schedule);
+  window.addEventListener("resize", schedule);
+  return {
+    update(next) {
+      min = next?.min ?? min;
+      schedule();
+    },
+    destroy() {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", schedule);
+    },
+  };
+}

@@ -33,7 +33,10 @@ const UNDO_FLOOR_MS = 4000;        // publish_delay_ms may be 0; the clerk still
 const DONE_KEEP_MS = 60000;        // how long a landed row lingers until the tape carries it
 const DUPES_KEEP = 20;
 
-const queueKey = (event) => `lsp.galaTerminal.queue.${event}`;
+// `scope` keeps a second surface's outbox (the show-control phone) apart from
+// the pledge terminal's when both run in one browser: same op-id discipline,
+// separate localStorage slot, so one tab's persist() never drops the other's.
+const queueKey = (event, scope = "") => `lsp.galaTerminal.queue.${event}${scope ? `.${scope}` : ""}`;
 
 /** Defaults compiled in, so a failed read changes nothing (10 s6). */
 const SAFE_STATE = {
@@ -41,7 +44,7 @@ const SAFE_STATE = {
   publish_delay_ms: 4000, total_cents: 0, gift_count: 0, show_names: true, version: 0,
 };
 
-export function createTerminalStore() {
+export function createTerminalStore({ scope = "" } = {}) {
   let checkin = null;
   let remote = null;
   let stopped = false;
@@ -93,14 +96,14 @@ export function createTerminalStore() {
     try {
       const keep = queue.filter((q) => q.state !== "done");
       const store = window.localStorage;
-      if (!keep.length) store.removeItem(queueKey(remote?.event || ""));
-      else store.setItem(queueKey(remote?.event || ""), JSON.stringify(packQueue(keep)));
+      if (!keep.length) store.removeItem(queueKey(remote?.event || "", scope));
+      else store.setItem(queueKey(remote?.event || "", scope), JSON.stringify(packQueue(keep)));
     } catch { /* private mode, full disk: the entry still lives in memory */ }
   }
 
   function restore() {
     try {
-      queue = unpackQueue(window.localStorage.getItem(queueKey(remote?.event || "")));
+      queue = unpackQueue(window.localStorage.getItem(queueKey(remote?.event || "", scope)));
     } catch { queue = []; }
   }
 

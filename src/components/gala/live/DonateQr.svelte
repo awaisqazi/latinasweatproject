@@ -116,7 +116,13 @@
     padding: calc(var(--u) * 7);
   }
   .compact .label {
-    font-size: calc(var(--u) * 52);
+    font-size: calc(var(--u) * 44);
+  }
+  .compact .url {
+    font-size: calc(var(--u) * 23) !important;
+    margin-top: calc(var(--u) * 4);
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
   /* QR spotlight (04 section 3.3): the code carries to the back tables. */
   .spotlight .card {

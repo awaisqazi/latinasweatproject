@@ -9,9 +9,20 @@
     HONOREES, VOICES, MENU, MCS, FOUNDER, FASHION, PERFORMERS, REMARKS, SPONSOR_ROWS, TABLE_ROWS, SILENT_AUCTION_URL, SILENT_AUCTION_LABEL,
     segmentById, normalizePos, honorAt, voiceAt, resolveHonoree, monogram, logoStyle,
   } from "../../../lib/galaLive/program.js";
-  import { money } from "../../../lib/galaLive/config.js";
+  import { COPY, money, levelMoney, levelFor } from "../../../lib/galaLive/config.js";
+  import SeatMiniMap from "./SeatMiniMap.svelte";
 
-  let { program = {}, scene = "program", levelCents = null, impactLine = "", reduced = false, demo = false } = $props();
+  let {
+    program = {}, scene = "program", levelCents = null, impactLine = "", levels = [], goalCents = 0,
+    reduced = false, demo = false,
+  } = $props();
+
+  // Paddle raise: the level being called, its photo (hidden if it fails to
+  // load) and the whole ladder as a plain scrolling list.
+  const calling = $derived(Number(levelCents) > 0);
+  const current = $derived(levelFor(levels, levelCents));
+  let failedPhoto = $state("");
+  const photo = $derived(current?.photo && current.photo !== failedPhoto ? current.photo : "");
 
   const pos = $derived(normalizePos(program));
   const view = $derived(scene === "appeal" || scene === "auction" ? "appeal" : scene === "thanks" || scene === "finale" ? "thanks" : pos.seg);
@@ -43,23 +54,46 @@
         <h2 class="serif">Find your table</h2>
         <p class="lead">Find your table on the screens, or ask a host.</p>
         {#if demo}<div class="demo-plate" role="note">DEMO DATA · not the real seating</div>{/if}
-        <div class="map" aria-label="Dinner corridor map, table numbers">
-          <div class="mapends"><span>Coat check</span><span>Entrance</span></div>
-          <div class="cols">
-            {#each TABLE_ROWS as row, i (i)}
-              <div class="col">
-                {#each row as n (n)}<div class="tb">{n}</div>{/each}
-              </div>
-            {/each}
-          </div>
+        <div class="map">
+          <!-- The same corridor drawing as the projector's mini-map. Numbers
+               only: names never reach a guest's phone. -->
+          <div class="minimap"><SeatMiniMap rows={TABLE_ROWS} vw={300} vh={170} label="Dinner corridor map, table numbers" /></div>
           <div class="mapnote">Podium on the N. Gallery side</div>
         </div>
       {:else if view === "appeal"}
         <div class="eyebrow">8:15 PM · Live bidding</div>
         <h2 class="serif foil">Raise your paddle</h2>
-        {#if levelCents}
-          <div class="level">{money(levelCents)}</div>
-          {#if impactLine}<p class="lead">{impactLine}</p>{/if}
+        {#if calling}
+          <div class="ask">
+            {#if photo}
+              <div class="askphoto"><img src={photo} alt="" onerror={() => (failedPhoto = photo)} /></div>
+            {/if}
+            <div class="askbody">
+              <div class="eyebrow small">{COPY.askLevel}</div>
+              <div class="level">{levelMoney(levelCents)}</div>
+              {#if impactLine}<p class="askimpact serif">{impactLine}</p>{/if}
+            </div>
+          </div>
+        {:else if levels.length}
+          <div class="ask">
+            <div class="askbody">
+              <div class="eyebrow small">{COPY.goalEyebrow}</div>
+              <div class="level">{money(goalCents)}</div>
+              <p class="askimpact serif">{COPY.anyAmountLine}</p>
+            </div>
+          </div>
+        {/if}
+        {#if levels.length}
+          <div class="eyebrow small ladderhead">{COPY.ladderEyebrow}</div>
+          <ol class="ladder">
+            {#each levels as l (l.amount_cents)}
+              {@const cur = calling && Number(l.amount_cents) === Number(levelCents)}
+              <li class:cur class:dim={calling && !!current && !cur}>
+                <span class="lamt">{levelMoney(l.amount_cents)}</span>
+                <span class="limp">{l.impact || l.label}</span>
+              </li>
+            {/each}
+          </ol>
         {/if}
       {:else if view === "thanks"}
         <div class="eyebrow">With gratitude</div>
@@ -260,9 +294,107 @@
   }
   .level {
     font-family: var(--g26-serif);
-    font-size: 44px;
+    font-style: italic;
+    font-size: 48px;
+    line-height: 1.05;
     color: var(--g26-cream);
     font-variant-numeric: lining-nums;
+  }
+  .ask {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 189, 89, 0.45);
+    border-radius: 6px;
+    background: rgba(5, 7, 12, 0.72);
+  }
+  .askphoto {
+    position: relative;
+    aspect-ratio: 4 / 3;
+  }
+  .askphoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+  /* The photo sinks into the card: ink at its foot. */
+  .askphoto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5, 7, 12, 0) 55%, rgba(5, 7, 12, 0.85) 100%);
+  }
+  .askbody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 16px 18px;
+  }
+  .askimpact {
+    margin: 0;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--g26-cream);
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+  .ladderhead {
+    margin-top: 6px;
+  }
+  .ladder {
+    align-self: stretch;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+  }
+  .ladder li {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 12px;
+    border-left: 3px solid transparent;
+    border-radius: 3px;
+    background: rgba(5, 7, 12, 0.45);
+  }
+  .lamt {
+    font-family: var(--g26-serif);
+    font-style: italic;
+    font-size: 21px;
+    color: var(--g26-cream);
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: lining-nums;
+  }
+  .limp {
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--g26-warm);
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+  .ladder li.cur {
+    background: rgba(255, 189, 89, 0.16);
+    border-left-color: var(--g26-gold);
+  }
+  .ladder li.cur .lamt {
+    color: var(--g26-gold);
+  }
+  .ladder li.cur .limp {
+    color: var(--g26-cream);
+    font-weight: 700;
+  }
+  .ladder li.dim {
+    opacity: 0.62;
   }
   .menu {
     list-style: none;
@@ -448,41 +580,9 @@
     width: 100%;
     margin-top: 4px;
   }
-  .mapends {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--g26-gold-soft);
-    border-top: 2px solid rgba(255, 189, 89, 0.6);
-    padding-top: 5px;
-    margin-bottom: 8px;
-  }
-  .cols {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-    align-items: stretch;
-  }
-  .col {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .tb {
-    flex: 1;
-    min-height: 40px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(255, 189, 89, 0.55);
-    border-radius: 3px;
-    background: rgba(5, 7, 12, 0.6);
-    font-family: var(--g26-serif);
-    font-style: italic;
-    font-size: 19px;
-    color: var(--g26-cream);
+  .minimap {
+    width: 100%;
+    aspect-ratio: 300 / 170;
   }
   .mapnote {
     margin-top: 8px;

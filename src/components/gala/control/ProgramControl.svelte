@@ -14,14 +14,27 @@
   // (polled every 4 s) and, on top of it, what you just asked for, marked
   // "Sending". Writes go out one at a time, newest intent wins, and a failed
   // send is retried with the same op id (gala_display_set is idempotent on it).
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { supabase } from "../../../lib/supabaseClient.js";
   import { createCheckinRemote, newOpId, DEFAULT_EVENT } from "../../../lib/galaCheckin/remote.js";
+  import { createCheckinStore } from "../../../lib/galaCheckin/store.svelte.js";
+  import { createTerminalStore } from "../../../lib/galaTerminal/store.svelte.js";
+  import GiftPanel from "./GiftPanel.svelte";
   import {
     SEGMENTS, HONOREES, HONOR_STEPS, segmentById, normalizePos, nextPos, prevPos, patchFor, sceneFor,
     honorAt, honorStepOf, resolveHonoree, statusLine, stepLabel, voiceAt, safeImageUrl, REMARKS,
   } from "../../../lib/galaLive/program.js";
-  import { money } from "../../../lib/galaLive/config.js";
+  import { money, levelMoney, normalizeLevels } from "../../../lib/galaLive/config.js";
+
+  // Standalone (/gala/control) this page owns its gate, session and stores.
+  // Embedded in /gala/admin the host passes its already-unlocked admin remote
+  // and the shared check-in + terminal stores, and `onLock` for sign-out or a
+  // dead session.
+  let {
+    remote: injectedRemote = null, checkin: injectedCheckin = null, terminal: injectedTerminal = null,
+    onLock = null,
+  } = $props();
+  const embedded = !!injectedRemote;
 
   const POLL_MS = 4000;
   const SESSION_DEAD = new Set(["bad-session", "expired", "revoked", "closed", "forbidden"]);
@@ -33,11 +46,36 @@
     }
     return DEFAULT_EVENT;
   }
-  const event = pickEvent();
-  const remote = createCheckinRemote({ event });
+  const event = injectedRemote?.event || pickEvent();
+  const remote = injectedRemote || createCheckinRemote({ event });
+
+  // The gift panel writes through the pledge terminal's store, so a gift keyed
+  // here is exactly a terminal entry. Scope "control": its own outbox slot.
+  const checkin = injectedCheckin || createCheckinStore();
+  const terminal = injectedTerminal || createTerminalStore({ scope: "control" });
+  let giftsAttached = !!injectedTerminal;
+  async function attachGifts() {
+    if (giftsAttached) return;
+    giftsAttached = true;
+    const res = await checkin.attach(remote);
+    if (!res?.ok && !res?.transient) {
+      giftsAttached = false;
+      return;
+    }
+    await terminal.attach({ checkin, remote });
+  }
+  $effect(() => {
+    if (phase === "ready" && !embedded) void attachGifts();
+  });
+  onDestroy(() => {
+    if (embedded) return;
+    terminal.stop();
+    checkin.stop();
+  });
+  let giftOpen = $state(false);
 
   /* ---------------- gate ---------------- */
-  let phase = $state("checking"); // checking | gate | ready
+  let phase = $state(injectedRemote ? "ready" : "checking"); // checking | gate | ready
   let pass = $state("");
   let who = $state("");
   let remember = $state(true);
@@ -73,6 +111,7 @@
   }
 
   async function signOut() {
+    if (embedded) return onLock?.("signout");
     await remote.logout();
     phase = "gate";
   }
@@ -150,6 +189,10 @@
           inflight = null;
           desired = null;
           gateError = res.reason === "forbidden" ? "This session cannot change the screen. Unlock with the admin passcode." : "Your session ended. Unlock again.";
+          if (embedded) {
+            onLock?.(res.reason);
+            return;
+          }
           phase = "gate";
           return;
         }
@@ -188,13 +231,15 @@
       fx: p.fx_mode ?? c.fx_mode ?? "full",
       level: "current_level_cents" in p ? p.current_level_cents : c.current_level_cents ?? null,
       goal: p.goal_cents ?? c.goal_cents ?? 0,
-      levels: Array.isArray(c.levels) ? c.levels : [],
+      levels: normalizeLevels(c.levels),
       total: Number(c.total_cents) || 0,
       program,
     };
   });
 
   const pos = $derived(normalizePos(view.program));
+  // Paddle raise on screen: calling levels and the gift panel move to the top.
+  const raiseFirst = $derived(view.scene === "appeal" || view.scene === "auction");
   const seg = $derived(segmentById(pos.seg));
   const roomPos = $derived(normalizePos(confirmed?.program));
   const roomScene = $derived(confirmed?.scene || "ambient");
@@ -301,7 +346,8 @@
 
   onMount(() => {
     let alive = true;
-    (async () => {
+    if (embedded) poll();
+    else (async () => {
       // A remembered session: prove it is an admin one without changing
       // anything (an empty patch answers "nothing-to-change" only after auth).
       const res = await remote.displaySet(newOpId(), {});
@@ -326,7 +372,33 @@
   });
 </script>
 
-<div class="gc">
+{#snippet raisePanel()}
+  <section class="panel">
+    <div class="eyebrow">Paddle raise · calling level</div>
+    <div class="levels">
+      {#each view.levels as l (l.amount_cents)}
+        <button class="lvl" class:on={Number(view.level) === Number(l.amount_cents)} onclick={() => want({ current_level_cents: l.amount_cents })}>
+          <span class="lamt">{levelMoney(l.amount_cents)}</span>
+          {#if l.impact || l.label}<span class="lhint">{l.impact || l.label}</span>{/if}
+        </button>
+      {/each}
+      <button class="lvl any" class:on={view.level == null} onclick={() => want({ current_level_cents: null })}>
+        <span class="lamt">Any amount</span>
+        <span class="lhint">No level called · ladder and goal</span>
+      </button>
+    </div>
+    {#if !view.levels.length}<p class="muted small">No giving levels are set. Add them in the ops console.</p>{/if}
+    <form class="goal" onsubmit={(e) => { e.preventDefault(); saveGoal(); }}>
+      <label>
+        <span>Goal (now {money(view.goal)})</span>
+        <input type="text" inputmode="decimal" bind:value={goalDraft} placeholder="75000" />
+      </label>
+      <button class="btn small" type="submit" disabled={!goalDraft}>Set goal</button>
+    </form>
+  </section>
+{/snippet}
+
+<div class="gc" class:embedded>
   {#if phase === "checking"}
     <div class="center"><p class="muted">Checking this device…</p></div>
   {:else if phase === "gate"}
@@ -380,6 +452,11 @@
         <small>{nextLabel(pos)}</small>
       </button>
     </div>
+
+    {#if raiseFirst}
+      {@render raisePanel()}
+      <GiftPanel {terminal} levels={view.levels} callingCents={view.level} />
+    {/if}
 
     <section class="room">
       <div class="eyebrow">What the room sees now</div>
@@ -459,25 +536,15 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="eyebrow">Paddle raise</div>
-      <div class="levels">
-        {#each view.levels as l (l.amount_cents)}
-          <button class="btn small" class:on={Number(view.level) === Number(l.amount_cents)} onclick={() => want({ current_level_cents: l.amount_cents })}>
-            {money(l.amount_cents)}
-          </button>
-        {/each}
-        <button class="btn small" class:on={view.level == null} onclick={() => want({ current_level_cents: null })}>No level</button>
-      </div>
-      {#if !view.levels.length}<p class="muted small">No giving levels are set. Add them in the ops console.</p>{/if}
-      <form class="goal" onsubmit={(e) => { e.preventDefault(); saveGoal(); }}>
-        <label>
-          <span>Goal (now {money(view.goal)})</span>
-          <input type="text" inputmode="decimal" bind:value={goalDraft} placeholder="75000" />
-        </label>
-        <button class="btn small" type="submit" disabled={!goalDraft}>Set goal</button>
-      </form>
-    </section>
+    {#if !raiseFirst}
+      {@render raisePanel()}
+      {#if giftOpen}
+        <GiftPanel {terminal} levels={view.levels} callingCents={view.level} />
+        <button class="link small" onclick={() => (giftOpen = false)}>Hide the gift panel</button>
+      {:else}
+        <button class="btn wide gifttoggle" onclick={() => (giftOpen = true)}>Record a gift</button>
+      {/if}
+    {/if}
 
     <section class="panel">
       <div class="eyebrow">Effects (kill switch)</div>
@@ -879,9 +946,47 @@
     gap: 6px;
   }
   .levels {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
+  }
+  .lvl {
+    min-height: 60px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 189, 89, 0.45);
+    background: var(--navy2);
+    color: var(--cream);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    min-width: 0;
+  }
+  .lvl .lamt {
+    font: 800 17px var(--sans);
+    font-variant-numeric: tabular-nums;
+  }
+  .lvl .lhint {
+    font: 500 12px/1.3 var(--sans);
+    color: var(--dim);
+    overflow-wrap: anywhere;
+  }
+  .lvl.on {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+  .lvl.on .lhint {
+    color: rgba(5, 7, 12, 0.78);
+  }
+  .gifttoggle {
+    margin-top: 0;
+  }
+  .gc.embedded {
+    min-height: 0;
   }
   .goal {
     display: flex;

@@ -129,7 +129,7 @@
   .og {
     display: grid;
     gap: 12px;
-    color: #1e1e1e;
+    color: var(--g26-text);
   }
 
   .og-kinds {
@@ -143,9 +143,9 @@
     font-family: var(--g26-sans);
     font-size: 13px;
     font-weight: 700;
-    color: #1e1e1e;
-    background: rgb(255 255 255 / 0.6);
-    border: 1px solid rgb(30 30 30 / 0.24);
+    color: var(--g26-text);
+    background: var(--g26-surface-2);
+    border: 1px solid var(--g26-line);
     border-radius: 999px;
     cursor: pointer;
   }
@@ -156,7 +156,7 @@
   }
   .og-kind:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--g26-cream), 0 0 0 4px var(--g26-gold-deep);
+    box-shadow: var(--g26-focus);
   }
 
   .og-grid {
@@ -176,16 +176,17 @@
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgb(30 30 30 / 0.6);
+    color: var(--g26-gold-soft);
   }
   .og-field input {
     min-height: 52px;
     padding: 0 10px;
     font: inherit;
     font-size: 16px;
-    color: #1e1e1e;
-    background: rgb(255 255 255 / 0.78);
-    border: 1px solid rgb(30 30 30 / 0.28);
+    color: var(--g26-text);
+    background: var(--g26-surface-3);
+    color-scheme: dark;
+    border: 1px solid var(--g26-line-strong);
     border-radius: 2px;
   }
   .og-field input:disabled {
@@ -217,7 +218,7 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: rgb(30 30 30 / 0.72);
+    color: var(--g26-muted);
   }
 
   .og-save {
@@ -239,4 +240,5 @@
       grid-template-columns: 1fr;
     }
   }
+  input::placeholder { color: var(--g26-dim); opacity: 1; }
 </style>

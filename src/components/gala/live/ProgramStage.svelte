@@ -15,7 +15,7 @@
   import { fade } from "svelte/transition";
   import {
     SEGMENTS, HONOREES, VOICES, MENU, MCS, FASHION, PERFORMERS, REMARKS, SPONSOR_ROWS,
-    SILENT_AUCTION_URL, SILENT_AUCTION_LABEL,
+    SILENT_AUCTION_URL, SILENT_AUCTION_LABEL, SEATING_BOARDS,
     segmentById, honorAt, voiceAt, resolveHonoree, monogram, logoStyle,
   } from "../../../lib/galaLive/program.js";
   import { COPY } from "../../../lib/galaLive/config.js";
@@ -61,7 +61,10 @@
 
   // Where the X sits, per view (stage units: left, top, width, height).
   const ANCHORS = {
-    seating: [1668, 22, 156, 124],
+    // Top right, clear of both seating layouts (the whole room owns the stage
+    // below y 100). One spot for every seating board: the scene reads the
+    // anchor only when the program step changes.
+    seating: [1760, 12, 120, 96],
     welcome: [680, 70, 560, 430],
     hosts: [1380, 110, 440, 180],
     sponsors: [810, 40, 300, 200],
@@ -86,6 +89,12 @@
     `left: calc(var(--u) * ${a[0]}); top: calc(var(--u) * ${a[1]}); width: calc(var(--u) * ${a[2]}); height: calc(var(--u) * ${a[3]})`;
 
   const dur = $derived(reduced ? 0 : 1);
+
+  // Which seating board is up (SeatingBoard cycles it). The whole-room board
+  // owns the stage, so the page title, the footer and the follow strip step
+  // aside while it shows.
+  let seatIdx = $state(0);
+  const seatWhole = $derived(seg.id === "seating" && SEATING_BOARDS[seatIdx]?.id === "all");
   const showRoll = $derived(named && rows.length > 0 && seg.id !== "seating");
 
   /** Svelte action: ask the page for a light moment once this node is laid out. */
@@ -108,7 +117,7 @@
 
 <!-- The follow strip comes first in the DOM so it is always one of the scene's
      quiet rects. -->
-<FollowStrip variant="corner" />
+<div class="follow-wrap" class:gone={seatWhole}><FollowStrip variant="corner" /></div>
 
 {#if seg.id !== "seating"}
   <header class="hdr" transition:fade={{ duration: 400 * dur }}>
@@ -131,26 +140,31 @@
     out:fade={{ duration: 380 * dur }}
   >
     {#if seg.id === "seating"}
-      <div class="seat-head">
-        <div class="eyebrow">{seg.eyebrow} · {seg.time}</div>
-        <h1 class="serif h-seat">Find your table</h1>
-      </div>
-      <div class="seat-meta">MCA Chicago<br />Friday, September 25, 2026</div>
-      <div class="seat-board" data-fx-quiet>
-        <SeatingBoard {board} width={1728} height={636} {reduced} />
-      </div>
+      <!-- Quiet for the dust in every seating layout (the scene re-reads quiet
+           rects only on a program step, so this one never moves). -->
+      <div class="seat-quiet" data-fx-quiet aria-hidden="true"></div>
+      {#if !seatWhole}
+        <div class="seat-chrome" transition:fade={{ duration: 450 * dur }}>
+          <div class="seat-head">
+            <div class="eyebrow">{seg.eyebrow} · {seg.time}</div>
+            <h1 class="serif h-seat">Find your table</h1>
+          </div>
+          <div class="seat-meta">MCA Chicago<br />Friday, September 25, 2026</div>
+          <div class="seat-foot">
+            {#if board?.demo}
+              Invented names for rehearsal only. The real plan loads only with the seating passcode.
+            {:else if board && !board.numbersOnly}
+              {board.tables} tables · {board.seated} dinner guests · Seat 1 is on the coat check side, seats count clockwise
+            {:else}
+              Your table number is on your place card. Ask any host for help.
+            {/if}
+          </div>
+        </div>
+      {/if}
+      <SeatingBoard {board} {reduced} eyebrow={`${seg.eyebrow} · ${seg.time}`} bind:idx={seatIdx} />
       {#if board?.demo}
         <div class="demo-plate" role="note">DEMO DATA · not the real seating</div>
       {/if}
-      <div class="seat-foot">
-        {#if board?.demo}
-          Invented names for rehearsal only. The real plan loads only with the seating passcode.
-        {:else if board && !board.numbersOnly}
-          {board.tables} tables · {board.seated} dinner guests · Seat 1 is on the coat check side, seats count clockwise
-        {:else}
-          Your table number is on your place card. Ask any host for help.
-        {/if}
-      </div>
     {:else if seg.id === "welcome"}
       <div class="center-stack" style="top: calc(var(--u) * 560)">
         <div class="eyebrow rise" style="--d: 200ms">Welcome to the</div>
@@ -594,10 +608,27 @@
     line-height: 1.5;
     color: var(--g26-warm);
   }
-  .seat-board {
+  .seat-quiet {
     position: absolute;
-    left: calc(var(--u) * 96);
-    top: calc(var(--u) * 196);
+    left: 0;
+    top: calc(var(--u) * 140);
+    width: calc(var(--u) * 1920);
+    height: calc(var(--u) * 930);
+    pointer-events: none;
+  }
+  .seat-chrome {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .follow-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 450ms ease;
+  }
+  .follow-wrap.gone {
+    opacity: 0;
   }
   .seat-foot {
     position: absolute;

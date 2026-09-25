@@ -14,7 +14,7 @@ export default defineConfig({
         const excluded = [
           '/shifts', '/checkin', '/volunteeradmin', '/subsadmin',
           '/subs', '/electionadmin', '/elections', '/admin/',
-          '/gala/live', '/gala/volunteer-checkin', '/gala/pledges', '/gala/control',
+          '/gala/live', '/gala/volunteer-checkin', '/gala/pledges', '/gala/control', '/gala/admin',
           '/marketing', '/forms', '/register', '/account',
           '/intake', '/donate', '/lspgala', '/galaraffle',
           '/silentauction', '/teachertrainingclasses', '/teach/',

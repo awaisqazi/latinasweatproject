@@ -81,12 +81,60 @@ export function mergeState(snapshot) {
   if (!Array.isArray(out.tier_cents) || !out.tier_cents.length) {
     out.tier_cents = STATE_DEFAULTS.tier_cents;
   }
-  if (!Array.isArray(out.levels)) out.levels = [];
+  out.levels = normalizeLevels(out.levels);
   if (!out.program || typeof out.program !== "object" || Array.isArray(out.program)) out.program = {};
   if (!(out.goal_cents > 0)) out.goal_cents = STATE_DEFAULTS.goal_cents;
   const poll = Number(out.poll_ms);
   out.poll_ms = Number.isFinite(poll) ? Math.min(120000, Math.max(1000, poll)) : STATE_DEFAULTS.poll_ms;
   return out;
+}
+
+/**
+ * The paddle-raise ladder, defensively. The server stores
+ * [{amount_cents, impact_line}] (gala_display_set rebuilds every rung and keeps
+ * only those two keys); `impact` and `label` are read too so a hand-written row
+ * or a later schema cannot blank the copy. Every rung comes out as
+ * {amount_cents, impact, impact_line, label}: a positive whole number of cents,
+ * strings that are never undefined. Order is the operator's; duplicates and
+ * non-positive amounts are dropped.
+ */
+export function normalizeLevels(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const l of raw) {
+    if (!l || typeof l !== "object") continue;
+    const cents = Math.round(Number(l.amount_cents));
+    if (!Number.isFinite(cents) || cents <= 0 || seen.has(cents)) continue;
+    seen.add(cents);
+    const impact = String(l.impact || l.impact_line || "").replace(/\s+/g, " ").trim();
+    out.push({ amount_cents: cents, impact, impact_line: impact, label: String(l.label ?? "").trim(), photo: levelPhoto(cents) });
+    if (out.length >= 24) break;
+  }
+  return out;
+}
+
+/**
+ * Photos for tonight's ladder, keyed by amount_cents. Files live in
+ * public/images/gala/2026/impact; a level without one (or a file that fails to
+ * load) simply shows no photo.
+ */
+export const IMPACT_PHOTOS = Object.freeze({
+  500000: "/images/gala/2026/impact/5000.jpg",
+  250000: "/images/gala/2026/impact/2500.jpg",
+  150000: "/images/gala/2026/impact/1500.jpg",
+  50000: "/images/gala/2026/impact/500.jpg",
+  25000: "/images/gala/2026/impact/250.jpg",
+  10000: "/images/gala/2026/impact/100.jpg",
+  6250: "/images/gala/2026/impact/62-50.jpg",
+});
+
+export const levelPhoto = (cents) => IMPACT_PHOTOS[Math.round(Number(cents) || 0)] || "";
+
+/** The rung being called, or null. `current_level_cents` null means none. */
+export function levelFor(levels, cents) {
+  if (cents == null || !Array.isArray(levels)) return null;
+  return levels.find((l) => Number(l?.amount_cents) === Number(cents)) || null;
 }
 
 export const SCENES = ["ambient", "program", "appeal", "auction", "finale", "thanks", "blackout"];
@@ -198,6 +246,10 @@ export const COPY = Object.freeze({
   giveNow: "Give now",
   scanToGive: "Scan to give",
   askLevel: "Raise your paddle at",
+  ladderEyebrow: "What your paddle provides",
+  goalEyebrow: "Tonight’s goal",
+  anyAmount: "Any amount",
+  anyAmountLine: "Raise your paddle at any amount",
   currentBid: "Current bid",
   lot: "Lot",
   goingOnce: "Going once",
@@ -244,6 +296,16 @@ const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD",
 
 /** Cents to "$1,234". Never shows cents: the room reads whole dollars. */
 export const money = (cents) => usd.format(Math.round((Number(cents) || 0) / 100));
+
+/**
+ * A giving level: "$5,000" for round money, "$62.50" when the cents matter.
+ * `money` rounds to whole dollars, which would print the $62.50 rung as $63.
+ */
+export function levelMoney(cents) {
+  const n = Math.round(Number(cents) || 0);
+  if (n % 100 === 0) return money(n);
+  return `$${(n / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 /** Cents to "$1,234" from a dollars number (demo helper). */
 export const moneyFromDollars = (dollars) => usd.format(Math.round(Number(dollars) || 0));

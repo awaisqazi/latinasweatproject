@@ -26,7 +26,7 @@
 
   import { onMount } from "svelte";
   import { createGiftFeed, readDisplayKey } from "../../../lib/galaLive/giftFeed.js";
-  import { DEFAULT_EVENT, COPY, money } from "../../../lib/galaLive/config.js";
+  import { DEFAULT_EVENT, COPY, money, levelMoney } from "../../../lib/galaLive/config.js";
   import { statusLine, programStarted } from "../../../lib/galaLive/program.js";
 
   let { fallbackGiveUrl = "" } = $props();
@@ -247,7 +247,7 @@
     {#if levelCents}
       <div class="level">
         <div class="level-eyebrow">{COPY.askLevel}</div>
-        <div class="level-num">{money(levelCents)}</div>
+        <div class="level-num">{levelMoney(levelCents)}</div>
         {#if impactLine}<div class="impact">{impactLine}</div>{/if}
       </div>
     {/if}
