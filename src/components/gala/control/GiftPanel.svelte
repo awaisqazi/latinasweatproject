@@ -127,7 +127,10 @@
     if (dupe) return { kind: "dupe", text: `Already recorded at this level by ${dupe.by}` };
     const item = terminal.queue.find((q) => q.op === last.op);
     if (item?.state === "waiting" || item?.state === "sending") {
-      return { kind: "send", text: item.tries ? "No connection, retrying" : "Sending" };
+      // The queue drains head first, so only the head item counts tries: any
+      // retrying item means this one is stuck behind a dead connection too.
+      const stuck = item.tries || terminal.queue.some((q) => q.tries > 0 && q.state !== "done");
+      return { kind: "send", text: stuck ? "No connection, retrying" : "Sending" };
     }
     if (item?.state === "failed") return { kind: "fail", text: `Not saved: ${terminal.reasonText(item.reason)}`, retry: true };
     const id = item?.donationId ?? last.donationId;

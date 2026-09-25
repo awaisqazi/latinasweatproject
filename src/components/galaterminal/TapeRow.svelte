@@ -98,7 +98,10 @@
       </button>
     </div>
   {/if}
-  {#if queued?.state === "waiting"}
+  {#if queued?.state === "waiting" && !(queued.tries > 0)}
+    <!-- Only an entry that was never attempted can be dropped locally. After a
+         timed-out attempt the server may already hold it: let it land, then
+         pull it back from this row, so the screen never keeps a ghost gift. -->
     <div class="tr-tools">
       <button type="button" class="tr-btn" onclick={() => store.discardItem(queued.op)} title="Drop it before it is sent">
         <RotateCcw size={15} strokeWidth={2.2} /> Drop

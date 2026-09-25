@@ -360,13 +360,17 @@ export function createTerminalStore({ scope = "" } = {}) {
     if (!slot) return { ok: false, reason: "nothing-to-undo" };
     const item = queue.find((q) => q.op === slot.op);
 
-    if (item && item.state === "waiting") {
+    // Only an entry that has NEVER been attempted is safe to drop locally. After
+    // a timed-out attempt (tries > 0) the server may already hold the gift, so
+    // it goes the "pending" way: the same op id is sent, the server answers with
+    // the donation id (or a replay of it), and landed() retracts it.
+    if (item && item.state === "waiting" && !(item.tries > 0)) {
       dropItem(slot.op);
       undoSlot = null;
       checkin?.push({ kind: "info", text: "Dropped before it was sent." });
       return { ok: true, outcome: "dropped" };
     }
-    if (item && item.state === "sending" && !slot.donationId) {
+    if (item && (item.state === "sending" || item.state === "waiting") && !slot.donationId) {
       undoSlot = { ...slot, wanted: true };        // retract the moment the id lands
       return { ok: true, outcome: "pending" };
     }
