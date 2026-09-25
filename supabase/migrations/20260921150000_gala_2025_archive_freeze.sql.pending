@@ -1,0 +1,114 @@
+-- STAGED, NOT APPLIED. The .pending suffix keeps this out of every migration
+-- runner and out of the ledger. The owner applies it by hand, through the
+-- Management API, once the legacy /admin/gala UI no longer writes to these
+-- tables. Nothing else in the gala stack depends on it.
+--
+-- WHY. 2025 is the single biggest data risk of gala night (09 R2, score 20):
+-- 142 guests and 29 donations sit in public.gala_guests / public.gala_donations,
+-- joined to each other by paddle_number ALONE and with no event column. A 2026
+-- paddle 1 and a 2025 paddle 1 are the same key. Any script, any admin tap, any
+-- half-migrated adapter that writes into these tables mixes the two years, and
+-- the 2026 total starts at last year's number. 00-MASTER-PLAN s2 settles it:
+-- FREEZE IN PLACE. The rows stay exactly where they are and become read-only.
+--
+-- WHY IT IS NOT APPLIED WITH THE REST. src/components/admin/gala/GalaView.svelte
+-- and src/stores/galaStore.js still INSERT and UPDATE these tables through the
+-- 2025 dashboard card. Applying this before that card is repointed at the
+-- gala_event_* RPCs turns a working archive screen into an error dialog during
+-- gala week, which is exactly the kind of late change 09 R9 is about.
+--
+-- BEFORE APPLYING
+--   1. Record the checksum that 09 R2 asks for, and keep it:
+--        select count(*) from public.gala_guests;                      -- expect 142
+--        select count(*), sum(amount) from public.gala_donations;      -- expect 29
+--        select count(*) from public.gala_donations_public;            -- expect 26
+--   2. Confirm nothing writes any more:
+--        grep -rn "gala_guests\|gala_donations" src/ | grep -v gala_event_
+--   3. Apply through the Management API, never `supabase db push`.
+--   4. Re-run the counts. They must be identical.
+--
+-- HOW TO WRITE ANYWAY (a genuine correction to the 2025 archive):
+--   begin;
+--     select set_config('app.gala_archive_unlock', 'on', true);  -- true = THIS transaction only
+--     update public.gala_donations set amount = 250 where id = 17;
+--   commit;
+-- The setting is transaction-local, so it cannot be left switched on.
+
+-- 1) The write block -----------------------------------------------------------
+
+create or replace function public.gala_archive_frozen()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, pg_temp
+as $fn$
+begin
+  if coalesce(current_setting('app.gala_archive_unlock', true), '') = 'on' then
+    return coalesce(new, old);
+  end if;
+
+  raise exception
+    'The 2025 gala archive is frozen. % on %.% was refused. To make a deliberate correction: begin; select set_config(''app.gala_archive_unlock'', ''on'', true); <your statement>; commit;',
+    tg_op, tg_table_schema, tg_table_name
+    using errcode = 'GA001',
+          hint = 'Tonight''s gala writes belong in the gala_event_* tables via their RPCs, never here.';
+end;
+$fn$;
+
+-- Row level: INSERT / UPDATE / DELETE.
+drop trigger if exists gala_guests_frozen on public.gala_guests;
+create trigger gala_guests_frozen
+  before insert or update or delete on public.gala_guests
+  for each row execute function public.gala_archive_frozen();
+
+drop trigger if exists gala_donations_frozen on public.gala_donations;
+create trigger gala_donations_frozen
+  before insert or update or delete on public.gala_donations
+  for each row execute function public.gala_archive_frozen();
+
+-- Statement level: TRUNCATE fires no row triggers, so it needs its own.
+drop trigger if exists gala_guests_frozen_truncate on public.gala_guests;
+create trigger gala_guests_frozen_truncate
+  before truncate on public.gala_guests
+  for each statement execute function public.gala_archive_frozen();
+
+drop trigger if exists gala_donations_frozen_truncate on public.gala_donations;
+create trigger gala_donations_frozen_truncate
+  before truncate on public.gala_donations
+  for each statement execute function public.gala_archive_frozen();
+
+revoke all on function public.gala_archive_frozen() from public, anon, authenticated, service_role;
+
+-- 2) Retire the 2025 public view -----------------------------------------------
+-- COMMENTED OUT ON PURPOSE. gala_donations_public is the only object in the
+-- project that hands donor NAMES to the anon key with no secret at all, and it
+-- resolves them unconditionally: it is 09 R15 in one line of SQL. Its 2026
+-- replacement is gala_display_public (numbers, no names, anon) plus
+-- gala_display_feed (names, display key only), both in
+-- 20260921140000_gala_event_display.sql.
+--
+-- Uncomment ONLY once nothing public reads the view. It is still referenced by
+-- src/stores/galaStore.js and src/lib/galaUtils.js, which feed the live 2025
+-- /gala/live page, so revoking first would blank that page with a silent 401.
+-- Order: repoint /gala/live at gala_display_public -> deploy -> confirm the new
+-- page works on the production URL -> then run this.
+--
+--   revoke select on public.gala_donations_public from anon;
+--   -- authenticated keeps it: the dashboard archive card reads through it.
+--
+-- And, once the archive card no longer needs a name join either, the view can go
+-- entirely. Dropping it is irreversible without this file, so it stays a comment:
+--
+--   drop view if exists public.gala_donations_public;
+
+-- 3) Verification to run straight after applying -------------------------------
+--   select tgname, tgrelid::regclass from pg_trigger
+--    where tgname like 'gala_%_frozen%' order by 1;                    -- expect 4
+--   insert into public.gala_donations (amount) values (1);             -- expect GA001
+--   select count(*) from public.gala_guests;                           -- expect 142
+--   select count(*), sum(amount) from public.gala_donations;           -- expect 29
+--
+-- To lift the freeze completely (post-gala schema move, 02 option b):
+--   drop trigger gala_guests_frozen on public.gala_guests;
+--   drop trigger gala_donations_frozen on public.gala_donations;
+--   drop trigger gala_guests_frozen_truncate on public.gala_guests;
+--   drop trigger gala_donations_frozen_truncate on public.gala_donations;

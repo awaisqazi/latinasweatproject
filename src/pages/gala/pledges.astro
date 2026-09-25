@@ -1,0 +1,75 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import GalaTerminalApp from "@/components/galaterminal/GalaTerminalApp.svelte";
+
+// The pledge entry terminal for the Annual Gala: the keyboard-first screen one
+// or two clerks work during the paddle raise while the emcee calls the giving
+// levels. Unlisted: not in the nav, noindex, excluded from the sitemap in
+// astro.config.mjs and disallowed in public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships EMPTY. Every guest, gift and
+// total comes from LSP's passcode-protected database at run time, over RPCs
+// that refuse to answer without an 18 hour session token. Nothing about a guest
+// or a donor is committed here or put in a URL. The only thing this device
+// writes to disk is the token and a queue of paddle numbers and amounts.
+//
+// No site Header or Footer: a clerk with a spotter shouting at them needs the
+// whole screen, and the terminal renders its own bars.
+---
+
+<Layout
+  title="Pledge Terminal | The Latina Sweat Project"
+  description="Internal pledge entry terminal for the Annual Gala."
+  robots="noindex, nofollow"
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#0B1320" />
+    <meta name="referrer" content="same-origin" />
+    <!-- iPhone and iPad only: stop Safari magnifying the page every time the
+         paddle field is focused, which on a 72px input throws the tape off the
+         screen between two entries. iOS ignores maximum-scale for a manual
+         pinch, so zooming by hand still works. Not applied on Android or
+         desktop, where it WOULD block pinch. -->
+    <script is:inline>
+      (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        if (!ios) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      })();
+    </script>
+    <style is:inline>
+      /* The terminal owns the viewport: no page scroll, no rubber banding
+         behind an open sheet, and the tape is the only thing that moves. */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #0b1320;
+        overscroll-behavior: none;
+      }
+      @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+        html,
+        body {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          overflow: hidden;
+          overscroll-behavior: none;
+          -webkit-text-size-adjust: 100%;
+        }
+      }
+    </style>
+  </Fragment>
+
+  <GalaTerminalApp client:only="svelte" />
+
+  <noscript>
+    <p style="color:#fff8ef;font-family:Arial,sans-serif;padding:24px;">
+      The pledge terminal needs JavaScript. Turn it on and reload this page.
+    </p>
+  </noscript>
+</Layout>

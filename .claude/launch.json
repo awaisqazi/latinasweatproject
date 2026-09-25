@@ -4,9 +4,22 @@
     {
       "name": "astro-dev",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "npx astro dev --port ${PORT:-4321}"],
+      "runtimeArgs": [
+        "-c",
+        "npx astro dev --port ${PORT:-4321}"
+      ],
       "port": 4321,
       "autoPort": true
+    },
+    {
+      "name": "astro-dev-ipv4",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "npx astro dev --host 127.0.0.1 --port 4323"
+      ],
+      "port": 4323,
+      "url": "http://127.0.0.1:4323"
     },
     {
       "name": "mqpena",
@@ -16,6 +29,15 @@
         "cd /Users/fezqazi/Documents/MQPena && npx astro dev --port 4322"
       ],
       "port": 4322
+    },
+    {
+      "name": "astro-preview",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "npx astro preview --port 4330"
+      ],
+      "port": 4330
     }
   ]
 }

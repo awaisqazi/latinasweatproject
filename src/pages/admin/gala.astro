@@ -1,10 +1,15 @@
 ---
+// Standalone ops console (ticket G7): event switcher between the live
+// Gala 2026 tools and the read-only Gala 2025 archive. The 2025-era
+// GalaDashboard.svelte (and the components it mounts: GalaOverview,
+// CheckInStation, PaddleManager, DonationTerminal, DonationManager) read and
+// WRITE the legacy public.gala_guests / public.gala_donations tables, which
+// are now the frozen 2025 archive. Left on disk, unmounted, per the ticket:
+// nothing new may write to those tables.
 import Layout from "../../layouts/Layout.astro";
-import GalaDashboard from "../../components/admin/GalaDashboard.svelte";
+import GalaOpsConsole from "../../components/admin/gala/GalaOpsConsole.svelte";
 ---
 
-<Layout title="Gala Admin Dashboard" hideFooter={true}>
-    <main class="w-full min-h-screen bg-gray-50">
-        <GalaDashboard client:only="svelte" />
-    </main>
+<Layout title="Gala Ops Console | The Latina Sweat Project" hideFooter={true} robots="noindex, nofollow">
+    <GalaOpsConsole client:only="svelte" />
 </Layout>

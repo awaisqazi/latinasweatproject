@@ -1,8 +1,73 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import MobileCheckIn from "@/components/gala/MobileCheckIn.svelte";
+import GalaCheckinApp from "@/components/galacheckin/GalaCheckinApp.svelte";
+
+// Volunteer check-in desk for the Annual Gala at the Museum of Contemporary Art
+// Chicago. Unlisted: not in the nav, noindex, already excluded from the sitemap
+// in astro.config.mjs and disallowed in public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships EMPTY. Every guest row comes
+// from LSP's passcode-protected database at run time, over RPCs that refuse to
+// answer without an 18 hour session token. Nothing about a guest is committed
+// here, saved to the phone, or put in a URL.
+//
+// No site Header or Footer: a volunteer standing in a dark lobby needs the
+// whole screen, and the app renders its own bars.
 ---
 
-<Layout title="Volunteer Check-In - Gala" hideFooter={true}>
-    <MobileCheckIn client:only="svelte" />
+<Layout
+  title="Volunteer Check-In | The Latina Sweat Project"
+  description="Internal check-in desk for the Annual Gala."
+  robots="noindex, nofollow"
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#0B1320" />
+    <meta name="referrer" content="same-origin" />
+    <!-- iPhone and iPad only: stop Safari magnifying the page every time a field
+         is focused. iOS ignores maximum-scale for a manual pinch, so zooming by
+         hand (an accessibility feature) still works; this only switches off the
+         automatic focus zoom, which on a 56px search bar throws the list off
+         screen. Not applied on Android or desktop, where it WOULD block pinch. -->
+    <script is:inline>
+      (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        if (!ios) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      })();
+    </script>
+    <style is:inline>
+      /* The desk owns the viewport: no page scroll, no rubber banding behind an
+         open sheet, no sideways drift past the bottom bar. */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #0b1320;
+        overscroll-behavior: none;
+      }
+      @media (max-width: 1023px), (pointer: coarse) and (max-height: 599px) {
+        html,
+        body {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          overflow: hidden;
+          overscroll-behavior: none;
+          -webkit-text-size-adjust: 100%;
+        }
+      }
+    </style>
+  </Fragment>
+
+  <GalaCheckinApp client:only="svelte" />
+
+  <noscript>
+    <p style="color:#fff8ef;font-family:Arial,sans-serif;padding:24px;">
+      The check-in desk needs JavaScript. Turn it on and reload this page.
+    </p>
+  </noscript>
 </Layout>

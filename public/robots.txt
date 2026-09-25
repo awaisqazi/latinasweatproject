@@ -9,6 +9,8 @@ Disallow: /electionadmin
 Disallow: /elections
 Disallow: /gala/live
 Disallow: /gala/volunteer-checkin
+Disallow: /gala/pledges
+Disallow: /gala/control
 Disallow: /admin/
 Disallow: /forms
 Disallow: /galaseating
