@@ -1,4 +1,9 @@
+import { abc7Feature } from "./abc7WindyCity";
+
 export interface PressArticle {
+  /** Stable id for entries that have their own treatment elsewhere (e.g. the
+   *  ABC7 hero on /press filters its card out of the grid by key). */
+  key?: string;
   outlet: string;
   title: string;
   url: string;
@@ -22,6 +27,16 @@ export interface PressArticle {
 }
 
 export const pressArticles: PressArticle[] = [
+  {
+    key: abc7Feature.key,
+    outlet: "ABC7 Chicago (Windy City Weekend)",
+    title: abc7Feature.headline,
+    url: abc7Feature.articleUrl,
+    snippet: abc7Feature.shortBlurb,
+    isVideo: true,
+    ctaLabel: "Watch the Segment",
+    logo: abc7Feature.logo,
+  },
   {
     outlet: "Chicago Reader",
     title: "Más allá del estudio",
@@ -61,7 +76,7 @@ export const pressArticles: PressArticle[] = [
     title: "Best Latina-owned inclusive wellness studio building strength together",
     url: "https://chicagoreader.com/best-of-chicago/the-latina-sweat-project/",
     snippet:
-      "Named Best of Chicago 2025 in Sports & Recreation, the Chicago Reader celebrates The Latina Sweat Project as a place where workout classes feel like they're led by actual friends — building community and strength together.",
+      "Named Best of Chicago 2025 in Sports & Recreation, the Chicago Reader celebrates The Latina Sweat Project as a place where workout classes feel like they're led by actual friends, building community and strength together.",
   },
   {
     outlet: "NBC Chicago & Telemundo Chicago",

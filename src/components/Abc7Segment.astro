@@ -1,0 +1,281 @@
+---
+/*
+ * ABC7 "Windy City Weekend" click-to-load player.
+ *
+ * A facade: the page ships only an LSP-owned poster photo, the ABC7 bug and
+ * a play button. ABC7's player (and its preroll ads) loads only when the
+ * visitor presses play; the script then swaps the poster for the official
+ * embed iframe. Works for any number of instances on a page.
+ *
+ * Other CTAs can start a player too: give them
+ * `data-abc7-trigger="<player id>"` (the player needs an `id`).
+ *
+ * Built for dark surfaces (/press hero, homepage spotlight, /links card,
+ * /gala recap band): the text under the frame is white at low opacity.
+ */
+import { abc7Feature } from "@/data/abc7WindyCity";
+
+interface Props {
+  variant?: "spotlight" | "card" | "inline";
+  /** Public path without base. Defaults to the gala recap hero photo. */
+  poster?: string;
+  /** "both" renders .lang-en / .lang-es pairs (the /links toggle). */
+  lang?: "en" | "es" | "both";
+  class?: string;
+  id?: string;
+  /** Sent as data-conversion-context on the play button and the fallback link. */
+  context: string;
+}
+
+const {
+  variant = "spotlight",
+  poster = abc7Feature.poster,
+  lang = "en",
+  class: className = "",
+  id,
+  context,
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const withBase = (p: string) => `${base}${p.replace(/^\//, "")}`;
+const posterSrc = withBase(poster);
+const logoSrc = withBase(abc7Feature.logo);
+
+const iframeTitle = "ABC7 Chicago: Windy City Weekend, September 25, 2026";
+
+const copy = {
+  bug: { en: "Windy City Weekend · Sep 25, 2026", es: "Windy City Weekend · 25 sep 2026" },
+  hint: { en: abc7Feature.hint, es: abc7Feature.hintEs },
+  play: { en: "Play the ABC7 segment", es: "Reproducir el segmento de ABC7" },
+  trouble: { en: "Trouble playing?", es: "¿No se reproduce?" },
+  watchOn: abc7Feature.cta.watchOnAbc7,
+};
+
+// Single-language modes read from here; "both" renders span pairs.
+const one = (entry: { en: string; es: string }) => (lang === "es" ? entry.es : entry.en);
+
+const size = {
+  spotlight: {
+    play: "h-16 w-16 sm:h-20 sm:w-20",
+    icon: "h-7 w-7 sm:h-8 sm:w-8",
+    bugLogo: "h-8 w-8 sm:h-9 sm:w-9",
+    bugText: "text-[10px] sm:text-xs",
+    inset: "left-3 top-3 sm:left-4 sm:top-4",
+    hint: "bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 text-[10px] sm:text-[11px]",
+    below: "text-xs",
+  },
+  inline: {
+    play: "h-16 w-16",
+    icon: "h-7 w-7",
+    bugLogo: "h-8 w-8",
+    bugText: "text-[10px] sm:text-xs",
+    inset: "left-3 top-3 sm:left-4 sm:top-4",
+    hint: "bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 text-[10px] sm:text-[11px]",
+    below: "text-xs",
+  },
+  card: {
+    play: "h-14 w-14",
+    icon: "h-6 w-6",
+    bugLogo: "h-7 w-7",
+    bugText: "text-[9px]",
+    inset: "left-2.5 top-2.5",
+    hint: "bottom-2.5 left-2.5 right-2.5 text-[9px]",
+    below: "text-[11px]",
+  },
+}[variant];
+---
+
+<div
+  id={id}
+  class:list={["abc7-player", className]}
+  data-abc7-player
+  data-embed-src={abc7Feature.embedUrl}
+  data-embed-title={iframeTitle}
+>
+  <div class="relative overflow-hidden rounded-2xl bg-black shadow-2xl ring-1 ring-white/10">
+    {/* Gradient halo: abc blue into gold (same construction as the WGN9 frame) */}
+    <div
+      class="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-[#0058f0]/45 via-transparent to-accent-gold/40 opacity-60"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="relative aspect-video w-full" data-abc7-stage>
+      <div class="absolute inset-0" data-abc7-poster>
+        <img
+          src={posterSrc}
+          alt=""
+          width="1600"
+          height="1067"
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 h-full w-full object-cover brightness-[.45]"
+        />
+        <div
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#202030]/90 via-[#202030]/35 to-[#202030]/55"
+          aria-hidden="true"
+        >
+        </div>
+        {/* Scanlines, poster only */}
+        <div
+          class="pointer-events-none absolute inset-0"
+          style="background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px);"
+          aria-hidden="true"
+        >
+        </div>
+
+        {/* ABC7 bug */}
+        <div class:list={["absolute z-20 flex items-center gap-2", size.inset]}>
+          <span class:list={["flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-lg", size.bugLogo]}>
+            <img src={logoSrc} alt="ABC7 Chicago" width="512" height="512" class="h-full w-full scale-[1.2] object-contain" loading="lazy" decoding="async" />
+          </span>
+          <span class:list={["rounded-full bg-black/45 px-2.5 py-1 font-bold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm", size.bugText]}>
+            {lang === "both" ? (
+              <>
+                <span class="lang-en">{copy.bug.en}</span>
+                <span class="lang-es hidden">{copy.bug.es}</span>
+              </>
+            ) : (
+              one(copy.bug)
+            )}
+          </span>
+        </div>
+
+        {/* Play button */}
+        <div class="absolute inset-0 z-20 flex items-center justify-center">
+          <button
+            type="button"
+            data-abc7-play
+            data-conversion-event="press_abc7_play"
+            data-conversion-context={context}
+            aria-label={lang === "both" ? undefined : one(copy.play)}
+            class:list={[
+              "group/play relative flex items-center justify-center rounded-full border-2 border-white/90 bg-black/35 text-white shadow-[0_10px_40px_-8px] shadow-[#0058f0]/60 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#0058f0] hover:bg-[#0058f0] focus-visible:scale-105 focus-visible:border-[#0058f0] focus-visible:bg-[#0058f0] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-gold/70",
+              size.play,
+            ]}
+          >
+            <span class="absolute inset-0 rounded-full ring-2 ring-white/25 motion-safe:animate-ping [animation-duration:2.4s]" aria-hidden="true"></span>
+            <svg class:list={["relative translate-x-[2px]", size.icon]} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            {lang === "both" && (
+              <>
+                <span class="lang-en sr-only">{copy.play.en}</span>
+                <span class="lang-es hidden sr-only">{copy.play.es}</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Player hint */}
+        <p class:list={["absolute z-20 font-bold uppercase tracking-[0.14em] text-white/80 drop-shadow", size.hint]}>
+          {lang === "both" ? (
+            <>
+              <span class="lang-en">{copy.hint.en}</span>
+              <span class="lang-es hidden">{copy.hint.es}</span>
+            </>
+          ) : (
+            one(copy.hint)
+          )}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* Under the frame: the hint (once the player is up) and the fallback link */}
+  <div class:list={["mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 font-medium text-white/50", size.below]}>
+    <p class="hidden italic" data-abc7-hint-below>
+      {lang === "both" ? (
+        <>
+          <span class="lang-en">{copy.hint.en}</span>
+          <span class="lang-es hidden">{copy.hint.es}</span>
+        </>
+      ) : (
+        one(copy.hint)
+      )}
+    </p>
+    <a
+      href={abc7Feature.videoPageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-conversion-event="press_abc7_click"
+      data-conversion-context={context}
+      class="ml-auto inline-flex items-center gap-1.5 underline-offset-4 transition-colors hover:text-white hover:underline"
+    >
+      {lang === "both" ? (
+        <>
+          <span class="lang-en">{copy.trouble.en} {copy.watchOn.en}</span>
+          <span class="lang-es hidden">{copy.trouble.es} {copy.watchOn.es}</span>
+        </>
+      ) : (
+        <span>{one(copy.trouble)} {one(copy.watchOn)}</span>
+      )}
+      <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+      </svg>
+    </a>
+  </div>
+</div>
+
+<style>
+  /* lang="both": the /links toggle sets .lang-active-en / .lang-active-es on
+     <main>; its page-scoped rules cannot reach this component, so the
+     player carries its own (same pattern as GalaTicketDeadline). */
+  :global(.lang-active-en) .abc7-player :global(.lang-es),
+  :global(.lang-active-es) .abc7-player :global(.lang-en) {
+    display: none !important;
+  }
+  :global(.lang-active-es) .abc7-player :global(.lang-es) {
+    display: inline !important;
+  }
+  :global(.lang-active-es) .abc7-player :global(.lang-es.sr-only) {
+    display: inline-block !important;
+  }
+</style>
+
+<script>
+  const activate = (root: HTMLElement) => {
+    if (root.dataset.abc7Loaded === "true") return;
+    const src = root.dataset.embedSrc;
+    const stage = root.querySelector<HTMLElement>("[data-abc7-stage]");
+    if (!src || !stage) return;
+    root.dataset.abc7Loaded = "true";
+
+    const iframe = document.createElement("iframe");
+    iframe.src = src;
+    iframe.title = root.dataset.embedTitle || "ABC7 Chicago video";
+    iframe.allow = "autoplay; fullscreen; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.setAttribute("loading", "lazy");
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    iframe.className = "absolute inset-0 h-full w-full";
+    stage.appendChild(iframe);
+
+    // Drop the poster (and its scanlines) once the player is in place.
+    root.querySelector("[data-abc7-poster]")?.remove();
+    root.querySelector("[data-abc7-hint-below]")?.classList.remove("hidden");
+    iframe.focus({ preventScroll: true });
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-abc7-player]").forEach((root) => {
+    root.querySelector("[data-abc7-play]")?.addEventListener("click", () => activate(root));
+  });
+
+  // Outside CTAs: <a|button data-abc7-trigger="player-id">
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>("[data-abc7-trigger]");
+    if (!trigger) return;
+    const root = document.getElementById(trigger.dataset.abc7Trigger || "");
+    if (!root || !root.hasAttribute("data-abc7-player")) return;
+    event.preventDefault();
+    // window.scrollTo instead of scrollIntoView: inside an overflow-hidden
+    // section the latter also scrolls the section's own box (the offset
+    // glows give it room), which left a blank band under the player.
+    const rect = root.getBoundingClientRect();
+    const top = window.scrollY + rect.top - Math.max(0, (window.innerHeight - rect.height) / 2);
+    window.scrollTo({ top, behavior: "smooth" });
+    activate(root);
+  });
+</script>

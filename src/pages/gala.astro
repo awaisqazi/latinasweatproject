@@ -14,14 +14,18 @@ import RecapHonors from "@/components/gala/recap/RecapHonors.astro";
 import RecapAlbum from "@/components/gala/recap/RecapAlbum.astro";
 import RecapLightbox from "@/components/gala/recap/RecapLightbox.astro";
 import RecapGratitude from "@/components/gala/recap/RecapGratitude.astro";
+import Abc7Segment from "@/components/Abc7Segment.astro";
 import {
   galaRecap,
   galaResults,
   galaAuctionPackages,
 } from "@/data/galaRecap2026";
 import { galaAlbumUrl, galaPhotoCount } from "@/data/galaGallery2026";
+import { abc7Feature } from "@/data/abc7WindyCity";
 
 const RECAP_IMG = "/images/gala/2026/recap";
+// ABC7 "Windy City Weekend" band (aired gala day): the logo for its eyebrow.
+const abc7LogoSrc = `${import.meta.env.BASE_URL}${abc7Feature.logo.replace(/^\//, "")}`;
 const flickr2025Url =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720330894284";
 
@@ -193,6 +197,64 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
               {galaRecap.signoff}
             </p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== AS SEEN ON ABC7 (gala day) ===================== */}
+    {/* ABC7's "Windy City Weekend" aired the afternoon of the gala. Compact
+        band: gold eyebrow with the ABC7 bug, one serif line, the short
+        blurb, the click-to-load player and a ghost link to the article.
+        No new photos, no names beyond the on-air guests in the blurb. */}
+    <section id="abc7" class="relative overflow-hidden pb-16 pt-4 scroll-mt-28 sm:pb-20 lg:pb-24">
+      <div class="gala-ambient pointer-events-none absolute left-1/2 top-1/3 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,88,240,0.14),transparent_65%)] blur-2xl" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <div class="reveal flex items-center justify-center gap-3" aria-hidden="true">
+            <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+            <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+            <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+          </div>
+          <p class="reveal mt-6 flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold" style="transition-delay: 60ms;">
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white shadow-lg">
+              <img
+                src={abc7LogoSrc}
+                alt=""
+                width="512"
+                height="512"
+                class="h-full w-full scale-[1.2] object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            As seen on ABC7 Chicago
+          </p>
+          <h2 class="reveal mt-4 text-balance font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl" style="transition-delay: 120ms;">
+            Windy City Weekend, gala day
+          </h2>
+          <p class="reveal mt-5 text-balance text-base leading-relaxed text-white/70 sm:text-lg" style="transition-delay: 180ms;">
+            {abc7Feature.shortBlurb}
+          </p>
+        </div>
+
+        <div class="reveal mt-10" style="transition-delay: 240ms;">
+          <Abc7Segment id="abc7-player-gala" variant="inline" context="gala_recap_abc7" class="mx-auto max-w-3xl" />
+        </div>
+
+        <div class="reveal mt-8 flex justify-center" style="transition-delay: 300ms;">
+          <a
+            href={abc7Feature.articleUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-conversion-event="press_abc7_click"
+            data-conversion-context="gala_recap_abc7"
+            class="gala-btn gala-btn--ghost gr-ghost-solid group inline-flex items-center justify-center gap-3 px-7 py-3.5 text-sm font-extrabold"
+          >
+            {abc7Feature.cta.readOnAbc7.en}
+            <svg class="h-4 w-4 text-accent-gold transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
