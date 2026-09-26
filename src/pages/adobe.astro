@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import { galaTeaser, galaTickets } from "@/data/galaTeaser";
+import { galaRecapCard } from "@/data/galaTeaser";
 const base = import.meta.env.BASE_URL;
 
 // Unlisted thank-you page for Adobe after they hosted an LSP candlelight
@@ -46,9 +46,10 @@ const photos = [
   { id: "55445695429", secret: "003b78546d", alt: "The whole room rises into cobra, facing the screens together" },
 ];
 
-const sponsorAmounts = galaTickets.sponsorships.map((s) => s.amount);
-const sponsorMin = Math.min(...sponsorAmounts).toLocaleString("en-US");
-const sponsorMax = Math.max(...sponsorAmounts).toLocaleString("en-US");
+// The Annual Gala happened Sep 25, 2026: the P.S. card is now a recap
+// (aggregate total only, from galaRecapCard) and the P.P.S. ask is the
+// new-home campaign instead of gala sponsorships.
+const galaRaised = galaRecapCard.stats[0].value;
 ---
 
 <Layout
@@ -156,11 +157,11 @@ const sponsorMax = Math.max(...sponsorAmounts).toLocaleString("en-US");
             <a
               href={`${base}gala`}
               class="inline-flex items-center gap-2 rounded-full border border-off-black/15 bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-off-black shadow-card transition hover:border-accent-gold hover:text-brand-ink"
-              data-conversion-event="gala_ticket_click"
+              data-conversion-event="gala_recap_click"
               data-conversion-context="adobe_thank_you_quick_links"
             >
               <span class="h-1.5 w-1.5 rounded-full bg-accent-gold"></span>
-              The Gala · {galaTeaser.shortDateLabel}
+              Gala 2026 · Recap
             </a>
             <a
               href={`${base}schedule`}
@@ -237,61 +238,58 @@ const sponsorMax = Math.max(...sponsorAmounts).toLocaleString("en-US");
     {/* ========================= P.S. CARDS ========================= */}
     <section class="px-4 py-12 sm:py-16">
       <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-3">
-        {/* P.S. Gala */}
+        {/* P.S. Gala (recap since Sep 26, 2026) */}
         <div class="reveal flex flex-col rounded-lg bg-off-black p-8 text-white shadow-pop">
           <p class="font-marker text-2xl text-accent-gold">P.S.</p>
           <h3 class="mt-3 font-display text-2xl font-semibold">
-            Save us a dance in September.
+            Gracias, comunidad.
           </h3>
           <p class="mt-3 flex-1 font-body leading-7 text-slate-200">
-            Our {galaTeaser.title} lands at the
-            {" "}{galaTeaser.venueName} on {galaTeaser.dateLabel}. Black tie,
-            contemporary art, a seated dinner, and dancing until midnight, all
-            in support of wellness access across Chicago. We would love to see
-            Adobe in the room.
+            Our Annual Gala at the MCA, September 25, 2026, filled the museum
+            with black tie, contemporary art, dinner and honors, and dancing
+            until midnight. The room raised {galaRaised} on the night for
+            wellness access across Chicago. Every photo is up now.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a
               href={`${base}gala`}
               class="btn inline-flex items-center justify-center rounded-full bg-accent-gold px-5 py-2.5 text-sm font-bold text-off-black transition hover:bg-white"
-              data-conversion-event="gala_ticket_click"
+              data-conversion-event="gala_recap_click"
               data-conversion-context="adobe_thank_you_ps"
             >
-              Explore the Gala
+              Relive the night
             </a>
             <a
-              href={galaTeaser.ticketsUrl}
-              target="_blank"
-              rel="noopener"
+              href={`${base}gala#photos`}
               class="inline-flex items-center justify-center rounded-full border border-white/40 px-5 py-2.5 text-sm font-bold text-white transition hover:border-accent-gold hover:text-accent-gold"
-              data-conversion-event="gala_ticket_click"
-              data-conversion-context="adobe_thank_you_ps_tickets"
+              data-conversion-event="gala_recap_click"
+              data-conversion-context="adobe_thank_you_ps_photos"
             >
-              Get Tickets
+              See the photos
             </a>
           </div>
         </div>
 
-        {/* P.P.S. Sponsorship */}
+        {/* P.P.S. The new home */}
         <div class="reveal flex flex-col rounded-lg border-2 border-accent-gold bg-white p-8 shadow-card">
           <p class="font-marker text-2xl text-brand-ink">P.P.S.</p>
           <h3 class="mt-3 font-display text-2xl font-semibold text-off-black">
             Want to go bigger with us?
           </h3>
           <p class="mt-3 flex-1 font-body leading-7 text-medium-gray">
-            Gala sponsorships run from ${sponsorMin} to ${sponsorMax}, and our
-            Champion tier certifies five new yoga teachers from our community.
-            {" "}{galaTickets.sponsorshipsCloseLabel}. Prefer more hours like
-            the one we shared? We bring classes to offices year-round.
+            We are building a permanent home of our own in Pilsen, opening
+            early 2027, and partners like you can help us get there. Prefer
+            more hours like the one we shared? We bring classes to offices
+            year-round.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a
-              href={`${base}gala#tickets`}
+              href={`${base}donate`}
               class="btn inline-flex items-center justify-center rounded-full bg-off-black px-5 py-2.5 text-sm font-bold text-white transition"
-              data-conversion-event="gala_sponsor_click"
+              data-conversion-event="donation_click"
               data-conversion-context="adobe_thank_you_pps"
             >
-              Sponsorship Details
+              Support the new home
             </a>
             <a
               href={`${base}collab`}

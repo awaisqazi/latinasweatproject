@@ -1,30 +1,43 @@
 ---
+// /gala: the Annual Gala 2026 RECAP. The gala was Friday, September 25, 2026
+// at the Museum of Contemporary Art Chicago; this page is the thank-you of
+// record, the results, the honors and the full photo album. Nothing here
+// sells tickets any more: the only ask is the new-home campaign (/donate).
+// Results are aggregates and levels only (see src/data/galaRecap2026.js):
+// never render donor, bidder or guest names, and never caption people in
+// photos.
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
-import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
-import GalaImpactStats from "@/components/GalaImpactStats.astro";
+import RecapStats from "@/components/gala/recap/RecapStats.astro";
+import RecapConstellation from "@/components/gala/recap/RecapConstellation.astro";
+import RecapHonors from "@/components/gala/recap/RecapHonors.astro";
+import RecapAlbum from "@/components/gala/recap/RecapAlbum.astro";
+import RecapLightbox from "@/components/gala/recap/RecapLightbox.astro";
+import RecapGratitude from "@/components/gala/recap/RecapGratitude.astro";
 import {
-  galaDetails,
-  galaEvening,
-  galaFashionShow,
-  galaImpactIntro,
-  galaPhotos,
-  galaTeaser,
-  galaTickets,
-  mcaPhotoSlots,
-} from "@/data/galaTeaser";
+  galaRecap,
+  galaResults,
+  galaAuctionPackages,
+} from "@/data/galaRecap2026";
+import { galaAlbumUrl, galaPhotoCount } from "@/data/galaGallery2026";
 
-// Access label per timeline stop: which tickets are in the room.
-const tierAccessLabel = (tiers) =>
-  tiers.length > 1 ? "All ticket tiers" : "Benefactor tier";
-
-const base = import.meta.env.BASE_URL;
-const flickrGalleryUrl =
+const RECAP_IMG = "/images/gala/2026/recap";
+const flickr2025Url =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720330894284";
 
+const money = (n) =>
+  "$" +
+  n.toLocaleString("en-US", {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+const auction = galaResults.silentAuction;
+const claimedCount = galaAuctionPackages.filter((p) => p.claimed).length;
+
+const pageTitle = "Annual Gala 2026 Recap | The Latina Sweat Project";
+const pageDescription = `Gracias, comunidad: the Annual Gala 2026 at the Museum of Contemporary Art Chicago raised ${money(galaResults.raisedOnTheNight)} on the night for accessible classes and teacher training. See the honors, the paddle raise and all ${galaPhotoCount} photos.`;
+
 // Floating gold particles drifting up through the hero (desktop only, motion-safe).
-// A mix of fine motes and a few larger "bokeh" gold dots for depth variation.
 const heroParticles = Array.from({ length: 22 }, (_, i) => ({
   left: (i * 53 + 7) % 100,
   size: i % 5 === 0 ? 6 + (i % 3) : 3 + (i % 4),
@@ -35,30 +48,7 @@ const heroParticles = Array.from({ length: 22 }, (_, i) => ({
   bokeh: i % 5 === 0,
 }));
 
-// Themed SVG path markup for each galaDetails card (When / Where / Dress /
-// Details), in array order so they line up with galaDetails index-for-index.
-const detailIcons = [
-  // When — calendar
-  '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />',
-  // Where — map pin
-  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.8 7-11a7 7 0 1 0-14 0c0 6.2 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" />',
-  // Dress — bow tie
-  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 12l-5-3.5a1.5 1.5 0 0 0-2.3 1.26v4.48A1.5 1.5 0 0 0 7 15.5l5-3.5 5 3.5a1.5 1.5 0 0 0 2.3-1.26V9.76A1.5 1.5 0 0 0 17 8.5L12 12z" /><circle cx="12" cy="12" r="1.4" />',
-  // Details — star/ticket
-  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.09 4.26L19 8.27l-3.5 3.4.83 4.83L12 14.77l-4.33 2.73.83-4.83L5 8.27l4.91-1.01L12 3z" />',
-];
-
-// A lighter particle field carried down the page for energy continuity.
-const ambientParticles = Array.from({ length: 10 }, (_, i) => ({
-  left: (i * 89 + 13) % 100,
-  size: 3 + (i % 3),
-  duration: 14 + (i % 5) * 2,
-  delay: (i % 7) * 2.1,
-  drift: (i % 2 === 0 ? 1 : -1) * (8 + (i % 3) * 8),
-  opacity: 0.18 + (i % 3) * 0.1,
-}));
-
-// Denser particle field for the closing invitation so the page bookends visually.
+// Denser particle field for the closing section so the page bookends visually.
 const closingParticles = Array.from({ length: 16 }, (_, i) => ({
   left: (i * 67 + 5) % 100,
   size: i % 4 === 0 ? 6 : 3 + (i % 4),
@@ -68,92 +58,44 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
   opacity: 0.2 + (i % 3) * 0.12,
   bokeh: i % 4 === 0,
 }));
-
-// Outline icons for the fashion show brand links (galaFashionShow socials).
-const fashionSocialIcons = {
-  website: {
-    label: "the web",
-    icon: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>',
-  },
-  instagram: {
-    label: "Instagram",
-    icon: '<rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/>',
-  },
-  tiktok: {
-    label: "TikTok",
-    icon: '<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.3 2.6 1.9 4.3 4.5 4.6"/>',
-  },
-  facebook: {
-    label: "Facebook",
-    icon: '<path d="M14.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.5V4.4c-.7-.1-1.5-.2-2.3-.2-2.3 0-3.8 1.4-3.8 3.9v2.4H9v3h2.5V21"/>',
-  },
-};
-
-// 2025 sponsors shown as a gratitude marquee (last year's partners, from
-// /public/images/galalogos/). Excludes the recap photo + QR. Duplicated by the
-// marquee track for a seamless infinite scroll.
-const sponsorLogos2025 = [
-  "AON Logo",
-  "Chicago Community Loan Fund",
-  "antiquetaco",
-  "barbi",
-  "cruzdefuegomexcal",
-  "djvestus",
-  "donchurro",
-  "fleetfeet",
-  "losvalores",
-  "ohsnap",
-  "omni",
-  "ponce",
-  "sacredagave",
-  "sox",
-  "studioe",
-  "vestus",
-  "vidamia",
-  "whiskyprieto",
-  "wintrust",
-];
 ---
 
 <Layout
-  title={`${galaTeaser.title} | The Latina Sweat Project`}
-  description={`${galaTeaser.title} at ${galaTeaser.venueName} on ${galaTeaser.dateTimeLabel}. Full-night Benefactor tickets are $375. Sales close September 18 at 11:59 PM Chicago time. Reserve cocktails, dinner, art, fashion, and dancing for a cause.`}
+  title={pageTitle}
+  description={pageDescription}
+  socialImage={`${RECAP_IMG}/og-gala-recap.jpg`}
+  socialImageAlt="Gracias, comunidad. Annual Gala 2026 at MCA Chicago: the dinner room with golden lanterns and the podium."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
 >
   <Header />
-  <main class="bg-off-black text-white">
+  <main class="gr-page text-white">
     {/* ============================ HERO ============================ */}
     <section
       id="save-the-date"
-      class="relative isolate overflow-hidden border-b border-accent-gold/25 py-16 sm:py-20 lg:py-28"
+      class="gr-hero relative isolate flex overflow-hidden border-b border-accent-gold/25"
     >
-      {/* Aurora: slow-drifting layered radial glow (gold + mauve). */}
-      <div class="gala-aurora pointer-events-none absolute inset-0" aria-hidden="true">
-      </div>
-      <div class="gala-lattice absolute inset-0 opacity-[0.06]"></div>
-      <div
-        class="pointer-events-none absolute inset-0"
-        style="background: radial-gradient(125% 85% at 50% -10%, transparent 38%, rgba(0,0,0,0.6) 100%);"
-      >
-      </div>
-      <div
-        class="gala-ambient pointer-events-none absolute -left-10 top-10 h-72 w-1/2 rounded-full bg-gradient-to-r from-accent-gold/20 to-transparent blur-3xl"
-      >
-      </div>
-      <div
-        class="gala-ambient pointer-events-none absolute bottom-0 right-0 h-80 w-2/3 rounded-full bg-gradient-to-l from-vibrant-pink/20 to-transparent blur-3xl"
-        style="animation-delay: 2.5s;"
-      >
-      </div>
-      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule"></div>
+      <picture class="absolute inset-0 -z-10 block" aria-hidden="true">
+        <source media="(max-width: 767px)" srcset={`${RECAP_IMG}/gala-recap-hero-900.webp`} type="image/webp" />
+        <img
+          src={`${RECAP_IMG}/gala-recap-hero-1600.webp`}
+          alt=""
+          width="1600"
+          height="1067"
+          fetchpriority="high"
+          decoding="async"
+          class="gr-hero-img h-full w-full object-cover"
+        />
+      </picture>
+      {/* Navy scrim: heavy at the bottom and left where the type sits. */}
+      <div class="gr-hero-scrim pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+      <div class="gala-lattice pointer-events-none absolute inset-0 -z-10 opacity-[0.035]" aria-hidden="true"></div>
+      <div class="absolute inset-x-0 top-0 h-px gala-foil-rule" aria-hidden="true"></div>
+      <div class="gala-theater-sweep pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
-      {/* One-time theater light sweep across the hero on load. */}
-      <div class="gala-theater-sweep pointer-events-none absolute inset-0" aria-hidden="true">
-      </div>
-
-      <div
-        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
-        aria-hidden="true"
-      >
+      <div class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
         {
           heroParticles.map((p) => (
             <span
@@ -164,387 +106,98 @@ const sponsorLogos2025 = [
         }
       </div>
 
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <p
-              class="hero-rise flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-white/55"
-            >
-              <span class="h-px w-8 bg-accent-gold/70"></span>
-              The Latina Sweat Project presents
-            </p>
-            <h1
-              class="hero-rise mt-5 max-w-4xl font-display text-5xl font-bold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl"
-              style="animation-delay: 0.06s;"
-            >
-              <span class="gala-foil">{galaTeaser.shortTitle}</span>
-              <span class="block text-white/90">Gala</span>
-            </h1>
-            {/* Gold rule that draws in beneath the title. */}
-            <div
-              class="gala-rule-draw hero-rise mt-5 flex items-center gap-3"
-              style="animation-delay: 0.12s;"
-            >
-              <span class="h-px w-14 gala-foil-rule"></span>
-              <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
-              <span class="h-px w-full max-w-[14rem] gala-foil-rule"></span>
-            </div>
-            <div
-              class="hero-rise mt-7 space-y-4 text-lg font-semibold text-white/90"
-              style="animation-delay: 0.22s;"
-            >
-              <p class="flex items-start gap-3">
-                <svg
-                  class="mt-1 h-5 w-5 flex-shrink-0 text-accent-gold"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"
-                  />
-                </svg>
-                <span>{galaTeaser.dateTimeLabel}</span>
-              </p>
-              <p class="flex items-start gap-3">
-                <svg
-                  class="mt-1 h-5 w-5 flex-shrink-0 text-accent-gold"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 21s7-4.8 7-11a7 7 0 1 0-14 0c0 6.2 7 11 7 11z"
-                  />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg>
-                <span>{galaTeaser.venueName}</span>
-              </p>
-            </div>
-
-            <p
-              class="hero-rise mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl"
-              style="animation-delay: 0.28s;"
-            >
-              One unforgettable night of art, movement, and community care at
-              MCA Chicago. Reserve the Full Evening while Benefactor tickets
-              are still available.
-            </p>
-            <p
-              class="hero-rise mt-3 text-base font-semibold text-accent-gold"
-              style="animation-delay: 0.32s;"
-            >
-              Full Evening tickets are $375 and close September 18, 2026.
-            </p>
-
-            <div
-              class="hero-rise mt-8 flex flex-col gap-3 sm:flex-row"
-              style="animation-delay: 0.38s;"
-            >
-              <a
-                href={galaTeaser.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-                data-conversion-event="gala_ticket_click"
-                data-conversion-context="gala_page_hero"
-                data-gala-full-night-cta="true"
-              >
-                <span class="relative z-[1]">Reserve the Full Evening</span>
-                <svg
-                  class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </a>
-              <a
-                href="#impact"
-                class="gala-btn gala-btn--ghost group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-              >
-                See Our Impact
-                <svg
-                  class="h-4 w-4 text-accent-gold transition-transform group-hover:translate-y-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <div
-            class="hero-rise group relative"
-            style="animation-delay: 0.24s;"
+      <div class="relative mx-auto flex w-full max-w-7xl items-end px-4 pb-14 pt-24 sm:px-6 sm:pb-16 lg:px-8 lg:pb-20">
+        <div class="max-w-3xl">
+          <p class="hero-rise flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/80 sm:text-xs sm:tracking-[0.3em]">
+            <span class="h-px w-8 bg-accent-gold/80" aria-hidden="true"></span>
+            {galaRecap.eyebrow}
+          </p>
+          <h1
+            class="hero-rise mt-5 font-display text-5xl font-bold leading-[1.02] tracking-tight sm:text-7xl lg:text-8xl"
+            style="animation-delay: 0.06s;"
           >
-            {/* Soft spotlight breathing behind the framed photo. */}
-            <div
-              class="gala-spotlight pointer-events-none absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_50%_40%,rgba(255,189,89,0.32),transparent_60%)] blur-2xl"
-              aria-hidden="true"
-            >
-            </div>
-            <div
-              class="gala-ambient absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-accent-gold/30 via-vibrant-pink/20 to-transparent blur-2xl"
-            >
-            </div>
-            <div
-              data-gala-parallax
-              data-gala-speed="0.1"
-              class="relative"
-              style="will-change: transform;"
-            >
-              <GalaPhotoFrame
-                slot={galaPhotos.atrium}
-                variant="hero"
-                loading="eager"
-                corners
-              />
-              <div
-                class="absolute right-5 top-5 rounded-full border border-accent-gold/40 bg-off-black/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-accent-gold shadow-lg backdrop-blur-md"
-              >
-                Black tie
-              </div>
-            </div>
+            <span class="gala-foil gr-hero-title">{galaRecap.heading}</span>
+          </h1>
+          <div class="gala-rule-draw hero-rise mt-6 flex items-center gap-3" style="animation-delay: 0.12s;" aria-hidden="true">
+            <span class="h-px w-14 gala-foil-rule"></span>
+            <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+            <span class="h-px w-full max-w-[14rem] gala-foil-rule"></span>
           </div>
-        </div>
-
-        <div class="reveal mt-12">
-          <GalaTicketDeadline context="gala_page_deadline" />
-        </div>
-
-        <div class="reveal mt-12 flex justify-center">
-          <a
-            href="#impact"
-            class="group inline-flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 transition-colors duration-300 hover:text-accent-gold"
+          <p
+            class="hero-rise mt-6 max-w-2xl text-base font-semibold leading-relaxed text-white/90 sm:text-lg"
+            style="animation-delay: 0.2s;"
           >
-            Scroll to explore
-            <svg
-              class="h-5 w-5 text-accent-gold/70 motion-safe:animate-bounce"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
+            {galaRecap.dateLine}
+          </p>
+          <div class="hero-rise mt-9 flex flex-col gap-3 sm:flex-row" style="animation-delay: 0.3s;">
+            <a
+              href="#photos"
+              class="gala-btn gala-btn--ghost gr-ghost-solid group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M19 14l-7 7m0 0l-7-7"
-              />
-            </svg>
-          </a>
+              See the photos
+              <svg class="h-4 w-4 text-accent-gold transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </a>
+            <a
+              href={galaRecap.givePath}
+              class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
+              data-conversion-event="donation_click"
+              data-conversion-context="gala_recap_hero"
+            >
+              <span class="relative z-[1]">{galaRecap.giveLabel}</span>
+              <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </section>
 
-    {/* Gold ribbon divider */}
-    <div class="gala-ribbon relative -mt-px h-8 bg-off-black" aria-hidden="true">
-      <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
-        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
-        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
-        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
-      </div>
-    </div>
-
-    {/* ============================ IMPACT ============================ */}
-    <section
-      id="impact"
-      class="relative overflow-hidden border-b border-white/10 py-16 scroll-mt-24 sm:py-20 lg:py-24"
-    >
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-off-black via-[#161616] to-off-black"
-      >
-      </div>
-      {/* Faint aurora drift so the section feels continuous with the hero. */}
-      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true">
-      </div>
-      <div
-        class="gala-ambient pointer-events-none absolute left-1/2 top-10 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,189,89,0.16),transparent_65%)] blur-2xl"
-      >
-      </div>
-      <div
-        class="absolute inset-x-0 top-0 mx-auto h-px max-w-3xl gala-foil-rule opacity-60"
-      >
-      </div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-3xl text-center">
-          <p
-            class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
-          >
-            {galaImpactIntro.eyebrow}
-          </p>
-          <h2
-            class="reveal mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
-            style="transition-delay: 90ms;"
-          >
-            {galaImpactIntro.heading}
-          </h2>
-          <p
-            class="reveal mt-5 text-lg leading-relaxed text-white/70"
-            style="transition-delay: 180ms;"
-          >
-            {galaImpactIntro.body}
-          </p>
-        </div>
-
-        <div class="reveal mt-14">
-          <GalaImpactStats variant="feature" />
-        </div>
-      </div>
-    </section>
-
-    {/* Gold ribbon divider */}
-    <div class="gala-ribbon relative h-8 bg-off-black" aria-hidden="true">
-      <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
-        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
-        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
-        <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
-      </div>
-    </div>
-
-    {/* ====================== EVENING WITH PURPOSE ====================== */}
-    <section
-      class="relative overflow-hidden border-b border-white/10 py-16 sm:py-20 lg:py-24"
-    >
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-off-black via-[#171717] to-off-black"
-      >
-      </div>
-      <div
-        class="absolute inset-0 opacity-[0.08]"
-        style="background-image: radial-gradient(circle at 20% 20%, #ffbd59 0, transparent 28%), radial-gradient(circle at 80% 70%, #b5a18d 0, transparent 24%);"
-      >
-      </div>
-
-      {/* Ambient particles carrying the hero's energy down the page. */}
-      <div
-        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
-        aria-hidden="true"
-      >
-        {
-          ambientParticles.map((p) => (
-            <span
-              class="gala-particle absolute bottom-0 rounded-full bg-accent-gold"
-              style={`left: ${p.left}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
-            />
-          ))
-        }
-      </div>
-
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div class="reveal">
-            <p
-              class="text-xs font-extrabold uppercase tracking-[0.28em] text-accent-gold"
-            >
-              At the Museum of Contemporary Art Chicago
+    {/* ====================== THE THANK-YOU OF RECORD ====================== */}
+    <section id="gracias" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <div class="gala-ambient pointer-events-none absolute left-1/2 top-10 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,189,89,0.14),transparent_65%)] blur-2xl" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="gala-invite reveal relative px-6 py-12 text-off-black sm:px-12 sm:py-16 lg:px-16">
+          <div class="gala-invite-frame absolute inset-3 sm:inset-4" aria-hidden="true">
+            <span class="absolute -left-1 -top-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
+            <span class="absolute -right-1 -top-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
+            <span class="absolute -bottom-1 -left-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
+            <span class="absolute -bottom-1 -right-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
+          </div>
+          <div class="relative">
+            <div class="flex items-center justify-center gap-3" aria-hidden="true">
+              <span class="h-px w-12 bg-[#8a5700]/40"></span>
+              <span class="h-1.5 w-1.5 rotate-45 bg-[#b8860b]"></span>
+              <span class="h-px w-12 bg-[#8a5700]/40"></span>
+            </div>
+            <p class="mt-6 text-center text-[11px] font-extrabold uppercase tracking-[0.24em] text-[#8a5700] sm:text-xs sm:tracking-[0.35em]">
+              {galaRecap.shortDateLine}
             </p>
-            <h2
-              class="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
-            >
-              An evening with purpose.
+            <h2 class="mt-4 text-center font-display text-3xl font-semibold italic leading-tight tracking-tight sm:text-4xl">
+              Thank you
             </h2>
-            <p class="mt-5 max-w-2xl text-lg leading-relaxed text-white/70">
-              {galaTeaser.pageDescription}
+            <div class="mt-8 space-y-5 text-base leading-relaxed text-[#3a3a3a] sm:text-[1.075rem]">
+              {galaRecap.thankYou.map((para) => <p>{para}</p>)}
+            </div>
+            <p lang="es" class="mt-8 text-balance text-center font-display text-xl italic leading-snug text-[#8a5700] sm:text-2xl">
+              {galaRecap.thankYouEs}
             </p>
-            <p class="mt-4 max-w-2xl text-base leading-relaxed text-white/60">
-              MCA's event spaces include the Atrium, Terrace, and Sculpture
-              Garden, with downtown access and a striking contemporary backdrop.
-              It is the right stage for a bigger, bolder chapter of community
-              celebration.
+            <div class="mt-8 flex items-center justify-center gap-3" aria-hidden="true">
+              <span class="h-px w-10 bg-[#8a5700]/35"></span>
+              <span class="h-1 w-1 rotate-45 bg-[#b8860b]"></span>
+              <span class="h-px w-10 bg-[#8a5700]/35"></span>
+            </div>
+            <p class="mt-6 text-center font-display text-lg italic text-off-black">
+              {galaRecap.signoff}
             </p>
           </div>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            {
-              mcaPhotoSlots.slice(1).map((slot, index) => (
-                <div
-                  class:list={[
-                    "reveal group",
-                    slot.id === "facade" ? "sm:col-span-2" : "",
-                  ]}
-                  style={`transition-delay: ${index * 110}ms;`}
-                >
-                  <div class="gala-frame-lift" data-gala-parallax={slot.id === "facade" ? undefined : ""} data-gala-speed="0.04">
-                    <GalaPhotoFrame
-                      slot={slot}
-                      variant={slot.id === "facade" ? "panorama" : "venue"}
-                      corners
-                    />
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-
-        <div class="mt-12 grid gap-4 md:grid-cols-4">
-          {
-            galaDetails.map((detail, index) => {
-              const icon = detailIcons[index];
-              return (
-                <div
-                  class="gala-detail-card reveal group relative overflow-hidden rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-accent-gold/45 hover:shadow-lg hover:shadow-accent-gold/10"
-                  style={`transition-delay: ${index * 90}ms;`}
-                >
-                  {/* Top gold hairline that brightens on hover. */}
-                  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/50 to-transparent transition-opacity duration-300 group-hover:via-accent-gold" />
-                  {/* Gold corner brackets (black-tie trim, matches photo frames). */}
-                  <span class="pointer-events-none absolute left-2 top-2 h-4 w-4 rounded-tl border-l-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute right-2 top-2 h-4 w-4 rounded-tr border-r-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl border-b-2 border-l-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute bottom-2 right-2 h-4 w-4 rounded-br border-b-2 border-r-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-
-                  <div class="relative">
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/25 bg-accent-gold/10 text-accent-gold transition-all duration-300 group-hover:bg-accent-gold/20 group-hover:shadow-[0_0_18px_-4px] group-hover:shadow-accent-gold/50">
-                      <svg
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        set:html={icon}
-                      />
-                    </span>
-                    <p class="mt-4 text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
-                      {detail.label}
-                    </p>
-                    {/* Short foil-rule divider that draws across on hover. */}
-                    <div class="gala-detail-rule mt-3 h-px w-10 gala-foil-rule" />
-                    <p class="mt-3 text-base font-bold leading-snug text-white/90">
-                      {detail.value}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          }
         </div>
       </div>
     </section>
 
-    {/* Gold ribbon divider */}
-    <div class="gala-ribbon relative h-8 bg-off-black" aria-hidden="true">
+    <div class="gala-ribbon relative h-8" aria-hidden="true">
       <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
         <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
         <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
@@ -552,583 +205,95 @@ const sponsorLogos2025 = [
       </div>
     </div>
 
-    {/* ========================== FASHION SHOW ========================== */}
-    <section
-      id="fashion-show"
-      class="relative overflow-hidden border-b border-white/10 py-16 scroll-mt-24 sm:py-20 lg:py-24"
-    >
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-off-black via-[#161616] to-off-black"
-      >
-      </div>
-      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true">
-      </div>
-      <div
-        class="gala-ambient pointer-events-none absolute left-1/2 top-10 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,189,89,0.16),transparent_65%)] blur-2xl"
-      >
-      </div>
-      <div
-        class="absolute inset-x-0 top-0 mx-auto h-px max-w-3xl gala-foil-rule opacity-60"
-      >
-      </div>
-
+    {/* ======================= THE NIGHT IN NUMBERS ======================= */}
+    <section id="numbers" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <span id="impact" class="absolute top-0" aria-hidden="true"></span>
+      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true"></div>
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p
-            class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold"
-          >
-            {galaFashionShow.eyebrow}
-          </p>
-          <h2
-            class="reveal mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
-            style="transition-delay: 90ms;"
-          >
-            {galaFashionShow.heading}
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">Friday, by the numbers</p>
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            The night in numbers
           </h2>
-          <p
-            class="reveal mt-5 text-lg leading-relaxed text-white/70"
-            style="transition-delay: 180ms;"
-          >
-            {galaFashionShow.body}
-          </p>
         </div>
-
-        {/* The lineup as garment tags: two per row on phones, three from sm,
-            so six brands always land on clean rows. Logos stay in their
-            original colors, so dark artwork rides a white tag and the white
-            mark gets an off-black one. */}
-        <div
-          class="mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-3 sm:mt-14 sm:grid-cols-3 sm:gap-5"
-        >
-          {
-            galaFashionShow.brands.map((brand, index) => {
-              return (
-                <div
-                  class:list={[
-                    "gala-runway-tag reveal group relative flex aspect-[4/5] flex-col items-center justify-center rounded-2xl p-4 text-center transition-all duration-300 hover:-translate-y-1 sm:aspect-[4/3] sm:p-6",
-                    brand.tile === "dark"
-                      ? "gala-runway-tag--dark border border-accent-gold/30 bg-off-black hover:border-accent-gold/60"
-                      : "gala-runway-tag--light border border-accent-gold/40 hover:border-accent-gold/70",
-                  ]}
-                  style={`transition-delay: ${index * 80}ms;`}
-                >
-                  {/* Gold corner brackets, same trim as the detail cards. */}
-                  <span class="pointer-events-none absolute left-2 top-2 h-4 w-4 rounded-tl border-l-2 border-t-2 border-[color:var(--tag-bracket)] transition-colors duration-300" />
-                  <span class="pointer-events-none absolute right-2 top-2 h-4 w-4 rounded-tr border-r-2 border-t-2 border-[color:var(--tag-bracket)] transition-colors duration-300" />
-                  <span class="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl border-b-2 border-l-2 border-[color:var(--tag-bracket)] transition-colors duration-300" />
-                  <span class="pointer-events-none absolute bottom-2 right-2 h-4 w-4 rounded-br border-b-2 border-r-2 border-[color:var(--tag-bracket)] transition-colors duration-300" />
-
-                  <span class="relative min-h-0 w-full flex-1">
-                    <img
-                      src={`${base}images/gala/fashion/${brand.logo}`}
-                      alt={`${brand.name.replace(/^@/, "")} logo`}
-                      loading="lazy"
-                      decoding="async"
-                      class:list={[
-                        "absolute inset-0 m-auto object-contain transition-transform duration-500 group-hover:scale-[1.04]",
-                        "h-full w-full max-w-[240px]",
-                      ]}
-                    />
-                  </span>
-
-                  {/* Short foil rule that draws across on hover. */}
-                  <span
-                    class="gala-runway-tag__rule mt-3 h-px w-8 gala-foil-rule"
-                    aria-hidden="true"
-                  />
-                  <span
-                    class:list={[
-                      "mt-2 block text-[0.6rem] font-extrabold uppercase leading-[1.4] tracking-[0.06em] [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.18em]",
-                      brand.tile === "dark"
-                        ? "text-accent-gold/80"
-                        : "text-off-black/70",
-                    ]}
-                  >
-                    {brand.name}
-                  </span>
-
-                  {/* Stretched primary link: the whole tag opens the brand's
-                      main page, while the social icons below stay clickable. */}
-                  {brand.url && (
-                    <a
-                      href={brand.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="absolute inset-0 z-[1] rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-gold"
-                      aria-label={`${brand.name} (opens in a new tab)`}
-                    />
-                  )}
-                  {/* Always rendered so captions line up across tags. */}
-                  {(
-                    <span class="relative z-[2] mt-2 flex h-8 items-center justify-center gap-1">
-                      {(brand.socials ?? []).map((social) => (
-                        <a
-                          href={social.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${brand.name} on ${fashionSocialIcons[social.type].label}`}
-                          class:list={[
-                            "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200",
-                            brand.tile === "dark"
-                              ? "text-accent-gold/80 hover:bg-accent-gold/15 hover:text-accent-gold"
-                              : "text-off-black/60 hover:bg-off-black/10 hover:text-off-black",
-                          ]}
-                        >
-                          <svg
-                            class="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                            set:html={fashionSocialIcons[social.type].icon}
-                          />
-                        </a>
-                      ))}
-                    </span>
-                  )}
-                </div>
-              );
-            })
-          }
+        <div class="mt-12">
+          <RecapStats />
         </div>
+        <p class="reveal mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/55">
+          Paddle raise, silent auction and Give Tonight gifts. Tickets and sponsorships not included.
+        </p>
       </div>
     </section>
 
-    {/* ============================ TICKETS ============================ */}
-    <section
-      id="tickets"
-      class="relative overflow-hidden border-b border-white/10 py-16 scroll-mt-24 sm:py-20 lg:py-24"
-    >
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-off-black via-[#161616] to-off-black"
-      >
-      </div>
-      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true">
-      </div>
-      <div
-        class="gala-ambient pointer-events-none absolute left-1/2 top-8 h-72 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,189,89,0.16),transparent_65%)] blur-2xl"
-      >
-      </div>
-      <div class="absolute inset-x-0 top-0 mx-auto h-px max-w-3xl gala-foil-rule opacity-60"></div>
-
+    {/* ===================== THE PADDLE RAISE, REPLAYED ===================== */}
+    <section id="paddle-raise" class="gr-band relative overflow-hidden border-y border-accent-gold/15 py-16 scroll-mt-28 sm:py-20 lg:py-28">
+      <div class="gr-night-sky pointer-events-none absolute inset-0" aria-hidden="true"></div>
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">
-            Attend · Tickets on sale now
+            {galaResults.paddleRaise.startedAt} · La Constelación
           </p>
-          <h2
-            class="reveal mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
-            style="transition-delay: 90ms;"
-          >
-            Choose your evening
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            The paddle raise, replayed
           </h2>
-          <div class="reveal mt-6 flex justify-center" style="transition-delay: 150ms;">
-            <span
-              class="inline-flex items-center gap-2 rounded-full border border-accent-gold/40 bg-accent-gold/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-accent-gold"
-            >
-              <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
-              Full night. One unforgettable experience.
-            </span>
-          </div>
-          <p
-            class="reveal mt-4 text-center text-sm font-semibold text-white/60"
-            style="transition-delay: 190ms;"
-          >
-            Full Evening tickets close September 18, 2026 · Supporter tickets
-            remain
-            on sale through event day
+          <p class="reveal mt-5 text-lg leading-relaxed text-white/70" style="transition-delay: 180ms;">
+            On the night, every gift crossed the projector as a comet and
+            settled as a star in the glowing LSP X. This is the sky the room
+            built, one star for each paddle.
           </p>
         </div>
-
-        {/* ============ The evening, hour by hour (desktop track) ============ */}
-        <div class="gala-timeline reveal relative mx-auto mt-16 hidden max-w-6xl lg:block">
-          <p class="text-center text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">
-            The evening · 6 PM to midnight
-          </p>
-          <div class="relative ml-44 mt-4 h-[380px]">
-            {/* Track that draws in, with hour ticks and a traveling glow. */}
-            <div class="gala-tl-track absolute inset-x-0 top-1/2 h-[2px] gala-foil-rule"></div>
-            <div
-              class="gala-tl-glow pointer-events-none absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-gold"
-              aria-hidden="true"
-            >
-            </div>
-            {
-              [1, 2, 3, 4, 5].map((h) => (
-                <span
-                  class="absolute top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-accent-gold/30"
-                  style={`left: ${(h / 6) * 100}%;`}
-                  aria-hidden="true"
-                />
-              ))
-            }
-
-            <ol class="absolute inset-0">
-              {
-                galaEvening.map((stop, i) => {
-                  const above = i % 2 === 1;
-                  const pct = stop.at * 100;
-                  const align =
-                    stop.at === 0 ? "start" : stop.at === 1 ? "end" : "center";
-                  const delay = 0.35 + i * 0.13;
-                  return (
-                    <li>
-                      {/* Diamond stop + connector tick on the track. */}
-                      <span
-                        class="gala-tl-pop absolute top-1/2 h-3.5 w-3.5 bg-accent-gold shadow-[0_0_14px_rgba(255,189,89,0.55)]"
-                        style={`left: ${pct}%; --tl-delay: ${delay}s;`}
-                        aria-hidden="true"
-                      />
-                      <span
-                        class:list={[
-                          "gala-tl-anim absolute w-px bg-gradient-to-b from-accent-gold/60 to-transparent",
-                          above ? "bottom-[calc(50%+10px)] h-6 rotate-180" : "top-[calc(50%+10px)] h-6",
-                        ]}
-                        style={`left: ${pct}%; --tl-delay: ${delay}s;`}
-                        aria-hidden="true"
-                      />
-                      {/* Stop copy, alternating above/below the track. */}
-                      <div
-                        class:list={[
-                          "absolute",
-                          above
-                            ? "bottom-[calc(50%+44px)]"
-                            : "top-[calc(50%+44px)]",
-                          align === "center" && "-translate-x-1/2",
-                          align === "end" && "-translate-x-full",
-                        ]}
-                        style={`left: ${pct}%;`}
-                      >
-                        <div
-                          class:list={[
-                            "gala-tl-anim w-64",
-                            align === "center" && "text-center",
-                            align === "end" && "text-right",
-                          ]}
-                          style={`--tl-delay: ${delay}s;`}
-                        >
-                          <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-accent-gold">
-                            {stop.time}
-                          </p>
-                          <p class="mt-1.5 font-display text-xl font-bold leading-tight text-white">
-                            {stop.title}
-                          </p>
-                          <p class="mt-1.5 text-sm leading-relaxed text-white/60">
-                            {stop.detail}
-                          </p>
-                          <p class="mt-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/60">
-                            {tierAccessLabel(stop.tiers)}
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })
-              }
-            </ol>
-          </div>
-
-          {/* Access lanes: what each ticket covers, drawn on the same time
-              scale as the track above. Row labels live in a left gutter so
-              the bars read as chart lanes, not section headers. */}
-          <div class="mt-3 space-y-2.5">
-            <div class="flex items-center">
-              <div class="w-44 shrink-0 pr-5 text-right">
-                <p class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-accent-gold">
-                  Benefactor
-                </p>
-                <p class="mt-0.5 text-[10px] font-semibold text-white/45">
-                  The Full Evening
-                </p>
-              </div>
-              <div class="relative flex-1">
-                <div
-                  class="gala-tl-bar flex h-10 items-center rounded-lg bg-accent-gold px-5 shadow-lg shadow-accent-gold/20"
-                  style="--tl-delay: 1s;"
-                >
-                  <span class="truncate text-[11px] font-extrabold uppercase tracking-[0.16em] text-off-black">
-                    In the room from 6 PM · cocktail hour through last dance
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center">
-              <div class="w-44 shrink-0 pr-5 text-right">
-                <p class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-accent-gold">
-                  Supporter
-                </p>
-                <p class="mt-0.5 text-[10px] font-semibold text-white/45">
-                  Late Night Access
-                </p>
-              </div>
-              <div class="relative h-10 flex-1">
-                <div
-                  class="gala-tl-bar absolute inset-y-0 right-0 flex w-1/2 items-center rounded-lg border-2 border-accent-gold/70 bg-accent-gold/10 px-5"
-                  style="--tl-delay: 1.15s;"
-                >
-                  <span class="truncate text-[11px] font-extrabold uppercase tracking-[0.16em] text-accent-gold">
-                    Joins at 9 PM · museum after dark onward
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center">
-              <div class="w-44 shrink-0 pr-5 text-right">
-                <p class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/55">
-                  Sponsor tables
-                </p>
-              </div>
-              <div class="relative flex-1">
-                <div
-                  class="gala-tl-bar flex h-10 items-center rounded-lg border border-accent-gold/30 bg-white/[0.03] px-5"
-                  style="--tl-delay: 1.3s;"
-                >
-                  <span class="truncate text-[11px] font-semibold italic text-white/55">
-                    The full evening, from 6 PM · packages below
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ============ The evening, hour by hour (mobile rail) ============ */}
-        <div class="gala-timeline reveal mt-12 lg:hidden">
-          <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">
-            The evening · 6 PM to midnight
-          </p>
-          <ol class="relative ml-1.5 mt-6 space-y-7 border-l-2 border-accent-gold/25 pl-6">
-            {
-              galaEvening.map((stop, i) => (
-                <li
-                  class="gala-tl-anim relative"
-                  style={`--tl-delay: ${0.15 + i * 0.1}s;`}
-                >
-                  <span
-                    class="absolute -left-[31px] top-1.5 h-2.5 w-2.5 rotate-45 bg-accent-gold shadow-[0_0_10px_rgba(255,189,89,0.5)]"
-                    aria-hidden="true"
-                  >
-                  </span>
-                  <p class="flex flex-wrap items-center gap-2.5 text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
-                    {stop.time}
-                    <span class="rounded-full border border-accent-gold/25 bg-accent-gold/5 px-2.5 py-0.5 text-[10px] font-bold normal-case tracking-[0.08em] text-white/60">
-                      {tierAccessLabel(stop.tiers)}
-                    </span>
-                  </p>
-                  <p class="mt-1 font-display text-lg font-bold text-white">
-                    {stop.title}
-                  </p>
-                  <p class="mt-1 text-sm leading-relaxed text-white/65">
-                    {stop.detail}
-                  </p>
-                </li>
-              ))
-            }
-          </ol>
-          <div class="mt-8">
-            <p class="text-[10px] font-extrabold uppercase tracking-[0.26em] text-white/40">
-              Ticket access
-            </p>
-            <div class="mt-3 space-y-2.5">
-              <div class="gala-tl-bar flex items-center justify-center rounded-lg bg-accent-gold px-5 py-3 text-center" style="--tl-delay: 0.7s;">
-                <span class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-off-black">
-                  Benefactor · Full Evening · from 6 PM
-                </span>
-              </div>
-              <div class="gala-tl-bar ml-auto flex w-[88%] items-center justify-center rounded-lg border-2 border-accent-gold/70 bg-accent-gold/10 px-5 py-3 text-center" style="--tl-delay: 0.85s;">
-                <span class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-accent-gold">
-                  Supporter · Late Night · from 9 PM
-                </span>
-              </div>
-              <p class="pt-1 text-center text-xs font-medium italic text-white/50">
-                Sponsor tables enjoy the full evening
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Ticket tier cards */}
-        <div class="mt-12 grid gap-5 md:grid-cols-2">
-          {
-            galaTickets.tiers.map((tier, index) => (
-              <div
-                class="gala-detail-card reveal group relative flex flex-col overflow-hidden rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-accent-gold/45 hover:shadow-lg hover:shadow-accent-gold/10 sm:p-8"
-                style={`transition-delay: ${index * 100}ms;`}
-              >
-                {/* Top gold hairline that brightens on hover. */}
-                <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/50 to-transparent transition-opacity duration-300 group-hover:via-accent-gold" />
-                {/* Gold corner brackets (black-tie trim). */}
-                <span class="pointer-events-none absolute left-2 top-2 h-4 w-4 rounded-tl border-l-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                <span class="pointer-events-none absolute right-2 top-2 h-4 w-4 rounded-tr border-r-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                <span class="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl border-b-2 border-l-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                <span class="pointer-events-none absolute bottom-2 right-2 h-4 w-4 rounded-br border-b-2 border-r-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-
-                <div class="relative flex flex-1 flex-col">
-                  <div class="flex items-center justify-between gap-3">
-                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold">
-                      {tier.eyebrow}
-                    </p>
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/25 bg-accent-gold/5 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
-                      {tier.accessLabel}
-                    </span>
-                  </div>
-
-                  <h3 class="mt-3 font-display text-3xl font-bold leading-tight text-white">
-                    <span class="gala-foil">{tier.name}</span>
-                  </h3>
-
-                  <div class="gala-detail-rule mt-4 h-px w-10 gala-foil-rule" />
-
-                  <div class="mt-5 flex items-end gap-3">
-                    <span class="font-display text-5xl font-bold leading-none text-accent-gold">
-                      ${tier.regular}
-                    </span>
-                    <span class="pb-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/55">
-                      Regular price
-                    </span>
-                  </div>
-                  <p class="mt-2 text-sm font-semibold text-white/60">
-                    {tier.id === "benefactor"
-                      ? "Full evening · dinner + afterparty"
-                      : "Late night access · from 9 PM"}
-                  </p>
-
-                  <p class="mt-5 text-base leading-relaxed text-white/70">
-                    {tier.description}
-                  </p>
-
-                  <p class="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
-                    {tier.closesLabel}
-                  </p>
-
-                  <div class="mt-7 pt-2">
-                    <a
-                      href={galaTeaser.ticketsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="gala-btn gala-btn--gold gala-sheen group/btn inline-flex w-full items-center justify-center gap-3 px-7 py-4 text-base font-extrabold"
-                      data-conversion-event="gala_ticket_click"
-                      data-conversion-context={`gala_page_tickets_${tier.id}`}
-                      data-gala-full-night-cta={
-                        tier.id === "benefactor" ? "true" : undefined
-                      }
-                    >
-                      <span class="relative z-[1]">
-                        {tier.id === "benefactor"
-                          ? "Reserve the Full Evening"
-                          : "Get Tickets"}
-                      </span>
-                      <svg
-                        class="relative z-[1] h-4 w-4 transition-transform group-hover/btn:translate-x-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M14 5l7 7m0 0l-7 7m7-7H3"
-                        />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-
-        {/* Sponsorship strip */}
-        <div class="reveal mt-14">
-          <div class="mx-auto mb-8 flex max-w-3xl flex-col items-center text-center">
-            <div class="flex items-center justify-center gap-3">
-              <span class="h-px w-12 gala-foil-rule"></span>
-              <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
-              <span class="h-px w-12 gala-foil-rule"></span>
-            </div>
-            <h3 class="mt-5 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Sponsor the evening
-            </h3>
-            <p class="mt-4 text-base leading-relaxed text-white/70">
-              Partner with us and put your name behind Latina leadership and
-              wellness access. Every sponsor seat includes the full evening,
-              from cocktail hour through the late-night celebration.
-            </p>
-          </div>
-
-          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {
-              galaTickets.sponsorships.map((sponsor, index) => (
-                <div
-                  class="gala-detail-card group relative overflow-hidden rounded-2xl border border-accent-gold/20 bg-white/[0.04] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-accent-gold/45 hover:shadow-lg hover:shadow-accent-gold/10"
-                  style={`transition-delay: ${index * 90}ms;`}
-                >
-                  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/50 to-transparent transition-opacity duration-300 group-hover:via-accent-gold" />
-                  <span class="pointer-events-none absolute left-2 top-2 h-4 w-4 rounded-tl border-l-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute right-2 top-2 h-4 w-4 rounded-tr border-r-2 border-t-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl border-b-2 border-l-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-                  <span class="pointer-events-none absolute bottom-2 right-2 h-4 w-4 rounded-br border-b-2 border-r-2 border-accent-gold/60 transition-colors duration-300 group-hover:border-accent-gold" />
-
-                  <div class="relative">
-                    <p class="font-display text-2xl font-bold leading-tight text-white">
-                      {sponsor.name}
-                    </p>
-                    <div class="gala-detail-rule mt-3 h-px w-10 gala-foil-rule" />
-                    <p class="mt-4 font-display text-4xl font-bold leading-none text-accent-gold">
-                      ${sponsor.amount.toLocaleString("en-US")}
-                    </p>
-                    <p class="mt-3 text-sm font-bold uppercase tracking-[0.16em] text-white/70">
-                      {sponsor.seats}
-                    </p>
-                    {sponsor.note && (
-                      <p class="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-vibrant-pink">
-                        {sponsor.note}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-
-          <div class="mt-10 flex flex-col items-center justify-center gap-4 text-center">
-            <a
-              href={galaTeaser.ticketsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-extrabold"
-              data-conversion-event="gala_ticket_click"
-              data-conversion-context="gala_page_sponsorships"
-            >
-              <span class="relative z-[1]">Become a Sponsor</span>
-              <svg
-                class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </a>
-            <p class="text-xs font-bold uppercase tracking-[0.22em] text-white/70">
-              {galaTickets.sponsorshipsCloseLabel}
-            </p>
-          </div>
+        <div class="mt-14">
+          <RecapConstellation />
         </div>
       </div>
     </section>
 
-    {/* Gold ribbon divider */}
-    <div class="gala-ribbon relative h-8 bg-off-black" aria-hidden="true">
+    {/* ========================== SILENT AUCTION ========================== */}
+    <section id="auction" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">Silent auction</p>
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            {claimedCount} packages found new homes
+          </h2>
+          <p class="reveal mt-6 font-display text-5xl font-bold leading-none tracking-tight sm:text-6xl" style="transition-delay: 150ms;">
+            <span class="gala-foil tabular-nums lining-nums">{money(auction.total)}</span>
+          </p>
+          <p class="reveal mt-4 text-base leading-relaxed text-white/65" style="transition-delay: 210ms;">
+            Raised in the silent auction, from {galaAuctionPackages.length} donated packages.
+          </p>
+        </div>
+
+        <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="list">
+          {
+            galaAuctionPackages.map((pkg, i) => (
+              <li
+                class="gala-detail-card reveal group relative overflow-hidden rounded-2xl border border-accent-gold/20 bg-white/[0.035] px-6 py-6"
+                style={`transition-delay: ${(i % 3) * 80}ms;`}
+              >
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/45 to-transparent" aria-hidden="true" />
+                <span class="pointer-events-none absolute left-2 top-2 h-3.5 w-3.5 rounded-tl border-l-2 border-t-2 border-accent-gold/55" aria-hidden="true" />
+                <span class="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 rounded-tr border-r-2 border-t-2 border-accent-gold/55" aria-hidden="true" />
+                <span class="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 rounded-bl border-b-2 border-l-2 border-accent-gold/55" aria-hidden="true" />
+                <span class="pointer-events-none absolute bottom-2 right-2 h-3.5 w-3.5 rounded-br border-b-2 border-r-2 border-accent-gold/55" aria-hidden="true" />
+                <p class="text-[11px] font-extrabold uppercase tracking-[0.22em] text-accent-gold">{pkg.donor}</p>
+                <p class="mt-2 font-display text-xl font-semibold leading-snug text-white">{pkg.title}</p>
+                {pkg.claimed && (
+                  <p class="mt-4">
+                    <span class="gr-seal">
+                      <span class="gr-seal-diamond" aria-hidden="true"></span>
+                      Claimed
+                    </span>
+                  </p>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <div class="gala-ribbon relative h-8" aria-hidden="true">
       <div class="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-4">
         <span class="h-px w-24 sm:w-40 gala-foil-rule"></span>
         <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
@@ -1136,136 +301,91 @@ const sponsorLogos2025 = [
       </div>
     </div>
 
-    {/* ======================= LAST YEAR RECAP ======================= */}
-    <section class="bg-[#fdf2f2] py-16 text-off-black sm:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <div class="reveal">
-            <p
-              class="text-xs font-extrabold uppercase tracking-[0.28em] text-vibrant-pink"
-            >
-              Last year's Gala
-            </p>
-            <h2
-              class="mt-4 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl"
-            >
-              Relive Noche Inolvidable, the night that started it all.
-            </h2>
-            <p class="mt-5 text-lg leading-relaxed text-medium-gray">
-              Our 2025 inaugural gala brought together movement, wellness, and
-              community care. Revisit the gallery, then claim your seat for
-              this year's evening at the MCA.
-            </p>
-            <a
-              href={flickrGalleryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="gala-btn gala-btn--night group mt-7 inline-flex items-center gap-3 px-7 py-4 text-base font-extrabold"
-            >
-              View Last Year's Gallery
-              <svg
-                class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </a>
-          </div>
-
-          <a
-            href={flickrGalleryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="reveal group relative block overflow-hidden rounded-3xl border border-accent-gold/40 bg-off-black p-3 shadow-2xl shadow-off-black/20 transition-transform duration-300 hover:-translate-y-1"
-          >
-            <img
-              src={`${base}images/galalogos/galagallery.jpg`}
-              alt="Guests gathered at last year's Noche Inolvidable Gala"
-              class="aspect-[16/10] w-full rounded-2xl object-cover ring-1 ring-inset ring-white/10 transition-transform duration-700 group-hover:scale-[1.03]"
-              loading="lazy"
-            />
-            <div
-              class="absolute inset-x-3 bottom-3 rounded-b-2xl bg-gradient-to-t from-off-black/90 to-transparent px-5 pb-5 pt-20"
-            >
-              <p
-                class="text-sm font-bold uppercase tracking-[0.2em] text-accent-gold"
-              >
-                2025 recap gallery
-              </p>
-            </div>
-          </a>
+    {/* ============================== HONORS ============================== */}
+    <section id="honors" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <div class="gala-aurora gala-aurora--soft pointer-events-none absolute inset-0" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">Honors</p>
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            The night's honorees
+          </h2>
         </div>
-
-        {/* --- 2025 sponsor gratitude marquee --- */}
-        <div class="reveal mt-14 border-t border-off-black/10 pt-10">
-          <p class="text-center text-xs font-extrabold uppercase tracking-[0.3em] text-vibrant-pink">
-            With gratitude to our 2025 sponsors
-          </p>
-
-          <div class="gala-marquee mt-7">
-            <div class="gala-marquee__track gala-marquee__track--left">
-              {
-                [...sponsorLogos2025, ...sponsorLogos2025].map((name, i) => (
-                  <span
-                    class:list={[
-                      "gala-sponsor-logo",
-                      i >= sponsorLogos2025.length &&
-                        "gala-sponsor-logo--duplicate",
-                    ]}
-                    aria-hidden={i >= sponsorLogos2025.length ? "true" : undefined}
-                  >
-                    <img
-                      src={`${base}images/galalogos/${name}.png`}
-                      alt={i < sponsorLogos2025.length ? name : ""}
-                      loading="eager"
-                      decoding="async"
-                      fetchpriority="low"
-                      class="h-12 w-auto object-contain"
-                    />
-                  </span>
-                ))
-              }
-            </div>
-          </div>
-
-          <p class="mt-7 text-center text-sm font-medium text-medium-gray">
-            Interested in 2026 sponsorship opportunities?
-            <a
-              href="#tickets"
-              class="link-underline ml-1 font-extrabold text-off-black"
-              data-conversion-event="gala_ticket_click"
-              data-conversion-context="gala_page_sponsor_tease"
-            >
-              See sponsorship packages &rarr;
-            </a>
-          </p>
+        <div class="mt-12">
+          <RecapHonors />
         </div>
       </div>
     </section>
 
-    {/* ======================= CLOSING INVITATION ======================= */}
-    <section
-      id="gala-interest"
-      class="relative overflow-hidden py-16 scroll-mt-24 sm:py-20"
-    >
-      <div class="gala-lattice absolute inset-0 opacity-[0.05]"></div>
-      <div
-        class="gala-ambient pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-gradient-to-b from-accent-gold/15 to-transparent blur-3xl"
-      >
-      </div>
+    {/* ========================= THE NIGHT IN PHOTOS ========================= */}
+    <section id="photos" class="gr-band relative overflow-hidden border-y border-accent-gold/15 py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">The album · {galaPhotoCount} photos</p>
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            {galaRecap.photosHeading}
+          </h2>
+          <p class="reveal mt-5 text-lg leading-relaxed text-white/70" style="transition-delay: 180ms;">
+            {galaRecap.photosIntro}
+          </p>
+          <p class="reveal mt-5" style="transition-delay: 240ms;">
+            <a
+              href={galaAlbumUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-sm font-extrabold text-white underline decoration-accent-gold decoration-1 underline-offset-[6px] transition-colors hover:text-accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
+              data-conversion-event="gala_gallery_click"
+              data-conversion-context="gala_recap_photos"
+            >
+              Open the album on Flickr
+              <svg class="h-4 w-4 text-accent-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <span class="sr-only">(opens in a new tab)</span>
+            </a>
+          </p>
+        </div>
 
-      {/* Denser particle field so the page bookends visually. */}
-      <div
-        class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
-        aria-hidden="true"
-      >
+        <div class="mt-14">
+          <RecapAlbum />
+        </div>
+
+        <p class="mt-16 text-center">
+          <a
+            href={flickr2025Url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs font-bold uppercase tracking-[0.24em] text-white/50 underline decoration-white/25 underline-offset-4 transition-colors hover:text-accent-gold hover:decoration-accent-gold"
+          >
+            Looking back: the 2025 gallery<span class="sr-only"> (opens in a new tab)</span>
+          </a>
+        </p>
+      </div>
+    </section>
+
+    {/* ============================ WITH GRATITUDE ============================ */}
+    <section id="gratitude" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
+      <span id="fashion-show" class="absolute top-0" aria-hidden="true"></span>
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">With gratitude</p>
+          <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+            The partners behind the night
+          </h2>
+        </div>
+        <div class="mt-12">
+          <RecapGratitude />
+        </div>
+      </div>
+    </section>
+
+    {/* ======================= WHAT THE NIGHT BUILDS ======================= */}
+    <section id="give" class="relative overflow-hidden py-20 scroll-mt-28 sm:py-24 lg:py-28">
+      <span id="tickets" class="absolute top-0" aria-hidden="true"></span>
+      <span id="gala-interest" class="absolute top-0" aria-hidden="true"></span>
+      <div class="gala-lattice pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-gradient-to-b from-accent-gold/15 to-transparent blur-3xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
         {
           closingParticles.map((p) => (
             <span
@@ -1276,169 +396,126 @@ const sponsorLogos2025 = [
         }
       </div>
 
-      {/* Gold ribbon above the invitation. */}
-      <div class="relative mb-10 flex items-center justify-center gap-4" aria-hidden="true">
-        <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
-        <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
-        <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
-      </div>
-
-      {/* The invitation itself: engraved cream card stock with a gilt edge
-          and a double hairline frame, the one light moment on the dark page. */}
-      <div class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="gala-invite reveal relative px-6 py-14 text-center text-off-black sm:px-12 sm:py-16 lg:px-16"
-        >
-          <div class="gala-invite-frame absolute inset-3 sm:inset-4" aria-hidden="true">
-            <span class="absolute -left-1 -top-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
-            <span class="absolute -right-1 -top-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
-            <span class="absolute -bottom-1 -left-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
-            <span class="absolute -bottom-1 -right-1 h-2 w-2 rotate-45 bg-accent-gold"></span>
-          </div>
-
-          <div class="relative">
-            <div class="flex items-center justify-center gap-3" aria-hidden="true">
-              <span class="h-px w-12 bg-[#8a5700]/40"></span>
-              <span class="h-1.5 w-1.5 rotate-45 bg-[#b8860b]"></span>
-              <span class="h-px w-12 bg-[#8a5700]/40"></span>
-            </div>
-
-            <p class="mt-6 text-xs font-extrabold uppercase tracking-[0.35em] text-[#8a5700]">
-              You're invited
-            </p>
-            <h2 class="mt-5 font-display text-3xl font-semibold italic leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem]">
-              Reserve the full evening before September 18, 2026.
-            </h2>
-            <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-medium-gray sm:text-lg">
-              Your $375 Benefactor seat includes cocktail hour, a three-course
-              seated dinner, live bidding, museum garden access, and the full
-              late-night celebration. Every seat helps us reach more people
-              through accessible classes and nonprofit partnerships.
-            </p>
-
-            {/* Formal detail lines, set like engraved stationery. */}
-            <div class="mt-8 space-y-1.5">
-              <p class="text-sm font-extrabold uppercase tracking-[0.22em] text-off-black">
-                {galaTeaser.dateLabel} · {galaTeaser.timeLabel}
-              </p>
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-medium-gray">
-                {galaTeaser.venueName}
-              </p>
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#8a5700]">
-                {galaTeaser.attire}
-              </p>
-            </div>
-
-            <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href={galaTeaser.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-extrabold"
-                data-conversion-event="gala_ticket_click"
-                data-conversion-context="gala_page_closing"
-                data-gala-full-night-cta="true"
-              >
-                <span class="relative z-[1]">Reserve the Full Evening</span>
-                <svg
-                  class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </a>
-              <a
-                href="#tickets"
-                class="gala-btn gala-btn--ink group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-extrabold"
-              >
-                Explore Sponsorships
-                <svg
-                  class="h-4 w-4 text-[#8a5700] transition-transform group-hover:translate-y-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </svg>
-              </a>
-            </div>
-
-            <p class="mt-7 text-[11px] font-bold uppercase tracking-[0.26em] text-medium-gray">
-              {galaTeaser.statusLabel}
-            </p>
-          </div>
+      <div class="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <div class="reveal flex items-center justify-center gap-4" aria-hidden="true">
+          <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
+          <span class="h-2 w-2 rotate-45 bg-accent-gold"></span>
+          <span class="h-px w-20 sm:w-32 gala-foil-rule"></span>
+        </div>
+        <p class="reveal mt-8 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">What the night builds</p>
+        <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
+          {galaRecap.giveHeading}
+        </h2>
+        <p class="reveal mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/75" style="transition-delay: 180ms;">
+          {galaRecap.giveBody}
+        </p>
+        <div class="reveal mt-10 flex justify-center" style="transition-delay: 240ms;">
+          <a
+            href={galaRecap.givePath}
+            class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-extrabold"
+            data-conversion-event="donation_click"
+            data-conversion-context="gala_recap_closing"
+          >
+            <span class="relative z-[1]">{galaRecap.giveLabel}</span>
+            <svg class="relative z-[1] h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
-
-    {/* ======================= STICKY CONVERSION BAR ======================= */}
-    <div
-      id="gala-sticky-bar"
-      class="gala-sticky-bar fixed inset-x-0 bottom-0 z-40 transition-all duration-500"
-      aria-hidden="true"
-    >
-      <div class="mx-auto max-w-7xl px-3 pb-3 sm:px-6">
-        <div class="gala-sheen flex items-center justify-between gap-3 rounded-2xl border border-accent-gold/40 bg-off-black/90 px-4 py-3 shadow-2xl shadow-black/50 backdrop-blur-md sm:px-5">
-          <div class="flex min-w-0 items-center gap-3">
-            <span class="hidden h-2 w-2 rotate-45 bg-accent-gold sm:block"></span>
-            <div class="min-w-0">
-              <p class="truncate font-display text-sm font-bold text-white">
-                {galaTeaser.title}
-              </p>
-              <p class="truncate text-[11px] font-semibold text-accent-gold">
-                {galaTeaser.shortDateTimeLabel}
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <a
-              href={galaTeaser.ticketsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="gala-btn gala-btn--gold relative z-[1] inline-flex items-center gap-2 px-4 py-2 text-xs font-extrabold sm:px-5 sm:text-sm"
-              data-conversion-event="gala_ticket_click"
-              data-conversion-context="gala_page_sticky"
-            >
-              Get Tickets
-            </a>
-            <button
-              type="button"
-              class="gala-sticky-close inline-flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-              aria-label="Dismiss"
-            >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </main>
+
+  {/* The album viewer stays OUTSIDE <main> so the fixed header can never
+      trap it (see RecapLightbox). */}
+  <RecapLightbox />
 </Layout>
 
 <style>
-  /* Cinematic hero load-in. The LCP heading and siblings rise gently into
-     place; suppressed entirely for reduced-motion users. */
+  /* Page palette: navy night with off-black, gold foil and mauve. Scoped
+     here so nothing leaks into global.css. */
+  .gr-page {
+    --gr-night: #0b1320;
+    --gr-navy: #111a27;
+    background: linear-gradient(180deg, #0b1320 0%, #101824 40%, #0e141d 100%);
+  }
+  /* Playfair defaults to old-style figures; set every display numeral on
+     lining figures so amounts and years sit on the baseline. */
+  .gr-page :global(.font-display) {
+    font-variant-numeric: lining-nums;
+  }
+  .gr-band {
+    background: linear-gradient(180deg, #0a111c, #0d1522 50%, #0a111c);
+  }
+
+  /* Hero: full-bleed photo, tall enough to breathe, the type anchored low. */
+  .gr-hero {
+    min-height: clamp(34rem, calc(100vh - 7rem), 60rem);
+  }
+  @supports (height: 1svh) {
+    .gr-hero {
+      min-height: clamp(34rem, calc(100svh - 7rem), 60rem);
+    }
+  }
+  .gr-hero-img {
+    object-position: 50% 45%;
+  }
+  .gr-hero-scrim {
+    background:
+      linear-gradient(0deg, rgba(11, 19, 32, 0.96) 0%, rgba(11, 19, 32, 0.78) 28%, rgba(11, 19, 32, 0.3) 58%, rgba(11, 19, 32, 0.45) 100%),
+      linear-gradient(90deg, rgba(11, 19, 32, 0.7) 0%, rgba(11, 19, 32, 0.25) 55%, rgba(11, 19, 32, 0) 80%);
+  }
+  .gr-hero-title {
+    filter: drop-shadow(0 2px 18px rgba(0, 0, 0, 0.55));
+  }
+  /* The ghost button gets a touch more body over the photo. */
+  .gr-ghost-solid {
+    background: rgba(11, 19, 32, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* A faint star field behind the constellation. */
+  .gr-night-sky {
+    background:
+      radial-gradient(60% 55% at 28% 50%, rgba(255, 189, 89, 0.08), transparent 70%),
+      radial-gradient(1px 1px at 12% 22%, rgba(255, 243, 216, 0.35), transparent),
+      radial-gradient(1px 1px at 78% 14%, rgba(255, 243, 216, 0.3), transparent),
+      radial-gradient(1px 1px at 88% 68%, rgba(255, 243, 216, 0.25), transparent),
+      radial-gradient(1px 1px at 6% 80%, rgba(255, 243, 216, 0.25), transparent),
+      radial-gradient(1px 1px at 52% 92%, rgba(255, 243, 216, 0.2), transparent);
+  }
+
+  /* "Claimed" seal: rotated gold diamond + small caps. */
+  .gr-seal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255, 189, 89, 0.5);
+    border-radius: 2px;
+    padding: 0.3rem 0.55rem 0.3rem 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #ffbd59;
+    background: rgba(255, 189, 89, 0.06);
+  }
+  .gr-seal-diamond {
+    width: 0.45rem;
+    height: 0.45rem;
+    background: #ffbd59;
+    transform: rotate(45deg);
+    box-shadow: 0 0 8px rgba(255, 189, 89, 0.6);
+  }
+
+  /* Cinematic hero load-in, suppressed for reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
     .hero-rise {
       opacity: 0;
       animation: hero-rise 0.85s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
     }
   }
-
   @keyframes hero-rise {
     from {
       opacity: 0;
@@ -1450,8 +527,7 @@ const sponsorLogos2025 = [
     }
   }
 
-  /* Floating gold particles drifting up. Static (invisible) unless motion is
-     allowed. Fine motes get a tight glow; bokeh motes get a larger soft halo. */
+  /* Floating gold particles drifting up. Invisible unless motion is allowed. */
   .gala-particle {
     opacity: 0;
     box-shadow: 0 0 6px rgba(255, 189, 89, 0.5);
@@ -1459,7 +535,6 @@ const sponsorLogos2025 = [
   .gala-particle--bokeh {
     box-shadow: 0 0 14px 3px rgba(255, 189, 89, 0.35);
   }
-
   @media (prefers-reduced-motion: no-preference) {
     .gala-particle {
       animation-name: gala-float-up;
@@ -1467,7 +542,6 @@ const sponsorLogos2025 = [
       animation-iteration-count: infinite;
     }
   }
-
   @keyframes gala-float-up {
     0% {
       transform: translate(0, 0);
@@ -1485,8 +559,7 @@ const sponsorLogos2025 = [
     }
   }
 
-  /* Aurora: slow-drifting layered radial glow behind the hero (and a softer
-     variant for the impact band). Motion-safe only. */
+  /* Aurora: slow layered radial glow, motion-safe only. */
   .gala-aurora {
     background:
       radial-gradient(40% 50% at 18% 25%, rgba(255, 189, 89, 0.16), transparent 70%),
@@ -1495,7 +568,7 @@ const sponsorLogos2025 = [
     background-repeat: no-repeat;
   }
   .gala-aurora--soft {
-    opacity: 0.55;
+    opacity: 0.5;
   }
   @media (prefers-reduced-motion: no-preference) {
     .gala-aurora {
@@ -1503,7 +576,8 @@ const sponsorLogos2025 = [
     }
   }
   @keyframes gala-aurora-drift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 0%, 0% 0%, 0% 0%;
       transform: scale(1);
     }
@@ -1518,19 +592,13 @@ const sponsorLogos2025 = [
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      105deg,
-      transparent 30%,
-      rgba(255, 243, 216, 0.14) 48%,
-      transparent 66%
-    );
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 243, 216, 0.12) 48%, transparent 66%);
     transform: translateX(-130%);
     pointer-events: none;
   }
   @media (prefers-reduced-motion: no-preference) {
     .gala-theater-sweep::after {
-      animation: gala-sweep-once 1.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s 1
-        forwards;
+      animation: gala-sweep-once 1.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s 1 forwards;
     }
   }
   @keyframes gala-sweep-once {
@@ -1542,222 +610,9 @@ const sponsorLogos2025 = [
     }
   }
 
-  /* Soft spotlight breathing behind the framed hero photo. */
-  .gala-spotlight {
-    opacity: 0.7;
-  }
-
-  /* Venue frame hover-lift wrapper (pairs with GalaPhotoFrame's own zoom). */
-  .gala-frame-lift {
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    height: 100%;
-  }
-  .gala-frame-lift:hover {
-    transform: translateY(-4px);
-  }
-
-  /* Infinite sponsor marquee: grayscale by default, gold/color on hover, pause
-     on row hover. Two identical halves make the loop seamless. */
-  .gala-marquee {
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 8%,
-      black 92%,
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 8%,
-      black 92%,
-      transparent
-    );
-  }
-  .gala-marquee__track {
-    display: flex;
-    align-items: center;
-    gap: 2.5rem;
-    width: max-content;
-  }
-  .gala-marquee__track--left {
-    animation: gala-marquee-left 40s linear infinite;
-  }
-  .gala-marquee:hover .gala-marquee__track {
-    animation-play-state: paused;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .gala-marquee__track {
-      animation: none;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-    }
-  }
-  @keyframes gala-marquee-left {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-  .gala-sponsor-logo {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    height: 3rem;
-    filter: grayscale(1) opacity(0.65);
-    transition: filter 0.3s ease, transform 0.3s ease;
-  }
-  .gala-sponsor-logo:hover {
-    filter: grayscale(0) opacity(1);
-    transform: scale(1.06);
-  }
-
-  /* Fashion show runway tags: white garment tags for the dark artwork, an
-     off-black tag with a gold hairline for the white mark. Logos keep their
-     original colors (no invert or grayscale). The corner-bracket color rides
-     on --tag-bracket so one set of spans reads on both treatments. */
-  .gala-runway-tag {
-    --tag-bracket: rgba(166, 116, 30, 0.5);
-    box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
-  }
-  .gala-runway-tag--light {
-    background: #ffffff;
-  }
-  .gala-runway-tag--dark {
-    --tag-bracket: rgba(255, 189, 89, 0.55);
-  }
-  .gala-runway-tag--light:hover {
-    --tag-bracket: rgba(166, 116, 30, 0.95);
-  }
-  .gala-runway-tag--dark:hover {
-    --tag-bracket: rgba(255, 189, 89, 0.95);
-  }
-  .gala-runway-tag__rule {
-    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  .gala-runway-tag:hover .gala-runway-tag__rule {
-    width: 3rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .gala-runway-tag,
-    .gala-runway-tag img,
-    .gala-runway-tag__rule {
-      transition: none;
-    }
-  }
-
-  /* Detail cards: the foil-rule divider draws across on hover, the gold
-     brackets + top hairline brighten (handled inline above). */
-  .gala-detail-rule {
-    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  .gala-detail-card:hover .gala-detail-rule {
-    width: 3.5rem;
-  }
-
-  /* Evening timeline: the track draws in, stops pop with a stagger, and the
-     access bars sweep across at the same scale. All initial-hidden states are
-     gated behind `.js` (set in Layout <head>) so content is never stuck hidden
-     without JS, and reduced-motion shows everything immediately. Delays ride
-     on a per-element --tl-delay custom property. */
-  :global(.js) .gala-timeline .gala-tl-anim {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  :global(.js) .gala-timeline.is-visible .gala-tl-anim {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 0.7s cubic-bezier(0.25, 0.8, 0.25, 1),
-      transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transition-delay: var(--tl-delay, 0s);
-  }
-  :global(.js) .gala-timeline .gala-tl-pop {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(45deg) scale(0);
-  }
-  :global(.js) .gala-timeline.is-visible .gala-tl-pop {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(45deg) scale(1);
-    transition:
-      opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transition-delay: var(--tl-delay, 0s);
-  }
-  /* Non-JS fallback keeps the diamond's rotation. */
-  .gala-timeline .gala-tl-pop {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-  :global(.js) .gala-timeline .gala-tl-track {
-    transform: scaleX(0);
-    transform-origin: left center;
-  }
-  :global(.js) .gala-timeline.is-visible .gala-tl-track {
-    transform: scaleX(1);
-    transition: transform 1.1s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s;
-  }
-  :global(.js) .gala-timeline .gala-tl-bar {
-    transform: scaleX(0);
-    transform-origin: left center;
-  }
-  :global(.js) .gala-timeline.is-visible .gala-tl-bar {
-    transform: scaleX(1);
-    transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transition-delay: var(--tl-delay, 0.9s);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :global(.js) .gala-timeline .gala-tl-anim,
-    :global(.js) .gala-timeline .gala-tl-pop,
-    :global(.js) .gala-timeline .gala-tl-track,
-    :global(.js) .gala-timeline .gala-tl-bar {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-    :global(.js) .gala-timeline .gala-tl-pop {
-      transform: translate(-50%, -50%) rotate(45deg);
-    }
-  }
-
-  /* A soft glow that travels the track once the timeline is in view, like a
-     spotlight crossing the evening. Motion-safe only. */
-  .gala-tl-glow {
-    opacity: 0;
-    box-shadow: 0 0 14px 5px rgba(255, 189, 89, 0.4);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .gala-timeline.is-visible .gala-tl-glow {
-      animation: gala-tl-travel 9s ease-in-out 1.6s infinite;
-    }
-  }
-  @keyframes gala-tl-travel {
-    0% {
-      left: 0%;
-      opacity: 0;
-    }
-    7% {
-      opacity: 0.9;
-    }
-    45% {
-      opacity: 0.9;
-    }
-    52% {
-      left: 100%;
-      opacity: 0;
-    }
-    100% {
-      left: 100%;
-      opacity: 0;
-    }
-  }
-
-  /* The closing invitation: engraved cream card stock. The gilt edge is a
-     double gold ring drawn with box-shadow; the inner double hairline frame
-     is .gala-invite-frame (+ its ::after) in engraved dark-gold ink. */
+  /* The thank-you card: engraved cream card stock, the one light moment on
+     the dark page. Gilt edge = double gold ring; inner double hairline frame
+     is .gala-invite-frame (+ ::after) in engraved dark-gold ink. */
   .gala-invite {
     background: linear-gradient(165deg, #fbf6ea 0%, #f7f0dd 100%);
     border-radius: 6px;
@@ -1778,106 +633,4 @@ const sponsorLogos2025 = [
     border: 1px solid rgba(138, 87, 0, 0.2);
     border-radius: 2px;
   }
-
-  /* Sticky conversion bar: hidden by default, shown via JS adding the
-     --visible class. Both states use transform + opacity so they never
-     conflict with Tailwind's `translate` utility. */
-  .gala-sticky-bar {
-    transform: translateY(140%);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .gala-sticky-bar.gala-sticky--visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
 </style>
-
-<script>
-  // Subtle parallax: elements with [data-gala-parallax] lag slightly behind
-  // scroll for a sense of depth. Each may carry an optional data-gala-speed
-  // (default 0.1). rAF-throttled, desktop-only (>=1024px), motion-safe.
-  (() => {
-    const els = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-gala-parallax]"),
-    );
-    if (els.length === 0) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const lg = window.matchMedia("(min-width: 1024px)");
-    let ticking = false;
-
-    const apply = () => {
-      ticking = false;
-      if (!lg.matches) {
-        for (const el of els) el.style.transform = "";
-        return;
-      }
-      for (const el of els) {
-        const speed = parseFloat(el.dataset.galaSpeed || "0.1");
-        // Clamp the drift proportionally to the speed so subtle layers barely move.
-        const max = Math.min(50, 50 * speed);
-        const offset = Math.min(window.scrollY * speed, max);
-        el.style.transform = `translate3d(0, ${offset}px, 0)`;
-      }
-    };
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(apply);
-    };
-
-    apply();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    lg.addEventListener("change", apply);
-  })();
-
-  // Sticky interest-list conversion bar: fades in once the hero has scrolled
-  // away and hides again once the closing invitation reaches view (so it never
-  // doubles the final CTA). Dismissible for the session.
-  (() => {
-    const bar = document.getElementById("gala-sticky-bar");
-    const hero = document.getElementById("save-the-date");
-    const closing = document.getElementById("gala-interest");
-    if (!bar || !hero) return;
-
-    let dismissed = false;
-    const closeBtn = bar.querySelector<HTMLButtonElement>(".gala-sticky-close");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        dismissed = true;
-        bar.classList.remove("gala-sticky--visible");
-        bar.setAttribute("aria-hidden", "true");
-      });
-    }
-
-    const evaluate = () => {
-      if (dismissed) return;
-      // Show only between the hero (scrolled past) and the closing invite
-      // (not yet in view). Both checks must pass.
-      const heroBottom = hero.getBoundingClientRect().bottom;
-      const heroGone = heroBottom < 0;
-      const closingInView =
-        !!closing &&
-        closing.getBoundingClientRect().top < window.innerHeight * 0.85;
-      const shouldShow = heroGone && !closingInView;
-      bar.classList.toggle("gala-sticky--visible", shouldShow);
-      bar.setAttribute("aria-hidden", String(!shouldShow));
-    };
-
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        ticking = false;
-        evaluate();
-      });
-    };
-
-    evaluate();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-  })();
-</script>

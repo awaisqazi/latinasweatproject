@@ -1,14 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
-import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
-import {
-  galaPhotos,
-  galaTeaser,
-  galaTicketDeadline,
-  galaTickets,
-} from "@/data/galaTeaser";
+import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
 import {
   sweatFest,
   sweatFestColors,
@@ -20,7 +13,6 @@ const base = import.meta.env.BASE_URL;
 // Chicago Reader graduation feature (Aug 21, 2026): the featured press card.
 const readerArticle = pressArticles.find((a) => a.featured);
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
-const galaPageUrl = withBase(galaTeaser.pagePath);
 // Graduation 2026 recap: the internal page is the hub, the Flickr album
 // holds the full 307-photo gallery.
 const graduationPageUrl = withBase("graduation");
@@ -37,25 +29,12 @@ const sweatFestMerchShots = [
 // The festival is past: the card is a recap, its primary CTA is the album.
 const sweatFestPrimaryUrl = withBase("/sweatfest#photos");
 
-// Server-rendered fallback for the gold days-left chip on the gala
-// card. GalaTicketDeadline's script recomputes it on load and every
-// 30 s, and relabels it once the full-evening window closes, so this
-// mirrors that formula exactly.
-const galaHoursLeft =
-  (new Date(galaTicketDeadline.closesAtISO).getTime() - Date.now()) / 3.6e6;
-const galaDaysLeft = Math.floor(galaHoursLeft / 24);
-const galaDaysLeftEn =
-  galaDaysLeft >= 2
-    ? `${galaDaysLeft} days left`
-    : galaDaysLeft === 1
-      ? "1 day left"
-      : "Closes tonight";
-const galaDaysLeftEs =
-  galaDaysLeft >= 2
-    ? `Quedan ${galaDaysLeft} días`
-    : galaDaysLeft === 1
-      ? "Queda 1 día"
-      : "Cierra esta noche";
+// Gala 2026 recap card (post-gala, Sep 26 2026): Spanish labels for the
+// three aggregate stats, in galaRecapCard.stats order. The 4:5 photo is a
+// local crop of album #69 (dinner under the gold lanterns).
+const galaRecapPhotosUrl = withBase("/gala#photos");
+const galaRecapStatLabelsEs = ["recaudados esa noche", "paletas levantadas", "fotos"];
+const galaRecapPhotoSrc = `${base}images/gala/2026/recap-home/gala-2026-recap-card-4x5.webp`;
 
 // Define links data with English and Spanish translations
 const links = [
@@ -161,8 +140,8 @@ const links = [
   },
 ];
 
-// Highlight Stories Bar configuration. The gala leads (Sep 25, the only
-// live ticket sale), then the recaps in reverse-chronological order:
+// Highlight Stories Bar configuration. The gala recap leads (Sep 25,
+// the newest story), then the other recaps in reverse-chronological order:
 // Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22). Matches
 // the feature-card order below.
 const highlights = [
@@ -411,10 +390,11 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Gala Featured Card: black-tie stationery, leading the page
-          while full-evening tickets are on sale. The inline
-          GalaTicketDeadline module under the price tiles carries the only
-          ticket CTA on this card, so nothing here repeats the ask. */}
+      {/* Gala 2026 Recap Card (post-gala, Sep 26 2026): black-tie
+          stationery, still leading the page as the newest story. Gold
+          "Recap" chip, the 4:5 recap photo, the three aggregate stats as
+          small tiles, and ONE CTA into the /gala photo wall. Every visible
+          string carries an EN/ES pair. */}
       <div
         id="gala-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
@@ -422,105 +402,106 @@ const getLinkConversionProvider = (url = "") => {
       >
         <div class="gala-lattice absolute inset-0 opacity-[0.10]"></div>
         <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
-          <a href={galaPageUrl} class="block">
-            <div class="mb-4 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#fbf6ea] p-1 shadow-lg shadow-[#ffbd59]/10">
-                  <img
-                    src={`${base}logo.png`}
-                    width="1000"
-                    height="1000"
-                    alt="The Latina Sweat Project"
-                    class="h-full w-full object-contain"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-                <div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
-                      <span class="lang-en">Featured</span>
-                      <span class="lang-es hidden">Destacado</span>
-                    </p>
-                    <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-[#ffbd59] px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
-                      <span class="h-1 w-1 rotate-45 bg-[#1E1E1E]" aria-hidden="true" />
-                      <span class="lang-en" data-gala-days-left data-lang="en">{galaDaysLeftEn}</span>
-                      <span class="lang-es hidden" data-gala-days-left data-lang="es">{galaDaysLeftEs}</span>
-                    </span>
-                  </div>
-                  <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-                    <span class="lang-en">{galaTeaser.shortDateTimeLabel}</span>
-                    <span class="lang-es hidden">25 Sep · 6 PM CT</span>
-                  </p>
-                </div>
-              </div>
-              <span class="rounded-[3px] border border-[#ffbd59]/60 bg-[#ffbd59]/10 px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#ffbd59] whitespace-nowrap shrink-0">
-                <span class="lang-en">{galaTeaser.attire}</span>
-                <span class="lang-es hidden">Etiqueta formal</span>
+          <a
+            href={galaRecapPhotosUrl}
+            class="block"
+            data-conversion-event="gala_recap_click"
+            data-conversion-context="links_gala_recap_card"
+          >
+            <div class="mb-4 flex items-center gap-3">
+              <span class="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-[#ffbd59]/70 bg-[#fbf6ea] p-1 shadow-lg shadow-[#ffbd59]/10">
+                <img
+                  src={`${base}logo.png`}
+                  width="1000"
+                  height="1000"
+                  alt="The Latina Sweat Project"
+                  class="h-full w-full object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
               </span>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <p class="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#ffbd59]">
+                    <span class="lang-en">Annual Gala 2026</span>
+                    <span class="lang-es hidden">Gala Anual 2026</span>
+                  </p>
+                  <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-[#ffbd59] px-2 py-[3px] text-[8px] font-extrabold uppercase tracking-widest text-[#1E1E1E]">
+                    <span class="h-1 w-1 rotate-45 bg-[#1E1E1E]" aria-hidden="true" />
+                    <span class="lang-en">Recap</span>
+                    <span class="lang-es hidden">Recap</span>
+                  </span>
+                </div>
+                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+                  <span class="lang-en">{galaRecapCard.dateLine}</span>
+                  <span class="lang-es hidden">25 de septiembre de 2026 · MCA Chicago</span>
+                </p>
+              </div>
             </div>
 
             <div class="grid gap-4">
-              <div>
-                <h2 class="font-display text-3xl font-bold leading-[1.0] tracking-tight text-white">
-                  <span class="lang-en"
-                    ><span class="gala-foil">{galaTeaser.shortTitle}</span> Gala</span
-                  >
-                  <span class="lang-es hidden"
-                    >Gala <span class="gala-foil">Anual</span></span
-                  >
-                </h2>
-                <p class="mt-3 text-[13px] font-semibold leading-relaxed text-white/65">
-                  <span class="lang-en">
-                    Black-tie evening for art, movement, and community at {galaTeaser.venueName}.
-                  </span>
-                  <span class="lang-es hidden">
-                    Una noche de gala formal para arte, movimiento y comunidad en el Museo de Arte Contemporáneo de Chicago.
-                  </span>
-                </p>
+              <div class="relative overflow-hidden rounded-xl border border-[#ffbd59]/30 bg-black/25 p-1.5 shadow-lg shadow-black/25">
+                <div class="relative aspect-[4/5] overflow-hidden rounded-lg ring-1 ring-inset ring-white/10 [transform:translateZ(0)]">
+                  <img
+                    src={galaRecapPhotoSrc}
+                    width="800"
+                    height="1000"
+                    alt="The Annual Gala 2026 dinner at MCA Chicago beneath glowing gold lanterns"
+                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101010]/85 via-transparent to-transparent"></div>
+                  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-gold/80 to-transparent"></div>
+                  <h2 class="absolute inset-x-4 bottom-4 font-display text-3xl font-bold leading-[1.0] tracking-tight text-white drop-shadow">
+                    <span class="lang-en"><span class="gala-foil">{galaRecapCard.heading}</span></span>
+                    <span class="lang-es hidden"><span class="gala-foil">{galaRecapCard.heading}</span></span>
+                  </h2>
+                </div>
+                <span class="pointer-events-none absolute left-3 top-3 z-10 h-5 w-5 rounded-tl-md border-l-2 border-t-2 border-accent-gold/75"></span>
+                <span class="pointer-events-none absolute right-3 top-3 z-10 h-5 w-5 rounded-tr-md border-r-2 border-t-2 border-accent-gold/75"></span>
               </div>
 
-              <GalaPhotoFrame slot={galaPhotos.facade} variant="links" corners />
+              <p class="text-[13px] font-semibold leading-relaxed text-white/65">
+                <span class="lang-en">{galaRecapCard.blurb}</span>
+                <span class="lang-es hidden">{galaRecapCard.blurbEs}</span>
+              </p>
             </div>
           </a>
 
-          <div class="mt-4 grid grid-cols-2 gap-2">
+          <div class="mt-4 grid grid-cols-3 gap-2">
             {
-              galaTickets.tiers.map((tier) => (
-                <div class="relative rounded-[3px] border border-[#ffbd59]/30 bg-black/40 px-3 py-2 before:pointer-events-none before:absolute before:inset-[3px] before:rounded-[1px] before:border before:border-[#ffbd59]/15">
-                  <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/70">
-                    <span class="lang-en">{tier.id === "benefactor" ? "Full Evening" : "Late Night"}</span>
-                    <span class="lang-es hidden">{tier.id === "benefactor" ? "Velada completa" : "Acceso nocturno"}</span>
+              galaRecapCard.stats.map((stat, i) => (
+                <div class="relative min-w-0 rounded-[3px] border border-[#ffbd59]/30 bg-black/40 px-2 py-2 text-center before:pointer-events-none before:absolute before:inset-[3px] before:rounded-[1px] before:border before:border-[#ffbd59]/15">
+                  <p class="font-display text-[15px] font-bold leading-tight text-[#ffbd59]">
+                    {stat.value}
                   </p>
-                  <p class="mt-0.5 text-sm font-extrabold text-[#ffbd59]">
-                    ${tier.regular}
-                    <span class="text-[10px] font-bold uppercase tracking-wide text-white/70">
-                      <span class="lang-en">regular</span>
-                      <span class="lang-es hidden">regular</span>
-                    </span>
+                  <p class="mt-0.5 text-[8px] font-extrabold uppercase leading-tight tracking-[0.12em] text-white/70">
+                    <span class="lang-en">{stat.label}</span>
+                    <span class="lang-es hidden">{galaRecapStatLabelsEs[i]}</span>
                   </p>
                 </div>
               ))
             }
           </div>
-          <p class="mt-2 text-center text-[10px] font-semibold text-white/70">
-            <span class="lang-en">Benefactor includes the full evening from 6 PM · Supporter joins at 9 PM</span>
-            <span class="lang-es hidden">Benefactor incluye la velada completa desde las 6 PM · Supporter se une a las 9 PM</span>
-          </p>
 
-          {/* The one ask on this card: days left, a three-tile
-              countdown, the gold full-evening CTA, the checkout hint, and
-              the quiet late-night alternative. Stays clean at 320px. */}
-          <div class="mt-4">
-            <GalaTicketDeadline
-              context="links_gala_card"
-              variant="inline"
-              bilingual={true}
-            />
-          </div>
+          <a
+            href={galaRecapPhotosUrl}
+            data-conversion-event="gala_recap_click"
+            data-conversion-context="links_gala_recap"
+            class="gala-btn gala-btn--gold mt-4 flex items-center justify-between px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffbd59] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101010]"
+          >
+            <span class="text-sm font-extrabold uppercase tracking-[0.12em]">
+              <span class="lang-en">See the photos</span>
+              <span class="lang-es hidden">Ver las fotos</span>
+            </span>
+            <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
           <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
-            <span class="lang-en">{galaTeaser.statusLabel}</span>
-            <span class="lang-es hidden">Boletos para la noche completa hasta el 18 de septiembre</span>
+            <span class="lang-en">{galaTeaser.statusLabel} · Gracias, comunidad</span>
+            <span class="lang-es hidden">Fue un éxito · Gracias, comunidad</span>
           </p>
         </div>
       </div>

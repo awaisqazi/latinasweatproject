@@ -1,0 +1,165 @@
+---
+// With gratitude: sponsors, designers and performers on a dark plate using
+// the white knockout logo set (dark plates ONLY, never cream). Each logo sits
+// in a fixed invisible cell per tier; `scale` and `maxH` are the optical
+// corrections from the projector (src/lib/galaLive/program.js), so the
+// featured trio reads larger than the partners.
+import { galaSponsors2026, galaAuctionPackages } from "@/data/galaRecap2026";
+
+const s = galaSponsors2026;
+const logoStyle = (l) => `--s:${Number(l?.scale) || 1};--h:${Number(l?.maxH) || 1}`;
+const donors = [...new Set(galaAuctionPackages.map((p) => p.donor))];
+---
+
+<div class="gr-plate reveal relative mx-auto max-w-6xl px-5 py-12 sm:px-10 sm:py-14">
+  <span class="gr-plate-diamond left-0 top-0" aria-hidden="true"></span>
+  <span class="gr-plate-diamond right-0 top-0" aria-hidden="true"></span>
+  <span class="gr-plate-diamond bottom-0 left-0" aria-hidden="true"></span>
+  <span class="gr-plate-diamond bottom-0 right-0" aria-hidden="true"></span>
+
+  <h3 class="gr-tier-label">Sponsors and partners</h3>
+  <ul class="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:gap-x-16" role="list">
+    {
+      s.featured.map((l) => (
+        <li class="gr-mark gr-mark--featured">
+          <img src={l.logo} alt={l.name} style={logoStyle(l)} loading="lazy" decoding="async" />
+        </li>
+      ))
+    }
+  </ul>
+  <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-7 sm:gap-x-14" role="list">
+    {
+      s.partners.map((l) => (
+        <li class="gr-mark gr-mark--partner">
+          <img src={l.logo} alt={l.name} style={logoStyle(l)} loading="lazy" decoding="async" />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="gr-plate-rule my-12" aria-hidden="true"></div>
+
+  <h3 class="gr-tier-label">The fashion show</h3>
+  <ul class="mt-8 grid grid-cols-2 place-items-center gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-6" role="list">
+    {
+      s.designers.map((l) => (
+        <li class="gr-mark gr-mark--designer">
+          <img src={l.logo} alt={l.name} style={logoStyle(l)} loading="lazy" decoding="async" />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="gr-plate-rule my-12" aria-hidden="true"></div>
+
+  <h3 class="gr-tier-label">Entertainment</h3>
+  <ul class="mt-8 flex flex-wrap items-start justify-center gap-x-16 gap-y-10" role="list">
+    {
+      s.entertainment.map((l) => (
+        <li class="flex flex-col items-center text-center">
+          <span class="gr-mark gr-mark--perf">
+            <img src={l.logo} alt={l.name} style={logoStyle(l)} loading="lazy" decoding="async" />
+          </span>
+          <span class="mt-3 text-[11px] font-bold uppercase tracking-[0.24em] text-white/50">{l.role}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="gr-plate-rule my-12" aria-hidden="true"></div>
+
+  <h3 class="gr-tier-label">Auction donors</h3>
+  <ul class="mx-auto mt-6 flex max-w-4xl flex-wrap justify-center gap-x-8 gap-y-2 text-center font-display text-lg leading-relaxed text-white/85 sm:text-xl" role="list">
+    {donors.map((name) => <li class="whitespace-nowrap">{name}</li>)}
+  </ul>
+</div>
+
+<style>
+  .gr-plate {
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgba(255, 189, 89, 0.07), transparent 70%),
+      linear-gradient(180deg, #111a27, #0b1320);
+    border: 1px solid rgba(255, 189, 89, 0.35);
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 5px #0b1320,
+      inset 0 0 0 6px rgba(255, 189, 89, 0.14),
+      0 40px 90px -40px rgba(0, 0, 0, 0.9);
+  }
+  .gr-plate-diamond {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #ffbd59;
+    transform: translate(var(--tx, -50%), var(--ty, -50%)) rotate(45deg);
+  }
+  .gr-plate-diamond.right-0 {
+    --tx: 50%;
+  }
+  .gr-plate-diamond.bottom-0 {
+    --ty: 50%;
+  }
+  .gr-plate-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 189, 89, 0.4), transparent);
+  }
+  .gr-tier-label {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #ffbd59;
+  }
+
+  /* Each logo: an explicit cell, the img contained inside it, then its
+     optical scale (--s) and wordmark height cap (--h). */
+  .gr-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+  .gr-mark img {
+    display: block;
+    width: 100%;
+    height: calc(100% * var(--h, 1));
+    object-fit: contain;
+    transform: scale(var(--s, 1));
+    opacity: 0.94;
+  }
+  .gr-mark--featured {
+    width: 12rem;
+    height: 4rem;
+  }
+  .gr-mark--partner {
+    width: 8.5rem;
+    height: 2.75rem;
+  }
+  .gr-mark--designer {
+    width: 7rem;
+    height: 4rem;
+  }
+  .gr-mark--perf {
+    width: 11rem;
+    height: 3.6rem;
+  }
+  @media (min-width: 640px) {
+    .gr-mark--featured {
+      width: 15.5rem;
+      height: 5.25rem;
+    }
+    .gr-mark--partner {
+      width: 10.5rem;
+      height: 3.35rem;
+    }
+    .gr-mark--designer {
+      width: 8.5rem;
+      height: 5rem;
+    }
+    .gr-mark--perf {
+      width: 13rem;
+      height: 4.25rem;
+    }
+  }
+</style>

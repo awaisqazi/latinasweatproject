@@ -1,5 +1,13 @@
 ---
-// /lspgala: the Annual Gala day-of hub.
+// /lspgala: the Annual Gala hub, in its POST-GALA state since 2026-09-26.
+//
+// The gala was Fri Sep 25, 2026. The page now thanks the room, keeps Give
+// first (the form still works for stragglers), links the /gala recap, and
+// keeps the printed program PDF plus the run of show as "The evening as it
+// happened". Dropped post-gala: the silent auction button (auction closed;
+// /silentauction now redirects to /gala#auction), the "follow along live"
+// link to /gala/live (projector page is over), and the HubLive island (its
+// live total would be stale; see the commented-out usage below).
 //
 // latinasweatproject.com/lspgala is PRINTED on the paper program and on 150 bid
 // paddles as "scan to give", so this path must keep working and the Give
@@ -22,12 +30,14 @@
 // Printed program: public/gala-program-2026.pdf is a COPY of
 // output/gala-2026/final/Gala-2026-Program-Modern-Print.pdf (gitignored, still
 // being revised). Re-copy it before every deploy until the program is final.
-import HubLive from "../components/gala/hub/HubLive.svelte";
+// Post-gala: the HubLive island is no longer rendered (see markup below).
+// import HubLive from "../components/gala/hub/HubLive.svelte";
 import { galaTeaser } from "../data/galaTeaser.js";
 
 const giveUrl = galaTeaser.galaGiveUrl;
 
-// The run of show, as printed on the program. Keep in step with the PDF.
+// The run of show, as printed on the program (kept as the record of the
+// evening; matches the PDF).
 const tonight = [
   { time: "6:00", title: "Welcome & Cocktail Hour" },
   { time: "6:30", title: "Mariachi" },
@@ -53,10 +63,10 @@ const tonight = [
         <meta name="color-scheme" content="dark" />
         <meta
             name="description"
-            content="Give tonight, follow the live total, and see the program for The Latina Sweat Project Annual Gala at MCA Chicago."
+            content="Gracias, comunidad. The Latina Sweat Project Annual Gala was Friday, September 25, 2026 at MCA Chicago. Give, relive the night, and see the program."
         />
         <link rel="icon" href="/favicon.ico" />
-        <title>LSP at the MCA · Annual Gala 2026</title>
+        <title>Gracias, comunidad · Annual Gala 2026</title>
         <style is:global>
             /* Design tokens, scoped to this page (same values as /gala/live).
                global.css is untouched. */
@@ -122,10 +132,10 @@ const tonight = [
                         <span>The Latina Sweat Project ·</span>
                         <span>Annual Gala 2026</span>
                     </p>
-                    <h1>LSP at the MCA</h1>
+                    <h1>Gracias, comunidad.</h1>
                     <p class="when">
-                        <span>{galaTeaser.dateLabel} ·</span>
-                        <span>{galaTeaser.venueName}</span>
+                        The Annual Gala was <span>Friday, September 25</span>
+                        at the MCA.
                     </p>
                 </header>
 
@@ -139,18 +149,9 @@ const tonight = [
                     >
                         Give now
                     </a>
-                    <a
-                        class="btn btn-gold btn-auction"
-                        href="/silentauction"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        <span>Silent auction · Bid now</span>
-                        <span class="btn-sub">Open all night · last call before the fashion show</span>
-                    </a>
-                    <a class="btn btn-line btn-live" href="/gala/live" data-gala-watch>
-                        <span>Follow along live</span>
-                        <span class="btn-sub">latinasweatproject.com/gala/live</span>
+                    <a class="btn btn-line btn-live" href="/gala">
+                        <span>Relive the night</span>
+                        <span class="btn-sub">Photos and results</span>
                     </a>
                     <p class="charity">
                         Latina Sweat Cares is a 501(c)(3) public charity ·
@@ -158,16 +159,14 @@ const tonight = [
                     </p>
                 </section>
 
+                {/* Post-gala (2026-09-26): the live total is stale now that
+                    the night is over, so the HubLive island is no longer
+                    rendered. The component itself is untouched.
                 <HubLive client:only="svelte" fallbackGiveUrl={giveUrl} />
-                <noscript>
-                    <p class="noscript">
-                        The live total needs JavaScript. Giving works either
-                        way.
-                    </p>
-                </noscript>
+                */}
 
                 <section class="tonight" aria-labelledby="tonight-h">
-                    <h2 id="tonight-h">Tonight</h2>
+                    <h2 id="tonight-h">The evening as it happened</h2>
                     <ol class="run">
                         {
                             tonight.map((row) => (
@@ -190,7 +189,7 @@ const tonight = [
 
                 <footer class="foot">
                     <a href="/">latinasweatproject.com</a>
-                    <p>Raise your paddle at 8:15 PM · or give any time from this page</p>
+                    <p>Thank you for raising your paddle · give any time from this page</p>
                 </footer>
             </main>
         </div>

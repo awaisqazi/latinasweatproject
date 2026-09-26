@@ -15,9 +15,16 @@ export const galaTeaser = {
   venueAddress: "220 E Chicago Ave, Chicago, IL",
   venueLine: "Museum of Contemporary Art Chicago · 220 E Chicago Ave",
   attire: "Black tie",
-  statusLabel: "Full-evening tickets close September 18",
-  lateNightStatusLabel: "Late-night access on sale through September 25",
+  // The gala happened 2026-09-25; every surface outside /gala now reads
+  // recap state (same pattern as sweatFest.isPast). Ticket, price, and
+  // deadline fields below are historical: keep them exported (other code
+  // imports them) but nothing public should render prices any more.
+  isPast: true,
+  statusLabel: "That's a wrap",
+  lateNightStatusLabel: "Thank you for a night at the MCA",
   pagePath: "/gala",
+  recapPath: "/gala",
+  recapLabel: "Relive the night",
   saveDatePath: "/gala#save-the-date",
   // Live Zeffy ticketing form (tickets AND sponsorships). CTAs across the site
   // should point here now that sales are open.
@@ -48,6 +55,28 @@ export const galaTeaser = {
     "The gala supports Latina leadership, wellness access, and culturally rooted care across Chicago.",
 };
 
+// Recap card copy for the homepage spotlight, /events, and /links. Numbers
+// are the aggregates of record from src/data/galaRecap2026.js (paddle raise +
+// silent auction + Give Tonight = raised on the night); aggregates only,
+// never donor, bidder, or guest names.
+export const galaRecapCard = {
+  eyebrow: "That's a wrap · Annual Gala 2026",
+  heading: "Gracias, comunidad",
+  dateLine: "September 25, 2026 · MCA Chicago",
+  blurb:
+    "One night at Chicago's iconic MCA: cocktails on the terrace, dinner and honors, a ten-minute paddle raise, the fashion show, and dancing until midnight. See every photo and what the night raised.",
+  blurbEs: "Una noche en el MCA. Mira las fotos y lo que logramos juntos.",
+  ctaLabel: "See the photos",
+  stats: [
+    { value: "$30,182.50", label: "raised on the night" },
+    { value: "41", label: "paddles raised" },
+    { value: "422", label: "photos" },
+  ],
+};
+
+// HISTORICAL (the gala is past): the 2026 ticket sale as it ran. Kept for
+// reference and for code that still imports it; do not render on public
+// surfaces.
 // Ticket + sponsorship pricing for the live 2026 sale. Facts match the Zeffy
 // form and the printed two-pager: early bird July 1-31, regular from August 1,
 // Benefactor and all sponsorships close September 18, Supporter sells through
@@ -99,6 +128,8 @@ export const galaTickets = {
   sponsorshipsCloseLabel: "Sponsorships close September 18, 2026",
 };
 
+// HISTORICAL (the gala is past): GalaTicketDeadline now resolves to its
+// "past" phase and hides itself.
 // Sales stay open through September 18 in Chicago (CDT, UTC−05:00).
 // Use an exclusive midnight boundary so every second of September 18 counts.
 // `eventEndsAtISO` is the exclusive end of gala day: after it every gala CTA

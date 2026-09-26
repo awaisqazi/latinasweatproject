@@ -1,0 +1,170 @@
+---
+// The night in numbers: Playfair numerals with a motion-safe count-up (the
+// GalaImpactStats approach). Final values are server-rendered so no-JS and
+// reduced-motion visitors always see the real figures.
+import { galaResults, galaAuctionPackages, galaHonors } from "@/data/galaRecap2026";
+import { galaPhotoCount } from "@/data/galaGallery2026";
+
+const claimed = galaAuctionPackages.filter((p) => p.claimed).length;
+
+const stats = [
+  { value: galaResults.raisedOnTheNight, prefix: "$", label: "Raised on the night", feature: true },
+  { value: galaResults.paddleRaise.gifts, label: "Paddles raised" },
+  { value: claimed, label: "Auction packages claimed" },
+  { value: galaHonors.length, label: "Honors" },
+  { value: galaResults.guestsOnList, label: "Guests" },
+  { value: galaPhotoCount, label: "Photos" },
+];
+
+const decimalsOf = (n) => (Number.isInteger(n) ? 0 : 2);
+const fmt = (s) =>
+  `${s.prefix || ""}${s.value.toLocaleString("en-US", {
+    minimumFractionDigits: decimalsOf(s.value),
+    maximumFractionDigits: decimalsOf(s.value),
+  })}`;
+const hasGrandTotal = typeof galaResults.grandTotal === "number";
+---
+
+<dl class="gr-stats">
+  {
+    stats.map((s, index) => (
+      <div
+        class:list={["gr-stat reveal", s.feature && "gr-stat--feature"]}
+        style={`transition-delay: ${index * 80}ms;`}
+      >
+        <dd
+          class="font-display font-bold leading-none tracking-tight text-accent-gold tabular-nums lining-nums [text-shadow:0_0_28px_rgba(255,189,89,0.25)]"
+          data-gr-countup
+          data-to={s.value}
+          data-prefix={s.prefix || ""}
+          data-decimals={decimalsOf(s.value)}
+        >
+          {fmt(s)}
+        </dd>
+        <dt class="mt-3 text-xs font-extrabold uppercase leading-snug tracking-[0.2em] text-white/80">
+          {s.label}
+        </dt>
+      </div>
+    ))
+  }
+</dl>
+
+{
+  hasGrandTotal && (
+    <p class="reveal mt-8 text-center font-display text-2xl text-white">
+      Grand total:{" "}
+      <span class="text-accent-gold">
+        ${galaResults.grandTotal.toLocaleString("en-US", { maximumFractionDigits: 2 })}
+      </span>
+    </p>
+  )
+}
+
+<style>
+  .gr-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 189, 89, 0.28), transparent);
+    border-top: 1px solid rgba(255, 189, 89, 0.22);
+    border-bottom: 1px solid rgba(255, 189, 89, 0.22);
+  }
+  .gr-stat {
+    background: #0e1624;
+    padding: 1.75rem 0.75rem 1.6rem;
+    text-align: center;
+  }
+  .gr-stat dd {
+    font-size: 2.6rem;
+  }
+  .gr-stat--feature,
+  .gr-stat:last-child {
+    grid-column: span 2;
+  }
+  .gr-stat--feature dd {
+    font-size: 2.9rem;
+  }
+  @media (min-width: 640px) {
+    .gr-stats {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .gr-stat:last-child {
+      grid-column: auto;
+    }
+    .gr-stat--feature {
+      grid-column: span 5;
+    }
+    .gr-stat dd {
+      font-size: 2.5rem;
+    }
+    .gr-stat--feature dd {
+      font-size: 3.5rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .gr-stats {
+      grid-template-columns: 1.75fr repeat(5, minmax(0, 1fr));
+    }
+    .gr-stat {
+      padding: 2.25rem 0.75rem 2rem;
+    }
+    .gr-stat--feature {
+      grid-column: auto;
+    }
+    .gr-stat dd {
+      font-size: 3.1rem;
+    }
+    .gr-stat--feature dd {
+      font-size: 3.1rem;
+    }
+  }
+</style>
+
+<script>
+  // Count-up as each figure enters view. Handles cents: a value with a
+  // fractional part keeps two decimals throughout the animation.
+  (() => {
+    const nums = Array.from(document.querySelectorAll<HTMLElement>("[data-gr-countup]"));
+    if (!nums.length) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!("IntersectionObserver" in window)) return;
+    const render = (el: HTMLElement, v: number) => {
+      const d = Number(el.dataset.decimals || "0");
+      el.textContent =
+        (el.dataset.prefix || "") +
+        v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+    };
+    const animate = (el: HTMLElement) => {
+      const to = Number(el.dataset.to || "0");
+      const d = Number(el.dataset.decimals || "0");
+      const duration = 1700;
+      const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+      let start: number | null = null;
+      const step = (ts: number) => {
+        if (start === null) start = ts;
+        const p = Math.min(1, (ts - start) / duration);
+        const raw = to * ease(p);
+        render(el, d ? Math.floor(raw * 100) / 100 : Math.round(raw));
+        if (p < 1) requestAnimationFrame(step);
+        else render(el, to);
+      };
+      requestAnimationFrame(step);
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const el = e.target as HTMLElement;
+          // Lock the width so the tile never reflows while digits change.
+          el.style.minWidth = `${el.offsetWidth}px`;
+          el.style.display = "inline-block";
+          render(el, 0);
+          animate(el);
+          io.unobserve(el);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    nums.forEach((el) => io.observe(el));
+  })();
+</script>

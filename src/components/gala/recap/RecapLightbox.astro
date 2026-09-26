@@ -1,0 +1,361 @@
+---
+// One lightbox for the whole gala album. It MUST be rendered OUTSIDE <main>
+// (the /graduation and /sweatfest lesson): out there it competes in the root
+// stacking context, where z-index 1000 clears the fixed site header.
+// It walks every [data-gr-photo] button in #photos by its data-index, which
+// RecapAlbum assigns in rendered order, so prev/next crosses chapters in
+// clock order and the counter matches the thumbnails' labels.
+import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
+---
+
+<div
+  id="gr-lightbox"
+  class="gr-lb"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Annual Gala 2026 photo viewer"
+  data-cdn={galaAlbumCdnBase}
+  data-total={galaPhotoCount}
+  hidden
+>
+  <div class="gr-lb-stage" data-gr-stage>
+    <img class="gr-lb-image" data-gr-image alt="" decoding="async" />
+  </div>
+
+  <p class="gr-lb-counter" data-gr-counter role="status" aria-live="polite"></p>
+
+  <button class="gr-lb-btn gr-lb-prev" type="button" data-gr-prev aria-label="Previous photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"></path>
+    </svg>
+  </button>
+  <button class="gr-lb-btn gr-lb-next" type="button" data-gr-next aria-label="Next photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+  <button class="gr-lb-btn gr-lb-close" type="button" data-gr-close aria-label="Close photo viewer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"></path>
+    </svg>
+  </button>
+</div>
+
+<style>
+  /* `[hidden]` must beat the grid display or the dialog can never close. */
+  .gr-lb {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    background: rgba(8, 13, 22, 0.96);
+    padding: 4rem 1rem 1.25rem;
+  }
+  .gr-lb[hidden] {
+    display: none !important;
+  }
+  .gr-lb-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .gr-lb-image {
+    display: block;
+    max-width: min(100%, 76rem);
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 2px;
+    background: #111a27;
+    box-shadow:
+      0 0 0 1px rgba(255, 189, 89, 0.55),
+      0 0 0 6px rgba(8, 13, 22, 0.9),
+      0 0 0 7px rgba(255, 189, 89, 0.2),
+      0 30px 80px -30px rgba(0, 0, 0, 0.9);
+  }
+  .gr-lb-counter {
+    margin-top: 1rem;
+    text-align: center;
+    color: rgba(255, 243, 216, 0.8);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .gr-lb-btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border: 1px solid rgba(255, 189, 89, 0.55);
+    border-radius: 3px;
+    background: rgba(11, 19, 32, 0.82);
+    color: #fff3d8;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .gr-lb-btn::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255, 189, 89, 0.22);
+    border-radius: 1.5px;
+    pointer-events: none;
+  }
+  .gr-lb-btn:hover {
+    background: rgba(255, 189, 89, 0.14);
+    border-color: #ffbd59;
+  }
+  .gr-lb-btn:focus-visible {
+    outline: 2px solid #ffbd59;
+    outline-offset: 3px;
+  }
+  .gr-lb-btn svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+  .gr-lb-prev {
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .gr-lb-next {
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .gr-lb-close {
+    right: 0.9rem;
+    top: 0.9rem;
+  }
+  /* Phones: arrows drop to the bottom corners, level with the counter, so
+     they never sit on top of the photo. */
+  @media (max-width: 639px) {
+    .gr-lb {
+      padding: 4rem 0.75rem 1rem;
+    }
+    .gr-lb-counter {
+      margin-top: 0;
+      min-height: 2.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gr-lb-prev,
+    .gr-lb-next {
+      top: auto;
+      bottom: 1rem;
+      transform: none;
+    }
+    .gr-lb-image {
+      max-height: calc(100% - 1rem);
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const lb = document.getElementById("gr-lightbox");
+    const root = document.getElementById("photos");
+    if (!lb || !root) return;
+    const img = lb.querySelector<HTMLImageElement>("[data-gr-image]")!;
+    const counter = lb.querySelector<HTMLElement>("[data-gr-counter]")!;
+    const prevBtn = lb.querySelector<HTMLButtonElement>("[data-gr-prev]")!;
+    const nextBtn = lb.querySelector<HTMLButtonElement>("[data-gr-next]")!;
+    const closeBtn = lb.querySelector<HTMLButtonElement>("[data-gr-close]")!;
+    const stage = lb.querySelector<HTMLElement>("[data-gr-stage]")!;
+    const cdn = lb.dataset.cdn || "";
+
+    // Every photo button, keyed by its global rendered index.
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-gr-photo]"));
+    const byIndex: HTMLButtonElement[] = [];
+    for (const b of buttons) byIndex[Number(b.dataset.index)] = b;
+    const total = byIndex.length;
+    if (!total) return;
+
+    const broken = new Set<number>();
+    let current = -1;
+    let opener: HTMLElement | null = null;
+    let tracked = false;
+
+    const fullSrc = (i: number) => {
+      const stem = byIndex[i]?.dataset.stem;
+      return stem ? `${cdn}${stem}.jpg` : "";
+    };
+    const wrap = (i: number) => ((i % total) + total) % total;
+
+    // Broken thumbs retire their whole cell (error does not bubble, so
+    // listen in the capture phase), and the viewer skips them.
+    root.addEventListener(
+      "error",
+      (event) => {
+        const t = event.target;
+        if (!(t instanceof HTMLImageElement)) return;
+        const btn = t.closest<HTMLButtonElement>("[data-gr-photo]");
+        if (!btn) return;
+        broken.add(Number(btn.dataset.index));
+        const cell = btn.closest<HTMLElement>("[data-gr-cell]");
+        if (cell) {
+          cell.hidden = true;
+          cell.dataset.grBroken = "true";
+        }
+      },
+      true,
+    );
+
+    // Some engines never start `loading="lazy"` fetches for grid cells
+    // (seen in embedded Chromium): nudge each image to eager as it nears
+    // the viewport. Hidden cells are skipped until they are revealed.
+    const lazyImgs = Array.from(root.querySelectorAll<HTMLImageElement>("img[loading='lazy']"));
+    let nudge: IntersectionObserver | null = null;
+    if ("IntersectionObserver" in window) {
+      nudge = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            const im = e.target as HTMLImageElement;
+            if (!im.complete) im.loading = "eager";
+            nudge!.unobserve(im);
+          }
+        },
+        { rootMargin: "600px 0px" },
+      );
+      lazyImgs.forEach((im) => nudge!.observe(im));
+    } else {
+      lazyImgs.forEach((im) => (im.loading = "eager"));
+    }
+
+    const preload = (i: number) => {
+      const w = wrap(i);
+      if (broken.has(w)) return;
+      const src = fullSrc(w);
+      if (!src) return;
+      const p = new Image();
+      p.decoding = "async";
+      p.src = src;
+    };
+
+    const show = (i: number, step = 1) => {
+      let w = wrap(i);
+      let guard = 0;
+      while (broken.has(w) && guard++ < total) w = wrap(w + step);
+      if (broken.has(w)) return;
+      current = w;
+      img.src = fullSrc(w);
+      img.alt = `Annual Gala 2026, photo ${w + 1} of ${total}`;
+      counter.textContent = `${w + 1} of ${total}`;
+      preload(w + 1);
+      preload(w - 1);
+    };
+
+    img.addEventListener("error", () => {
+      if (current < 0 || lb.hidden) return;
+      broken.add(current);
+      if (broken.size < total) show(current + 1, 1);
+    });
+
+    const open = (i: number, trigger: HTMLElement) => {
+      opener = trigger;
+      lb.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      show(i, 1);
+      closeBtn.focus();
+      if (!tracked) {
+        tracked = true;
+        (window as any).trackConversion?.("gala_gallery_open", {
+          event_category: "gala_recap",
+          context: "gala_page_photos",
+        });
+      }
+    };
+
+    const close = () => {
+      lb.hidden = true;
+      current = -1;
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      img.removeAttribute("src");
+      // Return focus to the photo that opened the viewer.
+      opener?.focus();
+      opener = null;
+    };
+
+    for (const b of buttons) {
+      b.addEventListener("click", () => open(Number(b.dataset.index), b));
+    }
+    prevBtn.addEventListener("click", () => show(current - 1, -1));
+    nextBtn.addEventListener("click", () => show(current + 1, 1));
+    closeBtn.addEventListener("click", close);
+    lb.addEventListener("click", (e) => {
+      if (e.target === lb || e.target === stage) close();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (lb.hidden) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        show(current + 1, 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        show(current - 1, -1);
+      } else if (e.key === "Tab") {
+        // Focus stays inside the dialog while it is open.
+        const f = [closeBtn, prevBtn, nextBtn];
+        const pos = f.indexOf(document.activeElement as HTMLButtonElement);
+        e.preventDefault();
+        const off = e.shiftKey ? -1 : 1;
+        const next = pos < 0 ? 0 : (((pos + off) % f.length) + f.length) % f.length;
+        f[next].focus();
+      }
+    });
+
+    // Horizontal swipe; mostly-vertical gestures are ignored.
+    let tx = 0;
+    let ty = 0;
+    lb.addEventListener(
+      "touchstart",
+      (e) => {
+        const t = e.changedTouches[0];
+        tx = t.clientX;
+        ty = t.clientY;
+      },
+      { passive: true },
+    );
+    lb.addEventListener(
+      "touchend",
+      (e) => {
+        const t = e.changedTouches[0];
+        const dx = t.clientX - tx;
+        const dy = t.clientY - ty;
+        if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy)) return;
+        show(current + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      },
+      { passive: true },
+    );
+
+    // Per-chapter expanders: reveal that chapter's hidden cells (never the
+    // ones retired as broken) and move focus to the first new photo.
+    root.querySelectorAll<HTMLButtonElement>("[data-gr-expand]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const wall = btn.closest<HTMLElement>("[data-gr-wall]");
+        if (!wall) return;
+        const cells = Array.from(
+          wall.querySelectorAll<HTMLElement>("[data-gr-cell][hidden]"),
+        ).filter((c) => c.dataset.grBroken !== "true");
+        cells.forEach((c) => (c.hidden = false));
+        btn.setAttribute("aria-expanded", "true");
+        btn.closest("p")?.setAttribute("hidden", "");
+        cells[0]?.querySelector<HTMLButtonElement>("[data-gr-photo]")?.focus();
+      });
+    });
+  })();
+</script>

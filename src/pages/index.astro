@@ -3,8 +3,10 @@
 // below the crafted hero -> gala seam the light/dark cadence strictly
 // alternates:
 //   1. Hero [D]
-//   2. Annual Gala lead spotlight [D]  <- crafted gold seam, the page's one
-//      deliberate dark/dark junction (documented exception)
+//   2. Annual Gala 2026 recap spotlight [D]  <- crafted gold seam, the
+//      page's one deliberate dark/dark junction (documented exception).
+//      Post-gala (Sep 26 2026) the slot and theme are unchanged; only the
+//      content became the recap.
 //   3. "Relive the summer" recap band [L] (Graduation 2026 + Sweat Fest '26)
 //   4. WGN9 spotlight [D]
 //   5. Monday Miles Tee merch [L]
@@ -21,51 +23,30 @@
 // ended Aug 31), the standalone Graduation 2026 and Sweat Fest spotlights
 // (both now ride in the recap band and the carousel), the Sweat Fest merch
 // drop section (sold in person on Aug 22 only), and the light-band copy of
-// GalaTicketDeadline (the spotlight carries the inline module instead).
+// GalaTicketDeadline. Retired Sep 26 2026 (post-gala): the evening timeline,
+// the inline GalaTicketDeadline module, the impact strip, and every gala
+// ticket CTA (hero pill, spotlight, carousel card).
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
-import GalaImpactStats from "@/components/GalaImpactStats.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
-import {
-  galaEvening,
-  galaPhotos,
-  galaTeaser,
-  galaTicketDeadline,
-  galaTickets,
-} from "@/data/galaTeaser";
+import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
 import { sweatFest, sweatFestDay, sweatFestCheckerUri } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 
-// Gala: every price, date, and time is read from src/data/galaTeaser.js so the
-// site never drifts from the Zeffy form or the printed collateral.
-const galaPageUrl = withBase(galaTeaser.pagePath);
-const benefactorPrice = galaTickets.tiers.find(
-  (tier) => tier.id === "benefactor",
-).regular;
-// "Friday, September 25, 2026" -> "Friday, September 25" for the eyebrow.
-const galaDateNoYear = galaTeaser.dateLabel.replace(/,\s*\d{4}\s*$/, "");
-// Server-rendered fallbacks for the site-wide deadline hooks. The
-// GalaTicketDeadline script recomputes both on load and every 30 seconds, so
-// these only have to be right at build/request time.
-const galaHoursLeft =
-  (new Date(galaTicketDeadline.closesAtISO).getTime() - Date.now()) / 3.6e6;
-const galaDaysLeft = Math.floor(galaHoursLeft / 24);
-const galaDaysLeftLabel =
-  galaDaysLeft >= 2
-    ? `${galaDaysLeft} days left`
-    : galaDaysLeft === 1
-      ? "1 day left"
-      : "Closes tonight";
-const galaClosesInLabel =
-  galaDaysLeft >= 2
-    ? `closes in ${galaDaysLeft} days`
-    : galaDaysLeft === 1
-      ? "closes in 1 day"
-      : "closes tonight";
+// Gala (Sep 25, 2026) is past: the lead spotlight and the carousel card are
+// the recap. Copy and the three aggregate numbers come from galaRecapCard in
+// src/data/galaTeaser.js; the local photo is album #69 (dinner under the
+// gold lanterns), converted to webp in public/images/gala/2026/recap-home/.
+const galaPageUrl = withBase(galaTeaser.recapPath);
+const galaRecapPhotosUrl = withBase("gala#photos");
+const galaRecapPhoto = {
+  src: "/images/gala/2026/recap-home/gala-2026-recap-card.webp",
+  alt: "The Annual Gala 2026 dinner at MCA Chicago, tables leading to the podium beneath glowing gold lanterns",
+  objectPosition: "50% 55%",
+};
 // Floating gold motes over the gala spotlight (desktop only, motion-safe;
 // same idea as the /gala hero particle field, kept deliberately sparse).
 const galaMotes = Array.from({ length: 12 }, (_, i) => ({
@@ -120,19 +101,13 @@ const graduationFlickrUrl =
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
         <a
-          href={galaTeaser.ticketsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          data-gala-full-night-cta
+          href={galaRecapPhotosUrl}
           class="group mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-accent-gold hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
-          data-conversion-event="gala_ticket_click"
+          data-conversion-event="gala_recap_click"
           data-conversion-context="home_hero_announcement"
         >
           <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold" aria-hidden="true"></span>
-          <span data-gala-cta-label
-            >{galaTeaser.title} · {galaTeaser.shortDateLabel} ·
-            <span data-gala-closes-in>{galaClosesInLabel}</span></span
-          >
+          <span>Annual Gala 2026 · Gracias, comunidad · see the photos</span>
           <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
@@ -159,18 +134,18 @@ const graduationFlickrUrl =
     </section>
     {/* END: Hero Section */}
 
-    {/* START: Annual Gala lead spotlight (the marquee for the next two
-        weeks). Gala identity per design.md 8B: off-black room, gold #ffbd59
-        foil, mauve ambient, Playfair via `font-display`, sharp .gala-btn
-        keylines. This hero -> gala junction is the page's one deliberate
-        dark/dark adjacency (it replaces the retired Graduation seam) and is
-        carried by the crafted gold seam: a .gala-foil-rule hairline on the
-        very top edge, a static gold wash pooling up into the hero, two
-        slow-breathing .gala-ambient blobs, the diamond lattice at 5%, and a
-        sparse desktop-only mote field. Media sits LEFT so the WGN9 video
-        swings right directly below. One ask only: the inline
-        GalaTicketDeadline module carries the primary CTA, so nothing else
-        here competes with it. */}
+    {/* START: Annual Gala 2026 recap spotlight (post-gala, Sep 26 2026).
+        Same slot, same theme as the pre-gala marquee so the documented
+        cadence holds. Gala identity per design.md 8B: off-black room, gold
+        #ffbd59 foil, mauve ambient, Playfair via `font-display`, sharp
+        .gala-btn keylines. This hero -> gala junction is the page's one
+        deliberate dark/dark adjacency, carried by the crafted gold seam: a
+        .gala-foil-rule hairline on the very top edge, a static gold wash
+        pooling up into the hero, two slow-breathing .gala-ambient blobs, the
+        diamond lattice at 5%, and a sparse desktop-only mote field. Media
+        sits LEFT so the WGN9 video swings right directly below. One ask:
+        "See the photos" into the /gala recap; the ghost button is the
+        new-home campaign. Results are aggregates only (galaRecapCard). */}
     <section
       id="gala"
       class="relative overflow-hidden bg-off-black py-16 text-white scroll-mt-28 sm:py-20 lg:py-24"
@@ -222,12 +197,18 @@ const graduationFlickrUrl =
               aria-hidden="true"
             >
             </div>
-            <div class="relative">
-              <GalaPhotoFrame slot={galaPhotos.atrium} variant="hero" corners />
+            <a
+              href={galaRecapPhotosUrl}
+              class="relative block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black"
+              aria-label="See the Annual Gala 2026 photos"
+              data-conversion-event="gala_recap_click"
+              data-conversion-context="home_gala_recap_photo"
+            >
+              <GalaPhotoFrame slot={galaRecapPhoto} variant="hero" label={false} corners />
               <span class="absolute -top-3 right-5 z-20 rounded-full border border-accent-gold/40 bg-off-black/85 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-accent-gold shadow-lg backdrop-blur-sm">
-                Fri · Sep 25 · 6 PM
+                Sep 25 · MCA Chicago
               </span>
-            </div>
+            </a>
             <p class="relative mt-4 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 lg:text-left">
               {galaTeaser.venueLine}
             </p>
@@ -237,123 +218,68 @@ const graduationFlickrUrl =
           <div class="reveal text-center lg:col-span-3 lg:text-left" style="transition-delay: 120ms;">
             <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs font-extrabold uppercase tracking-[0.24em] text-white/60 lg:justify-start">
               <span class="gala-foil-rule h-px w-8" aria-hidden="true"></span>
-              {galaTeaser.title} · {galaTeaser.attire} · {galaDateNoYear}
+              {galaRecapCard.eyebrow}
             </p>
 
             <h2 class="mt-5 font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala
+              <span class="gala-foil">{galaRecapCard.heading}</span>
             </h2>
-            <p class="mt-3 font-display text-2xl italic leading-snug text-white/90 sm:text-3xl">
-              One night that funds the movement.
+            <p class="mt-3 text-xs font-extrabold uppercase tracking-[0.2em] text-accent-gold/85">
+              {galaRecapCard.dateLine}
             </p>
 
             <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg lg:mx-0">
-              {galaTeaser.homepageDescription}
+              {galaRecapCard.blurb}
             </p>
 
-            {/* The evening at a glance (desktop): a foil-rule track with a
-                rotated gold square at each stop's `at` position, labels
-                alternating above and below the line. */}
-            <div class="mt-10 hidden lg:block">
-              <p class="text-[11px] font-extrabold uppercase tracking-[0.28em] text-accent-gold">
-                The evening · 6 PM to midnight
-              </p>
-              <div class="relative mt-9 h-[128px]">
-                <div class="gala-foil-rule absolute inset-x-0 top-1/2 h-px -translate-y-1/2" aria-hidden="true"></div>
-                {
-                  galaEvening.map((stop, i) => {
-                    const above = i % 2 === 1;
-                    const pct = stop.at * 100;
-                    const align =
-                      stop.at === 0 ? "start" : stop.at === 1 ? "end" : "center";
-                    const fullOnly = stop.tiers.length === 1;
-                    return (
-                      <div>
-                        <span
-                          class="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-accent-gold shadow-[0_0_12px_rgba(255,189,89,0.5)]"
-                          style={`left: ${pct}%;`}
-                          aria-hidden="true"
-                        />
-                        <div
-                          class:list={[
-                            "absolute w-[158px]",
-                            above ? "bottom-[calc(50%+14px)]" : "top-[calc(50%+14px)]",
-                            align === "center" && "-translate-x-1/2 text-center",
-                            align === "end" && "-translate-x-full text-right",
-                          ]}
-                          style={`left: ${pct}%;`}
-                        >
-                          <p class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-accent-gold">
-                            {stop.time}
-                          </p>
-                          <p class="mt-1 font-display text-lg font-bold leading-tight text-white">
-                            {stop.title}
-                          </p>
-                          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-                            {fullOnly ? "Full evening" : "All tickets"}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                }
-              </div>
-            </div>
-
-            {/* The evening at a glance (mobile): a compact chip grid */}
-            <div class="mt-8 grid grid-cols-2 gap-2.5 lg:hidden">
+            {/* The night in three numbers (aggregates only) */}
+            <dl class="mx-auto mt-8 grid max-w-xl grid-cols-[1.4fr_1fr_1fr] border-y sm:grid-cols-3 border-accent-gold/25 lg:mx-0">
               {
-                galaEvening.map((stop, i) => (
+                galaRecapCard.stats.map((stat, i) => (
                   <div
                     class:list={[
-                      "rounded-[3px] border border-accent-gold/25 bg-accent-gold/[0.07] px-3 py-2.5 text-left",
-                      i === galaEvening.length - 1 && "col-span-2",
+                      "px-2 py-4 text-center sm:px-4 lg:text-left",
+                      i > 0 && "border-l border-accent-gold/20",
                     ]}
                   >
-                    <p class="text-[10px] font-extrabold uppercase tracking-[0.18em] text-accent-gold">
-                      {stop.time}
-                    </p>
-                    <p class="mt-0.5 text-sm font-bold text-white">{stop.title}</p>
+                    <dt class="sr-only">{stat.label}</dt>
+                    <dd class="font-display text-2xl font-bold leading-none text-white sm:text-3xl">
+                      {stat.value}
+                    </dd>
+                    <dd class="mt-2 text-[10px] font-extrabold uppercase leading-snug tracking-[0.18em] text-accent-gold sm:text-[11px]" aria-hidden="true">
+                      {stat.label}
+                    </dd>
                   </div>
                 ))
               }
-            </div>
+            </dl>
 
-            {/* The single ask: days left, countdown, gold CTA, checkout hint,
-                and the quiet late-night alternative all live in here. */}
-            <div class="mt-9">
-              <GalaTicketDeadline context="home_gala_spotlight" variant="inline" />
-            </div>
-
-            <div class="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap lg:justify-start">
+            <div class="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap lg:justify-start">
               <a
-                href={galaPageUrl}
-                class="gala-btn gala-btn--ghost group inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
+                href={galaRecapPhotosUrl}
+                class="gala-btn gala-btn--gold group inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
+                data-conversion-event="gala_recap_click"
+                data-conversion-context="home_gala_recap"
               >
-                Explore the Gala
+                {galaRecapCard.ctaLabel}
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
               </a>
               <a
-                href={`${galaPageUrl}#tickets`}
-                class="text-sm font-semibold text-white/60 underline-offset-4 transition hover:text-accent-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
-                data-conversion-event="gala_ticket_click"
-                data-conversion-context="home_gala_sponsor_tease"
+                href={withBase("donate")}
+                class="gala-btn gala-btn--ghost inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
+                data-conversion-event="donation_click"
+                data-conversion-context="home_gala_recap"
               >
-                Sponsorship packages
+                Support the new home
               </a>
             </div>
-
-            <p class="mt-9 text-sm text-white/60">
-              Every seat expands free and discounted wellness across Chicago.
-            </p>
-            <GalaImpactStats variant="strip" class="mt-4 justify-center lg:justify-start" />
           </div>
         </div>
       </div>
     </section>
-    {/* END: Annual Gala lead spotlight */}
+    {/* END: Annual Gala 2026 recap spotlight */}
 
     {/* START: Relive the summer recap band (light). Both summer events were
         demoted from full spotlights to this one compact band on Sep 2026.
@@ -1311,7 +1237,10 @@ const graduationFlickrUrl =
     </section>
     {/* END: Monday Miles — Community Runs Section */}
 
-    {/* START: A New Chapter Section (former Grand Opening) */}
+    {/* START: A New Chapter Section (former Grand Opening). Copy updated
+        Sep 26, 2026: the 16th Street studio closed Sep 25; pop-up this fall,
+        the new Pilsen home opens early 2027. Slot, dark theme, and RIGHT
+        media side unchanged. */}
     <section class="bg-off-black py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
@@ -1329,18 +1258,18 @@ const graduationFlickrUrl =
             <h2
               class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
             >
-              One more month on 16th Street. Then we go pop-up.
+              Our first studio has closed its doors. The movement goes <span class="whitespace-nowrap">pop-up.</span>
             </h2>
             <div class="mt-6 space-y-4 font-body text-lg text-white/65">
               <p>
-                Daily classes at 949 W 16th St run through September 25, the
-                night of our gala. Come move with us while this room is still
-                ours.
+                Daily classes at 949 W 16th Street ended September 25, the same
+                night we gathered for the Annual Gala. Gracias to everyone who
+                made that room ours.
               </p>
               <p>
-                After that, LSP goes pop-up: classes and programming around the
-                neighborhood while we build our new home in Pilsen, opening
-                early 2027.
+                This fall, LSP is pop-up across the neighborhood: classes and
+                community programming around Pilsen while we build our
+                permanent home, opening early 2027.
               </p>
             </div>
             <blockquote
@@ -1376,14 +1305,13 @@ const graduationFlickrUrl =
               </a>
             </div>
             <p class="mt-4 text-center text-sm text-white/45 lg:text-left">
-              Special classes and community programming continue after
-              September 25.
+              Pop-up classes and community programming are on the schedule.
             </p>
           </div>
           <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
             <img
               src={`${base}images/studio.png`}
-              alt="Inside the Latina Sweat Project studio at 949 W 16th St in Pilsen"
+              alt="Inside the Latina Sweat Project's first studio at 949 W 16th St in Pilsen"
               class="h-full w-full object-cover"
             />
           </div>
@@ -1441,34 +1369,30 @@ const graduationFlickrUrl =
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
-          {/* Annual Gala event card (leads the carousel: the only ticketed
-              event on sale. The days-left chip and the CTA label are driven
-              by the GalaTicketDeadline script's site-wide hooks.) */}
+          {/* Annual Gala 2026 recap card (leads the carousel). Post-gala
+              (Sep 26 2026): no ticket hooks, links to the /gala recap. */}
           <a
-            href={galaTeaser.ticketsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={galaPageUrl}
             class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
-            data-conversion-event="gala_ticket_click"
+            data-conversion-event="gala_recap_click"
             data-conversion-context="home_events_carousel_gala"
-            data-gala-full-night-cta
           >
             <div
               class="relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent-gold/35 bg-off-black text-white shadow-xl shadow-off-black/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent-gold/20"
             >
               <div class="relative h-52 overflow-hidden bg-gradient-to-br from-[#171717] via-off-black to-[#2a241d]">
                 <GalaPhotoFrame
-                  slot={galaPhotos.atrium}
+                  slot={galaRecapPhoto}
                   variant="carousel"
                   label={false}
                 />
                 <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                  <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                    {galaTeaser.attire}
-                  </span>
                   <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
                     <span class="h-1.5 w-1.5 rotate-45 bg-off-black" aria-hidden="true"></span>
-                    <span data-gala-days-left>{galaDaysLeftLabel}</span>
+                    Recap
+                  </span>
+                  <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                    422 photos
                   </span>
                 </div>
               </div>
@@ -1477,21 +1401,21 @@ const graduationFlickrUrl =
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path>
                   </svg>
-                  {galaTeaser.shortDateTimeLabel}
+                  {galaRecapCard.dateLine}
                 </div>
                 <h3 class="mt-2 font-display text-2xl font-bold leading-tight">
-                  <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala
+                  <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala 2026
                 </h3>
                 <p class="mt-2 text-sm font-semibold text-white/70">
                   {galaTeaser.venueName}
                 </p>
                 <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
-                  Cocktails, a three-course dinner, live bidding, museum
-                  galleries, the fashion show, and dancing until midnight.
-                  Reserve the full evening from 6 PM.
+                  We gathered for cocktails on the terrace, dinner and honors,
+                  the paddle raise, the fashion show, and dancing until
+                  midnight. Gracias, comunidad.
                 </p>
                 <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
-                  <span data-gala-cta-label>Reserve the Full Evening · ${benefactorPrice}</span>
+                  <span>{galaTeaser.recapLabel}</span>
                   <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                   </svg>

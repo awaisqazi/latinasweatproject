@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import { sweatFest } from "@/data/sweatFest";
-import { galaTeaser } from "@/data/galaTeaser";
+import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
 import galleryPhotos, { galleryCdnBase } from "@/data/graduationGallery";
 
 // Public recap of the YTT 2025 + 2026 graduation ceremony (Friday, August 7,
@@ -360,7 +360,11 @@ const sweatFestPrimaryUrl = withBase("sweatfest");
 const sweatFestPrimaryLabel = "Relive the day";
 const sweatFestPrimaryEvent = "sweatfest_explore_click";
 const sweatFestPhotosUrl = withBase("sweatfest#photos");
-const galaPageUrl = withBase(galaTeaser.pagePath);
+// The gala happened Sep 25, 2026, so its card is a recap ambassador too:
+// the first sentence of galaRecapCard.blurb, CTAs into the /gala recap.
+const galaPageUrl = withBase(galaTeaser.recapPath);
+const galaPhotosUrl = withBase("gala#photos");
+const galaRecapLine = `${galaRecapCard.blurb.split(". ")[0]}.`;
 
 const pageTitle = "Graduation 2026 | The Latina Sweat Project";
 const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga Teacher Training graduation on ${eventDateLabel} in Pilsen, Chicago, where the 2025 and 2026 cohorts were certified and LSP reached nearly 100 teachers trained.`;
@@ -1057,9 +1061,9 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
           <p class="eyebrow">Te esperamos</p>
           <h2 id="invite-title" class="display">Come stand in the next room</h2>
           <p class="section-lede">
-            If this page made you want to be in the photos next time, there are
-            two open doors between now and the fall. Consider this your
-            invitation.
+            If this page made you want to be in the photos next time, start
+            with the two celebrations that closed out our summer, then come
+            move with us for what comes next.
           </p>
         </header>
 
@@ -1106,41 +1110,40 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
             </div>
           </article>
 
-          {/* The gala in its own dark-luxe identity: off-black, Playfair, gold
-              foil and hairline rules. This card IS a gala surface, so the
-              global .gala-foil utilities are correct here and only here. */}
+          {/* The gala recap in its own dark-luxe identity: off-black,
+              Playfair, gold foil and hairline rules. This card IS a gala
+              surface, so the global .gala-foil utilities are correct here and
+              only here. Post-gala (Sep 26, 2026): recap copy, no tickets. */}
           <article class="invite-card invite-card--gala reveal">
-            <p class="gala-eyebrow">The Latina Sweat Project presents</p>
+            <p class="gala-eyebrow">Annual Gala 2026 · Recap</p>
             <h3 class="gala-wordmark">
-              <span class="gala-foil">{galaTeaser.shortTitle}</span>
-              <span class="gala-wordmark-rest">Gala</span>
+              <span class="gala-foil">Gracias,</span>
+              <span class="gala-wordmark-rest">comunidad</span>
             </h3>
             <div class="gala-rule" aria-hidden="true">
               <span class="gala-foil-rule gala-rule-short"></span>
               <span class="gala-diamond"></span>
               <span class="gala-foil-rule gala-rule-long"></span>
             </div>
-            <p class="gala-meta">{galaTeaser.dateTimeLabel}</p>
+            <p class="gala-meta">{galaTeaser.dateLabel}</p>
             <p class="gala-meta gala-meta--venue">{galaTeaser.venueName}</p>
-            <p class="gala-body">
-              {galaTeaser.homepageDescription} It is the night that funds the
-              scholarships, the trainings, and the next studio, so the room you
-              just scrolled through keeps growing.
-            </p>
-            <p class="gala-status">{galaTeaser.statusLabel}</p>
+            <p class="gala-body">{galaRecapLine}</p>
             <div class="cta-row cta-row--tight">
               <a
                 class="btn btn--gold btn--small"
-                href={galaTeaser.ticketsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-conversion-event="gala_ticket_click"
-                data-conversion-context="graduation_page"
+                href={galaPageUrl}
+                data-conversion-event="gala_recap_click"
+                data-conversion-context="graduation_gala_recap"
               >
-                {galaTeaser.ticketsLabel}
+                {galaTeaser.recapLabel}
               </a>
-              <a class="btn btn--ghost btn--small" href={galaPageUrl}>
-                See the evening
+              <a
+                class="btn btn--ghost btn--small"
+                href={galaPhotosUrl}
+                data-conversion-event="gala_recap_click"
+                data-conversion-context="graduation_gala_recap_photos"
+              >
+                See the photos
               </a>
             </div>
           </article>
@@ -3318,13 +3321,6 @@ const pageDescription = `Photos and speeches from the Latina Sweat Project Yoga 
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.98rem;
     line-height: 1.75;
-  }
-
-  .gala-status {
-    margin: 0.85rem 0 0;
-    color: #ffbd59;
-    font-size: 0.82rem;
-    font-weight: 700;
   }
 
   .invite-card--gala .btn--gold {

@@ -1,0 +1,284 @@
+---
+// The paddle raise, replayed: the "Constelación" the projector drew on gala
+// night, frozen as a static inline SVG. One star per gift, sized by level,
+// scattered along the two strokes of the LSP X. Every position is computed
+// here at build time from a fixed seed, so the page never randomises at
+// runtime and the constellation is identical on every visit. The twinkle is
+// CSS only and switches off for reduced motion.
+import { galaResults } from "@/data/galaRecap2026";
+
+const raise = galaResults.paddleRaise;
+const levels = [...raise.levels].sort((a, b) => b.amount - a.amount);
+
+const money = (n) =>
+  "$" +
+  n.toLocaleString("en-US", {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+
+// Star size per level: a gentle square-root ramp from the smallest gift to
+// the largest, so a $5,000 star reads big without swamping the $62.50 ones.
+const minAmt = Math.min(...levels.map((l) => l.amount));
+const maxAmt = Math.max(...levels.map((l) => l.amount));
+const radiusFor = (amount) => {
+  const t =
+    (Math.sqrt(amount) - Math.sqrt(minAmt)) /
+    (Math.sqrt(maxAmt) - Math.sqrt(minAmt) || 1);
+  return +(4 + t * 9.5).toFixed(2);
+};
+const glowFor = (amount) => {
+  const t = (Math.log(amount) - Math.log(minAmt)) / (Math.log(maxAmt) - Math.log(minAmt) || 1);
+  return +(0.55 + t * 0.45).toFixed(2);
+};
+
+// Seeded PRNG (mulberry32). The seed is the gala date.
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(20260925);
+
+// Geometry: a 600-unit square, the X's four arms running from the centre
+// out to the corners.
+const VB = 600;
+const C = VB / 2;
+const ARM = 350; // centre-to-tip length along the diagonal
+const dirs = [
+  [-1, -1],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
+].map(([x, y]) => [x / Math.SQRT2, y / Math.SQRT2]);
+
+// Every gift as its own star, biggest first so the large stars claim space
+// before the small ones fill in around them.
+const gifts = levels.flatMap((l) =>
+  Array.from({ length: l.count }, () => ({ amount: l.amount })),
+);
+
+// Stratified placement: gifts are dealt round-robin to the four arms
+// (biggest first), and each arm has evenly spaced slots handed out in a
+// seeded shuffle, so the stars spread along the whole stroke and the large
+// ones land at varied distances from the crossing.
+const START = 46;
+const perArm = Math.ceil(gifts.length / 4);
+const slotStep = (ARM - START) / perArm;
+const shuffled = dirs.map(() => {
+  const a = Array.from({ length: perArm }, (_, k) => k);
+  for (let k = a.length - 1; k > 0; k--) {
+    const j = Math.floor(rand() * (k + 1));
+    [a[k], a[j]] = [a[j], a[k]];
+  }
+  return a;
+});
+
+const stars = [];
+gifts.forEach((gift, n) => {
+  const r = radiusFor(gift.amount);
+  const arm = n % 4;
+  const slot = shuffled[arm][Math.floor(n / 4)];
+  const [dx, dy] = dirs[arm];
+  let placed = null;
+  for (let attempt = 0; attempt < 60 && !placed; attempt++) {
+    const along = START + (slot + 0.5) * slotStep + (rand() - 0.5) * slotStep * 0.6;
+    const spread = (rand() - 0.5) * 2 * (8 + along * 0.075);
+    const x = C + dx * along - dy * spread;
+    const y = C + dy * along + dx * spread;
+    const clear = stars.every((s) => Math.hypot(s.x - x, s.y - y) > s.r + r + 6);
+    if (clear || attempt === 59) placed = { x, y, r };
+  }
+  stars.push({
+    ...placed,
+    x: +placed.x.toFixed(1),
+    y: +placed.y.toFixed(1),
+    amount: gift.amount,
+    glow: glowFor(gift.amount),
+    // Staggered twinkle timing, also from the seed.
+    dur: +(3.4 + rand() * 3.2).toFixed(2),
+    delay: +(-rand() * 6).toFixed(2),
+    sparkle: gift.amount >= 1500,
+  });
+});
+
+// Soft glowing strokes of the X behind the stars.
+const tip = (i, len) => [C + dirs[i][0] * len, C + dirs[i][1] * len];
+const [a0, a2] = [tip(0, ARM + 12), tip(2, ARM + 12)];
+const [b1, b3] = [tip(1, ARM + 12), tip(3, ARM + 12)];
+
+// Four-point sparkle for the largest gifts.
+const sparklePath = (s) => {
+  const L = s.r * 3.1;
+  const w = s.r * 0.34;
+  return `M${s.x} ${s.y - L} L${s.x + w} ${s.y - w} L${s.x + L} ${s.y} L${s.x + w} ${s.y + w} L${s.x} ${s.y + L} L${s.x - w} ${s.y + w} L${s.x - L} ${s.y} L${s.x - w} ${s.y - w} Z`;
+};
+
+const label = `A constellation of ${raise.gifts} gold stars arranged along the two strokes of the LSP X, one star for each paddle raise gift. Larger, brighter stars are larger gifts.`;
+---
+
+<div class="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
+  <figure class="reveal relative mx-auto w-full max-w-[34rem]">
+    <div class="gr-constellation-halo pointer-events-none absolute inset-[8%] rounded-full" aria-hidden="true"></div>
+    <svg
+      class="gr-constellation relative block h-auto w-full"
+      viewBox={`0 0 ${VB} ${VB}`}
+      role="img"
+      aria-label={label}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <radialGradient id="gr-star-halo">
+          <stop offset="0" stop-color="#ffd48a" stop-opacity="0.85" />
+          <stop offset="0.35" stop-color="#ffbd59" stop-opacity="0.32" />
+          <stop offset="1" stop-color="#ffbd59" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="gr-star-core">
+          <stop offset="0" stop-color="#fffaf0" />
+          <stop offset="0.55" stop-color="#ffe2a8" />
+          <stop offset="1" stop-color="#ffbd59" />
+        </radialGradient>
+        <linearGradient id="gr-stroke" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffbd59" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#ffbd59" stop-opacity="1" />
+          <stop offset="1" stop-color="#ffbd59" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="gr-stroke-b" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffbd59" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#ffbd59" stop-opacity="1" />
+          <stop offset="1" stop-color="#ffbd59" stop-opacity="0" />
+        </linearGradient>
+        <filter id="gr-soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="14" />
+        </filter>
+      </defs>
+
+      {/* The glowing X: a wide blurred wash, then a fine engraved hairline. */}
+      <g aria-hidden="true">
+        <line x1={a0[0]} y1={a0[1]} x2={a2[0]} y2={a2[1]} stroke="url(#gr-stroke)" stroke-width="64" stroke-linecap="round" opacity="0.2" filter="url(#gr-soft)" />
+        <line x1={b1[0]} y1={b1[1]} x2={b3[0]} y2={b3[1]} stroke="url(#gr-stroke-b)" stroke-width="64" stroke-linecap="round" opacity="0.2" filter="url(#gr-soft)" />
+        <line x1={a0[0]} y1={a0[1]} x2={a2[0]} y2={a2[1]} stroke="url(#gr-stroke)" stroke-width="0.8" opacity="0.45" />
+        <line x1={b1[0]} y1={b1[1]} x2={b3[0]} y2={b3[1]} stroke="url(#gr-stroke-b)" stroke-width="0.8" opacity="0.45" />
+        {/* The crossing of the X, as a single engraved ring. */}
+        <circle cx={C} cy={C} r="22" fill="none" stroke="#ffbd59" stroke-opacity="0.35" stroke-width="0.9" />
+      </g>
+
+      <g aria-hidden="true">
+        {
+          stars.map((s, i) => (
+            <g
+              class="gr-star"
+              style={`--peak:${s.glow};animation-duration:${s.dur}s;animation-delay:${s.delay}s;`}
+            >
+              <circle cx={s.x} cy={s.y} r={(s.r * 3.4).toFixed(2)} fill="url(#gr-star-halo)" opacity={(s.glow * 0.8).toFixed(2)} />
+              {s.sparkle && <path d={sparklePath(s)} fill="#fff3d8" opacity="0.75" />}
+              <circle cx={s.x} cy={s.y} r={s.r} fill="url(#gr-star-core)" />
+            </g>
+          ))
+        }
+      </g>
+    </svg>
+    <figcaption class="mt-4 text-center text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">
+      One star for every gift
+    </figcaption>
+  </figure>
+
+  <div class="reveal" style="transition-delay: 120ms;">
+    <ol class="gr-ladder" role="list">
+      {
+        levels.map((l) => (
+          <li class="gr-ladder-row">
+            <span class="gr-ladder-key" aria-hidden="true">
+              <svg viewBox="0 0 28 28" class="h-7 w-7">
+                <circle cx="14" cy="14" r={Math.min(13, radiusFor(l.amount) * 1.25)} fill="url(#gr-key-halo)" opacity="0.5" />
+                <circle cx="14" cy="14" r={radiusFor(l.amount) * 0.62} fill="#ffd48a" />
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <p class="font-display text-2xl font-bold leading-tight text-white sm:text-[1.7rem]">
+                <span class="tabular-nums lining-nums">{l.count}</span>
+                <span class="mx-1 text-accent-gold/70">×</span>
+                <span class="text-accent-gold tabular-nums lining-nums">{money(l.amount)}</span>
+              </p>
+              <p class="mt-1 text-sm leading-relaxed text-white/65">{l.impact}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <svg width="0" height="0" class="absolute" aria-hidden="true">
+      <defs>
+        <radialGradient id="gr-key-halo">
+          <stop offset="0" stop-color="#ffbd59" stop-opacity="0.9" />
+          <stop offset="1" stop-color="#ffbd59" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
+
+    <div class="mt-8 border-t border-accent-gold/40 pt-6">
+      <p class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-accent-gold/80">Paddle raise total</p>
+      <p class="mt-3 font-display text-5xl font-bold leading-none tracking-tight sm:text-6xl">
+        <span class="gala-foil tabular-nums lining-nums">{money(raise.total)}</span>
+      </p>
+      <p class="mt-4 text-base font-semibold leading-snug text-white/75">
+        {raise.gifts} gifts in ten minutes, <span class="whitespace-nowrap">{raise.startedAt.replace(" PM", "")} to {raise.endedAt}</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .gr-constellation-halo {
+    background: radial-gradient(circle, rgba(255, 189, 89, 0.12), transparent 68%);
+  }
+  .gr-constellation {
+    overflow: visible;
+  }
+  .gr-star {
+    opacity: var(--peak, 0.8);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gr-star {
+      animation-name: gr-twinkle;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+  }
+  @keyframes gr-twinkle {
+    0%,
+    100% {
+      opacity: var(--peak, 0.8);
+    }
+    50% {
+      opacity: calc(var(--peak, 0.8) * 0.5);
+    }
+  }
+
+  .gr-ladder-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    padding: 1.05rem 0;
+  }
+  .gr-ladder-row + .gr-ladder-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 189, 89, 0.5), rgba(255, 243, 216, 0.35) 40%, transparent);
+  }
+  .gr-ladder-key {
+    display: flex;
+    padding-top: 0.2rem;
+  }
+</style>
