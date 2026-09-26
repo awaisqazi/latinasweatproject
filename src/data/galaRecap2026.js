@@ -5,9 +5,11 @@
 // after the event (PII purge, see docs/gala-2026/06 s12) and the Zeffy forms
 // close:
 //   - the paddle raise: our own night-of tool (`gala_event_donations`,
-//     event `gala-2026`, non-voided rows; 41 gifts incl. one recorded without
-//     a paddle number that the spotter flagged for review, kept because the
-//     room saw it on the projector total)
+//     event `gala-2026`, non-voided rows). The tool holds 41 rows; the
+//     organizer's ruling on 2026-09-26: only Dave's $5,000 pledge counts,
+//     the second $5,000 row is not, so 40 gifts are published. The $500 row
+//     recorded without a paddle number stays (the room saw it on the
+//     projector total).
 //   - the silent auction and Give Tonight: the two Zeffy exports of
 //     2026-09-26 (Succeeded payments only; Incomplete checkouts excluded)
 //   - tickets and attendance: the Zeffy ticketing export + the check-in tool
@@ -43,17 +45,17 @@ export const galaRecap = {
 // Money raised on the night itself, by ask. Amounts in dollars.
 export const galaResults = {
   asOf: "2026-09-26",
-  // Paddle raise, from our tool. 41 gifts between 9:07 and 9:17 PM.
+  // Paddle raise, from our tool. 40 gifts between 9:07 and 9:17 PM.
   paddleRaise: {
-    total: 18862.5,
-    gifts: 41,
+    total: 13862.5,
+    gifts: 40,
     startedAt: "9:07 PM",
     endedAt: "9:17 PM",
     minutes: 10,
     // Levels as called from the stage, highest first, with the impact line
     // the projector showed for each level. `count` = gifts at that level.
     levels: [
-      { amount: 5000, count: 2, impact: "One 200-hour teacher-training certification, tuition free" },
+      { amount: 5000, count: 1, impact: "One 200-hour teacher-training certification, tuition free" },
       { amount: 1500, count: 1, impact: "One year of membership for an underrepresented student" },
       { amount: 500, count: 9, impact: "One community grief-counseling session led by certified counselors" },
       { amount: 250, count: 2, impact: "One outdoor community event with yoga" },
@@ -74,16 +76,26 @@ export const galaResults = {
     gifts: 9,
   },
   // Sum of the three asks above: what the room gave on the night.
-  raisedOnTheNight: 30182.5,
-  // Tickets and sponsorships settled through Zeffy (several sponsorships were
-  // paid off-platform, so this is not the gala's grand total). Set
-  // `grandTotal` once the books are reconciled and the page will show it.
+  raisedOnTheNight: 25182.5,
+  // Tickets and sponsorships settled through Zeffy (Succeeded payments in the
+  // 2026-09-26 ticketing export: 77 full-evening, 30 late-night, two
+  // Community and one Gold sponsorship, plus $2,625 in add-on donations at
+  // checkout; the one $200 refund is excluded).
   tickets: {
     fullEvening: 77,
     lateNight: 30,
+    sponsorshipsOnForm: 10000,
     addOnDonations: 2625,
+    gross: 45950,
   },
-  grandTotal: null,
+  // Grand total the site can verify today: raised on the night + the Zeffy
+  // ticketing gross. Sponsorships paid off-platform (Aon, CCLF, Wintrust,
+  // Hilario, and any check or invoice) are NOT in here yet; the organizer
+  // asked to publish this figure now and update it as the books reconcile.
+  // $25,182.50 + $45,950 = $71,132.50. Set to null to hide the line.
+  grandTotal: 71132.5,
+  grandTotalNote:
+    "With tickets and sponsorships paid through our ticketing, as of September 26. Sponsorships paid by check or invoice are still being added.",
   // Attendance from the check-in tool: names on the door list after removals
   // and placeholders.
   guestsOnList: 180,

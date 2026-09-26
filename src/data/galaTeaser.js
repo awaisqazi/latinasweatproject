@@ -68,8 +68,8 @@ export const galaRecapCard = {
   blurbEs: "Una noche en el MCA. Mira las fotos y lo que logramos juntos.",
   ctaLabel: "See the photos",
   stats: [
-    { value: "$30,182.50", label: "raised on the night" },
-    { value: "41", label: "paddles raised" },
+    { value: "$25,182.50", label: "raised on the night" },
+    { value: "40", label: "paddles raised" },
     { value: "422", label: "photos" },
   ],
 };

@@ -49,14 +49,25 @@ const hasGrandTotal = typeof galaResults.grandTotal === "number";
   }
 </dl>
 
+<p class="reveal mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/55">
+  Raised on the night = paddle raise, silent auction and Give Tonight gifts. Tickets and sponsorships not included.
+</p>
+
 {
   hasGrandTotal && (
-    <p class="reveal mt-8 text-center font-display text-2xl text-white">
-      Grand total:{" "}
-      <span class="text-accent-gold">
-        ${galaResults.grandTotal.toLocaleString("en-US", { maximumFractionDigits: 2 })}
-      </span>
-    </p>
+    <div class="reveal mt-10 border-t border-accent-gold/20 pt-8 text-center" data-gr-grand>
+      <p class="text-[11px] font-extrabold uppercase tracking-[0.28em] text-accent-gold">
+        Grand total to date
+      </p>
+      <p class="mt-2 font-display text-4xl font-bold leading-none tracking-tight text-white tabular-nums lining-nums sm:text-5xl">
+        {fmt({ value: galaResults.grandTotal, prefix: "$" })}
+      </p>
+      {galaResults.grandTotalNote && (
+        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/60">
+          {galaResults.grandTotalNote}
+        </p>
+      )}
+    </div>
   )
 }
 
