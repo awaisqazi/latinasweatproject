@@ -40,6 +40,7 @@ const clientJson = JSON.stringify(runwayClientData);
       </div>
       <div class="rw-flash" data-rw-flash aria-hidden="true"></div>
       <div class="rw-crowd" data-rw-crowd aria-hidden="true"></div>
+      <div class="rw-sweep" data-rw-sweep aria-hidden="true"></div>
       <div class="rw-scrim-top" aria-hidden="true"></div>
       <div class="rw-scrim-bottom" aria-hidden="true"></div>
       <div class="rw-shimmer" data-rw-shimmer hidden aria-hidden="true"></div>
@@ -67,6 +68,9 @@ const clientJson = JSON.stringify(runwayClientData);
             <svg class="rw-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /><rect x="13.9" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /></svg>
             <svg class="rw-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z" fill="currentColor" /></svg>
           </button>
+          <button type="button" class="rw-icon-btn" data-rw-act="save" aria-label="Save this look as a story card">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M12 8v7.2M9.2 12.6l2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
           <button type="button" class="rw-icon-btn" data-rw-act="share" aria-label="Share this look">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.2l4-3.7 4 3.7M7.5 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
           </button>
@@ -83,6 +87,13 @@ const clientJson = JSON.stringify(runwayClientData);
         by <a href="#" target="_blank" rel="noopener noreferrer" data-rw-creditlink><span data-rw-creditname></span><span class="sr-only"> on Instagram (opens in a new tab)</span></a>
       </p>
     </div>
+
+    {/* Swipe cue: while the show holds on a close-up, the next tag peeks in. */}
+    <button type="button" class="rw-next" data-rw-next data-rw-act="next-look" hidden>
+      <span class="rw-next-word rw-caps" data-rw-nextword>Next</span>
+      <span class="rw-next-num rw-didot" data-rw-nextnum>02</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </button>
 
     <nav class="rw-track" data-rw-track aria-label="Jump to a look">
       <span class="rw-track-line" aria-hidden="true"></span>
@@ -268,6 +279,82 @@ const clientJson = JSON.stringify(runwayClientData);
     background: radial-gradient(circle, #fff 0 22%, rgba(255, 236, 200, 0.75) 40%, rgba(255, 189, 89, 0) 70%);
     filter: blur(0.6px);
   }
+  /* Light sweep: a diagonal band of gold light crosses the stage once when
+     a new look steps out, like a spotlight finding the walker. */
+  .rw-sweep {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(115deg, transparent 38%, rgba(255, 226, 168, 0.55) 49%, rgba(255, 189, 89, 0.28) 52%, transparent 62%);
+    mix-blend-mode: screen;
+    transform: translateX(-60%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-sweep.is-on {
+      animation: rw-sweep 760ms cubic-bezier(0.3, 0.7, 0.3, 1) 1;
+    }
+  }
+  @keyframes rw-sweep {
+    0% { opacity: 0; transform: translateX(-60%); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(60%); }
+  }
+  /* Next-look peek: a small cream tag that slides up at the bottom right
+     during the hero hold. Above the caption's row, clear of the track. */
+  .rw-next {
+    position: absolute;
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.35rem 0.7rem 0.35rem 0.85rem;
+    border: 0;
+    border-radius: 4px;
+    color: #1e1e1e;
+    background: linear-gradient(180deg, #fffcf6 0%, #f4ecdf 55%, #efe3d0 100%);
+    box-shadow:
+      0 0 0 1px rgba(255, 189, 89, 0.55),
+      0 10px 22px -10px rgba(0, 0, 0, 0.75);
+    cursor: pointer;
+    opacity: 1;
+    transform: none;
+  }
+  .rw-next[hidden] {
+    display: none;
+  }
+  .rw-next-word {
+    color: #8a5700;
+    font-size: 0.56rem;
+  }
+  .rw-next-num {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .rw-next svg {
+    width: 16px;
+    height: 16px;
+    color: #8a5700;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-next.is-in {
+      animation: rw-next-in 520ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+    }
+    .rw-next svg {
+      animation: rw-next-nudge 1.6s ease-in-out infinite;
+    }
+  }
+  @keyframes rw-next-in {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes rw-next-nudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
   .rw-scrim-top,
   .rw-scrim-bottom {
     position: absolute;
@@ -446,7 +533,8 @@ const clientJson = JSON.stringify(runwayClientData);
   .rw-caption {
     position: absolute;
     left: calc(env(safe-area-inset-left, 0px) + 18px);
-    right: calc(env(safe-area-inset-right, 0px) + 64px);
+    /* Leaves the bottom-right corner to the next-look peek. */
+    right: calc(env(safe-area-inset-right, 0px) + 150px);
     bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
     pointer-events: none;
     z-index: 3;
@@ -777,6 +865,10 @@ const clientJson = JSON.stringify(runwayClientData);
     const adj = $("[data-rw-adj]");
     const flashEl = $("[data-rw-flash]");
     const crowdEl = $("[data-rw-crowd]") as HTMLElement;
+    const sweepEl = $("[data-rw-sweep]") as HTMLElement;
+    const nextEl = $<HTMLButtonElement>("[data-rw-next]");
+    const nextNum = $("[data-rw-nextnum]");
+    const nextWord = $("[data-rw-nextword]");
     const shimmer = $("[data-rw-shimmer]");
     const bars = $("[data-rw-bars]");
     const tagWrap = $("[data-rw-tagwrap]");
@@ -971,6 +1063,33 @@ const clientJson = JSON.stringify(runwayClientData);
       crowdFlashes();
     }
 
+    // The next-look peek: shown while the show holds on the hero frame.
+    function showNext() {
+      if (pos >= L) return;
+      const last = pos === L - 1;
+      nextWord.textContent = last ? "Up next" : "Next";
+      nextNum.textContent = last ? "Finale" : data.looks[pos + 1].num;
+      nextEl.classList.toggle("rw-next--word", last);
+      nextEl.setAttribute("aria-label", last ? "Up next: the finale" : `Next: look ${pos + 2}`);
+      if (nextEl.hidden) {
+        nextEl.hidden = false;
+        nextEl.classList.remove("is-in");
+        void nextEl.offsetWidth;
+        nextEl.classList.add("is-in");
+      }
+    }
+    function hideNext() {
+      nextEl.hidden = true;
+      nextEl.classList.remove("is-in");
+    }
+    // The spotlight sweep when a look steps out.
+    function sweep() {
+      if (!motionOK) return;
+      sweepEl.classList.remove("is-on");
+      void sweepEl.offsetWidth;
+      sweepEl.classList.add("is-on");
+    }
+
     // A handful of phone flashes from the guests lining the runway, spread
     // across the hero hold. Deterministic per look (seeded by its number) so
     // the same look always sparkles the same way; skipped under reduced
@@ -1044,6 +1163,8 @@ const clientJson = JSON.stringify(runwayClientData);
         if (backdrop.getAttribute("src") !== src) backdrop.src = src;
         setLoading(false);
         if (landed && i === heroOf(pos) && !scrubbing && opts.flash !== false) flash();
+        if (i === heroOf(pos) && !scrubbing) showNext();
+        else hideNext();
       } else {
         setLoading(true);
         if (f.state !== "loading") preloadAround();
@@ -1166,6 +1287,8 @@ const clientJson = JSON.stringify(runwayClientData);
       }
       pos = np;
       clearCrowd();
+      hideNext();
+      if (np < L && np !== prev) sweep();
       reel.style.transition = "none";
       reel.style.transform = "";
       adj.hidden = true;
@@ -1354,6 +1477,7 @@ const clientJson = JSON.stringify(runwayClientData);
 
     function close(opts: { toLookbook?: boolean } = {}) {
       clearCrowd();
+      hideNext();
       if (!isOpen) return;
       isOpen = false;
       cancelAnimationFrame(raf);
@@ -1409,6 +1533,203 @@ const clientJson = JSON.stringify(runwayClientData);
         return ok;
       }
     }
+    // ---------------- save this look: a 1080x1920 story card ----------------
+    // The current frame inside a gold corner-bracket frame on the gala navy,
+    // the cream garment tag hung from the top, and the show's line at the
+    // bottom. Flickr's CDN allows cross-origin canvas use. Shared as an image
+    // file through the share sheet (Instagram Stories on a phone) or
+    // downloaded where files cannot be shared.
+    let savingCard = false;
+    function loadImg(src: string) {
+      return new Promise<HTMLImageElement>((resolve, reject) => {
+        const im = new Image();
+        im.crossOrigin = "anonymous";
+        im.decoding = "async";
+        im.onload = () => resolve(im);
+        im.onerror = () => reject(new Error("image"));
+        im.src = src;
+      });
+    }
+    function roundRect(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+      c.beginPath();
+      c.moveTo(x + r, y);
+      c.arcTo(x + w, y, x + w, y + h, r);
+      c.arcTo(x + w, y + h, x, y + h, r);
+      c.arcTo(x, y + h, x, y, r);
+      c.arcTo(x, y, x + w, y, r);
+      c.closePath();
+    }
+    async function renderCard(): Promise<{ blob: Blob; name: string; title: string }> {
+      const inLook = pos < L;
+      const seq = seqOf(pos);
+      const f = seq[fi] || seq[0];
+      const num = inLook ? data.looks[pos].num : "";
+      const n = inLook ? pos + 1 : 0;
+      const img = await loadImg(f.h || f.b);
+      const W = 1080, H = 1920;
+      const cv = document.createElement("canvas");
+      cv.width = W;
+      cv.height = H;
+      const c = cv.getContext("2d")!;
+      // Ground
+      const g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#05070c");
+      g.addColorStop(0.25, "#0b1320");
+      g.addColorStop(0.75, "#0d1522");
+      g.addColorStop(1, "#05070c");
+      c.fillStyle = g;
+      c.fillRect(0, 0, W, H);
+      const glow = c.createRadialGradient(W / 2, 250, 20, W / 2, 250, 620);
+      glow.addColorStop(0, "rgba(255,189,89,0.16)");
+      glow.addColorStop(1, "rgba(255,189,89,0)");
+      c.fillStyle = glow;
+      c.fillRect(0, 0, W, H);
+      // Photo, cover-fit into the plate
+      const px = 84, py = 252, pw = W - 168, ph = 1372;
+      const s = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
+      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      c.save();
+      c.beginPath();
+      c.rect(px, py, pw, ph);
+      c.clip();
+      c.drawImage(img, px + (pw - dw) / 2, py + (ph - dh) * 0.35, dw, dh);
+      c.restore();
+      // Keyline + corner brackets
+      c.strokeStyle = "rgba(255,189,89,0.55)";
+      c.lineWidth = 2;
+      c.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+      c.strokeStyle = "#ffbd59";
+      c.lineWidth = 5;
+      const b = 44, o = 14;
+      const corners: [number, number, number, number][] = [
+        [px - o, py - o, 1, 1], [px + pw + o, py - o, -1, 1], [px - o, py + ph + o, 1, -1], [px + pw + o, py + ph + o, -1, -1],
+      ];
+      for (const [cx, cy, sx, sy] of corners) {
+        c.beginPath();
+        c.moveTo(cx, cy + sy * b);
+        c.lineTo(cx, cy);
+        c.lineTo(cx + sx * b, cy);
+        c.stroke();
+      }
+      // The garment tag on its string
+      c.strokeStyle = "#ffbd59";
+      c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(W / 2, 0);
+      c.lineTo(W / 2, 96);
+      c.stroke();
+      const tw = inLook ? 300 : 360, th = 176, tx = (W - tw) / 2, ty = 96;
+      c.save();
+      c.shadowColor = "rgba(0,0,0,0.6)";
+      c.shadowBlur = 30;
+      c.shadowOffsetY = 12;
+      const tg = c.createLinearGradient(0, ty, 0, ty + th);
+      tg.addColorStop(0, "#fffcf6");
+      tg.addColorStop(0.55, "#f4ecdf");
+      tg.addColorStop(1, "#efe3d0");
+      c.fillStyle = tg;
+      roundRect(c, tx, ty, tw, th, 12);
+      c.fill();
+      c.restore();
+      c.strokeStyle = "rgba(255,189,89,0.7)";
+      c.lineWidth = 2;
+      roundRect(c, tx, ty, tw, th, 12);
+      c.stroke();
+      c.strokeStyle = "rgba(156,122,68,0.35)";
+      c.lineWidth = 1.5;
+      roundRect(c, tx + 8, ty + 8, tw - 16, th - 16, 7);
+      c.stroke();
+      // eyelet
+      c.beginPath();
+      c.arc(W / 2, ty + 26, 11, 0, Math.PI * 2);
+      c.fillStyle = "#0b1320";
+      c.fill();
+      c.lineWidth = 4;
+      c.strokeStyle = "#ffbd59";
+      c.stroke();
+      c.textAlign = "center";
+      c.fillStyle = "#8a5700";
+      c.font = "800 22px Rubik, 'Helvetica Neue', Arial, sans-serif";
+      c.letterSpacing = "6px";
+      c.fillText(inLook ? "LOOK" : "THE RUNWAY", W / 2, ty + 78);
+      c.letterSpacing = "0px";
+      c.fillStyle = "#1e1e1e";
+      c.font = `italic 400 ${inLook ? 88 : 60}px Didot, 'Bodoni 72', 'Playfair Display', Georgia, serif`;
+      c.fillText(inLook ? num : "Finale", W / 2, ty + (inLook ? 156 : 146));
+      // Bottom lines
+      const designer = inLook ? data.looks[pos].designer : null;
+      let y = py + ph + 60;
+      if (designer) {
+        c.fillStyle = "rgba(255,255,255,0.92)";
+        c.font = "italic 400 40px Didot, 'Bodoni 72', 'Playfair Display', Georgia, serif";
+        c.fillText(`by ${designer.name}`, W / 2, y);
+        y += 54;
+      }
+      c.fillStyle = "#ffbd59";
+      c.font = "800 24px Rubik, 'Helvetica Neue', Arial, sans-serif";
+      c.letterSpacing = "7px";
+      c.fillText("THE RUNWAY · ANNUAL GALA 2026 · MCA CHICAGO", W / 2, y + 4);
+      c.letterSpacing = "0px";
+      const rule = c.createLinearGradient(W / 2 - 220, 0, W / 2 + 220, 0);
+      rule.addColorStop(0, "rgba(255,189,89,0)");
+      rule.addColorStop(0.5, "#ffbd59");
+      rule.addColorStop(1, "rgba(255,189,89,0)");
+      c.fillStyle = rule;
+      c.fillRect(W / 2 - 220, y + 34, 440, 2);
+      c.save();
+      c.translate(W / 2, y + 35);
+      c.rotate(Math.PI / 4);
+      c.fillStyle = "#ffbd59";
+      c.fillRect(-6, -6, 12, 12);
+      c.restore();
+      c.fillStyle = "rgba(255,255,255,0.72)";
+      c.font = "600 28px Rubik, 'Helvetica Neue', Arial, sans-serif";
+      c.fillText("latinasweatproject.com/gala/fashion-show", W / 2, y + 88);
+      const blob = await new Promise<Blob | null>((r) => cv.toBlob(r, "image/jpeg", 0.9));
+      if (!blob) throw new Error("blob");
+      const name = n ? `the-runway-look-${num}.jpg` : "the-runway-finale.jpg";
+      const title = n ? `The Runway · Look ${n}` : "The Runway · Finale";
+      (window as any).__runwayLastCard = URL.createObjectURL(blob);
+      return { blob, name, title };
+    }
+    async function saveCard() {
+      if (savingCard) return;
+      savingCard = true;
+      const wasPaused = userPaused;
+      userPaused = true;
+      updatePauseUi();
+      toast("Making your card");
+      (window as any).trackConversion?.("gala_runway_save", { context: pos < L ? `look_${pos + 1}` : "finale" });
+      try {
+        const { blob, name, title } = await renderCard();
+        const file = new File([blob], name, { type: "image/jpeg" });
+        const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+        if (typeof nav.share === "function" && nav.canShare?.({ files: [file] })) {
+          try {
+            await nav.share({ files: [file], title });
+            toast("Shared");
+          } catch (e) {
+            if ((e as Error)?.name !== "AbortError") throw e;
+          }
+        } else {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          dlg.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+          toast("Saved to your downloads");
+        }
+      } catch {
+        toast("Could not make the card. Try sharing the link instead.");
+      } finally {
+        savingCard = false;
+        userPaused = wasPaused;
+        updatePauseUi();
+      }
+    }
+
     async function share() {
       const n = pos < L ? pos + 1 : 0;
       const url = n ? `${data.url}#look-${n}` : `${data.url}#finale`;
@@ -1634,6 +1955,7 @@ const clientJson = JSON.stringify(runwayClientData);
         userPaused = !userPaused;
         updatePauseUi();
       } else if (act === "share") share();
+      else if (act === "save") saveCard();
       else if (act === "prev-frame") stepPrev();
       else if (act === "next-frame") stepNext();
       else if (act === "prev-look") {

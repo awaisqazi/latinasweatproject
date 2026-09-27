@@ -135,6 +135,18 @@ const motes = Array.from({ length: 18 }, (_, i) => ({
   }
   .rw-cover-img {
     object-position: 50% 50%;
+    transform-origin: 50% 40%;
+  }
+  /* A slow push-in on the cover photo, the way a room breathes before a
+     show. Static under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-cover-img {
+      animation: rw-drift 28s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes rw-drift {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); }
   }
   /* Phones: the portrait crop sits width-fitted at the top (faces land in
      the upper third) and the title block sits below them, never on them. */
