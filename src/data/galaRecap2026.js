@@ -92,10 +92,12 @@ export const galaResults = {
   // ticketing gross. Sponsorships paid off-platform (Aon, CCLF, Wintrust,
   // Hilario, and any check or invoice) are NOT in here yet; the organizer
   // asked to publish this figure now and update it as the books reconcile.
-  // $25,182.50 + $45,950 = $71,132.50. Set to null to hide the line.
+  // $25,182.50 + $45,950 = $71,132.50. This is the HEADLINE figure of the
+  // recap's numbers section (RecapStats); set it to null and the night's
+  // figure becomes the headline again.
   grandTotal: 71132.5,
   grandTotalNote:
-    "With tickets and sponsorships paid through our ticketing, as of September 26. Sponsorships paid by check or invoice are still being added.",
+    "Raised to date: the night's paddle raise, silent auction and Give Tonight gifts, plus tickets and sponsorships paid through our ticketing, as of September 26. Sponsorships paid by check or invoice are still being added.",
   // Attendance from the check-in tool: names on the door list after removals
   // and placeholders.
   guestsOnList: 180,

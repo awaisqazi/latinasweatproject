@@ -7,8 +7,16 @@ import { galaPhotoCount } from "@/data/galaGallery2026";
 
 const claimed = galaAuctionPackages.filter((p) => p.claimed).length;
 
+// The headline tile is the grand total to date when the books have one;
+// otherwise the night's figure leads (and its tile below is dropped).
+const hasGrandTotal = typeof galaResults.grandTotal === "number";
 const stats = [
-  { value: galaResults.raisedOnTheNight, prefix: "$", label: "Raised on the night", feature: true },
+  hasGrandTotal
+    ? { value: galaResults.grandTotal, prefix: "$", label: "Raised to date", feature: true }
+    : { value: galaResults.raisedOnTheNight, prefix: "$", label: "Raised on the night", feature: true },
+  ...(hasGrandTotal
+    ? [{ value: galaResults.raisedOnTheNight, prefix: "$", label: "Raised on the night", wide: true }]
+    : []),
   { value: galaResults.paddleRaise.gifts, label: "Paddles raised" },
   { value: claimed, label: "Auction packages claimed" },
   { value: galaHonors.length, label: "Honors" },
@@ -22,14 +30,13 @@ const fmt = (s) =>
     minimumFractionDigits: decimalsOf(s.value),
     maximumFractionDigits: decimalsOf(s.value),
   })}`;
-const hasGrandTotal = typeof galaResults.grandTotal === "number";
 ---
 
 <dl class="gr-stats">
   {
     stats.map((s, index) => (
       <div
-        class:list={["gr-stat reveal", s.feature && "gr-stat--feature"]}
+        class:list={["gr-stat reveal", s.feature && "gr-stat--feature", s.wide && "gr-stat--wide"]}
         style={`transition-delay: ${index * 80}ms;`}
       >
         <dd
@@ -50,26 +57,10 @@ const hasGrandTotal = typeof galaResults.grandTotal === "number";
 </dl>
 
 <p class="reveal mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/55">
-  Raised on the night = paddle raise, silent auction and Give Tonight gifts. Tickets and sponsorships not included.
+  {hasGrandTotal && galaResults.grandTotalNote
+    ? galaResults.grandTotalNote
+    : "Raised on the night = paddle raise, silent auction and Give Tonight gifts. Tickets and sponsorships not included."}
 </p>
-
-{
-  hasGrandTotal && (
-    <div class="reveal mt-10 border-t border-accent-gold/20 pt-8 text-center" data-gr-grand>
-      <p class="text-[11px] font-extrabold uppercase tracking-[0.28em] text-accent-gold">
-        Grand total to date
-      </p>
-      <p class="mt-2 font-display text-4xl font-bold leading-none tracking-tight text-white tabular-nums lining-nums sm:text-5xl">
-        {fmt({ value: galaResults.grandTotal, prefix: "$" })}
-      </p>
-      {galaResults.grandTotalNote && (
-        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/60">
-          {galaResults.grandTotalNote}
-        </p>
-      )}
-    </div>
-  )
-}
 
 <style>
   .gr-stats {
@@ -88,45 +79,60 @@ const hasGrandTotal = typeof galaResults.grandTotal === "number";
   .gr-stat dd {
     font-size: 2.6rem;
   }
-  .gr-stat--feature,
+  /* Phone: the dollar tile with cents needs the full row, and the last
+     tile spans too so the five small ones close the grid without an orphan. */
+  .gr-stat--wide,
   .gr-stat:last-child {
     grid-column: span 2;
   }
+  .gr-stat--feature {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 2.25rem;
+    padding-bottom: 2.1rem;
+  }
   .gr-stat--feature dd {
-    font-size: 2.9rem;
+    font-size: 3rem;
+  }
+  .gr-stat--feature dt {
+    color: #ffbd59;
   }
   @media (min-width: 640px) {
     .gr-stats {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+    .gr-stat--wide,
     .gr-stat:last-child {
       grid-column: auto;
     }
     .gr-stat--feature {
-      grid-column: span 5;
+      grid-column: span 3;
     }
     .gr-stat dd {
       font-size: 2.5rem;
     }
     .gr-stat--feature dd {
-      font-size: 3.5rem;
+      font-size: 4rem;
     }
   }
   @media (min-width: 1280px) {
     .gr-stats {
-      grid-template-columns: 1.75fr repeat(5, minmax(0, 1fr));
+      grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr));
     }
     .gr-stat {
       padding: 2.25rem 0.75rem 2rem;
     }
     .gr-stat--feature {
       grid-column: auto;
+      grid-row: span 2;
     }
     .gr-stat dd {
-      font-size: 3.1rem;
+      font-size: 2.6rem;
     }
     .gr-stat--feature dd {
-      font-size: 3.1rem;
+      font-size: 3.9rem;
     }
   }
 </style>
