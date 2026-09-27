@@ -183,10 +183,31 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
     let opener: HTMLElement | null = null;
     let tracked = false;
 
-    const fullSrc = (i: number) => {
-      const stem = byIndex[i]?.dataset.stem;
-      return stem ? `${cdn}${stem}.jpg` : "";
+    // Rendition ladder for the viewer: the stored _h 1600px stem first, then
+    // _b 1024px and _c 800px built from the base stem. Flickr occasionally
+    // throttles a burst of full-size loads; stepping down keeps the photo on
+    // screen instead of marking it broken.
+    const sources = (i: number) => {
+      const b = byIndex[i];
+      const stem = b?.dataset.stem;
+      const base = b?.dataset.base;
+      const out: string[] = [];
+      if (stem) out.push(`${cdn}${stem}.jpg`);
+      if (base) out.push(`${cdn}${base}_b.jpg`, `${cdn}${base}_c.jpg`);
+      return out;
     };
+    const fullSrc = (i: number) => sources(i)[0] || "";
+    let tier = 0;
+    // "Could not load" notice, built here so it needs no scoped styles.
+    const msg = document.createElement("p");
+    msg.hidden = true;
+    msg.setAttribute("role", "status");
+    msg.style.cssText =
+      "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:22rem;margin:0;padding:1rem 1.25rem;text-align:center;font-size:.95rem;line-height:1.5;color:#fff;background:rgba(5,7,12,.85);border:1px solid rgba(255,189,89,.45);border-radius:6px;z-index:2;";
+    msg.innerHTML =
+      'This photo did not load. Try the next one, or <a href="https://www.flickr.com/photos/88623248@N07/albums/72177720335849859" target="_blank" rel="noopener noreferrer" style="color:#ffbd59;text-decoration:underline;text-underline-offset:3px">open the album on Flickr</a>.';
+    stage.style.position = stage.style.position || "relative";
+    stage.appendChild(msg);
     const wrap = (i: number) => ((i % total) + total) % total;
 
     // Broken thumbs retire their whole cell (error does not bubble, so
@@ -246,6 +267,9 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
       while (broken.has(w) && guard++ < total) w = wrap(w + step);
       if (broken.has(w)) return;
       current = w;
+      tier = 0;
+      msg.hidden = true;
+      img.style.visibility = "";
       img.src = fullSrc(w);
       img.alt = `Annual Gala 2026, photo ${w + 1} of ${total}`;
       counter.textContent = `${w + 1} of ${total}`;
@@ -253,10 +277,24 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
       preload(w - 1);
     };
 
+    // A failed load steps down the rendition ladder for the SAME photo; when
+    // every size fails the viewer says so and stays put (prev/next still
+    // work). It never advances on its own, so one bad response cannot
+    // cascade through the album.
     img.addEventListener("error", () => {
       if (current < 0 || lb.hidden) return;
-      broken.add(current);
-      if (broken.size < total) show(current + 1, 1);
+      const list = sources(current);
+      tier += 1;
+      if (tier < list.length) {
+        img.src = list[tier];
+        return;
+      }
+      img.style.visibility = "hidden";
+      msg.hidden = false;
+    });
+    img.addEventListener("load", () => {
+      msg.hidden = true;
+      img.style.visibility = "";
     });
 
     const open = (i: number, trigger: HTMLElement) => {
