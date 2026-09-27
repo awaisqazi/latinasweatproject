@@ -1,3 +1,5 @@
+import { galaResults } from "./galaRecap2026";
+
 export const galaTeaser = {
   slug: "noche-inolvidable-gala",
   // This year's gala has not been named yet; refer to it as the "Annual Gala"
@@ -56,21 +58,31 @@ export const galaTeaser = {
 };
 
 // Recap card copy for the homepage spotlight, /events, and /links. Numbers
-// are the aggregates of record from src/data/galaRecap2026.js (paddle raise +
-// silent auction + Give Tonight = raised on the night); aggregates only,
+// are the aggregates of record from src/data/galaRecap2026.js: the headline
+// is the grand total to date (raised on the night + Zeffy ticketing gross)
+// when the books have one, otherwise the night's figure; aggregates only,
 // never donor, bidder, or guest names.
+const money = (n) =>
+  "$" +
+  n.toLocaleString("en-US", {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+const hasGrandTotal = typeof galaResults.grandTotal === "number";
 export const galaRecapCard = {
   eyebrow: "That's a wrap · Annual Gala 2026",
   heading: "Gracias, comunidad",
   dateLine: "September 25, 2026 · MCA Chicago",
   blurb:
-    "One night at Chicago's iconic MCA: cocktails on the terrace, dinner and honors, a ten-minute paddle raise, the fashion show, and dancing until midnight. See every photo and what the night raised.",
+    "One night at Chicago's iconic MCA: cocktails on the terrace, dinner and honors, a ten-minute paddle raise, the fashion show, and dancing until midnight. See every photo and what we have raised so far.",
   blurbEs: "Una noche en el MCA. Mira las fotos y lo que logramos juntos.",
   ctaLabel: "See the photos",
   stats: [
-    { value: "$25,182.50", label: "raised on the night" },
-    { value: "40", label: "paddles raised" },
-    { value: "422", label: "photos" },
+    hasGrandTotal
+      ? { value: money(galaResults.grandTotal), label: "raised to date", labelEs: "recaudados hasta hoy" }
+      : { value: money(galaResults.raisedOnTheNight), label: "raised on the night", labelEs: "recaudados esa noche" },
+    { value: String(galaResults.paddleRaise.gifts), label: "paddles raised", labelEs: "paletas levantadas" },
+    { value: "422", label: "photos", labelEs: "fotos" },
   ],
 };
 

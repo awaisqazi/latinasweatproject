@@ -35,7 +35,7 @@ const sweatFestPrimaryUrl = withBase("/sweatfest#photos");
 // three aggregate stats, in galaRecapCard.stats order. The 4:5 photo is a
 // local crop of album #69 (dinner under the gold lanterns).
 const galaRecapPhotosUrl = withBase("/gala#photos");
-const galaRecapStatLabelsEs = ["recaudados esa noche", "paletas levantadas", "fotos"];
+// ES labels ride on each stat (galaRecapCard.stats[i].labelEs).
 const galaRecapPhotoSrc = `${base}images/gala/2026/recap-home/gala-2026-recap-card-4x5.webp`;
 
 // ABC7 "Windy City Weekend" card (aired Sep 25 2026, gala day). All copy and
@@ -499,7 +499,7 @@ const getLinkConversionProvider = (url = "") => {
                   </p>
                   <p class="mt-0.5 text-[8px] font-extrabold uppercase leading-tight tracking-[0.12em] text-white/70">
                     <span class="lang-en">{stat.label}</span>
-                    <span class="lang-es hidden">{galaRecapStatLabelsEs[i]}</span>
+                    <span class="lang-es hidden">{stat.labelEs}</span>
                   </p>
                 </div>
               ))
