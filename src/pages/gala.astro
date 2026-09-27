@@ -20,8 +20,15 @@ import {
   galaResults,
   galaAuctionPackages,
 } from "@/data/galaRecap2026";
-import { galaAlbumUrl, galaPhotoCount } from "@/data/galaGallery2026";
+import {
+  galaAlbumCdnBase,
+  galaAlbumUrl,
+  galaPhotoCount,
+  galaPhotoStems,
+} from "@/data/galaGallery2026";
 import { abc7Feature } from "@/data/abc7WindyCity";
+
+const base = import.meta.env.BASE_URL;
 
 const RECAP_IMG = "/images/gala/2026/recap";
 // ABC7 "Windy City Weekend" band (aired gala day): the logo for its eyebrow.
@@ -39,7 +46,11 @@ const auction = galaResults.silentAuction;
 const claimedCount = galaAuctionPackages.filter((p) => p.claimed).length;
 
 const pageTitle = "Annual Gala 2026 Recap | The Latina Sweat Project";
-const pageDescription = `Gracias, comunidad: the Annual Gala 2026 at the Museum of Contemporary Art Chicago raised ${money(galaResults.raisedOnTheNight)} on the night for accessible classes and teacher training. See the honors, the paddle raise and all ${galaPhotoCount} photos.`;
+const headlineRaised =
+  typeof galaResults.grandTotal === "number"
+    ? `${money(galaResults.grandTotal)} to date`
+    : `${money(galaResults.raisedOnTheNight)} on the night`;
+const pageDescription = `Gracias, comunidad: the Annual Gala 2026 at the Museum of Contemporary Art Chicago raised ${headlineRaised} for accessible classes and teacher training. See the honors, the paddle raise and all ${galaPhotoCount} photos.`;
 
 // Floating gold particles drifting up through the hero (desktop only, motion-safe).
 const heroParticles = Array.from({ length: 22 }, (_, i) => ({
@@ -376,6 +387,69 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
       </div>
     </section>
 
+    {/* ========================= THE RUNWAY, REPLAYED =========================
+        Entry point for /gala/fashion-show: a portrait runway still in a
+        corner-bracket frame beside the invitation. The still is look 16's
+        hero frame from the album (hotlinked at _c like the wall). */}
+    <section id="fashion-show" class="relative overflow-hidden border-t border-accent-gold/15 py-16 scroll-mt-28 sm:py-20 lg:py-24" style="background: linear-gradient(180deg, #0b1320 0%, #0d1522 60%, #0b1320 100%);">
+      <div class="gala-lattice pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true"></div>
+      <div class="gala-ambient pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full blur-[120px]" style="background: rgba(255, 189, 89, 0.14);" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-10 sm:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <a
+            href={`${base}gala/fashion-show`}
+            class="reveal group relative mx-auto block w-full max-w-[300px] sm:max-w-none"
+            aria-label="Watch the runway replay"
+            data-conversion-event="gala_runway_open"
+            data-conversion-context="gala_recap_band_photo"
+          >
+            <span class="pointer-events-none absolute -left-2 -top-2 h-5 w-5 border-l-2 border-t-2 border-accent-gold/70" aria-hidden="true"></span>
+            <span class="pointer-events-none absolute -right-2 -top-2 h-5 w-5 border-r-2 border-t-2 border-accent-gold/70" aria-hidden="true"></span>
+            <span class="pointer-events-none absolute -bottom-2 -left-2 h-5 w-5 border-b-2 border-l-2 border-accent-gold/70" aria-hidden="true"></span>
+            <span class="pointer-events-none absolute -bottom-2 -right-2 h-5 w-5 border-b-2 border-r-2 border-accent-gold/70" aria-hidden="true"></span>
+            <img
+              src={`${galaAlbumCdnBase}${galaPhotoStems[245].t}_c.jpg`}
+              alt="A look on the fourth-floor runway at the MCA"
+              width="533"
+              height="800"
+              loading="lazy"
+              decoding="async"
+              class="aspect-[2/3] w-full object-cover ring-1 ring-inset ring-white/10 transition-transform duration-700 group-hover:scale-[1.02]"
+            />
+            <span class="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-off-black/85 to-transparent px-4 pb-4 pt-16">
+              <span class="text-[11px] font-extrabold uppercase tracking-[0.22em] text-accent-gold">Look 16 of 20</span>
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-accent-gold/60 bg-off-black/60 text-accent-gold backdrop-blur-sm transition-colors group-hover:bg-accent-gold group-hover:text-off-black">
+                <svg class="ml-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              </span>
+            </span>
+          </a>
+          <div class="reveal text-center sm:text-left" style="transition-delay: 120ms;">
+            <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">The fashion show · 10 PM</p>
+            <h2 class="mt-4 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+              The Runway, <span class="gala-foil italic">replayed</span>
+            </h2>
+            <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/70 sm:mx-0">
+              Twenty looks from the fourth floor, frame by frame: tap to step, swipe for the next look, and watch the show end in a constellation. Best on your phone.
+            </p>
+            <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row">
+              <a
+                href={`${base}gala/fashion-show`}
+                class="gala-btn gala-btn--gold inline-flex items-center gap-3 px-7 py-4 text-base font-extrabold"
+                data-conversion-event="gala_runway_open"
+                data-conversion-context="gala_recap_band"
+              >
+                Watch the runway
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              </a>
+              <a href={`${base}gala/fashion-show#lookbook`} class="link-underline text-sm font-extrabold text-white/80 hover:text-white">
+                Browse all twenty looks
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     {/* ========================= THE NIGHT IN PHOTOS ========================= */}
     <section id="photos" class="gr-band relative overflow-hidden border-y border-accent-gold/15 py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -424,7 +498,6 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
 
     {/* ============================ WITH GRATITUDE ============================ */}
     <section id="gratitude" class="relative overflow-hidden py-16 scroll-mt-28 sm:py-20 lg:py-24">
-      <span id="fashion-show" class="absolute top-0" aria-hidden="true"></span>
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
           <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">With gratitude</p>

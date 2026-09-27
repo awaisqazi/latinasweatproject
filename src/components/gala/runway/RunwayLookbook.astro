@@ -1,0 +1,367 @@
+---
+// The lookbook: every look's hero frame as a card with a cream garment tag.
+// Each card opens the player at that look; without JS it is a plain link to
+// the full-size photo. Then the finale card, the six designers on a dark
+// plate (white knockout marks, dark plates only) and quiet links home.
+import {
+  runwayLooks,
+  runwayFinale,
+  runwayDesigners,
+  runwayAnyUncredited,
+  runwayPhotoCount,
+  runwayTotal,
+  pad2,
+} from "./runwayData";
+
+const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
+---
+
+<section id="lookbook" class="rw-lookbook relative scroll-mt-4 overflow-hidden py-16 sm:py-20 lg:py-24" aria-labelledby="rw-lookbook-title">
+  <div class="gala-lattice pointer-events-none absolute inset-0 opacity-[0.035]" aria-hidden="true"></div>
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <div class="flex items-center justify-center gap-3" aria-hidden="true">
+        <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+        <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+        <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+      </div>
+      <p class="mt-6 text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">
+        Look 01 to {pad2(runwayTotal)}
+      </p>
+      <h2 id="rw-lookbook-title" class="mt-3 font-display text-5xl font-medium italic leading-tight tracking-tight sm:text-6xl">
+        <span class="gala-foil">The looks</span>
+      </h2>
+    </div>
+
+    <ul class="mt-10 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 lg:gap-6" role="list">
+      {
+        runwayLooks.map((look, k) => (
+          <li class="rw-card-item">
+            <a
+              href={look.heroPhoto.h}
+              class="rw-card"
+              data-rw-open={k}
+              data-rw-card={k}
+              aria-label={`Look ${look.n}, ${look.frames.length} frames. Play from this look`}
+            >
+              <span class="rw-card-media">
+                <img
+                  src={look.heroPhoto.c}
+                  alt={`Look ${look.n} on the runway at the MCA`}
+                  width="533"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                />
+                <span class="rw-card-shade" aria-hidden="true"></span>
+                <span class="rw-card-play" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+                </span>
+              </span>
+              <span class="rw-card-tag rw-tag rw-tag--left" aria-hidden="true">
+                <span class="rw-tag__eyelet"></span>
+                <span class="rw-tag__word">Look</span>
+                <span class="rw-tag__num">{look.num}</span>
+              </span>
+              <span class="rw-card-count rw-caps" aria-hidden="true">
+                {look.frames.length} {look.frames.length === 1 ? "frame" : "frames"}
+              </span>
+            </a>
+            {look.designer && (
+              <p class="rw-card-credit">
+                by{" "}
+                <a href={look.designer.instagram} target="_blank" rel="noopener noreferrer">
+                  {look.designer.name}
+                  <span class="sr-only"> on Instagram (opens in a new tab)</span>
+                </a>
+              </p>
+            )}
+          </li>
+        ))
+      }
+      <li class="rw-card-item col-span-full">
+        <a
+          href={runwayFinale.group.h}
+          class="rw-card rw-card--finale"
+          data-rw-open="finale"
+          data-rw-card="finale"
+          aria-label="The finale. Play the finale walk and La Constelación del Runway"
+        >
+          <span class="rw-card-media rw-card-media--wide">
+            <img
+              src={runwayFinale.group.c}
+              srcset={`${runwayFinale.group.c} 800w, ${runwayFinale.group.b} 1024w`}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              alt={runwayFinale.group.alt}
+              width="800"
+              height="533"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+            />
+            <span class="rw-card-shade" aria-hidden="true"></span>
+            <span class="rw-card-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+            </span>
+          </span>
+          <span class="rw-card-tag rw-tag rw-tag--left" aria-hidden="true">
+            <span class="rw-tag__eyelet"></span>
+            <span class="rw-tag__word rw-tag__word--solo">The finale</span>
+          </span>
+        </a>
+      </li>
+    </ul>
+
+    {/* The designers, tier-free, on a dark plate. */}
+    <div class="rw-plate relative mx-auto mt-16 max-w-5xl px-5 py-11 text-center sm:mt-20 sm:px-10 sm:py-14">
+      <span class="rw-plate-diamond left-0 top-0" aria-hidden="true"></span>
+      <span class="rw-plate-diamond right-0 top-0" aria-hidden="true"></span>
+      <span class="rw-plate-diamond bottom-0 left-0" aria-hidden="true"></span>
+      <span class="rw-plate-diamond bottom-0 right-0" aria-hidden="true"></span>
+      <p class="text-[0.7rem] font-extrabold uppercase tracking-[0.32em] text-accent-gold">On the runway</p>
+      <h2 class="mt-3 font-display text-3xl font-semibold italic leading-tight sm:text-4xl">The designers</h2>
+      <ul class="mt-9 grid grid-cols-2 place-items-center gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6" role="list">
+        {
+          runwayDesigners.map((d) => (
+            <li>
+              <a
+                href={d.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rw-mark"
+                data-conversion-event="gala_runway_designer_click"
+                data-conversion-context="runway_lookbook"
+              >
+                <img src={d.white.src} alt="" style={markStyle(d.white)} loading="lazy" decoding="async" />
+                <span class="sr-only">{d.name} on Instagram (opens in a new tab)</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mx-auto mt-9 max-w-xl text-balance text-base leading-relaxed text-white/70">
+        Six designers walked the fourth floor.{runwayAnyUncredited && " Designer credits for each look are coming soon."}
+      </p>
+    </div>
+
+    <p class="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center">
+      <a href="/gala" class="rw-quiet">
+        <span aria-hidden="true">←</span> Back to the gala recap
+      </a>
+      <a href="/gala#photos" class="rw-quiet">See all {runwayPhotoCount} photos</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .rw-lookbook {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4rem);
+  }
+
+  .rw-card-item {
+    position: relative;
+  }
+  .rw-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rw-card-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #111a27;
+    box-shadow:
+      0 0 0 1px rgba(255, 189, 89, 0.18),
+      0 24px 50px -30px rgba(0, 0, 0, 0.9);
+    transition: box-shadow 0.3s ease;
+  }
+  .rw-card-media--wide {
+    aspect-ratio: 3 / 2;
+  }
+  @media (min-width: 1024px) {
+    .rw-card-media--wide {
+      aspect-ratio: 21 / 9;
+    }
+  }
+  .rw-card-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .rw-card--finale .rw-card-media img {
+    object-position: 50% 58%;
+  }
+  .rw-card-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(5, 7, 12, 0.7) 0%, rgba(5, 7, 12, 0) 34%);
+  }
+  .rw-card-play {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgba(255, 189, 89, 0.6);
+    border-radius: 50%;
+    background: rgba(5, 7, 12, 0.45);
+    color: #ffbd59;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .rw-card-play svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-left: 2px;
+  }
+  .rw-card:hover .rw-card-media,
+  .rw-card:focus-visible .rw-card-media {
+    box-shadow:
+      0 0 0 1.5px #ffbd59,
+      0 28px 60px -30px rgba(0, 0, 0, 0.9);
+  }
+  .rw-card:hover .rw-card-play,
+  .rw-card:focus-visible .rw-card-play {
+    background: #ffbd59;
+    color: #1e1e1e;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .rw-card:hover .rw-card-media img {
+      transform: scale(1.035);
+    }
+  }
+  .rw-card:focus-visible {
+    outline: none;
+  }
+
+  /* The cream tag, pinned to the top-left corner. */
+  .rw-card-tag {
+    position: absolute;
+    top: 0.55rem;
+    left: 0.55rem;
+    gap: 0.3rem;
+    padding: 0.3rem 0.55rem 0.3rem 1.3rem;
+    transform: rotate(-3deg);
+    transform-origin: 11px 50%;
+  }
+  .rw-card-tag .rw-tag__num {
+    font-size: 1.05rem;
+  }
+  .rw-tag__word--solo {
+    padding: 0.2rem 0;
+  }
+  .rw-card-count {
+    position: absolute;
+    left: 0.7rem;
+    bottom: 0.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.6rem;
+  }
+  .rw-card-credit {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .rw-card-credit a {
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    text-decoration-color: #ffbd59;
+    text-underline-offset: 4px;
+  }
+
+  /* Dark plate: same stationery as the recap's gratitude plate. */
+  .rw-plate {
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgba(255, 189, 89, 0.07), transparent 70%),
+      linear-gradient(180deg, #111a27, #0b1320);
+    border: 1px solid rgba(255, 189, 89, 0.35);
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 5px #0b1320,
+      inset 0 0 0 6px rgba(255, 189, 89, 0.14),
+      0 40px 90px -40px rgba(0, 0, 0, 0.9);
+  }
+  .rw-plate-diamond {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #ffbd59;
+    transform: translate(var(--tx, -50%), var(--ty, -50%)) rotate(45deg);
+  }
+  .rw-plate-diamond.right-0 {
+    --tx: 50%;
+  }
+  .rw-plate-diamond.bottom-0 {
+    --ty: 50%;
+  }
+  .rw-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 7.5rem;
+    height: 4.25rem;
+    border-radius: 3px;
+    transition: background-color 0.25s ease;
+  }
+  .rw-mark img {
+    display: block;
+    width: 100%;
+    height: calc(100% * var(--h, 1));
+    object-fit: contain;
+    transform: scale(calc(var(--s, 1) * 0.86));
+    opacity: 0.94;
+    transition: opacity 0.25s ease;
+  }
+  .rw-mark:hover {
+    background: rgba(255, 189, 89, 0.07);
+  }
+  .rw-mark:hover img {
+    opacity: 1;
+  }
+  .rw-mark:focus-visible {
+    outline: 2px solid #ffbd59;
+    outline-offset: 3px;
+  }
+  @media (min-width: 640px) {
+    .rw-mark {
+      width: 8.5rem;
+      height: 5rem;
+    }
+  }
+
+  .rw-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 189, 89, 0.45);
+    text-underline-offset: 6px;
+    transition: color 0.2s ease;
+  }
+  .rw-quiet:hover {
+    color: #ffbd59;
+  }
+</style>

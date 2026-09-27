@@ -1,0 +1,1790 @@
+---
+// The Runway player: a full-screen modal <dialog> that replays each look as
+// a stop-motion walk (hard cuts at walk tempo, a hold on the hero frame),
+// TikTok-style vertical look changes, flipbook scrubbing, and a vertical
+// "runway track" of twenty gold diamonds. After look 20 the finale walk
+// plays, then La Constelación del Runway (RunwayConstellation).
+// Vanilla TypeScript, no framework. Styles are global (rw- prefix) because
+// the script builds frames and progress segments at runtime.
+import RunwayConstellation from "./RunwayConstellation.astro";
+import { runwayClientData, runwayLooks, pad2 } from "./runwayData";
+
+const total = runwayLooks.length;
+const clientJson = JSON.stringify(runwayClientData);
+---
+
+<script is:inline type="application/json" id="rw-data" set:html={clientJson} />
+
+<dialog id="rw-player" class="rw-player" data-mode="look" aria-label="The Runway: Annual Gala 2026 fashion show" tabindex="-1">
+  <div class="rw-backdrop" aria-hidden="true">
+    <img class="rw-backdrop-img" data-rw-backdrop alt="" draggable="false" />
+    <div class="rw-backdrop-shade"></div>
+    <div class="rw-backdrop-lattice gala-lattice"></div>
+  </div>
+
+  <p class="sr-only" aria-live="polite" aria-atomic="true" data-rw-live></p>
+
+  <div class="rw-frame" data-rw-frame>
+    {/* Keyboard and screen-reader controls: hidden until focused. */}
+    <div class="rw-skip">
+      <button type="button" class="rw-skip-btn" data-rw-act="prev-frame">Previous frame</button>
+      <button type="button" class="rw-skip-btn" data-rw-act="next-frame">Next frame</button>
+      <button type="button" class="rw-skip-btn" data-rw-act="prev-look">Previous look</button>
+      <button type="button" class="rw-skip-btn" data-rw-act="next-look">Next look</button>
+    </div>
+
+    <div class="rw-stage" data-rw-stage>
+      <div class="rw-reel" data-rw-reel>
+        <div class="rw-panel" data-rw-cur></div>
+        <div class="rw-panel rw-panel--adj" data-rw-adj hidden></div>
+      </div>
+      <div class="rw-flash" data-rw-flash aria-hidden="true"></div>
+      <div class="rw-crowd" data-rw-crowd aria-hidden="true"></div>
+      <div class="rw-scrim-top" aria-hidden="true"></div>
+      <div class="rw-scrim-bottom" aria-hidden="true"></div>
+      <div class="rw-shimmer" data-rw-shimmer hidden aria-hidden="true"></div>
+    </div>
+
+    <div class="rw-edge rw-brackets" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+    <div class="rw-top">
+      <div class="rw-bars" data-rw-bars aria-hidden="true"></div>
+      <div class="rw-row">
+        <div class="rw-tagline">
+          <span class="rw-ptag" data-rw-tagwrap aria-hidden="true">
+            <span class="rw-ptag-string"></span>
+            <span class="rw-tag rw-tag--top rw-ptag-card">
+              <span class="rw-tag__eyelet"></span>
+              <span class="rw-tag__word" data-rw-tagword>Look</span>
+              <span class="rw-tag__num" data-rw-tagnum>01</span>
+            </span>
+          </span>
+          <span class="rw-of rw-caps" data-rw-of aria-hidden="true">of {pad2(total)}</span>
+          <span class="rw-pill rw-caps" data-rw-pill hidden>Paused</span>
+        </div>
+        <div class="rw-actions">
+          <button type="button" class="rw-icon-btn" data-rw-act="pause" aria-pressed="false" aria-label="Pause">
+            <svg class="rw-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /><rect x="13.9" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /></svg>
+            <svg class="rw-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z" fill="currentColor" /></svg>
+          </button>
+          <button type="button" class="rw-icon-btn" data-rw-act="share" aria-label="Share this look">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.2l4-3.7 4 3.7M7.5 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <button type="button" class="rw-icon-btn" data-rw-close aria-label="Close the show">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rw-caption" data-rw-caption>
+      <p class="rw-caption-look"><span data-rw-capword>Look</span> <span class="rw-didot" data-rw-capnum>01</span></p>
+      <p class="rw-caption-credit" data-rw-credit hidden>
+        by <a href="#" target="_blank" rel="noopener noreferrer" data-rw-creditlink><span data-rw-creditname></span><span class="sr-only"> on Instagram (opens in a new tab)</span></a>
+      </p>
+    </div>
+
+    <nav class="rw-track" data-rw-track aria-label="Jump to a look">
+      <span class="rw-track-line" aria-hidden="true"></span>
+      <ol role="list">
+        {runwayLooks.map((l, k) => (
+          <li>
+            <button type="button" class="rw-track-btn" data-rw-jump={k} aria-label={`Look ${l.n}`}>
+              <span class="rw-diamond" aria-hidden="true"></span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <div class="rw-chevrons">
+      <button type="button" class="rw-icon-btn rw-chev" data-rw-act="prev-look" aria-label="Previous look">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button type="button" class="rw-icon-btn rw-chev" data-rw-act="next-look" aria-label="Next look">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <RunwayConstellation />
+
+  <template data-rw-skyteaser>
+    <div class="rw-teaser">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M20 20L80 80M80 20L20 80" stroke="#ffbd59" stroke-width="0.6" stroke-opacity="0.7" /><circle cx="50" cy="50" r="4" fill="none" stroke="#ffbd59" stroke-opacity="0.5" stroke-width="0.4" /></svg>
+    </div>
+  </template>
+
+  <p class="rw-toast" role="status" data-rw-toast></p>
+</dialog>
+
+<style is:global>
+  /* ============ The Runway player (global: runtime-built nodes) ============ */
+  html.rw-locked,
+  html.rw-locked body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .rw-player {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #05070c;
+    color: #fff;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  .rw-player:not([open]) {
+    display: none;
+  }
+  .rw-player::backdrop {
+    background: #05070c;
+  }
+
+  /* Blurred, darkened copy of the current frame (desktop column, finale). */
+  .rw-backdrop {
+    position: absolute;
+    inset: 0;
+    display: none;
+    overflow: hidden;
+  }
+  .rw-backdrop-img {
+    position: absolute;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
+    object-fit: cover;
+    filter: blur(38px) saturate(1.15) brightness(0.42);
+    transform: translateZ(0);
+  }
+  .rw-backdrop-shade {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(75% 70% at 50% 45%, rgba(5, 7, 12, 0.15), rgba(5, 7, 12, 0.75));
+  }
+  .rw-backdrop-lattice {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+  }
+  .rw-player[data-mode="walk"] .rw-backdrop {
+    display: block;
+  }
+
+  /* Phone: the frame fills the screen. */
+  .rw-frame {
+    position: absolute;
+    inset: 0;
+  }
+  .rw-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+  .rw-reel {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+  .rw-panel {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: transparent;
+  }
+  .rw-panel--adj {
+    background: #05070c;
+  }
+  .rw-panel[hidden] {
+    display: none;
+  }
+  .rw-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+    visibility: hidden;
+    transform-origin: 50% 42%;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+  .rw-img.is-on {
+    visibility: visible;
+  }
+  .rw-player[data-mode="walk"] .rw-panel:not(.rw-panel--adj) .rw-img,
+  .rw-panel--adj.is-walk .rw-img {
+    object-fit: contain;
+  }
+  .rw-teaser {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(60% 40% at 50% 45%, rgba(255, 189, 89, 0.12), transparent 70%), #05070c;
+  }
+  .rw-teaser svg {
+    width: min(70%, 22rem);
+  }
+
+  .rw-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(90% 55% at 50% 0%, rgba(255, 255, 255, 1), rgba(255, 250, 240, 0.4) 45%, rgba(255, 255, 255, 0) 75%);
+  }
+  /* Crowd flashes: phones going off along the runway when the hero frame
+     lands. Pinpoints live in the lower half, off the center third. */
+  .rw-crowd {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .rw-crowd span {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    opacity: 0;
+    background: radial-gradient(circle, #fff 0 22%, rgba(255, 236, 200, 0.75) 40%, rgba(255, 189, 89, 0) 70%);
+    filter: blur(0.6px);
+  }
+  .rw-scrim-top,
+  .rw-scrim-bottom {
+    position: absolute;
+    inset-inline: 0;
+    pointer-events: none;
+  }
+  .rw-scrim-top {
+    top: 0;
+    height: calc(env(safe-area-inset-top, 0px) + 150px);
+    background: linear-gradient(180deg, rgba(5, 7, 12, 0.72), rgba(5, 7, 12, 0.35) 55%, rgba(5, 7, 12, 0));
+  }
+  .rw-scrim-bottom {
+    bottom: 0;
+    height: calc(env(safe-area-inset-bottom, 0px) + 190px);
+    background: linear-gradient(0deg, rgba(5, 7, 12, 0.85), rgba(5, 7, 12, 0.4) 55%, rgba(5, 7, 12, 0));
+  }
+  .rw-shimmer {
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 50%;
+    height: 2px;
+    overflow: hidden;
+    background: rgba(255, 189, 89, 0.25);
+    pointer-events: none;
+  }
+  .rw-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, #fff3d8, #ffbd59, transparent);
+    transform: translateX(-100%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-shimmer::after {
+      animation: rw-shimmer 1.1s ease-in-out infinite;
+    }
+  }
+  @keyframes rw-shimmer {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  .rw-shimmer[hidden] {
+    display: none;
+  }
+  .rw-edge {
+    display: none;
+  }
+
+  /* Top chrome. */
+  .rw-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 10px) 0 calc(env(safe-area-inset-left, 0px) + 12px);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .rw-bars {
+    display: flex;
+    gap: 3px;
+    height: 3px;
+  }
+  .rw-seg {
+    position: relative;
+    flex: 1 1 0;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15);
+  }
+  .rw-seg-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #f4a833, #ffbd59 60%, #fff3d8);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+  .rw-seg.is-hero {
+    background: rgba(255, 243, 216, 0.4);
+  }
+  .rw-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .rw-tagline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding-top: 6px;
+  }
+  .rw-ptag {
+    position: relative;
+    display: inline-block;
+    transform-origin: 50% 0;
+  }
+  .rw-ptag-string {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% - 8px);
+    width: 1px;
+    height: 16px;
+    background: linear-gradient(180deg, rgba(255, 189, 89, 0), #ffbd59);
+  }
+  .rw-ptag-card {
+    flex-direction: column;
+    gap: 1px;
+    padding: 17px 13px 6px;
+    min-width: 58px;
+  }
+  .rw-ptag-card .rw-tag__num {
+    font-size: 1.3rem;
+  }
+  .rw-of {
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  }
+  .rw-pill {
+    padding: 5px 9px 5px 10px;
+    border: 1px solid rgba(255, 189, 89, 0.7);
+    border-radius: 999px;
+    background: rgba(5, 7, 12, 0.72);
+    color: #ffbd59;
+    font-size: 0.6rem;
+  }
+  .rw-pill[hidden],
+  .rw-of[hidden] {
+    display: none;
+  }
+  .rw-actions {
+    display: flex;
+    gap: 2px;
+    pointer-events: auto;
+  }
+  .rw-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  .rw-icon-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  .rw-icon-btn:hover {
+    color: #ffbd59;
+  }
+  .rw-icon-btn:focus-visible {
+    outline: 2px solid #ffbd59;
+    outline-offset: -2px;
+  }
+  .rw-icon-btn .rw-ico-play {
+    display: none;
+  }
+  .rw-icon-btn[aria-pressed="true"] .rw-ico-play {
+    display: block;
+  }
+  .rw-icon-btn[aria-pressed="true"] .rw-ico-pause {
+    display: none;
+  }
+
+  /* Caption. */
+  .rw-caption {
+    position: absolute;
+    left: calc(env(safe-area-inset-left, 0px) + 18px);
+    right: calc(env(safe-area-inset-right, 0px) + 64px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .rw-caption-look {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    line-height: 1;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+  }
+  .rw-caption-look [data-rw-capword] {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #ffbd59;
+  }
+  .rw-caption-look .rw-didot {
+    font-size: 3.4rem;
+    color: #fff;
+  }
+  .rw-player[data-mode="walk"] .rw-caption-look .rw-didot {
+    display: none;
+  }
+  .rw-player[data-mode="walk"] .rw-caption-look [data-rw-capword] {
+    font-family: "Didot", "Bodoni 72", "Playfair Display", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 2.6rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #fff;
+  }
+  .rw-caption-credit {
+    margin-top: 0.4rem;
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  }
+  .rw-caption-credit a {
+    pointer-events: auto;
+    display: inline-block;
+    padding: 0.35rem 0;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    text-decoration-color: #ffbd59;
+    text-underline-offset: 4px;
+  }
+  .rw-caption-credit[hidden] {
+    display: none;
+  }
+
+  /* The runway track: a vertical foil hairline with a diamond per look. */
+  .rw-track {
+    position: absolute;
+    z-index: 3;
+    right: calc(env(safe-area-inset-right, 0px) + 2px);
+    top: calc(env(safe-area-inset-top, 0px) + 126px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 116px);
+    width: 44px;
+    touch-action: none;
+  }
+  .rw-track ol {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .rw-track li {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .rw-track-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -0.5px;
+    background: linear-gradient(180deg, rgba(255, 189, 89, 0), #f4a833 8%, #fff3d8 50%, #f4a833 92%, rgba(255, 189, 89, 0));
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.55);
+    opacity: 0.85;
+  }
+  .rw-track-btn {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .rw-track-btn:focus-visible {
+    outline: 2px solid #ffbd59;
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+  .rw-diamond {
+    display: block;
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    border: 1.2px solid rgba(255, 189, 89, 0.9);
+    background: rgba(5, 7, 12, 0.55);
+    box-shadow: 0 0 0 1px rgba(5, 7, 12, 0.35);
+    transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .rw-track-btn.is-past .rw-diamond {
+    background: #ffbd59;
+  }
+  .rw-track-btn.is-current .rw-diamond {
+    width: 11px;
+    height: 11px;
+    background: #fff3d8;
+    border-color: #ffbd59;
+    box-shadow:
+      0 0 0 1.5px #ffbd59,
+      0 0 12px 3px rgba(255, 189, 89, 0.75);
+  }
+  .rw-track-btn.is-preview .rw-diamond {
+    transform: rotate(45deg) scale(1.5);
+  }
+  @media (hover: hover) {
+    .rw-track-btn:hover .rw-diamond {
+      transform: rotate(45deg) scale(1.35);
+    }
+  }
+
+  .rw-chevrons {
+    display: none;
+  }
+
+  .rw-skip {
+    position: absolute;
+    z-index: 6;
+    top: calc(env(safe-area-inset-top, 0px) + 64px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+  }
+  .rw-skip-btn {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+    padding: 0;
+  }
+  .rw-skip-btn:focus-visible {
+    position: static;
+    width: auto;
+    height: auto;
+    clip: auto;
+    clip-path: none;
+    overflow: visible;
+    padding: 10px 14px;
+    border: 1px solid #ffbd59;
+    border-radius: 3px;
+    background: #05070c;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    outline: none;
+  }
+
+  .rw-toast {
+    position: absolute;
+    z-index: 40;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+    transform: translate(-50%, 10px);
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 189, 89, 0.7);
+    border-radius: 3px;
+    background: rgba(5, 7, 12, 0.92);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    max-width: calc(100% - 32px);
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .rw-toast.is-on {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  /* ---- Wide or landscape windows: a centered portrait column. ---- */
+  @media (min-aspect-ratio: 4/5) {
+    .rw-backdrop {
+      display: block;
+    }
+    .rw-frame {
+      inset: auto;
+      left: 50%;
+      top: 50%;
+      height: calc(100% - 2 * clamp(10px, 3vh, 28px));
+      aspect-ratio: 5 / 8;
+      max-width: calc(100% - 190px);
+      transform: translate(-50%, -50%);
+    }
+    .rw-player[data-mode="walk"] .rw-frame {
+      aspect-ratio: 3 / 2;
+    }
+    .rw-player[data-mode="walk"] .rw-panel:not(.rw-panel--adj) .rw-img {
+      object-fit: cover;
+    }
+    .rw-stage {
+      box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.9);
+    }
+    .rw-edge {
+      display: block;
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 189, 89, 0.55);
+      pointer-events: none;
+      z-index: 4;
+    }
+    .rw-top {
+      padding: 12px 8px 0 14px;
+    }
+    .rw-scrim-top {
+      height: 150px;
+    }
+    .rw-scrim-bottom {
+      height: 190px;
+    }
+    .rw-caption {
+      left: 22px;
+      right: 22px;
+      bottom: 22px;
+    }
+    .rw-track {
+      right: -58px;
+      top: 4%;
+      bottom: 4%;
+    }
+    .rw-toast {
+      bottom: 90px;
+    }
+  }
+  @media (min-aspect-ratio: 4/5) and (hover: hover) and (pointer: fine) {
+    .rw-chevrons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: absolute;
+      left: -64px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .rw-chev {
+      border: 1px solid rgba(255, 189, 89, 0.5);
+      background: rgba(5, 7, 12, 0.5);
+    }
+    .rw-chev:hover {
+      border-color: #ffbd59;
+      background: rgba(255, 189, 89, 0.1);
+    }
+  }
+  /* Phone held sideways: keep the chrome compact. */
+  @media (min-aspect-ratio: 4/5) and (max-height: 520px) {
+    .rw-caption-look .rw-didot {
+      font-size: 2.2rem;
+    }
+    .rw-track {
+      right: -52px;
+    }
+  }
+  .rw-player[data-mode="sky"] .rw-frame {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  type Credit = { name: string; instagram: string } | null;
+  type Frame = {
+    c: string;
+    b: string;
+    h: string;
+    alt: string;
+    el?: HTMLImageElement;
+    state?: "idle" | "loading" | "ready" | "dead";
+  };
+  type Look = { n: number; num: string; hero: number; designer: Credit; frames: Frame[] };
+  type Data = { url: string; total: number; looks: Look[]; finale: Frame[] };
+
+  // Timing and gesture thresholds (see the page report for the rationale).
+  const WALK_MS = 550; // stop-motion walk tempo, per frame
+  const HOLD_MS = 2400; // hold on the hero frame
+  const FINAL_BEAT_MS = 1100; // last finale frame, before the constellation
+  const PUSH = 0.035; // push-in scale across a frame
+  const FLASH_MS = 180;
+  const SCRUB_PX = 28; // horizontal drag distance per frame
+  const PRESS_MS = 260; // press-and-hold threshold
+  const SLOP_PX = 10; // movement that decides tap vs drag, and its axis
+  const SLIDE_MS = 360;
+  const SWIPE_FRACTION = 0.18; // of stage height
+  const SWIPE_VELOCITY = 0.45; // px per ms
+  const LOAD_TIMEOUT_MS = 12000;
+  const MAX_INFLIGHT = 4;
+
+  const dataEl = document.getElementById("rw-data");
+  const dlg = document.getElementById("rw-player") as HTMLDialogElement | null;
+  if (dataEl && dlg) init(JSON.parse(dataEl.textContent || "{}") as Data, dlg);
+
+  function init(data: Data, dlg: HTMLDialogElement) {
+    const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = dlg) =>
+      root.querySelector(sel) as T;
+    const $$ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) =>
+      Array.from(root.querySelectorAll(sel)) as T[];
+
+    const frameEl = $("[data-rw-frame]");
+    const stage = $("[data-rw-stage]");
+    const reel = $("[data-rw-reel]");
+    const cur = $("[data-rw-cur]");
+    const adj = $("[data-rw-adj]");
+    const flashEl = $("[data-rw-flash]");
+    const crowdEl = $("[data-rw-crowd]") as HTMLElement;
+    const shimmer = $("[data-rw-shimmer]");
+    const bars = $("[data-rw-bars]");
+    const tagWrap = $("[data-rw-tagwrap]");
+    const tagWord = $("[data-rw-tagword]");
+    const tagNum = $("[data-rw-tagnum]");
+    const ofEl = $("[data-rw-of]");
+    const pill = $("[data-rw-pill]");
+    const capWord = $("[data-rw-capword]");
+    const capNum = $("[data-rw-capnum]");
+    const credit = $("[data-rw-credit]");
+    const creditLink = $<HTMLAnchorElement>("[data-rw-creditlink]");
+    const creditName = $("[data-rw-creditname]");
+    const live = $("[data-rw-live]");
+    const toastEl = $("[data-rw-toast]");
+    const backdrop = $<HTMLImageElement>("[data-rw-backdrop]");
+    const pauseBtn = $<HTMLButtonElement>('[data-rw-act="pause"]');
+    const track = $("[data-rw-track]");
+    const trackBtns = $$<HTMLButtonElement>("[data-rw-jump]", dlg);
+    const sky = $("[data-rw-sky]");
+    const skyX = $("[data-rw-x]");
+    const skyTitle = $("#rw-sky-title");
+    const teaserTpl = $<HTMLTemplateElement>("[data-rw-skyteaser]");
+
+    const L = data.looks.length;
+    const POS_WALK = L;
+    const POS_SKY = L + 1;
+    const reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let motionOK = !reduceMQ.matches;
+    reduceMQ.addEventListener?.("change", (e) => (motionOK = !e.matches));
+
+    // ---------------- state ----------------
+    let isOpen = false;
+    let pos = 0;
+    let fi = 0;
+    let elapsed = 0;
+    let lastTs = 0;
+    let raf = 0;
+    let userPaused = false;
+    let holdPaused = false;
+    let gesturePaused = false;
+    let hiddenPaused = false;
+    let animating = false;
+    let pendingPos = -1;
+    let slideTimer = 0;
+    let adjPos = -1;
+    let shownEl: HTMLImageElement | null = null;
+    let opener: HTMLElement | null = null;
+    let useH = false;
+    let savedY = 0;
+    let scrubbing = false;
+    let shimmerTimer = 0;
+    let toastTimer = 0;
+    let segs: { i: number; fill: HTMLElement }[] = [];
+
+    const seqOf = (p: number): Frame[] =>
+      p >= 0 && p < L ? data.looks[p].frames : p === POS_WALK ? data.finale : [];
+    const heroOf = (p: number) => (p >= 0 && p < L ? data.looks[p].hero : -1);
+    const isAlive = (f?: Frame) => !!f && f.state !== "dead";
+    const nextAlive = (p: number, i: number) => {
+      const s = seqOf(p);
+      for (let j = i + 1; j < s.length; j++) if (isAlive(s[j])) return j;
+      return -1;
+    };
+    const prevAlive = (p: number, i: number) => {
+      const s = seqOf(p);
+      for (let j = i - 1; j >= 0; j--) if (isAlive(s[j])) return j;
+      return -1;
+    };
+    const firstAlive = (p: number) => nextAlive(p, -1);
+    const lastAlive = (p: number) => prevAlive(p, seqOf(p).length);
+    const durOf = (p: number, i: number) =>
+      i === heroOf(p) ? HOLD_MS : p === POS_WALK && i === lastAlive(p) ? FINAL_BEAT_MS : WALK_MS;
+    const playing = () => !userPaused && !holdPaused && !gesturePaused && !hiddenPaused && !animating;
+
+    // ---------------- loading ----------------
+    const queue: Frame[] = [];
+    let inflight = 0;
+
+    function want(list: Frame[]) {
+      queue.length = 0;
+      for (const f of list) if (!f.state || f.state === "idle") queue.push(f);
+      pump();
+    }
+    function pump() {
+      while (inflight < MAX_INFLIGHT && queue.length) {
+        const f = queue.shift()!;
+        if (!f.state || f.state === "idle") startLoad(f);
+      }
+    }
+    function startLoad(f: Frame) {
+      f.state = "loading";
+      inflight++;
+      const img = new Image();
+      img.decoding = "async";
+      img.alt = f.alt;
+      img.draggable = false;
+      img.className = "rw-img";
+      const primary = useH ? f.h : f.b;
+      const srcs = primary === f.c ? [f.c] : [primary, f.c];
+      let k = 0;
+      let settled = false;
+      let timer = 0;
+      const settle = (ok: boolean) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        inflight--;
+        if (ok) {
+          f.el = img;
+          f.state = "ready";
+          onReady(f);
+        } else {
+          f.state = "dead";
+          onDead(f);
+        }
+        pump();
+      };
+      const tryNext = () => {
+        if (settled) return;
+        clearTimeout(timer);
+        if (k >= srcs.length) return settle(false);
+        const src = srcs[k++];
+        timer = window.setTimeout(tryNext, LOAD_TIMEOUT_MS);
+        img.src = src;
+      };
+      img.onload = () => {
+        if (settled) return;
+        clearTimeout(timer);
+        const d = typeof img.decode === "function" ? img.decode() : Promise.resolve();
+        d.catch(() => {}).then(() => settle(img.naturalWidth > 0));
+      };
+      img.onerror = () => tryNext();
+      tryNext();
+    }
+
+    function preloadAround() {
+      const list: Frame[] = [];
+      const s = seqOf(pos);
+      // Current frame first, then the rest of the walk in order.
+      for (let j = fi; j < s.length; j++) list.push(s[j]);
+      for (let j = 0; j < fi; j++) list.push(s[j]);
+      if (pos + 1 <= POS_WALK) list.push(...seqOf(pos + 1).slice(0, 3));
+      if (pos - 1 >= 0) list.push(...seqOf(pos - 1).slice(0, 1));
+      want(list);
+    }
+
+    function onReady(f: Frame) {
+      if (!isOpen) return;
+      const s = seqOf(pos);
+      if (s[fi] === f) showFrame(fi);
+      if (adjPos >= 0 && adjPos < POS_SKY) {
+        const a = seqOf(adjPos);
+        if (a[firstAlive(adjPos)] === f && !adj.firstElementChild) fillAdj(adjPos);
+      }
+    }
+    function onDead(f: Frame) {
+      if (!isOpen) return;
+      const s = seqOf(pos);
+      const idx = s.indexOf(f);
+      if (idx < 0) return;
+      buildBars();
+      if (firstAlive(pos) < 0) {
+        // Every frame of this look failed: skip it.
+        goPos(pos + 1, { animate: false });
+        return;
+      }
+      if (idx === fi) {
+        const j = nextAlive(pos, fi);
+        if (j >= 0) showFrame(j);
+        else goPos(pos + 1, { animate: false });
+      } else {
+        paintBars();
+      }
+    }
+
+    // ---------------- display ----------------
+    function setLoading(on: boolean) {
+      clearTimeout(shimmerTimer);
+      if (!on) {
+        shimmer.hidden = true;
+        return;
+      }
+      shimmerTimer = window.setTimeout(() => (shimmer.hidden = false), 140);
+    }
+
+    function flash() {
+      if (!motionOK || !flashEl.animate) return;
+      flashEl.animate(
+        [{ opacity: 0 }, { opacity: 0.35, offset: 0.3 }, { opacity: 0 }],
+        { duration: FLASH_MS, easing: "ease-out" },
+      );
+      crowdFlashes();
+    }
+
+    // A handful of phone flashes from the guests lining the runway, spread
+    // across the hero hold. Deterministic per look (seeded by its number) so
+    // the same look always sparkles the same way; skipped under reduced
+    // motion and while the show is scrubbed or paused.
+    let crowdTimers: number[] = [];
+    function clearCrowd() {
+      crowdTimers.forEach((id) => clearTimeout(id));
+      crowdTimers = [];
+      crowdEl.replaceChildren();
+    }
+    function crowdFlashes() {
+      clearCrowd();
+      if (!motionOK) return;
+      let seed = (pos + 1) * 2654435761;
+      const rnd = () => {
+        seed = (seed + 0x6d2b79f5) >>> 0;
+        let x = seed;
+        x = Math.imul(x ^ (x >>> 15), x | 1);
+        x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+        return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+      };
+      const count = 4 + Math.floor(rnd() * 3);
+      for (let k = 0; k < count; k++) {
+        const left = rnd() < 0.5 ? 3 + rnd() * 27 : 70 + rnd() * 27;
+        const top = 42 + rnd() * 40;
+        const at = 120 + rnd() * (HOLD_MS - 700);
+        const size = 0.7 + rnd() * 0.9;
+        crowdTimers.push(
+          window.setTimeout(() => {
+            if (!isOpen || scrubbing || !playing()) return;
+            const dot = document.createElement("span");
+            dot.style.left = `${left.toFixed(1)}%`;
+            dot.style.top = `${top.toFixed(1)}%`;
+            crowdEl.appendChild(dot);
+            const a = dot.animate(
+              [
+                { opacity: 0, transform: `scale(${(size * 0.4).toFixed(2)})` },
+                { opacity: 0.95, transform: `scale(${size.toFixed(2)})`, offset: 0.25 },
+                { opacity: 0, transform: `scale(${(size * 1.6).toFixed(2)})` },
+              ],
+              { duration: 170 + rnd() * 90, easing: "ease-out" },
+            );
+            a.onfinish = () => dot.remove();
+          }, at),
+        );
+      }
+    }
+
+    function showFrame(i: number, opts: { flash?: boolean } = {}) {
+      const s = seqOf(pos);
+      const f = s[i];
+      if (!f) return;
+      const changed = i !== fi;
+      fi = i;
+      if (changed) elapsed = 0;
+      if (f.state === "ready" && f.el) {
+        const el = f.el;
+        const landed = shownEl !== el;
+        if (el.parentElement !== cur) cur.appendChild(el);
+        if (shownEl && shownEl !== el) {
+          shownEl.classList.remove("is-on");
+          shownEl.style.transform = "";
+        }
+        el.classList.add("is-on");
+        if (landed) {
+          el.style.transform = "";
+          elapsed = 0;
+        }
+        shownEl = el;
+        const src = el.currentSrc || el.src;
+        if (backdrop.getAttribute("src") !== src) backdrop.src = src;
+        setLoading(false);
+        if (landed && i === heroOf(pos) && !scrubbing && opts.flash !== false) flash();
+      } else {
+        setLoading(true);
+        if (f.state !== "loading") preloadAround();
+      }
+      paintBars();
+    }
+
+    function buildBars() {
+      bars.replaceChildren();
+      segs = [];
+      const s = seqOf(pos);
+      const hero = heroOf(pos);
+      s.forEach((f, i) => {
+        if (!isAlive(f)) return;
+        const seg = document.createElement("span");
+        seg.className = "rw-seg" + (i === hero ? " is-hero" : "");
+        const fill = document.createElement("span");
+        fill.className = "rw-seg-fill";
+        seg.appendChild(fill);
+        bars.appendChild(seg);
+        segs.push({ i, fill });
+      });
+    }
+    function paintBars() {
+      for (const s of segs) s.fill.style.transform = `scaleX(${s.i < fi ? 1 : 0})`;
+    }
+
+    function updateChrome(swing: boolean) {
+      const inLook = pos < L;
+      if (inLook) {
+        const look = data.looks[pos];
+        tagWord.textContent = "Look";
+        tagNum.textContent = look.num;
+        tagNum.hidden = false;
+        capWord.textContent = "Look";
+        capNum.textContent = look.num;
+        if (look.designer) {
+          creditName.textContent = look.designer.name;
+          creditLink.href = look.designer.instagram;
+          credit.hidden = false;
+        } else {
+          credit.hidden = true;
+        }
+      } else {
+        tagWord.textContent = "Finale";
+        tagNum.textContent = "";
+        tagNum.hidden = true;
+        capWord.textContent = "Finale";
+        capNum.textContent = "";
+        credit.hidden = true;
+      }
+      ofEl.hidden = !inLook || isPausedVisible();
+      updatePauseUi();
+      trackBtns.forEach((b, k) => {
+        const past = k < pos;
+        const now = k === pos;
+        b.classList.toggle("is-past", past);
+        b.classList.toggle("is-current", now);
+        if (now) b.setAttribute("aria-current", "step");
+        else b.removeAttribute("aria-current");
+      });
+      if (swing && motionOK && tagWrap.animate) {
+        tagWrap.animate(
+          [
+            { transform: "rotate(-18deg)" },
+            { transform: "rotate(8deg)", offset: 0.42 },
+            { transform: "rotate(-3.5deg)", offset: 0.68 },
+            { transform: "rotate(1.2deg)", offset: 0.86 },
+            { transform: "rotate(0deg)" },
+          ],
+          { duration: 520, easing: "cubic-bezier(.25,.8,.35,1)" },
+        );
+      }
+    }
+
+    const isPausedVisible = () => userPaused || holdPaused;
+    function updatePauseUi() {
+      pauseBtn.setAttribute("aria-pressed", String(userPaused));
+      pauseBtn.setAttribute("aria-label", userPaused ? "Play" : "Pause");
+      const showPill = isPausedVisible() && pos < POS_SKY;
+      pill.hidden = !showPill;
+      ofEl.hidden = pos >= L || showPill;
+    }
+
+    function announce(text: string) {
+      live.textContent = text;
+    }
+    function syncHash() {
+      const hash = pos < L ? `#look-${pos + 1}` : "#finale";
+      if (location.hash !== hash) history.replaceState(history.state, "", hash);
+    }
+
+    // ---------------- sky (La Constelación) ----------------
+    function showSky() {
+      sky.hidden = false;
+      sky.scrollTop = 0;
+      frameEl.inert = true;
+      skyX.classList.remove("is-assembling");
+      void skyX.offsetWidth;
+      skyX.classList.add("is-assembling");
+      requestAnimationFrame(() => sky.classList.add("is-on"));
+      if (!motionOK) sky.classList.add("is-on");
+      skyTitle.focus({ preventScroll: true });
+      clearTimeout(shimmerTimer);
+      shimmer.hidden = true;
+    }
+    function hideSky() {
+      sky.classList.remove("is-on");
+      sky.hidden = true;
+      frameEl.inert = false;
+    }
+
+    // ---------------- position changes ----------------
+    function commit(np: number, dir = 1) {
+      const prev = pos;
+      if (np < POS_SKY && firstAlive(np) < 0) {
+        // Nothing to show here (every frame failed): keep going.
+        const skip = np + (dir >= 0 ? 1 : -1);
+        if (skip >= 0 && skip <= POS_SKY) return commit(skip, dir);
+      }
+      pos = np;
+      clearCrowd();
+      reel.style.transition = "none";
+      reel.style.transform = "";
+      adj.hidden = true;
+      adj.replaceChildren();
+      adj.classList.remove("is-walk");
+      adjPos = -1;
+      animating = false;
+      pendingPos = -1;
+      dlg.dataset.mode = np < L ? "look" : np === POS_WALK ? "walk" : "sky";
+      if (np === POS_SKY) {
+        cur.replaceChildren();
+        shownEl = null;
+        queue.length = 0;
+        showSky();
+        announce("La Constelación del Runway");
+        syncHash();
+        updateChrome(false);
+        return;
+      }
+      if (prev === POS_SKY) hideSky();
+      cur.replaceChildren();
+      shownEl = null;
+      fi = firstAlive(np);
+      elapsed = 0;
+      buildBars();
+      updateChrome(prev !== np);
+      preloadAround();
+      showFrame(fi, { flash: false });
+      syncHash();
+      announce(np < L ? `Look ${np + 1} of ${L}` : "Finale");
+    }
+
+    function prepAdj(np: number, dir: number) {
+      adj.replaceChildren();
+      adj.hidden = false;
+      adj.style.transform = `translateY(${dir * 100}%)`;
+      adj.classList.toggle("is-walk", np === POS_WALK);
+      adjPos = np;
+      fillAdj(np);
+    }
+    function fillAdj(np: number) {
+      if (np === POS_SKY) {
+        adj.appendChild(teaserTpl.content.cloneNode(true));
+        return;
+      }
+      const s = seqOf(np);
+      const f = s[firstAlive(np)];
+      if (f && f.state === "ready" && f.el) {
+        const c = f.el.cloneNode() as HTMLImageElement;
+        c.classList.add("is-on");
+        c.style.transform = "";
+        adj.replaceChildren(c);
+      }
+    }
+
+    function slideTo(np: number, dir: number) {
+      if (adjPos !== np) prepAdj(np, dir);
+      animating = true;
+      pendingPos = np;
+      reel.style.transition = `transform ${SLIDE_MS}ms cubic-bezier(.2,.75,.2,1)`;
+      reel.style.transform = `translateY(${-dir * 100}%)`;
+      clearTimeout(slideTimer);
+      slideTimer = window.setTimeout(finishSlide, SLIDE_MS + 20);
+    }
+    function finishSlide() {
+      if (!animating) return;
+      clearTimeout(slideTimer);
+      const np = pendingPos;
+      const dir = np >= pos ? 1 : -1;
+      commit(np, dir);
+    }
+
+    function goPos(np: number, opts: { animate?: boolean } = {}) {
+      if (animating) finishSlide();
+      if (np < 0 || np > POS_SKY) return;
+      if (np === pos) {
+        // Same look again: restart its walk.
+        if (np < POS_SKY) {
+          const f0 = firstAlive(np);
+          if (f0 >= 0) showFrame(f0);
+        }
+        return;
+      }
+      const dir = np > pos ? 1 : -1;
+      const canSlide =
+        motionOK && opts.animate !== false && pos < POS_SKY && np < POS_SKY && Math.abs(np - pos) === 1;
+      if (canSlide) slideTo(np, dir);
+      else commit(np, dir);
+    }
+
+    // Relative moves resolve against where an in-flight slide is heading,
+    // so rapid key presses or taps never get swallowed.
+    function goRel(delta: number) {
+      if (animating) finishSlide();
+      goPos(pos + delta);
+    }
+
+    function stepNext() {
+      if (animating) finishSlide();
+      if (pos >= POS_SKY) return;
+      const j = nextAlive(pos, fi);
+      if (j >= 0) showFrame(j);
+      else goPos(pos + 1);
+    }
+    function stepPrev() {
+      if (animating) finishSlide();
+      if (pos >= POS_SKY) return;
+      const j = prevAlive(pos, fi);
+      if (j >= 0) showFrame(j);
+      else if (pos > 0) goPos(pos - 1);
+      else showFrame(fi);
+    }
+
+    // ---------------- clock ----------------
+    function tick(ts: number) {
+      raf = requestAnimationFrame(tick);
+      const dt = lastTs ? Math.min(100, ts - lastTs) : 0;
+      lastTs = ts;
+      if (!isOpen || pos >= POS_SKY) return;
+      const f = seqOf(pos)[fi];
+      const ready = !!f && f.state === "ready" && shownEl === f.el;
+      const d = durOf(pos, fi);
+      if (ready && playing()) {
+        elapsed += dt;
+        if (elapsed >= d) {
+          elapsed = 0;
+          const j = nextAlive(pos, fi);
+          if (j >= 0) showFrame(j);
+          else goPos(pos + 1);
+          return;
+        }
+      }
+      const p = ready ? Math.min(1, elapsed / d) : 0;
+      if (shownEl && motionOK) shownEl.style.transform = `scale(${(1 + PUSH * p).toFixed(4)})`;
+      const seg = segs.find((s) => s.i === fi);
+      if (seg) seg.fill.style.transform = `scaleX(${p.toFixed(4)})`;
+    }
+
+    // ---------------- open / close ----------------
+    function lockScroll() {
+      savedY = window.scrollY;
+      const b = document.body.style;
+      b.position = "fixed";
+      b.top = `-${savedY}px`;
+      b.left = "0";
+      b.right = "0";
+      b.width = "100%";
+      document.documentElement.classList.add("rw-locked");
+    }
+    function unlockScroll() {
+      const b = document.body.style;
+      b.position = "";
+      b.top = "";
+      b.left = "";
+      b.right = "";
+      b.width = "";
+      const html = document.documentElement;
+      html.classList.remove("rw-locked");
+      const prevBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      window.scrollTo(0, savedY);
+      html.style.scrollBehavior = prevBehavior;
+    }
+
+    function open(p: number, from: HTMLElement | null) {
+      if (isOpen) {
+        goPos(p, { animate: false });
+        return;
+      }
+      opener = from;
+      lockScroll();
+      dlg.showModal();
+      isOpen = true;
+      dlg.focus({ preventScroll: true });
+      useH = stage.getBoundingClientRect().height > 1000;
+      userPaused = false;
+      holdPaused = false;
+      gesturePaused = false;
+      hiddenPaused = document.hidden;
+      pos = -1;
+      commit(Math.max(0, Math.min(POS_SKY, p)));
+      lastTs = 0;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(tick);
+    }
+
+    function close(opts: { toLookbook?: boolean } = {}) {
+      clearCrowd();
+      if (!isOpen) return;
+      isOpen = false;
+      cancelAnimationFrame(raf);
+      clearTimeout(slideTimer);
+      animating = false;
+      queue.length = 0;
+      hideSky();
+      dlg.close();
+      unlockScroll();
+      cur.replaceChildren();
+      adj.replaceChildren();
+      shownEl = null;
+      history.replaceState(history.state, "", location.pathname + location.search);
+      const lastPos = pos;
+      const card =
+        document.querySelector<HTMLElement>(`[data-rw-card="${lastPos < L ? lastPos : "finale"}"]`);
+      if (opts.toLookbook || !opener || !document.contains(opener)) {
+        if (opts.toLookbook) document.getElementById("lookbook")?.scrollIntoView();
+        else card?.scrollIntoView({ block: "center" });
+        card?.focus({ preventScroll: true });
+      } else {
+        opener.focus({ preventScroll: true });
+      }
+      opener = null;
+    }
+
+    // ---------------- share + toast ----------------
+    function toast(text: string) {
+      toastEl.textContent = text;
+      toastEl.classList.add("is-on");
+      clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toastEl.classList.remove("is-on"), 2200);
+    }
+    async function copyText(text: string) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        dlg.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try {
+          ok = document.execCommand("copy");
+        } catch {
+          ok = false;
+        }
+        ta.remove();
+        return ok;
+      }
+    }
+    async function share() {
+      const n = pos < L ? pos + 1 : 0;
+      const url = n ? `${data.url}#look-${n}` : `${data.url}#finale`;
+      const title = n ? `The Runway · Look ${n}` : "The Runway · Finale";
+      (window as any).trackConversion?.("gala_runway_share", { context: n ? `look_${n}` : "finale" });
+      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+      if (typeof nav.share === "function" && (!nav.canShare || nav.canShare({ title, url }))) {
+        try {
+          await nav.share({ title, url });
+          return;
+        } catch (err) {
+          if ((err as DOMException)?.name === "AbortError") return;
+        }
+      }
+      const ok = await copyText(url);
+      toast(ok ? "Link copied" : url);
+    }
+
+    // ---------------- gestures on the stage ----------------
+    let pid: number | null = null;
+    let gx = 0;
+    let gy = 0;
+    let gMode: "pending" | "hold" | "scrub" | "swipe" | "none" = "none";
+    let holdTimer = 0;
+    let scrubFrom = 0;
+    let swipeDir = 0;
+    let samples: { t: number; y: number }[] = [];
+
+    stage.addEventListener("contextmenu", (e) => e.preventDefault());
+    stage.addEventListener("dragstart", (e) => e.preventDefault());
+
+    stage.addEventListener("pointerdown", (e) => {
+      if (!isOpen || pos >= POS_SKY) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (pid !== null) return;
+      if (animating) finishSlide();
+      pid = e.pointerId;
+      try {
+        stage.setPointerCapture(e.pointerId);
+      } catch {}
+      gx = e.clientX;
+      gy = e.clientY;
+      gMode = "pending";
+      samples = [{ t: e.timeStamp, y: e.clientY }];
+      clearTimeout(holdTimer);
+      holdTimer = window.setTimeout(() => {
+        if (gMode === "pending") {
+          gMode = "hold";
+          holdPaused = true;
+          updatePauseUi();
+        }
+      }, PRESS_MS);
+    });
+
+    stage.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== pid) return;
+      const dx = e.clientX - gx;
+      const dy = e.clientY - gy;
+      samples.push({ t: e.timeStamp, y: e.clientY });
+      if (samples.length > 6) samples.shift();
+      if (gMode === "pending" && Math.hypot(dx, dy) > SLOP_PX) {
+        clearTimeout(holdTimer);
+        if (Math.abs(dx) > Math.abs(dy)) {
+          gMode = "scrub";
+          scrubbing = true;
+          scrubFrom = fi;
+        } else {
+          gMode = "swipe";
+          swipeDir = 0;
+        }
+        gesturePaused = true;
+      }
+      if (gMode === "scrub") {
+        const steps = Math.trunc(dx / SCRUB_PX);
+        let target = scrubFrom;
+        const dirStep = steps > 0 ? 1 : -1;
+        for (let n = 0; n < Math.abs(steps); n++) {
+          const j = dirStep > 0 ? nextAlive(pos, target) : prevAlive(pos, target);
+          if (j < 0) break;
+          target = j;
+        }
+        if (target !== fi) {
+          showFrame(target);
+          if (shownEl) shownEl.style.transform = "";
+        }
+      } else if (gMode === "swipe") {
+        const dir = dy < 0 ? 1 : -1;
+        const np = pos + dir;
+        const allowed = np >= 0 && np <= POS_SKY;
+        let off = dy;
+        if (!allowed) {
+          off = dy * 0.25;
+          if (adjPos !== -1) {
+            adj.hidden = true;
+            adj.replaceChildren();
+            adjPos = -1;
+          }
+          swipeDir = 0;
+        } else if (dir !== swipeDir || adjPos !== np) {
+          swipeDir = dir;
+          prepAdj(np, dir);
+        }
+        reel.style.transition = "none";
+        reel.style.transform = `translateY(${off}px)`;
+      }
+    });
+
+    function endGesture(e: PointerEvent, cancelled: boolean) {
+      if (e.pointerId !== pid) return;
+      pid = null;
+      clearTimeout(holdTimer);
+      const dx = e.clientX - gx;
+      const dy = e.clientY - gy;
+      const mode = gMode;
+      gMode = "none";
+      if (mode === "pending" && !cancelled) {
+        const r = stage.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        if (x < 0.35) stepPrev();
+        else stepNext();
+      } else if (mode === "hold") {
+        holdPaused = false;
+        updatePauseUi();
+      } else if (mode === "scrub") {
+        scrubbing = false;
+        gesturePaused = false;
+        elapsed = 0;
+      } else if (mode === "swipe") {
+        gesturePaused = false;
+        const h = stage.clientHeight || 1;
+        const dir = dy < 0 ? 1 : -1;
+        const np = pos + dir;
+        const first = samples[0];
+        const last = samples[samples.length - 1];
+        const v = first && last && last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0;
+        const fast = Math.abs(v) > SWIPE_VELOCITY && Math.sign(v) === Math.sign(dy);
+        const allowed = np >= 0 && np <= POS_SKY && adjPos === np;
+        if (!cancelled && allowed && (Math.abs(dy) > h * SWIPE_FRACTION || fast)) {
+          animating = true;
+          pendingPos = np;
+          const ms = motionOK ? SLIDE_MS * 0.8 : 120;
+          reel.style.transition = `transform ${ms}ms cubic-bezier(.2,.75,.2,1)`;
+          reel.style.transform = `translateY(${-dir * 100}%)`;
+          clearTimeout(slideTimer);
+          slideTimer = window.setTimeout(finishSlide, ms + 20);
+        } else {
+          reel.style.transition = `transform 220ms cubic-bezier(.2,.75,.2,1)`;
+          reel.style.transform = "translateY(0)";
+          window.setTimeout(() => {
+            if (!animating && pid === null) {
+              adj.hidden = true;
+              adj.replaceChildren();
+              adjPos = -1;
+            }
+          }, 240);
+        }
+      }
+      void dx;
+    }
+    stage.addEventListener("pointerup", (e) => endGesture(e, false));
+    stage.addEventListener("pointercancel", (e) => endGesture(e, true));
+
+    // Track: tap a diamond, or slide a finger along the rail.
+    trackBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        const k = Number(b.dataset.rwJump);
+        if (k !== pos) goPos(k, { animate: false });
+        else goPos(k);
+      }),
+    );
+    let trackPid: number | null = null;
+    let trackY0 = 0;
+    let trackMoved = false;
+    const trackIndexAt = (y: number) => {
+      const r = track.getBoundingClientRect();
+      const k = Math.floor(((y - r.top) / r.height) * L);
+      return Math.max(0, Math.min(L - 1, k));
+    };
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse") return;
+      trackPid = e.pointerId;
+      trackY0 = e.clientY;
+      trackMoved = false;
+    });
+    track.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== trackPid) return;
+      if (!trackMoved && Math.abs(e.clientY - trackY0) > SLOP_PX) {
+        trackMoved = true;
+        try {
+          track.setPointerCapture(e.pointerId);
+        } catch {}
+      }
+      if (trackMoved) {
+        const k = trackIndexAt(e.clientY);
+        trackBtns.forEach((b, i) => b.classList.toggle("is-preview", i === k));
+      }
+    });
+    const trackEnd = (e: PointerEvent) => {
+      if (e.pointerId !== trackPid) return;
+      trackPid = null;
+      trackBtns.forEach((b) => b.classList.remove("is-preview"));
+      if (trackMoved) {
+        const k = trackIndexAt(e.clientY);
+        goPos(k, { animate: false });
+        trackMoved = false;
+        // Swallow the click that follows a slide.
+        const swallow = (ev: Event) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+        track.addEventListener("click", swallow, { capture: true, once: true });
+        window.setTimeout(() => track.removeEventListener("click", swallow, true), 350);
+      }
+    };
+    track.addEventListener("pointerup", trackEnd);
+    track.addEventListener("pointercancel", trackEnd);
+
+    // Buttons.
+    dlg.addEventListener("click", (e) => {
+      const t = e.target as Element;
+      const act = t.closest<HTMLElement>("[data-rw-act]")?.dataset.rwAct;
+      if (act === "pause") {
+        userPaused = !userPaused;
+        updatePauseUi();
+      } else if (act === "share") share();
+      else if (act === "prev-frame") stepPrev();
+      else if (act === "next-frame") stepNext();
+      else if (act === "prev-look") {
+        if (pos >= POS_SKY) commit(L - 1, -1);
+        else goRel(-1);
+      } else if (act === "next-look") goRel(1);
+      if (t.closest("[data-rw-close]")) close();
+      const star = t.closest<HTMLElement>("[data-rw-star]");
+      if (star) commit(Number(star.dataset.rwStar));
+      if (t.closest("[data-rw-again]")) commit(0);
+      if (t.closest("[data-rw-browse]")) close({ toLookbook: true });
+    });
+
+    // Star thumbnails load on first hover or focus.
+    const loadTip = (e: Event) => {
+      const img = (e.target as Element).closest?.("[data-rw-star]")?.querySelector<HTMLImageElement>("img[data-src]");
+      if (img && !img.src) img.src = img.dataset.src || "";
+    };
+    sky.addEventListener("pointerover", loadTip);
+    sky.addEventListener("focusin", loadTip);
+
+    // Keyboard.
+    const focusables = () =>
+      Array.from(
+        dlg.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => el.getClientRects().length > 0 && !el.closest("[inert]") && !el.closest("[hidden]"));
+
+    dlg.addEventListener("keydown", (e) => {
+      if (!isOpen) return;
+      const target = e.target as HTMLElement;
+      const onControl = !!target.closest?.("button, a");
+      if (e.key === "Tab") {
+        const f = focusables();
+        if (!f.length) return;
+        const first = f[0];
+        const last = f[f.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && (active === first || active === dlg || !f.includes(active as HTMLElement))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (active === last || !f.includes(active as HTMLElement))) {
+          e.preventDefault();
+          first.focus();
+        }
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key === "Home") {
+        e.preventDefault();
+        goPos(0, { animate: false });
+        return;
+      }
+      if (pos >= POS_SKY) {
+        // The constellation scrolls natively; only Up returns to the looks.
+        if (e.key === "ArrowUp" && sky.scrollTop <= 0) {
+          e.preventDefault();
+          commit(L - 1, -1);
+        }
+        return;
+      }
+      switch (e.key) {
+        case "ArrowRight":
+          e.preventDefault();
+          stepNext();
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          stepPrev();
+          break;
+        case "ArrowDown":
+        case "PageDown":
+          e.preventDefault();
+          goRel(1);
+          break;
+        case "ArrowUp":
+        case "PageUp":
+          e.preventDefault();
+          goRel(-1);
+          break;
+        case " ":
+        case "Spacebar":
+          if (onControl) return;
+          e.preventDefault();
+          userPaused = !userPaused;
+          updatePauseUi();
+          break;
+      }
+    });
+    dlg.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      close();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      hiddenPaused = document.hidden;
+    });
+
+    // ---------------- page wiring ----------------
+    // Lookbook cards: links to the full photo without JS, buttons with it.
+    $$<HTMLAnchorElement>("a[data-rw-card]").forEach((a) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      for (const attr of Array.from(a.attributes)) {
+        if (attr.name !== "href") btn.setAttribute(attr.name, attr.value);
+      }
+      btn.append(...Array.from(a.childNodes));
+      a.replaceWith(btn);
+    });
+
+    const posFromKey = (v: string | undefined) => {
+      if (v === "finale") return POS_WALK;
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 0 && n < L ? n : -1;
+    };
+    document.addEventListener("click", (e) => {
+      const el = (e.target as Element).closest?.<HTMLElement>("[data-rw-open]");
+      if (!el || dlg.contains(el)) return;
+      const p = posFromKey(el.dataset.rwOpen);
+      if (p < 0) return;
+      e.preventDefault();
+      open(p, el);
+    });
+
+    function fromHash() {
+      const h = location.hash;
+      const m = /^#look-(\d{1,3})$/.exec(h);
+      if (m) {
+        const n = Number(m[1]);
+        if (n >= 1 && n <= L) {
+          open(n - 1, null);
+          return;
+        }
+        // Not a look: fall back to the cover.
+        history.replaceState(history.state, "", location.pathname + location.search);
+        window.scrollTo(0, 0);
+        return;
+      }
+      if (h === "#finale") open(POS_WALK, null);
+    }
+    window.addEventListener("hashchange", () => {
+      if (!isOpen) fromHash();
+    });
+    fromHash();
+
+    // Debug/QA handle (read-only snapshot of the player state).
+    (window as any).__runway = {
+      state: () => ({ isOpen, pos, fi, elapsed, userPaused, holdPaused, animating, mode: dlg.dataset.mode }),
+    };
+  }
+</script>

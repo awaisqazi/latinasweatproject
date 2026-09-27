@@ -68,8 +68,18 @@ if (running !== total) {
           </div>
           <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-1 sm:pb-1">
             <p class="max-w-xl text-base leading-relaxed text-white/65">{chapter.detail}</p>
-            <p class="text-[11px] font-extrabold uppercase tracking-[0.26em] text-white/45">
-              {chapter.count} photos
+            <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-extrabold uppercase tracking-[0.26em] text-white/45">
+              {chapter.key === "afterdark" && (
+                <a
+                  href="/gala/fashion-show"
+                  class="link-underline text-accent-gold hover:text-white"
+                  data-conversion-event="gala_runway_open"
+                  data-conversion-context="gala_album_chapter"
+                >
+                  Watch the runway replay &rarr;
+                </a>
+              )}
+              <span>{chapter.count} photos</span>
             </p>
           </div>
         </header>

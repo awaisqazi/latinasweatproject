@@ -1,0 +1,394 @@
+---
+// The Runway, first screen: the finale walk (album #266) full-bleed, a navy
+// scrim, rising gold motes, and the title block hung from a garment tag.
+// Portrait crop on phones, landscape on wide screens (local webp renders
+// made from the Flickr _h, see public/images/gala/2026/runway/).
+import { galaRunway } from "@/data/galaFashionShow2026";
+import { runwayTotal, pad2 } from "./runwayData";
+
+const IMG = "/images/gala/2026/runway";
+
+// A sparse, deterministic field of motes (motion-safe only).
+const motes = Array.from({ length: 18 }, (_, i) => ({
+  left: (i * 37 + 11) % 100,
+  size: i % 6 === 0 ? 5 : 2 + (i % 3),
+  duration: 12 + (i % 5) * 2.6,
+  delay: -((i * 1.9) % 14),
+  drift: (i % 2 === 0 ? 1 : -1) * (10 + (i % 4) * 8),
+  peak: 0.28 + (i % 3) * 0.14,
+  bokeh: i % 6 === 0,
+}));
+---
+
+<section class="rw-cover relative isolate flex overflow-hidden" aria-labelledby="rw-title">
+  <picture class="rw-cover-pic absolute inset-0 -z-10 block" aria-hidden="true">
+    <source media="(max-aspect-ratio: 4/5)" srcset={`${IMG}/cover-portrait-1000.webp`} type="image/webp" />
+    <img
+      src={`${IMG}/cover-1600.webp`}
+      alt=""
+      width="1600"
+      height="1067"
+      fetchpriority="high"
+      decoding="async"
+      class="rw-cover-img h-full w-full object-cover"
+      draggable="false"
+    />
+  </picture>
+  <div class="rw-cover-scrim pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+  <div class="gala-lattice pointer-events-none absolute inset-0 -z-10 opacity-[0.04]" aria-hidden="true"></div>
+  <div class="absolute inset-x-0 top-0 h-px gala-foil-rule" aria-hidden="true"></div>
+
+  <div class="rw-motes pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    {
+      motes.map((m) => (
+        <span
+          class:list={["rw-mote", m.bokeh && "rw-mote--bokeh"]}
+          style={`left:${m.left}%;width:${m.size}px;height:${m.size}px;--drift:${m.drift}px;--peak:${m.peak};animation-duration:${m.duration}s;animation-delay:${m.delay}s;`}
+        />
+      ))
+    }
+  </div>
+
+  <a href="/gala" class="rw-back">
+    <span aria-hidden="true">←</span> Gala recap
+  </a>
+
+  <div class="rw-cover-body relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 text-center sm:px-6">
+    {/* The garment tag hangs from a gold string at the top of the title block. */}
+    <div class="rw-cover-hang" aria-hidden="true">
+      <span class="rw-cover-string"></span>
+      <span class="rw-cover-tag rw-tag rw-tag--top">
+        <span class="rw-tag__eyelet"></span>
+        <span class="rw-tag__word">Look</span>
+        <span class="rw-tag__num">01 · {pad2(runwayTotal)}</span>
+      </span>
+    </div>
+
+    <p class="rw-rise mt-5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-accent-gold min-[400px]:text-[11px] sm:mt-6 sm:text-xs sm:tracking-[0.32em]">
+      {galaRunway.eyebrow}
+    </p>
+    <h1 id="rw-title" class="rw-rise mt-2 font-display text-[3.6rem] font-medium italic leading-[0.95] tracking-tight sm:text-8xl" style="animation-delay:0.06s;">
+      <span class="gala-foil rw-cover-title">{galaRunway.title}</span>
+    </h1>
+    <div class="rw-rise mt-4 flex items-center justify-center gap-3 sm:mt-5" style="animation-delay:0.12s;" aria-hidden="true">
+      <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+      <span class="h-1.5 w-1.5 rotate-45 bg-accent-gold"></span>
+      <span class="h-px w-12 gala-foil-rule sm:w-20"></span>
+    </div>
+    <p class="rw-rise mt-4 max-w-md text-balance text-base font-medium leading-relaxed text-white/90 sm:max-w-xl sm:text-lg" style="animation-delay:0.18s;">
+      Twenty looks. Six designers. One night on the fourth floor of the MCA.
+    </p>
+
+    <div class="rw-rise mt-6 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:w-auto sm:flex-row" style="animation-delay:0.26s;">
+      <a
+        href="#lookbook"
+        data-rw-open="0"
+        data-conversion-event="gala_runway_start"
+        data-conversion-context="runway_cover"
+        class="gala-btn gala-btn--gold gala-sheen group inline-flex items-center justify-center gap-3 px-8 py-3.5 text-base font-extrabold sm:py-4"
+      >
+        <svg class="relative z-[1] h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" /></svg>
+        <span class="relative z-[1]">Start the show</span>
+      </a>
+      <a
+        href="#lookbook"
+        class="gala-btn gala-btn--ghost rw-ghost-solid inline-flex items-center justify-center gap-3 px-7 py-3.5 text-base font-extrabold sm:py-4"
+      >
+        Browse the looks
+        <svg class="h-4 w-4 text-accent-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </a>
+    </div>
+
+    <p class="rw-rise rw-hint mt-5 sm:mt-6" style="animation-delay:0.34s;">
+      <span class="rw-hint-item">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.4" fill="currentColor" /><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.1" opacity="0.6" /></svg>
+        Tap to step
+      </span>
+      <span class="rw-hint-dot" aria-hidden="true">·</span>
+      <span class="rw-hint-item">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13.5V3m0 0L4 7m4-4l4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        Swipe up for the next look
+      </span>
+      <span class="rw-hint-dot" aria-hidden="true">·</span>
+      <span class="rw-hint-item">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.3" y="3.5" width="2.4" height="9" rx="0.6" fill="currentColor" /><rect x="9.3" y="3.5" width="2.4" height="9" rx="0.6" fill="currentColor" /></svg>
+        Hold to pause
+      </span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .rw-cover {
+    min-height: 100vh;
+    align-items: flex-end;
+  }
+  @supports (height: 100svh) {
+    .rw-cover {
+      min-height: 100svh;
+    }
+  }
+  .rw-cover {
+    background: linear-gradient(180deg, #0b1320, #05070c);
+  }
+  .rw-cover-img {
+    object-position: 50% 50%;
+  }
+  /* Phones: the portrait crop sits width-fitted at the top (faces land in
+     the upper third) and the title block sits below them, never on them. */
+  @media (max-aspect-ratio: 4/5) {
+    .rw-cover-pic {
+      bottom: auto;
+      height: min(100%, 166.7vw);
+      -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    }
+    .rw-cover-img {
+      object-position: 50% 0;
+    }
+  }
+  .rw-cover-scrim {
+    background:
+      linear-gradient(0deg, rgba(5, 7, 12, 0.97) 0%, rgba(11, 19, 32, 0.88) 30%, rgba(11, 19, 32, 0.4) 56%, rgba(11, 19, 32, 0.12) 72%, rgba(5, 7, 12, 0.55) 100%);
+  }
+  .rw-cover-body {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4.5rem);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.25rem);
+  }
+  @media (min-width: 640px) {
+    .rw-cover-body {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
+    }
+  }
+  /* Short landscape windows (laptops, phones sideways): a tighter block so
+     the tag hangs below the walkers' faces, which sit near 40% height. */
+  @media (min-aspect-ratio: 4/5) and (max-height: 860px) {
+    .rw-cover-body {
+      padding-bottom: 1.5rem;
+    }
+    .rw-cover-body :global(h1) {
+      font-size: clamp(3.4rem, 10vh, 5.25rem);
+    }
+    .rw-cover-body .rw-cover-string {
+      height: 22px;
+    }
+    .rw-cover-tag {
+      padding: 0.95rem 0.8rem 0.45rem;
+    }
+    .rw-cover-tag .rw-tag__num {
+      font-size: 1.15rem;
+    }
+  }
+  .rw-cover-title {
+    padding: 0 0.08em 0.06em 0.02em;
+    filter: drop-shadow(0 2px 18px rgba(0, 0, 0, 0.6));
+  }
+
+  .rw-back {
+    position: absolute;
+    z-index: 2;
+    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    left: calc(env(safe-area-inset-left, 0px) + 0.85rem);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 0.95rem;
+    border: 1px solid rgba(255, 189, 89, 0.4);
+    border-radius: 3px;
+    background: rgba(5, 7, 12, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .rw-back:hover {
+    border-color: #ffbd59;
+    color: #ffbd59;
+  }
+  .rw-back:focus-visible {
+    outline: 2px solid #ffbd59;
+    outline-offset: 2px;
+  }
+
+  /* The hanging tag: a gold string, then the tag, swaying on the string. */
+  .rw-cover-hang {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: 50% 0;
+  }
+  .rw-cover-string {
+    display: block;
+    width: 1px;
+    height: 34px;
+    background: linear-gradient(180deg, rgba(255, 189, 89, 0), #ffbd59 45%, #fff3d8);
+  }
+  @media (min-width: 640px) {
+    .rw-cover-string {
+      height: 52px;
+    }
+  }
+  /* Phone held sideways: the photo takes the first screen, the title block
+     starts under the walkers instead of across them. */
+  @media (min-aspect-ratio: 4/5) and (max-height: 500px) {
+    .rw-cover-pic {
+      bottom: auto;
+      height: 100vh;
+      height: 100svh;
+      -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+    }
+    .rw-cover-body {
+      padding-top: 74vh;
+      padding-top: 74svh;
+    }
+  }
+  /* Portrait phones: the tag hangs from the top edge of the screen on its
+     string, over the ceiling (a dead zone), never over the walkers. Out of
+     the flow, so the title block also sits lower, on the runway floor. */
+  @media (max-aspect-ratio: 4/5) {
+    .rw-cover-hang {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) - 2px);
+      left: 0;
+      right: 0;
+      z-index: 1;
+      width: max-content;
+      margin: 0 auto;
+    }
+    .rw-cover-string {
+      height: 58px;
+      background: linear-gradient(180deg, #fff3d8, #ffbd59 55%, #ffbd59);
+    }
+    /* The block stops being the positioned ancestor, so the tag measures
+       from the screen edge (the section is the containing block). */
+    .rw-cover-body {
+      position: static;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 9rem);
+    }
+  }
+  /* Short landscape screens: the decorative tag would land on a face, so
+     it goes. */
+  @media (min-aspect-ratio: 4/5) and (max-height: 740px) {
+    .rw-cover-hang {
+      display: none;
+    }
+  }
+  .rw-cover-tag {
+    margin-top: -2px;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1.05rem 1rem 0.6rem;
+    min-width: 6.4rem;
+  }
+  .rw-cover-tag .rw-tag__num {
+    font-size: 1.35rem;
+    white-space: nowrap;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-cover-hang {
+      animation: rw-sway 5.2s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes rw-sway {
+    from {
+      transform: rotate(-3deg);
+    }
+    to {
+      transform: rotate(3deg);
+    }
+  }
+
+  .rw-ghost-solid {
+    background: rgba(11, 19, 32, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .rw-hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .rw-hint-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+  }
+  .rw-hint-item svg {
+    width: 14px;
+    height: 14px;
+    color: #ffbd59;
+  }
+  .rw-hint-dot {
+    color: rgba(255, 189, 89, 0.7);
+  }
+
+  /* Rising gold motes. Invisible unless motion is allowed. */
+  .rw-mote {
+    position: absolute;
+    bottom: -8px;
+    border-radius: 9999px;
+    background: #ffbd59;
+    opacity: 0;
+    box-shadow: 0 0 6px rgba(255, 189, 89, 0.5);
+  }
+  .rw-mote--bokeh {
+    box-shadow: 0 0 14px 3px rgba(255, 189, 89, 0.35);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-mote {
+      animation-name: rw-rise-mote;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+  }
+  @keyframes rw-rise-mote {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+    12% {
+      opacity: var(--peak, 0.4);
+    }
+    85% {
+      opacity: var(--peak, 0.4);
+    }
+    100% {
+      transform: translate(var(--drift, 0px), -95vh);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-rise {
+      opacity: 0;
+      animation: rw-rise-in 0.85s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
+  }
+  @keyframes rw-rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

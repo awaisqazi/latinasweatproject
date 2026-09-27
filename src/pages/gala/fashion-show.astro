@@ -1,0 +1,148 @@
+---
+// /gala/fashion-show: "The Runway", an interactive replay of the Annual Gala
+// 2026 fashion show (Friday, September 25, 2026, fourth floor of the MCA
+// Chicago, 10 PM). Phone first: most visitors arrive from Instagram on an
+// iPhone. The page is a cover, a lookbook and a full-screen player dialog
+// (stop-motion walk per look, then La Constelación del Runway finale).
+// Looks are numbered only: never name or describe the people or clothes.
+// Designer credits render only when a look's `designer` is set in
+// src/data/galaFashionShow2026.js.
+import Layout from "@/layouts/Layout.astro";
+import RunwayCover from "@/components/gala/runway/RunwayCover.astro";
+import RunwayLookbook from "@/components/gala/runway/RunwayLookbook.astro";
+import RunwayPlayer from "@/components/gala/runway/RunwayPlayer.astro";
+
+const title = "The Runway · Annual Gala 2026 Fashion Show | The Latina Sweat Project";
+const description =
+  "Replay the Annual Gala 2026 fashion show at the MCA Chicago: twenty looks from six designers, frame by frame, made for your phone.";
+---
+
+<Layout
+  title={title}
+  description={description}
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+  socialImage="/images/gala/2026/runway/og-runway.jpg"
+  socialImageAlt="The Runway, Annual Gala 2026 at MCA Chicago: the finale walk down the fourth-floor runway, guests lining both sides."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <main class="rw-page text-white">
+    <RunwayCover />
+    <RunwayLookbook />
+  </main>
+  {/* The player is a top-layer <dialog>, outside <main>. */}
+  <RunwayPlayer />
+</Layout>
+
+<style is:global>
+  /* ---------- The Runway: shared tokens and the garment tag ---------- */
+  html:has(.rw-page),
+  body:has(.rw-page) {
+    background: #05070c;
+  }
+  .rw-page {
+    --rw-ink: #05070c;
+    --rw-night: #0b1320;
+    --rw-navy: #111a27;
+    --rw-gold: #ffbd59;
+    --rw-cream: #f4ecdf;
+    background: linear-gradient(180deg, #05070c 0%, #0b1320 22%, #0d1522 70%, #05070c 100%);
+    min-height: 100vh;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:has(.rw-page) {
+      scroll-behavior: smooth;
+    }
+  }
+  .rw-page .font-display,
+  .rw-player .font-display {
+    font-variant-numeric: lining-nums;
+  }
+  /* Didot italic numerals, native on iOS and macOS. */
+  .rw-didot {
+    font-family: "Didot", "Bodoni 72", "Playfair Display", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-variant-numeric: lining-nums;
+  }
+  .rw-caps {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  /* The cream garment tag: card stock, an engraved inner hairline and a
+     punched gold eyelet, the way a look is tagged backstage. The eyelet
+     position is a modifier (--top: hangs from above; --left: pinned). */
+  .rw-tag {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #1e1e1e;
+    background: linear-gradient(180deg, #fffcf6 0%, #f4ecdf 55%, #efe3d0 100%);
+    border-radius: 5px;
+    box-shadow:
+      0 0 0 1px rgba(255, 189, 89, 0.5),
+      0 10px 22px -10px rgba(0, 0, 0, 0.75);
+  }
+  .rw-tag::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(156, 122, 68, 0.32);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .rw-tag__eyelet {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, #0b1320 0 55%, #05070c 100%);
+    box-shadow:
+      0 0 0 1.75px #ffbd59,
+      0 0 0 2.5px rgba(138, 87, 0, 0.35);
+  }
+  .rw-tag--top .rw-tag__eyelet {
+    top: 6px;
+    left: 50%;
+    margin-left: -4.5px;
+  }
+  .rw-tag--left .rw-tag__eyelet {
+    left: 7px;
+    top: 50%;
+    margin-top: -4.5px;
+  }
+  .rw-tag__word {
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8a5700;
+  }
+  .rw-tag__num {
+    font-family: "Didot", "Bodoni 72", "Playfair Display", serif;
+    font-style: italic;
+    font-variant-numeric: lining-nums;
+    line-height: 1;
+    color: #1e1e1e;
+  }
+
+  /* Corner-bracket frame (four gold L's), shared by plates and the stage. */
+  .rw-brackets > span {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: rgba(255, 189, 89, 0.8);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .rw-brackets > span:nth-child(1) { left: -6px; top: -6px; border-width: 1.5px 0 0 1.5px; }
+  .rw-brackets > span:nth-child(2) { right: -6px; top: -6px; border-width: 1.5px 1.5px 0 0; }
+  .rw-brackets > span:nth-child(3) { left: -6px; bottom: -6px; border-width: 0 0 1.5px 1.5px; }
+  .rw-brackets > span:nth-child(4) { right: -6px; bottom: -6px; border-width: 0 1.5px 1.5px 0; }
+</style>
