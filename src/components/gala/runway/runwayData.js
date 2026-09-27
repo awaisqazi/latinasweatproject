@@ -51,20 +51,33 @@ function brandByName(name) {
 
 const total = galaRunway.looks.length;
 
+// Every look follows one grammar: frames = [walk (if any), front]. The walk
+// is one distant walk-out frame; the front is the close-up the show holds on
+// (always the last beat, so `hero` = frames.length - 1). `back` is one back
+// view the viewer can flip to, or null.
+const isIndex = (i) => Number.isInteger(i) && i >= 0;
+
 export const runwayLooks = galaRunway.looks.map((look, k) => {
   const n = k + 1;
-  const hero = look.frames.indexOf(look.hero);
-  if (hero < 0) throw new Error(`runwayData: look ${n} hero is not one of its frames`);
+  if (!isIndex(look.front)) throw new Error(`runwayData: look ${n} has no front frame`);
+  if (look.walk != null && !isIndex(look.walk)) throw new Error(`runwayData: look ${n} walk is not an album index`);
+  if (look.back != null && !isIndex(look.back)) throw new Error(`runwayData: look ${n} back is not an album index`);
   const brand = look.designer ? brandByName(look.designer) : null;
+  const frames = [];
+  if (look.walk != null) {
+    frames.push({ ...photo(look.walk), beat: "walk", alt: `Look ${n} on the runway at the MCA, walking out` });
+  }
+  frames.push({ ...photo(look.front), beat: "front", alt: `Look ${n} on the runway at the MCA, the front` });
   return {
     n,
     num: pad2(n),
-    frames: look.frames.map((i, f) => ({
-      ...photo(i),
-      alt: `Look ${n} on the runway at the MCA, frame ${f + 1} of ${look.frames.length}`,
-    })),
-    hero,
-    heroPhoto: photo(look.hero),
+    frames,
+    hero: frames.length - 1,
+    heroPhoto: photo(look.front),
+    back:
+      look.back != null
+        ? { ...photo(look.back), alt: `Look ${n} on the runway at the MCA, the back` }
+        : null,
     designer: brand ? { name: brand.name, instagram: instagramOf(brand) } : null,
   };
 });
@@ -117,6 +130,7 @@ export const runwayClientData = {
     hero: l.hero,
     designer: l.designer,
     frames: l.frames.map(({ c, b, h, alt }) => ({ c, b, h, alt })),
+    back: l.back ? { c: l.back.c, b: l.back.b, h: l.back.h, alt: l.back.alt } : null,
   })),
   finale: runwayFinale.walk.map(({ c, b, h, alt }) => ({ c, b, h, alt })),
 };

@@ -1,9 +1,17 @@
 ---
-// The Runway player: a full-screen modal <dialog> that replays each look as
-// a stop-motion walk (hard cuts at walk tempo, a hold on the hero frame),
-// TikTok-style vertical look changes, flipbook scrubbing, and a vertical
-// "runway track" of twenty gold diamonds. After look 20 the finale walk
-// plays, then La Constelación del Runway (RunwayConstellation).
+// The Runway player: a full-screen modal <dialog> that replays the show one
+// look at a time, every look in the same fixed grammar:
+//   1. "Walking out": one distant walk-out frame (900 ms, a hard cut with a
+//      slow push-in). Looks without a walk frame skip this beat.
+//   2. "The look": the close-up the show holds on (3 s), with the
+//      photographer's flash, crowd flashes and the next-look peek.
+// One progress segment per beat. When a look has a back view, tapping the
+// stage flips the look over like a card to "The back" (autoplay pauses;
+// tap again to turn it back). Looks without a back ignore stage taps (the
+// tag just nudges). Vertical swipes change looks, horizontal drags scrub
+// the beats, press and hold pauses, and a vertical "runway track" of twenty
+// gold diamonds jumps anywhere. After look 20 the finale walk plays, then
+// La Constelación del Runway (RunwayConstellation).
 // Vanilla TypeScript, no framework. Styles are global (rw- prefix) because
 // the script builds frames and progress segments at runtime.
 import RunwayConstellation from "./RunwayConstellation.astro";
@@ -35,7 +43,14 @@ const clientJson = JSON.stringify(runwayClientData);
 
     <div class="rw-stage" data-rw-stage>
       <div class="rw-reel" data-rw-reel>
-        <div class="rw-panel" data-rw-cur></div>
+        {/* The current look is a two-faced card: the front face holds the
+            walk and the close-up, the reverse face holds the back view. */}
+        <div class="rw-panel rw-panel--cur" data-rw-curpanel>
+          <div class="rw-flip" data-rw-flip>
+            <div class="rw-face" data-rw-cur></div>
+            <div class="rw-face rw-face--back" data-rw-backface></div>
+          </div>
+        </div>
         <div class="rw-panel rw-panel--adj" data-rw-adj hidden></div>
       </div>
       <div class="rw-flash" data-rw-flash aria-hidden="true"></div>
@@ -64,6 +79,9 @@ const clientJson = JSON.stringify(runwayClientData);
           <span class="rw-pill rw-caps" data-rw-pill hidden>Paused</span>
         </div>
         <div class="rw-actions">
+          <button type="button" class="rw-icon-btn" data-rw-act="flip" aria-pressed="false" aria-label="See the back" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="8" height="12.5" rx="1.3" fill="currentColor" /><rect x="12.5" y="6" width="8" height="12.5" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2 1.6" /><path d="M7.5 4.2c1.4-1.6 7.6-1.6 9 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /><path d="M14.4 2.6l2.2 1.6-1.4 2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
           <button type="button" class="rw-icon-btn" data-rw-act="pause" aria-pressed="false" aria-label="Pause">
             <svg class="rw-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /><rect x="13.9" y="5" width="3.6" height="14" rx="0.8" fill="currentColor" /></svg>
             <svg class="rw-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z" fill="currentColor" /></svg>
@@ -82,11 +100,20 @@ const clientJson = JSON.stringify(runwayClientData);
     </div>
 
     <div class="rw-caption" data-rw-caption>
-      <p class="rw-caption-look"><span data-rw-capword>Look</span> <span class="rw-didot" data-rw-capnum>01</span></p>
+      <p class="rw-caption-look"><span data-rw-capword>Look</span> <span class="rw-didot" data-rw-capnum>01</span> <span class="rw-caption-beat" data-rw-capbeat><span class="rw-caption-sep" aria-hidden="true">·</span> <span data-rw-beatword>Walking out</span></span></p>
+      <p class="rw-caption-hint" data-rw-caphint hidden>Tap to turn back</p>
       <p class="rw-caption-credit" data-rw-credit hidden>
         by <a href="#" target="_blank" rel="noopener noreferrer" data-rw-creditlink><span data-rw-creditname></span><span class="sr-only"> on Instagram (opens in a new tab)</span></a>
       </p>
     </div>
+
+    {/* Flip cue: on the close-up of a look that has a back view. Visual only
+        (the stage takes the tap; the flip button serves keyboards and
+        screen readers). */}
+    <p class="rw-flipcue" data-rw-flipcue hidden aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="8" height="12.5" rx="1.3" fill="currentColor" /><rect x="12.5" y="6" width="8" height="12.5" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2 1.6" /><path d="M7.5 4.2c1.4-1.6 7.6-1.6 9 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /><path d="M14.4 2.6l2.2 1.6-1.4 2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <span>Tap to see the back</span>
+    </p>
 
     {/* Swipe cue: while the show holds on a close-up, the next tag peeks in. */}
     <button type="button" class="rw-next" data-rw-next data-rw-act="next-look" hidden>
@@ -220,6 +247,35 @@ const clientJson = JSON.stringify(runwayClientData);
   .rw-panel--adj {
     background: #05070c;
   }
+  /* The flip card: perspective on the panel, the two faces inside. */
+  .rw-panel--cur {
+    perspective: 1600px;
+  }
+  .rw-flip {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateY(0deg);
+  }
+  .rw-flip.is-flipped {
+    transform: rotateY(180deg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-flip.is-animated {
+      transition: transform 520ms cubic-bezier(0.45, 0.05, 0.25, 1);
+    }
+  }
+  .rw-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .rw-face--back {
+    transform: rotateY(180deg);
+    background: #05070c;
+  }
   .rw-panel[hidden] {
     display: none;
   }
@@ -325,6 +381,29 @@ const clientJson = JSON.stringify(runwayClientData);
   }
   .rw-next[hidden] {
     display: none;
+  }
+  /* Before the finale the peek stacks "Up next" over "Finale", so it is no
+     wider than a numbered peek. */
+  .rw-next--word {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.15rem;
+  }
+  .rw-next--word .rw-next-word {
+    grid-column: 1;
+    grid-row: 1;
+    line-height: 1;
+  }
+  .rw-next--word .rw-next-num {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 1.1rem;
+  }
+  .rw-next--word svg {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
   .rw-next-word {
     color: #8a5700;
@@ -519,6 +598,12 @@ const clientJson = JSON.stringify(runwayClientData);
     outline: 2px solid #ffbd59;
     outline-offset: -2px;
   }
+  .rw-icon-btn[hidden] {
+    display: none;
+  }
+  .rw-icon-btn[data-rw-act="flip"][aria-pressed="true"] {
+    color: #ffbd59;
+  }
   .rw-icon-btn .rw-ico-play {
     display: none;
   }
@@ -533,16 +618,19 @@ const clientJson = JSON.stringify(runwayClientData);
   .rw-caption {
     position: absolute;
     left: calc(env(safe-area-inset-left, 0px) + 18px);
-    /* Leaves the bottom-right corner to the next-look peek. */
-    right: calc(env(safe-area-inset-right, 0px) + 150px);
+    /* The box hugs its text and leaves the bottom-right corner to the
+       next-look peek. */
+    right: auto;
+    max-width: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 168px);
     bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
     pointer-events: none;
     z-index: 3;
   }
   .rw-caption-look {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.4rem;
+    gap: 0 0.4rem;
     line-height: 1;
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
   }
@@ -556,6 +644,78 @@ const clientJson = JSON.stringify(runwayClientData);
   .rw-caption-look .rw-didot {
     font-size: 3.4rem;
     color: #fff;
+  }
+  /* The beat label: "Walking out", "The look" or "The back". */
+  .rw-caption-beat {
+    white-space: nowrap;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .rw-caption-sep {
+    margin-right: 0.15rem;
+    color: #ffbd59;
+  }
+  .rw-caption-beat[hidden],
+  .rw-caption-hint[hidden] {
+    display: none;
+  }
+  .rw-caption-hint {
+    margin-top: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.78);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  }
+  /* Flip cue: a small cream tag centred above the caption row, so it never
+     meets the caption (bottom left) or the next-look peek (bottom right).
+     --rw-cap-h is the caption's live height, set by the script. */
+  .rw-flipcue {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px + var(--rw-cap-h, 56px) + 14px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.45rem 0.75rem 0.45rem 0.6rem;
+    border-radius: 999px;
+    color: #1e1e1e;
+    background: linear-gradient(180deg, #fffcf6 0%, #f4ecdf 55%, #efe3d0 100%);
+    box-shadow:
+      0 0 0 1px rgba(255, 189, 89, 0.55),
+      0 10px 22px -10px rgba(0, 0, 0, 0.75);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .rw-flipcue svg {
+    width: 16px;
+    height: 16px;
+    color: #8a5700;
+  }
+  .rw-flipcue span {
+    color: #8a5700;
+  }
+  .rw-flipcue[hidden] {
+    display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rw-flipcue.is-in {
+      animation: rw-cue-in 420ms ease-out 400ms both;
+    }
+  }
+  @keyframes rw-cue-in {
+    from { opacity: 0; transform: translate(-50%, 8px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
   }
   .rw-player[data-mode="walk"] .rw-caption-look .rw-didot {
     display: none;
@@ -775,7 +935,8 @@ const clientJson = JSON.stringify(runwayClientData);
     }
     .rw-caption {
       left: 22px;
-      right: 22px;
+      right: auto;
+      max-width: calc(100% - 44px);
       bottom: 22px;
     }
     .rw-track {
@@ -830,13 +991,15 @@ const clientJson = JSON.stringify(runwayClientData);
     el?: HTMLImageElement;
     state?: "idle" | "loading" | "ready" | "dead";
   };
-  type Look = { n: number; num: string; hero: number; designer: Credit; frames: Frame[] };
+  type Look = { n: number; num: string; hero: number; designer: Credit; frames: Frame[]; back: Frame | null };
   type Data = { url: string; total: number; looks: Look[]; finale: Frame[] };
 
   // Timing and gesture thresholds (see the page report for the rationale).
-  const WALK_MS = 550; // stop-motion walk tempo, per frame
-  const HOLD_MS = 2400; // hold on the hero frame
+  const WALK_MS = 900; // the walk-out beat
+  const HOLD_MS = 3000; // hold on the front (the hero, always the last beat)
+  const FINALE_MS = 550; // finale walk tempo, per frame
   const FINAL_BEAT_MS = 1100; // last finale frame, before the constellation
+  const FLIP_MS = 520; // the card flip to the back view (matches the CSS)
   const PUSH = 0.035; // push-in scale across a frame
   const FLASH_MS = 180;
   const SCRUB_PX = 28; // horizontal drag distance per frame
@@ -861,7 +1024,16 @@ const clientJson = JSON.stringify(runwayClientData);
     const frameEl = $("[data-rw-frame]");
     const stage = $("[data-rw-stage]");
     const reel = $("[data-rw-reel]");
+    const curPanel = $("[data-rw-curpanel]");
+    const flipEl = $("[data-rw-flip]");
     const cur = $("[data-rw-cur]");
+    const backFace = $("[data-rw-backface]");
+    const flipBtn = $<HTMLButtonElement>('[data-rw-act="flip"]');
+    const flipCue = $("[data-rw-flipcue]");
+    const captionEl = $("[data-rw-caption]");
+    const capBeat = $("[data-rw-capbeat]");
+    const beatWord = $("[data-rw-beatword]");
+    const capHint = $("[data-rw-caphint]");
     const adj = $("[data-rw-adj]");
     const flashEl = $("[data-rw-flash]");
     const crowdEl = $("[data-rw-crowd]") as HTMLElement;
@@ -922,10 +1094,17 @@ const clientJson = JSON.stringify(runwayClientData);
     let shimmerTimer = 0;
     let toastTimer = 0;
     let segs: { i: number; fill: HTMLElement }[] = [];
+    let flipped = false; // the current look is turned over to its back view
+    let pendingFlip = false; // a flip is waiting on the back image
 
     const seqOf = (p: number): Frame[] =>
       p >= 0 && p < L ? data.looks[p].frames : p === POS_WALK ? data.finale : [];
     const heroOf = (p: number) => (p >= 0 && p < L ? data.looks[p].hero : -1);
+    const backOf = (p: number): Frame | null => (p >= 0 && p < L ? data.looks[p].back : null);
+    const hasBack = (p: number) => {
+      const b = backOf(p);
+      return !!b && b.state !== "dead";
+    };
     const isAlive = (f?: Frame) => !!f && f.state !== "dead";
     const nextAlive = (p: number, i: number) => {
       const s = seqOf(p);
@@ -940,8 +1119,15 @@ const clientJson = JSON.stringify(runwayClientData);
     const firstAlive = (p: number) => nextAlive(p, -1);
     const lastAlive = (p: number) => prevAlive(p, seqOf(p).length);
     const durOf = (p: number, i: number) =>
-      i === heroOf(p) ? HOLD_MS : p === POS_WALK && i === lastAlive(p) ? FINAL_BEAT_MS : WALK_MS;
-    const playing = () => !userPaused && !holdPaused && !gesturePaused && !hiddenPaused && !animating;
+      i === heroOf(p)
+        ? HOLD_MS
+        : p === POS_WALK
+          ? i === lastAlive(p)
+            ? FINAL_BEAT_MS
+            : FINALE_MS
+          : WALK_MS;
+    const playing = () =>
+      !userPaused && !holdPaused && !gesturePaused && !hiddenPaused && !animating && !flipped;
 
     // ---------------- loading ----------------
     const queue: Frame[] = [];
@@ -1007,8 +1193,11 @@ const clientJson = JSON.stringify(runwayClientData);
     function preloadAround() {
       const list: Frame[] = [];
       const s = seqOf(pos);
-      // Current frame first, then the rest of the walk in order.
+      // Current beat first, then the rest of the look, then its back view
+      // (so a flip never lands on an empty face).
       for (let j = fi; j < s.length; j++) list.push(s[j]);
+      const back = backOf(pos);
+      if (back) list.push(back);
       for (let j = 0; j < fi; j++) list.push(s[j]);
       if (pos + 1 <= POS_WALK) list.push(...seqOf(pos + 1).slice(0, 3));
       if (pos - 1 >= 0) list.push(...seqOf(pos - 1).slice(0, 1));
@@ -1017,6 +1206,12 @@ const clientJson = JSON.stringify(runwayClientData);
 
     function onReady(f: Frame) {
       if (!isOpen) return;
+      if (f === backOf(pos)) {
+        mountBack();
+        if (pendingFlip) setFlip(true);
+        else updateBeatUi();
+        return;
+      }
       const s = seqOf(pos);
       if (s[fi] === f) showFrame(fi);
       if (adjPos >= 0 && adjPos < POS_SKY) {
@@ -1026,6 +1221,16 @@ const clientJson = JSON.stringify(runwayClientData);
     }
     function onDead(f: Frame) {
       if (!isOpen) return;
+      if (f === backOf(pos)) {
+        // No back view after all: this look behaves like one without.
+        if (pendingFlip) {
+          pendingFlip = false;
+          showFrame(fi, { flash: false });
+          nudge();
+        }
+        updateBeatUi();
+        return;
+      }
       const s = seqOf(pos);
       const idx = s.indexOf(f);
       if (idx < 0) return;
@@ -1065,7 +1270,7 @@ const clientJson = JSON.stringify(runwayClientData);
 
     // The next-look peek: shown while the show holds on the hero frame.
     function showNext() {
-      if (pos >= L) return;
+      if (pos >= L || flipped) return;
       const last = pos === L - 1;
       nextWord.textContent = last ? "Up next" : "Next";
       nextNum.textContent = last ? "Finale" : data.looks[pos + 1].num;
@@ -1161,16 +1366,162 @@ const clientJson = JSON.stringify(runwayClientData);
         shownEl = el;
         const src = el.currentSrc || el.src;
         if (backdrop.getAttribute("src") !== src) backdrop.src = src;
-        setLoading(false);
+        if (!pendingFlip) setLoading(false);
         if (landed && i === heroOf(pos) && !scrubbing && opts.flash !== false) flash();
-        if (i === heroOf(pos) && !scrubbing) showNext();
+        if (i === heroOf(pos) && !scrubbing && !flipped) showNext();
         else hideNext();
+        // The front has landed: make sure its back view is on the way.
+        if (i === heroOf(pos)) ensureBack();
       } else {
         setLoading(true);
         if (f.state !== "loading") preloadAround();
       }
       paintBars();
+      updateBeatUi();
     }
+
+    // ---------------- the flip (front and back of a look) ----------------
+    function ensureBack() {
+      const b = backOf(pos);
+      if (!b || (b.state && b.state !== "idle")) return;
+      const k = queue.indexOf(b);
+      if (k >= 0) queue.splice(k, 1);
+      queue.unshift(b);
+      pump();
+    }
+    // Put the back image on the reverse face as soon as it is ready.
+    function mountBack() {
+      const b = backOf(pos);
+      if (!b || b.state !== "ready" || !b.el) return;
+      if (b.el.parentElement !== backFace) {
+        b.el.classList.add("is-on");
+        b.el.style.transform = "";
+        backFace.replaceChildren(b.el);
+      }
+    }
+    // Snap back to the front with no animation (look change, close).
+    function resetFlip() {
+      flipped = false;
+      pendingFlip = false;
+      flipEl.classList.remove("is-animated", "is-flipped");
+      backFace.replaceChildren();
+    }
+    // A look without a back view: the tag gives a small shake, nothing else.
+    function nudge() {
+      if (!motionOK || !tagWrap.animate) return;
+      tagWrap.animate(
+        [
+          { transform: "rotate(0deg)" },
+          { transform: "rotate(7deg)", offset: 0.25 },
+          { transform: "rotate(-5deg)", offset: 0.55 },
+          { transform: "rotate(2deg)", offset: 0.8 },
+          { transform: "rotate(0deg)" },
+        ],
+        { duration: 460, easing: "ease-out" },
+      );
+    }
+    function setFlip(on: boolean, opts: { instant?: boolean } = {}) {
+      pendingFlip = false;
+      if (on) {
+        if (pos >= L || !hasBack(pos)) {
+          nudge();
+          updateBeatUi();
+          return;
+        }
+        const b = backOf(pos)!;
+        if (b.state !== "ready" || !b.el) {
+          // Wait for the back image rather than turn over to an empty face.
+          pendingFlip = true;
+          ensureBack();
+          setLoading(true);
+          return;
+        }
+        // The back belongs to the close-up: land on it underneath.
+        const h = heroOf(pos);
+        if (fi !== h && isAlive(seqOf(pos)[h])) showFrame(h, { flash: false });
+        mountBack();
+        setLoading(false);
+      }
+      if (on === flipped) {
+        // Nothing to turn (e.g. a pending flip was cancelled): just refresh
+        // the front, which also clears the loading shimmer.
+        if (!on) showFrame(fi, { flash: false });
+        else updateBeatUi();
+        return;
+      }
+      flipped = on;
+      const animate = motionOK && !opts.instant;
+      flipEl.classList.toggle("is-animated", animate);
+      flipEl.classList.toggle("is-flipped", on);
+      if (animate && curPanel.animate) {
+        curPanel.animate(
+          [{ transform: "scale(1)" }, { transform: "scale(0.94)", offset: 0.5 }, { transform: "scale(1)" }],
+          { duration: FLIP_MS, easing: "ease-in-out" },
+        );
+      }
+      const n = pos + 1;
+      if (on) {
+        hideNext();
+        clearCrowd();
+        const el = backOf(pos)!.el!;
+        const src = el.currentSrc || el.src;
+        if (backdrop.getAttribute("src") !== src) backdrop.src = src;
+        announce(`Look ${n}, the back`);
+      } else {
+        const src = shownEl ? shownEl.currentSrc || shownEl.src : "";
+        if (src && backdrop.getAttribute("src") !== src) backdrop.src = src;
+        showFrame(fi, { flash: false });
+        announce(`Look ${n}, the front`);
+      }
+      updateBeatUi();
+    }
+    function toggleFlip() {
+      if (animating) finishSlide();
+      if (flipped || pendingFlip) setFlip(false);
+      else setFlip(true);
+    }
+
+    const beatName = () =>
+      pos >= POS_SKY
+        ? "sky"
+        : pos === POS_WALK
+          ? "finale"
+          : flipped
+            ? "back"
+            : fi === heroOf(pos)
+              ? "front"
+              : "walk";
+
+    // The caption's beat label, the flip button and the flip cue.
+    function syncCapH() {
+      frameEl.style.setProperty("--rw-cap-h", `${Math.round(captionEl.offsetHeight)}px`);
+    }
+    function updateBeatUi() {
+      const inLook = pos >= 0 && pos < L;
+      const beat = beatName();
+      capBeat.hidden = !inLook;
+      beatWord.textContent = beat === "walk" ? "Walking out" : beat === "back" ? "The back" : "The look";
+      capHint.hidden = !(inLook && flipped);
+      const back = inLook && hasBack(pos);
+      if (!back && document.activeElement === flipBtn) dlg.focus({ preventScroll: true });
+      flipBtn.hidden = !back;
+      flipBtn.setAttribute("aria-pressed", String(flipped));
+      flipBtn.setAttribute("aria-label", flipped ? "See the front" : "See the back");
+      const hero = inLook ? seqOf(pos)[heroOf(pos)] : undefined;
+      const frontShown = beat === "front" && !!hero && hero.state === "ready" && shownEl === hero.el;
+      const cueOn = back && frontShown && !scrubbing && !pendingFlip;
+      if (cueOn && flipCue.hidden) {
+        flipCue.hidden = false;
+        flipCue.classList.remove("is-in");
+        void flipCue.offsetWidth;
+        flipCue.classList.add("is-in");
+      } else if (!cueOn && !flipCue.hidden) {
+        flipCue.hidden = true;
+        flipCue.classList.remove("is-in");
+      }
+      syncCapH();
+    }
+    if (typeof ResizeObserver === "function") new ResizeObserver(syncCapH).observe(captionEl);
 
     function buildBars() {
       bars.replaceChildren();
@@ -1218,6 +1569,7 @@ const clientJson = JSON.stringify(runwayClientData);
       }
       ofEl.hidden = !inLook || isPausedVisible();
       updatePauseUi();
+      updateBeatUi();
       trackBtns.forEach((b, k) => {
         const past = k < pos;
         const now = k === pos;
@@ -1286,6 +1638,7 @@ const clientJson = JSON.stringify(runwayClientData);
         if (skip >= 0 && skip <= POS_SKY) return commit(skip, dir);
       }
       pos = np;
+      resetFlip();
       clearCrowd();
       hideNext();
       if (np < L && np !== prev) sweep();
@@ -1313,6 +1666,7 @@ const clientJson = JSON.stringify(runwayClientData);
       shownEl = null;
       fi = firstAlive(np);
       elapsed = 0;
+      mountBack();
       buildBars();
       updateChrome(prev !== np);
       preloadAround();
@@ -1367,6 +1721,7 @@ const clientJson = JSON.stringify(runwayClientData);
       if (np === pos) {
         // Same look again: restart its walk.
         if (np < POS_SKY) {
+          if (flipped || pendingFlip) setFlip(false, { instant: true });
           const f0 = firstAlive(np);
           if (f0 >= 0) showFrame(f0);
         }
@@ -1389,6 +1744,7 @@ const clientJson = JSON.stringify(runwayClientData);
     function stepNext() {
       if (animating) finishSlide();
       if (pos >= POS_SKY) return;
+      if (flipped || pendingFlip) setFlip(false, { instant: true });
       const j = nextAlive(pos, fi);
       if (j >= 0) showFrame(j);
       else goPos(pos + 1);
@@ -1396,6 +1752,7 @@ const clientJson = JSON.stringify(runwayClientData);
     function stepPrev() {
       if (animating) finishSlide();
       if (pos >= POS_SKY) return;
+      if (flipped || pendingFlip) setFlip(false, { instant: true });
       const j = prevAlive(pos, fi);
       if (j >= 0) showFrame(j);
       else if (pos > 0) goPos(pos - 1);
@@ -1479,6 +1836,7 @@ const clientJson = JSON.stringify(runwayClientData);
       clearCrowd();
       hideNext();
       if (!isOpen) return;
+      resetFlip();
       isOpen = false;
       cancelAnimationFrame(raf);
       clearTimeout(slideTimer);
@@ -1562,7 +1920,9 @@ const clientJson = JSON.stringify(runwayClientData);
     async function renderCard(): Promise<{ blob: Blob; name: string; title: string }> {
       const inLook = pos < L;
       const seq = seqOf(pos);
-      const f = seq[fi] || seq[0];
+      // The frame on screen: the back view when the look is turned over.
+      const back = flipped ? backOf(pos) : null;
+      const f = back && back.state === "ready" ? back : seq[fi] || seq[0];
       const num = inLook ? data.looks[pos].num : "";
       const n = inLook ? pos + 1 : 0;
       const img = await loadImg(f.h || f.b);
@@ -1779,6 +2139,7 @@ const clientJson = JSON.stringify(runwayClientData);
         if (gMode === "pending") {
           gMode = "hold";
           holdPaused = true;
+          if (flipped || pendingFlip) setFlip(false);
           updatePauseUi();
         }
       }, PRESS_MS);
@@ -1795,6 +2156,7 @@ const clientJson = JSON.stringify(runwayClientData);
         if (Math.abs(dx) > Math.abs(dy)) {
           gMode = "scrub";
           scrubbing = true;
+          if (flipped || pendingFlip) setFlip(false);
           scrubFrom = fi;
         } else {
           gMode = "swipe";
@@ -1846,10 +2208,9 @@ const clientJson = JSON.stringify(runwayClientData);
       const mode = gMode;
       gMode = "none";
       if (mode === "pending" && !cancelled) {
-        const r = stage.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;
-        if (x < 0.35) stepPrev();
-        else stepNext();
+        // A tap turns the look over (or back); looks without a back view
+        // only nudge their tag. Taps never step beats or change looks.
+        toggleFlip();
       } else if (mode === "hold") {
         holdPaused = false;
         updatePauseUi();
@@ -1857,6 +2218,8 @@ const clientJson = JSON.stringify(runwayClientData);
         scrubbing = false;
         gesturePaused = false;
         elapsed = 0;
+        // The scrub may end on the close-up: bring back its peek and cue.
+        showFrame(fi, { flash: false });
       } else if (mode === "swipe") {
         gesturePaused = false;
         const h = stage.clientHeight || 1;
@@ -1954,7 +2317,8 @@ const clientJson = JSON.stringify(runwayClientData);
       if (act === "pause") {
         userPaused = !userPaused;
         updatePauseUi();
-      } else if (act === "share") share();
+      } else if (act === "flip") toggleFlip();
+      else if (act === "share") share();
       else if (act === "save") saveCard();
       else if (act === "prev-frame") stepPrev();
       else if (act === "next-frame") stepNext();
@@ -2039,6 +2403,17 @@ const clientJson = JSON.stringify(runwayClientData);
           e.preventDefault();
           goRel(-1);
           break;
+        case "f":
+        case "F":
+          if (e.metaKey || e.ctrlKey || e.altKey) return;
+          e.preventDefault();
+          toggleFlip();
+          break;
+        case "Enter":
+          if (onControl) return;
+          e.preventDefault();
+          toggleFlip();
+          break;
         case " ":
         case "Spacebar":
           if (onControl) return;
@@ -2106,7 +2481,18 @@ const clientJson = JSON.stringify(runwayClientData);
 
     // Debug/QA handle (read-only snapshot of the player state).
     (window as any).__runway = {
-      state: () => ({ isOpen, pos, fi, elapsed, userPaused, holdPaused, animating, mode: dlg.dataset.mode }),
+      state: () => ({
+        isOpen,
+        pos,
+        fi,
+        elapsed,
+        userPaused,
+        holdPaused,
+        animating,
+        flipped,
+        beat: beatName(),
+        mode: dlg.dataset.mode,
+      }),
     };
   }
 </script>

@@ -2,8 +2,11 @@
 // /gala/fashion-show: "The Runway", an interactive replay of the Annual Gala
 // 2026 fashion show (Friday, September 25, 2026, fourth floor of the MCA
 // Chicago, 10 PM). Phone first: most visitors arrive from Instagram on an
-// iPhone. The page is a cover, a lookbook and a full-screen player dialog
-// (stop-motion walk per look, then La Constelación del Runway finale).
+// iPhone. The page is a cover, a lookbook and a full-screen player dialog.
+// Every look plays the same fixed grammar (src/data/galaFashionShow2026.js):
+// one walk-out frame when there is one, then the front close-up the show
+// holds on; a tap flips the look like a card to its back view when it has
+// one. Then the finale walk and La Constelación del Runway.
 // Looks are numbered only: never name or describe the people or clothes.
 // Designer credits render only when a look's `designer` is set in
 // src/data/galaFashionShow2026.js.
@@ -14,7 +17,7 @@ import RunwayPlayer from "@/components/gala/runway/RunwayPlayer.astro";
 
 const title = "The Runway · Annual Gala 2026 Fashion Show | The Latina Sweat Project";
 const description =
-  "Replay the Annual Gala 2026 fashion show at the MCA Chicago: twenty looks from six designers, frame by frame, made for your phone.";
+  "Replay the Annual Gala 2026 fashion show at the MCA Chicago: twenty looks from six designers, made for your phone.";
 ---
 
 <Layout

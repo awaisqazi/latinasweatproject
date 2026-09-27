@@ -1,5 +1,6 @@
 ---
-// The lookbook: every look's hero frame as a card with a cream garment tag.
+// The lookbook: every look's front (the close-up) as a card with a cream
+// garment tag, and a "Front + back" chip on looks that have a back view.
 // Each card opens the player at that look; without JS it is a plain link to
 // the full-size photo. Then the finale card, the six designers on a dark
 // plate (white knockout marks, dark plates only) and quiet links home.
@@ -42,7 +43,7 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
               class="rw-card"
               data-rw-open={k}
               data-rw-card={k}
-              aria-label={`Look ${look.n}, ${look.frames.length} frames. Play from this look`}
+              aria-label={look.back ? `Look ${look.n}. Front and back. Play from this look` : `Look ${look.n}. Play from this look`}
             >
               <span class="rw-card-media">
                 <img
@@ -64,9 +65,12 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
                 <span class="rw-tag__word">Look</span>
                 <span class="rw-tag__num">{look.num}</span>
               </span>
-              <span class="rw-card-count rw-caps" aria-hidden="true">
-                {look.frames.length} {look.frames.length === 1 ? "frame" : "frames"}
-              </span>
+              {look.back && (
+                <span class="rw-card-chip" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="8" height="12.5" rx="1.3" fill="currentColor" /><rect x="12.5" y="6" width="8" height="12.5" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2 1.6" /><path d="M7.5 4.2c1.4-1.6 7.6-1.6 9 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /><path d="M14.4 2.6l2.2 1.6-1.4 2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  Front + back
+                </span>
+              )}
             </a>
             {look.designer && (
               <p class="rw-card-credit">
@@ -266,12 +270,30 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
   .rw-tag__word--solo {
     padding: 0.2rem 0;
   }
-  .rw-card-count {
+  /* "Front + back": only on looks that have a back view. */
+  .rw-card-chip {
     position: absolute;
-    left: 0.7rem;
-    bottom: 0.75rem;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.6rem;
+    left: 0.6rem;
+    bottom: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.55rem 0.28rem 0.45rem;
+    border: 1px solid rgba(255, 189, 89, 0.6);
+    border-radius: 999px;
+    background: rgba(5, 7, 12, 0.55);
+    color: #fff3d8;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .rw-card-chip svg {
+    width: 11px;
+    height: 11px;
+    color: #ffbd59;
   }
   .rw-card-credit {
     margin-top: 0.5rem;
