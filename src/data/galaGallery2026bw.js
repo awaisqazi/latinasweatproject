@@ -17,6 +17,13 @@
 // the "Download the originals" link.
 
 export const galaBwBase = "/images/gala/2026/album-bw/";
+// Photographer credit for this set (organizer, 2026-09-27).
+export const galaBwCredit = {
+  name: "Aldo Enrique",
+  handle: "@aldoenriquephoto",
+  url: "https://www.instagram.com/aldoenriquephoto/",
+};
+
 export const galaBwOriginalsUrl =
   "https://drive.google.com/drive/folders/18YkiLvKsZb1GifhIlS0piVqF7iMAUhd-?usp=share_link";
 

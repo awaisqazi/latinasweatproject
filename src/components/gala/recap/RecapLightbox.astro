@@ -283,6 +283,7 @@ import { galaBwBase } from "@/data/galaGallery2026bw";
       img.src = fullSrc(w);
       img.alt = `Annual Gala 2026, photo ${w + 1} of ${total}`;
       counter.textContent = `${w + 1} of ${total}`;
+      if (byIndex[w]?.dataset.set === "bw") counter.textContent += " · Photo by @aldoenriquephoto";
       preload(w + 1);
       preload(w - 1);
     };

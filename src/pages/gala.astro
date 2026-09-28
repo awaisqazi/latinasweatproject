@@ -29,6 +29,7 @@ import {
 import {
   galaBwBase,
   galaBwOriginalsUrl,
+  galaBwCredit,
   galaBwPhotos,
 } from "@/data/galaGallery2026bw";
 import { abc7Feature } from "@/data/abc7WindyCity";
@@ -512,6 +513,17 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
             >
               Download the originals (Google Drive)<span class="sr-only"> (opens in a new tab)</span>
             </a>
+          </p>
+          <p class="reveal mt-4 text-sm text-white/60" style="transition-delay: 320ms;">
+            Black-and-white photos by
+            <a
+              href={galaBwCredit.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-white underline decoration-accent-gold decoration-1 underline-offset-4 transition-colors hover:text-accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
+              data-conversion-event="gala_photographer_click"
+              data-conversion-context="gala_page_bw_credit"
+            >{galaBwCredit.handle}<span class="sr-only"> on Instagram (opens in a new tab)</span></a>
           </p>
         </div>
 
