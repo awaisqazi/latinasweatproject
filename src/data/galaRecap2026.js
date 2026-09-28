@@ -32,7 +32,7 @@ export const galaRecap = {
   signoff: "Con amor, The Latina Sweat Project",
   photosHeading: "The night in photos",
   photosIntro:
-    "Every photo from the official album, in the order the night unfolded: cocktail hour on the terrace, dinner and honors, the galleries after dark, and the fashion show. Tap any photo to view it large, or open the full album on Flickr.",
+    "Two photographers, one album: the official colour set and a second camera in black and white, merged in the order the night unfolded. Cocktail hour on the terrace, dinner and honors, the paddle raise, the galleries after dark, and the fashion show. Tap any photo to view it large.",
   // Post-gala ask. The gala give form stays live for stragglers, but the
   // site's ask is now the new-home campaign.
   giveHeading: "The night is over. The work is not.",
@@ -217,8 +217,10 @@ export const galaSponsors2026 = {
   ],
 };
 
-// Photo picks for the /gala recap page, by index into galaPhotoStems (album
-// order). Chosen from the contact sheets on 2026-09-26: wide room, venue
+// Photo picks for the /gala recap page. A colour pick is an index into
+// galaPhotoStems (album order); a lead may instead be a black-and-white
+// frame from the second camera, by camera id: `{ bw: "EOSR1760" }` (see
+// galaGallery2026bw.js). Either form takes `big: true`. Chosen from the contact sheets on 2026-09-26: wide room, venue
 // and performance frames; no single guest fills the hero or the OG card.
 //   hero: the dinner room at the MCA, lanterns and the podium (album #69).
 //         Rendered locally to public/images/gala/2026/recap/ (1600w + a
@@ -229,7 +231,10 @@ export const galaSponsors2026 = {
 //         `big` tiles span 2x2; portraits span one column, two rows. The
 //         patterns ("B s s B s s", "B B P P P P", "P P P P B B") are the ones
 //         that tile a 4-column desktop and a 2-column phone grid with no
-//         holes, so keep one of them if you swap a photo.
+//         holes, so keep one of them if you swap a photo. Leads are
+//         matched by set + index/id, and a pick outside its chapter throws.
+//         bidding (the paddle raise, second camera only, 2026-09-27): wide
+//         paddle frames and the room, "B s s B s s" (all six landscape).
 export const galaRecapPhotos = {
   hero: 69,
   leads: {
@@ -248,6 +253,14 @@ export const galaRecapPhotos = {
       { i: 61, big: true },
       { i: 66 },
       { i: 70 },
+    ],
+    bidding: [
+      { bw: "EOSR1740", big: true },
+      { bw: "EOSR1744" },
+      { bw: "EOSR1760" },
+      { bw: "EOSR1762", big: true },
+      { bw: "EOSR1764" },
+      { bw: "EOSR1772" },
     ],
     gallery: [
       { i: 73, big: true },

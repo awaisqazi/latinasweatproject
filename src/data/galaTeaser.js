@@ -1,4 +1,5 @@
 import { galaResults } from "./galaRecap2026";
+import { galaAllPhotoCount } from "./galaGallery2026";
 
 export const galaTeaser = {
   slug: "noche-inolvidable-gala",
@@ -82,7 +83,7 @@ export const galaRecapCard = {
       ? { value: money(galaResults.grandTotal), label: "raised to date", labelEs: "recaudados hasta hoy" }
       : { value: money(galaResults.raisedOnTheNight), label: "raised on the night", labelEs: "recaudados esa noche" },
     { value: String(galaResults.paddleRaise.gifts), label: "paddles raised", labelEs: "paletas levantadas" },
-    { value: "422", label: "photos", labelEs: "fotos" },
+    { value: String(galaAllPhotoCount), label: "photos", labelEs: "fotos" },
   ],
 };
 

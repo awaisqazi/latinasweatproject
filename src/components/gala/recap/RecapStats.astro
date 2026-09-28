@@ -3,7 +3,7 @@
 // GalaImpactStats approach). Final values are server-rendered so no-JS and
 // reduced-motion visitors always see the real figures.
 import { galaResults, galaAuctionPackages, galaHonors } from "@/data/galaRecap2026";
-import { galaPhotoCount } from "@/data/galaGallery2026";
+import { galaAllPhotoCount } from "@/data/galaGallery2026";
 
 const claimed = galaAuctionPackages.filter((p) => p.claimed).length;
 
@@ -21,7 +21,7 @@ const stats = [
   { value: claimed, label: "Auction packages claimed" },
   { value: galaHonors.length, label: "Honors" },
   { value: galaResults.guestsOnList, label: "Guests" },
-  { value: galaPhotoCount, label: "Photos" },
+  { value: galaAllPhotoCount, label: "Photos" },
 ];
 
 const decimalsOf = (n) => (Number.isInteger(n) ? 0 : 2);

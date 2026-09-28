@@ -1,4 +1,5 @@
 ---
+import { galaAllPhotoCount } from "@/data/galaGallery2026";
 // The lookbook: every look's front (the close-up) as a card with a cream
 // garment tag, and a "Front + back" chip on looks that have a back view.
 // Each card opens the player at that look; without JS it is a plain link to
@@ -153,7 +154,7 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
       <a href="/gala" class="rw-quiet">
         <span aria-hidden="true">←</span> Back to the gala recap
       </a>
-      <a href="/gala#photos" class="rw-quiet">See all {runwayPhotoCount} photos</a>
+      <a href="/gala#photos" class="rw-quiet">See all {galaAllPhotoCount} photos</a>
     </p>
   </div>
 </section>

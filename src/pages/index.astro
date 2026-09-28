@@ -34,6 +34,7 @@ import Header from "@/components/Header.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
+import { galaAllPhotoCount } from "@/data/galaGallery2026";
 import { sweatFest, sweatFestDay, sweatFestCheckerUri } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
@@ -1380,7 +1381,7 @@ const graduationFlickrUrl =
                     Recap
                   </span>
                   <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                    422 photos
+                    {galaAllPhotoCount} photos
                   </span>
                 </div>
               </div>

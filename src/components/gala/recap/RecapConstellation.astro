@@ -123,7 +123,10 @@ const label = `A constellation of ${raise.gifts} gold stars arranged along the t
 ---
 
 <div class="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
-  <figure class="reveal relative mx-auto w-full max-w-[34rem]">
+  <!-- Left column: the sky, then the optional "plate" slot (a photo plate
+       from the page) under it; on phones both stack above the ladder. -->
+  <div class="mx-auto w-full max-w-[34rem]">
+  <figure class="reveal relative w-full">
     <div class="gr-constellation-halo pointer-events-none absolute inset-[8%] rounded-full" aria-hidden="true"></div>
     <svg
       class="gr-constellation relative block h-auto w-full"
@@ -187,6 +190,8 @@ const label = `A constellation of ${raise.gifts} gold stars arranged along the t
       One star for every gift
     </figcaption>
   </figure>
+  <slot name="plate" />
+  </div>
 
   <div class="reveal" style="transition-delay: 120ms;">
     <ol class="gr-ladder" role="list">

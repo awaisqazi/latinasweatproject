@@ -1,41 +1,61 @@
 ---
-// The night in photos: the whole official album, natively, in four clock-
-// ordered chapters. Each chapter opens with an editorial mosaic of six hand-
-// picked frames at Flickr's _c 800px, then a square _q thumb wall of the rest
+// The night in photos: the whole album from BOTH photographers (the colour
+// Flickr set and the second camera's black-and-white set, self-hosted), in
+// five clock-ordered chapters. Each chapter merges the two sets by capture
+// time, opens with an editorial mosaic of six hand-picked frames (Flickr _c
+// 800px or the black-and-white _c.webp), then a square thumb wall of the rest
 // (first 16 visible, the remainder behind a per-chapter expander). Every
 // photo is a button carrying one global index in RENDERED order, which is
 // the order the shared lightbox (RecapLightbox, outside <main>) walks.
+// Flickr buttons carry data-stem/data-base; black-and-white buttons carry
+// data-set="bw" + data-id (renditions under galaBwBase).
 import {
   galaAlbumCdnBase,
   galaAlbumChapters,
+  galaAllPhotoCount,
   galaPhotoStems,
 } from "@/data/galaGallery2026";
+import { galaBwBase, galaBwPhotos, galaClockKey } from "@/data/galaGallery2026bw";
 import { galaRecapPhotos } from "@/data/galaRecap2026";
 
-const total = galaPhotoStems.length;
+const total = galaAllPhotoCount;
 const WALL_VISIBLE = 16;
 const cdn = galaAlbumCdnBase;
 
-// Clock order inside a chapter; ties keep the photographer's album order.
-const byClock = (a, b) => a.p.at.localeCompare(b.p.at) || a.i - b.i;
+// One list, both sets. `key` identifies a photo for lead matching.
+const SET_ORDER = { flickr: 0, bw: 1 };
+const everything = [
+  ...galaPhotoStems.map((p, i) => ({ set: "flickr", p, i, key: `f:${i}` })),
+  ...galaBwPhotos.map((p, i) => ({ set: "bw", p, i, key: `bw:${p.id}` })),
+];
+
+// Clock order inside a chapter (after midnight sorts last); ties go colour
+// set first, then each set's own order.
+const byClock = (a, b) =>
+  galaClockKey(a.p.at).localeCompare(galaClockKey(b.p.at)) ||
+  SET_ORDER[a.set] - SET_ORDER[b.set] ||
+  a.i - b.i;
+
+// A lead pick is `{ i }` (colour album index) or `{ bw: "<camera id>" }`.
+const pickKey = (l) => (l.bw ? `bw:${l.bw}` : `f:${l.i}`);
 
 let running = 0;
 const chapters = galaAlbumChapters.map((chapter) => {
-  const all = galaPhotoStems
-    .map((p, i) => ({ p, i }))
-    .filter((x) => x.p.c === chapter.key)
-    .sort(byClock);
+  const all = everything.filter((x) => x.p.c === chapter.key).sort(byClock);
   const picks = galaRecapPhotos.leads[chapter.key] || [];
-  const leadSet = new Set(picks.map((l) => l.i));
-  const bigSet = new Set(picks.filter((l) => l.big).map((l) => l.i));
-  const leads = all.filter((x) => leadSet.has(x.i));
-  const wall = all.filter((x) => !leadSet.has(x.i));
+  const leadSet = new Set(picks.map(pickKey));
+  const bigSet = new Set(picks.filter((l) => l.big).map(pickKey));
+  const leads = all.filter((x) => leadSet.has(x.key));
+  if (leads.length !== picks.length) {
+    throw new Error(`RecapAlbum: a lead in "${chapter.key}" is not in that chapter`);
+  }
+  const wall = all.filter((x) => !leadSet.has(x.key));
   const withIndex = (list, kind) =>
     list.map((x) => ({
       ...x,
       g: running++,
       kind,
-      big: bigSet.has(x.i),
+      big: bigSet.has(x.key),
     }));
   const leadItems = withIndex(leads, "lead");
   const wallItems = withIndex(wall, "wall");
@@ -45,6 +65,24 @@ const chapters = galaAlbumChapters.map((chapter) => {
 if (running !== total) {
   throw new Error(`RecapAlbum: rendered ${running} photos, album has ${total}`);
 }
+
+// Per-set rendering details for one photo.
+const attrs = (x) =>
+  x.set === "bw"
+    ? { "data-set": "bw", "data-id": x.p.id }
+    : { "data-stem": x.p.f, "data-base": x.p.t };
+const mosaicImg = (x) =>
+  x.set === "bw"
+    ? { src: `${galaBwBase}${x.p.id}_c.webp`, width: x.p.w, height: x.p.h }
+    : {
+        src: `${cdn}${x.p.t}_c.jpg`,
+        width: x.p.o === "p" ? 533 : 800,
+        height: x.p.o === "p" ? 800 : 533,
+      };
+const thumbImg = (x) =>
+  x.set === "bw"
+    ? { src: `${galaBwBase}${x.p.id}_q.webp`, width: 320, height: 320 }
+    : { src: `${cdn}${x.p.t}_q.jpg`, width: 150, height: 150 };
 ---
 
 <div class="space-y-20 sm:space-y-24">
@@ -100,15 +138,12 @@ if (running !== total) {
                   class="gr-photo gr-tile-btn"
                   data-gr-photo
                   data-index={x.g}
-                  data-stem={x.p.f}
-                  data-base={x.p.t}
+                  {...attrs(x)}
                   aria-label={`Photo ${x.g + 1} of ${total}, view large`}
                 >
                   <img
-                    src={`${cdn}${x.p.t}_c.jpg`}
+                    {...mosaicImg(x)}
                     alt=""
-                    width={x.p.o === "p" ? 533 : 800}
-                    height={x.p.o === "p" ? 800 : 533}
                     loading="lazy"
                     decoding="async"
                   />
@@ -128,16 +163,12 @@ if (running !== total) {
                     class="gr-photo gr-thumb"
                     data-gr-photo
                     data-index={x.g}
-                    data-stem={x.p.f}
-                    data-base={x.p.t}
-                  data-base={x.p.t}
+                    {...attrs(x)}
                     aria-label={`Photo ${x.g + 1} of ${total}, view large`}
                   >
                     <img
-                      src={`${cdn}${x.p.t}_q.jpg`}
+                      {...thumbImg(x)}
                       alt=""
-                      width="150"
-                      height="150"
                       loading="lazy"
                       decoding="async"
                     />

@@ -4,8 +4,11 @@
 // stacking context, where z-index 1000 clears the fixed site header.
 // It walks every [data-gr-photo] button in #photos by its data-index, which
 // RecapAlbum assigns in rendered order, so prev/next crosses chapters in
-// clock order and the counter matches the thumbnails' labels.
-import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
+// clock order and the counter matches the thumbnails' labels. The album
+// merges two sets: Flickr (colour) and the self-hosted black-and-white set
+// (buttons with data-set="bw", renditions under data-bw-base).
+import { galaAlbumCdnBase, galaAllPhotoCount } from "@/data/galaGallery2026";
+import { galaBwBase } from "@/data/galaGallery2026bw";
 ---
 
 <div
@@ -15,7 +18,8 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
   aria-modal="true"
   aria-label="Annual Gala 2026 photo viewer"
   data-cdn={galaAlbumCdnBase}
-  data-total={galaPhotoCount}
+  data-bw-base={galaBwBase}
+  data-total={galaAllPhotoCount}
   hidden
 >
   <div class="gr-lb-stage" data-gr-stage>
@@ -170,6 +174,7 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
     const closeBtn = lb.querySelector<HTMLButtonElement>("[data-gr-close]")!;
     const stage = lb.querySelector<HTMLElement>("[data-gr-stage]")!;
     const cdn = lb.dataset.cdn || "";
+    const bwBase = lb.dataset.bwBase || "";
 
     // Every photo button, keyed by its global rendered index.
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-gr-photo]"));
@@ -186,9 +191,14 @@ import { galaAlbumCdnBase, galaPhotoCount } from "@/data/galaGallery2026";
     // Rendition ladder for the viewer: the stored _h 1600px stem first, then
     // _b 1024px and _c 800px built from the base stem. Flickr occasionally
     // throttles a burst of full-size loads; stepping down keeps the photo on
-    // screen instead of marking it broken.
+    // screen instead of marking it broken. The black-and-white set is ours:
+    // _h.webp 1600px, then _c.webp 1000px.
     const sources = (i: number) => {
       const b = byIndex[i];
+      if (b?.dataset.set === "bw") {
+        const id = b.dataset.id;
+        return id ? [`${bwBase}${id}_h.webp`, `${bwBase}${id}_c.webp`] : [];
+      }
       const stem = b?.dataset.stem;
       const base = b?.dataset.base;
       const out: string[] = [];

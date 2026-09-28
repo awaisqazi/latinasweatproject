@@ -23,9 +23,14 @@ import {
 import {
   galaAlbumCdnBase,
   galaAlbumUrl,
-  galaPhotoCount,
+  galaAllPhotoCount,
   galaPhotoStems,
 } from "@/data/galaGallery2026";
+import {
+  galaBwBase,
+  galaBwOriginalsUrl,
+  galaBwPhotos,
+} from "@/data/galaGallery2026bw";
 import { abc7Feature } from "@/data/abc7WindyCity";
 
 const base = import.meta.env.BASE_URL;
@@ -50,7 +55,11 @@ const headlineRaised =
   typeof galaResults.grandTotal === "number"
     ? `${money(galaResults.grandTotal)} to date`
     : `${money(galaResults.raisedOnTheNight)} on the night`;
-const pageDescription = `Gracias, comunidad: the Annual Gala 2026 at the Museum of Contemporary Art Chicago raised ${headlineRaised} for accessible classes and teacher training. See the honors, the paddle raise and all ${galaPhotoCount} photos.`;
+const pageDescription = `Gracias, comunidad: the Annual Gala 2026 at the Museum of Contemporary Art Chicago raised ${headlineRaised} for accessible classes and teacher training. See the honors, the paddle raise and all ${galaAllPhotoCount} photos.`;
+
+// One black-and-white paddle-raise frame (second camera) under the
+// constellation: a wide view of paddles in the air, no caption.
+const paddlePlate = galaBwPhotos.find((p) => p.id === "EOSR1760");
 
 // Floating gold particles drifting up through the hero (desktop only, motion-safe).
 const heroParticles = Array.from({ length: 22 }, (_, i) => ({
@@ -313,7 +322,21 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
           </p>
         </div>
         <div class="mt-14">
-          <RecapConstellation />
+          <RecapConstellation>
+            {paddlePlate && (
+              <figure slot="plate" class="reveal mx-auto mt-10 w-full max-w-sm border border-accent-gold/35 p-1.5 sm:max-w-md">
+                <img
+                  src={`${galaBwBase}${paddlePlate.id}_c.webp`}
+                  alt="Paddles in the air during the raise"
+                  width={paddlePlate.w}
+                  height={paddlePlate.h}
+                  loading="lazy"
+                  decoding="async"
+                  class="block h-auto w-full"
+                />
+              </figure>
+            )}
+          </RecapConstellation>
         </div>
       </div>
     </section>
@@ -455,7 +478,7 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
     <section id="photos" class="gr-band relative overflow-hidden border-y border-accent-gold/15 py-16 scroll-mt-28 sm:py-20 lg:py-24">
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">The album · {galaPhotoCount} photos</p>
+          <p class="reveal text-xs font-extrabold uppercase tracking-[0.3em] text-accent-gold">The album · {galaAllPhotoCount} photos</p>
           <h2 class="reveal mt-4 text-balance font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style="transition-delay: 90ms;">
             {galaRecap.photosHeading}
           </h2>
@@ -476,6 +499,18 @@ const closingParticles = Array.from({ length: 16 }, (_, i) => ({
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
               <span class="sr-only">(opens in a new tab)</span>
+            </a>
+          </p>
+          <p class="reveal mt-3" style="transition-delay: 280ms;">
+            <a
+              href={galaBwOriginalsUrl}
+              target="_blank"
+              rel="noopener"
+              class="text-xs font-bold uppercase tracking-[0.24em] text-white/55 underline decoration-white/25 underline-offset-4 transition-colors hover:text-accent-gold hover:decoration-accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
+              data-conversion-event="gala_gallery_click"
+              data-conversion-context="gala_page_originals"
+            >
+              Download the originals (Google Drive)<span class="sr-only"> (opens in a new tab)</span>
             </a>
           </p>
         </div>

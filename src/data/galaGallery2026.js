@@ -1,6 +1,13 @@
-// Annual Gala 2026 photo album: all 422 photos from the official Flickr set,
-// in album order (the photographer's edit order, not clock order). Each
-// entry is a pair of Flickr-CDN path stems; build a URL with
+// Annual Gala 2026 photo album, TWO photographers:
+//   1. Colour: the 422 photos of the official Flickr set (this file), stored
+//      in album order (the photographer's edit order, not clock order).
+//   2. Black and white: 135 frames from the second camera, self-hosted as
+//      webp (galaGallery2026bw.js, built by marketing/gala-bw-photos/
+//      prepare.mjs; originals in a Google Drive folder).
+// The /gala album (RecapAlbum) merges both sets per chapter by `at`, so the
+// viewer walks the night in clock order: galaAllPhotoCount photos in all.
+//
+// Colour entries are pairs of Flickr-CDN path stems; build a URL with
 // `https://live.staticflickr.com/${stem}.jpg`.
 //   t:  the BASE stem with NO size suffix (bare it serves the 500px
 //       rendition). Append `_q` for the 150px square thumb, `_c` for 800px
@@ -16,9 +23,13 @@
 //   c:  chapter key, derived from `at`: see galaAlbumChapters. The camera
 //       clock runs a little behind the program (the 20:xx frames are the
 //       9 PM gallery hour, 21:xx is already the fashion show), so chapters
-//       are cut by what the frames show, not by the printed times.
+//       are cut by what the frames show, not by the printed times. The
+//       black-and-white camera keeps true clock time, so inside a chapter
+//       the merged order interleaves the two sets only approximately.
 // Album: https://www.flickr.com/photos/88623248@N07/albums/72177720335849859
 // Pulled 2026-09-26 via flickr.photosets.getPhotos (extras url_q,url_c,url_h).
+
+import { galaBwPhotoCount } from "./galaGallery2026bw.js";
 
 export const galaAlbumUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335849859";
@@ -27,8 +38,9 @@ export const galaAlbumCdnBase = "https://live.staticflickr.com/";
 // The night in chapters, in clock order. `key` matches each photo's `c`.
 export const galaAlbumChapters = [
   { key: "cocktails", time: "6 PM", title: "Cocktail hour", detail: "Mariachi Sirenas, the museum terrace, and the first arrivals." },
-  { key: "dinner", time: "7 PM", title: "Dinner and honors", detail: "Three courses, featured voices, eight honors, and the paddle raise." },
-  { key: "gallery", time: "9 PM", title: "Gallery and open bar", detail: "The museum after dark: the galleries open, the late-night guests arrive." },
+  { key: "dinner", time: "7 PM", title: "Dinner and honors", detail: "Three courses, featured voices, and eight honors." },
+  { key: "bidding", time: "9:07 PM", title: "The paddle raise", detail: "Ten minutes of paddles in the air, 9:07 to 9:17 PM." },
+  { key: "gallery", time: "9:30 PM", title: "Gallery and open bar", detail: "The museum after dark: the galleries open, the late-night guests arrive." },
   { key: "afterdark", time: "10 PM", title: "The fashion show and the dance floor", detail: "Six designers on the fourth floor, then DJ Mateo until midnight." },
 ];
 
@@ -458,3 +470,7 @@ export const galaPhotoStems = [
 ];
 
 export const galaPhotoCount = galaPhotoStems.length;
+
+// Both photographers together (colour + black and white): the album's count
+// on every public surface.
+export const galaAllPhotoCount = galaPhotoCount + galaBwPhotoCount;
