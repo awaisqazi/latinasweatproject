@@ -34,11 +34,11 @@ const locations = popUpLocations.map((loc) => ({
   days: groupSessionsByDay(loc),
   teachers: locationInstructors(loc),
 }));
-// Keep "pop-up" from hyphen-breaking across lines in the display headline.
-const headlineParts = popUpWeek1.headline.split("pop-up");
+// Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
+const headlineParts = popUpWeek1.headline.split(" · ");
 const pageTitle = `${popUpWeek1.title} · Oct 5 – 11 | The Latina Sweat Project`;
 const pageDescription =
-  "LSP goes pop-up in Pilsen, Oct 5 – 11: 45-minute classes at Chicago Art Department (pay what you can) and Sanctuary Health ($10 per mat, 12 mats). Reserve your spot.";
+  "LSP Pop Up · Pilsen, Oct 5 – 11: 45-minute classes at Chicago Art Department (pay what you can) and Sanctuary Health ($10 per mat, 12 mats). Reserve your spot.";
 ---
 
 <Layout
@@ -67,7 +67,7 @@ const pageDescription =
           ))}
         </p>
         <h1 class="pu-display mt-4 max-w-[11ch] text-[2.9rem] sm:text-7xl lg:text-8xl">
-          {headlineParts[0]}<span class="whitespace-nowrap">pop-up</span>{headlineParts[1]}
+          <span class="whitespace-nowrap">{headlineParts[0]}</span>{headlineParts[1] && <><br /><span>{headlineParts[1]}</span></>}
         </h1>
         <p class="mt-6 max-w-xl text-base leading-relaxed text-[color:var(--pu-ink-soft)] sm:text-lg">
           {popUpWeek1.body}

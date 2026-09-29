@@ -29,7 +29,7 @@ export const popUpWeek1 = {
   eyebrow: "Pop Up Week 1 · October 5 – 11",
   startsAtISO: "2026-10-05T00:00:00-05:00",
   endsAtISO: "2026-10-11T23:59:59-05:00",
-  headline: "LSP goes pop-up in Pilsen.",
+  headline: "LSP Pop Up · Pilsen",
   body:
     "Our studio is between homes, so this week the classes come to the " +
     "neighborhood. Two locations, one week, the same community. Pick a " +
