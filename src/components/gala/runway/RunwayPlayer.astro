@@ -5,10 +5,14 @@
 //      slow push-in). Looks without a walk frame skip this beat.
 //   2. "The look": the close-up the show holds on (3 s), with the
 //      photographer's flash, crowd flashes and the next-look peek.
-// One progress segment per beat. When a look has a back view, tapping the
-// stage flips the look over like a card to "The back" (autoplay pauses;
-// tap again to turn it back). Looks without a back ignore stage taps (the
-// tag just nudges). Vertical swipes change looks, horizontal drags scrub
+// One progress segment per beat. A look has up to three faces, in order:
+// the front (always), "The back" (a back view from the main camera, when
+// there is one) and "Black and white" (the same look from the second
+// photographer's camera, when there is one). Tapping the stage (or the flip
+// button, F, Enter) turns the look over like a card to the next face and
+// cycles front, back, black and white, front, skipping missing faces; any
+// face but the front pauses autoplay. Looks with only a front ignore stage
+// taps (the tag just nudges). Vertical swipes change looks, horizontal drags scrub
 // the beats, press and hold pauses, and a vertical "runway track" of twenty
 // gold diamonds jumps anywhere. After look 20 the finale walk plays, then
 // La Constelación del Runway (RunwayConstellation).
@@ -16,6 +20,7 @@
 // the script builds frames and progress segments at runtime.
 import RunwayConstellation from "./RunwayConstellation.astro";
 import { runwayClientData, runwayLooks, pad2 } from "./runwayData";
+import { galaBwCredit } from "@/data/galaGallery2026bw";
 
 const total = runwayLooks.length;
 const clientJson = JSON.stringify(runwayClientData);
@@ -43,11 +48,16 @@ const clientJson = JSON.stringify(runwayClientData);
 
     <div class="rw-stage" data-rw-stage>
       <div class="rw-reel" data-rw-reel>
-        {/* The current look is a two-faced card: the front face holds the
-            walk and the close-up, the reverse face holds the back view. */}
+        {/* The current look is a two-sided card: the front side holds the
+            walk and the close-up, the reverse side holds whichever other
+            face (back or black and white) is turned up. The cover layer on
+            the front side briefly holds the outgoing face when the card
+            turns from one reverse face to the next, so every change is a
+            full card flip. */}
         <div class="rw-panel rw-panel--cur" data-rw-curpanel>
           <div class="rw-flip" data-rw-flip>
             <div class="rw-face" data-rw-cur></div>
+            <div class="rw-face rw-face--over" data-rw-overface></div>
             <div class="rw-face rw-face--back" data-rw-backface></div>
           </div>
         </div>
@@ -105,14 +115,18 @@ const clientJson = JSON.stringify(runwayClientData);
       <p class="rw-caption-credit" data-rw-credit hidden>
         by <a href="#" target="_blank" rel="noopener noreferrer" data-rw-creditlink><span data-rw-creditname></span><span class="sr-only"> on Instagram (opens in a new tab)</span></a>
       </p>
+      {/* The second photographer, only while the black-and-white face is up. */}
+      <p class="rw-caption-credit" data-rw-bwcredit hidden>
+        <a href={galaBwCredit.url} target="_blank" rel="noopener noreferrer">Black and white by {galaBwCredit.handle}<span class="sr-only"> on Instagram (opens in a new tab)</span></a>
+      </p>
     </div>
 
-    {/* Flip cue: on the close-up of a look that has a back view. Visual only
-        (the stage takes the tap; the flip button serves keyboards and
-        screen readers). */}
+    {/* Flip cue: on any face of a look that has more than a front, naming the
+        face a tap turns to next. Visual only (the stage takes the tap; the
+        flip button serves keyboards and screen readers). */}
     <p class="rw-flipcue" data-rw-flipcue hidden aria-hidden="true">
       <svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="8" height="12.5" rx="1.3" fill="currentColor" /><rect x="12.5" y="6" width="8" height="12.5" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2 1.6" /><path d="M7.5 4.2c1.4-1.6 7.6-1.6 9 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /><path d="M14.4 2.6l2.2 1.6-1.4 2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
-      <span>Tap to see the back</span>
+      <span data-rw-cuetext>Tap to see the back</span>
     </p>
 
     {/* Swipe cue: while the show holds on a close-up, the next tag peeks in. */}
@@ -275,6 +289,12 @@ const clientJson = JSON.stringify(runwayClientData);
   .rw-face--back {
     transform: rotateY(180deg);
     background: #05070c;
+  }
+  .rw-face--over {
+    background: #05070c;
+  }
+  .rw-face--over:empty {
+    display: none;
   }
   .rw-panel[hidden] {
     display: none;
@@ -645,7 +665,8 @@ const clientJson = JSON.stringify(runwayClientData);
     font-size: 3.4rem;
     color: #fff;
   }
-  /* The beat label: "Walking out", "The look" or "The back". */
+  /* The beat label: "Walking out", "The look", "The back" or
+     "Black and white". */
   .rw-caption-beat {
     white-space: nowrap;
     font-size: 0.62rem;
@@ -991,15 +1012,32 @@ const clientJson = JSON.stringify(runwayClientData);
     el?: HTMLImageElement;
     state?: "idle" | "loading" | "ready" | "dead";
   };
-  type Look = { n: number; num: string; hero: number; designer: Credit; frames: Frame[]; back: Frame | null };
-  type Data = { url: string; total: number; looks: Look[]; finale: Frame[] };
+  type Look = {
+    n: number;
+    num: string;
+    hero: number;
+    designer: Credit;
+    frames: Frame[];
+    back: Frame | null;
+    bw: Frame | null;
+  };
+  type Data = {
+    url: string;
+    total: number;
+    looks: Look[];
+    finale: Frame[];
+    bwCredit: { handle: string; url: string };
+  };
+  // The faces of a look, in flip order: the front (walk + close-up), the
+  // back view, the second camera's black-and-white frame.
+  type Face = "front" | "back" | "bw";
 
   // Timing and gesture thresholds (see the page report for the rationale).
   const WALK_MS = 900; // the walk-out beat
   const HOLD_MS = 3000; // hold on the front (the hero, always the last beat)
   const FINALE_MS = 550; // finale walk tempo, per frame
   const FINAL_BEAT_MS = 1100; // last finale frame, before the constellation
-  const FLIP_MS = 520; // the card flip to the back view (matches the CSS)
+  const FLIP_MS = 520; // the card flip between faces (matches the CSS)
   const PUSH = 0.035; // push-in scale across a frame
   const FLASH_MS = 180;
   const SCRUB_PX = 28; // horizontal drag distance per frame
@@ -1028,6 +1066,9 @@ const clientJson = JSON.stringify(runwayClientData);
     const flipEl = $("[data-rw-flip]");
     const cur = $("[data-rw-cur]");
     const backFace = $("[data-rw-backface]");
+    const overFace = $("[data-rw-overface]");
+    const cueText = $("[data-rw-cuetext]");
+    const bwCredit = $("[data-rw-bwcredit]");
     const flipBtn = $<HTMLButtonElement>('[data-rw-act="flip"]');
     const flipCue = $("[data-rw-flipcue]");
     const captionEl = $("[data-rw-caption]");
@@ -1094,17 +1135,39 @@ const clientJson = JSON.stringify(runwayClientData);
     let shimmerTimer = 0;
     let toastTimer = 0;
     let segs: { i: number; fill: HTMLElement }[] = [];
-    let flipped = false; // the current look is turned over to its back view
-    let pendingFlip = false; // a flip is waiting on the back image
+    let face: Face = "front"; // the face of the current look that is up
+    let flipped = false; // face !== "front" (autoplay pauses)
+    let pendingFlip = false; // a flip is waiting on its face's image
+    let pendingFace: Face | null = null; // ...and this is the face it waits for
+    let cueShown = ""; // the flip cue's current text (replays its entrance on change)
 
     const seqOf = (p: number): Frame[] =>
       p >= 0 && p < L ? data.looks[p].frames : p === POS_WALK ? data.finale : [];
     const heroOf = (p: number) => (p >= 0 && p < L ? data.looks[p].hero : -1);
     const backOf = (p: number): Frame | null => (p >= 0 && p < L ? data.looks[p].back : null);
-    const hasBack = (p: number) => {
-      const b = backOf(p);
-      return !!b && b.state !== "dead";
+    const bwOf = (p: number): Frame | null => (p >= 0 && p < L ? data.looks[p].bw : null);
+    const faceFrame = (p: number, fc: Face): Frame | null =>
+      fc === "back" ? backOf(p) : fc === "bw" ? bwOf(p) : null;
+    // The faces this look can show, in flip order (a face whose image failed
+    // to load drops out).
+    const facesOf = (p: number): Face[] => {
+      if (p < 0 || p >= L) return [];
+      const out: Face[] = ["front"];
+      for (const fc of ["back", "bw"] as Face[]) {
+        const f = faceFrame(p, fc);
+        if (f && f.state !== "dead") out.push(fc);
+      }
+      return out;
     };
+    const hasBack = (p: number) => facesOf(p).length > 1; // anything to flip to
+    // The face a flip turns to from the one that is up.
+    const nextFace = (p: number): Face => {
+      const fs = facesOf(p);
+      const k = fs.indexOf(face);
+      return fs[(k + 1) % fs.length] || "front";
+    };
+    const faceOf = (f: Frame): Face | null =>
+      f === backOf(pos) ? "back" : f === bwOf(pos) ? "bw" : null;
     const isAlive = (f?: Frame) => !!f && f.state !== "dead";
     const nextAlive = (p: number, i: number) => {
       const s = seqOf(p);
@@ -1194,10 +1257,12 @@ const clientJson = JSON.stringify(runwayClientData);
       const list: Frame[] = [];
       const s = seqOf(pos);
       // Current beat first, then the rest of the look, then its back view
-      // (so a flip never lands on an empty face).
+      // and its black-and-white frame (so a flip never lands on an empty face).
       for (let j = fi; j < s.length; j++) list.push(s[j]);
       const back = backOf(pos);
       if (back) list.push(back);
+      const bw = bwOf(pos);
+      if (bw) list.push(bw);
       for (let j = 0; j < fi; j++) list.push(s[j]);
       if (pos + 1 <= POS_WALK) list.push(...seqOf(pos + 1).slice(0, 3));
       if (pos - 1 >= 0) list.push(...seqOf(pos - 1).slice(0, 1));
@@ -1206,9 +1271,9 @@ const clientJson = JSON.stringify(runwayClientData);
 
     function onReady(f: Frame) {
       if (!isOpen) return;
-      if (f === backOf(pos)) {
-        mountBack();
-        if (pendingFlip) setFlip(true);
+      const fc = faceOf(f);
+      if (fc) {
+        if (pendingFlip && pendingFace === fc) setFace(fc);
         else updateBeatUi();
         return;
       }
@@ -1221,11 +1286,15 @@ const clientJson = JSON.stringify(runwayClientData);
     }
     function onDead(f: Frame) {
       if (!isOpen) return;
-      if (f === backOf(pos)) {
-        // No back view after all: this look behaves like one without.
-        if (pendingFlip) {
+      const fc = faceOf(f);
+      if (fc) {
+        // That face after all does not exist: the look behaves like one
+        // without it (the flip order skips it).
+        if (pendingFlip && pendingFace === fc) {
           pendingFlip = false;
-          showFrame(fi, { flash: false });
+          pendingFace = null;
+          setLoading(false);
+          if (face === "front") showFrame(fi, { flash: false });
           nudge();
         }
         updateBeatUi();
@@ -1370,8 +1439,8 @@ const clientJson = JSON.stringify(runwayClientData);
         if (landed && i === heroOf(pos) && !scrubbing && opts.flash !== false) flash();
         if (i === heroOf(pos) && !scrubbing && !flipped) showNext();
         else hideNext();
-        // The front has landed: make sure its back view is on the way.
-        if (i === heroOf(pos)) ensureBack();
+        // The front has landed: make sure its other faces are on the way.
+        if (i === heroOf(pos)) ensureFaces();
       } else {
         setLoading(true);
         if (f.state !== "loading") preloadAround();
@@ -1380,33 +1449,36 @@ const clientJson = JSON.stringify(runwayClientData);
       updateBeatUi();
     }
 
-    // ---------------- the flip (front and back of a look) ----------------
-    function ensureBack() {
-      const b = backOf(pos);
-      if (!b || (b.state && b.state !== "idle")) return;
-      const k = queue.indexOf(b);
-      if (k >= 0) queue.splice(k, 1);
-      queue.unshift(b);
+    // ---------------- the flip (the faces of a look) ----------------
+    // Put the look's back view and black-and-white frame at the head of the
+    // load queue (back first: it is the next face).
+    function ensureFaces() {
+      for (const f of [bwOf(pos), backOf(pos)]) {
+        if (!f || (f.state && f.state !== "idle")) continue;
+        const k = queue.indexOf(f);
+        if (k >= 0) queue.splice(k, 1);
+        queue.unshift(f);
+      }
       pump();
     }
-    // Put the back image on the reverse face as soon as it is ready.
-    function mountBack() {
-      const b = backOf(pos);
-      if (!b || b.state !== "ready" || !b.el) return;
-      if (b.el.parentElement !== backFace) {
-        b.el.classList.add("is-on");
-        b.el.style.transform = "";
-        backFace.replaceChildren(b.el);
-      }
+    // Hang a face's image on one side of the card.
+    function mountFace(side: HTMLElement, f: Frame) {
+      if (!f.el) return;
+      f.el.classList.add("is-on");
+      f.el.style.transform = "";
+      if (f.el.parentElement !== side || side.childElementCount !== 1) side.replaceChildren(f.el);
     }
     // Snap back to the front with no animation (look change, close).
     function resetFlip() {
+      face = "front";
       flipped = false;
       pendingFlip = false;
+      pendingFace = null;
       flipEl.classList.remove("is-animated", "is-flipped");
       backFace.replaceChildren();
+      overFace.replaceChildren();
     }
-    // A look without a back view: the tag gives a small shake, nothing else.
+    // A look with only a front: the tag gives a small shake, nothing else.
     function nudge() {
       if (!motionOK || !tagWrap.animate) return;
       tagWrap.animate(
@@ -1420,39 +1492,72 @@ const clientJson = JSON.stringify(runwayClientData);
         { duration: 460, easing: "ease-out" },
       );
     }
-    function setFlip(on: boolean, opts: { instant?: boolean } = {}) {
+    // Turn the card to `target`. Front to a reverse face turns 0 to 180
+    // degrees; a reverse face back to the front turns 180 to 0; one reverse
+    // face to the next first moves the outgoing image onto the front side's
+    // cover layer while the card snaps to 0 (the same picture, no visible
+    // change), then turns 0 to 180 onto the incoming one.
+    function setFace(target: Face, opts: { instant?: boolean } = {}) {
+      const wasPending = pendingFlip;
       pendingFlip = false;
-      if (on) {
-        if (pos >= L || !hasBack(pos)) {
+      pendingFace = null;
+      const f = target === "front" ? null : faceFrame(pos, target);
+      if (target !== "front") {
+        if (pos >= L || !f || f.state === "dead") {
+          if (wasPending) setLoading(false);
           nudge();
           updateBeatUi();
           return;
         }
-        const b = backOf(pos)!;
-        if (b.state !== "ready" || !b.el) {
-          // Wait for the back image rather than turn over to an empty face.
+        if (f.state !== "ready" || !f.el) {
+          // Wait for the image rather than turn over to an empty face.
           pendingFlip = true;
-          ensureBack();
+          pendingFace = target;
+          ensureFaces();
           setLoading(true);
+          updateBeatUi();
           return;
         }
-        // The back belongs to the close-up: land on it underneath.
+        // The other faces belong to the close-up: land on it underneath.
         const h = heroOf(pos);
-        if (fi !== h && isAlive(seqOf(pos)[h])) showFrame(h, { flash: false });
-        mountBack();
+        if (face === "front" && fi !== h && isAlive(seqOf(pos)[h])) showFrame(h, { flash: false });
         setLoading(false);
       }
-      if (on === flipped) {
-        // Nothing to turn (e.g. a pending flip was cancelled): just refresh
-        // the front, which also clears the loading shimmer.
-        if (!on) showFrame(fi, { flash: false });
-        else updateBeatUi();
+      if (target === face) {
+        // Nothing to turn (e.g. a pending flip was cancelled): just refresh,
+        // which also clears the loading shimmer.
+        if (target === "front") showFrame(fi, { flash: false });
+        else {
+          setLoading(false);
+          updateBeatUi();
+        }
         return;
       }
-      flipped = on;
+      const from = face;
       const animate = motionOK && !opts.instant;
-      flipEl.classList.toggle("is-animated", animate);
-      flipEl.classList.toggle("is-flipped", on);
+      if (target === "front") {
+        overFace.replaceChildren();
+        flipEl.classList.toggle("is-animated", animate);
+        flipEl.classList.remove("is-flipped");
+      } else if (from === "front") {
+        overFace.replaceChildren();
+        mountFace(backFace, f!);
+        flipEl.classList.toggle("is-animated", animate);
+        flipEl.classList.add("is-flipped");
+      } else {
+        const out = faceFrame(pos, from);
+        if (animate && out && out.el) {
+          flipEl.classList.remove("is-animated");
+          mountFace(overFace, out);
+          flipEl.classList.remove("is-flipped");
+          void flipEl.offsetWidth;
+        }
+        mountFace(backFace, f!);
+        flipEl.classList.toggle("is-animated", animate);
+        flipEl.classList.add("is-flipped");
+      }
+      face = target;
+      flipped = target !== "front";
       if (animate && curPanel.animate) {
         curPanel.animate(
           [{ transform: "scale(1)" }, { transform: "scale(0.94)", offset: 0.5 }, { transform: "scale(1)" }],
@@ -1460,13 +1565,13 @@ const clientJson = JSON.stringify(runwayClientData);
         );
       }
       const n = pos + 1;
-      if (on) {
+      if (flipped) {
         hideNext();
         clearCrowd();
-        const el = backOf(pos)!.el!;
+        const el = f!.el!;
         const src = el.currentSrc || el.src;
         if (backdrop.getAttribute("src") !== src) backdrop.src = src;
-        announce(`Look ${n}, the back`);
+        announce(target === "bw" ? `Look ${n}, black and white` : `Look ${n}, the back`);
       } else {
         const src = shownEl ? shownEl.currentSrc || shownEl.src : "";
         if (src && backdrop.getAttribute("src") !== src) backdrop.src = src;
@@ -1475,10 +1580,20 @@ const clientJson = JSON.stringify(runwayClientData);
       }
       updateBeatUi();
     }
+    // Tap, the flip button, F and Enter: the next face in the cycle.
     function toggleFlip() {
       if (animating) finishSlide();
-      if (flipped || pendingFlip) setFlip(false);
-      else setFlip(true);
+      if (pendingFlip) {
+        // A second tap while a face is still loading cancels that flip.
+        setFace(face);
+        return;
+      }
+      if (pos >= L || !hasBack(pos)) {
+        nudge();
+        updateBeatUi();
+        return;
+      }
+      setFace(nextFace(pos));
     }
 
     const beatName = () =>
@@ -1487,7 +1602,7 @@ const clientJson = JSON.stringify(runwayClientData);
         : pos === POS_WALK
           ? "finale"
           : flipped
-            ? "back"
+            ? face
             : fi === heroOf(pos)
               ? "front"
               : "walk";
@@ -1500,17 +1615,37 @@ const clientJson = JSON.stringify(runwayClientData);
       const inLook = pos >= 0 && pos < L;
       const beat = beatName();
       capBeat.hidden = !inLook;
-      beatWord.textContent = beat === "walk" ? "Walking out" : beat === "back" ? "The back" : "The look";
-      capHint.hidden = !(inLook && flipped);
+      beatWord.textContent =
+        beat === "walk"
+          ? "Walking out"
+          : beat === "back"
+            ? "The back"
+            : beat === "bw"
+              ? "Black and white"
+              : "The look";
       const back = inLook && hasBack(pos);
+      // Every flip cue, hint and button label names the face a tap turns to.
+      const nf: Face = back ? nextFace(pos) : "front";
+      const tapText =
+        nf === "back" ? "Tap to see the back" : nf === "bw" ? "Tap for black and white" : "Tap to turn back";
       if (!back && document.activeElement === flipBtn) dlg.focus({ preventScroll: true });
       flipBtn.hidden = !back;
       flipBtn.setAttribute("aria-pressed", String(flipped));
-      flipBtn.setAttribute("aria-label", flipped ? "See the front" : "See the back");
+      flipBtn.setAttribute(
+        "aria-label",
+        nf === "back" ? "See the back" : nf === "bw" ? "See it in black and white" : "See the front",
+      );
+      bwCredit.hidden = !(inLook && face === "bw");
       const hero = inLook ? seqOf(pos)[heroOf(pos)] : undefined;
       const frontShown = beat === "front" && !!hero && hero.state === "ready" && shownEl === hero.el;
-      const cueOn = back && frontShown && !scrubbing && !pendingFlip;
-      if (cueOn && flipCue.hidden) {
+      const cueOn = back && (frontShown || flipped) && !scrubbing && !pendingFlip;
+      // The caption hint says the same thing; it only shows while flipped
+      // when the cue tag cannot (so the words never appear twice).
+      capHint.textContent = tapText;
+      capHint.hidden = !(inLook && flipped && !cueOn);
+      if (cueOn && (flipCue.hidden || cueShown !== tapText)) {
+        cueText.textContent = tapText;
+        cueShown = tapText;
         flipCue.hidden = false;
         flipCue.classList.remove("is-in");
         void flipCue.offsetWidth;
@@ -1518,6 +1653,7 @@ const clientJson = JSON.stringify(runwayClientData);
       } else if (!cueOn && !flipCue.hidden) {
         flipCue.hidden = true;
         flipCue.classList.remove("is-in");
+        cueShown = "";
       }
       syncCapH();
     }
@@ -1666,7 +1802,6 @@ const clientJson = JSON.stringify(runwayClientData);
       shownEl = null;
       fi = firstAlive(np);
       elapsed = 0;
-      mountBack();
       buildBars();
       updateChrome(prev !== np);
       preloadAround();
@@ -1721,7 +1856,7 @@ const clientJson = JSON.stringify(runwayClientData);
       if (np === pos) {
         // Same look again: restart its walk.
         if (np < POS_SKY) {
-          if (flipped || pendingFlip) setFlip(false, { instant: true });
+          if (flipped || pendingFlip) setFace("front", { instant: true });
           const f0 = firstAlive(np);
           if (f0 >= 0) showFrame(f0);
         }
@@ -1744,7 +1879,7 @@ const clientJson = JSON.stringify(runwayClientData);
     function stepNext() {
       if (animating) finishSlide();
       if (pos >= POS_SKY) return;
-      if (flipped || pendingFlip) setFlip(false, { instant: true });
+      if (flipped || pendingFlip) setFace("front", { instant: true });
       const j = nextAlive(pos, fi);
       if (j >= 0) showFrame(j);
       else goPos(pos + 1);
@@ -1752,7 +1887,7 @@ const clientJson = JSON.stringify(runwayClientData);
     function stepPrev() {
       if (animating) finishSlide();
       if (pos >= POS_SKY) return;
-      if (flipped || pendingFlip) setFlip(false, { instant: true });
+      if (flipped || pendingFlip) setFace("front", { instant: true });
       const j = prevAlive(pos, fi);
       if (j >= 0) showFrame(j);
       else if (pos > 0) goPos(pos - 1);
@@ -1920,9 +2055,10 @@ const clientJson = JSON.stringify(runwayClientData);
     async function renderCard(): Promise<{ blob: Blob; name: string; title: string }> {
       const inLook = pos < L;
       const seq = seqOf(pos);
-      // The frame on screen: the back view when the look is turned over.
-      const back = flipped ? backOf(pos) : null;
-      const f = back && back.state === "ready" ? back : seq[fi] || seq[0];
+      // The frame on screen: the face that is up when the look is turned over.
+      const up = flipped ? faceFrame(pos, face) : null;
+      const onBw = !!up && up.state === "ready" && face === "bw";
+      const f = up && up.state === "ready" ? up : seq[fi] || seq[0];
       const num = inLook ? data.looks[pos].num : "";
       const n = inLook ? pos + 1 : 0;
       const img = await loadImg(f.h || f.b);
@@ -2024,6 +2160,13 @@ const clientJson = JSON.stringify(runwayClientData);
         c.font = "italic 400 40px Didot, 'Bodoni 72', 'Playfair Display', Georgia, serif";
         c.fillText(`by ${designer.name}`, W / 2, y);
         y += 54;
+      }
+      if (onBw) {
+        // The second photographer's frame carries their credit.
+        c.fillStyle = "rgba(255,255,255,0.82)";
+        c.font = "600 28px Rubik, 'Helvetica Neue', Arial, sans-serif";
+        c.fillText(`Black and white by ${data.bwCredit.handle}`, W / 2, y - 6);
+        y += 50;
       }
       c.fillStyle = "#ffbd59";
       c.font = "800 24px Rubik, 'Helvetica Neue', Arial, sans-serif";
@@ -2139,7 +2282,7 @@ const clientJson = JSON.stringify(runwayClientData);
         if (gMode === "pending") {
           gMode = "hold";
           holdPaused = true;
-          if (flipped || pendingFlip) setFlip(false);
+          if (flipped || pendingFlip) setFace("front");
           updatePauseUi();
         }
       }, PRESS_MS);
@@ -2156,7 +2299,7 @@ const clientJson = JSON.stringify(runwayClientData);
         if (Math.abs(dx) > Math.abs(dy)) {
           gMode = "scrub";
           scrubbing = true;
-          if (flipped || pendingFlip) setFlip(false);
+          if (flipped || pendingFlip) setFace("front");
           scrubFrom = fi;
         } else {
           gMode = "swipe";
@@ -2490,6 +2633,7 @@ const clientJson = JSON.stringify(runwayClientData);
         holdPaused,
         animating,
         flipped,
+        face,
         beat: beatName(),
         mode: dlg.dataset.mode,
       }),

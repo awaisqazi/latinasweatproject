@@ -30,27 +30,35 @@ export const galaRunway = {
   // frame, shown only when the viewer flips the look, or null. Classified by
   // eye from the contact sheets on 2026-09-27; the rest of each burst
   // (near-duplicates, side angles) is left in the album, not in the show.
+  //
+  // `bw` = the SECOND camera: one black-and-white frame of the same look by
+  // the second photographer (id in galaBwPhotos, src/data/galaGallery2026bw.js;
+  // renditions under /images/gala/2026/album-bw/), or null. It is the look's
+  // third face, reached by flipping past the back. Matched to the looks by
+  // outfit and capture time on 2026-09-29. Look 16's match (EOSR2106) is
+  // held at null because only a renamed export (EOSR2106-2) exists on disk;
+  // set it once that frame is confirmed.
   looks: [
-    { walk: 149, front: 151, back: 152, designer: null },
-    { walk: null, front: 154, back: 155, designer: null },
-    { walk: 156, front: 158, back: 159, designer: null },
-    { walk: 161, front: 164, back: null, designer: null },
-    { walk: 166, front: 168, back: 171, designer: null },
-    { walk: 173, front: 176, back: 178, designer: null },
-    { walk: 183, front: 186, back: null, designer: null },
-    { walk: 189, front: 193, back: 194, designer: null },
-    { walk: 199, front: 202, back: null, designer: null },
-    { walk: null, front: 204, back: null, designer: null },
-    { walk: 206, front: 208, back: null, designer: null },
-    { walk: 210, front: 212, back: null, designer: null },
-    { walk: 214, front: 216, back: 219, designer: null },
-    { walk: 223, front: 226, back: 228, designer: null },
-    { walk: 233, front: 236, back: null, designer: null },
-    { walk: 242, front: 245, back: null, designer: null },
-    { walk: 246, front: 248, back: 249, designer: null },
-    { walk: 253, front: 257, back: null, designer: null },
-    { walk: 259, front: 261, back: 262, designer: null },
-    { walk: null, front: 273, back: 270, designer: null },
+    { walk: 149, front: 151, back: 152, bw: "EOSR1903", designer: null },
+    { walk: null, front: 154, back: 155, bw: null, designer: null },
+    { walk: 156, front: 158, back: 159, bw: "EOSR1913", designer: null },
+    { walk: 161, front: 164, back: null, bw: "EOSR1924", designer: null },
+    { walk: 166, front: 168, back: 171, bw: "EOSR1931", designer: null },
+    { walk: 173, front: 176, back: 178, bw: "EOSR1943", designer: null },
+    { walk: 183, front: 186, back: null, bw: "EOSR1954", designer: null },
+    { walk: 189, front: 193, back: 194, bw: "EOSR1966", designer: null },
+    { walk: 199, front: 202, back: null, bw: "EOSR1979", designer: null },
+    { walk: null, front: 204, back: null, bw: null, designer: null },
+    { walk: 206, front: 208, back: null, bw: null, designer: null },
+    { walk: 210, front: 212, back: null, bw: null, designer: null },
+    { walk: 214, front: 216, back: 219, bw: null, designer: null },
+    { walk: 223, front: 226, back: 228, bw: null, designer: null },
+    { walk: 233, front: 236, back: null, bw: null, designer: null },
+    { walk: 242, front: 245, back: null, bw: "EOSR2106-2", designer: null }, // the "-2" is the file name on disk
+    { walk: 246, front: 248, back: 249, bw: "EOSR2119", designer: null },
+    { walk: 253, front: 257, back: null, bw: "EOSR2133", designer: null },
+    { walk: 259, front: 261, back: 262, bw: "EOSR2149", designer: null },
+    { walk: null, front: 273, back: 270, bw: "EOSR2178", designer: null },
   ],
   // After the last look: the whole cast walks once more, then the group photo
   // in front of the gallery wall (landscape frames).

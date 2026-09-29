@@ -1,7 +1,9 @@
 ---
 import { galaAllPhotoCount } from "@/data/galaGallery2026";
 // The lookbook: every look's front (the close-up) as a card with a cream
-// garment tag, and a "Front + back" chip on looks that have a back view.
+// garment tag, and a small chip naming the extra faces a look can flip to:
+// "Front + back", "Front + B/W" (the second camera's black-and-white frame)
+// or "Front + back + B/W". Looks with only a front get no chip.
 // Each card opens the player at that look; without JS it is a plain link to
 // the full-size photo. Then the finale card, the six designers on a dark
 // plate (white knockout marks, dark plates only) and quiet links home.
@@ -16,6 +18,17 @@ import {
 } from "./runwayData";
 
 const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
+// The extra faces a look flips to, as the card chip and in its label.
+const facesChip = (look) =>
+  look.back && look.bw ? "Front + back + B/W" : look.back ? "Front + back" : look.bw ? "Front + B/W" : "";
+const facesLabel = (look) =>
+  look.back && look.bw
+    ? "Front, back and black and white"
+    : look.back
+      ? "Front and back"
+      : look.bw
+        ? "Front and black and white"
+        : "";
 ---
 
 <section id="lookbook" class="rw-lookbook relative scroll-mt-4 overflow-hidden py-16 sm:py-20 lg:py-24" aria-labelledby="rw-lookbook-title">
@@ -44,7 +57,7 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
               class="rw-card"
               data-rw-open={k}
               data-rw-card={k}
-              aria-label={look.back ? `Look ${look.n}. Front and back. Play from this look` : `Look ${look.n}. Play from this look`}
+              aria-label={`Look ${look.n}. ${facesLabel(look) ? `${facesLabel(look)}. ` : ""}Play from this look`}
             >
               <span class="rw-card-media">
                 <img
@@ -66,10 +79,10 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
                 <span class="rw-tag__word">Look</span>
                 <span class="rw-tag__num">{look.num}</span>
               </span>
-              {look.back && (
+              {facesChip(look) && (
                 <span class="rw-card-chip" aria-hidden="true">
                   <svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="8" height="12.5" rx="1.3" fill="currentColor" /><rect x="12.5" y="6" width="8" height="12.5" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2 1.6" /><path d="M7.5 4.2c1.4-1.6 7.6-1.6 9 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /><path d="M14.4 2.6l2.2 1.6-1.4 2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                  Front + back
+                  {facesChip(look)}
                 </span>
               )}
             </a>
@@ -178,6 +191,8 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
     color: inherit;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    /* The chip below sizes itself against the card, not the viewport. */
+    container-type: inline-size;
   }
   .rw-card-media {
     position: relative;
@@ -271,7 +286,8 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
   .rw-tag__word--solo {
     padding: 0.2rem 0;
   }
-  /* "Front + back": only on looks that have a back view. */
+  /* The extra faces ("Front + back", "Front + B/W", "Front + back + B/W"):
+     only on looks that have more than a front. */
   .rw-card-chip {
     position: absolute;
     left: 0.6rem;
@@ -295,6 +311,22 @@ const markStyle = (w) => `--s:${w.scale};--h:${w.maxH}`;
     width: 11px;
     height: 11px;
     color: #ffbd59;
+  }
+  /* Narrow cards (two-up on phones, three-up at 640px): the longest chip
+     would run under the play button, so every chip sits one row higher,
+     just above it; the narrowest cards also tighten the lettering. */
+  @container (max-width: 13.25rem) {
+    .rw-card-chip {
+      bottom: 3.05rem;
+    }
+  }
+  @container (max-width: 10.75rem) {
+    .rw-card-chip {
+      gap: 0.25rem;
+      padding: 0.28rem 0.45rem 0.28rem 0.38rem;
+      font-size: 0.52rem;
+      letter-spacing: 0.1em;
+    }
   }
   .rw-card-credit {
     margin-top: 0.5rem;

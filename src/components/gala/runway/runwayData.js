@@ -2,6 +2,7 @@
 // derived from the data files, never hand-typed here:
 //   looks and finale:  src/data/galaFashionShow2026.js (album indexes)
 //   photo URLs:        src/data/galaGallery2026.js (Flickr stems)
+//   black-and-white:   src/data/galaGallery2026bw.js (second camera, self-hosted)
 //   designer links:    galaFashionShow.brands in src/data/galaTeaser.js
 //   white marks:       galaSponsors2026.designers in src/data/galaRecap2026.js
 // PRIVACY: looks are numbered only. Alt text never names or describes the
@@ -13,7 +14,10 @@ import {
   galaPhotoCount,
   galaPhotoStems,
 } from "@/data/galaGallery2026";
+import { galaBwBase, galaBwCredit } from "@/data/galaGallery2026bw";
 import { galaFashionShow } from "@/data/galaTeaser";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { galaSponsors2026 } from "@/data/galaRecap2026";
 
 export const RUNWAY_PATH = "/gala/fashion-show";
@@ -36,6 +40,26 @@ function photo(i) {
   };
 }
 
+// One second-camera frame as its two stage renditions (_c 1000px, _h 1600px),
+// self-hosted under public/. A missing file fails the build rather than
+// shipping a flip to an empty face.
+// (Resolved from the project root: astro build runs there, and bundling
+// moves this module, so import.meta.url would not point into src/.)
+const publicDir = join(process.cwd(), "public");
+function bwPhoto(id, n) {
+  if (typeof id !== "string" || !/^[A-Z0-9-]+$/.test(id)) {
+    throw new Error(`runwayData: look ${n} bw "${id}" is not a camera frame id`);
+  }
+  const c = `${galaBwBase}${id}_c.webp`;
+  const h = `${galaBwBase}${id}_h.webp`;
+  for (const url of [c, h]) {
+    if (!existsSync(join(publicDir, url))) {
+      throw new Error(`runwayData: look ${n} bw rendition ${url} is missing from public/`);
+    }
+  }
+  return { c, h, alt: `Look ${n} on the runway at the MCA, in black and white` };
+}
+
 const instagramOf = (brand) =>
   brand.socials?.find((s) => s.type === "instagram")?.url || brand.url;
 
@@ -54,7 +78,9 @@ const total = galaRunway.looks.length;
 // Every look follows one grammar: frames = [walk (if any), front]. The walk
 // is one distant walk-out frame; the front is the close-up the show holds on
 // (always the last beat, so `hero` = frames.length - 1). `back` is one back
-// view the viewer can flip to, or null.
+// view the viewer can flip to, or null; `bw` is the second camera's
+// black-and-white frame of the same look, or null. The faces a flip cycles
+// through are front, back (if any), bw (if any), in that order.
 const isIndex = (i) => Number.isInteger(i) && i >= 0;
 
 export const runwayLooks = galaRunway.looks.map((look, k) => {
@@ -78,6 +104,7 @@ export const runwayLooks = galaRunway.looks.map((look, k) => {
       look.back != null
         ? { ...photo(look.back), alt: `Look ${n} on the runway at the MCA, the back` }
         : null,
+    bw: look.bw != null ? bwPhoto(look.bw, n) : null,
     designer: brand ? { name: brand.name, instagram: instagramOf(brand) } : null,
   };
 });
@@ -131,6 +158,10 @@ export const runwayClientData = {
     designer: l.designer,
     frames: l.frames.map(({ c, b, h, alt }) => ({ c, b, h, alt })),
     back: l.back ? { c: l.back.c, b: l.back.b, h: l.back.h, alt: l.back.alt } : null,
+    // The second camera's frame has no 1024px rendition: the phone stage
+    // loads _c (1000px), tall stages _h.
+    bw: l.bw ? { c: l.bw.c, b: l.bw.c, h: l.bw.h, alt: l.bw.alt } : null,
   })),
+  bwCredit: { handle: galaBwCredit.handle, url: galaBwCredit.url },
   finale: runwayFinale.walk.map(({ c, b, h, alt }) => ({ c, b, h, alt })),
 };
