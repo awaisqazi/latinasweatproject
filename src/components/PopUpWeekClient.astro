@@ -1,0 +1,69 @@
+---
+// Pop Up Week 1 client behaviour, shared by every surface that shows the
+// campaign (see src/data/popUpWeek1.js). Astro bundles and dedupes this
+// script, so it is safe to include the component more than once per page.
+//
+// 1. Auto-hide: after popUpWeek1.endsAtISO, elements carrying
+//    [data-popup-hide-when-past] are hidden, [data-popup-show-when-past]
+//    are revealed, and links with [data-popup-past-href] swap their href.
+//    (Surfaces also check the phase at build time; this covers a static
+//    build that is not redeployed after Oct 11.)
+// 2. Next up: inside each [data-popup-group], the first row whose
+//    [data-popup-starts] class has not ended yet (start + 45 min) gets
+//    data-popup-next="true". [data-popup-nextline] elements carry a JSON
+//    list of {s, l} (start ISO, label) and show the next label.
+import { popUpWeek1 } from "@/data/popUpWeek1";
+---
+
+<div hidden data-popup-bounds data-start={popUpWeek1.startsAtISO} data-end={popUpWeek1.endsAtISO}></div>
+
+<script>
+  (function () {
+    const bounds = document.querySelector<HTMLElement>("[data-popup-bounds]");
+    if (!bounds) return;
+    const now = Date.now();
+    const end = Date.parse(bounds.dataset.end || "");
+    const CLASS_MS = 45 * 60 * 1000;
+
+    if (Number.isFinite(end) && now > end) {
+      document.querySelectorAll<HTMLElement>("[data-popup-hide-when-past]").forEach((el) => {
+        el.hidden = true;
+        el.style.display = "none";
+      });
+      document.querySelectorAll<HTMLElement>("[data-popup-show-when-past]").forEach((el) => {
+        el.hidden = false;
+        el.style.removeProperty("display");
+      });
+      document.querySelectorAll<HTMLAnchorElement>("a[data-popup-past-href]").forEach((a) => {
+        a.href = a.dataset.popupPastHref || a.href;
+      });
+      return;
+    }
+
+    document.querySelectorAll<HTMLElement>("[data-popup-group]").forEach((group) => {
+      const rows = group.querySelectorAll<HTMLElement>("[data-popup-starts]");
+      for (const row of rows) {
+        const start = Date.parse(row.dataset.popupStarts || "");
+        if (Number.isFinite(start) && start + CLASS_MS > now) {
+          row.dataset.popupNext = "true";
+          break;
+        }
+      }
+    });
+
+    document.querySelectorAll<HTMLElement>("[data-popup-nextline]").forEach((el) => {
+      let list: { s: string; l: string }[] = [];
+      try {
+        list = JSON.parse(el.dataset.popupNextline || "[]");
+      } catch {
+        return;
+      }
+      const next = list.find((item) => Date.parse(item.s) + CLASS_MS > now);
+      const target = el.querySelector<HTMLElement>("[data-popup-nextline-text]");
+      if (next && target) {
+        target.textContent = next.l;
+        el.hidden = false;
+      }
+    });
+  })();
+</script>

@@ -12,7 +12,9 @@
 //   5. Monday Miles Tee merch [L]
 //   6. 40 Under 40 [D]
 //   7. Monday Miles community runs [L]
-//   8. A New Chapter (relocation) [D]
+//   8. A New Chapter (relocation) [D], with the Pop Up Week 1 companion
+//      band (PopUpWeekBand, tone="dark") inside it while the week is not
+//      past (Oct 5 to 11, 2026; auto-hides after Oct 11)
 //   9. Events carousel [L]
 //  10. Instagram [D]
 //  11. In The Press [L]
@@ -29,6 +31,10 @@
 // 2026: the WGN9 Around Town spotlight (slot 4), replaced in place by the
 // ABC7 Windy City Weekend spotlight; WGN9 remains a card in In The Press and
 // keeps its own page, /wgn9-around-town.
+// Pop Up Week 1 (Sep 28 2026 addition, src/data/popUpWeek1.js): while the
+// phase is not "past", the hero pill reads "Pop Up Week 1 · Oct 5 – 11"
+// and "Join a Class" goes to /popup; after Oct 11 both fall back to the
+// gala recap pill and /schedule (build time + PopUpWeekClient in-browser).
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
@@ -39,6 +45,9 @@ import { sweatFest, sweatFestDay, sweatFestCheckerUri } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
 import Abc7Segment from "@/components/Abc7Segment.astro";
+import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
+import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
+import { popUpWeek1, getPopUpPhase } from "@/data/popUpWeek1";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 
@@ -77,6 +86,13 @@ const sweatFestPrimaryLabel = "Relive the day";
 const graduationPageUrl = withBase("graduation");
 const graduationFlickrUrl =
   "https://www.flickr.com/photos/88623248@N07/albums/72177720335041327";
+// Pop Up Week 1 (Oct 5 to 11, 2026; src/data/popUpWeek1.js): while the
+// week is upcoming or live, the hero pill and "Join a Class" point to
+// /popup. Once past (at build time, or in the browser via
+// PopUpWeekClient after Oct 11) both fall back to the gala recap pill and
+// /schedule.
+const popUpActive = getPopUpPhase() !== "past";
+const popUpPageUrl = withBase(popUpWeek1.pagePath);
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -106,8 +122,25 @@ const graduationFlickrUrl =
       <div
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
+        {popUpActive && (
+          <a
+            href={popUpPageUrl}
+            class="group mb-5 inline-flex max-w-full items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-[#e0a83a] hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e0a83a] focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
+            data-popup-hide-when-past
+            data-conversion-event="popup_page_click"
+            data-conversion-context="home_hero_announcement"
+          >
+            <span class="h-2 w-2 shrink-0 rounded-full bg-[#c4573a]" aria-hidden="true"></span>
+            <span>{popUpWeek1.title} · {popUpWeek1.dateRangeShort}</span>
+            <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        )}
         <a
           href={galaRecapPhotosUrl}
+          data-popup-show-when-past
+          hidden={popUpActive}
           class="group mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-accent-gold hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
           data-conversion-event="gala_recap_click"
           data-conversion-context="home_hero_announcement"
@@ -128,15 +161,17 @@ const graduationFlickrUrl =
           celebrates our culture.
         </p>
         <a
-          href={`${base}schedule`}
+          href={popUpActive ? popUpPageUrl : `${base}schedule`}
+          data-popup-past-href={popUpActive ? `${base}schedule` : undefined}
           class="btn mt-8 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-slate-900"
           data-conversion-event="class_booking_start"
           data-conversion-context="home_hero"
-          data-conversion-booking-path="schedule_page"
+          data-conversion-booking-path={popUpActive ? "popup_page" : "schedule_page"}
         >
           Join a Class
         </a>
       </div>
+      <PopUpWeekClient />
     </section>
     {/* END: Hero Section */}
 
@@ -1305,6 +1340,17 @@ const graduationFlickrUrl =
             />
           </div>
         </div>
+
+        {/* Companion band: Pop Up Week 1 (Oct 5 to 11, 2026). It is this
+            section's story in action (the studio closed, the classes go
+            pop-up), so it rides INSIDE the dark A New Chapter room, like the
+            YTT '26 Trio band did inside Graduation: no new section, so the
+            light/dark alternation and the zig-zag are untouched. Campaign
+            identity (cream / terracotta / ink, CAD white card + Sanctuary ink
+            card), each card with its own Zeffy CTA. PopUpWeekBand renders
+            nothing once the week is past and hides itself in the browser
+            after Oct 11. */}
+        <PopUpWeekBand context="home_new_chapter_popup" tone="dark" class="mt-12 sm:mt-16" />
       </div>
     </section>
     {/* END: A New Chapter Section */}

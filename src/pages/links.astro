@@ -11,6 +11,13 @@ import {
 } from "@/data/sweatFest";
 import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
+import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
+import {
+  popUpWeek1,
+  popUpLocations,
+  getPopUpPhase,
+  popUpTicketEventFor,
+} from "@/data/popUpWeek1";
 const base = import.meta.env.BASE_URL;
 // Chicago Reader graduation feature (Aug 21, 2026): the featured press card.
 const readerArticle = pressArticles.find((a) => a.featured);
@@ -44,6 +51,17 @@ const abc7LogoSrc = withBase(abc7Feature.logo);
 // "Outlet team · date": the date wraps as one unit on a phone.
 const abc7BylineEn = abc7Feature.byline.split(" · ");
 const abc7BylineEs = abc7Feature.bylineEs.split(" · ");
+
+// Pop Up Week 1 (Oct 5 to 11, 2026): the live dated campaign, so its card
+// and bubble lead the page while the phase is not "past" (build time; the
+// PopUpWeekClient script also hides both in the browser after Oct 11).
+// Spanish row labels are derived from the session data, never hand-written.
+const popUpActive = getPopUpPhase() !== "past";
+const popUpDayEs = { Mon: "Lun", Tue: "Mar", Wed: "Mié", Thu: "Jue", Fri: "Vie", Sat: "Sáb", Sun: "Dom" };
+const popUpRowEs = (s) => {
+  const [, day] = s.dateLabel.split(" ");
+  return `${popUpDayEs[s.dayShort] ?? s.dayShort} ${day} Oct · ${s.time}`;
+};
 
 // Define links data with English and Spanish translations
 const links = [
@@ -149,12 +167,29 @@ const links = [
   },
 ];
 
-// Highlight Stories Bar configuration. The gala recap leads (Sep 25,
+// Highlight Stories Bar configuration. Pop Up Week 1 (Oct 5 to 11, the
+// live dated campaign) leads while it is not past; then the gala recap (Sep 25,
 // the newest story), then ABC7's Windy City Weekend segment (aired the
 // same day, before the gala), then the other recaps in reverse-chronological
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
+  ...(popUpActive
+    ? [
+        {
+          title: {
+            en: "Pop Up Wk 1",
+            es: "Pop Up Sem 1"
+          },
+          target: "#popup-card",
+          image: `${base}images/highlights/hl_popup.png`,
+          scale: "scale-[1.0]",
+          hoverScale: "group-hover:scale-[1.12]",
+          color: "amber",
+          popup: true
+        },
+      ]
+    : []),
   {
     title: {
       en: "Gala 2026",
@@ -270,6 +305,10 @@ const socials = [
 ];
 
 const getLinkConversionEvent = (url = "") => {
+  // Pop Up Week 1 Zeffy forms (exact URLs from src/data/popUpWeek1.js):
+  // class registrations, so class_booking_start.
+  const popUpEvent = popUpTicketEventFor(url);
+  if (popUpEvent) return popUpEvent;
   if (url.includes("/feedback")) return "feedback_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
@@ -277,6 +316,7 @@ const getLinkConversionEvent = (url = "") => {
 };
 
 const getLinkBookingPath = (url = "") => {
+  if (popUpTicketEventFor(url)) return "popup_zeffy";
   if (url.includes("/feedback")) return "post_class_feedback";
   if (url.includes("/schedule")) return "schedule_page";
   return undefined;
@@ -385,6 +425,7 @@ const getLinkConversionProvider = (url = "") => {
                 rel={story.url ? "noopener noreferrer" : undefined}
                 class="story-highlight flex flex-col items-center flex-shrink-0 snap-center select-none group"
                 data-target={story.target}
+                data-popup-hide-when-past={story.popup ? "" : undefined}
               >
                 {/* Glow story ring */}
                 <div class="relative w-[66px] h-[66px] flex items-center justify-center flex-shrink-0 rounded-full bg-gradient-to-tr from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_15px_rgba(255,189,89,0.4)] shadow-md">
@@ -411,6 +452,146 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
+      {/* Pop Up Week 1 Featured Card (Oct 5 to 11, 2026): the live dated
+          campaign, so it leads the feature cards. Campaign identity from
+          the IG graphics (cream ground, terracotta sun, ink, mustard on
+          dark): Chicago Art Dept as a white block, Sanctuary Health as an
+          ink block, every session as a compact row carrying
+          data-popup-date / data-popup-starts; PopUpWeekClient flags the
+          next class per location (NEXT / SIGUE) and hides the whole card
+          after Oct 11. Every visible string has an EN/ES pair. */}
+      {popUpActive && (
+        <div
+          id="popup-card"
+          class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms; background: #f3ede4; color: #1e1a17;"
+          data-popup-hide-when-past
+        >
+          <div class="pointer-events-none absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#c4573a]" aria-hidden="true"></div>
+          <div class="relative p-4 pt-5 sm:p-5 sm:pt-6">
+            <div class="flex items-center gap-2 pr-20">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#1e1a17] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#f3ede4]">
+                <span class="relative flex h-1.5 w-1.5">
+                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e0a83a] opacity-70"></span>
+                  <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#e0a83a]"></span>
+                </span>
+                <span class="lang-en">Oct 5 – 11</span>
+                <span class="lang-es hidden">5 – 11 Oct</span>
+              </span>
+            </div>
+            <p class="mt-4 pr-16 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
+              <span class="lang-en">{popUpWeek1.title} · Two locations</span>
+              <span class="lang-es hidden">{popUpWeek1.title} · Dos lugares</span>
+            </p>
+            <h2 class="mt-1 pr-10 text-[1.9rem] font-black uppercase leading-[0.92] tracking-tight text-[#1e1a17] sm:text-4xl">
+              <span class="lang-en">LSP goes pop-up in Pilsen.</span>
+              <span class="lang-es hidden">LSP se va pop-up en Pilsen.</span>
+            </h2>
+            <p class="mt-3 text-sm font-semibold leading-relaxed text-[#1e1a17]/75">
+              <span class="lang-en">Our studio is between homes, so this week the classes come to the neighborhood. {popUpWeek1.matsLine}</span>
+              <span class="lang-es hidden">Nuestro estudio está entre hogares, así que esta semana las clases llegan al barrio. {popUpWeek1.matsLineEs}</span>
+            </p>
+
+            {popUpLocations.map((loc) => {
+              const ink = loc.theme === "dark";
+              return (
+                <div
+                  class:list={[
+                    "mt-4 overflow-hidden rounded-xl",
+                    ink ? "bg-[#1e1a17] text-[#f3ede4]" : "bg-[#fdfbf7] text-[#1e1a17] shadow-[0_8px_20px_-14px_rgba(30,26,23,0.5)]",
+                  ]}
+                  data-popup-group
+                >
+                  <div class="px-3.5 pb-2 pt-3">
+                    <p class="text-base font-extrabold uppercase leading-tight tracking-tight">{loc.name}</p>
+                    <p class:list={["text-[10px] font-extrabold uppercase tracking-[0.16em]", ink ? "text-[#e0a83a]" : "text-[#c4573a]"]}>
+                      {loc.shortLabel}
+                    </p>
+                    <p class:list={["mt-1 text-[11px] font-semibold", ink ? "text-[#f3ede4]/65" : "text-[#1e1a17]/65"]}>
+                      {loc.address}
+                    </p>
+                    <p class="mt-1 text-[11px] font-extrabold">
+                      <span class="lang-en">{loc.priceLine} · {loc.capacityLine}</span>
+                      <span class="lang-es hidden">{loc.priceLineEs} · {loc.capacityLineEs}</span>
+                    </p>
+                  </div>
+                  <div class:list={["border-t", ink ? "border-[#f3ede4]/10" : "border-[#1e1a17]/10"]}>
+                    {loc.sessions.map((s, i) => (
+                      <div
+                        class:list={[
+                          "popup-row px-3.5 py-1.5",
+                          ink ? "popup-row--ink" : "popup-row--paper",
+                          i > 0 && (ink ? "border-t border-[#f3ede4]/[0.06]" : "border-t border-[#1e1a17]/[0.06]"),
+                        ]}
+                        data-popup-date={s.date}
+                        data-popup-starts={s.startsAt}
+                      >
+                        <div class="min-w-0">
+                          <div class:list={["flex flex-wrap items-center gap-x-1.5 text-[11px] font-extrabold", ink ? "text-[#e2765a]" : "text-[#c4573a]"]}>
+                            <span class="lang-en whitespace-nowrap">{s.dayShort} {s.dateLabel} · {s.time}</span>
+                            <span class="lang-es hidden whitespace-nowrap">{popUpRowEs(s)}</span>
+                            <span class:list={["popup-next-tag rounded-[3px] px-1.5 py-[1px] text-[8px] font-extrabold uppercase tracking-widest", ink ? "bg-[#e0a83a] text-[#1e1a17]" : "bg-[#c4573a] text-white"]}>
+                              <span class="lang-en">Next</span>
+                              <span class="lang-es hidden">Sigue</span>
+                            </span>
+                          </div>
+                          <p class="text-[12px] font-bold leading-snug">
+                            {s.className}
+                            <span class:list={["popup-names font-semibold", ink ? "text-[#f3ede4]/60" : "text-[#1e1a17]/55"]}> · {s.instructors.join(" / ")}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div class="p-3">
+                    <a
+                      href={loc.ticketsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-conversion-event={loc.conversionEvent}
+                      data-conversion-context="links_popup_card"
+                      data-conversion-provider="zeffy"
+                      data-conversion-booking-path="popup_zeffy"
+                      data-conversion-popup-location={loc.trackingLocation}
+                      class:list={[
+                        "flex items-center justify-between rounded-lg px-4 py-3 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                        ink ? "bg-[#c4573a] text-white focus-visible:ring-[#e0a83a] focus-visible:ring-offset-[#1e1a17]" : "bg-[#1e1a17] text-[#fdfbf7] focus-visible:ring-[#c4573a]",
+                      ]}
+                    >
+                      <span class="text-sm font-extrabold">
+                        <span class="lang-en">{loc.ticketsLabel}</span>
+                        <span class="lang-es hidden">{loc.ticketsLabelEs}</span>
+                      </span>
+                      <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+
+            <p class="mt-4 text-[11px] font-semibold leading-relaxed text-[#1e1a17]/65">
+              <span class="lang-en">{popUpWeek1.changeOfPlansLine}</span>
+              <span class="lang-es hidden">Si cambian tus planes, escribe a {popUpWeek1.changeOfPlansEmail} para que otra persona de la comunidad pueda tomar tu lugar.</span>
+            </p>
+            <a
+              href={withBase(popUpWeek1.pagePath)}
+              class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"
+              data-conversion-event="popup_page_click"
+              data-conversion-context="links_popup_card"
+            >
+              <span class="lang-en">Full week on the pop-up page</span>
+              <span class="lang-es hidden">Toda la semana en la página pop-up</span>
+              <svg class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+          </div>
+          <PopUpWeekClient />
+        </div>
+      )}
+
       {/* Gala 2026 Recap Card (post-gala, Sep 26 2026): black-tie
           stationery, still leading the page as the newest story. Gold
           "Recap" chip, the 4:5 recap photo, the three aggregate stats as
@@ -419,7 +600,7 @@ const getLinkConversionProvider = (url = "") => {
       <div
         id="gala-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ffbd59]/35 bg-[#101010]/85 p-[1px] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ffbd59]/70 hover:shadow-[#ffbd59]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms;"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 92ms;"
       >
         <div class="gala-lattice absolute inset-0 opacity-[0.10]"></div>
         <div class="relative rounded-2xl bg-white/[0.05] px-5 py-5 backdrop-blur-xl">
@@ -536,7 +717,7 @@ const getLinkConversionProvider = (url = "") => {
       <div
         id="abc7-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#0058f0]/40 bg-[#101322]/90 shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#0058f0]/70 hover:shadow-[#0058f0]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 95ms;"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 104ms;"
       >
         <div class="h-[3px] w-full bg-gradient-to-r from-[#0058f0] via-[#5b8cff] to-[#ffbd59]" aria-hidden="true"></div>
         {/* Decorative glows: abc blue behind the player, gold low */}
@@ -614,7 +795,7 @@ const getLinkConversionProvider = (url = "") => {
         <div
           id="reader-card"
           class="group relative mb-8 scroll-mt-24 overflow-hidden border-[5px] border-[#111111] bg-[#ffd210] shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-black/60"
-          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 110ms;"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 116ms;"
         >
           <a
             href={readerArticle.url}
@@ -698,7 +879,7 @@ const getLinkConversionProvider = (url = "") => {
       <div
         id="graduation-card"
         class="group relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl border border-[#f0c57c]/40 shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f0c57c]/70 hover:shadow-[#e08cb8]/20"
-        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 125ms; background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 128ms; background: linear-gradient(165deg, #2b1520, #1e1216 78%);"
       >
         {/* Candle-bokeh dots along the top edge: gold + rose, varying
             size and opacity */}
@@ -1584,6 +1765,21 @@ const getLinkConversionProvider = (url = "") => {
   /* Profile logo border custom width helper */
   .border-3 {
     border-width: 3px;
+  }
+
+  /* Pop Up Week 1 card: PopUpWeekClient flags the next class per location
+     (data-popup-next); tint it and show the NEXT / SIGUE tag. */
+  .popup-next-tag {
+    display: none;
+  }
+  .popup-row[data-popup-next="true"] .popup-next-tag {
+    display: inline-flex;
+  }
+  .popup-row--paper[data-popup-next="true"] {
+    background: rgba(196, 87, 58, 0.1);
+  }
+  .popup-row--ink[data-popup-next="true"] {
+    background: rgba(224, 168, 58, 0.14);
   }
 
   /* Line clamp fallback */

@@ -1,0 +1,227 @@
+---
+// Compact Pop Up Week 1 band: eyebrow, heading, the two locations as
+// mini-cards (Chicago Art Dept = white card, Sanctuary Health = ink card,
+// same as the campaign IG graphics), each with its "next up" class and a
+// direct Zeffy CTA, plus a link to the full /popup page.
+//
+// Used on /schedule and /classes (above the MarianaTek widget), /events
+// (inside the light page header), and the homepage "A New Chapter" section
+// (tone="dark"). Renders nothing once the week is past at build time, and
+// carries data-popup-hide-when-past so PopUpWeekClient hides it in the
+// browser after Oct 11 even without a rebuild.
+import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
+import PopUpAvatars from "@/components/PopUpAvatars.astro";
+import { popUpWeek1, popUpLocations, getPopUpPhase, locationInstructors } from "@/data/popUpWeek1";
+
+interface Props {
+  context: string;
+  tone?: "light" | "dark";
+  heading?: string;
+  class?: string;
+}
+const phase = getPopUpPhase();
+// Default heading: "This week LSP is pop-up" once the week is live at
+// build time; before that, the campaign headline (always true).
+const {
+  context,
+  tone = "light",
+  heading = phase === "live" ? "This week LSP is pop-up" : popUpWeek1.headline,
+  class: className = "",
+} = Astro.props;
+const base = import.meta.env.BASE_URL;
+const popupUrl = `${base}${popUpWeek1.pagePath}`;
+const dark = tone === "dark";
+const nextLineData = (loc) =>
+  JSON.stringify(
+    loc.sessions.map((s) => ({
+      s: s.startsAt,
+      l: `${s.dayShort} ${s.dateLabel} · ${s.time} · ${s.className}`,
+    })),
+  );
+---
+
+{
+  phase !== "past" && (
+    <div
+      class:list={["popup-band relative overflow-hidden rounded-3xl p-5 sm:p-7", dark ? "popup-band--dark" : "popup-band--light", className]}
+      data-popup-hide-when-past
+    >
+      <div class="popup-band-sun pointer-events-none absolute -right-16 -top-20 h-36 w-36 rounded-full sm:-right-10 sm:h-56 sm:w-56" aria-hidden="true" />
+      <div class="relative">
+        <p class="popup-band-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
+          {popUpWeek1.eyebrow.split(" · ").map((part, i) => (
+            <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+          ))}
+        </p>
+        <h2 class="popup-band-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
+          {heading.split("pop-up").map((part, i) => (
+            <>{i > 0 && <span class="whitespace-nowrap">pop-up</span>}{part}</>
+          ))}
+        </h2>
+        <p class="popup-band-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">
+          Two locations in Pilsen, 45-minute classes, Oct 5 through Oct 11.
+          Reserve your spot. {popUpWeek1.matsLine}
+        </p>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+          {popUpLocations.map((loc) => (
+            <div class:list={["popup-mini rounded-2xl p-4 sm:p-5", loc.theme === "dark" ? "popup-mini--ink" : "popup-mini--paper"]}>
+              <p class="popup-mini-name font-sans text-lg font-extrabold uppercase leading-tight tracking-tight">
+                {loc.name}
+              </p>
+              <p class="popup-mini-label mt-0.5 text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                {loc.shortLabel}
+              </p>
+              {/* The week's teachers at this location: up to 6 faces + "+N",
+                  no names (full names are on /popup). */}
+              <PopUpAvatars
+                people={locationInstructors(loc)}
+                max={6}
+                size={32}
+                sizeSm={36}
+                ring={loc.theme === "dark" ? "#1e1a17" : "#fdfbf7"}
+                bg={loc.theme === "dark" ? "#3b342e" : "#ece2d4"}
+                tone={loc.theme === "dark" ? "dark" : "light"}
+                class="mt-3"
+              />
+              <p class="popup-mini-meta mt-2 text-sm leading-snug">{loc.address}</p>
+              <p class="popup-mini-meta mt-1 text-sm font-bold leading-snug">
+                {loc.priceLine} · {loc.capacityLine}
+              </p>
+              <p class="popup-mini-next mt-2 text-[13px] leading-snug" data-popup-nextline={nextLineData(loc)} hidden>
+                <span class="popup-mini-next-tag mr-1 text-[10px] font-extrabold uppercase tracking-[0.14em]">Next up</span>
+                <span data-popup-nextline-text />
+              </p>
+              <a
+                href={loc.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="popup-mini-cta group mt-4 flex items-center justify-between gap-3 rounded-full px-4 py-3 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                data-conversion-event={loc.conversionEvent}
+                data-conversion-context={context}
+                data-conversion-provider="zeffy"
+                data-conversion-booking-path="popup_zeffy"
+                data-conversion-popup-location={loc.trackingLocation}
+              >
+                <span>{loc.ticketsLabel}</span>
+                <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
+          ))}
+        </div>
+
+        <a
+          href={popupUrl}
+          class="popup-band-link mt-4 inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] underline-offset-4 hover:underline"
+          data-conversion-event="popup_page_click"
+          data-conversion-context={context}
+        >
+          Full week schedule and details
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+      <PopUpWeekClient />
+    </div>
+  )
+}
+
+<style>
+  .popup-band {
+    --pu-cream: #f3ede4;
+    --pu-paper: #fdfbf7;
+    --pu-terracotta: #c4573a;
+    --pu-ink: #1e1a17;
+    --pu-mustard: #e0a83a;
+    --pu-muted: #6f6760;
+  }
+  .popup-band--light {
+    background: var(--pu-cream);
+    color: var(--pu-ink);
+    box-shadow: 0 1px 0 rgba(30, 26, 23, 0.06), 0 18px 40px -24px rgba(30, 26, 23, 0.35);
+  }
+  .popup-band--dark {
+    background: rgba(243, 237, 228, 0.05);
+    border: 1px solid rgba(243, 237, 228, 0.14);
+    color: var(--pu-cream);
+  }
+  .popup-band-sun {
+    background: var(--pu-terracotta);
+    opacity: 0.9;
+  }
+  .popup-band--dark .popup-band-sun {
+    opacity: 0.55;
+  }
+  .popup-band-eyebrow {
+    color: var(--pu-terracotta);
+    /* keep the eyebrow clear of the sun on phones */
+    padding-right: 4.5rem;
+  }
+  .popup-band--dark .popup-band-eyebrow {
+    color: var(--pu-mustard);
+  }
+  .popup-band-heading {
+    padding-right: 4rem;
+  }
+  .popup-band--light .popup-band-body {
+    color: rgba(30, 26, 23, 0.75);
+  }
+  .popup-band--dark .popup-band-body {
+    color: rgba(243, 237, 228, 0.72);
+  }
+  .popup-mini--paper {
+    background: var(--pu-paper);
+    color: var(--pu-ink);
+    box-shadow: 0 10px 24px -16px rgba(30, 26, 23, 0.4);
+  }
+  .popup-mini--ink {
+    background: var(--pu-ink);
+    color: var(--pu-cream);
+    border: 1px solid rgba(243, 237, 228, 0.12);
+  }
+  .popup-mini-label {
+    color: var(--pu-terracotta);
+  }
+  .popup-mini--ink .popup-mini-label,
+  .popup-mini--ink .popup-mini-next-tag {
+    color: var(--pu-mustard);
+  }
+  .popup-mini--paper .popup-mini-meta,
+  .popup-mini--paper .popup-mini-next {
+    color: rgba(30, 26, 23, 0.72);
+  }
+  .popup-mini--ink .popup-mini-meta,
+  .popup-mini--ink .popup-mini-next {
+    color: rgba(243, 237, 228, 0.72);
+  }
+  .popup-mini--paper .popup-mini-next-tag {
+    color: var(--pu-terracotta);
+  }
+  .popup-mini--paper .popup-mini-cta {
+    background: var(--pu-ink);
+    color: var(--pu-paper);
+  }
+  .popup-mini--paper .popup-mini-cta:hover {
+    background: var(--pu-terracotta);
+  }
+  .popup-mini--ink .popup-mini-cta {
+    background: var(--pu-terracotta);
+    color: #fff;
+  }
+  .popup-mini--ink .popup-mini-cta:hover {
+    background: var(--pu-mustard);
+    color: var(--pu-ink);
+  }
+  .popup-mini-cta:focus-visible {
+    --tw-ring-color: var(--pu-terracotta);
+  }
+  .popup-band--light .popup-band-link {
+    color: var(--pu-terracotta);
+  }
+  .popup-band--dark .popup-band-link {
+    color: var(--pu-mustard);
+  }
+</style>

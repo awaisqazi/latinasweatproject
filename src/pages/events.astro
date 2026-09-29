@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import EventsList from "@/components/EventsList.svelte";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
+import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
 import {
   sweatFest,
@@ -11,7 +12,8 @@ import {
   sweatFestTickets,
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
-// Section order (light/dark cadence): light page header -> dark Annual
+// Section order (light/dark cadence): light page header (carrying the Pop
+// Up Week 1 strip, Oct 5 to 11 2026, until the week is past) -> dark Annual
 // Gala 2026 recap (post-gala since Sep 26 2026; it keeps the lead slot and
 // the dark theme so the cadence holds) -> light Sweat Fest recap -> dark
 // Graduation 2026 recap -> the Supabase-driven events list -> Monday
@@ -73,6 +75,13 @@ const featuredSlugs = [
           Join our vibrant community. Sweat, dance, and connect at our upcoming
           events.
         </p>
+        {/* Pop Up Week 1 strip (Oct 5 to 11, 2026): lives INSIDE the light
+            page header so the light/dark cadence below is unchanged. Points
+            to /popup plus both Zeffy forms; renders nothing once the week
+            is past and hides itself in the browser after Oct 11. */}
+        <div class="mx-auto mt-10 max-w-4xl text-left">
+          <PopUpWeekBand context="events_popup_strip" />
+        </div>
       </div>
     </section>
     {/* END: Page Header Section */}

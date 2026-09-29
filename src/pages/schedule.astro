@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
+import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
@@ -91,6 +92,16 @@ import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    {/* Pop Up Week 1 (Oct 5 to 11, 2026): the studio is closed, so this
+        week's classes are booked on Zeffy per location, not in the
+        MarianaTek widget below. Renders nothing once the week is past and
+        hides itself in the browser after Oct 11 (see popUpWeek1.js). */}
+    <div class="mt-4 mb-6 px-4">
+      <div class="mx-auto max-w-5xl">
+        <PopUpWeekBand context="schedule_popup_band" />
       </div>
     </div>
 

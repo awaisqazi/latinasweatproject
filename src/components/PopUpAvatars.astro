@@ -1,0 +1,145 @@
+---
+// Overlapping instructor avatar stack for Pop Up Week 1 (design.md Option I).
+// `people` are instructorInfo objects from src/data/popUpWeek1.js. Photos are
+// square transparent webps (face-centred, 12% margin, so the face sits fully
+// inside the circle); a person without a photo gets an initials circle
+// (mustard ground, ink text). Alt text is the full name, never a guess.
+//
+// Props (set inline as custom properties, so the parent needs no CSS):
+//   size / sizeSm (px, phone / >=640px), ring (2px ring = the colour of the
+//   surface the stack sits on, so overlaps read as cut-outs), bg (circle
+//   ground behind the transparent cutout), tone ("light" | "dark", picks the
+//   "+N" chip colours).
+import { instructorInfo } from "@/data/popUpWeek1";
+
+interface Props {
+  people: Array<ReturnType<typeof instructorInfo>>;
+  max?: number;
+  class?: string;
+  label?: string;
+  size?: number;
+  sizeSm?: number;
+  ring?: string;
+  bg?: string;
+  tone?: "light" | "dark";
+}
+const {
+  people,
+  max = 99,
+  class: className = "",
+  label,
+  size = 32,
+  sizeSm = size,
+  ring = "#fdfbf7",
+  bg = "#ece2d4",
+  tone = "light",
+} = Astro.props;
+const dark = tone === "dark";
+const vars = [
+  `--pa-s:${size}px`,
+  `--pa-s-sm:${sizeSm}px`,
+  `--pa-ring:${ring}`,
+  `--pa-bg:${bg}`,
+  `--pa-more-bg:${dark ? "#f3ede4" : "#1e1a17"}`,
+  `--pa-more-fg:${dark ? "#1e1a17" : "#f3ede4"}`,
+].join(";");
+const base = import.meta.env.BASE_URL;
+const shown = people.slice(0, max);
+const extra = people.length - shown.length;
+---
+
+<span
+  class:list={["pa-stack", className]}
+  style={vars}
+  role={label ? "img" : undefined}
+  aria-label={label}
+>
+  {shown.map((p, i) => (
+    <span class="pa-item" style={`z-index:${shown.length - i + 1}`}>
+      {p.photo ? (
+        <img
+          src={`${base}${p.photoSmall}`}
+          srcset={`${base}${p.photoSmall} 160w, ${base}${p.photo} 320w`}
+          sizes={`(min-width: 640px) ${sizeSm}px, ${size}px`}
+          alt={label ? "" : p.name}
+          title={p.name}
+          width="160"
+          height="160"
+          loading="lazy"
+          decoding="async"
+          class="pa-img"
+        />
+      ) : (
+        <span
+          class="pa-initials"
+          style={i > 0 ? "padding-left:calc(var(--pa-size) * 0.34)" : undefined}
+          role={label ? undefined : "img"} aria-label={label ? undefined : p.name} title={p.name}>
+          {p.initials}
+        </span>
+      )}
+    </span>
+  ))}
+  {extra > 0 && (
+    <span class="pa-item pa-item--more" style={shown.length ? "margin-left:4px" : undefined} title={`${extra} more`}>
+      <span class="pa-more">+{extra}<span class="sr-only"> more</span></span>
+    </span>
+  )}
+</span>
+
+<style>
+  .pa-stack {
+    --pa-size: var(--pa-s);
+    --pa-overlap: calc(var(--pa-s) * -0.34);
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+  @media (min-width: 640px) {
+    .pa-stack {
+      --pa-size: var(--pa-s-sm);
+      --pa-overlap: calc(var(--pa-s-sm) * -0.34);
+    }
+  }
+  .pa-item {
+    position: relative;
+    display: inline-flex;
+    width: var(--pa-size, 32px);
+    height: var(--pa-size, 32px);
+    flex: 0 0 auto;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 2px var(--pa-ring, #fdfbf7);
+    background: var(--pa-bg, #e6dccd);
+    overflow: hidden;
+  }
+  .pa-item + .pa-item {
+    margin-left: var(--pa-overlap, -8px);
+  }
+  .pa-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .pa-initials,
+  .pa-more {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    font-size: calc(var(--pa-size, 32px) * 0.36);
+    line-height: 1;
+  }
+  .pa-initials {
+    background: #e0a83a;
+    color: #1e1a17;
+  }
+  .pa-more {
+    background: var(--pa-more-bg, #1e1a17);
+    color: var(--pa-more-fg, #f3ede4);
+  }
+</style>

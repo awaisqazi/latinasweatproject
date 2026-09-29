@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
@@ -14,6 +15,13 @@ import Header from "@/components/Header.astro";
           Please note: Participants must be 12 years of age or older to register
           for and attend classes.
         </p>
+      </div>
+    </div>
+    {/* Pop Up Week 1 (Oct 5 to 11, 2026): Zeffy per location, above the
+        MarianaTek widget; auto-hides after Oct 11 (see popUpWeek1.js). */}
+    <div class="my-8 px-4">
+      <div class="mx-auto max-w-4xl">
+        <PopUpWeekBand context="classes_popup_band" />
       </div>
     </div>
     <div class="my-8 px-4 text-center">
