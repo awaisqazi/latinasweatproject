@@ -17,6 +17,8 @@
 // whose end instant has passed dims and says "This one has happened" (build
 // time + FinishLineClient in the browser). Once the series is past every CTA
 // hides and the wrapped note shows; the page stays up as the record.
+// The donation section (collectiveFinishLine.donate) is evergreen and never
+// hides.
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import FinishLineClient from "@/components/FinishLineClient.astro";
@@ -33,6 +35,8 @@ const isPast = phase === "past";
 const events = finishLineEvents.map((ev, i) => ({ ...ev, done: ev.isPast(), clip: finishLineTornClip(11 + i * 7, 36, 9) }));
 const heroClip = finishLineTornClip(7, 60, 12);
 const expectClip = finishLineTornClip(29, 40, 9);
+const donateClip = finishLineTornClip(43, 56, 12);
+const donate = cfl.donate;
 const pageTitle = `${cfl.title} · Oct 5 – 14 | The Latina Sweat Project`;
 const pageDescription =
   "Chicago Marathon week with LSP: a pre-marathon yoga flow Mon Oct 5 and a restorative flow Wed Oct 14 at Chicago Art Department (pay what you can, suggested $10), plus our cheer zone at 18th & Peoria on marathon day.";
@@ -269,6 +273,50 @@ const pageDescription =
               </article>
             );
           })}
+        </div>
+      </div>
+    </section>
+
+    {/* ============================ DONATE ============================ */}
+    {/* Evergreen donation ask: no data-finishline-hide-when-past, so it
+        stays after Oct 14 while the event CTAs hide. Copy lives in
+        collectiveFinishLine.donate. Marigold torn sheet, taped, with a big
+        charcoal CTA so it reads as the page's second ask. */}
+    <section class="fl-donate" id="support" aria-labelledby="fl-donate-title">
+      <div class="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
+        <div class="fl-donate-wrap relative">
+          <span class="fl-tape fl-tape--donate-l" aria-hidden="true"></span>
+          <span class="fl-tape fl-tape--donate-r" aria-hidden="true"></span>
+          <div class="fl-donate-sheet px-5 pb-8 pt-12 sm:px-10 sm:pb-12 sm:pt-16 lg:px-14" style={`clip-path: ${donateClip};`}>
+            <div class="grid gap-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end lg:gap-12">
+              <div>
+                <p class="fl-donate-eyebrow inline-flex rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em]">{donate.eyebrow}</p>
+                <h2 id="fl-donate-title" class="fl-donate-title mt-5">{donate.headline}</h2>
+                <p class="mt-5 max-w-xl text-base font-medium leading-relaxed sm:text-lg">{donate.body}</p>
+              </div>
+              <div class="fl-donate-ask rounded-2xl px-5 py-6 sm:px-7 sm:py-7">
+                <p class="text-base font-semibold leading-relaxed sm:text-lg">{donate.askLine}</p>
+                <a
+                  href={`${base}${donate.path}`}
+                  class="fl-donate-cta group mt-5 flex items-center justify-between gap-3 whitespace-nowrap rounded-full px-5 py-4 text-base font-extrabold sm:px-6 sm:text-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  data-conversion-event="donation_click"
+                  data-conversion-context="finishline_page"
+                  data-conversion-provider="zeffy"
+                >
+                  <span class="inline-flex items-center gap-2.5">
+                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.5 1.1 4.3 2.4.8-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"></path>
+                    </svg>
+                    {donate.ctaLabel}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </a>
+                <p class="fl-donate-note mt-3 text-center text-xs font-semibold uppercase tracking-[0.12em]">{donate.ctaNote}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -549,6 +597,66 @@ const pageDescription =
   }
   .fl-card-wrap[data-finishline-done="true"] .fl-cta {
     display: none;
+  }
+
+  /* Donate (evergreen) */
+  .fl-donate-wrap {
+    filter: drop-shadow(0 18px 26px rgba(72, 72, 72, 0.18)) drop-shadow(0 1px 1px rgba(72, 72, 72, 0.12));
+  }
+  .fl-donate-sheet {
+    background: var(--fl-marigold);
+    color: var(--fl-char);
+  }
+  .fl-donate-eyebrow {
+    background: var(--fl-char);
+    color: var(--fl-marigold);
+  }
+  .fl-donate-title {
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    font-size: clamp(2.3rem, 9.5vw, 4.6rem);
+    text-wrap: balance;
+  }
+  .fl-donate-ask {
+    background: var(--fl-sheet);
+    box-shadow: 3px 6px 0 rgba(72, 72, 72, 0.14);
+  }
+  .fl-donate-cta {
+    background: var(--fl-char);
+    color: #fff;
+  }
+  .fl-donate-cta:hover {
+    background: #2f2f2f;
+  }
+  .fl-donate-cta:focus-visible {
+    --tw-ring-color: var(--fl-char);
+  }
+  .fl-donate-note {
+    color: #6f6254;
+  }
+  .fl-tape--donate-l {
+    left: -1.1rem;
+    top: 0.4rem;
+    transform: rotate(-32deg);
+  }
+  .fl-tape--donate-r {
+    right: -1.1rem;
+    top: 0.4rem;
+    transform: rotate(32deg);
+  }
+  @media (max-width: 639px) {
+    .fl-tape--donate-l,
+    .fl-tape--donate-r {
+      width: 5.5rem;
+      height: 1.5rem;
+    }
+    .fl-tape--donate-l {
+      left: -0.6rem;
+    }
+    .fl-tape--donate-r {
+      right: -0.6rem;
+    }
   }
 
   /* Closing band */

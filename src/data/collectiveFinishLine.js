@@ -73,6 +73,30 @@ export const collectiveFinishLine = {
     alt:
       "The Collective Finish Line flyer: yoga flows Oct 5 and Oct 14, 7:00 to 7:45 PM at Chicago Art Department, 1926 S Halsted, plus the LSP cheer zone on marathon day.",
   },
+  // Donation ask (evergreen: never auto-hides after Oct 14, so no
+  // data-finishline-hide-when-past on the /finishline section). Goes to the
+  // general LSP Zeffy donation form; tracked as donation_click.
+  donate: {
+    eyebrow: "Run with us from anywhere",
+    headline: "Our runners are running for access.",
+    body:
+      "Every mile this marathon week is for wider access to wellness: yoga " +
+      "and fitness that are more diverse, inclusive, and accessible for our " +
+      "community.",
+    askLine:
+      "Can't make it to a flow or the cheer zone? Support the mission from " +
+      "wherever you are and help build LSP's next home.",
+    ctaLabel: "Support the mission",
+    ctaNote: "Opens our donation form on Zeffy",
+    // Site path (relative to BASE_URL): /donate redirects to the general
+    // Zeffy donation form, same as every other donate link on the site.
+    path: "donate",
+    // Short line for the /links #finishline-card (EN + ES).
+    linksLine: "Can't make it? Support the mission from wherever you are.",
+    linksLineEs: "¿No puedes venir? Apoya la misión desde donde estés.",
+    linksCtaLabel: "Support the mission",
+    linksCtaLabelEs: "Apoya la misión",
+  },
   ogImage: "images/finishline/og-finishline.jpg",
   highlightImage: "images/highlights/hl_finishline.png",
   // Palette from the Canva flyer (torn paper / charcoal / marigold).

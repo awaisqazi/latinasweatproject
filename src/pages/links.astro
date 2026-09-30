@@ -740,6 +740,20 @@ const getLinkConversionProvider = (url = "") => {
               <span class="lang-en">{collectiveFinishLine.matsLine}</span>
               <span class="lang-es hidden">{collectiveFinishLine.matsLineEs}</span>
             </p>
+            <p class="mt-3 border-t border-dashed border-[#b0a090] pt-3 text-[11px] font-semibold leading-relaxed text-[#484848]/80">
+              <span class="lang-en">{collectiveFinishLine.donate.linksLine}</span>
+              <span class="lang-es hidden">{collectiveFinishLine.donate.linksLineEs}</span>
+              <a
+                href={`${base}${collectiveFinishLine.donate.path}`}
+                class="font-extrabold text-[#484848] underline decoration-[#efbd62] decoration-2 underline-offset-4 hover:decoration-[#484848]"
+                data-conversion-event="donation_click"
+                data-conversion-context="links_finishline_card"
+                data-conversion-provider="zeffy"
+              >
+                <span class="lang-en">{collectiveFinishLine.donate.linksCtaLabel}</span>
+                <span class="lang-es hidden">{collectiveFinishLine.donate.linksCtaLabelEs}</span>
+              </a>
+            </p>
             <a
               href={withBase(collectiveFinishLine.pagePath)}
               class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#484848] underline-offset-4 hover:underline"
