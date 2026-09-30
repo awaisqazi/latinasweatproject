@@ -1,0 +1,220 @@
+---
+// Compact Collective Finish Line band (design.md Option J): eyebrow,
+// heading "The Collective Finish Line · Marathon week", three mini-rows
+// (date · title · instructor) with direct Zeffy CTAs for the two classes,
+// and a link to /finishline. Torn-paper sheet on light surfaces, a quiet
+// outlined panel on dark ones (tone="dark").
+//
+// `bare` drops the sheet, eyebrow and heading so a host section (e.g. the
+// /events featured section) can wrap the rows in its own headline.
+//
+// Renders nothing once the series is past at build time, and carries
+// data-finishline-hide-when-past so FinishLineClient hides it in the
+// browser after Oct 14 even without a rebuild. A class whose end instant
+// has passed loses its CTA (data-finishline-past-at) and dims.
+import FinishLineClient from "@/components/FinishLineClient.astro";
+import {
+  collectiveFinishLine as cfl,
+  finishLineEvents,
+  getFinishLinePhase,
+  finishLineTornClip,
+} from "@/data/collectiveFinishLine";
+
+interface Props {
+  context: string;
+  tone?: "light" | "dark";
+  heading?: string;
+  bare?: boolean;
+  class?: string;
+}
+const {
+  context,
+  tone = "light",
+  heading = "The Collective Finish Line · Marathon week",
+  bare = false,
+  class: className = "",
+} = Astro.props;
+const phase = getFinishLinePhase();
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}${cfl.pagePath}`;
+const dark = tone === "dark";
+const clip = finishLineTornClip(5, 40, 8);
+const headingParts = heading.split(" · ");
+---
+
+{
+  phase !== "past" && (
+    <div
+      class:list={["fl-band relative", !bare && "fl-band--framed", dark ? "fl-band--dark" : "fl-band--light", bare && "fl-band--bare", className]}
+      data-finishline-hide-when-past
+    >
+      <div class:list={["fl-band-inner", !bare && "p-5 pt-7 sm:p-7 sm:pt-9"]} style={!bare && !dark ? `clip-path: ${clip};` : undefined}>
+        {!bare && (
+          <>
+            <p class="fl-band-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
+              {cfl.eyebrow.split(" · ").map((part, i) => (
+                <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+              ))}
+            </p>
+            <h2 class="fl-band-heading mt-2 text-2xl leading-[0.98] sm:text-3xl">
+              <span>{headingParts[0]}</span>
+              {headingParts[1] && <span class="fl-band-heading-sub block text-base sm:text-lg">{headingParts[1]}</span>}
+            </h2>
+            <p class="fl-band-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">
+              {cfl.supportingLine} {cfl.priceLine}.
+            </p>
+          </>
+        )}
+
+        <ol class:list={["space-y-2.5", !bare && "mt-5"]}>
+          {finishLineEvents.map((ev) => {
+            const cheer = ev.kind === "cheer";
+            const done = ev.isPast();
+            return (
+              <li
+                class:list={["fl-row grid grid-cols-[3.4rem_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-2xl p-3 sm:grid-cols-[3.8rem_minmax(0,1fr)_auto] sm:p-3.5", cheer ? "fl-row--marigold" : "fl-row--sheet", done && "is-done"]}
+                data-finishline-event-end={ev.endsAtISO}
+              >
+                <div class="text-center">
+                  <p class="fl-row-day text-lg font-black uppercase leading-none">{ev.dayShort}</p>
+                  <p class="fl-row-date mt-1 text-[11px] font-extrabold uppercase tracking-[0.06em]">{ev.dateLabel}</p>
+                </div>
+                <div class="min-w-0">
+                  <p class="fl-row-title text-[15px] font-extrabold leading-snug">{ev.title}</p>
+                  <p class="fl-row-meta text-[13px] leading-snug">
+                    {cheer ? <>{ev.venueShort} · {ev.timeLabel.split(" · ")[0]} · No ticket needed</> : <>{ev.timeLabel} · with {ev.instructor}</>}
+                  </p>
+                </div>
+                {!cheer && !done && (
+                  <a
+                    href={ev.ticketsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="fl-row-cta group col-span-2 inline-flex items-center justify-between gap-2 rounded-full px-4 py-2.5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:col-span-1 sm:justify-center"
+                    data-finishline-past-at={ev.endsAtISO}
+                    data-conversion-event="class_booking_start"
+                    data-conversion-context={context}
+                    data-conversion-provider="zeffy"
+                    data-conversion-booking-path="finishline_zeffy"
+                    data-conversion-finishline-event={ev.trackingKey}
+                  >
+                    <span>{cfl.ticketsLabel}</span>
+                    <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        <a
+          href={pageUrl}
+          class="fl-band-link mt-4 inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] underline-offset-4 hover:underline"
+          data-conversion-event="finishline_page_click"
+          data-conversion-context={context}
+        >
+          All three, with details
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+      <FinishLineClient />
+    </div>
+  )
+}
+
+<style>
+  .fl-band {
+    --fl-marigold: #efbd62;
+    --fl-char: #484848;
+    --fl-sheet: #f7f6f1;
+    --fl-taupe: #b0a090;
+    font-family: "Poppins", var(--font-sans);
+  }
+  .fl-band--framed.fl-band--light {
+    filter: drop-shadow(0 12px 20px rgba(72, 72, 72, 0.14));
+  }
+  .fl-band--framed.fl-band--light .fl-band-inner {
+    background: var(--fl-sheet);
+    color: var(--fl-char);
+  }
+  .fl-band--framed.fl-band--dark .fl-band-inner {
+    border-radius: 1.5rem;
+    background: rgba(247, 246, 241, 0.05);
+    border: 1px solid rgba(247, 246, 241, 0.14);
+    color: var(--fl-sheet);
+  }
+  .fl-band--bare {
+    color: var(--fl-char);
+  }
+  .fl-band-eyebrow {
+    color: #7d6f60;
+  }
+  .fl-band--dark .fl-band-eyebrow {
+    color: var(--fl-marigold);
+  }
+  .fl-band-heading {
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+  .fl-band-heading-sub {
+    margin-top: 0.3rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: #7d6f60;
+  }
+  .fl-band--dark .fl-band-heading-sub {
+    color: var(--fl-marigold);
+  }
+  .fl-band--light .fl-band-body {
+    color: rgba(72, 72, 72, 0.85);
+  }
+  .fl-band--dark .fl-band-body {
+    color: rgba(247, 246, 241, 0.72);
+  }
+  .fl-row--sheet {
+    background: #fff;
+    color: var(--fl-char);
+    box-shadow: 0 8px 18px -14px rgba(72, 72, 72, 0.55);
+  }
+  .fl-band--dark .fl-row--sheet {
+    background: var(--fl-sheet);
+  }
+  .fl-row--marigold {
+    background: var(--fl-marigold);
+    color: var(--fl-char);
+  }
+  .fl-row-date {
+    color: #7d6f60;
+  }
+  .fl-row--marigold .fl-row-date {
+    color: rgba(72, 72, 72, 0.8);
+  }
+  .fl-row-meta {
+    color: rgba(72, 72, 72, 0.8);
+  }
+  .fl-row-cta {
+    background: var(--fl-char);
+    color: #fff;
+  }
+  .fl-row-cta:hover {
+    background: #2f2f2f;
+  }
+  .fl-row-cta:focus-visible {
+    --tw-ring-color: var(--fl-marigold);
+  }
+  .fl-row.is-done,
+  .fl-row[data-finishline-done="true"] {
+    opacity: 0.55;
+  }
+  .fl-band--light .fl-band-link {
+    color: var(--fl-char);
+  }
+  .fl-band--dark .fl-band-link {
+    color: var(--fl-marigold);
+  }
+</style>

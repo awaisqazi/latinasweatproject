@@ -74,7 +74,22 @@ import Header from "../components/Header.astro";
 <script>
     // Case-insensitive redirects
     const path = window.location.pathname.toLowerCase();
-    if (path === "/water" || path === "/water/") {
+    // The Collective Finish Line (marathon week, Oct 2026): flyer and
+    // spoken variants all land on /finishline. Exact matches only, and
+    // never when already on /finishline (no redirect loop).
+    const finishLineAliases = [
+        "/finishline",
+        "/collectivefinishline",
+        "/finish-line",
+        "/marathon",
+    ];
+    const bare = path.replace(/\/+$/, "");
+    if (
+        finishLineAliases.includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/finishline"
+    ) {
+        window.location.replace("/finishline");
+    } else if (path === "/water" || path === "/water/") {
         window.location.replace(
             "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",
         );

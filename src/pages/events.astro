@@ -5,6 +5,12 @@ import EventsList from "@/components/EventsList.svelte";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
+import FinishLineBand from "@/components/FinishLineBand.astro";
+import {
+  collectiveFinishLine,
+  getFinishLinePhase,
+  finishLineTornClip,
+} from "@/data/collectiveFinishLine";
 import { galaRecapCard, galaTeaser } from "@/data/galaTeaser";
 import {
   sweatFest,
@@ -13,13 +19,20 @@ import {
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 // Section order (light/dark cadence): light page header (carrying the Pop
-// Up Week 1 strip, Oct 5 to 11 2026, until the week is past) -> dark Annual
+// Up Week 1 strip, Oct 5 to 11 2026, until the week is past) -> The
+// Collective Finish Line featured section (#finishline, Oct 5 – 14 2026,
+// paper ground whose torn-paper top edge is the seam against the light
+// header; renders nothing once the series is past) -> dark Annual
 // Gala 2026 recap (post-gala since Sep 26 2026; it keeps the lead slot and
 // the dark theme so the cadence holds) -> light Sweat Fest recap -> dark
 // Graduation 2026 recap -> the Supabase-driven events list -> Monday
 // Miles -> Stay Connected.
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
+// The Collective Finish Line (Oct 5 – 14, 2026): featured while not past.
+const finishLineActive = getFinishLinePhase() !== "past";
+const finishLineUrl = withBase(collectiveFinishLine.pagePath);
+const finishLineSeam = finishLineTornClip(17, 80, 14);
 const galaPageUrl = withBase(galaTeaser.recapPath);
 // Local recap photo (album #69, dinner under the gold lanterns) and the
 // official Flickr album.
@@ -85,6 +98,78 @@ const featuredSlugs = [
       </div>
     </section>
     {/* END: Page Header Section */}
+
+    {/* START: The Collective Finish Line Featured Section (Oct 5 – 14,
+        2026; design.md Option J torn-paper / marigold). Paper ground with a
+        torn top edge against the light header; pinned flyer LEFT, copy and
+        the three FinishLineBand rows RIGHT (Zeffy CTAs for the two classes).
+        Renders nothing once the series is past; hides itself in the
+        browser after Oct 14 (FinishLineClient). */}
+    {finishLineActive && (
+      <section
+        id="finishline"
+        class="fl-ev relative scroll-mt-28 pb-16 pt-20 md:pb-20 md:pt-24"
+        style={`clip-path: ${finishLineSeam}; margin-top: -14px;`}
+        data-finishline-hide-when-past
+      >
+        <div class="relative mx-auto max-w-7xl px-4">
+          <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-5 lg:gap-12">
+            <div class="reveal relative mx-auto w-full max-w-sm lg:col-span-2 lg:max-w-none">
+              <a
+                href={finishLineUrl}
+                class="fl-ev-poster relative block"
+                aria-label="The Collective Finish Line: all three events"
+                data-conversion-event="finishline_page_click"
+                data-conversion-context="events_finishline"
+              >
+                <span class="fl-ev-tape fl-ev-tape--l" aria-hidden="true"></span>
+                <span class="fl-ev-tape fl-ev-tape--r" aria-hidden="true"></span>
+                <picture>
+                  <source srcset={`${base}${collectiveFinishLine.flyer.webp}`} type="image/webp" />
+                  <img
+                    src={`${base}${collectiveFinishLine.flyer.jpg}`}
+                    width={collectiveFinishLine.flyer.width}
+                    height={collectiveFinishLine.flyer.height}
+                    alt={collectiveFinishLine.flyer.alt}
+                    class="block h-auto w-full"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </a>
+            </div>
+
+            <div class="reveal lg:col-span-3 text-center lg:text-left" style="transition-delay: 120ms;">
+              <p class="inline-flex items-center gap-2 rounded-lg bg-[#b0a090] px-3 py-1.5 text-xs font-bold text-white">
+                <img src={`${base}images/popup/lsp-x-mark.png`} alt="" width="240" height="204" class="h-5 w-auto brightness-0 invert" />
+                Chicago Marathon week · {collectiveFinishLine.dateRangeShort}
+              </p>
+              <h2 class="fl-ev-display mt-5 text-[2.6rem] sm:text-6xl lg:text-7xl">
+                {collectiveFinishLine.headlineLines.map((line) => <span class="block whitespace-nowrap">{line}</span>)}
+              </h2>
+              <p class="mx-auto mt-5 max-w-2xl text-base font-semibold uppercase leading-snug text-[#484848] lg:mx-0">
+                {collectiveFinishLine.supportingLine}
+              </p>
+              <p class="mx-auto mt-2 max-w-2xl text-base leading-relaxed text-[#484848]/80 lg:mx-0">
+                {collectiveFinishLine.cheerLine}
+              </p>
+              <ul class="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start" aria-label="What to expect">
+                {collectiveFinishLine.whatToExpect.map((item) => (
+                  <li class="rounded-full bg-[#efbd62] px-4 py-1.5 text-sm font-bold text-[#484848]">{item}</li>
+                ))}
+              </ul>
+              <div class="mx-auto mt-7 max-w-2xl text-left lg:mx-0">
+                <FinishLineBand context="events_finishline" bare />
+              </div>
+              <p class="mx-auto mt-4 max-w-2xl text-sm font-semibold text-[#484848]/75 lg:mx-0">
+                {collectiveFinishLine.matsLine}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+    {/* END: The Collective Finish Line Featured Section */}
 
     {/* START: Annual Gala 2026 Recap Section (post-gala, Sep 26 2026).
         The gala was Fri Sep 25 at MCA Chicago; this block keeps the lead
@@ -682,3 +767,51 @@ const featuredSlugs = [
     {/* END: Stay Connected Section */}
   </main>
 </Layout>
+
+<style>
+  /* The Collective Finish Line featured section (design.md Option J). */
+  .fl-ev {
+    background: #f0f0ec;
+    color: #484848;
+    font-family: "Poppins", var(--font-sans);
+    overflow-x: clip;
+  }
+  .fl-ev-display {
+    font-weight: 900;
+    color: #484848;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+  }
+  .fl-ev-poster {
+    background: #fff;
+    padding: 0.6rem;
+    transform: rotate(-1.6deg);
+    box-shadow: 0 1px 2px rgba(72, 72, 72, 0.18), 0 22px 40px -18px rgba(72, 72, 72, 0.45);
+    transition: transform 0.3s ease;
+  }
+  .fl-ev-poster:hover {
+    transform: rotate(-0.6deg) translateY(-2px);
+  }
+  .fl-ev-poster:focus-visible {
+    outline: 3px solid #efbd62;
+    outline-offset: 4px;
+  }
+  .fl-ev-tape {
+    position: absolute;
+    z-index: 2;
+    width: 5.5rem;
+    height: 1.6rem;
+    top: 0.4rem;
+    background: #9a9a9a;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .fl-ev-tape--l {
+    left: -0.9rem;
+    transform: rotate(-38deg);
+  }
+  .fl-ev-tape--r {
+    right: -0.9rem;
+    transform: rotate(38deg);
+  }
+</style>

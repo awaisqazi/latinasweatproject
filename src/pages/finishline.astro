@@ -1,0 +1,563 @@
+---
+// /finishline: The Collective Finish Line, LSP's three-part series around
+// the Chicago Marathon (Sun Oct 11, 2026): a pre-marathon yoga flow (Mon
+// Oct 5), the cheer zone on marathon day (Sun Oct 11), and a post-marathon
+// restorative flow (Wed Oct 14). Every fact comes from
+// src/data/collectiveFinishLine.js.
+//
+// Identity: the Canva flyer's torn-paper poster look (design.md Option J),
+// NOT gala navy/gold and NOT the pop-up terracotta: paper ground, cream
+// sheets with a deckle top edge, grey tape, soft shadow; heavy charcoal
+// Poppins headline in three stacked lines; marigold "What to expect" box
+// with white pills; taupe LSP tag. Poppins (500 to 900) loads on this page
+// only, through Layout's named head slot. The whole flyer is shown as a
+// pinned poster; faces are never cropped out of it or captioned.
+//
+// Phase: while upcoming/live the page sells both Zeffy forms. An event
+// whose end instant has passed dims and says "This one has happened" (build
+// time + FinishLineClient in the browser). Once the series is past every CTA
+// hides and the wrapped note shows; the page stays up as the record.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import FinishLineClient from "@/components/FinishLineClient.astro";
+import {
+  collectiveFinishLine as cfl,
+  finishLineEvents,
+  getFinishLinePhase,
+  finishLineTornClip,
+} from "@/data/collectiveFinishLine";
+
+const base = import.meta.env.BASE_URL;
+const phase = getFinishLinePhase();
+const isPast = phase === "past";
+const events = finishLineEvents.map((ev, i) => ({ ...ev, done: ev.isPast(), clip: finishLineTornClip(11 + i * 7, 36, 9) }));
+const heroClip = finishLineTornClip(7, 60, 12);
+const expectClip = finishLineTornClip(29, 40, 9);
+const pageTitle = `${cfl.title} · Oct 5 – 14 | The Latina Sweat Project`;
+const pageDescription =
+  "Chicago Marathon week with LSP: a pre-marathon yoga flow Mon Oct 5 and a restorative flow Wed Oct 14 at Chicago Art Department (pay what you can, suggested $10), plus our cheer zone at 18th & Peoria on marathon day.";
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  socialImage={cfl.ogImage}
+  socialImageAlt="The Collective Finish Line: LSP yoga flows Oct 5 and Oct 14 and a marathon-day cheer zone on Oct 11 in Pilsen."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <Fragment slot="head">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+  <Header />
+  <main class="fl-page">
+    {/* ============================ HERO ============================ */}
+    <section class="fl-hero">
+      <div class="mx-auto grid max-w-6xl gap-10 px-4 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.9fr)] lg:items-center lg:gap-12 lg:px-8 lg:pb-20 lg:pt-16">
+        <div class="fl-sheet-wrap relative">
+          <span class="fl-tape fl-tape--tl" aria-hidden="true"></span>
+          <span class="fl-tape fl-tape--br" aria-hidden="true"></span>
+          <div class="fl-sheet px-5 pb-8 pt-10 sm:px-10 sm:pb-12 sm:pt-14" style={`clip-path: ${heroClip};`}>
+            <p class="fl-tag inline-flex items-center gap-2.5 rounded-lg px-3 py-2 sm:px-4">
+              <img src={`${base}images/popup/lsp-x-mark.png`} alt="" width="240" height="204" class="fl-tag-mark h-6 w-auto sm:h-7" />
+              <span>The Latina Sweat Project</span>
+            </p>
+            <p class="fl-eyebrow mt-6 text-[11px] font-bold uppercase tracking-[0.2em] sm:text-xs">
+              {cfl.eyebrow.split(" · ").map((part, i) => (
+                <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+              ))}
+            </p>
+            <h1 class="fl-display mt-3">
+              {cfl.headlineLines.map((line) => <span class="block whitespace-nowrap">{line}</span>)}
+            </h1>
+            <p class="fl-support mt-6 max-w-xl text-base font-medium uppercase leading-snug sm:text-lg">
+              {cfl.supportingLine}
+            </p>
+            <p class="fl-body mt-3 max-w-xl text-base leading-relaxed sm:text-lg">
+              {cfl.cheerLine}
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center gap-2" aria-label="Dates">
+              {cfl.datePills.map((d, i) => (
+                <>
+                  {i > 0 && <span class="fl-dot" aria-hidden="true">·</span>}
+                  <span class="fl-date-pill rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em]">{d}</span>
+                </>
+              ))}
+            </div>
+
+            <div
+              class="fl-wrapped mt-8 max-w-xl rounded-2xl px-5 py-4"
+              data-finishline-show-when-past
+              hidden={!isPast}
+            >
+              <p class="text-sm font-bold uppercase tracking-[0.12em]">{cfl.wrappedLine}</p>
+            </div>
+
+            {!isPast && (
+              <div class="mt-8 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap" data-finishline-hide-when-past>
+                {events.map((ev) => (
+                  <a
+                    href={`#${ev.id}`}
+                    class:list={["fl-jump inline-flex items-center justify-between gap-2 rounded-full px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2", ev.kind === "cheer" ? "fl-jump--marigold" : "fl-jump--char"]}
+                  >
+                    <span class="min-w-0">{ev.dayShort} {ev.dateLabel} · {ev.kind === "cheer" ? "Cheer zone" : ev.id === "oct5-flow" ? "Yoga flow" : "Restorative"}</span>
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pinned poster: the whole Canva flyer, taped and tilted. */}
+        <figure class="fl-poster-wrap mx-auto w-full max-w-sm sm:max-w-md lg:max-w-none">
+          <div class="fl-poster relative">
+            <span class="fl-tape fl-tape--poster-l" aria-hidden="true"></span>
+            <span class="fl-tape fl-tape--poster-r" aria-hidden="true"></span>
+            <picture>
+              <source srcset={`${base}${cfl.flyer.webp}`} type="image/webp" />
+              <img
+                src={`${base}${cfl.flyer.jpg}`}
+                width={cfl.flyer.width}
+                height={cfl.flyer.height}
+                alt={cfl.flyer.alt}
+                class="block h-auto w-full"
+                decoding="async"
+              />
+            </picture>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    {/* ======================== WHAT TO EXPECT ======================== */}
+    <section class="fl-expect-section">
+      <div class="mx-auto max-w-6xl px-4 pb-12 sm:px-6 sm:pb-16 lg:px-8">
+        <div class="fl-expect rounded-3xl px-5 py-7 sm:px-10 sm:py-10">
+          <div class="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
+            <div>
+              <h2 class="fl-expect-title">What to expect:</h2>
+              <p class="mt-3 max-w-md text-base font-medium leading-relaxed text-[color:var(--fl-char)]">
+                {cfl.welcomeLine}
+              </p>
+            </div>
+            <ul class="flex flex-wrap gap-3 sm:gap-4">
+              {cfl.whatToExpect.map((item, i) => (
+                <li class="fl-pill rounded-full px-5 py-2.5 text-base font-semibold sm:px-6 sm:py-3 sm:text-lg" style={`--fl-rot: ${[-2, 1.5, -1][i % 3]}deg;`}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ============================ EVENTS ============================ */}
+    <section class="fl-events">
+      <div class="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
+        <p class="fl-kicker text-[11px] font-bold uppercase tracking-[0.22em]">Three ways to show up</p>
+        <div class="mt-5 grid gap-7 lg:grid-cols-3 lg:gap-6">
+          {events.map((ev) => {
+            const cheer = ev.kind === "cheer";
+            return (
+              <article
+                id={ev.id}
+                class:list={["fl-card-wrap relative scroll-mt-28", ev.done && "is-done"]}
+                data-finishline-event-end={ev.endsAtISO}
+              >
+                <span class="fl-tape fl-tape--card" aria-hidden="true"></span>
+                <div
+                  class:list={["fl-card flex h-full flex-col px-5 pb-6 pt-9 sm:px-7 sm:pb-7", cheer ? "fl-card--marigold" : "fl-card--sheet"]}
+                  style={`clip-path: ${ev.clip};`}
+                >
+                  <p
+                    class="fl-happened mb-3 inline-flex self-start rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em]"
+                    data-finishline-show-past-at={ev.endsAtISO}
+                    hidden={!ev.done}
+                  >
+                    {cfl.happenedLine}
+                  </p>
+                  <div class="flex items-end gap-3">
+                    <p class="fl-day leading-none">{ev.dayShort}</p>
+                    <p class="fl-date leading-none">{ev.dateLabel}</p>
+                  </div>
+                  <p class="fl-time mt-2 text-sm font-bold uppercase tracking-[0.12em]">{ev.timeLabel}</p>
+                  <h2 class="fl-card-title mt-4">{ev.title}</h2>
+                  {ev.instructor && (
+                    <p class="fl-instructor mt-1 text-[15px] font-semibold">with {ev.instructor}</p>
+                  )}
+                  <p class="fl-desc mt-3 text-[15px] leading-relaxed">{ev.description}</p>
+
+                  <a
+                    href={ev.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="fl-address mt-4 inline-flex items-start gap-2 text-sm font-semibold underline-offset-4 hover:underline"
+                  >
+                    <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"></path>
+                    </svg>
+                    <span>
+                      {cheer ? <>{ev.venue} <span class="fl-maps-hint">· Open in Maps</span></> : <>{ev.venue}, {ev.address}</>}
+                    </span>
+                  </a>
+
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {cheer ? (
+                      <>
+                        <span class="fl-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]">No ticket needed</span>
+                        <span class="fl-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]">Come as you are</span>
+                      </>
+                    ) : (
+                      <>
+                        <span class="fl-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]">{cfl.priceLine}</span>
+                        <span class="fl-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]">{cfl.capacityLine}</span>
+                        <span class="fl-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em]">{cfl.classLengthLabel}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {!cheer && <p class="fl-bring mt-4 text-sm font-medium leading-snug">{cfl.matsLine}</p>}
+                  {cheer && <p class="fl-bring mt-4 text-sm font-medium leading-snug">Celebrate and support the runners all day. Bring your loudest cheer.</p>}
+
+                  <div class="mt-auto pt-6">
+                    {!cheer && !isPast && !ev.done && (
+                      <a
+                        href={ev.ticketsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="fl-cta group flex items-center justify-between gap-3 rounded-full px-5 py-3.5 text-base font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                        data-finishline-hide-when-past
+                        data-finishline-past-at={ev.endsAtISO}
+                        data-conversion-event="class_booking_start"
+                        data-conversion-context="finishline_page"
+                        data-conversion-provider="zeffy"
+                        data-conversion-booking-path="finishline_zeffy"
+                        data-conversion-finishline-event={ev.trackingKey}
+                      >
+                        <span>{cfl.ticketsLabel}</span>
+                        <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </a>
+                    )}
+                    {cheer && (
+                      <a
+                        href={ev.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="fl-cta-line group flex items-center justify-between gap-3 rounded-full px-5 py-3.5 text-base font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      >
+                        <span>Find 18th & Peoria</span>
+                        <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    {/* ========================= CLOSING BAND ========================= */}
+    <section class="fl-close">
+      <div class="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+        <p class="fl-close-eyebrow text-[11px] font-bold uppercase tracking-[0.22em]">{cfl.title} · {cfl.dateRangeShort}</p>
+        <p class="mt-4 text-xl font-semibold leading-relaxed sm:text-2xl">
+          {cfl.supportLine}
+        </p>
+        <p class="mt-5 text-base leading-relaxed opacity-80">
+          If your plans change, email
+          <a href={`mailto:${cfl.changeOfPlansEmail}`} class="fl-mail break-all font-bold underline underline-offset-4">{cfl.changeOfPlansEmail}</a>
+          so another community member can take your spot.
+        </p>
+        <p class="mt-3 text-base leading-relaxed opacity-80">
+          General Admission, one ticket = one space. {cfl.welcomeLine}
+        </p>
+      </div>
+    </section>
+
+    <FinishLineClient />
+  </main>
+</Layout>
+
+<style>
+  .fl-page {
+    --fl-marigold: #efbd62;
+    --fl-char: #484848;
+    --fl-paper: #f0f0ec;
+    --fl-sheet: #f7f6f1;
+    --fl-taupe: #b0a090;
+    --fl-tape: #9a9a9a;
+    --fl-display: "Poppins", var(--font-sans);
+    background: var(--fl-paper);
+    color: var(--fl-char);
+    font-family: var(--fl-display);
+    overflow-x: clip;
+  }
+
+  /* Torn sheets: clip-path carries the deckle top edge, the wrapper carries
+     the shadow (clip-path would clip a box-shadow). */
+  .fl-sheet-wrap,
+  .fl-card-wrap {
+    filter: drop-shadow(0 14px 22px rgba(72, 72, 72, 0.14)) drop-shadow(0 1px 1px rgba(72, 72, 72, 0.12));
+  }
+  .fl-sheet {
+    background: var(--fl-sheet);
+  }
+  .fl-tape {
+    position: absolute;
+    z-index: 2;
+    width: 7.5rem;
+    height: 1.9rem;
+    background: var(--fl-tape);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .fl-tape--tl {
+    left: -1.1rem;
+    top: 0.2rem;
+    transform: rotate(-35deg);
+  }
+  .fl-tape--br {
+    right: -1.1rem;
+    bottom: 0.4rem;
+    transform: rotate(-35deg);
+  }
+  .fl-tape--card {
+    width: 5.5rem;
+    height: 1.6rem;
+    left: 50%;
+    top: -0.35rem;
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  @media (max-width: 639px) {
+    .fl-tape--tl {
+      width: 5.5rem;
+      height: 1.5rem;
+      left: -0.6rem;
+    }
+    .fl-tape--br {
+      width: 5.5rem;
+      height: 1.5rem;
+      right: -0.6rem;
+    }
+  }
+
+  .fl-tag {
+    background: var(--fl-taupe);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+  .fl-tag-mark {
+    filter: brightness(0) invert(1);
+  }
+  .fl-eyebrow,
+  .fl-kicker {
+    color: #7d6f60;
+  }
+  .fl-display {
+    font-family: var(--fl-display);
+    font-weight: 900;
+    color: var(--fl-char);
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    font-size: clamp(2.7rem, 12.6vw, 6.9rem);
+  }
+  @media (min-width: 1024px) {
+    .fl-display {
+      font-size: clamp(4.5rem, 7.4vw, 6.9rem);
+    }
+  }
+  .fl-support {
+    color: var(--fl-char);
+    letter-spacing: 0.01em;
+  }
+  .fl-body {
+    color: rgba(72, 72, 72, 0.85);
+  }
+  .fl-date-pill {
+    background: var(--fl-char);
+    color: var(--fl-sheet);
+  }
+  .fl-dot {
+    color: var(--fl-taupe);
+    font-weight: 900;
+  }
+  .fl-wrapped {
+    background: var(--fl-char);
+    color: var(--fl-marigold);
+  }
+  .fl-jump--char {
+    background: var(--fl-char);
+    color: #fff;
+  }
+  .fl-jump--marigold {
+    background: var(--fl-marigold);
+    color: var(--fl-char);
+  }
+  .fl-jump:hover {
+    transform: translateY(-1px);
+  }
+  .fl-jump:focus-visible,
+  .fl-cta:focus-visible,
+  .fl-cta-line:focus-visible {
+    --tw-ring-color: var(--fl-marigold);
+  }
+
+  /* Pinned poster */
+  .fl-poster {
+    background: #fff;
+    padding: 0.6rem;
+    transform: rotate(2deg);
+    box-shadow: 0 1px 2px rgba(72, 72, 72, 0.18), 0 22px 40px -18px rgba(72, 72, 72, 0.45);
+  }
+  @media (min-width: 640px) {
+    .fl-poster {
+      padding: 0.8rem;
+    }
+  }
+  .fl-tape--poster-l {
+    width: 6rem;
+    height: 1.7rem;
+    left: -1.5rem;
+    top: 0.6rem;
+    transform: rotate(-40deg);
+  }
+  .fl-tape--poster-r {
+    width: 6rem;
+    height: 1.7rem;
+    right: -1.5rem;
+    top: 0.6rem;
+    transform: rotate(40deg);
+  }
+
+  /* What to expect */
+  .fl-expect {
+    background: var(--fl-marigold);
+    color: var(--fl-char);
+  }
+  .fl-expect-title {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: clamp(1.5rem, 5.5vw, 2.4rem);
+    line-height: 1;
+  }
+  .fl-pill {
+    background: #fff;
+    color: var(--fl-char);
+    transform: rotate(var(--fl-rot, 0deg));
+    box-shadow: 2px 5px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  /* Event cards */
+  .fl-card--sheet {
+    background: var(--fl-sheet);
+  }
+  .fl-card--marigold {
+    background: var(--fl-marigold);
+  }
+  .fl-day {
+    font-weight: 900;
+    font-size: 3.4rem;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+  .fl-date {
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    padding-bottom: 0.3rem;
+    color: #7d6f60;
+  }
+  .fl-card--marigold .fl-date {
+    color: rgba(72, 72, 72, 0.8);
+  }
+  .fl-time {
+    color: var(--fl-char);
+  }
+  .fl-card-title {
+    font-weight: 800;
+    font-size: 1.55rem;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .fl-instructor {
+    color: #6f6254;
+  }
+  .fl-desc,
+  .fl-bring {
+    color: rgba(72, 72, 72, 0.88);
+  }
+  .fl-card--marigold .fl-desc,
+  .fl-card--marigold .fl-bring {
+    color: var(--fl-char);
+  }
+  .fl-address {
+    color: var(--fl-char);
+  }
+  .fl-maps-hint {
+    font-weight: 500;
+    opacity: 0.75;
+  }
+  .fl-card--sheet .fl-chip {
+    background: #ebe7dc;
+    color: var(--fl-char);
+  }
+  .fl-card--marigold .fl-chip {
+    background: #fff;
+    color: var(--fl-char);
+  }
+  .fl-cta {
+    background: var(--fl-char);
+    color: #fff;
+  }
+  .fl-cta:hover {
+    background: #2f2f2f;
+  }
+  .fl-cta-line {
+    border: 2px solid var(--fl-char);
+    color: var(--fl-char);
+  }
+  .fl-cta-line:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+  .fl-happened {
+    background: var(--fl-char);
+    color: var(--fl-marigold);
+  }
+  .fl-card-wrap.is-done .fl-card,
+  .fl-card-wrap[data-finishline-done="true"] .fl-card {
+    opacity: 0.6;
+  }
+  .fl-card-wrap[data-finishline-done="true"] .fl-cta {
+    display: none;
+  }
+
+  /* Closing band */
+  .fl-close {
+    background: var(--fl-char);
+    color: var(--fl-sheet);
+  }
+  .fl-close-eyebrow,
+  .fl-mail {
+    color: var(--fl-marigold);
+  }
+</style>

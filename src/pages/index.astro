@@ -11,11 +11,14 @@
 //   4. ABC7 Windy City Weekend spotlight [D] (#abc7-windy-city, media RIGHT)
 //   5. Monday Miles Tee merch [L]
 //   6. 40 Under 40 [D]
-//   7. Monday Miles community runs [L]
+//   7. Monday Miles community runs [L], with a small Collective Finish
+//      Line note inside it ("Mon Oct 5: Monday Miles becomes the pre-marathon
+//      flow") until the Oct 5 class has happened (src/data/collectiveFinishLine.js)
 //   8. A New Chapter (relocation) [D], with the Pop Up Week 1 companion
 //      band (PopUpWeekBand, tone="dark") inside it while the week is not
 //      past (Oct 5 to 11, 2026; auto-hides after Oct 11)
-//   9. Events carousel [L]
+//   9. Events carousel [L] (The Collective Finish Line card leads it while
+//      the series is not past, Oct 5 – 14 2026; auto-hides after Oct 14)
 //  10. Instagram [D]
 //  11. In The Press [L]
 // Desktop media zig-zag: Gala photo LEFT -> ABC7 video RIGHT -> Tee LEFT ->
@@ -48,6 +51,12 @@ import Abc7Segment from "@/components/Abc7Segment.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import { popUpWeek1, getPopUpPhase } from "@/data/popUpWeek1";
+import FinishLineClient from "@/components/FinishLineClient.astro";
+import {
+  collectiveFinishLine,
+  finishLineEvents,
+  getFinishLinePhase,
+} from "@/data/collectiveFinishLine";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 
@@ -93,6 +102,14 @@ const graduationFlickrUrl =
 // /schedule.
 const popUpActive = getPopUpPhase() !== "past";
 const popUpPageUrl = withBase(popUpWeek1.pagePath);
+// The Collective Finish Line (Oct 5 – 14, 2026): the Monday Miles note
+// shows until the Oct 5 flow has happened; the carousel card leads until
+// the series is past (build time + FinishLineClient in the browser).
+const finishLineActive = getFinishLinePhase() !== "past";
+const finishLinePageUrl = withBase(collectiveFinishLine.pagePath);
+const finishLineOct5 = finishLineEvents.find((e) => e.id === "oct5-flow");
+const finishLineClasses = finishLineEvents.filter((e) => e.kind === "class");
+const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -1176,6 +1193,54 @@ const popUpPageUrl = withBase(popUpWeek1.pagePath);
                 >Meet in the cafe. Warm up together.</span
               >
             </div>
+
+            {/* The Collective Finish Line note (Mon Oct 5, 2026): that night
+                Monday Miles becomes the pre-marathon yoga flow. Hides once
+                the Oct 5 class has happened (build time + FinishLineClient
+                via data-finishline-past-at). */}
+            {showMondayMilesFinishLine && (
+              <div
+                class="mx-auto mt-8 max-w-xl rounded-2xl border-l-[6px] border-[#efbd62] bg-[#f7f6f1] p-4 text-left shadow-lg shadow-off-black/10 ring-1 ring-[#484848]/10 sm:p-5 lg:mx-0"
+                data-finishline-hide-when-past
+                data-finishline-past-at={finishLineOct5.endsAtISO}
+              >
+                <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7d6f60]">
+                  {collectiveFinishLine.title} · Marathon week
+                </p>
+                <p class="mt-1.5 text-base font-bold leading-snug text-[#484848] sm:text-lg">
+                  Mon Oct 5: Monday Miles becomes the Collective Finish Line pre-marathon flow
+                </p>
+                <p class="mt-1 text-sm leading-snug text-[#484848]/80">
+                  {finishLineOct5.timeLabel} · with {finishLineOct5.instructor} · {finishLineOct5.venue} · {collectiveFinishLine.priceLine}
+                </p>
+                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <a
+                    href={finishLineOct5.ticketsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group inline-flex items-center gap-2 rounded-full bg-[#484848] px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#2f2f2f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#efbd62] focus-visible:ring-offset-2"
+                    data-conversion-event="class_booking_start"
+                    data-conversion-context="home_monday_miles_finishline"
+                    data-conversion-provider="zeffy"
+                    data-conversion-booking-path="finishline_zeffy"
+                    data-conversion-finishline-event={finishLineOct5.trackingKey}
+                  >
+                    {collectiveFinishLine.ticketsLabel}
+                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                  <a
+                    href={finishLinePageUrl}
+                    class="text-xs font-extrabold uppercase tracking-[0.14em] text-[#484848] underline underline-offset-4 hover:text-off-black"
+                    data-conversion-event="finishline_page_click"
+                    data-conversion-context="home_monday_miles_finishline"
+                  >
+                    See marathon week
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Visual card (left on desktop via lg:order-1) */}
@@ -1403,6 +1468,76 @@ const popUpPageUrl = withBase(popUpWeek1.pagePath);
           </div>
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
+
+          {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the
+              carousel while the series is not past. A div (not an <a>) so
+              the two Zeffy CTAs are not nested links; it stays a DIRECT
+              child of #events-carousel, and data-finishline-end lets the
+              dots script skip it once hidden after Oct 14. */}
+          {finishLineActive && (
+            <div
+              class="group flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+              data-finishline-hide-when-past
+              data-finishline-end={collectiveFinishLine.endsAtISO}
+            >
+              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f7f6f1] text-[#484848] shadow-xl shadow-off-black/15 ring-1 ring-[#484848]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                <a
+                  href={finishLinePageUrl}
+                  class="block"
+                  data-conversion-event="finishline_page_click"
+                  data-conversion-context="home_events_carousel_finishline"
+                >
+                  <div class="relative aspect-[1200/630] overflow-hidden bg-[#f0f0ec]">
+                    <img
+                      src={`${base}${collectiveFinishLine.ogImage}`}
+                      width="1200"
+                      height="630"
+                      alt="The Collective Finish Line: yoga flows Oct 5 and Oct 14, cheer zone Oct 11"
+                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </a>
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-center gap-2 text-sm font-bold text-[#7d6f60]">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Oct 5 · Oct 11 · Oct 14
+                  </div>
+                  <h3 class="mt-2 text-xl font-extrabold leading-tight">
+                    <a href={finishLinePageUrl} class="hover:underline" data-conversion-event="finishline_page_click" data-conversion-context="home_events_carousel_finishline">{collectiveFinishLine.title}</a>
+                  </h3>
+                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#484848]/75">
+                    Chicago Marathon week: two yoga flows at Chicago Art Department
+                    ({collectiveFinishLine.priceLine}) and our cheer zone at 18th & Peoria on marathon day.
+                  </p>
+                  <div class="mt-4 grid gap-2">
+                    {finishLineClasses.map((ev) => (
+                      <a
+                        href={ev.ticketsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center justify-between gap-2 rounded-full bg-[#484848] px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#2f2f2f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#efbd62] focus-visible:ring-offset-2"
+                        data-finishline-past-at={ev.endsAtISO}
+                        data-conversion-event="class_booking_start"
+                        data-conversion-context="home_events_carousel_finishline"
+                        data-conversion-provider="zeffy"
+                        data-conversion-booking-path="finishline_zeffy"
+                        data-conversion-finishline-event={ev.trackingKey}
+                      >
+                        <span>{ev.dayShort} {ev.dateLabel} · {ev.kind === "class" && ev.id === "oct5-flow" ? "Yoga flow" : "Restorative flow"}</span>
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Annual Gala 2026 recap card (leads the carousel). Post-gala
               (Sep 26 2026): no ticket hooks, links to the /gala recap. */}
@@ -1653,6 +1788,7 @@ const popUpPageUrl = withBase(popUpWeek1.pagePath);
           </div>
         </div>
       </div>
+      <FinishLineClient />
     </section>
     {/* END: Events Section */}
 
@@ -1664,7 +1800,12 @@ const popUpPageUrl = withBase(popUpWeek1.pagePath);
         const dotsContainer = document.getElementById('events-dots');
         if (!carousel) return;
 
-        const cards = Array.from(carousel.children);
+        // Skip a campaign card that the page auto-hides once its series is
+        // past (data-finishline-end), so the dots match the visible cards.
+        const cards = Array.from(carousel.children).filter((card) => {
+          const end = Date.parse(card.getAttribute('data-finishline-end') || '');
+          return !(Number.isFinite(end) && Date.now() > end);
+        });
         const isScrollable = () => carousel.scrollWidth > carousel.clientWidth + 4;
 
         const DOT_INACTIVE = 'events-dot h-2 w-2 rounded-full bg-off-black/25 transition-all duration-300 hover:bg-accent-gold/70 focus:outline-none focus:ring-2 focus:ring-accent-gold/40 focus:ring-offset-2 focus:ring-offset-[#f7efe3]';

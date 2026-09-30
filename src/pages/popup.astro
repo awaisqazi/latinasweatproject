@@ -25,6 +25,8 @@ import {
   getPopUpPhase,
   locationInstructors,
 } from "@/data/popUpWeek1";
+import FinishLineClient from "@/components/FinishLineClient.astro";
+import { collectiveFinishLine, getFinishLinePhase } from "@/data/collectiveFinishLine";
 
 const base = import.meta.env.BASE_URL;
 const phase = getPopUpPhase();
@@ -35,6 +37,9 @@ const locations = popUpLocations.map((loc) => ({
   teachers: locationInstructors(loc),
 }));
 // Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
+// Cross-link to The Collective Finish Line (same venue, Oct 5 & Oct 14)
+// under the Chicago Art Department card while that series is not past.
+const finishLineActive = getFinishLinePhase() !== "past";
 const headlineParts = popUpWeek1.headline.split(" · ");
 const pageTitle = `${popUpWeek1.title} · Oct 5 – 11 | The Latina Sweat Project`;
 const pageDescription =
@@ -240,6 +245,23 @@ const pageDescription =
                     {loc.sessions.length} classes · {popUpWeek1.classLengthLabel} each · {popUpWeek1.matsLine}
                   </p>
                 </div>
+                {loc.id === "chicago-art-department" && finishLineActive && (
+                  <a
+                    href={`${base}${collectiveFinishLine.pagePath}`}
+                    class="pu-fl-link group flex items-center justify-between gap-3 px-5 py-4 text-sm font-semibold leading-snug sm:px-7"
+                    data-finishline-hide-when-past
+                    data-conversion-event="finishline_page_click"
+                    data-conversion-context="popup_finishline_crosslink"
+                  >
+                    <span>
+                      <span class="pu-fl-kicker block text-[10px] font-extrabold uppercase tracking-[0.16em]">Also at Chicago Art Dept</span>
+                      <span class="font-extrabold">{collectiveFinishLine.title}</span>, Mon Oct 5 &amp; Wed Oct 14 · 7 PM
+                    </span>
+                    <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                )}
               </article>
             );
           })}
@@ -275,6 +297,7 @@ const pageDescription =
     </section>
 
     <PopUpWeekClient />
+    <FinishLineClient />
   </main>
 </Layout>
 
@@ -539,6 +562,19 @@ const pageDescription =
   .pu-cta:focus-visible,
   .pu-jump:focus-visible {
     --tw-ring-color: var(--pu-terracotta);
+  }
+
+  /* Cross-link to The Collective Finish Line (its own marigold, so it reads
+     as a neighbouring campaign, not part of this week's schedule). */
+  .pu-fl-link {
+    background: #efbd62;
+    color: #484848;
+  }
+  .pu-fl-link:hover {
+    background: #f3c979;
+  }
+  .pu-fl-kicker {
+    color: rgba(72, 72, 72, 0.75);
   }
 
   /* Ink band */

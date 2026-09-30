@@ -1,0 +1,56 @@
+---
+// The Collective Finish Line client behaviour, shared by every surface that
+// shows the series (see src/data/collectiveFinishLine.js). Astro bundles and
+// dedupes this script, so it is safe to include the component more than
+// once per page. Mirrors PopUpWeekClient.
+//
+// 1. Series auto-hide: after collectiveFinishLine.endsAtISO (Oct 14,
+//    23:59:59 CT) elements carrying [data-finishline-hide-when-past] are
+//    hidden and [data-finishline-show-when-past] are revealed. (Surfaces also
+//    check the phase at build time; this covers a static build that is not
+//    redeployed after Oct 14.)
+// 2. Per event: elements with [data-finishline-past-at="<ISO>"] are hidden
+//    once that instant has passed (a CTA for a class that already happened),
+//    elements with [data-finishline-show-past-at="<ISO>"] are revealed, and
+//    [data-finishline-event-end="<ISO>"] containers get
+//    data-finishline-done="true" (CSS dims them).
+import { collectiveFinishLine } from "@/data/collectiveFinishLine";
+---
+
+<div hidden data-finishline-bounds data-end={collectiveFinishLine.endsAtISO}></div>
+
+<script>
+  (function () {
+    const bounds = document.querySelector<HTMLElement>("[data-finishline-bounds]");
+    if (!bounds) return;
+    const now = Date.now();
+    const end = Date.parse(bounds.dataset.end || "");
+    const passed = (iso?: string) => {
+      const t = Date.parse(iso || "");
+      return Number.isFinite(t) && now > t;
+    };
+    const hide = (el: HTMLElement) => {
+      el.hidden = true;
+      el.style.display = "none";
+    };
+    const show = (el: HTMLElement) => {
+      el.hidden = false;
+      el.style.removeProperty("display");
+    };
+
+    document.querySelectorAll<HTMLElement>("[data-finishline-past-at]").forEach((el) => {
+      if (passed(el.dataset.finishlinePastAt)) hide(el);
+    });
+    document.querySelectorAll<HTMLElement>("[data-finishline-show-past-at]").forEach((el) => {
+      if (passed(el.dataset.finishlineShowPastAt)) show(el);
+    });
+    document.querySelectorAll<HTMLElement>("[data-finishline-event-end]").forEach((el) => {
+      if (passed(el.dataset.finishlineEventEnd)) el.dataset.finishlineDone = "true";
+    });
+
+    if (Number.isFinite(end) && now > end) {
+      document.querySelectorAll<HTMLElement>("[data-finishline-hide-when-past]").forEach(hide);
+      document.querySelectorAll<HTMLElement>("[data-finishline-show-when-past]").forEach(show);
+    }
+  })();
+</script>
