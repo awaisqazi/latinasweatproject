@@ -1,6 +1,10 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
+import StudioTransitionSection from '@/components/StudioTransitionSection.astro';
+// Toggle lives in src/data/transition.js: false = studio transition section
+// in place of the MarianaTek buy widget; true = the original pricing page.
+import { showMarianaSchedule, studioTransition } from '@/data/transition';
 
 const pricingOptions = [
   {
@@ -45,18 +49,19 @@ const pricingOptions = [
     <section class="bg-off-black px-4 py-14 text-white sm:py-16">
       <div class="mx-auto max-w-6xl">
         <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent-gold">
-          Studio pricing
+          {showMarianaSchedule ? "Studio pricing" : studioTransition.pricingPaused.eyebrow}
         </p>
         <div class="mt-4 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
             <h1 class="max-w-3xl font-sans text-4xl font-extrabold leading-tight sm:text-5xl">
-              Class packs and memberships for movement in Pilsen.
+              {showMarianaSchedule
+                ? "Class packs and memberships for movement in Pilsen."
+                : "Pop-up pricing, one class at a time."}
             </h1>
             <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-200">
-              The Latina Sweat Project offers yoga, pilates, dance fitness, and
-              community wellness classes with options for drop-ins, class packs,
-              unlimited memberships, and new students trying the studio for the
-              first time.
+              {showMarianaSchedule
+                ? "The Latina Sweat Project offers yoga, pilates, dance fitness, and community wellness classes with options for drop-ins, class packs, unlimited memberships, and new students trying the studio for the first time."
+                : studioTransition.pricingPaused.body}
             </p>
           </div>
           <div class="rounded-lg border border-white/15 bg-white/[0.06] p-5">
@@ -76,6 +81,7 @@ const pricingOptions = [
         </div>
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          {showMarianaSchedule && (
           <a
             href="https://latinasweatproject.marianatools.com/?_mt=/buy/48717"
             target="_blank"
@@ -88,18 +94,23 @@ const pricingOptions = [
             data-conversion-location-id="48717"
             >Buy passes or memberships</a
           >
+          )}
           <a
             href="/schedule"
             class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-bold text-white transition hover:border-accent-gold hover:text-accent-gold"
             data-conversion-event="class_booking_start"
             data-conversion-context="pricing_hero_schedule"
             data-conversion-booking-path="schedule_page"
-            >View class schedule</a
+            >{showMarianaSchedule ? "View class schedule" : "See pop-up classes"}</a
           >
         </div>
       </div>
     </section>
 
+    {/* Price cards: every option is a MarianaTek product, so they hide
+        while studio programming is paused (showMarianaSchedule in src/data/transition.js);
+        the hero carries the paused note instead. */}
+    {showMarianaSchedule && (
     <section class="px-4 py-12">
       <div class="mx-auto max-w-6xl">
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -121,7 +132,9 @@ const pricingOptions = [
         </div>
       </div>
     </section>
+    )}
 
+    {showMarianaSchedule && (
     <section class="border-y border-gray-100 bg-slate-50 px-4 py-10">
       <div class="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
         <div>
@@ -167,7 +180,17 @@ const pricingOptions = [
         </div>
       </div>
     </section>
+    )}
 
+    {!showMarianaSchedule && (
+      <div class="px-4 py-12">
+        <div class="mx-auto max-w-5xl">
+          <StudioTransitionSection context="pricing_transition" />
+        </div>
+      </div>
+    )}
+
+    {showMarianaSchedule && (<>
     <section class="px-4 py-10">
       <div class="mx-auto max-w-4xl rounded-lg border border-accent-gold/50 bg-amber-50 p-5 text-center">
         <p class="font-semibold text-amber-900">
@@ -204,5 +227,6 @@ const pricingOptions = [
     <div
       data-mariana-integrations="/buy/48717"
     ></div>
+    </>)}
   </main>
 </Layout>

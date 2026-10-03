@@ -1,0 +1,374 @@
+---
+// Pop Up Week 1 full schedule: the "Two locations" kicker and the two
+// location cards (Chicago Art Department = paper card, Sanctuary Health =
+// ink card), each with address, price/capacity chips, "Your teachers this
+// week" avatars, the day-by-day session list (time, class, instructor
+// avatars + names, "Next up" tag, "No classes" days), the Zeffy reserve
+// CTA, and (Chicago Art Dept only) the cross-link to The Collective Finish
+// Line while that series is not past. All facts from popUpWeek1.js.
+//
+// Extracted from /popup (Oct 2, 2026) so /popup, /schedule and /classes
+// share one source. Used by:
+//   /popup       src/pages/popup.astro (stays up as the record when past)
+//   /schedule, /classes  via StudioTransitionSection (hideWhenPast)
+//
+// This component does NOT include PopUpWeekClient; the host page must
+// (it drives "Next up" via [data-popup-group] / [data-popup-starts] and
+// the hide-when-past behaviour). Card ids (#chicago-art-department,
+// #sanctuary-health) are anchors, so render this once per page.
+import PopUpAvatars from "@/components/PopUpAvatars.astro";
+import {
+  popUpWeek1,
+  popUpLocations,
+  groupSessionsByDay,
+  getPopUpPhase,
+  locationInstructors,
+} from "@/data/popUpWeek1";
+import { collectiveFinishLine, getFinishLinePhase } from "@/data/collectiveFinishLine";
+
+interface Props {
+  /** data-conversion-context for the Zeffy reserve CTAs. */
+  context: string;
+  /** data-conversion-context for the Collective Finish Line cross-link. */
+  finishLineContext: string;
+  /**
+   * true: hide in the browser after Oct 11 (data-popup-hide-when-past).
+   * Hosts that want it gone at build time once past skip rendering it
+   * (see StudioTransitionSection). /popup leaves this off so the schedule
+   * stays as the record. (The markup is deliberately NOT wrapped in a
+   * {cond && (...)} expression: that trims the inline whitespace, e.g. the
+   * space before the "Next up" tag, and /popup would shift by pixels.)
+   */
+  hideWhenPast?: boolean;
+}
+const { context, finishLineContext, hideWhenPast = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const isPast = getPopUpPhase() === "past";
+const locations = popUpLocations.map((loc) => ({
+  ...loc,
+  days: groupSessionsByDay(loc),
+  teachers: locationInstructors(loc),
+}));
+// Cross-link to The Collective Finish Line (same venue, Oct 5 & Oct 14)
+// under the Chicago Art Department card while that series is not past.
+const finishLineActive = getFinishLinePhase() !== "past";
+---
+
+<div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined}>
+  <p class="pu-kicker text-[11px] font-extrabold uppercase tracking-[0.22em]">Two locations</p>
+  <div class="mt-4 grid gap-6 lg:grid-cols-2 lg:items-start">
+    {locations.map((loc) => {
+      const ink = loc.theme === "dark";
+      return (
+        <article
+          id={loc.id}
+          class:list={["pu-card scroll-mt-28 overflow-hidden rounded-3xl", ink ? "pu-card--ink" : "pu-card--paper"]}
+          data-popup-group
+        >
+          <header class="pu-card-head flex flex-wrap items-start justify-between gap-4 p-5 sm:p-7">
+            <div>
+              <p class="pu-lockup" aria-label={loc.name}>
+                {loc.lockup.map((word) => <span class="block">{word}</span>)}
+              </p>
+            </div>
+            <p class="pu-card-label text-[11px] font-extrabold uppercase tracking-[0.18em] sm:text-right">
+              {loc.shortLabel}
+            </p>
+          </header>
+
+          <div class="px-5 sm:px-7">
+            <a
+              href={loc.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="pu-address inline-flex items-start gap-2 text-sm font-semibold underline-offset-4 hover:underline"
+            >
+              <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"></path>
+              </svg>
+              <span>{loc.address}</span>
+            </a>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span class="pu-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em]">{loc.priceLine}</span>
+              <span class="pu-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em]">{loc.capacityLine}</span>
+            </div>
+            {/* Your teachers this week: unique instructors at this
+                location, up to 8 faces + "+N". */}
+            <div class="pu-teachers mt-5">
+              <p class="pu-teachers-label text-[11px] font-extrabold uppercase leading-tight tracking-[0.16em]">
+                Your teachers this week <span class="pu-teachers-count">· {loc.teachers.length}</span>
+              </p>
+              <PopUpAvatars
+                people={loc.teachers}
+                max={8}
+                size={32}
+                sizeSm={40}
+                ring={ink ? "#1e1a17" : "#fdfbf7"}
+                bg={ink ? "#3b342e" : "#ece2d4"}
+                tone={ink ? "dark" : "light"}
+                class="mt-2.5"
+              />
+            </div>
+          </div>
+
+          <ol class="mt-5 space-y-2 px-3 sm:px-5" aria-label={`${loc.name} classes`}>
+            {loc.days.map((day) => (
+              <li class="pu-day flex gap-3 rounded-2xl px-3 py-3 sm:gap-4 sm:px-4">
+                <div class="w-12 shrink-0 sm:w-14">
+                  <p class="pu-day-name text-base font-extrabold uppercase leading-none">{day.dayShort}</p>
+                  <p class="pu-day-date mt-1 text-[10px] font-bold uppercase tracking-[0.1em]">{day.dateLabel}</p>
+                </div>
+                <div class="min-w-0 flex-1">
+                  {day.closed ? (
+                    <p class="pu-closed text-sm font-semibold italic">No classes</p>
+                  ) : (
+                    <ul class="space-y-2">
+                      {day.sessions.map((s) => (
+                        <li
+                          class="pu-row relative grid grid-cols-[4.25rem_1fr] gap-x-2 rounded-lg sm:grid-cols-[6rem_1fr] sm:gap-x-3"
+                          data-popup-starts={s.startsAt}
+                          data-popup-date={s.date}
+                        >
+                          <div>
+                            <p class="pu-time text-sm font-extrabold leading-snug">{s.time}</p>
+                            <PopUpAvatars
+                              people={s.people}
+                              size={28}
+                              sizeSm={36}
+                              ring={ink ? "#2b2723" : "#f3ede4"}
+                              bg={ink ? "#3b342e" : "#e3d6c4"}
+                              tone={ink ? "dark" : "light"}
+                              class="mt-1.5"
+                            />
+                          </div>
+                          <div class="min-w-0">
+                            <p class="pu-class text-[15px] font-semibold leading-snug">
+                              {s.className}
+                              <span class="pu-next-tag ml-1 rounded px-1.5 py-[1px] align-middle text-[9px] font-extrabold uppercase tracking-[0.14em]">Next up</span>
+                            </p>
+                            <p class="pu-names text-[13px] leading-snug">{s.instructors.join(" / ")}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div class="p-5 sm:p-7">
+            {!isPast && (
+              <a
+                href={loc.ticketsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="pu-cta group flex items-center justify-between gap-3 rounded-full px-5 py-4 text-base font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                data-popup-hide-when-past
+                data-conversion-event={loc.conversionEvent}
+                data-conversion-context={context}
+                data-conversion-provider="zeffy"
+                data-conversion-booking-path="popup_zeffy"
+                data-conversion-popup-location={loc.trackingLocation}
+              >
+                <span>{loc.ticketsLabel}</span>
+                <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            )}
+            <p class="pu-card-foot mt-3 text-center text-xs font-semibold">
+              {loc.sessions.length} classes · {popUpWeek1.classLengthLabel} each · {popUpWeek1.matsLine}
+            </p>
+          </div>
+          {loc.id === "chicago-art-department" && finishLineActive && (
+            <a
+              href={`${base}${collectiveFinishLine.pagePath}`}
+              class="pu-fl-link group flex items-center justify-between gap-3 px-5 py-4 text-sm font-semibold leading-snug sm:px-7"
+              data-finishline-hide-when-past
+              data-conversion-event="finishline_page_click"
+              data-conversion-context={finishLineContext}
+            >
+              <span>
+                <span class="pu-fl-kicker block text-[10px] font-extrabold uppercase tracking-[0.16em]">Also at Chicago Art Dept</span>
+                <span class="font-extrabold">{collectiveFinishLine.title}</span>, Mon Oct 5 &amp; Wed Oct 14 · 7 PM
+              </span>
+              <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+          )}
+        </article>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .pu-sched {
+    --pu-cream: #f3ede4;
+    --pu-paper: #fdfbf7;
+    --pu-terracotta: #c4573a;
+    --pu-ink: #1e1a17;
+    --pu-mustard: #e0a83a;
+    --pu-muted: #6f6760;
+    color: var(--pu-ink);
+  }
+  .pu-kicker {
+    color: var(--pu-terracotta);
+  }
+
+  /* Location cards */
+  .pu-card--paper {
+    background: var(--pu-paper);
+    color: var(--pu-ink);
+    box-shadow: 0 1px 0 rgba(30, 26, 23, 0.05), 0 24px 50px -30px rgba(30, 26, 23, 0.45);
+  }
+  .pu-card--ink {
+    background: var(--pu-ink);
+    color: var(--pu-cream);
+    box-shadow: 0 24px 50px -30px rgba(30, 26, 23, 0.8);
+  }
+  .pu-lockup {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.9rem;
+    line-height: 0.95;
+    letter-spacing: 0.06em;
+  }
+  .pu-card--ink .pu-lockup {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    font-size: 1.6rem;
+    line-height: 1.1;
+  }
+  .pu-card--ink .pu-lockup span:last-child {
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    opacity: 0.8;
+  }
+  .pu-card-label {
+    color: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-card-label {
+    color: var(--pu-mustard);
+  }
+  .pu-card--paper .pu-address {
+    color: var(--pu-ink);
+  }
+  .pu-card--ink .pu-address {
+    color: var(--pu-cream);
+  }
+  .pu-card--paper .pu-chip {
+    background: var(--pu-cream);
+    color: var(--pu-ink);
+  }
+  .pu-card--ink .pu-chip {
+    background: rgba(243, 237, 228, 0.1);
+    color: var(--pu-cream);
+  }
+  .pu-card--paper .pu-day {
+    background: var(--pu-cream);
+  }
+  .pu-card--ink .pu-day {
+    background: rgba(243, 237, 228, 0.06);
+  }
+  .pu-day-name {
+    color: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-day-name {
+    color: #e2765a;
+  }
+  .pu-day-date,
+  .pu-names,
+  .pu-closed {
+    color: var(--pu-muted);
+  }
+  .pu-card--ink .pu-day-date,
+  .pu-card--ink .pu-names,
+  .pu-card--ink .pu-closed {
+    color: rgba(243, 237, 228, 0.6);
+  }
+  .pu-card-foot {
+    color: var(--pu-muted);
+  }
+  .pu-card--ink .pu-card-foot {
+    color: rgba(243, 237, 228, 0.55);
+  }
+
+  .pu-teachers-label {
+    color: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-teachers-label {
+    color: var(--pu-mustard);
+  }
+  .pu-teachers-count {
+    color: var(--pu-muted);
+  }
+  .pu-card--ink .pu-teachers-count {
+    color: rgba(243, 237, 228, 0.6);
+  }
+
+  /* Next up (flagged by PopUpWeekClient) */
+  .pu-next-tag {
+    display: none;
+    background: var(--pu-terracotta);
+    color: #fff;
+  }
+  .pu-row[data-popup-next="true"] .pu-next-tag {
+    display: inline-block;
+  }
+  .pu-row[data-popup-next="true"]::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 0.15rem;
+    bottom: 0.15rem;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-row[data-popup-next="true"] .pu-next-tag {
+    background: var(--pu-mustard);
+    color: var(--pu-ink);
+  }
+  .pu-card--ink .pu-row[data-popup-next="true"]::before {
+    background: var(--pu-mustard);
+  }
+
+  /* CTAs */
+  .pu-card--paper .pu-cta {
+    background: var(--pu-ink);
+    color: var(--pu-paper);
+  }
+  .pu-card--paper .pu-cta:hover {
+    background: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-cta {
+    background: var(--pu-terracotta);
+    color: #fff;
+  }
+  .pu-card--ink .pu-cta:hover {
+    background: var(--pu-mustard);
+    color: var(--pu-ink);
+  }
+  .pu-cta:focus-visible {
+    --tw-ring-color: var(--pu-terracotta);
+  }
+
+  /* Cross-link to The Collective Finish Line (its own marigold, so it reads
+     as a neighbouring campaign, not part of this week's schedule). */
+  .pu-fl-link {
+    background: #efbd62;
+    color: #484848;
+  }
+  .pu-fl-link:hover {
+    background: #f3c979;
+  }
+  .pu-fl-kicker {
+    color: rgba(72, 72, 72, 0.75);
+  }
+</style>

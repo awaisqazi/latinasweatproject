@@ -1,0 +1,272 @@
+---
+// "A new chapter" studio-transition section that stands in for the embedded MarianaTek
+// schedule / buy widgets while showMarianaSchedule is false (see
+// src/data/transition.js for the toggle and every surface it gates).
+//
+// Three parts, in the Pop Up "Option I" identity (cream / terracotta / ink /
+// mustard, Rubik extra-bold uppercase display; design.md):
+//   1. Transition message (cream card, terracotta sun)
+//   2. Donation ask (ink card inside the cream card, -> /donate -> Zeffy)
+//   3. Pop-up classes: PopUpWeekBand + FinishLineBand, reused as-is. Each
+//      renders nothing once its dates are past (build time) and hides itself
+//      in the browser after its end instant. A closing "more pop-ups are on
+//      the way" Instagram line is always present, and the intro copy swaps
+//      to a past-tense-safe version once every dated pop-up has ended
+//      (build time + the small script below), so the block never reads as
+//      an empty box.
+import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
+import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
+import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
+import FinishLineBand from "@/components/FinishLineBand.astro";
+import { studioTransition as st } from "@/data/transition";
+import { popUpWeek1, getPopUpPhase } from "@/data/popUpWeek1";
+import { collectiveFinishLine } from "@/data/collectiveFinishLine";
+
+interface Props {
+  /** Analytics context prefix, e.g. "schedule_transition". */
+  context: string;
+  /**
+   * "full": the complete Pop Up Week 1 schedule (PopUpWeekSchedule, the
+   * same cards as /popup), for the schedule pages (/schedule, /classes).
+   * "band": the compact PopUpWeekBand (e.g. /pricing).
+   */
+  popupView?: "full" | "band";
+  /** Conversion contexts for the full schedule's Zeffy CTAs and its
+   *  Collective Finish Line cross-link (popupView="full" only). */
+  popupContext?: string;
+  popupFinishLineContext?: string;
+  class?: string;
+}
+const {
+  context,
+  popupView = "band",
+  popupContext = `${context}_popup`,
+  popupFinishLineContext = `${context}_finishline_crosslink`,
+  class: className = "",
+} = Astro.props;
+const popupWeekPast = getPopUpPhase() === "past";
+const popupHeadline = popUpWeek1.headline.split(" · ");
+const base = import.meta.env.BASE_URL;
+
+// Latest end instant across the dated pop-up series.
+const popupsEndISO = [popUpWeek1.endsAtISO, collectiveFinishLine.endsAtISO].sort(
+  (a, b) => Date.parse(b) - Date.parse(a),
+)[0];
+const popupsPast = Date.now() > Date.parse(popupsEndISO);
+---
+
+<div class:list={["st-wrap", className]} data-transition-end={popupsEndISO}>
+  {/* 1 + 2: transition message with the donation card */}
+  <section
+    class="st-card relative overflow-hidden rounded-3xl p-5 sm:p-8 lg:p-10"
+    aria-labelledby={`${context}-heading`}
+  >
+    <div class="st-sun pointer-events-none absolute -right-16 -top-20 h-40 w-40 rounded-full sm:-right-12 sm:-top-24 sm:h-60 sm:w-60" aria-hidden="true"></div>
+    <div class="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-10">
+      <div>
+        <p class="st-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
+          {st.eyebrow.split(" · ").map((part, i) => (
+            <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+          ))}
+        </p>
+        <h2
+          id={`${context}-heading`}
+          class="st-heading mt-3 font-sans text-[1.7rem] font-extrabold uppercase leading-[0.98] tracking-tight sm:text-4xl"
+        >
+          {st.heading}
+        </h2>
+        <div class="st-body mt-4 space-y-3 text-base leading-relaxed sm:text-lg">
+          {st.body.map((p) => <p>{p}</p>)}
+        </div>
+        <p class="st-questions mt-4 text-sm leading-relaxed">
+          {st.questionsLead}
+          <a
+            href={`mailto:${st.questionsEmail}`}
+            class="st-link font-bold underline underline-offset-4 [overflow-wrap:anywhere]"
+          >{st.questionsEmail}</a>.
+        </p>
+      </div>
+
+      <div class="st-donate rounded-2xl p-5 sm:p-6">
+        <p class="st-donate-eyebrow text-[11px] font-extrabold uppercase tracking-[0.18em]">
+          {st.donate.eyebrow}
+        </p>
+        <p class="mt-2 font-sans text-2xl font-extrabold uppercase leading-[1.02] tracking-tight">
+          {st.donate.headline}
+        </p>
+        <p class="st-donate-body mt-3 text-[15px] leading-relaxed">
+          {st.donate.body}
+        </p>
+        <a
+          href={`${base}${st.donate.path}`}
+          class="st-donate-cta group mt-5 flex items-center justify-between gap-3 rounded-full px-5 py-3.5 text-[13px] font-extrabold uppercase tracking-[0.04em] sm:text-sm sm:tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          data-conversion-event="donation_click"
+          data-conversion-context={`${context}_donate`}
+          data-conversion-provider="zeffy"
+        >
+          <span class="flex items-center gap-2.5">
+            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 21s-6.7-4.35-9.33-8.16C.8 10.1 1.6 6.3 4.73 5.2c2.05-.72 4.1.1 5.27 1.74L12 9.2l2-2.26c1.17-1.64 3.22-2.46 5.27-1.74 3.13 1.1 3.93 4.9 2.06 7.64C18.7 16.65 12 21 12 21z" />
+            </svg>
+            {st.donate.ctaLabel}
+          </span>
+          <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+        <p class="st-donate-note mt-2 text-xs">{st.donate.ctaNote}</p>
+      </div>
+    </div>
+  </section>
+
+  {/* 3: pop-up classes */}
+  <section class="mt-8 sm:mt-10" aria-labelledby={`${context}-popups`}>
+    <p class="st-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
+      {st.popups.eyebrow}
+    </p>
+    <h2
+      id={`${context}-popups`}
+      class="st-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.98] tracking-tight sm:text-3xl"
+    >
+      {st.popups.heading}
+    </h2>
+    <p class="st-body mt-3 max-w-2xl text-base leading-relaxed" data-transition-live hidden={popupsPast}>
+      {st.popups.body}
+    </p>
+    <p class="st-body mt-3 max-w-2xl text-base leading-relaxed" data-transition-past hidden={!popupsPast}>
+      {st.popups.pastBody}
+    </p>
+
+    <div class="mt-5 space-y-5 empty:hidden">
+      {popupView === "band" && <PopUpWeekBand context={`${context}_popup_band`} />}
+      {popupView === "full" && !popupWeekPast && (
+        <div class="st-popup-full rounded-3xl p-3 pt-5 sm:p-6 sm:pt-7" data-popup-hide-when-past>
+          <div class="px-2 sm:px-1">
+            <p class="st-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
+              {popUpWeek1.eyebrow.split(" · ").map((part, i) => (
+                <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+              ))}
+            </p>
+            <h3 class="st-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
+              {popupHeadline[0]}{popupHeadline[1] && <> · {popupHeadline[1]}</>}
+            </h3>
+            <p class="st-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">{popUpWeek1.body}</p>
+          </div>
+          <div class="mt-5">
+            <PopUpWeekSchedule context={popupContext} finishLineContext={popupFinishLineContext} hideWhenPast />
+          </div>
+        </div>
+      )}
+      {popupView === "full" && <PopUpWeekClient />}
+      <FinishLineBand context={`${context}_finishline`} />
+    </div>
+
+    <p class="st-more mt-5 rounded-2xl px-5 py-4 text-sm leading-relaxed sm:text-base">
+      {st.popups.moreLine}
+      <a
+        href={st.popups.instagramUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="st-link font-bold underline underline-offset-4"
+      >{st.popups.instagramHandle}</a>
+      {st.popups.moreLineTail}
+    </p>
+  </section>
+</div>
+
+<script>
+  // Static site: once every dated pop-up has ended, swap the intro line even
+  // if nobody rebuilds (the bands hide themselves via their own clients).
+  (function () {
+    const now = Date.now();
+    document.querySelectorAll<HTMLElement>("[data-transition-end]").forEach((wrap) => {
+      const end = Date.parse(wrap.dataset.transitionEnd || "");
+      if (!Number.isFinite(end) || now <= end) return;
+      wrap.querySelectorAll<HTMLElement>("[data-transition-live]").forEach((el) => (el.hidden = true));
+      wrap.querySelectorAll<HTMLElement>("[data-transition-past]").forEach((el) => (el.hidden = false));
+    });
+  })();
+</script>
+
+<style>
+  .st-wrap {
+    --st-cream: #f3ede4;
+    --st-paper: #fdfbf7;
+    --st-terracotta: #c4573a;
+    --st-ink: #1e1a17;
+    --st-mustard: #e0a83a;
+    --st-muted: #6f6760;
+    color: var(--st-ink);
+  }
+  .st-card {
+    background: var(--st-cream);
+    box-shadow: 0 1px 0 rgba(30, 26, 23, 0.06), 0 18px 40px -24px rgba(30, 26, 23, 0.35);
+  }
+  .st-sun {
+    background: var(--st-terracotta);
+    opacity: 0.9;
+  }
+  .st-eyebrow {
+    color: var(--st-terracotta);
+  }
+  .st-card .st-eyebrow,
+  .st-card .st-heading {
+    /* keep the first lines clear of the sun on phones */
+    padding-right: 4.5rem;
+  }
+  @media (min-width: 1024px) {
+    .st-card .st-heading {
+      padding-right: 0;
+    }
+  }
+  .st-heading {
+    color: var(--st-ink);
+  }
+  .st-body {
+    color: rgba(30, 26, 23, 0.78);
+  }
+  .st-questions {
+    color: var(--st-muted);
+  }
+  .st-link {
+    color: var(--st-terracotta);
+  }
+  .st-link:hover {
+    color: var(--st-ink);
+  }
+  .st-donate {
+    background: var(--st-ink);
+    color: var(--st-cream);
+    border: 1px solid rgba(243, 237, 228, 0.12);
+    box-shadow: 0 16px 32px -20px rgba(30, 26, 23, 0.55);
+  }
+  .st-donate-eyebrow {
+    color: var(--st-mustard);
+  }
+  .st-donate-body {
+    color: rgba(243, 237, 228, 0.75);
+  }
+  .st-donate-cta {
+    background: var(--st-terracotta);
+    color: #fff;
+  }
+  .st-donate-cta:hover {
+    background: var(--st-mustard);
+    color: var(--st-ink);
+  }
+  .st-donate-cta:focus-visible {
+    --tw-ring-color: var(--st-mustard);
+    --tw-ring-offset-color: var(--st-ink);
+  }
+  .st-donate-note {
+    color: rgba(243, 237, 228, 0.55);
+  }
+  .st-popup-full {
+    background: var(--st-cream);
+  }
+  .st-more {
+    background: var(--st-paper);
+    border: 1px dashed rgba(30, 26, 23, 0.22);
+    color: rgba(30, 26, 23, 0.8);
+  }
+</style>

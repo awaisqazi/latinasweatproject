@@ -61,7 +61,7 @@ const headingParts = heading.split(" · ");
               {headingParts[1] && <span class="fl-band-heading-sub block text-base sm:text-lg">{headingParts[1]}</span>}
             </h2>
             <p class="fl-band-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">
-              {cfl.supportingLine} {cfl.priceLine}.
+              {`${cfl.supportingLine} ${cfl.priceLine}.`}
             </p>
           </>
         )}

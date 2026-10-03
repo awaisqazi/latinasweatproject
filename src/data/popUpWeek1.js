@@ -1,5 +1,5 @@
 // Pop Up Week 1: LSP's first pop-up class week, Oct 5 to Oct 11, 2026.
-// The studio at 949 W 16th St closed Sep 25, 2026; this fall LSP is pop-up
+// Programming at 949 W 16th St is paused (LSP is being displaced); this fall LSP is pop-up
 // across Pilsen while the permanent home is built (opening early 2027).
 //
 // Single source of truth for every surface that mentions the week:
@@ -31,7 +31,7 @@ export const popUpWeek1 = {
   endsAtISO: "2026-10-11T23:59:59-05:00",
   headline: "LSP Pop Up · Pilsen",
   body:
-    "Our studio is between homes, so this week the classes come to the " +
+    "Programming at our studio is paused, so this week the classes come to the " +
     "neighborhood. Two locations, one week, the same community. Pick a " +
     "class and reserve your spot. Bring water and your mat, limited mats " +
     "available for rent.",

@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import Footer from "@/components/Footer.astro"; // Import the new Footer
+import { showMarianaSchedule } from "@/data/transition";
 // (The studio status banner renders inside Header.astro's fixed
 // #header-wrapper so it can never overlap the header.)
 const base = import.meta.env.BASE_URL;
@@ -55,6 +56,14 @@ const canonicalURL = new URL(
 const GA_MEASUREMENT_ID = "G-RW22LK0G9J";
 // Google Ads Conversion ID
 const GOOGLE_ADS_ID = "AW-17990206229";
+
+// Routes that render MarianaTek web-integration markup (see the loader
+// below). While studio programming is paused (showMarianaSchedule false in
+// src/data/transition.js) /schedule, /classes and /pricing show the
+// StudioTransitionSection instead of a widget, so the loader skips them.
+const MARIANA_ROUTES = showMarianaSchedule
+  ? ["/schedule", "/classes", "/pricing", "/account", "/register"]
+  : ["/account", "/register"];
 ---
 
 <!doctype html>
@@ -293,7 +302,7 @@ const GOOGLE_ADS_ID = "AW-17990206229";
         }
       })();
     </script>
-    <script is:inline>
+    <script is:inline define:vars={{ MARIANA_ROUTES }}>
       (function () {
         // ALLOWLIST, not a denylist.
         //
@@ -320,13 +329,9 @@ const GOOGLE_ADS_ID = "AW-17990206229";
         // Matching is by path segment, so it keeps working under any BASE_URL
         // prefix (for example /latinasweatproject/schedule) and with or
         // without a trailing slash, the same way the old includes() check did.
-        var MARIANA_ROUTES = [
-          "/schedule",
-          "/classes",
-          "/pricing",
-          "/account",
-          "/register",
-        ];
+        // MARIANA_ROUTES comes from the frontmatter (define:vars) so the
+        // studio-transition toggle in src/data/transition.js can drop
+        // /schedule, /classes and /pricing while their widgets are hidden.
 
         var path = window.location.pathname.replace(/\/+$/, "") || "/";
         var onMarianaRoute = false;

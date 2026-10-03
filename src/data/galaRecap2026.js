@@ -24,7 +24,7 @@ export const galaRecap = {
   shortDateLine: "September 25, 2026 · MCA Chicago",
   // The thank-you of record. EN paragraphs plus one Spanish line.
   thankYou: [
-    "To everyone who filled the MCA on Friday night: thank you. You came in black tie on the same day we taught our last classes at 949 W 16th Street, and you turned a goodbye to our first studio into a celebration of what comes next.",
+    "To everyone who filled the MCA on Friday night: thank you. You came in black tie on the same day we paused programming at 949 W 16th Street, and you turned a hard day for our first studio into a celebration of what comes next.",
     "Thank you to our sponsors and partners, to the businesses that donated auction packages, to the designers who walked the fourth floor, to Mariachi Sirenas and DJ Mateo, to our MCs Alo and Cynthia, to our honorees and featured voices, and to the volunteers who ran the door, the paddles, and the room. And to everyone who raised a paddle: in ten minutes you funded scholarships for the next teachers.",
     "What we raised is already at work. It keeps classes accessible and teacher training on full scholarship while we build a permanent home of our own in Pilsen, opening early 2027.",
   ],
@@ -37,7 +37,7 @@ export const galaRecap = {
   // site's ask is now the new-home campaign.
   giveHeading: "The night is over. The work is not.",
   giveBody:
-    "Friday was our last day of classes on 16th Street. This fall LSP goes pop-up across the neighborhood while we build a permanent home in Pilsen, opening early 2027. Every gift keeps classes accessible and teacher training tuition-free until we get there.",
+    "Programming at our 16th Street studio is paused while we are in the process of being displaced. This fall LSP goes pop-up across the neighborhood while we build a permanent home in Pilsen, opening early 2027. Every gift keeps classes accessible and teacher training tuition-free until we get there.",
   givePath: "/donate",
   giveLabel: "Support the new home",
 };

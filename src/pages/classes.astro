@@ -2,6 +2,10 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
+import StudioTransitionSection from "@/components/StudioTransitionSection.astro";
+// Toggle lives in src/data/transition.js: false = studio transition section
+// in place of the MarianaTek widget; true = the original booking page.
+import { showMarianaSchedule } from "@/data/transition";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
@@ -17,6 +21,19 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
         </p>
       </div>
     </div>
+    {!showMarianaSchedule && (
+      <div class="my-8 px-4">
+        <div class="mx-auto max-w-4xl">
+          <StudioTransitionSection
+            context="classes_transition"
+            popupView="full"
+            popupContext="classes_page"
+            popupFinishLineContext="classes_finishline_crosslink"
+          />
+        </div>
+      </div>
+    )}
+    {showMarianaSchedule && (<>
     {/* Pop Up Week 1 (Oct 5 to 11, 2026): Zeffy per location, above the
         MarianaTek widget; auto-hides after Oct 11 (see popUpWeek1.js). */}
     <div class="my-8 px-4">
@@ -45,5 +62,6 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
       data-mariana-integrations="/schedule/daily/48541?locations=48717"
     >
     </div>
+    </>)}
   </main>
 </Layout>

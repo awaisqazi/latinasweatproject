@@ -1,7 +1,7 @@
 ---
 // /popup: Pop Up Week 1 (Oct 5 to Oct 11, 2026), LSP's first week of
-// pop-up classes across Pilsen after the 949 W 16th St studio closed on
-// Sep 25, 2026. Every fact comes from src/data/popUpWeek1.js.
+// pop-up classes across Pilsen while programming at the 949 W 16th St
+// studio is paused (LSP is in the process of being displaced). Every fact comes from src/data/popUpWeek1.js.
 //
 // Identity: the campaign's own cream / terracotta / ink look from the IG
 // graphics (NOT gala navy/gold): cream ground, a big terracotta sun, bold
@@ -17,29 +17,14 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
-import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import {
-  popUpWeek1,
-  popUpLocations,
-  groupSessionsByDay,
-  getPopUpPhase,
-  locationInstructors,
-} from "@/data/popUpWeek1";
+import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
+import { popUpWeek1, popUpLocations, getPopUpPhase } from "@/data/popUpWeek1";
 import FinishLineClient from "@/components/FinishLineClient.astro";
-import { collectiveFinishLine, getFinishLinePhase } from "@/data/collectiveFinishLine";
 
 const base = import.meta.env.BASE_URL;
 const phase = getPopUpPhase();
 const isPast = phase === "past";
-const locations = popUpLocations.map((loc) => ({
-  ...loc,
-  days: groupSessionsByDay(loc),
-  teachers: locationInstructors(loc),
-}));
 // Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
-// Cross-link to The Collective Finish Line (same venue, Oct 5 & Oct 14)
-// under the Chicago Art Department card while that series is not past.
-const finishLineActive = getFinishLinePhase() !== "past";
 const headlineParts = popUpWeek1.headline.split(" · ");
 const pageTitle = `${popUpWeek1.title} · Oct 5 – 11 | The Latina Sweat Project`;
 const pageDescription =
@@ -96,7 +81,7 @@ const pageDescription =
 
         {!isPast && (
           <div class="mt-8 flex flex-col gap-3 sm:flex-row" data-popup-hide-when-past>
-            {locations.map((loc) => (
+            {popUpLocations.map((loc) => (
               <a
                 href={`#${loc.id}`}
                 class:list={[
@@ -118,154 +103,9 @@ const pageDescription =
     {/* ========================== LOCATIONS ========================== */}
     <section class="pu-locations">
       <div class="mx-auto max-w-6xl px-4 pb-14 sm:px-6 sm:pb-20 lg:px-8">
-        <p class="pu-kicker text-[11px] font-extrabold uppercase tracking-[0.22em]">Two locations</p>
-        <div class="mt-4 grid gap-6 lg:grid-cols-2 lg:items-start">
-          {locations.map((loc) => {
-            const ink = loc.theme === "dark";
-            return (
-              <article
-                id={loc.id}
-                class:list={["pu-card scroll-mt-28 overflow-hidden rounded-3xl", ink ? "pu-card--ink" : "pu-card--paper"]}
-                data-popup-group
-              >
-                <header class="pu-card-head flex flex-wrap items-start justify-between gap-4 p-5 sm:p-7">
-                  <div>
-                    <p class="pu-lockup" aria-label={loc.name}>
-                      {loc.lockup.map((word) => <span class="block">{word}</span>)}
-                    </p>
-                  </div>
-                  <p class="pu-card-label text-[11px] font-extrabold uppercase tracking-[0.18em] sm:text-right">
-                    {loc.shortLabel}
-                  </p>
-                </header>
-
-                <div class="px-5 sm:px-7">
-                  <a
-                    href={loc.mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="pu-address inline-flex items-start gap-2 text-sm font-semibold underline-offset-4 hover:underline"
-                  >
-                    <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"></path>
-                    </svg>
-                    <span>{loc.address}</span>
-                  </a>
-                  <div class="mt-3 flex flex-wrap gap-2">
-                    <span class="pu-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em]">{loc.priceLine}</span>
-                    <span class="pu-chip rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em]">{loc.capacityLine}</span>
-                  </div>
-                  {/* Your teachers this week: unique instructors at this
-                      location, up to 8 faces + "+N". */}
-                  <div class="pu-teachers mt-5">
-                    <p class="pu-teachers-label text-[11px] font-extrabold uppercase leading-tight tracking-[0.16em]">
-                      Your teachers this week <span class="pu-teachers-count">· {loc.teachers.length}</span>
-                    </p>
-                    <PopUpAvatars
-                      people={loc.teachers}
-                      max={8}
-                      size={32}
-                      sizeSm={40}
-                      ring={ink ? "#1e1a17" : "#fdfbf7"}
-                      bg={ink ? "#3b342e" : "#ece2d4"}
-                      tone={ink ? "dark" : "light"}
-                      class="mt-2.5"
-                    />
-                  </div>
-                </div>
-
-                <ol class="mt-5 space-y-2 px-3 sm:px-5" aria-label={`${loc.name} classes`}>
-                  {loc.days.map((day) => (
-                    <li class="pu-day flex gap-3 rounded-2xl px-3 py-3 sm:gap-4 sm:px-4">
-                      <div class="w-12 shrink-0 sm:w-14">
-                        <p class="pu-day-name text-base font-extrabold uppercase leading-none">{day.dayShort}</p>
-                        <p class="pu-day-date mt-1 text-[10px] font-bold uppercase tracking-[0.1em]">{day.dateLabel}</p>
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        {day.closed ? (
-                          <p class="pu-closed text-sm font-semibold italic">No classes</p>
-                        ) : (
-                          <ul class="space-y-2">
-                            {day.sessions.map((s) => (
-                              <li
-                                class="pu-row relative grid grid-cols-[4.25rem_1fr] gap-x-2 rounded-lg sm:grid-cols-[6rem_1fr] sm:gap-x-3"
-                                data-popup-starts={s.startsAt}
-                                data-popup-date={s.date}
-                              >
-                                <div>
-                                  <p class="pu-time text-sm font-extrabold leading-snug">{s.time}</p>
-                                  <PopUpAvatars
-                                    people={s.people}
-                                    size={28}
-                                    sizeSm={36}
-                                    ring={ink ? "#2b2723" : "#f3ede4"}
-                                    bg={ink ? "#3b342e" : "#e3d6c4"}
-                                    tone={ink ? "dark" : "light"}
-                                    class="mt-1.5"
-                                  />
-                                </div>
-                                <div class="min-w-0">
-                                  <p class="pu-class text-[15px] font-semibold leading-snug">
-                                    {s.className}
-                                    <span class="pu-next-tag ml-1 rounded px-1.5 py-[1px] align-middle text-[9px] font-extrabold uppercase tracking-[0.14em]">Next up</span>
-                                  </p>
-                                  <p class="pu-names text-[13px] leading-snug">{s.instructors.join(" / ")}</p>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-
-                <div class="p-5 sm:p-7">
-                  {!isPast && (
-                    <a
-                      href={loc.ticketsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="pu-cta group flex items-center justify-between gap-3 rounded-full px-5 py-4 text-base font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                      data-popup-hide-when-past
-                      data-conversion-event={loc.conversionEvent}
-                      data-conversion-context="popup_page"
-                      data-conversion-provider="zeffy"
-                      data-conversion-booking-path="popup_zeffy"
-                      data-conversion-popup-location={loc.trackingLocation}
-                    >
-                      <span>{loc.ticketsLabel}</span>
-                      <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                      </svg>
-                    </a>
-                  )}
-                  <p class="pu-card-foot mt-3 text-center text-xs font-semibold">
-                    {loc.sessions.length} classes · {popUpWeek1.classLengthLabel} each · {popUpWeek1.matsLine}
-                  </p>
-                </div>
-                {loc.id === "chicago-art-department" && finishLineActive && (
-                  <a
-                    href={`${base}${collectiveFinishLine.pagePath}`}
-                    class="pu-fl-link group flex items-center justify-between gap-3 px-5 py-4 text-sm font-semibold leading-snug sm:px-7"
-                    data-finishline-hide-when-past
-                    data-conversion-event="finishline_page_click"
-                    data-conversion-context="popup_finishline_crosslink"
-                  >
-                    <span>
-                      <span class="pu-fl-kicker block text-[10px] font-extrabold uppercase tracking-[0.16em]">Also at Chicago Art Dept</span>
-                      <span class="font-extrabold">{collectiveFinishLine.title}</span>, Mon Oct 5 &amp; Wed Oct 14 · 7 PM
-                    </span>
-                    <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                    </svg>
-                  </a>
-                )}
-              </article>
-            );
-          })}
-        </div>
+        {/* The two location cards with the full day-by-day schedule live in
+            PopUpWeekSchedule (shared with /schedule and /classes). */}
+        <PopUpWeekSchedule context="popup_page" finishLineContext="popup_finishline_crosslink" />
       </div>
     </section>
 
@@ -289,8 +129,9 @@ const pageDescription =
           so another community member can take your spot.
         </p>
         <p class="mt-8 text-sm text-[color:var(--pu-cream)]/55">
-          Our first studio closed September 25. This fall LSP is pop-up across
-          Pilsen while we build our permanent home, opening early 2027.
+          Programming at our 16th Street studio is paused while we are in the
+          process of being displaced. This fall LSP is popping up across Pilsen
+          while we build our permanent home, opening early 2027.
           <a href={`${base}donate`} class="pu-mail font-bold underline underline-offset-4" data-conversion-event="donation_click" data-conversion-context="popup_page">Support the next studio.</a>
         </p>
       </div>
@@ -370,8 +211,7 @@ const pageDescription =
       top: 14rem;
     }
   }
-  .pu-eyebrow,
-  .pu-kicker {
+  .pu-eyebrow {
     color: var(--pu-terracotta);
   }
   .pu-eyebrow {
@@ -423,158 +263,8 @@ const pageDescription =
     transform: translateY(-1px);
   }
 
-  /* Location cards */
-  .pu-card--paper {
-    background: var(--pu-paper);
-    color: var(--pu-ink);
-    box-shadow: 0 1px 0 rgba(30, 26, 23, 0.05), 0 24px 50px -30px rgba(30, 26, 23, 0.45);
-  }
-  .pu-card--ink {
-    background: var(--pu-ink);
-    color: var(--pu-cream);
-    box-shadow: 0 24px 50px -30px rgba(30, 26, 23, 0.8);
-  }
-  .pu-lockup {
-    font-family: var(--font-sans);
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1.9rem;
-    line-height: 0.95;
-    letter-spacing: 0.06em;
-  }
-  .pu-card--ink .pu-lockup {
-    font-family: Georgia, "Times New Roman", serif;
-    font-weight: 400;
-    letter-spacing: 0.14em;
-    font-size: 1.6rem;
-    line-height: 1.1;
-  }
-  .pu-card--ink .pu-lockup span:last-child {
-    font-size: 0.6em;
-    letter-spacing: 0.32em;
-    opacity: 0.8;
-  }
-  .pu-card-label {
-    color: var(--pu-terracotta);
-  }
-  .pu-card--ink .pu-card-label {
-    color: var(--pu-mustard);
-  }
-  .pu-card--paper .pu-address {
-    color: var(--pu-ink);
-  }
-  .pu-card--ink .pu-address {
-    color: var(--pu-cream);
-  }
-  .pu-card--paper .pu-chip {
-    background: var(--pu-cream);
-    color: var(--pu-ink);
-  }
-  .pu-card--ink .pu-chip {
-    background: rgba(243, 237, 228, 0.1);
-    color: var(--pu-cream);
-  }
-  .pu-card--paper .pu-day {
-    background: var(--pu-cream);
-  }
-  .pu-card--ink .pu-day {
-    background: rgba(243, 237, 228, 0.06);
-  }
-  .pu-day-name {
-    color: var(--pu-terracotta);
-  }
-  .pu-card--ink .pu-day-name {
-    color: #e2765a;
-  }
-  .pu-day-date,
-  .pu-names,
-  .pu-closed {
-    color: var(--pu-muted);
-  }
-  .pu-card--ink .pu-day-date,
-  .pu-card--ink .pu-names,
-  .pu-card--ink .pu-closed {
-    color: rgba(243, 237, 228, 0.6);
-  }
-  .pu-card-foot {
-    color: var(--pu-muted);
-  }
-  .pu-card--ink .pu-card-foot {
-    color: rgba(243, 237, 228, 0.55);
-  }
-
-  .pu-teachers-label {
-    color: var(--pu-terracotta);
-  }
-  .pu-card--ink .pu-teachers-label {
-    color: var(--pu-mustard);
-  }
-  .pu-teachers-count {
-    color: var(--pu-muted);
-  }
-  .pu-card--ink .pu-teachers-count {
-    color: rgba(243, 237, 228, 0.6);
-  }
-
-  /* Next up (flagged by PopUpWeekClient) */
-  .pu-next-tag {
-    display: none;
-    background: var(--pu-terracotta);
-    color: #fff;
-  }
-  .pu-row[data-popup-next="true"] .pu-next-tag {
-    display: inline-block;
-  }
-  .pu-row[data-popup-next="true"]::before {
-    content: "";
-    position: absolute;
-    left: -0.5rem;
-    top: 0.15rem;
-    bottom: 0.15rem;
-    width: 3px;
-    border-radius: 3px;
-    background: var(--pu-terracotta);
-  }
-  .pu-card--ink .pu-row[data-popup-next="true"] .pu-next-tag {
-    background: var(--pu-mustard);
-    color: var(--pu-ink);
-  }
-  .pu-card--ink .pu-row[data-popup-next="true"]::before {
-    background: var(--pu-mustard);
-  }
-
-  /* CTAs */
-  .pu-card--paper .pu-cta {
-    background: var(--pu-ink);
-    color: var(--pu-paper);
-  }
-  .pu-card--paper .pu-cta:hover {
-    background: var(--pu-terracotta);
-  }
-  .pu-card--ink .pu-cta {
-    background: var(--pu-terracotta);
-    color: #fff;
-  }
-  .pu-card--ink .pu-cta:hover {
-    background: var(--pu-mustard);
-    color: var(--pu-ink);
-  }
-  .pu-cta:focus-visible,
   .pu-jump:focus-visible {
     --tw-ring-color: var(--pu-terracotta);
-  }
-
-  /* Cross-link to The Collective Finish Line (its own marigold, so it reads
-     as a neighbouring campaign, not part of this week's schedule). */
-  .pu-fl-link {
-    background: #efbd62;
-    color: #484848;
-  }
-  .pu-fl-link:hover {
-    background: #f3c979;
-  }
-  .pu-fl-kicker {
-    color: rgba(72, 72, 72, 0.75);
   }
 
   /* Ink band */

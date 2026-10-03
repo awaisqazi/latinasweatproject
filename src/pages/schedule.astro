@@ -3,6 +3,10 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GalaTicketDeadline from "@/components/GalaTicketDeadline.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
+import StudioTransitionSection from "@/components/StudioTransitionSection.astro";
+// Toggle lives in src/data/transition.js: false = studio transition section
+// in place of the MarianaTek widget; true = the original booking page.
+import { showMarianaSchedule } from "@/data/transition";
 ---
 
 <Layout title="Schedule | The Latina Sweat Project">
@@ -17,7 +21,7 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
     {/* Compact policy strip */}
     <div class="mt-6 mb-4 px-4">
       <div class="mx-auto max-w-5xl">
-        <div class="grid gap-3 sm:grid-cols-3">
+        <div class:list={["grid gap-3", showMarianaSchedule ? "sm:grid-cols-3" : "sm:grid-cols-2"]}>
           {/* Age Policy */}
           <div class="rounded-xl border border-red-200 bg-red-50/70 p-3.5 flex items-start gap-3">
             <span
@@ -65,7 +69,9 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
             </div>
           </div>
 
-          {/* Membership Cancellation */}
+          {/* Membership Cancellation (studio memberships only; hidden while
+              studio programming is paused because memberships are not renewing) */}
+          {showMarianaSchedule && (
           <div
             class="rounded-xl border border-accent-gold/40 bg-amber-50/70 p-3.5 flex items-start gap-3"
           >
@@ -91,11 +97,26 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
               </p>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
 
-    {/* Pop Up Week 1 (Oct 5 to 11, 2026): the studio is closed, so this
+    {!showMarianaSchedule && (
+      <div class="mt-4 mb-10 px-4">
+        <div class="mx-auto max-w-5xl">
+          <StudioTransitionSection
+            context="schedule_transition"
+            popupView="full"
+            popupContext="schedule_page"
+            popupFinishLineContext="schedule_finishline_crosslink"
+          />
+        </div>
+      </div>
+    )}
+
+    {showMarianaSchedule && (<>
+    {/* Pop Up Week 1 (Oct 5 to 11, 2026): studio programming is paused, so this
         week's classes are booked on Zeffy per location, not in the
         MarianaTek widget below. Renders nothing once the week is past and
         hides itself in the browser after Oct 11 (see popUpWeek1.js). */}
@@ -224,6 +245,7 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
         </div>
       </div>
     </div>
+    </>)}
 
     <style>
       /* Tighten the gap between the trouble-viewing line and the MarianaTek widget.
