@@ -1,7 +1,15 @@
 ---
-// /popup: Pop Up Week 1 (Oct 5 to Oct 11, 2026), LSP's first week of
-// pop-up classes across Pilsen while programming at the 949 W 16th St
-// studio is paused (LSP is in the process of being displaced). Every fact comes from src/data/popUpWeek1.js.
+// /popup: the LSP Pop Up weeks (Week 1 Oct 5 to 11, Week 2 Oct 12 to 18,
+// 2026), pop-up classes across Pilsen while programming at the 949 W 16th
+// St studio is paused (LSP is in the process of being displaced). Every
+// fact comes from src/data/popUpWeeks.js (popUpWeek1.js, popUpWeek2.js).
+//
+// Multi-week: every active week (live + upcoming) is listed in order, each
+// with its own eyebrow and the full PopUpWeekSchedule. While Week 1 is live,
+// Week 2 sits below it under "Next week"; after Oct 11 Week 2 leads (at
+// build time, or in the browser via the PopUpWeekClient flip attributes);
+// after the last week the page shows the wrapped line and keeps the last
+// week's schedule as the record. Title / OG describe the current week.
 //
 // Identity: the campaign's own cream / terracotta / ink look from the IG
 // graphics (NOT gala navy/gold): cream ground, a big terracotta sun, bold
@@ -18,24 +26,33 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
-import { popUpWeek1, popUpLocations, getPopUpPhase } from "@/data/popUpWeek1";
+import { activePopUpWeeks, lastPopUpWeek, popUpWeekWindow } from "@/data/popUpWeeks";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 
 const base = import.meta.env.BASE_URL;
-const phase = getPopUpPhase();
-const isPast = phase === "past";
+const activeWeeks = activePopUpWeeks();
+const isPast = activeWeeks.length === 0;
+// Weeks on the page: the active ones, or the last week as the record.
+const weeks = isPast ? [lastPopUpWeek] : activeWeeks;
+const lead = weeks[0];
+// Hero / ink-band parts that name a week flip in the browser (kept for the
+// last week as the record).
+const heroWindow = (i) => popUpWeekWindow(weeks, i, { keepLast: true });
+// Card anchors: the leading week gets #chicago-art-department /
+// #sanctuary-health, later weeks a "-week-N" suffix.
+const anchorSuffix = (i) => (i === 0 ? "" : `-${weeks[i].id}`);
 // Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
-const headlineParts = popUpWeek1.headline.split(" · ");
-const pageTitle = `${popUpWeek1.title} · Oct 5 – 11 | The Latina Sweat Project`;
+const headlineParts = lead.headline.split(" · ");
+const pageTitle = `${lead.title} · ${lead.dateRangeShort} | The Latina Sweat Project`;
 const pageDescription =
-  "LSP Pop Up · Pilsen, Oct 5 – 11: 45-minute classes at Chicago Art Department (pay what you can) and Sanctuary Health ($10 per mat, 12 mats). Reserve your spot.";
+  `LSP Pop Up · Pilsen, ${lead.dateRangeShort}: 45-minute classes at Chicago Art Department (pay what you can) and Sanctuary Health ($10 per mat, 12 mats). Reserve your spot.`;
 ---
 
 <Layout
   title={pageTitle}
   description={pageDescription}
-  socialImage="images/popup/og-popup-week1.jpg"
-  socialImageAlt="Pop Up Week 1, October 5 – 11: LSP classes at Chicago Art Department and Sanctuary Health in Pilsen."
+  socialImage={lead.ogImage}
+  socialImageAlt={lead.ogImageAlt}
   socialImageWidth={1200}
   socialImageHeight={630}
   socialImageType="image/jpeg"
@@ -51,22 +68,26 @@ const pageDescription =
           <img src={`${base}images/popup/lsp-x-mark.png`} alt="" class="w-[58%]" width="240" height="204" />
         </div>
 
-        <p class="pu-eyebrow text-xs font-extrabold uppercase tracking-[0.22em] sm:text-sm">
-          {popUpWeek1.eyebrow.split(" · ").map((part, i) => (
-            <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
-          ))}
-        </p>
+        {weeks.map((week, w) => (
+          <p class="pu-eyebrow text-xs font-extrabold uppercase tracking-[0.22em] sm:text-sm" {...heroWindow(w)}>
+            {week.eyebrow.split(" · ").map((part, i) => (
+              <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
+            ))}
+          </p>
+        ))}
         <h1 class="pu-display mt-4 max-w-[11ch] text-[2.9rem] sm:text-7xl lg:text-8xl">
           <span class="whitespace-nowrap">{headlineParts[0]}</span>{headlineParts[1] && <><br /><span>{headlineParts[1]}</span></>}
         </h1>
         <p class="mt-6 max-w-xl text-base leading-relaxed text-[color:var(--pu-ink-soft)] sm:text-lg">
-          {popUpWeek1.body}
+          {lead.body}
         </p>
 
         <div class="mt-6 flex flex-wrap items-center gap-2">
-          <span class="pu-pill-ink rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">October 5 – 11</span>
+          {weeks.map((week, w) => (
+            <span class="pu-pill-ink rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]" {...heroWindow(w)}>{week.datePill}</span>
+          ))}
           <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">Two locations · Pilsen</span>
-          <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">{popUpWeek1.classLengthLabel} classes</span>
+          <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">{lead.classLengthLabel} classes</span>
         </div>
 
         {/* Wrapped note: shown at build time once past, or by the client
@@ -76,14 +97,15 @@ const pageDescription =
           data-popup-show-when-past
           hidden={!isPast}
         >
-          <p class="text-sm font-extrabold uppercase tracking-[0.14em]">{popUpWeek1.wrappedLine}</p>
+          <p class="text-sm font-extrabold uppercase tracking-[0.14em]">{lastPopUpWeek.wrappedLine}</p>
         </div>
 
-        {!isPast && (
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row" data-popup-hide-when-past>
-            {popUpLocations.map((loc) => (
+        {!isPast && weeks.map((week, w) => (
+          <div data-popup-hide-when-past {...popUpWeekWindow(weeks, w)}>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            {week.locations.map((loc) => (
               <a
-                href={`#${loc.id}`}
+                href={`#${loc.id}${anchorSuffix(w)}`}
                 class:list={[
                   "pu-jump inline-flex items-center justify-between gap-3 rounded-full px-5 py-3.5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   loc.theme === "dark" ? "pu-jump--ink" : "pu-jump--paper",
@@ -96,7 +118,8 @@ const pageDescription =
               </a>
             ))}
           </div>
-        )}
+          </div>
+        ))}
       </div>
     </section>
 
@@ -104,8 +127,40 @@ const pageDescription =
     <section class="pu-locations">
       <div class="mx-auto max-w-6xl px-4 pb-14 sm:px-6 sm:pb-20 lg:px-8">
         {/* The two location cards with the full day-by-day schedule live in
-            PopUpWeekSchedule (shared with /schedule and /classes). */}
-        <PopUpWeekSchedule context="popup_page" finishLineContext="popup_finishline_crosslink" />
+            PopUpWeekSchedule (shared with /schedule and /classes), once per
+            week. A week's block hides in the browser after that week ends
+            (except the last, kept as the record); a later week carries a
+            "Next week" tag until the week before it ends. */}
+        <div class="flex flex-col gap-14 sm:gap-20">
+        {weeks.map((week, w) => (
+          <div
+            class="pu-week"
+            data-popup-week={week.id}
+            data-popup-hide-after={w < weeks.length - 1 ? week.endsAtISO : undefined}
+          >
+            {weeks.length > 1 && (
+              <div class="pu-week-head mb-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+                {w > 0 && (
+                  <span
+                    class="pu-next-week rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em]"
+                    data-popup-hide-after={weeks[w - 1].endsAtISO}
+                  >Next week</span>
+                )}
+                <h2 class="pu-week-title font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
+                  {week.title} <span class="pu-week-dates">· {week.dateRangeShort}</span>
+                </h2>
+              </div>
+            )}
+            <PopUpWeekSchedule
+              context="popup_page"
+              finishLineContext="popup_finishline_crosslink"
+              week={week}
+              anchorSuffix={anchorSuffix(w)}
+              nextAfter={w > 0 ? weeks[w - 1].endsAtISO : undefined}
+            />
+          </div>
+        ))}
+        </div>
       </div>
     </section>
 
@@ -113,19 +168,21 @@ const pageDescription =
     <section class="pu-ink-band relative overflow-hidden">
       <div class="pu-sun pu-sun--low pointer-events-none absolute" aria-hidden="true"></div>
       <div class="relative mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
-        <p class="pu-eyebrow-dark text-[11px] font-extrabold uppercase tracking-[0.22em]">{popUpWeek1.title}</p>
+        {weeks.map((week, w) => (
+          <p class="pu-eyebrow-dark text-[11px] font-extrabold uppercase tracking-[0.22em]" {...heroWindow(w)}>{week.title}</p>
+        ))}
         <p class="mt-4 text-xl font-semibold leading-relaxed text-[color:var(--pu-cream)] sm:text-2xl">
-          {popUpWeek1.blurb}
+          {lead.blurb}
         </p>
         <p class="mt-6 text-base leading-relaxed text-[color:var(--pu-cream)]/75">
-          {popUpWeek1.supportLine}
+          {lead.supportLine}
         </p>
         <p class="mt-4 text-base leading-relaxed text-[color:var(--pu-cream)]/75">
           If your plans change, email
           <a
-            href={`mailto:${popUpWeek1.changeOfPlansEmail}`}
+            href={`mailto:${lead.changeOfPlansEmail}`}
             class="pu-mail font-bold underline underline-offset-4 break-all"
-          >{popUpWeek1.changeOfPlansEmail}</a>
+          >{lead.changeOfPlansEmail}</a>
           so another community member can take your spot.
         </p>
         <p class="mt-8 text-sm text-[color:var(--pu-cream)]/55">
@@ -258,6 +315,17 @@ const pageDescription =
   .pu-jump--ink {
     background: var(--pu-ink);
     color: var(--pu-cream);
+  }
+  /* Week blocks (multi-week) */
+  .pu-week-title {
+    color: var(--pu-ink);
+  }
+  .pu-week-dates {
+    color: var(--pu-terracotta);
+  }
+  .pu-next-week {
+    background: var(--pu-terracotta);
+    color: #fff;
   }
   .pu-jump:hover {
     transform: translateY(-1px);

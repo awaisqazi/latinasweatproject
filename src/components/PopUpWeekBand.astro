@@ -1,5 +1,5 @@
 ---
-// Compact Pop Up Week 1 band: eyebrow, heading, the two locations as
+// Compact Pop Up week band: eyebrow, heading, the two locations as
 // mini-cards (Chicago Art Dept = white card, Sanctuary Health = ink card,
 // same as the campaign IG graphics), each with its "next up" class and a
 // direct Zeffy CTA, plus a link to the full /popup page.
@@ -8,10 +8,16 @@
 // (inside the light page header), and the homepage "A New Chapter" section
 // (tone="dark"). Renders nothing once the week is past at build time, and
 // carries data-popup-hide-when-past so PopUpWeekClient hides it in the
-// browser after Oct 11 even without a rebuild.
+// browser after the last week ends even without a rebuild.
+//
+// Multi-week (Oct 6 2026): one band per active week (src/data/popUpWeeks.js)
+// is rendered, but only the CURRENT week's band is visible: each carries
+// the popUpWeekWindow() flip attributes, so a build made during Week 1
+// shows Week 2's band (and hides Week 1's) from Mon Oct 12 in the browser.
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import { popUpWeek1, popUpLocations, getPopUpPhase, locationInstructors } from "@/data/popUpWeek1";
+import { locationInstructors, weekPhase } from "@/data/popUpShared";
+import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 
 interface Props {
   context: string;
@@ -19,17 +25,13 @@ interface Props {
   heading?: string;
   class?: string;
 }
-const phase = getPopUpPhase();
-// Default heading: "This week LSP is pop-up" once the week is live at
-// build time; before that, the campaign headline (always true).
-const {
-  context,
-  tone = "light",
-  heading = phase === "live" ? "This week LSP is pop-up" : popUpWeek1.headline,
-  class: className = "",
-} = Astro.props;
+const weeks = activePopUpWeeks();
+// Default heading per week: "This week LSP is pop-up" once that week is
+// live at build time; before that, the campaign headline (always true).
+const { context, tone = "light", heading: headingProp, class: className = "" } = Astro.props;
+const headingFor = (week) =>
+  headingProp ?? (weekPhase(week) === "live" ? "This week LSP is pop-up" : week.headline);
 const base = import.meta.env.BASE_URL;
-const popupUrl = `${base}${popUpWeek1.pagePath}`;
 const dark = tone === "dark";
 const nextLineData = (loc) =>
   JSON.stringify(
@@ -41,30 +43,32 @@ const nextLineData = (loc) =>
 ---
 
 {
-  phase !== "past" && (
+  weeks.map((week, i) => (
     <div
       class:list={["popup-band relative overflow-hidden rounded-3xl p-5 sm:p-7", dark ? "popup-band--dark" : "popup-band--light", className]}
       data-popup-hide-when-past
+      data-popup-week={week.id}
+      {...popUpWeekWindow(weeks, i)}
     >
       <div class="popup-band-sun pointer-events-none absolute -right-16 -top-20 h-36 w-36 rounded-full sm:-right-10 sm:h-56 sm:w-56" aria-hidden="true" />
       <div class="relative">
         <p class="popup-band-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
-          {popUpWeek1.eyebrow.split(" · ").map((part, i) => (
+          {week.eyebrow.split(" · ").map((part, i) => (
             <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
           ))}
         </p>
         <h2 class="popup-band-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
-          {heading.split("pop-up").map((part, i) => (
+          {headingFor(week).split("pop-up").map((part, i) => (
             <>{i > 0 && <span class="whitespace-nowrap">pop-up</span>}{part}</>
           ))}
         </h2>
         <p class="popup-band-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">
-          Two locations in Pilsen, 45-minute classes, Oct 5 through Oct 11.
-          Reserve your spot. {popUpWeek1.matsLine}
+          Two locations in Pilsen, 45-minute classes, {week.throughLabel}.
+          Reserve your spot. {week.matsLine}
         </p>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
-          {popUpLocations.map((loc) => (
+          {week.locations.map((loc) => (
             <div class:list={["popup-mini rounded-2xl p-4 sm:p-5", loc.theme === "dark" ? "popup-mini--ink" : "popup-mini--paper"]}>
               <p class="popup-mini-name font-sans text-lg font-extrabold uppercase leading-tight tracking-tight">
                 {loc.name}
@@ -102,6 +106,7 @@ const nextLineData = (loc) =>
                 data-conversion-provider="zeffy"
                 data-conversion-booking-path="popup_zeffy"
                 data-conversion-popup-location={loc.trackingLocation}
+                data-conversion-popup-week={week.trackingWeek}
               >
                 <span>{loc.ticketsLabel}</span>
                 <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -113,7 +118,7 @@ const nextLineData = (loc) =>
         </div>
 
         <a
-          href={popupUrl}
+          href={`${base}${week.pagePath}`}
           class="popup-band-link mt-4 inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] underline-offset-4 hover:underline"
           data-conversion-event="popup_page_click"
           data-conversion-context={context}
@@ -124,10 +129,10 @@ const nextLineData = (loc) =>
           </svg>
         </a>
       </div>
-      <PopUpWeekClient />
     </div>
-  )
+  ))
 }
+{weeks.length > 0 && <PopUpWeekClient />}
 
 <style>
   .popup-band {

@@ -18,8 +18,27 @@
 // phase at build time AND carries data-popup-hide-when-past so the small
 // client script (PopUpWeekClient) hides CTAs in browsers after Oct 11 even
 // if nobody rebuilds. /popup itself stays up and says the week has wrapped.
+//
+// Multi-week (Oct 6 2026): shared helpers live in src/data/popUpShared.js
+// (re-exported below so these exports stay stable) and the ordered list of
+// weeks plus the "current week" helpers live in src/data/popUpWeeks.js.
+// Week 2 (Oct 12 to 18) is src/data/popUpWeek2.js, same shape as this file.
+import {
+  instructorSlug,
+  instructorInitials,
+  instructorInfo,
+  makeSessionFactory,
+  locationInstructors,
+  groupSessionsByDay,
+  weekPhase,
+  sessionCount,
+} from "./popUpShared.js";
+
+export { instructorSlug, instructorInitials, instructorInfo, locationInstructors, groupSessionsByDay };
 
 export const popUpWeek1 = {
+  id: "week-1",
+  number: 1,
   title: "Pop Up Week 1",
   shortTitle: "Pop Up Week",
   pagePath: "popup",
@@ -27,6 +46,16 @@ export const popUpWeek1 = {
   // En dash for ranges, never an em dash.
   dateRangeShort: "Oct 5 – 11",
   eyebrow: "Pop Up Week 1 · October 5 – 11",
+  // "October 5 – 11" (hero pill) and "Oct 5 through Oct 11" (band body).
+  datePill: "October 5 – 11",
+  throughLabel: "Oct 5 through Oct 11",
+  // GA4 param popup_week on Zeffy CTAs (data-conversion-popup-week).
+  trackingWeek: "week_1",
+  ogImage: "images/popup/og-popup-week1.jpg",
+  ogImageAlt:
+    "Pop Up Week 1, October 5 – 11: LSP classes at Chicago Art Department and Sanctuary Health in Pilsen.",
+  highlightImage: "images/highlights/hl_popup.png",
+  highlightLabel: { en: "Pop Up Wk 1", es: "Pop Up Sem 1" },
   startsAtISO: "2026-10-05T00:00:00-05:00",
   endsAtISO: "2026-10-11T23:59:59-05:00",
   headline: "LSP Pop Up · Pilsen",
@@ -63,9 +92,8 @@ export const popUpWeek1 = {
   },
 };
 
-// Session helper: 45-minute class; `startsAt` is a full ISO timestamp
-// (America/Chicago, CDT = -05:00) so "next up" compares real instants.
-const DAY = {
+// Session helper: 45-minute class (see makeSessionFactory in popUpShared.js).
+const session = makeSessionFactory({
   "10-05": ["Monday", "Mon", "Oct 5"],
   "10-06": ["Tuesday", "Tue", "Oct 6"],
   "10-07": ["Wednesday", "Wed", "Oct 7"],
@@ -73,63 +101,7 @@ const DAY = {
   "10-09": ["Friday", "Fri", "Oct 9"],
   "10-10": ["Saturday", "Sat", "Oct 10"],
   "10-11": ["Sunday", "Sun", "Oct 11"],
-};
-// Instructor avatars. The slug is the full name lowercased, ASCII-folded,
-// spaces -> hyphens ("Vero Quiñones" -> "vero-quinones"); that mapping is the
-// ONLY identity source (never guess who is in a photo). Square face-centred
-// transparent webps live at public/images/popup/instructors/<slug>.webp
-// (320px) and <slug>-160.webp, built by
-// `python3 scripts/render-popup-instructor-avatars.py` from the cutouts in
-// marketing/popup-week1/instructors/. Names listed here have no photo and
-// render an initials circle instead.
-const INSTRUCTORS_WITHOUT_PHOTO = new Set(["Rosa Ortega"]);
-export const instructorSlug = (name) =>
-  name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-export const instructorInitials = (name) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-// { name, slug, initials, photo, photoSmall } ; photo paths are relative to
-// BASE_URL (prefix with import.meta.env.BASE_URL), null when there is none.
-export const instructorInfo = (name) => {
-  const slug = instructorSlug(name);
-  const has = !INSTRUCTORS_WITHOUT_PHOTO.has(name);
-  return {
-    name,
-    slug,
-    initials: instructorInitials(name),
-    photo: has ? `images/popup/instructors/${slug}.webp` : null,
-    photoSmall: has ? `images/popup/instructors/${slug}-160.webp` : null,
-  };
-};
-
-// `instructors` stays an array of full-name strings (existing consumers
-// join it as text); `people` is the same list as instructorInfo objects.
-const session = (loc, md, hhmm, time, className, instructors) => {
-  const [day, dayShort, dateLabel] = DAY[md];
-  return {
-    id: `${loc}-${md}-${hhmm.replace(":", "")}`,
-    date: `2026-${md}`,
-    startsAt: `2026-${md}T${hhmm}:00-05:00`,
-    day,
-    dayShort,
-    dateLabel,
-    time,
-    className,
-    instructors,
-    people: instructors.map(instructorInfo),
-  };
-};
+});
 
 export const popUpLocations = [
   {
@@ -202,42 +174,18 @@ export const popUpLocations = [
   },
 ];
 
-// Unique instructors at a location, in first-appearance order.
-export const locationInstructors = (location) => {
-  const seen = new Map();
-  for (const s of location.sessions) for (const p of s.people) if (!seen.has(p.name)) seen.set(p.name, p);
-  return [...seen.values()];
-};
+export const popUpSessionCount = sessionCount(popUpLocations);
 
-// Sessions grouped by calendar day (for the /popup day-grouped lists).
-export const groupSessionsByDay = (location) => {
-  const days = [];
-  for (const s of location.sessions) {
-    let d = days.find((x) => x.date === s.date);
-    if (!d) {
-      d = { date: s.date, day: s.day, dayShort: s.dayShort, dateLabel: s.dateLabel, sessions: [], closed: false };
-      days.push(d);
-    }
-    d.sessions.push(s);
-  }
-  for (const c of location.closedDays ?? []) {
-    days.push({ ...c, sessions: [], closed: true });
-  }
-  return days.sort((a, b) => a.date.localeCompare(b.date));
-};
+// The week as one object (copy + locations), the shape popUpWeeks.js lists.
+export const popUpWeek1Full = { ...popUpWeek1, locations: popUpLocations };
 
-export const popUpSessionCount = popUpLocations.reduce((n, l) => n + l.sessions.length, 0);
-
-// "upcoming" before Oct 5, "live" Oct 5 to Oct 11, "past" after.
-export const getPopUpPhase = (now = new Date()) => {
-  const t = now instanceof Date ? now.getTime() : new Date(now).getTime();
-  if (t < Date.parse(popUpWeek1.startsAtISO)) return "upcoming";
-  if (t <= Date.parse(popUpWeek1.endsAtISO)) return "live";
-  return "past";
-};
+// "upcoming" before Oct 5, "live" Oct 5 to Oct 11, "past" after. (Week 1
+// only; multi-week surfaces use currentPopUpWeek() from popUpWeeks.js.)
+export const getPopUpPhase = (now = new Date()) => weekPhase(popUpWeek1, now);
 export const isPopUpLive = (now = new Date()) => getPopUpPhase(now) === "live";
 export const isPopUpActive = (now = new Date()) => getPopUpPhase(now) !== "past";
 
-// Exact Zeffy URL -> GA4 conversion event (used by /links).
+// Exact Zeffy URL -> GA4 conversion event (Week 1 only; /links uses the
+// all-weeks version in popUpWeeks.js).
 export const popUpTicketEventFor = (url = "") =>
   popUpLocations.find((l) => l.ticketsUrl === url)?.conversionEvent;

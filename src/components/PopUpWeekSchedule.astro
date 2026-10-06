@@ -5,7 +5,9 @@
 // week" avatars, the day-by-day session list (time, class, instructor
 // avatars + names, "Next up" tag, "No classes" days), the Zeffy reserve
 // CTA, and (Chicago Art Dept only) the cross-link to The Collective Finish
-// Line while that series is not past. All facts from popUpWeek1.js.
+// Line while that series is not past. All facts come from the week passed
+// in (`week`, an entry of popUpWeeks in src/data/popUpWeeks.js; defaults to
+// the current week).
 //
 // Extracted from /popup (Oct 2, 2026) so /popup, /schedule and /classes
 // share one source. Used by:
@@ -15,16 +17,13 @@
 // This component does NOT include PopUpWeekClient; the host page must
 // (it drives "Next up" via [data-popup-group] / [data-popup-starts] and
 // the hide-when-past behaviour). Card ids (#chicago-art-department,
-// #sanctuary-health) are anchors, so render this once per page.
+// #sanctuary-health, plus `anchorSuffix`) are anchors: when a page lists
+// several weeks, the leading week gets the plain ids and later weeks pass a
+// suffix such as "-week-2".
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import {
-  popUpWeek1,
-  popUpLocations,
-  groupSessionsByDay,
-  getPopUpPhase,
-  locationInstructors,
-} from "@/data/popUpWeek1";
-import { collectiveFinishLine, getFinishLinePhase } from "@/data/collectiveFinishLine";
+import { groupSessionsByDay, locationInstructors, weekPhase } from "@/data/popUpShared";
+import { currentPopUpWeek, popUpWeeks } from "@/data/popUpWeeks";
+import { collectiveFinishLine, finishLineClasses, getFinishLinePhase } from "@/data/collectiveFinishLine";
 
 interface Props {
   /** data-conversion-context for the Zeffy reserve CTAs. */
@@ -40,18 +39,47 @@ interface Props {
    * space before the "Next up" tag, and /popup would shift by pixels.)
    */
   hideWhenPast?: boolean;
+  /** The week to render (an entry of popUpWeeks). Default: current week,
+   *  else the last week (the record once every week is past). */
+  week?: (typeof popUpWeeks)[number];
+  /** Appended to the location card ids (anchors). */
+  anchorSuffix?: string;
+  /** ISO instant before which "Next up" is not flagged in this week's
+   *  cards (set for a later week listed under the current one). */
+  nextAfter?: string;
 }
-const { context, finishLineContext, hideWhenPast = false } = Astro.props;
+const {
+  context,
+  finishLineContext,
+  hideWhenPast = false,
+  week = currentPopUpWeek() ?? popUpWeeks[popUpWeeks.length - 1],
+  anchorSuffix = "",
+  nextAfter,
+} = Astro.props;
 const base = import.meta.env.BASE_URL;
-const isPast = getPopUpPhase() === "past";
-const locations = popUpLocations.map((loc) => ({
+const isPast = weekPhase(week) === "past";
+const locations = week.locations.map((loc) => ({
   ...loc,
   days: groupSessionsByDay(loc),
   teachers: locationInstructors(loc),
 }));
 // Cross-link to The Collective Finish Line (same venue, Oct 5 & Oct 14)
 // under the Chicago Art Department card while that series is not past.
-const finishLineActive = getFinishLinePhase() !== "past";
+// Teachers kicker, phase-aware: "Your teachers this week" once this week
+// is the current one; before that "Your teachers next week" (a later week
+// listed under the current one, gate = previous week's end) or "Your
+// teachers · Oct 12 – 18" (upcoming with nothing listed above it, gate =
+// this week's start). PopUpWeekClient flips it in the browser via
+// data-popup-show-after / data-popup-hide-after (the Oct 11 to 12 flip).
+const teachersGate = nextAfter ?? week.startsAtISO;
+const teachersLive = Date.now() > Date.parse(teachersGate);
+const teachersUpcomingLabel = nextAfter ? "Your teachers next week" : `Your teachers · ${week.dateRangeShort}`;
+// Only the Finish Line classes on or after this week's start are named
+// (Week 1: "Mon Oct 5 & Wed Oct 14"; Week 2: "Wed Oct 14").
+const weekStartDate = week.startsAtISO.slice(0, 10);
+const finishLineInWeek = finishLineClasses.filter((e) => e.date >= weekStartDate);
+const finishLineDates = finishLineInWeek.map((e) => `${e.dayShort} ${e.dateLabel}`).join(" & ");
+const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.length > 0;
 ---
 
 <div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined}>
@@ -61,9 +89,10 @@ const finishLineActive = getFinishLinePhase() !== "past";
       const ink = loc.theme === "dark";
       return (
         <article
-          id={loc.id}
+          id={`${loc.id}${anchorSuffix}`}
           class:list={["pu-card scroll-mt-28 overflow-hidden rounded-3xl", ink ? "pu-card--ink" : "pu-card--paper"]}
           data-popup-group
+          data-popup-next-after={nextAfter}
         >
           <header class="pu-card-head flex flex-wrap items-start justify-between gap-4 p-5 sm:p-7">
             <div>
@@ -97,7 +126,7 @@ const finishLineActive = getFinishLinePhase() !== "past";
                 location, up to 8 faces + "+N". */}
             <div class="pu-teachers mt-5">
               <p class="pu-teachers-label text-[11px] font-extrabold uppercase leading-tight tracking-[0.16em]">
-                Your teachers this week <span class="pu-teachers-count">· {loc.teachers.length}</span>
+                <span data-popup-show-after={teachersGate} hidden={!teachersLive}>Your teachers this week</span><span data-popup-hide-after={teachersGate} hidden={teachersLive}>{teachersUpcomingLabel}</span> <span class="pu-teachers-count">· {loc.teachers.length}</span>
               </p>
               <PopUpAvatars
                 people={loc.teachers}
@@ -120,6 +149,9 @@ const finishLineActive = getFinishLinePhase() !== "past";
                   <p class="pu-day-date mt-1 text-[10px] font-bold uppercase tracking-[0.1em]">{day.dateLabel}</p>
                 </div>
                 <div class="min-w-0 flex-1">
+                  {day.note && (
+                    <p class="pu-day-note mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em]">{day.note}</p>
+                  )}
                   {day.closed ? (
                     <p class="pu-closed text-sm font-semibold italic">No classes</p>
                   ) : (
@@ -166,11 +198,13 @@ const finishLineActive = getFinishLinePhase() !== "past";
                 rel="noopener noreferrer"
                 class="pu-cta group flex items-center justify-between gap-3 rounded-full px-5 py-4 text-base font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 data-popup-hide-when-past
+                data-popup-hide-after={week.endsAtISO}
                 data-conversion-event={loc.conversionEvent}
                 data-conversion-context={context}
                 data-conversion-provider="zeffy"
                 data-conversion-booking-path="popup_zeffy"
                 data-conversion-popup-location={loc.trackingLocation}
+                data-conversion-popup-week={week.trackingWeek}
               >
                 <span>{loc.ticketsLabel}</span>
                 <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -179,7 +213,7 @@ const finishLineActive = getFinishLinePhase() !== "past";
               </a>
             )}
             <p class="pu-card-foot mt-3 text-center text-xs font-semibold">
-              {loc.sessions.length} classes · {popUpWeek1.classLengthLabel} each · {popUpWeek1.matsLine}
+              {loc.sessions.length} classes · {week.classLengthLabel} each · {week.matsLine}
             </p>
           </div>
           {loc.id === "chicago-art-department" && finishLineActive && (
@@ -192,7 +226,7 @@ const finishLineActive = getFinishLinePhase() !== "past";
             >
               <span>
                 <span class="pu-fl-kicker block text-[10px] font-extrabold uppercase tracking-[0.16em]">Also at Chicago Art Dept</span>
-                <span class="font-extrabold">{collectiveFinishLine.title}</span>, Mon Oct 5 &amp; Wed Oct 14 · 7 PM
+                <span class="font-extrabold">{collectiveFinishLine.title}</span>, {finishLineDates} · 7 PM
               </span>
               <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -294,6 +328,13 @@ const finishLineActive = getFinishLinePhase() !== "past";
   }
   .pu-card-foot {
     color: var(--pu-muted);
+  }
+  /* Day note (e.g. "Indigenous Peoples Day"), above that day's classes */
+  .pu-day-note {
+    color: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-day-note {
+    color: var(--pu-mustard);
   }
   .pu-card--ink .pu-card-foot {
     color: rgba(243, 237, 228, 0.55);

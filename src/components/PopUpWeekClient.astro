@@ -1,21 +1,29 @@
 ---
-// Pop Up Week 1 client behaviour, shared by every surface that shows the
-// campaign (see src/data/popUpWeek1.js). Astro bundles and dedupes this
+// Pop Up weeks client behaviour, shared by every surface that shows the
+// campaign (see src/data/popUpWeeks.js). Astro bundles and dedupes this
 // script, so it is safe to include the component more than once per page.
 //
-// 1. Auto-hide: after popUpWeek1.endsAtISO, elements carrying
-//    [data-popup-hide-when-past] are hidden, [data-popup-show-when-past]
-//    are revealed, and links with [data-popup-past-href] swap their href.
-//    (Surfaces also check the phase at build time; this covers a static
-//    build that is not redeployed after Oct 11.)
+// 0. Week flip: elements carrying [data-popup-show-after] and/or
+//    [data-popup-hide-after] (ISO instants, from popUpWeekWindow() in
+//    popUpWeeks.js) are shown only while now is after show-after and not
+//    after hide-after. That is how a static build made during Week 1 shows
+//    Week 2 (and only Week 2) from Mon Oct 12 without a rebuild.
+// 1. Auto-hide: after the LAST week's end (lastPopUpEndISO), elements
+//    carrying [data-popup-hide-when-past] are hidden,
+//    [data-popup-show-when-past] are revealed, and links with
+//    [data-popup-past-href] swap their href. (Surfaces also check the phase
+//    at build time; this covers a static build that is not redeployed.)
 // 2. Next up: inside each [data-popup-group], the first row whose
 //    [data-popup-starts] class has not ended yet (start + 45 min) gets
-//    data-popup-next="true". [data-popup-nextline] elements carry a JSON
-//    list of {s, l} (start ISO, label) and show the next label.
-import { popUpWeek1 } from "@/data/popUpWeek1";
+//    data-popup-next="true". A group with [data-popup-next-after] (a later
+//    week listed under the current one) is only flagged once that instant
+//    has passed, so "Next up" never points into next week while this week
+//    still has classes. [data-popup-nextline] elements carry a JSON list of
+//    {s, l} (start ISO, label) and show the next label.
+import { popUpWeeks, lastPopUpEndISO } from "@/data/popUpWeeks";
 ---
 
-<div hidden data-popup-bounds data-start={popUpWeek1.startsAtISO} data-end={popUpWeek1.endsAtISO}></div>
+<div hidden data-popup-bounds data-start={popUpWeeks[0].startsAtISO} data-end={lastPopUpEndISO}></div>
 
 <script>
   (function () {
@@ -24,16 +32,32 @@ import { popUpWeek1 } from "@/data/popUpWeek1";
     const now = Date.now();
     const end = Date.parse(bounds.dataset.end || "");
     const CLASS_MS = 45 * 60 * 1000;
+    const after = (iso: string | undefined) => {
+      const t = Date.parse(iso || "");
+      return Number.isFinite(t) && now > t;
+    };
+    const show = (el: HTMLElement) => {
+      el.hidden = false;
+      el.style.removeProperty("display");
+    };
+    const hide = (el: HTMLElement) => {
+      el.hidden = true;
+      el.style.display = "none";
+    };
+
+    document
+      .querySelectorAll<HTMLElement>("[data-popup-show-after], [data-popup-hide-after]")
+      .forEach((el) => {
+        const showAfter = el.dataset.popupShowAfter;
+        const hideAfter = el.dataset.popupHideAfter;
+        const visible = (!showAfter || after(showAfter)) && (!hideAfter || !after(hideAfter));
+        if (visible) show(el);
+        else hide(el);
+      });
 
     if (Number.isFinite(end) && now > end) {
-      document.querySelectorAll<HTMLElement>("[data-popup-hide-when-past]").forEach((el) => {
-        el.hidden = true;
-        el.style.display = "none";
-      });
-      document.querySelectorAll<HTMLElement>("[data-popup-show-when-past]").forEach((el) => {
-        el.hidden = false;
-        el.style.removeProperty("display");
-      });
+      document.querySelectorAll<HTMLElement>("[data-popup-hide-when-past]").forEach(hide);
+      document.querySelectorAll<HTMLElement>("[data-popup-show-when-past]").forEach(show);
       document.querySelectorAll<HTMLAnchorElement>("a[data-popup-past-href]").forEach((a) => {
         a.href = a.dataset.popupPastHref || a.href;
       });
@@ -41,6 +65,8 @@ import { popUpWeek1 } from "@/data/popUpWeek1";
     }
 
     document.querySelectorAll<HTMLElement>("[data-popup-group]").forEach((group) => {
+      const gate = group.dataset.popupNextAfter;
+      if (gate && !after(gate)) return;
       const rows = group.querySelectorAll<HTMLElement>("[data-popup-starts]");
       for (const row of rows) {
         const start = Date.parse(row.dataset.popupStarts || "");

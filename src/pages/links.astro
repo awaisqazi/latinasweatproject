@@ -12,12 +12,7 @@ import {
 import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
-import {
-  popUpWeek1,
-  popUpLocations,
-  getPopUpPhase,
-  popUpTicketEventFor,
-} from "@/data/popUpWeek1";
+import { activePopUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 import {
   collectiveFinishLine,
@@ -60,11 +55,15 @@ const abc7LogoSrc = withBase(abc7Feature.logo);
 const abc7BylineEn = abc7Feature.byline.split(" · ");
 const abc7BylineEs = abc7Feature.bylineEs.split(" · ");
 
-// Pop Up Week 1 (Oct 5 to 11, 2026): the live dated campaign, so its card
-// and bubble lead the page while the phase is not "past" (build time; the
-// PopUpWeekClient script also hides both in the browser after Oct 11).
+// Pop Up weeks (Week 1 Oct 5 to 11, Week 2 Oct 12 to 18, 2026;
+// src/data/popUpWeeks.js): the live dated campaign, so its card and bubble
+// lead the page while any week is live or upcoming (build time; the
+// PopUpWeekClient script also hides both in the browser after Oct 18). The
+// card and bubble show the CURRENT week only: one copy per active week,
+// flipped in the browser on Oct 12 via popUpWeekWindow().
 // Spanish row labels are derived from the session data, never hand-written.
-const popUpActive = getPopUpPhase() !== "past";
+const popUpWeeksActive = activePopUpWeeks();
+const popUpActive = popUpWeeksActive.length > 0;
 const popUpDayEs = { Mon: "Lun", Tue: "Mar", Wed: "Mié", Thu: "Jue", Fri: "Vie", Sat: "Sáb", Sun: "Dom" };
 const popUpRowEs = (s) => {
   const [, day] = s.dateLabel.split(" ");
@@ -190,22 +189,16 @@ const links = [
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
-  ...(popUpActive
-    ? [
-        {
-          title: {
-            en: "Pop Up Wk 1",
-            es: "Pop Up Sem 1"
-          },
-          target: "#popup-card",
-          image: `${base}images/highlights/hl_popup.png`,
-          scale: "scale-[1.0]",
-          hoverScale: "group-hover:scale-[1.12]",
-          color: "amber",
-          popup: true
-        },
-      ]
-    : []),
+  ...popUpWeeksActive.map((week, i) => ({
+    title: week.highlightLabel,
+    target: "#popup-card",
+    image: `${base}${week.highlightImage}`,
+    scale: "scale-[1.0]",
+    hoverScale: "group-hover:scale-[1.12]",
+    color: "amber",
+    popup: true,
+    popupWindow: popUpWeekWindow(popUpWeeksActive, i),
+  })),
   ...(finishLineActive
     ? [
         {
@@ -337,7 +330,7 @@ const socials = [
 ];
 
 const getLinkConversionEvent = (url = "") => {
-  // Pop Up Week 1 Zeffy forms (exact URLs from src/data/popUpWeek1.js):
+  // Pop Up Zeffy forms, every week (exact URLs from src/data/popUpWeeks.js):
   // class registrations, so class_booking_start.
   const popUpEvent = popUpTicketEventFor(url);
   if (popUpEvent) return popUpEvent;
@@ -463,6 +456,7 @@ const getLinkConversionProvider = (url = "") => {
                 class="story-highlight flex flex-col items-center flex-shrink-0 snap-center select-none group"
                 data-target={story.target}
                 data-popup-hide-when-past={story.popup ? "" : undefined}
+                {...(story.popupWindow ?? {})}
                 data-finishline-hide-when-past={story.finishline ? "" : undefined}
               >
                 {/* Glow story ring */}
@@ -490,14 +484,16 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Pop Up Week 1 Featured Card (Oct 5 to 11, 2026): the live dated
+      {/* Pop Up week Featured Card (current week: Week 1 Oct 5 to 11, then
+          Week 2 Oct 12 to 18, 2026; one copy per active week, flipped in
+          the browser on Oct 12): the live dated
           campaign, so it leads the feature cards. Campaign identity from
           the IG graphics (cream ground, terracotta sun, ink, mustard on
           dark): Chicago Art Dept as a white block, Sanctuary Health as an
           ink block, every session as a compact row carrying
           data-popup-date / data-popup-starts; PopUpWeekClient flags the
           next class per location (NEXT / SIGUE) and hides the whole card
-          after Oct 11. Every visible string has an EN/ES pair. */}
+          after the last week (Oct 18). Every visible string has an EN/ES pair. */}
       {popUpActive && (
         <div
           id="popup-card"
@@ -506,31 +502,32 @@ const getLinkConversionProvider = (url = "") => {
           data-popup-hide-when-past
         >
           <div class="pointer-events-none absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#c4573a]" aria-hidden="true"></div>
-          <div class="relative p-4 pt-5 sm:p-5 sm:pt-6">
+          {popUpWeeksActive.map((week, wi) => (
+          <div class="relative p-4 pt-5 sm:p-5 sm:pt-6" data-popup-week={week.id} {...popUpWeekWindow(popUpWeeksActive, wi)}>
             <div class="flex items-center gap-2 pr-20">
               <span class="inline-flex items-center gap-1.5 rounded-full bg-[#1e1a17] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#f3ede4]">
                 <span class="relative flex h-1.5 w-1.5">
                   <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e0a83a] opacity-70"></span>
                   <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#e0a83a]"></span>
                 </span>
-                <span class="lang-en">Oct 5 – 11</span>
-                <span class="lang-es hidden">5 – 11 Oct</span>
+                <span class="lang-en">{week.dateRangeShort}</span>
+                <span class="lang-es hidden">{week.dateRangeShort.replace(/^Oct (.+)$/, "$1 Oct")}</span>
               </span>
             </div>
             <p class="mt-4 pr-16 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
-              <span class="lang-en">{popUpWeek1.title} · Two locations</span>
-              <span class="lang-es hidden">{popUpWeek1.title} · Dos lugares</span>
+              <span class="lang-en">{week.title} · Two locations</span>
+              <span class="lang-es hidden">{week.title} · Dos lugares</span>
             </p>
             <h2 class="mt-1 pr-10 text-[1.9rem] font-black uppercase leading-[0.92] tracking-tight text-[#1e1a17] sm:text-4xl">
               <span class="lang-en">LSP Pop Up · Pilsen</span>
               <span class="lang-es hidden">LSP Pop Up · Pilsen</span>
             </h2>
             <p class="mt-3 text-sm font-semibold leading-relaxed text-[#1e1a17]/75">
-              <span class="lang-en">Programming at our studio is paused, so this week the classes come to the neighborhood. {popUpWeek1.matsLine}</span>
-              <span class="lang-es hidden">La programación en nuestro estudio está en pausa, así que esta semana las clases llegan al barrio. {popUpWeek1.matsLineEs}</span>
+              <span class="lang-en">Programming at our studio is paused, so this week the classes come to the neighborhood. {week.matsLine}</span>
+              <span class="lang-es hidden">La programación en nuestro estudio está en pausa, así que esta semana las clases llegan al barrio. {week.matsLineEs}</span>
             </p>
 
-            {popUpLocations.map((loc) => {
+            {week.locations.map((loc) => {
               const ink = loc.theme === "dark";
               return (
                 <div
@@ -591,6 +588,7 @@ const getLinkConversionProvider = (url = "") => {
                       data-conversion-provider="zeffy"
                       data-conversion-booking-path="popup_zeffy"
                       data-conversion-popup-location={loc.trackingLocation}
+                      data-conversion-popup-week={week.trackingWeek}
                       class:list={[
                         "flex items-center justify-between rounded-lg px-4 py-3 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                         ink ? "bg-[#c4573a] text-white focus-visible:ring-[#e0a83a] focus-visible:ring-offset-[#1e1a17]" : "bg-[#1e1a17] text-[#fdfbf7] focus-visible:ring-[#c4573a]",
@@ -610,11 +608,11 @@ const getLinkConversionProvider = (url = "") => {
             })}
 
             <p class="mt-4 text-[11px] font-semibold leading-relaxed text-[#1e1a17]/65">
-              <span class="lang-en">{popUpWeek1.changeOfPlansLine}</span>
-              <span class="lang-es hidden">Si cambian tus planes, escribe a {popUpWeek1.changeOfPlansEmail} para que otra persona de la comunidad pueda tomar tu lugar.</span>
+              <span class="lang-en">{week.changeOfPlansLine}</span>
+              <span class="lang-es hidden">Si cambian tus planes, escribe a {week.changeOfPlansEmail} para que otra persona de la comunidad pueda tomar tu lugar.</span>
             </p>
             <a
-              href={withBase(popUpWeek1.pagePath)}
+              href={withBase(week.pagePath)}
               class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"
               data-conversion-event="popup_page_click"
               data-conversion-context="links_popup_card"
@@ -626,6 +624,7 @@ const getLinkConversionProvider = (url = "") => {
               </svg>
             </a>
           </div>
+          ))}
           <PopUpWeekClient />
         </div>
       )}
