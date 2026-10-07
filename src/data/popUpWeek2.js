@@ -9,7 +9,12 @@
 // minutes; the Mon Oct 12 Chicago Art Dept classes carry the
 // "Indigenous Peoples Day" note. Revised the same day (brief REVISION
 // block): Thu Oct 15 6 PM is Yoga Sculpt with Alondra Alcazar and Sat Oct
-// 17 9 AM is Yoga Sculpt with Yaritza Jurado (the CAD form was edited). What to bring, verbatim: "Bring water and
+// 17 9 AM is Yoga Sculpt with Yaritza Jurado (the CAD form was edited).
+// REVISION 2 (Oct 7 2026, Fez's Interim Space Schedule sheet, overrides the
+// Zeffy forms): Tue Oct 13 6 PM Yoga Sculpt at CAD cancelled (10 CAD classes);
+// CAD Fri 6 AM = Jocelyn Vega + Gisella Mitchell; Sanctuary Tue 6 AM =
+// Benjamin Drury + Sarah Esparza; Sanctuary Thu 6 AM = Jiana Calixto +
+// Ghazala Irshad. What to bring, verbatim: "Bring water and
 // your mat, limited mats available for rent." Copy rules: never call these
 // "free classes"; no em dashes (en dash for ranges); no new address.
 //
@@ -78,12 +83,11 @@ export const popUpWeek2Locations = [
       session("cad", "10-12", "06:00", "6:00 AM", "Yoga Flow", ["Lizette Vega", "Anabel Hernandez"], holiday),
       session("cad", "10-12", "18:00", "6:00 PM", "Yoga Flow", ["Savannah Alvarez", "Jessica Eguia"], holiday),
       session("cad", "10-13", "06:00", "6:00 AM", "Yoga Sculpt", ["Andrea Fuentes"]),
-      session("cad", "10-13", "18:00", "6:00 PM", "Yoga Sculpt", ["Amayrani Nunez"]),
       session("cad", "10-14", "06:00", "6:00 AM", "Yoga Sculpt", ["Vero Quiñones"]),
       session("cad", "10-14", "18:00", "6:00 PM", "Yoga Sculpt", ["Vanessa Tirado"]),
       session("cad", "10-15", "06:00", "6:00 AM", "Strength Training", ["Jay Pena"]),
       session("cad", "10-15", "18:00", "6:00 PM", "Yoga Sculpt", ["Alondra Alcazar"]),
-      session("cad", "10-16", "06:00", "6:00 AM", "Yoga Flow", ["Sarah Esparza", "Gisella Mitchell"]),
+      session("cad", "10-16", "06:00", "6:00 AM", "Yoga Flow", ["Jocelyn Vega", "Gisella Mitchell"]),
       // Roster spelling is "Yari Jurado" (MarianaTek employee 6166; confirmed same person Oct 6 2026); display name follows the Zeffy form.
       session("cad", "10-17", "09:00", "9:00 AM", "Yoga Sculpt", ["Yaritza Jurado"]),
       session("cad", "10-18", "10:00", "10:00 AM", "Yoga Flow", ["Brenda Maldonado"]),
@@ -112,9 +116,9 @@ export const popUpWeek2Locations = [
     closedDays: [{ date: "2026-10-17", day: "Saturday", dayShort: "Sat", dateLabel: "Oct 17" }],
     sessions: [
       session("sanc", "10-12", "06:00", "6:00 AM", "Yoga Flow", ["Marelin Enriquez", "Celina Huerta"]),
-      session("sanc", "10-13", "06:00", "6:00 AM", "Yoga Flow", ["Ghazala Irshad", "Benjamin Drury"]),
+      session("sanc", "10-13", "06:00", "6:00 AM", "Yoga Flow", ["Benjamin Drury", "Sarah Esparza"]),
       session("sanc", "10-14", "06:00", "6:00 AM", "Yoga Flow", ["Kellyn Mitchell", "Antonia Rosales"]),
-      session("sanc", "10-15", "06:00", "6:00 AM", "Yoga Flow", ["Jiana Calixto", "Savannah Alvarez"]),
+      session("sanc", "10-15", "06:00", "6:00 AM", "Yoga Flow", ["Jiana Calixto", "Ghazala Irshad"]),
       session("sanc", "10-15", "20:30", "8:30 PM", "Yoga Flow", ["Jade Nguyen", "Xochyl Perez"]),
       session("sanc", "10-16", "06:00", "6:00 AM", "Yoga Flow", ["Dinorah Zubieta"]),
       session("sanc", "10-18", "20:00", "8:00 PM", "Yoga Flow", ["Rosa Ortega", "Courtney Luedke"]),
