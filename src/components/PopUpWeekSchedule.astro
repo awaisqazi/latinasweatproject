@@ -10,9 +10,10 @@
 // the current week).
 //
 // Extracted from /popup (Oct 2, 2026) so /popup, /schedule and /classes
-// share one source. Used by:
-//   /popup       src/pages/popup.astro (stays up as the record when past)
-//   /schedule, /classes  via StudioTransitionSection (hideWhenPast)
+// share one source. Used (one panel per week) by PopUpWeekSwitcher on
+// /popup and, via StudioTransitionSection, on /schedule and /classes.
+// Below md the two cards are a snap carousel with a location toggle
+// (script below); md and up they stack / sit side by side.
 //
 // This component does NOT include PopUpWeekClient; the host page must
 // (it drives "Next up" via [data-popup-group] / [data-popup-starts] and
@@ -82,10 +83,25 @@ const finishLineDates = finishLineInWeek.map((e) => `${e.dayShort} ${e.dateLabel
 const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.length > 0;
 ---
 
-<div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined}>
-  <p class="pu-kicker text-[11px] font-extrabold uppercase tracking-[0.22em]">Two locations</p>
-  <div class="mt-4 grid gap-6 lg:grid-cols-2 lg:items-start">
-    {locations.map((loc) => {
+<div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined} data-pu-locs>
+  <p class="pu-kicker hidden text-[11px] font-extrabold uppercase tracking-[0.22em] md:block">Two locations</p>
+  {/* Phones: a two-button location toggle over a native snap carousel
+      (one card per width). It scrolls to the chosen card and follows the
+      scroll position (IntersectionObserver, script below). md and up: the
+      cards stack / sit side by side as before and the toggle is hidden. */}
+  <div class="pu-loc-toggle flex rounded-full p-1 md:hidden" role="group" aria-label="Choose a location">
+    {locations.map((loc, i) => (
+      <button
+        type="button"
+        class="pu-loc-btn min-w-0 flex-1 whitespace-nowrap rounded-full px-2 py-2.5 text-[10px] font-extrabold uppercase tracking-[0.06em] min-[400px]:text-[11px] min-[400px]:tracking-[0.1em]"
+        aria-controls={`${loc.id}${anchorSuffix}`}
+        aria-pressed={i === 0 ? "true" : "false"}
+        data-pu-loc-btn={i}
+      >{loc.shortName}</button>
+    ))}
+  </div>
+  <div class="pu-loc-scroller mt-4 grid gap-6 lg:grid-cols-2 lg:items-start" data-pu-loc-scroller>
+    {locations.map((loc, i) => {
       const ink = loc.theme === "dark";
       return (
         <article
@@ -93,6 +109,7 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
           class:list={["pu-card scroll-mt-28 overflow-hidden rounded-3xl", ink ? "pu-card--ink" : "pu-card--paper"]}
           data-popup-group
           data-popup-next-after={nextAfter}
+          data-pu-loc-card={i}
         >
           <header class="pu-card-head flex flex-wrap items-start justify-between gap-4 p-5 sm:p-7">
             <div>
@@ -126,7 +143,7 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
                 location, up to 8 faces + "+N". */}
             <div class="pu-teachers mt-5">
               <p class="pu-teachers-label text-[11px] font-extrabold uppercase leading-tight tracking-[0.16em]">
-                <span data-popup-show-after={teachersGate} hidden={!teachersLive}>Your teachers this week</span><span data-popup-hide-after={teachersGate} hidden={teachersLive}>{teachersUpcomingLabel}</span> <span class="pu-teachers-count">· {loc.teachers.length}</span>
+                <span data-popup-show-after={teachersGate} data-popup-hide-after={week.endsAtISO} hidden={!teachersLive || isPast}>Your teachers this week</span><span data-popup-hide-after={teachersGate} hidden={teachersLive}>{teachersUpcomingLabel}</span><span data-popup-show-after={week.endsAtISO} hidden={!isPast}>Your teachers · {week.dateRangeShort}</span> <span class="pu-teachers-count">· {loc.teachers.length}</span>
               </p>
               <PopUpAvatars
                 people={loc.teachers}
@@ -239,6 +256,67 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
   </div>
 </div>
 
+<script>
+  // Phone location carousel (below md): the toggle scrolls the snap
+  // scroller to the chosen card; an IntersectionObserver keeps the toggle
+  // in step with native swipes. Astro dedupes this script per page.
+  (function () {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelectorAll<HTMLElement>("[data-pu-locs]").forEach((root) => {
+      const scroller = root.querySelector<HTMLElement>("[data-pu-loc-scroller]");
+      const btns = [...root.querySelectorAll<HTMLButtonElement>("[data-pu-loc-btn]")];
+      const cards = [...root.querySelectorAll<HTMLElement>("[data-pu-loc-card]")];
+      if (!scroller || !btns.length || cards.length !== btns.length) return;
+      const isCarousel = () => scroller.scrollWidth > scroller.clientWidth + 1;
+      let active = 0;
+      // The cards differ in height; the scroller takes the active card's
+      // height so a short card never leaves a gap below it.
+      const fit = () => {
+        if (!isCarousel()) {
+          scroller.style.removeProperty("height");
+          return;
+        }
+        scroller.style.height = `${cards[active].offsetHeight}px`;
+      };
+      const mark = (i: number) => {
+        if (i < 0) return;
+        active = i;
+        btns.forEach((b, j) => b.setAttribute("aria-pressed", j === i ? "true" : "false"));
+        fit();
+      };
+      if ("ResizeObserver" in window) {
+        const ro = new ResizeObserver(fit);
+        cards.forEach((c) => ro.observe(c));
+        ro.observe(scroller);
+      }
+      fit();
+      btns.forEach((b, i) =>
+        b.addEventListener("click", () => {
+          mark(i);
+          scroller.scrollTo({
+            left: cards[i].offsetLeft - scroller.offsetLeft,
+            behavior: reduce ? "auto" : "smooth",
+          });
+        }),
+      );
+      if (!("IntersectionObserver" in window)) return;
+      const io = new IntersectionObserver(
+        (entries) => {
+          // md and up the cards are not a carousel: nothing to follow.
+          if (!isCarousel()) return;
+          for (const e of entries) {
+            if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+              mark(cards.indexOf(e.target as HTMLElement));
+            }
+          }
+        },
+        { root: scroller, threshold: [0.6] },
+      );
+      cards.forEach((c) => io.observe(c));
+    });
+  })();
+</script>
+
 <style>
   .pu-sched {
     --pu-cream: #f3ede4;
@@ -251,6 +329,51 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
   }
   .pu-kicker {
     color: var(--pu-terracotta);
+  }
+
+  /* Phone location carousel (below md). One card per width, native
+     scroll-snap; the deep card shadow is dropped (the scroller would clip it). */
+  .pu-loc-toggle {
+    background: rgba(30, 26, 23, 0.07);
+  }
+  .pu-loc-btn {
+    color: rgba(30, 26, 23, 0.7);
+    transition: background-color 150ms, color 150ms;
+  }
+  .pu-loc-btn[aria-pressed="true"] {
+    background: var(--pu-ink);
+    color: var(--pu-cream);
+  }
+  .pu-loc-btn:focus-visible {
+    outline: 2px solid var(--pu-terracotta);
+    outline-offset: 2px;
+  }
+  @media (max-width: 767px) {
+    .pu-loc-scroller {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      transition: height 200ms ease-out;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .pu-loc-scroller::-webkit-scrollbar {
+      display: none;
+    }
+    .pu-loc-scroller > .pu-card {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      /* the scroller clips the deep drop shadow into a hard-edged box */
+      box-shadow: 0 1px 0 rgba(30, 26, 23, 0.06);
+    }
+  }
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    .pu-loc-scroller {
+      transition: none;
+    }
   }
 
   /* Location cards */

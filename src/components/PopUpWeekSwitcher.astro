@@ -1,0 +1,424 @@
+---
+// Pop Up week switcher: one PopUpWeekSchedule panel per week, ONE visible
+// at a time, with a header row of  ‹  Pop Up Week 2 · Oct 12 – 18  ›  and a
+// status tag ("This week" / "Next week" / "Last week"). Replaces the
+// stacked weeks on /popup and in the studio transition section
+// (/schedule, /classes) so later weeks are never buried (Oct 7, 2026).
+//
+// Default week = the current week (live, else next upcoming; see
+// currentPopUpWeek in src/data/popUpWeeks.js), else the last week once
+// every week is past. Computed at build time AND again in the browser from
+// each panel's data-week-start / data-week-end, so the Oct 11 to 12 flip
+// happens without a rebuild. Past weeks stay reachable with the left arrow
+// ("Last week"): their Zeffy CTAs hide (PopUpWeekSchedule /
+// PopUpWeekClient) and the week's wrapped line shows.
+//
+// URL state (urlState): ?week=2 or #week-2 selects a week on load (IG
+// deep links); a hash that names an anchor inside a week (e.g.
+// #sanctuary-health-week-2) selects that week too. Switching rewrites the
+// hash to #week-N with history.replaceState (no scroll, no history spam).
+//
+// Input: the arrows (real buttons, aria-disabled at the ends so focus
+// stays put), Left/Right arrow keys while focus is in the header row, and
+// a horizontal swipe that STARTS on the header row (touch-action: pan-y,
+// so vertical page scroll is untouched and it never competes with the
+// location carousel inside the cards).
+//
+// Tracking: the arrows carry data-conversion-event="popup_week_switch"
+// (Layout's generic click tracker) with context, direction and the
+// destination week; swipes and keys call window.trackConversion directly.
+//
+// The host page must include PopUpWeekClient (next-up flags, flip and
+// hide-when-past attributes inside the schedules).
+import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
+import { popUpWeeks } from "@/data/popUpWeeks";
+import { weekPhase } from "@/data/popUpShared";
+
+interface Props {
+  /** data-conversion-context for the Zeffy CTAs. */
+  context: string;
+  /** data-conversion-context for the Finish Line cross-link. */
+  finishLineContext: string;
+  /** data-conversion-context for the popup_week_switch event. */
+  switchContext?: string;
+  /** Hide the whole switcher after the last week ends (in the browser). */
+  hideWhenPast?: boolean;
+  /** Read ?week / #week-N on load and write #week-N on switch. */
+  urlState?: boolean;
+  /** Heading level for the week label (h2 on /popup, h3 in sections). */
+  headingLevel?: 2 | 3;
+  class?: string;
+}
+const {
+  context,
+  finishLineContext,
+  switchContext = `${context}_week_switch`,
+  hideWhenPast = false,
+  urlState = true,
+  headingLevel = 2,
+  class: className = "",
+} = Astro.props;
+
+const weeks = popUpWeeks;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const now = Date.now();
+// Build-time default: first week not yet past, else the last week.
+const firstActive = weeks.findIndex((w) => weekPhase(w) !== "past");
+const defaultIndex = firstActive === -1 ? weeks.length - 1 : firstActive;
+// Same rule as the client script below.
+const statusFor = (w) => {
+  const start = Date.parse(w.startsAtISO);
+  const end = Date.parse(w.endsAtISO);
+  if (now >= start && now <= end) return "This week";
+  const d = Math.floor((now - start) / WEEK_MS);
+  if (now < start) return d === -1 ? "Next week" : "Coming up";
+  return d === 1 ? "Last week" : "Past week";
+};
+// The build-time default week keeps the plain card anchors
+// (#chicago-art-department, #sanctuary-health; the /popup hero jump
+// buttons point there); other weeks get "-week-N".
+const anchorSuffix = (i) => (i === defaultIndex ? "" : `-${weeks[i].id}`);
+const Heading = headingLevel === 2 ? "h2" : "h3";
+---
+
+<div
+  class:list={["pu-switch", className]}
+  data-pu-switch
+  data-url-state={urlState ? "" : undefined}
+  data-popup-hide-when-past={hideWhenPast ? "" : undefined}
+>
+  <div class="pu-switch-head flex items-center justify-between gap-3 md:justify-start md:gap-5" data-pu-switch-head>
+    <button
+      type="button"
+      class="pu-arrow"
+      aria-label="Previous week"
+      aria-disabled={defaultIndex === 0 ? "true" : "false"}
+      data-pu-prev
+      data-conversion-event="popup_week_switch"
+      data-conversion-context={switchContext}
+      data-conversion-direction="prev"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <div class="min-w-0 flex-1 text-center md:flex-none md:text-left" aria-live="polite">
+      {weeks.map((w, i) => (
+        <div data-pu-label={i} hidden={i !== defaultIndex}>
+          <Heading class="pu-switch-title font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
+            <span class="block md:inline">{w.title}</span>
+            <span class="pu-switch-dates block md:inline"><span class="hidden md:inline">· </span>{w.dateRangeShort}</span>
+          </Heading>
+        </div>
+      ))}
+      <p class="mt-2 flex items-center justify-center gap-2.5 md:justify-start">
+        <span class="pu-switch-tag rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em]" data-pu-status>{statusFor(weeks[defaultIndex])}</span>
+        <span class="flex gap-1.5" aria-hidden="true">
+          {weeks.map((_, i) => (
+            <span class:list={["pu-dot", i === defaultIndex && "is-on"]} data-pu-dot={i}></span>
+          ))}
+        </span>
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="pu-arrow"
+      aria-label="Next week"
+      aria-disabled={defaultIndex === weeks.length - 1 ? "true" : "false"}
+      data-pu-next
+      data-conversion-event="popup_week_switch"
+      data-conversion-context={switchContext}
+      data-conversion-direction="next"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </div>
+
+  {weeks.map((w, i) => (
+    <div
+      class="pu-week-panel mt-6"
+      role="group"
+      aria-roledescription="week"
+      aria-label={`${w.title}, ${w.dateRangeShort}`}
+      data-pu-panel={i}
+      data-week-number={w.number}
+      data-week-tracking={w.trackingWeek}
+      data-week-start={w.startsAtISO}
+      data-week-end={w.endsAtISO}
+      hidden={i !== defaultIndex}
+    >
+      <p
+        class="pu-week-wrapped mb-5 rounded-2xl px-5 py-4 text-sm font-extrabold uppercase tracking-[0.14em]"
+        data-popup-show-after={w.endsAtISO}
+        hidden={weekPhase(w) !== "past"}
+      >{w.wrappedLine}</p>
+      <PopUpWeekSchedule
+        context={context}
+        finishLineContext={finishLineContext}
+        week={w}
+        anchorSuffix={anchorSuffix(i)}
+        nextAfter={i > 0 ? weeks[i - 1].endsAtISO : undefined}
+      />
+    </div>
+  ))}
+</div>
+
+<script>
+  (function () {
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const track = (params: Record<string, string>) => {
+      const fn = (window as unknown as { trackConversion?: (e: string, p: object) => void }).trackConversion;
+      if (typeof fn === "function") fn("popup_week_switch", params);
+    };
+
+    document.querySelectorAll<HTMLElement>("[data-pu-switch]").forEach((root) => {
+      const panels = [...root.querySelectorAll<HTMLElement>("[data-pu-panel]")];
+      const labels = [...root.querySelectorAll<HTMLElement>("[data-pu-label]")];
+      const dots = [...root.querySelectorAll<HTMLElement>("[data-pu-dot]")];
+      const status = root.querySelector<HTMLElement>("[data-pu-status]");
+      const prev = root.querySelector<HTMLButtonElement>("[data-pu-prev]");
+      const next = root.querySelector<HTMLButtonElement>("[data-pu-next]");
+      const head = root.querySelector<HTMLElement>("[data-pu-switch-head]");
+      const urlState = root.hasAttribute("data-url-state");
+      if (!panels.length || !prev || !next || !head) return;
+
+      const now = Date.now();
+      const bounds = panels.map((p) => ({
+        start: Date.parse(p.dataset.weekStart || ""),
+        end: Date.parse(p.dataset.weekEnd || ""),
+      }));
+      const statusFor = (i: number) => {
+        const { start, end } = bounds[i];
+        if (now >= start && now <= end) return "This week";
+        const d = Math.floor((now - start) / WEEK_MS);
+        if (now < start) return d === -1 ? "Next week" : "Coming up";
+        return d === 1 ? "Last week" : "Past week";
+      };
+      // Default: the first week that has not ended (live, else next
+      // upcoming), else the last week.
+      let current = bounds.findIndex((b) => now <= b.end);
+      if (current === -1) current = panels.length - 1;
+
+      const indexForNumber = (n: string | null) =>
+        n ? panels.findIndex((p) => p.dataset.weekNumber === n.replace(/^week-?/i, "")) : -1;
+      const indexForHash = (hash: string) => {
+        const id = decodeURIComponent(hash.replace(/^#/, ""));
+        if (!id) return -1;
+        const m = id.match(/^week-(\d+)$/i);
+        if (m) return indexForNumber(m[1]);
+        const el = document.getElementById(id);
+        return el ? panels.findIndex((p) => p.contains(el)) : -1;
+      };
+
+      const setDisabled = (btn: HTMLButtonElement, off: boolean) => {
+        btn.setAttribute("aria-disabled", off ? "true" : "false");
+      };
+
+      const select = (i: number, opts: { dir?: number; writeUrl?: boolean } = {}) => {
+        if (i < 0 || i >= panels.length) return;
+        current = i;
+        panels.forEach((p, j) => {
+          p.hidden = j !== i;
+          p.classList.remove("pu-in-left", "pu-in-right");
+        });
+        if (opts.dir && !reduce) {
+          const p = panels[i];
+          void p.offsetWidth;
+          p.classList.add(opts.dir > 0 ? "pu-in-right" : "pu-in-left");
+        }
+        labels.forEach((l, j) => (l.hidden = j !== i));
+        dots.forEach((d, j) => d.classList.toggle("is-on", j === i));
+        if (status) status.textContent = statusFor(i);
+        setDisabled(prev, i === 0);
+        setDisabled(next, i === panels.length - 1);
+        if (opts.writeUrl && urlState) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("week");
+          url.hash = `week-${panels[i].dataset.weekNumber}`;
+          history.replaceState(history.state, "", url.toString());
+        }
+      };
+
+      const step = (dir: number, method: string) => {
+        const to = current + dir;
+        if (to < 0 || to >= panels.length) return false;
+        select(to, { dir, writeUrl: true });
+        if (method !== "arrow") {
+          track({
+            context: prev.dataset.conversionContext || "",
+            direction: dir > 0 ? "next" : "prev",
+            popup_week: panels[to].dataset.weekTracking || "",
+            method,
+          });
+        }
+        return true;
+      };
+
+      // Arrows. Layout's document-level tracker reads the data-conversion-*
+      // attributes after this handler, so the destination week is written
+      // first; a press at the end (aria-disabled) is a no-op and drops the
+      // event attribute until the state changes.
+      const onArrow = (btn: HTMLButtonElement, dir: number) => {
+        btn.addEventListener("click", () => {
+          const to = current + dir;
+          if (btn.getAttribute("aria-disabled") === "true" || to < 0 || to >= panels.length) {
+            btn.removeAttribute("data-conversion-event");
+            setTimeout(() => btn.setAttribute("data-conversion-event", "popup_week_switch"), 0);
+            return;
+          }
+          btn.dataset.conversionPopupWeek = panels[to].dataset.weekTracking || "";
+          step(dir, "arrow");
+        });
+      };
+      onArrow(prev, -1);
+      onArrow(next, 1);
+
+      // Keyboard: Left / Right while focus is in the header row.
+      head.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        e.preventDefault();
+        step(e.key === "ArrowRight" ? 1 : -1, "key");
+      });
+
+      // Swipe that starts on the header row.
+      let sx = 0,
+        sy = 0,
+        down = false;
+      head.addEventListener("pointerdown", (e) => {
+        down = true;
+        sx = e.clientX;
+        sy = e.clientY;
+      });
+      head.addEventListener("pointercancel", () => (down = false));
+      head.addEventListener("pointerup", (e) => {
+        if (!down) return;
+        down = false;
+        const dx = e.clientX - sx;
+        const dy = e.clientY - sy;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        step(dx < 0 ? 1 : -1, "swipe");
+      });
+
+      // In-page links into a hidden week (e.g. the /popup hero jump
+      // buttons) select that week before the browser scrolls to the anchor.
+      document.addEventListener("click", (e) => {
+        const a = (e.target as Element | null)?.closest?.("a[href*='#']") as HTMLAnchorElement | null;
+        if (!a || a.pathname !== window.location.pathname) return;
+        const i = indexForHash(a.hash);
+        if (i !== -1 && i !== current) select(i);
+      });
+
+      // Initial state: URL, else the computed default.
+      let fromUrl = -1;
+      let scrollToSwitch = false;
+      if (urlState) {
+        const hashIndex = indexForHash(window.location.hash);
+        if (hashIndex !== -1) {
+          fromUrl = hashIndex;
+          scrollToSwitch = /^#week-\d+$/i.test(window.location.hash);
+        } else {
+          fromUrl = indexForNumber(new URL(window.location.href).searchParams.get("week"));
+        }
+      }
+      select(fromUrl !== -1 ? fromUrl : current);
+      if (scrollToSwitch) root.scrollIntoView({ block: "start" });
+      else if (fromUrl !== -1 && window.location.hash && !/^#week-/i.test(window.location.hash)) {
+        // An anchor inside a week that was hidden at load: scroll now.
+        document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({ block: "start" });
+      }
+    });
+  })();
+</script>
+
+<style>
+  .pu-switch {
+    --pu-cream: #f3ede4;
+    --pu-paper: #fdfbf7;
+    --pu-terracotta: #c4573a;
+    --pu-ink: #1e1a17;
+    --pu-mustard: #e0a83a;
+    --pu-muted: #6f6760;
+    color: var(--pu-ink);
+    scroll-margin-top: 6rem;
+  }
+  .pu-switch-head {
+    touch-action: pan-y;
+  }
+  .pu-switch-title {
+    color: var(--pu-ink);
+  }
+  .pu-switch-dates {
+    color: var(--pu-terracotta);
+  }
+  .pu-switch-tag {
+    background: var(--pu-terracotta);
+    color: #fff;
+  }
+  .pu-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(30, 26, 23, 0.2);
+  }
+  .pu-dot.is-on {
+    background: var(--pu-ink);
+  }
+  .pu-arrow {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    border: 1.5px solid var(--pu-ink);
+    color: var(--pu-ink);
+    background: transparent;
+    transition: background-color 150ms, color 150ms, opacity 150ms;
+  }
+  .pu-arrow:hover:not([aria-disabled="true"]) {
+    background: var(--pu-ink);
+    color: var(--pu-cream);
+  }
+  .pu-arrow[aria-disabled="true"] {
+    opacity: 0.25;
+    cursor: default;
+  }
+  .pu-arrow:focus-visible {
+    outline: 2px solid var(--pu-terracotta);
+    outline-offset: 2px;
+  }
+  .pu-week-wrapped {
+    background: var(--pu-ink);
+    color: var(--pu-mustard);
+  }
+  .pu-in-right {
+    animation: pu-in-right 200ms ease-out;
+  }
+  .pu-in-left {
+    animation: pu-in-left 200ms ease-out;
+  }
+  @keyframes pu-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  @keyframes pu-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pu-in-right,
+    .pu-in-left {
+      animation: none;
+    }
+  }
+</style>

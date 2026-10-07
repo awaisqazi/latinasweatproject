@@ -7,8 +7,10 @@
 // mustard, Rubik extra-bold uppercase display; design.md):
 //   1. Transition message (cream card, terracotta sun)
 //   2. Donation ask (ink card inside the cream card, -> /donate -> Zeffy)
-//   3. Pop-up classes: PopUpWeekBand (or, popupView="full", every active
-//      Pop Up week's full schedule) + FinishLineBand, reused as-is. Each
+//   3. Pop-up classes: PopUpWeekBand (or, popupView="full", the
+//      PopUpWeekSwitcher: every Pop Up week's full schedule, one week at a
+//      time with arrows, defaulting to the current week) + FinishLineBand,
+//      reused as-is. Each
 //      renders nothing once its dates are past (build time) and hides itself
 //      in the browser after its end instant. A closing "more pop-ups are on
 //      the way" Instagram line is always present, and the intro copy swaps
@@ -16,7 +18,7 @@
 //      (build time + the small script below), so the block never reads as
 //      an empty box.
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
-import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
+import PopUpWeekSwitcher from "@/components/PopUpWeekSwitcher.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import FinishLineBand from "@/components/FinishLineBand.astro";
 import { studioTransition as st } from "@/data/transition";
@@ -27,9 +29,10 @@ interface Props {
   /** Analytics context prefix, e.g. "schedule_transition". */
   context: string;
   /**
-   * "full": the complete schedule of every active Pop Up week, in order
-   * (PopUpWeekSchedule, the same cards as /popup; a week's panel hides in
-   * the browser after that week ends), for /schedule and /classes.
+   * "full": the week switcher (PopUpWeekSwitcher, the same cards as
+   * /popup; one week at a time, past weeks one tap back with CTAs hidden;
+   * the whole block hides in the browser after the last week), for
+   * /schedule and /classes.
    * "band": the compact PopUpWeekBand (e.g. /pricing).
    */
   popupView?: "full" | "band";
@@ -141,42 +144,17 @@ const popupsPast = Date.now() > Date.parse(popupsEndISO);
 
     <div class="mt-5 space-y-5 empty:hidden">
       {popupView === "band" && <PopUpWeekBand context={`${context}_popup_band`} />}
-      {popupView === "full" && popupWeeks.map((week, w) => (
-        <div
-          class="st-popup-full rounded-3xl p-3 pt-5 sm:p-6 sm:pt-7"
-          data-popup-hide-when-past
-          data-popup-hide-after={week.endsAtISO}
-          data-popup-week={week.id}
-        >
-          <div class="px-2 sm:px-1">
-            {w > 0 && (
-              <span
-                class="st-next-week mb-3 inline-block rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em]"
-                data-popup-hide-after={popupWeeks[w - 1].endsAtISO}
-              >Next week</span>
-            )}
-            <p class="st-eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em]">
-              {week.eyebrow.split(" · ").map((part, i) => (
-                <span class="block sm:inline">{i > 0 && <span class="hidden sm:inline"> · </span>}{part}</span>
-              ))}
-            </p>
-            <h3 class="st-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
-              {week.headline.split(" · ")[0]}{week.headline.split(" · ")[1] && <> · {week.headline.split(" · ")[1]}</>}
-            </h3>
-            <p class="st-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">{week.body}</p>
-          </div>
-          <div class="mt-5">
-            <PopUpWeekSchedule
-              context={popupContext}
-              finishLineContext={popupFinishLineContext}
-              hideWhenPast
-              week={week}
-              anchorSuffix={w === 0 ? "" : `-${week.id}`}
-              nextAfter={w > 0 ? popupWeeks[w - 1].endsAtISO : undefined}
-            />
-          </div>
+      {popupView === "full" && popupWeeks.length > 0 && (
+        <div class="st-popup-full rounded-3xl p-3 pt-5 sm:p-6 sm:pt-7" data-popup-hide-when-past>
+          <PopUpWeekSwitcher
+            context={popupContext}
+            finishLineContext={popupFinishLineContext}
+            switchContext={`${popupContext}_week_switch`}
+            hideWhenPast
+            headingLevel={3}
+          />
         </div>
-      ))}
+      )}
       {popupView === "full" && <PopUpWeekClient />}
       <FinishLineBand context={`${context}_finishline`} />
     </div>
@@ -280,10 +258,6 @@ const popupsPast = Date.now() > Date.parse(popupsEndISO);
   }
   .st-donate-note {
     color: rgba(243, 237, 228, 0.55);
-  }
-  .st-next-week {
-    background: var(--st-terracotta);
-    color: #fff;
   }
   .st-popup-full {
     background: var(--st-cream);

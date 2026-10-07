@@ -4,12 +4,13 @@
 // St studio is paused (LSP is in the process of being displaced). Every
 // fact comes from src/data/popUpWeeks.js (popUpWeek1.js, popUpWeek2.js).
 //
-// Multi-week: every active week (live + upcoming) is listed in order, each
-// with its own eyebrow and the full PopUpWeekSchedule. While Week 1 is live,
-// Week 2 sits below it under "Next week"; after Oct 11 Week 2 leads (at
-// build time, or in the browser via the PopUpWeekClient flip attributes);
-// after the last week the page shows the wrapped line and keeps the last
-// week's schedule as the record. Title / OG describe the current week.
+// Multi-week (Oct 7, 2026): the schedule is a week switcher
+// (PopUpWeekSwitcher): one week at a time with arrows ("This week" /
+// "Next week" / "Last week"), defaulting to the current week, ?week=N or
+// #week-N to deep-link. The hero eyebrow, date pill and jump buttons flip
+// with the current week (PopUpWeekClient flip attributes); after the last
+// week the page shows the wrapped line and the last week stays the
+// default as the record. Title / OG describe the current week.
 //
 // Identity: the campaign's own cream / terracotta / ink look from the IG
 // graphics (NOT gala navy/gold): cream ground, a big terracotta sun, bold
@@ -25,7 +26,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
-import PopUpWeekSchedule from "@/components/PopUpWeekSchedule.astro";
+import PopUpWeekSwitcher from "@/components/PopUpWeekSwitcher.astro";
 import { activePopUpWeeks, lastPopUpWeek, popUpWeekWindow } from "@/data/popUpWeeks";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 
@@ -126,41 +127,18 @@ const pageDescription =
     {/* ========================== LOCATIONS ========================== */}
     <section class="pu-locations">
       <div class="mx-auto max-w-6xl px-4 pb-14 sm:px-6 sm:pb-20 lg:px-8">
-        {/* The two location cards with the full day-by-day schedule live in
-            PopUpWeekSchedule (shared with /schedule and /classes), once per
-            week. A week's block hides in the browser after that week ends
-            (except the last, kept as the record); a later week carries a
-            "Next week" tag until the week before it ends. */}
-        <div class="flex flex-col gap-14 sm:gap-20">
-        {weeks.map((week, w) => (
-          <div
-            class="pu-week"
-            data-popup-week={week.id}
-            data-popup-hide-after={w < weeks.length - 1 ? week.endsAtISO : undefined}
-          >
-            {weeks.length > 1 && (
-              <div class="pu-week-head mb-5 flex flex-wrap items-center gap-x-3 gap-y-2">
-                {w > 0 && (
-                  <span
-                    class="pu-next-week rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em]"
-                    data-popup-hide-after={weeks[w - 1].endsAtISO}
-                  >Next week</span>
-                )}
-                <h2 class="pu-week-title font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
-                  {week.title} <span class="pu-week-dates">· {week.dateRangeShort}</span>
-                </h2>
-              </div>
-            )}
-            <PopUpWeekSchedule
-              context="popup_page"
-              finishLineContext="popup_finishline_crosslink"
-              week={week}
-              anchorSuffix={anchorSuffix(w)}
-              nextAfter={w > 0 ? weeks[w - 1].endsAtISO : undefined}
-            />
-          </div>
-        ))}
-        </div>
+        {/* Week switcher (PopUpWeekSwitcher): every Pop Up week, one at a
+            time, arrows + swipe on the header row, ?week=N / #week-N deep
+            links. Each week's two location cards (full day-by-day schedule)
+            come from PopUpWeekSchedule, shared with /schedule and /classes.
+            Defaults to the current week (re-evaluated in the browser, so the
+            Oct 11 to 12 flip needs no rebuild); past weeks stay one tap back
+            with CTAs hidden and the wrapped line. */}
+        <PopUpWeekSwitcher
+          context="popup_page"
+          finishLineContext="popup_finishline_crosslink"
+          switchContext="popup_page_week_switch"
+        />
       </div>
     </section>
 
@@ -315,17 +293,6 @@ const pageDescription =
   .pu-jump--ink {
     background: var(--pu-ink);
     color: var(--pu-cream);
-  }
-  /* Week blocks (multi-week) */
-  .pu-week-title {
-    color: var(--pu-ink);
-  }
-  .pu-week-dates {
-    color: var(--pu-terracotta);
-  }
-  .pu-next-week {
-    background: var(--pu-terracotta);
-    color: #fff;
   }
   .pu-jump:hover {
     transform: translateY(-1px);

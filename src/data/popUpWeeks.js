@@ -8,8 +8,9 @@
 //   Compact surfaces (homepage hero pill + A New Chapter band, /pricing,
 //   /events, /links card + bubble) show only the current week, so on
 //   Mon Oct 12 they flip from Week 1 to Week 2 without a rebuild.
-//   /popup and the studio transition section (/schedule, /classes) list
-//   every active week (live + upcoming) in order.
+//   /popup and the studio transition section (/schedule, /classes) use
+//   PopUpWeekSwitcher: every week, one at a time, defaulting to the
+//   current week (else the last), past weeks one arrow back.
 //   data-popup-hide-when-past is keyed on the LAST week's end
 //   (lastPopUpEndISO).
 import { popUpWeek1Full } from "./popUpWeek1.js";
