@@ -32,9 +32,10 @@ import {
   groupSessionsByDay,
   weekPhase,
   sessionCount,
+  activeSessions,
 } from "./popUpShared.js";
 
-export { instructorSlug, instructorInitials, instructorInfo, locationInstructors, groupSessionsByDay };
+export { instructorSlug, instructorInitials, instructorInfo, locationInstructors, groupSessionsByDay, activeSessions };
 
 export const popUpWeek1 = {
   id: "week-1",
@@ -126,6 +127,9 @@ export const popUpLocations = [
     capacityLine: "Up to 75 mats per class",
     capacityLineEs: "Hasta 75 mats por clase",
     theme: "light",
+    // Optional per-location notice, shown on this card above the classes
+    // while the week is not past (PopUpWeekSchedule).
+    noticeLine: "Sunday Oct 11 morning class at Chicago Art Dept is cancelled for marathon day.",
     closedDays: [],
     sessions: [
       session("cad", "10-05", "06:00", "6:00 AM", "Yoga Flow", ["Giselle Castaneda", "Lizette Vega"]),
@@ -138,7 +142,8 @@ export const popUpLocations = [
       session("cad", "10-08", "18:00", "6:00 PM", "Yoga Sculpt", ["Rut Merida"]),
       session("cad", "10-09", "06:00", "6:00 AM", "Yoga Flow", ["Gisella Mitchell", "Sarah Esparza"]),
       session("cad", "10-10", "09:00", "9:00 AM", "Pilates", ["Ashley Reitz"]),
-      session("cad", "10-11", "10:00", "10:00 AM", "Yoga Flow", ["Brenda Maldonado"]),
+      // Cancelled Oct 9 2026 (marathon day, BRIEF REVISION 3).
+      session("cad", "10-11", "10:00", "10:00 AM", "Yoga Flow", ["Brenda Maldonado"], { cancelled: true }),
     ],
   },
   {

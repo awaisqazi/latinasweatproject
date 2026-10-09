@@ -559,7 +559,8 @@ const getLinkConversionProvider = (url = "") => {
                           i > 0 && (ink ? "border-t border-[#f3ede4]/[0.06]" : "border-t border-[#1e1a17]/[0.06]"),
                         ]}
                         data-popup-date={s.date}
-                        data-popup-starts={s.startsAt}
+                        data-popup-starts={s.cancelled ? undefined : s.startsAt}
+                        data-cancelled={s.cancelled ? "" : undefined}
                       >
                         <div class="min-w-0">
                           <div class:list={["flex flex-wrap items-center gap-x-1.5 text-[11px] font-extrabold", ink ? "text-[#e2765a]" : "text-[#c4573a]"]}>
@@ -569,10 +570,16 @@ const getLinkConversionProvider = (url = "") => {
                               <span class="lang-en">Next</span>
                               <span class="lang-es hidden">Sigue</span>
                             </span>
+                            {s.cancelled && (
+                              <span class:list={["popup-cancel-tag rounded-[3px] px-1.5 py-[1px] text-[8px] font-extrabold uppercase tracking-widest", ink ? "bg-[#e2765a] text-[#1e1a17]" : "bg-[#c4573a] text-white"]}>
+                                <span class="lang-en">Cancelled</span>
+                                <span class="lang-es hidden">Cancelada</span>
+                              </span>
+                            )}
                           </div>
                           <p class="text-[12px] font-bold leading-snug">
                             {s.className}
-                            <span class:list={["popup-names font-semibold", ink ? "text-[#f3ede4]/60" : "text-[#1e1a17]/55"]}> · {s.instructors.join(" / ")}</span>
+                            {!s.cancelled && <span class:list={["popup-names font-semibold", ink ? "text-[#f3ede4]/60" : "text-[#1e1a17]/55"]}> · {s.instructors.join(" / ")}</span>}
                           </p>
                         </div>
                       </div>
@@ -1964,6 +1971,14 @@ const getLinkConversionProvider = (url = "") => {
   }
   .popup-row--ink[data-popup-next="true"] {
     background: rgba(224, 168, 58, 0.14);
+  }
+
+  /* Cancelled pop-up class: struck through and dimmed, never "Next". */
+  .popup-row[data-cancelled] .lang-en.whitespace-nowrap,
+  .popup-row[data-cancelled] .lang-es.whitespace-nowrap,
+  .popup-row[data-cancelled] p {
+    text-decoration: line-through;
+    opacity: 0.6;
   }
 
   /* Line clamp fallback */

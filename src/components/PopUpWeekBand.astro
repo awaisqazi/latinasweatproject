@@ -2,7 +2,8 @@
 // Compact Pop Up week band: eyebrow, heading, the two locations as
 // mini-cards (Chicago Art Dept = white card, Sanctuary Health = ink card,
 // same as the campaign IG graphics), each with its "next up" class and a
-// direct Zeffy CTA, plus a link to the full /popup page.
+// direct Zeffy CTA, plus a link to the full /popup page. Cancelled
+// sessions are never offered as "next up" (activeSessions).
 //
 // Used on /schedule and /classes (above the MarianaTek widget), /events
 // (inside the light page header), and the homepage "A New Chapter" section
@@ -16,7 +17,7 @@
 // shows Week 2's band (and hides Week 1's) from Mon Oct 12 in the browser.
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import { locationInstructors, weekPhase } from "@/data/popUpShared";
+import { activeSessions, locationInstructors, weekPhase } from "@/data/popUpShared";
 import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 
 interface Props {
@@ -35,7 +36,7 @@ const base = import.meta.env.BASE_URL;
 const dark = tone === "dark";
 const nextLineData = (loc) =>
   JSON.stringify(
-    loc.sessions.map((s) => ({
+    activeSessions(loc).map((s) => ({
       s: s.startsAt,
       l: `${s.dayShort} ${s.dateLabel} · ${s.time} · ${s.className}`,
     })),

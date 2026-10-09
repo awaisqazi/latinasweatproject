@@ -48,10 +48,15 @@ export const instructorInfo = (name) => {
 // timestamp (America/Chicago, CDT = -05:00) so "next up" compares real
 // instants. `instructors` stays an array of full-name strings (consumers
 // join it as text); `people` is the same list as instructorInfo objects.
-// `extra` carries optional fields such as `note` (e.g. a holiday label).
+// `extra` carries optional fields such as `note` (e.g. a holiday label)
+// and `cancelled: true` (Oct 9 2026): a cancelled class stays listed (people
+// may have seen it) but renders struck through with a "Cancelled" tag, and
+// is excluded from "Next up", the teachers rows and every class count (use
+// the helpers below, never `location.sessions.length`).
 export const makeSessionFactory = (days, year = "2026") => (loc, md, hhmm, time, className, instructors, extra = {}) => {
   const [day, dayShort, dateLabel] = days[md];
   return {
+    cancelled: false,
     id: `${loc}-${md}-${hhmm.replace(":", "")}`,
     date: `${year}-${md}`,
     startsAt: `${year}-${md}T${hhmm}:00-05:00`,
@@ -66,16 +71,22 @@ export const makeSessionFactory = (days, year = "2026") => (loc, md, hhmm, time,
   };
 };
 
-// Unique instructors at a location, in first-appearance order.
+// Sessions that are going ahead (not cancelled).
+export const activeSessions = (location) => location.sessions.filter((s) => !s.cancelled);
+
+// Unique instructors at a location (cancelled classes excluded), in
+// first-appearance order.
 export const locationInstructors = (location) => {
   const seen = new Map();
-  for (const s of location.sessions) for (const p of s.people) if (!seen.has(p.name)) seen.set(p.name, p);
+  for (const s of activeSessions(location)) for (const p of s.people) if (!seen.has(p.name)) seen.set(p.name, p);
   return [...seen.values()];
 };
 
 // Sessions grouped by calendar day (for the /popup day-grouped lists). A
 // day's `note` is the first session note that day (e.g. "Indigenous
-// Peoples Day").
+// Peoples Day"). Cancelled sessions stay in their day, so a day whose only
+// classes are cancelled still shows (with the cancelled rows), never
+// "No classes".
 export const groupSessionsByDay = (location) => {
   const days = [];
   for (const s of location.sessions) {
@@ -103,4 +114,5 @@ export const weekPhase = (week, now = new Date()) => {
   return "past";
 };
 
-export const sessionCount = (locations) => locations.reduce((n, l) => n + l.sessions.length, 0);
+// Classes going ahead (cancelled excluded).
+export const sessionCount = (locations) => locations.reduce((n, l) => n + activeSessions(l).length, 0);

@@ -3,7 +3,11 @@
 // location cards (Chicago Art Department = paper card, Sanctuary Health =
 // ink card), each with address, price/capacity chips, "Your teachers this
 // week" avatars, the day-by-day session list (time, class, instructor
-// avatars + names, "Next up" tag, "No classes" days), the Zeffy reserve
+// avatars + names, "Next up" tag, "No classes" days, cancelled classes
+// struck through with a "Cancelled" tag and no instructors; they never get
+// data-popup-starts so they are never "Next up", and the teachers row and
+// class count leave them out), an optional per-location noticeLine while
+// the week is not past, the Zeffy reserve
 // CTA, and (Chicago Art Dept only) the cross-link to The Collective Finish
 // Line while that series is not past. All facts come from the week passed
 // in (`week`, an entry of popUpWeeks in src/data/popUpWeeks.js; defaults to
@@ -22,7 +26,7 @@
 // several weeks, the leading week gets the plain ids and later weeks pass a
 // suffix such as "-week-2".
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import { groupSessionsByDay, locationInstructors, weekPhase } from "@/data/popUpShared";
+import { activeSessions, groupSessionsByDay, locationInstructors, weekPhase } from "@/data/popUpShared";
 import { currentPopUpWeek, popUpWeeks } from "@/data/popUpWeeks";
 import { collectiveFinishLine, finishLineClasses, getFinishLinePhase } from "@/data/collectiveFinishLine";
 
@@ -158,6 +162,12 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
             </div>
           </div>
 
+          {loc.noticeLine && !isPast && (
+            <p
+              class="pu-notice mx-5 mt-5 rounded-xl px-4 py-3 text-[13px] font-bold leading-snug sm:mx-7"
+              data-popup-hide-after={week.endsAtISO}
+            >{loc.noticeLine}</p>
+          )}
           <ol class="mt-5 space-y-2 px-3 sm:px-5" aria-label={`${loc.name} classes`}>
             {loc.days.map((day) => (
               <li class="pu-day flex gap-3 rounded-2xl px-3 py-3 sm:gap-4 sm:px-4">
@@ -176,12 +186,13 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
                       {day.sessions.map((s) => (
                         <li
                           class="pu-row relative grid grid-cols-[4.25rem_1fr] gap-x-2 rounded-lg sm:grid-cols-[6rem_1fr] sm:gap-x-3"
-                          data-popup-starts={s.startsAt}
+                          data-popup-starts={s.cancelled ? undefined : s.startsAt}
                           data-popup-date={s.date}
+                          data-cancelled={s.cancelled ? "" : undefined}
                         >
                           <div>
                             <p class="pu-time text-sm font-extrabold leading-snug">{s.time}</p>
-                            <PopUpAvatars
+                            {!s.cancelled && <PopUpAvatars
                               people={s.people}
                               size={28}
                               sizeSm={36}
@@ -189,14 +200,15 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
                               bg={ink ? "#3b342e" : "#e3d6c4"}
                               tone={ink ? "dark" : "light"}
                               class="mt-1.5"
-                            />
+                            />}
                           </div>
                           <div class="min-w-0">
                             <p class="pu-class text-[15px] font-semibold leading-snug">
                               {s.className}
                               <span class="pu-next-tag ml-1 rounded px-1.5 py-[1px] align-middle text-[9px] font-extrabold uppercase tracking-[0.14em]">Next up</span>
+                              {s.cancelled && <span class="pu-cancel-tag ml-1.5 rounded px-1.5 py-[1px] align-middle text-[9px] font-extrabold uppercase tracking-[0.14em]">Cancelled</span>}
                             </p>
-                            <p class="pu-names text-[13px] leading-snug">{s.instructors.join(" / ")}</p>
+                            {!s.cancelled && <p class="pu-names text-[13px] leading-snug">{s.instructors.join(" / ")}</p>}
                           </div>
                         </li>
                       ))}
@@ -230,7 +242,7 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
               </a>
             )}
             <p class="pu-card-foot mt-3 text-center text-xs font-semibold">
-              {loc.sessions.length} classes · {week.classLengthLabel} each · {week.matsLine}
+              {activeSessions(loc).length} classes · {week.classLengthLabel} each · {week.matsLine}
             </p>
           </div>
           {loc.id === "chicago-art-department" && finishLineActive && (
@@ -501,6 +513,34 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
   }
   .pu-card--ink .pu-row[data-popup-next="true"]::before {
     background: var(--pu-mustard);
+  }
+
+  /* Cancelled class (session `cancelled: true`): time and class struck
+     through and dimmed; the tag is inline-block so the strike does not
+     reach it. */
+  .pu-row[data-cancelled] .pu-time,
+  .pu-row[data-cancelled] .pu-class {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    color: var(--pu-muted);
+  }
+  .pu-card--ink .pu-row[data-cancelled] .pu-time,
+  .pu-card--ink .pu-row[data-cancelled] .pu-class {
+    color: rgba(243, 237, 228, 0.5);
+  }
+  .pu-cancel-tag {
+    display: inline-block;
+    background: var(--pu-terracotta);
+    color: #fff;
+  }
+  /* Location notice (e.g. a cancelled class), above the classes */
+  .pu-notice {
+    background: rgba(196, 87, 58, 0.1);
+    color: var(--pu-terracotta);
+  }
+  .pu-card--ink .pu-notice {
+    background: rgba(226, 118, 90, 0.14);
+    color: #e2765a;
   }
 
   /* CTAs */
