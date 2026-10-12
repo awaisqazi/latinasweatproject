@@ -76,9 +76,16 @@ const locations = week.locations.map((loc) => ({
 // teachers · Oct 12 – 18" (upcoming with nothing listed above it, gate =
 // this week's start). PopUpWeekClient flips it in the browser via
 // data-popup-show-after / data-popup-hide-after (the Oct 11 to 12 flip).
+// With four weeks in the switcher (Oct 12 2026) "next week" is only true
+// in the 7 days before this week starts; earlier than that the kicker
+// reads "Your teachers · <dates>" (gate = nextWeekFrom).
 const teachersGate = nextAfter ?? week.startsAtISO;
 const teachersLive = Date.now() > Date.parse(teachersGate);
-const teachersUpcomingLabel = nextAfter ? "Your teachers next week" : `Your teachers · ${week.dateRangeShort}`;
+const nextWeekFrom = nextAfter
+  ? new Date(Date.parse(week.startsAtISO) - 7 * 24 * 60 * 60 * 1000).toISOString()
+  : undefined;
+const teachersNextWeekNow = !!nextWeekFrom && Date.now() > Date.parse(nextWeekFrom) && !teachersLive;
+const teachersDatesNow = !teachersLive && !teachersNextWeekNow;
 // Only the Finish Line classes on or after this week's start are named
 // (Week 1: "Mon Oct 5 & Wed Oct 14"; Week 2: "Wed Oct 14").
 const weekStartDate = week.startsAtISO.slice(0, 10);
@@ -147,7 +154,7 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
                 location, up to 8 faces + "+N". */}
             <div class="pu-teachers mt-5">
               <p class="pu-teachers-label text-[11px] font-extrabold uppercase leading-tight tracking-[0.16em]">
-                <span data-popup-show-after={teachersGate} data-popup-hide-after={week.endsAtISO} hidden={!teachersLive || isPast}>Your teachers this week</span><span data-popup-hide-after={teachersGate} hidden={teachersLive}>{teachersUpcomingLabel}</span><span data-popup-show-after={week.endsAtISO} hidden={!isPast}>Your teachers · {week.dateRangeShort}</span> <span class="pu-teachers-count">· {loc.teachers.length}</span>
+                <span data-popup-show-after={teachersGate} data-popup-hide-after={week.endsAtISO} hidden={!teachersLive || isPast}>Your teachers this week</span>{nextWeekFrom && <span data-popup-show-after={nextWeekFrom} data-popup-hide-after={teachersGate} hidden={!teachersNextWeekNow}>Your teachers next week</span>}<span data-popup-hide-after={nextWeekFrom ?? teachersGate} hidden={!teachersDatesNow}>Your teachers · {week.dateRangeShort}</span><span data-popup-show-after={week.endsAtISO} hidden={!isPast}>Your teachers · {week.dateRangeShort}</span> <span class="pu-teachers-count">· {loc.teachers.length}</span>
               </p>
               <PopUpAvatars
                 people={loc.teachers}

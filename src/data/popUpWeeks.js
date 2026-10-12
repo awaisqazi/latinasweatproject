@@ -1,6 +1,6 @@
 // Every LSP Pop Up week, in date order, plus the helpers the site surfaces
 // use to pick what to show. Each week is { ...copy, locations } (see
-// popUpWeek1.js / popUpWeek2.js). To add Week 3: create popUpWeek3.js with
+// popUpWeek1.js to popUpWeek4.js). To add a week: create popUpWeekN.js with
 // the same shape and append it here; every surface follows.
 //
 // Flip rule (build time AND in the browser via PopUpWeekClient):
@@ -15,9 +15,11 @@
 //   (lastPopUpEndISO).
 import { popUpWeek1Full } from "./popUpWeek1.js";
 import { popUpWeek2Full } from "./popUpWeek2.js";
+import { popUpWeek3Full } from "./popUpWeek3.js";
+import { popUpWeek4Full } from "./popUpWeek4.js";
 import { weekPhase, toMs } from "./popUpShared.js";
 
-export const popUpWeeks = [popUpWeek1Full, popUpWeek2Full];
+export const popUpWeeks = [popUpWeek1Full, popUpWeek2Full, popUpWeek3Full, popUpWeek4Full];
 
 export const popUpWeekPhase = weekPhase;
 

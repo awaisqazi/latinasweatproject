@@ -1,5 +1,5 @@
-// Shared helpers for the LSP Pop Up weeks (src/data/popUpWeek1.js,
-// src/data/popUpWeek2.js, combined in src/data/popUpWeeks.js). Each week
+// Shared helpers for the LSP Pop Up weeks (src/data/popUpWeek1.js to
+// src/data/popUpWeek4.js, combined in src/data/popUpWeeks.js). Each week
 // file holds only its own facts (copy, ISO bounds, locations, sessions);
 // everything that is the same from week to week lives here so the weeks
 // never drift apart.
@@ -12,7 +12,10 @@
 // `python3 scripts/render-popup-instructor-avatars.py` from the cutouts in
 // marketing/popup-week1/instructors/. Names listed here have no photo and
 // render an initials circle instead.
-export const INSTRUCTORS_WITHOUT_PHOTO = new Set(["Rosa Ortega"]);
+// Fabiola, Juanita, Gigi, Efren, Ariel (Weeks 3 and 4): first names only
+// until their MarianaTek roster entries are confirmed (Claude in Chrome was
+// not connected on Oct 12 2026); replace with full names + photos then.
+export const INSTRUCTORS_WITHOUT_PHOTO = new Set(["Rosa Ortega", "Fabiola", "Juanita", "Gigi", "Efren", "Ariel"]);
 export const instructorSlug = (name) =>
   name
     .normalize("NFD")
@@ -43,23 +46,50 @@ export const instructorInfo = (name) => {
   };
 };
 
-// Session factory for one week. `days` maps "MM-DD" -> [day, dayShort,
-// dateLabel]. Each session is a 45-minute class; `startsAt` is a full ISO
-// timestamp (America/Chicago, CDT = -05:00) so "next up" compares real
-// instants. `instructors` stays an array of full-name strings (consumers
-// join it as text); `people` is the same list as instructorInfo objects.
+// Day labels for a "MM-DD" date: ["Monday", "Mon", "Oct 19"] (Nov 1 ->
+// "Nov 1"). Computed from the calendar so any week works; a week may still
+// pass its own map to makeSessionFactory (Weeks 1 and 2 do).
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const dayLabels = (md, year = "2026") => {
+  const [m, d] = md.split("-").map(Number);
+  const day = WEEKDAYS[new Date(Date.UTC(Number(year), m - 1, d)).getUTCDay()];
+  return [day, day.slice(0, 3), `${MONTHS[m - 1]} ${d}`];
+};
+
+// America/Chicago UTC offset ("-05:00" CDT, "-06:00" CST) for a local
+// date + "HH:MM", so startsAt instants stay right across the DST change
+// (Sun Nov 1 2026 is CST). Uses Intl, so it works at build time and in Node.
+export const chicagoOffset = (isoDate, hhmm) => {
+  const guess = Date.parse(`${isoDate}T${hhmm}:00Z`) + 6 * 60 * 60 * 1000;
+  const name = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", timeZoneName: "shortOffset" })
+    .formatToParts(new Date(guess))
+    .find((p) => p.type === "timeZoneName").value; // "GMT-5"
+  const m = name.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  if (!m) return "-06:00";
+  return `${m[1]}${m[2].padStart(2, "0")}:${m[3] ?? "00"}`;
+};
+
+// Session factory for one week. `days` (optional) maps "MM-DD" -> [day,
+// dayShort, dateLabel]; dates it does not list use dayLabels(). Each
+// session is a 45-minute class; `startsAt` is a full ISO timestamp in
+// America/Chicago local time (CDT -05:00, CST -06:00 from Nov 1 2026) so
+// "next up" compares real instants. `instructors` stays an array of
+// full-name strings (consumers join it as text); `people` is the same list
+// as instructorInfo objects.
 // `extra` carries optional fields such as `note` (e.g. a holiday label)
 // and `cancelled: true` (Oct 9 2026): a cancelled class stays listed (people
 // may have seen it) but renders struck through with a "Cancelled" tag, and
 // is excluded from "Next up", the teachers rows and every class count (use
 // the helpers below, never `location.sessions.length`).
-export const makeSessionFactory = (days, year = "2026") => (loc, md, hhmm, time, className, instructors, extra = {}) => {
-  const [day, dayShort, dateLabel] = days[md];
+export const makeSessionFactory = (days = {}, year = "2026") => (loc, md, hhmm, time, className, instructors, extra = {}) => {
+  const [day, dayShort, dateLabel] = days[md] ?? dayLabels(md, year);
+  const date = `${year}-${md}`;
   return {
     cancelled: false,
     id: `${loc}-${md}-${hhmm.replace(":", "")}`,
-    date: `${year}-${md}`,
-    startsAt: `${year}-${md}T${hhmm}:00-05:00`,
+    date,
+    startsAt: `${date}T${hhmm}:00${chicagoOffset(date, hhmm)}`,
     day,
     dayShort,
     dateLabel,
@@ -69,6 +99,12 @@ export const makeSessionFactory = (days, year = "2026") => (loc, md, hhmm, time,
     people: instructors.map(instructorInfo),
     ...extra,
   };
+};
+
+// A "No classes" day for a location's closedDays list.
+export const closedDay = (md, year = "2026") => {
+  const [day, dayShort, dateLabel] = dayLabels(md, year);
+  return { date: `${year}-${md}`, day, dayShort, dateLabel };
 };
 
 // Sessions that are going ahead (not cancelled).
