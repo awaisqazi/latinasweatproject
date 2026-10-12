@@ -12,10 +12,7 @@
 // `python3 scripts/render-popup-instructor-avatars.py` from the cutouts in
 // marketing/popup-week1/instructors/. Names listed here have no photo and
 // render an initials circle instead.
-// Fabiola, Juanita, Gigi, Efren, Ariel (Weeks 3 and 4): first names only
-// until their MarianaTek roster entries are confirmed (Claude in Chrome was
-// not connected on Oct 12 2026); replace with full names + photos then.
-export const INSTRUCTORS_WITHOUT_PHOTO = new Set(["Rosa Ortega", "Fabiola", "Juanita", "Gigi", "Efren", "Ariel"]);
+export const INSTRUCTORS_WITHOUT_PHOTO = new Set(["Rosa Ortega"]);
 export const instructorSlug = (name) =>
   name
     .normalize("NFD")
@@ -150,14 +147,16 @@ export const weekPhase = (week, now = new Date()) => {
   return "past";
 };
 
-// Zeffy check-in manager link for a form (volunteers check people in at the
-// door from /checkin). THE ONE place the URL pattern lives: each week file
-// stores only `checkInFormId` and derives `checkInUrl` through this helper.
-// The pattern is a placeholder pending verification against Zeffy; if it is
-// wrong, fix it here and every button follows. An empty id returns null and
-// /checkin renders that location's button disabled ("Link coming").
-export const ZEFFY_CHECK_IN_BASE = "https://www.zeffy.com/en-US/o/check-in/";
-export const zeffyCheckInUrl = (formId) => (formId ? `${ZEFFY_CHECK_IN_BASE}${formId}` : null);
+// CHECK-IN LINKS (volunteers check people in at the door from /checkin).
+// Zeffy's check-in manager link is a SIGNED per-form URL
+// (https://www.zeffy.com/en-US/checkin-manager/<JWT>), so it cannot be built
+// from a form id. Each location (and each Finish Line class) carries its
+// own explicit `checkInUrl` string, copied from that form's campaign hub >
+// Guest list > Check-in manager; `checkInFormId` is kept for reference only.
+// The links collected Oct 12 2026 EXPIRE around Oct 12 2027 (JWT exp): copy
+// fresh ones from Zeffy if they are still needed then. A location whose
+// `checkInUrl` is null renders a disabled "Link coming" button on /checkin.
+// Source of the current set: marketing/popup-week3-4/checkin-links.json.
 
 // Classes going ahead (cancelled excluded).
 export const sessionCount = (locations) => locations.reduce((n, l) => n + activeSessions(l).length, 0);

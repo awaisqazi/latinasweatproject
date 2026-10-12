@@ -23,8 +23,6 @@
 // (data-finishline-past-at) so a class that already happened reads as done
 // while the series is still live. /finishline itself stays up as a record.
 
-import { zeffyCheckInUrl } from "./popUpShared.js";
-
 export const collectiveFinishLine = {
   title: "The Collective Finish Line",
   // Three stacked headline lines, as on the flyer.
@@ -192,10 +190,13 @@ export const finishLineEvents = [
     ...CAD,
     ticketsUrl:
       "https://www.zeffy.com/en-US/ticketing/collective-finish-line-post-marathon-restorative-flow",
-    // Zeffy form id for the volunteer check-in link on /checkin (the URL
-    // pattern lives in zeffyCheckInUrl, src/data/popUpShared.js).
+    // Volunteer check-in link on /checkin: checkInUrl is the signed Zeffy
+    // check-in manager link (see CHECK-IN LINKS in src/data/popUpShared.js);
+    // checkInFormId is kept for reference.
     checkInFormId: "79ea95b6-0085-4d3e-91a7-d6a56f732052",
-    checkInUrl: zeffyCheckInUrl("79ea95b6-0085-4d3e-91a7-d6a56f732052"),
+    checkInUrl:
+      // cfl-oct14: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNzllYTk1YjYtMDA4NS00ZDNlLTkxYTctZDZhNTZmNzMyMDUyIiwiaWF0IjoxNzkxODQ5MjA2LCJleHAiOjE4MjMzODUyMDZ9.7EJYJ-l4c-t-8-l8syoI8O9cEfLo5jZ2a3QmEr9thUU",
     trackingKey: "oct14_restorative",
   },
 ].map((e) => ({

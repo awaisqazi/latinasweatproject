@@ -11,7 +11,7 @@
 // THE TOGGLE: while false, /checkin is the "Pop-up class check-in" page
 // (one button per pop-up week and location that opens that form's Zeffy
 // check-in manager; data in src/data/popUpWeek1.js to popUpWeek4.js and
-// src/data/collectiveFinishLine.js, URL pattern in zeffyCheckInUrl in
-// src/data/popUpShared.js). Flip to true to bring the shift check-in back
+// src/data/collectiveFinishLine.js, each with a signed Zeffy `checkInUrl`;
+// see CHECK-IN LINKS in src/data/popUpShared.js). Flip to true to bring the shift check-in back
 // at /checkin exactly as before.
 export const showVolunteerCheckIn = false;

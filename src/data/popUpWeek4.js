@@ -16,7 +16,7 @@
 // Zeffy ticket URLs are the expected slugs of the Week 4 forms (duplicated
 // from Week 2); confirm against the live forms.
 import { popUpWeek2, popUpWeek2Locations } from "./popUpWeek2.js";
-import { makeSessionFactory, closedDay, weekPhase, sessionCount, zeffyCheckInUrl } from "./popUpShared.js";
+import { makeSessionFactory, closedDay, weekPhase, sessionCount } from "./popUpShared.js";
 
 export const popUpWeek4 = {
   ...popUpWeek2,
@@ -49,27 +49,32 @@ export const popUpWeek4Locations = [
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--4",
     // Own check-in form per week (never inherit Week 2's): /checkin.
     checkInFormId: "6f61be34-6b5a-4dd0-b2af-2844e31ae677",
-    checkInUrl: zeffyCheckInUrl("6f61be34-6b5a-4dd0-b2af-2844e31ae677"),
+    checkInUrl:
+      // cad-w4: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNmY2MWJlMzQtNmI1YS00ZGQwLWIyYWYtMjg0NGUzMWFlNjc3IiwiaWF0IjoxNzkxODQ5MTQ1LCJleHAiOjE4MjMzODUxNDV9.CBAI-qVzkzKQpj8qizQ8Y260bgaFZuijkOZSAilvXMs",
     noticeLine: "No weekend classes at Chicago Art Dept this week.",
     closedDays: [],
     sessions: [
       session("cad", "10-26", "06:00", "6:00 AM", "Yoga Flow", ["Kellyn Mitchell", "Antonia Rosales"]),
-      session("cad", "10-26", "18:00", "6:00 PM", "Yoga Flow", ["Courtney Luedke", "Fabiola"]),
+      // Fabiola Saldaña (MarianaTek 6942, newest YTT cohort ids 6937-6953) is a working
+      // assumption flagged for Fez; the other roster Fabiola is Fabiola Davila (6556).
+      session("cad", "10-26", "18:00", "6:00 PM", "Yoga Flow", ["Courtney Luedke", "Fabiola Saldaña"]),
       session("cad", "10-27", "06:00", "6:00 AM", "Yoga Sculpt", ["Yaritza Jurado"]),
       session("cad", "10-27", "18:00", "6:00 PM", "Yoga Sculpt", ["Vanessa Tirado"]),
       session("cad", "10-28", "06:00", "6:00 AM", "Yoga Sculpt", ["Vero Quiñones"]),
       session("cad", "10-28", "18:00", "6:00 PM", "Yoga Sculpt", ["Alondra Alcazar"]),
       session("cad", "10-29", "06:00", "6:00 AM", "Strength Training", ["Jay Pena"]),
-      session("cad", "10-29", "18:00", "6:00 PM", "Yoga Sculpt", ["Juanita"]),
+      session("cad", "10-29", "18:00", "6:00 PM", "Yoga Sculpt", ["Juanita Barajas"]),
       session("cad", "10-30", "06:00", "6:00 AM", "Yoga Flow", ["Marelin Enriquez", "Sarah Esparza"]),
     ],
   },
   {
     ...sancBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--4",
-    // Form id not known yet: /checkin shows "Link coming" until filled.
-    checkInFormId: "",
-    checkInUrl: zeffyCheckInUrl(""),
+    checkInFormId: "6b9eb140-462d-40c1-a0d2-7ef61675e2db",
+    checkInUrl:
+      // sanc-w4: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNmI5ZWIxNDAtNDYyZC00MGMxLWEwZDItN2VmNjE2NzVlMmRiIiwiaWF0IjoxNzkxODQ5MTQ3LCJleHAiOjE4MjMzODUxNDd9.8M35gd5O3lxs37Oa1YRwDP6D-5zclGZWNA9XQV_kCOM",
     // Sat Oct 31: no classes at this location.
     closedDays: [closedDay("10-31")],
     sessions: [
@@ -79,7 +84,7 @@ export const popUpWeek4Locations = [
       session("sanc", "10-29", "06:00", "6:00 AM", "Yoga Flow", ["Rosa Ortega", "Ghazala Irshad"]),
       session("sanc", "10-29", "20:30", "8:30 PM", "Yoga Flow", ["Savannah Alvarez", "Xochyl Perez"]),
       session("sanc", "10-30", "06:00", "6:00 AM", "Yoga Flow", ["Dinorah Zubieta"]),
-      session("sanc", "11-01", "20:00", "8:00 PM", "Yoga Flow", ["Efren", "Ariel"]),
+      session("sanc", "11-01", "20:00", "8:00 PM", "Yoga Flow", ["Efren Ramirez Jr", "Ariel Cervera"]),
     ],
   },
 ];

@@ -15,7 +15,7 @@
 // Zeffy ticket URLs are the expected slugs of the Week 3 forms (duplicated
 // from Week 2); confirm against the live forms.
 import { popUpWeek2, popUpWeek2Locations } from "./popUpWeek2.js";
-import { makeSessionFactory, closedDay, weekPhase, sessionCount, zeffyCheckInUrl } from "./popUpShared.js";
+import { makeSessionFactory, closedDay, weekPhase, sessionCount } from "./popUpShared.js";
 
 export const popUpWeek3 = {
   // Shared copy and palette come from Week 1 via Week 2 (same campaign).
@@ -49,17 +49,21 @@ export const popUpWeek3Locations = [
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--3",
     // Own check-in form per week (never inherit Week 2's): /checkin.
     checkInFormId: "e06204c5-c967-406b-a6cb-28da0ff5a3a0",
-    checkInUrl: zeffyCheckInUrl("e06204c5-c967-406b-a6cb-28da0ff5a3a0"),
+    checkInUrl:
+      // cad-w3: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiZTA2MjA0YzUtYzk2Ny00MDZiLWE2Y2ItMjhkYTBmZjVhM2EwIiwiaWF0IjoxNzkxODQ4ODQ1LCJleHAiOjE4MjMzODQ4NDV9.-_XqYP4WULhDG_cfDu8DViP1SOUvComnb3YWCBqUkts",
     closedDays: [],
     sessions: [
       session("cad", "10-19", "06:00", "6:00 AM", "Yoga Flow", ["Benjamin Drury", "Lizette Vega"]),
-      session("cad", "10-19", "18:00", "6:00 PM", "Yoga Flow", ["Fabiola", "Courtney Luedke"]),
+      // Fabiola Saldaña (MarianaTek 6942, newest YTT cohort ids 6937-6953) is a working
+      // assumption flagged for Fez; the other roster Fabiola is Fabiola Davila (6556).
+      session("cad", "10-19", "18:00", "6:00 PM", "Yoga Flow", ["Fabiola Saldaña", "Courtney Luedke"]),
       session("cad", "10-20", "06:00", "6:00 AM", "Yoga Sculpt", ["Yaritza Jurado"]),
       session("cad", "10-20", "18:00", "6:00 PM", "Yoga Sculpt", ["Vanessa Tirado"]),
       session("cad", "10-21", "06:00", "6:00 AM", "Yoga Sculpt", ["Vero Quiñones"]),
       session("cad", "10-21", "18:00", "6:00 PM", "Yoga Sculpt", ["Alondra Alcazar"]),
       session("cad", "10-22", "06:00", "6:00 AM", "Strength Training", ["Jay Pena"]),
-      session("cad", "10-22", "18:00", "6:00 PM", "Yoga Sculpt", ["Juanita"]),
+      session("cad", "10-22", "18:00", "6:00 PM", "Yoga Sculpt", ["Juanita Barajas"]),
       session("cad", "10-23", "06:00", "6:00 AM", "Yoga Flow", ["Sarah Esparza", "Gisella Mitchell"]),
       session("cad", "10-24", "09:00", "9:00 AM", "Pilates", ["Ashley Reitz"]),
       session("cad", "10-25", "10:00", "10:00 AM", "Yoga Flow", ["Brenda Maldonado"]),
@@ -69,7 +73,9 @@ export const popUpWeek3Locations = [
     ...sancBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--3",
     checkInFormId: "b60b7dab-6277-485e-a97f-13c21c838c06",
-    checkInUrl: zeffyCheckInUrl("b60b7dab-6277-485e-a97f-13c21c838c06"),
+    checkInUrl:
+      // sanc-w3: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiYjYwYjdkYWItNjI3Ny00ODVlLWE5N2YtMTNjMjFjODM4YzA2IiwiaWF0IjoxNzkxODQ4ODg3LCJleHAiOjE4MjMzODQ4ODd9.YQTl-8N1WK-uWj95oI1XjctOz6Abki8ks9F49kPpfug",
     // Sat Oct 24: no classes at this location.
     closedDays: [closedDay("10-24")],
     sessions: [
@@ -77,7 +83,7 @@ export const popUpWeek3Locations = [
       session("sanc", "10-20", "06:00", "6:00 AM", "Yoga Flow", ["Giselle Castaneda", "Rosa Ortega"]),
       session("sanc", "10-21", "06:00", "6:00 AM", "Yoga Flow", ["Antonia Rosales", "Kellyn Mitchell"]),
       session("sanc", "10-22", "06:00", "6:00 AM", "Yoga Flow", ["Ghazala Irshad", "Marlene Garcia"]),
-      session("sanc", "10-22", "20:30", "8:30 PM", "Yoga Flow", ["Gigi", "Efren"]),
+      session("sanc", "10-22", "20:30", "8:30 PM", "Yoga Flow", ["Gigi Torres", "Efren Ramirez Jr"]),
       session("sanc", "10-23", "06:00", "6:00 AM", "Yoga Flow", ["Dinorah Zubieta"]),
       session("sanc", "10-25", "20:00", "8:00 PM", "Yoga Flow", ["Anabel Hernandez", "Jade Nguyen"]),
     ],

@@ -9,8 +9,9 @@
 // button per location that opens that week's Zeffy check-in manager, plus
 // The Collective Finish Line classes that fall inside the week
 // (src/data/collectiveFinishLine.js). Links come from each location's
-// `checkInUrl` (built by zeffyCheckInUrl in src/data/popUpShared.js); a
-// location without a form id yet renders a disabled "Link coming" button.
+// `checkInUrl`, a signed Zeffy check-in manager link stored in the data
+// file (see CHECK-IN LINKS in src/data/popUpShared.js); a location whose
+// checkInUrl is null renders a disabled "Link coming" button.
 //
 // For volunteers, not the public: noindex, not in the nav, not on /links,
 // excluded from the sitemap (astro.config.mjs). No passcode (the old
@@ -45,7 +46,7 @@ const groupOf = (week) => {
 const finishLineIn = (week) =>
   finishLineClasses.filter(
     (e) =>
-      "checkInFormId" in e &&
+      "checkInUrl" in e &&
       Date.parse(e.startsAtISO) >= Date.parse(week.startsAtISO) &&
       Date.parse(e.startsAtISO) <= Date.parse(week.endsAtISO),
   );
@@ -108,6 +109,9 @@ const byGroup = (g) => weeks.filter((w) => w.group === g);
 					<li><span>2</span>Find the attendee by name.</li>
 					<li><span>3</span>Tap check in.</li>
 				</ol>
+				<p class="ci-help">
+					These links open Zeffy's check-in screen directly, no Zeffy login needed.
+				</p>
 				<p class="ci-help">
 					Name missing? Email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
 				</p>

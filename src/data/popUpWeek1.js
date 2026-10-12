@@ -24,7 +24,6 @@
 // weeks plus the "current week" helpers live in src/data/popUpWeeks.js.
 // Week 2 (Oct 12 to 18) is src/data/popUpWeek2.js, same shape as this file.
 import {
-  zeffyCheckInUrl,
   instructorSlug,
   instructorInitials,
   instructorInfo,
@@ -118,7 +117,9 @@ export const popUpLocations = [
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-depart",
     // Zeffy form id for the volunteer check-in link on /checkin.
     checkInFormId: "8d4b8296-bf39-40d7-bd5f-e430108bd2a4",
-    checkInUrl: zeffyCheckInUrl("8d4b8296-bf39-40d7-bd5f-e430108bd2a4"),
+    checkInUrl:
+      // cad-w1: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiOGQ0YjgyOTYtYmYzOS00MGQ3LWJkNWYtZTQzMDEwOGJkMmE0IiwiaWF0IjoxNzkxODQ5MjA4LCJleHAiOjE4MjMzODUyMDh9.cn0SgVtbad7mq4YfSWmxW-AgnKG_FxHbT0Mq_FpdD9E",
     ticketsLabel: "Reserve at Chicago Art Dept",
     ticketsLabelEs: "Reserva en Chicago Art Dept",
     // Zeffy class registrations count as class booking intent (design.md
@@ -160,9 +161,10 @@ export const popUpLocations = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=1843+S+Racine+Ave+Chicago+IL+60608",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health",
-    // Form id not known yet: /checkin shows "Link coming" until filled.
-    checkInFormId: "",
-    checkInUrl: zeffyCheckInUrl(""),
+    checkInFormId: "c42308c5-6c5f-4243-958d-5492ad842368",
+    checkInUrl:
+      // sanc-w1: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiYzQyMzA4YzUtNmM1Zi00MjQzLTk1OGQtNTQ5MmFkODQyMzY4IiwiaWF0IjoxNzkxODQ5MzIyLCJleHAiOjE4MjMzODUzMjJ9.q55nyFNb_N0FPkNjwQ_3Ql_K6v7sVYEEvm73_gX-iyg",
     ticketsLabel: "Reserve at Sanctuary Health",
     ticketsLabelEs: "Reserva en Sanctuary Health",
     conversionEvent: "class_booking_start",
