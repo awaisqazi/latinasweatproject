@@ -16,7 +16,7 @@
 // Zeffy ticket URLs are the expected slugs of the Week 4 forms (duplicated
 // from Week 2); confirm against the live forms.
 import { popUpWeek2, popUpWeek2Locations } from "./popUpWeek2.js";
-import { makeSessionFactory, closedDay, weekPhase, sessionCount } from "./popUpShared.js";
+import { makeSessionFactory, closedDay, weekPhase, sessionCount, zeffyCheckInUrl } from "./popUpShared.js";
 
 export const popUpWeek4 = {
   ...popUpWeek2,
@@ -47,6 +47,9 @@ export const popUpWeek4Locations = [
   {
     ...cadBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--4",
+    // Own check-in form per week (never inherit Week 2's): /checkin.
+    checkInFormId: "6f61be34-6b5a-4dd0-b2af-2844e31ae677",
+    checkInUrl: zeffyCheckInUrl("6f61be34-6b5a-4dd0-b2af-2844e31ae677"),
     noticeLine: "No weekend classes at Chicago Art Dept this week.",
     closedDays: [],
     sessions: [
@@ -64,6 +67,9 @@ export const popUpWeek4Locations = [
   {
     ...sancBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--4",
+    // Form id not known yet: /checkin shows "Link coming" until filled.
+    checkInFormId: "",
+    checkInUrl: zeffyCheckInUrl(""),
     // Sat Oct 31: no classes at this location.
     closedDays: [closedDay("10-31")],
     sessions: [

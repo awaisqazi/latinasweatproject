@@ -1,14 +1,347 @@
 ---
+// /checkin: volunteer check-in at the door.
+//
+// Oct 12, 2026: the Supabase volunteer SHIFT check-in (CheckInApp) is
+// paused during the pop-up era and gated by showVolunteerCheckIn in
+// src/data/volunteerCheckIn.js (one flip brings it back here unchanged).
+// While it is off, this route is "Pop-up class check-in": for each Pop Up
+// week (src/data/popUpWeeks.js, so it follows every week file) one big
+// button per location that opens that week's Zeffy check-in manager, plus
+// The Collective Finish Line classes that fall inside the week
+// (src/data/collectiveFinishLine.js). Links come from each location's
+// `checkInUrl` (built by zeffyCheckInUrl in src/data/popUpShared.js); a
+// location without a form id yet renders a disabled "Link coming" button.
+//
+// For volunteers, not the public: noindex, not in the nav, not on /links,
+// excluded from the sitemap (astro.config.mjs). No passcode (the old
+// kiosk had none either).
+//
+// Order: the current week (live, else next upcoming) first and open,
+// later weeks collapsed under "Coming up", ended weeks collapsed under
+// "Past weeks". Decided at build time and again in the browser from each
+// week's data-week-start / data-week-end, so the Monday flip needs no
+// rebuild. A "Today" line names the location's classes today.
+//
+// Identity: Option I (cream / terracotta / ink, Rubik), stripped down:
+// no sun, no mark, no decoration. Chicago Art Dept = paper card,
+// Sanctuary Health = ink card (design.md Option I rule).
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import CheckInApp from "../components/CheckInApp.svelte";
+import WeekBlock from "../components/PopUpCheckInWeek.astro";
+import { showVolunteerCheckIn } from "../data/volunteerCheckIn.js";
+import { popUpWeeks, currentPopUpWeek, popUpWeekPhase } from "../data/popUpWeeks.js";
+import { activeSessions } from "../data/popUpShared.js";
+import { finishLineClasses, collectiveFinishLine } from "../data/collectiveFinishLine.js";
+
+const contactEmail = "collab@latinasweatproject.com";
+const current = currentPopUpWeek();
+const groupOf = (week) => {
+  if (current && week.id === current.id) return "current";
+  return popUpWeekPhase(week) === "past" ? "past" : "upcoming";
+};
+
+// Finish Line classes with a check-in form, inside a week's bounds.
+const finishLineIn = (week) =>
+  finishLineClasses.filter(
+    (e) =>
+      "checkInFormId" in e &&
+      Date.parse(e.startsAtISO) >= Date.parse(week.startsAtISO) &&
+      Date.parse(e.startsAtISO) <= Date.parse(week.endsAtISO),
+  );
+
+// "6:00 AM" per date (YYYY-MM-DD), classes going ahead only.
+const timesByDate = (sessions) => {
+  const out = {};
+  for (const s of sessions) (out[s.date] ??= []).push(s.time);
+  return out;
+};
+
+const weeks = popUpWeeks.map((week) => ({
+  week,
+  group: groupOf(week),
+  buttons: [
+    ...week.locations.map((loc) => ({
+      key: loc.id,
+      title: loc.shortName,
+      sub: loc.shortLabel,
+      url: loc.checkInUrl,
+      dark: loc.theme === "dark" || loc.id === "sanctuary-health",
+      times: timesByDate(activeSessions(loc)),
+    })),
+    ...finishLineIn(week).map((e) => ({
+      key: e.id,
+      title: collectiveFinishLine.title,
+      sub: `${e.dayShort} ${e.dateLabel} · ${e.timeLabel} · ${e.venueShort}`,
+      url: e.checkInUrl,
+      dark: false,
+      times: { [e.date]: [e.timeLabel.split(" – ")[0] + " PM"] },
+    })),
+  ],
+}));
+const byGroup = (g) => weeks.filter((w) => w.group === g);
 ---
 
-<Layout title="Volunteer Check-in | The Latina Sweat Project">
-	<Header />
-	<main class="min-h-screen bg-gray-50">
-		<div class="py-12">
-			<CheckInApp client:load />
-		</div>
-	</main>
-</Layout>
+{showVolunteerCheckIn ? (
+	<Layout title="Volunteer Check-in | The Latina Sweat Project">
+		<Header />
+		<main class="min-h-screen bg-gray-50">
+			<div class="py-12">
+				<CheckInApp client:load />
+			</div>
+		</main>
+	</Layout>
+) : (
+	<Layout
+		title="Pop-up class check-in | The Latina Sweat Project"
+		description="Volunteer check-in links for LSP pop-up classes."
+		robots="noindex, nofollow"
+	>
+		<Header />
+		<main class="ci-page">
+			<div class="mx-auto max-w-xl px-4 pb-16 pt-8 sm:pt-12">
+				<p class="ci-kicker">Volunteers</p>
+				<h1 class="ci-title">Pop-up class <span class="whitespace-nowrap">check-in</span></h1>
+
+				<ol class="ci-steps">
+					<li><span>1</span>Open the link for today's location.</li>
+					<li><span>2</span>Find the attendee by name.</li>
+					<li><span>3</span>Tap check in.</li>
+				</ol>
+				<p class="ci-help">
+					Name missing? Email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+				</p>
+
+				{/* Week sections are built once and placed in a group at build
+				    time; the script below re-sorts them in the browser. */}
+				<div id="ci-current" class="mt-8">
+					{byGroup("current").map(({ week, buttons }) => (
+						<WeekBlock week={week} buttons={buttons} />
+					))}
+				</div>
+				<p id="ci-none" class="ci-note" hidden={!!current}>
+					No pop-up week is scheduled right now. Past weeks are below.
+				</p>
+
+				<details id="ci-upcoming-wrap" class="ci-fold" hidden={byGroup("upcoming").length === 0}>
+					<summary>Coming up</summary>
+					<div id="ci-upcoming">
+						{byGroup("upcoming").map(({ week, buttons }) => (
+							<WeekBlock week={week} buttons={buttons} />
+						))}
+					</div>
+				</details>
+
+				<details id="ci-past-wrap" class="ci-fold" hidden={byGroup("past").length === 0}>
+					<summary>Past weeks</summary>
+					<div id="ci-past">
+						{byGroup("past").reverse().map(({ week, buttons }) => (
+							<WeekBlock week={week} buttons={buttons} />
+						))}
+					</div>
+				</details>
+			</div>
+		</main>
+	</Layout>
+)}
+
+<script>
+	// Re-sort week sections by the browser clock (build may be stale):
+	// current = live week, else the next upcoming one; later weeks under
+	// "Coming up", ended weeks under "Past weeks" (newest first). Also
+	// fills each button's "Today" line from data-times.
+	const root = document.getElementById("ci-current");
+	if (root) {
+		const now = Date.now();
+		const blocks = [...document.querySelectorAll<HTMLElement>("[data-week-start]")].sort(
+			(a, b) => Date.parse(a.dataset.weekStart!) - Date.parse(b.dataset.weekStart!),
+		);
+		const isPast = (el: HTMLElement) => now > Date.parse(el.dataset.weekEnd!);
+		const current = blocks.find((el) => !isPast(el)) ?? null;
+		const upcoming = document.getElementById("ci-upcoming")!;
+		const past = document.getElementById("ci-past")!;
+		for (const el of blocks) {
+			if (el === current) root.append(el);
+			else if (isPast(el)) past.prepend(el);
+			else upcoming.append(el);
+		}
+		document.getElementById("ci-none")!.hidden = !!current;
+		document.getElementById("ci-upcoming-wrap")!.hidden = upcoming.children.length === 0;
+		document.getElementById("ci-past-wrap")!.hidden = past.children.length === 0;
+
+		// Today's date in Chicago as YYYY-MM-DD.
+		const today = new Intl.DateTimeFormat("en-CA", {
+			timeZone: "America/Chicago",
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		}).format(new Date());
+		for (const btn of document.querySelectorAll<HTMLElement>("[data-times]")) {
+			const times = JSON.parse(btn.dataset.times || "{}")[today];
+			const line = btn.querySelector<HTMLElement>("[data-today]");
+			if (line && times?.length) {
+				line.textContent = `Today · ${times.join(" · ")}`;
+				line.hidden = false;
+			}
+		}
+	}
+</script>
+
+<style is:global>
+	.ci-page {
+		--ci-cream: #f3ede4;
+		--ci-paper: #fdfbf7;
+		--ci-terracotta: #c4573a;
+		--ci-ink: #1e1a17;
+		--ci-mustard: #e0a83a;
+		--ci-muted: #6f6760;
+		background: var(--ci-cream);
+		color: var(--ci-ink);
+		min-height: 70vh;
+	}
+	.ci-kicker {
+		color: var(--ci-terracotta);
+		font-size: 0.75rem;
+		font-weight: 800;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+	}
+	.ci-title {
+		margin-top: 0.4rem;
+		font-size: 2.1rem;
+		line-height: 1.05;
+		font-weight: 900;
+		letter-spacing: -0.02em;
+	}
+	.ci-steps {
+		margin-top: 1.25rem;
+		display: grid;
+		gap: 0.6rem;
+		font-size: 1.0625rem;
+		font-weight: 600;
+	}
+	.ci-steps li {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.ci-steps span {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 999px;
+		background: var(--ci-ink);
+		color: var(--ci-cream);
+		font-size: 0.875rem;
+		font-weight: 800;
+	}
+	.ci-help {
+		margin-top: 1rem;
+		font-size: 0.95rem;
+		color: var(--ci-muted);
+	}
+	.ci-help a {
+		color: var(--ci-ink);
+		font-weight: 700;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		word-break: break-word;
+	}
+	.ci-week + .ci-week {
+		margin-top: 1.75rem;
+	}
+	.ci-week-label {
+		font-size: 0.8rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--ci-terracotta);
+	}
+	.ci-buttons {
+		margin-top: 0.75rem;
+		display: grid;
+		gap: 0.75rem;
+	}
+	.ci-btn {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: 5.5rem;
+		padding: 1.1rem 1.25rem;
+		border-radius: 1.25rem;
+		background: var(--ci-paper);
+		color: var(--ci-ink);
+		border: 1px solid rgba(30, 26, 23, 0.12);
+		text-decoration: none;
+		transition: transform 0.12s ease;
+	}
+	.ci-btn:active {
+		transform: scale(0.985);
+	}
+	.ci-btn:focus-visible {
+		outline: 3px solid var(--ci-terracotta);
+		outline-offset: 3px;
+	}
+	.ci-btn--dark {
+		background: var(--ci-ink);
+		color: var(--ci-cream);
+		border-color: var(--ci-ink);
+	}
+	.ci-btn-title {
+		display: block;
+		font-size: 1.3rem;
+		font-weight: 800;
+		line-height: 1.15;
+	}
+	.ci-btn-sub {
+		display: block;
+		margin-top: 0.2rem;
+		font-size: 0.9rem;
+		opacity: 0.72;
+	}
+	.ci-btn-today {
+		display: block;
+		margin-top: 0.4rem;
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--ci-terracotta);
+	}
+	.ci-btn--dark .ci-btn-today {
+		color: var(--ci-mustard);
+	}
+	.ci-btn-go {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.95rem;
+		font-weight: 800;
+		white-space: nowrap;
+	}
+	.ci-btn[aria-disabled="true"] {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.ci-note {
+		margin-top: 2rem;
+		font-weight: 600;
+	}
+	.ci-fold {
+		margin-top: 2rem;
+		border-top: 1px solid rgba(30, 26, 23, 0.15);
+		padding-top: 1rem;
+	}
+	.ci-fold summary {
+		cursor: pointer;
+		font-size: 1rem;
+		font-weight: 800;
+		padding: 0.5rem 0;
+	}
+	.ci-fold[open] summary {
+		margin-bottom: 1rem;
+	}
+</style>

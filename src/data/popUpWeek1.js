@@ -24,6 +24,7 @@
 // weeks plus the "current week" helpers live in src/data/popUpWeeks.js.
 // Week 2 (Oct 12 to 18) is src/data/popUpWeek2.js, same shape as this file.
 import {
+  zeffyCheckInUrl,
   instructorSlug,
   instructorInitials,
   instructorInfo,
@@ -115,6 +116,9 @@ export const popUpLocations = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=1926+S+Halsted+St+Chicago+IL+60608",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-depart",
+    // Zeffy form id for the volunteer check-in link on /checkin.
+    checkInFormId: "8d4b8296-bf39-40d7-bd5f-e430108bd2a4",
+    checkInUrl: zeffyCheckInUrl("8d4b8296-bf39-40d7-bd5f-e430108bd2a4"),
     ticketsLabel: "Reserve at Chicago Art Dept",
     ticketsLabelEs: "Reserva en Chicago Art Dept",
     // Zeffy class registrations count as class booking intent (design.md
@@ -156,6 +160,9 @@ export const popUpLocations = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=1843+S+Racine+Ave+Chicago+IL+60608",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health",
+    // Form id not known yet: /checkin shows "Link coming" until filled.
+    checkInFormId: "",
+    checkInUrl: zeffyCheckInUrl(""),
     ticketsLabel: "Reserve at Sanctuary Health",
     ticketsLabelEs: "Reserva en Sanctuary Health",
     conversionEvent: "class_booking_start",

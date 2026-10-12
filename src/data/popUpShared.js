@@ -150,5 +150,14 @@ export const weekPhase = (week, now = new Date()) => {
   return "past";
 };
 
+// Zeffy check-in manager link for a form (volunteers check people in at the
+// door from /checkin). THE ONE place the URL pattern lives: each week file
+// stores only `checkInFormId` and derives `checkInUrl` through this helper.
+// The pattern is a placeholder pending verification against Zeffy; if it is
+// wrong, fix it here and every button follows. An empty id returns null and
+// /checkin renders that location's button disabled ("Link coming").
+export const ZEFFY_CHECK_IN_BASE = "https://www.zeffy.com/en-US/o/check-in/";
+export const zeffyCheckInUrl = (formId) => (formId ? `${ZEFFY_CHECK_IN_BASE}${formId}` : null);
+
 // Classes going ahead (cancelled excluded).
 export const sessionCount = (locations) => locations.reduce((n, l) => n + activeSessions(l).length, 0);

@@ -22,7 +22,7 @@
 // Line post-marathon flow (its own Zeffy form, src/data/collectiveFinishLine.js),
 // not part of this week's form, so it is not listed here.
 import { popUpWeek1 } from "./popUpWeek1.js";
-import { makeSessionFactory, weekPhase, sessionCount } from "./popUpShared.js";
+import { makeSessionFactory, weekPhase, sessionCount, zeffyCheckInUrl } from "./popUpShared.js";
 
 export const popUpWeek2 = {
   // Shared copy and palette come from Week 1 (same campaign, same lines).
@@ -69,6 +69,9 @@ export const popUpWeek2Locations = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=1926+S+Halsted+St+Chicago+IL+60608",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--2",
+    // Zeffy form id for the volunteer check-in link on /checkin.
+    checkInFormId: "eae506ef-99dc-4467-aa02-af818e2c3253",
+    checkInUrl: zeffyCheckInUrl("eae506ef-99dc-4467-aa02-af818e2c3253"),
     ticketsLabel: "Reserve at Chicago Art Dept",
     ticketsLabelEs: "Reserva en Chicago Art Dept",
     conversionEvent: "class_booking_start",
@@ -103,6 +106,8 @@ export const popUpWeek2Locations = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=1843+S+Racine+Ave+Chicago+IL+60608",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--2",
+    checkInFormId: "5ae4e8d0-7345-4111-a184-1f6223efcfa4",
+    checkInUrl: zeffyCheckInUrl("5ae4e8d0-7345-4111-a184-1f6223efcfa4"),
     ticketsLabel: "Reserve at Sanctuary Health",
     ticketsLabelEs: "Reserva en Sanctuary Health",
     conversionEvent: "class_booking_start",

@@ -15,7 +15,7 @@
 // Zeffy ticket URLs are the expected slugs of the Week 3 forms (duplicated
 // from Week 2); confirm against the live forms.
 import { popUpWeek2, popUpWeek2Locations } from "./popUpWeek2.js";
-import { makeSessionFactory, closedDay, weekPhase, sessionCount } from "./popUpShared.js";
+import { makeSessionFactory, closedDay, weekPhase, sessionCount, zeffyCheckInUrl } from "./popUpShared.js";
 
 export const popUpWeek3 = {
   // Shared copy and palette come from Week 1 via Week 2 (same campaign).
@@ -47,6 +47,9 @@ export const popUpWeek3Locations = [
   {
     ...cadBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--3",
+    // Own check-in form per week (never inherit Week 2's): /checkin.
+    checkInFormId: "e06204c5-c967-406b-a6cb-28da0ff5a3a0",
+    checkInUrl: zeffyCheckInUrl("e06204c5-c967-406b-a6cb-28da0ff5a3a0"),
     closedDays: [],
     sessions: [
       session("cad", "10-19", "06:00", "6:00 AM", "Yoga Flow", ["Benjamin Drury", "Lizette Vega"]),
@@ -65,6 +68,8 @@ export const popUpWeek3Locations = [
   {
     ...sancBase,
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--3",
+    checkInFormId: "b60b7dab-6277-485e-a97f-13c21c838c06",
+    checkInUrl: zeffyCheckInUrl("b60b7dab-6277-485e-a97f-13c21c838c06"),
     // Sat Oct 24: no classes at this location.
     closedDays: [closedDay("10-24")],
     sessions: [

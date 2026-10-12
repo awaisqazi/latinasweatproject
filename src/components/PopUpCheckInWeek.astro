@@ -1,0 +1,57 @@
+---
+// One Pop Up week on /checkin: the week label and one big button per
+// location (plus any Collective Finish Line class that week). A button
+// without a check-in URL (Zeffy form id not filled in yet) renders
+// disabled with "Link coming". Styles live in src/pages/checkin.astro.
+interface Button {
+  key: string;
+  title: string;
+  sub: string;
+  url: string | null;
+  dark: boolean;
+  times: Record<string, string[]>;
+}
+interface Props {
+  week: { id: string; title: string; dateRangeShort: string; startsAtISO: string; endsAtISO: string };
+  buttons: Button[];
+}
+const { week, buttons } = Astro.props;
+---
+
+<section class="ci-week" data-week-start={week.startsAtISO} data-week-end={week.endsAtISO} aria-label={`${week.title}, ${week.dateRangeShort}`}>
+  <h2 class="ci-week-label">{week.title} · {week.dateRangeShort}</h2>
+  <div class="ci-buttons">
+    {buttons.map((b) =>
+      b.url ? (
+        <a
+          href={b.url}
+          target="_blank"
+          rel="noopener"
+          class:list={["ci-btn", b.dark && "ci-btn--dark"]}
+          data-times={JSON.stringify(b.times)}
+        >
+          <span>
+            <span class="ci-btn-title">{b.title}</span>
+            <span class="ci-btn-sub">{b.sub}</span>
+            <span class="ci-btn-today" data-today hidden></span>
+          </span>
+          <span class="ci-btn-go">
+            Check in
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </span>
+        </a>
+      ) : (
+        <div class:list={["ci-btn", b.dark && "ci-btn--dark"]} aria-disabled="true" data-times={JSON.stringify(b.times)}>
+          <span>
+            <span class="ci-btn-title">{b.title}</span>
+            <span class="ci-btn-sub">{b.sub}</span>
+            <span class="ci-btn-today" data-today hidden></span>
+          </span>
+          <span class="ci-btn-go">Link coming</span>
+        </div>
+      )
+    )}
+  </div>
+</section>
