@@ -1354,7 +1354,7 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
               </p>
               <p>
                 This fall, LSP is pop-up across the neighborhood: classes and
-                community programming around Pilsen while we build our
+                community programming around Pilsen and nearby while we build our
                 permanent home, opening early 2027.
               </p>
               <p>
@@ -1474,6 +1474,55 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
           </div>
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
+
+          {/* Pop Up week card (current week only; one card per active week,
+              windowed by popUpWeekWindow so the browser flips it Mon to Mon
+              with no rebuild). Leads the carousel: pop-ups are the class
+              offering while studio programming is paused. Option I cream /
+              terracotta / ink; image = the week's OG card. A direct child of
+              #events-carousel; the dots script skips hidden cards. */}
+          {popUpWeeksActive.map((week, i) => (
+            <a
+              href={popUpPageUrl}
+              class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+              {...popUpWeekWindow(popUpWeeksActive, i)}
+              data-popup-hide-when-past
+              data-conversion-event="popup_page_click"
+              data-conversion-context="home_events_carousel_popup"
+            >
+              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f3ede4] text-[#1e1a17] shadow-xl shadow-off-black/15 ring-1 ring-[#1e1a17]/10 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                <div class="relative aspect-[1200/630] overflow-hidden bg-[#f3ede4]">
+                  <img
+                    src={`${base}${week.ogImage}`}
+                    width="1200"
+                    height="630"
+                    alt={week.ogImageAlt}
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-center gap-2 text-sm font-bold text-[#c4573a]">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {week.dateRangeShort}
+                  </div>
+                  <h3 class="mt-2 text-xl font-extrabold uppercase leading-tight tracking-tight">{week.title}</h3>
+                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#1e1a17]/75">
+                    45-minute classes at {week.locations.map((l) => l.name).join(", ").replace(/, ([^,]*)$/, " and $1")}. Reserve one class at a time.
+                  </p>
+                  <span class="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-[#c4573a] transition-all group-hover:gap-2">
+                    See the schedule
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
 
           {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the
               carousel while the series is not past. A div (not an <a>) so
@@ -1807,10 +1856,21 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
         if (!carousel) return;
 
         // Skip a campaign card that the page auto-hides once its series is
-        // past (data-finishline-end), so the dots match the visible cards.
+        // past (data-finishline-end) or that is outside its Pop Up week
+        // window (data-popup-show-after / -hide-after, the same rule as
+        // PopUpWeekClient), so the dots match the visible cards whichever
+        // script runs first.
+        const passed = (iso) => {
+          const t = Date.parse(iso || '');
+          return Number.isFinite(t) && Date.now() > t;
+        };
         const cards = Array.from(carousel.children).filter((card) => {
-          const end = Date.parse(card.getAttribute('data-finishline-end') || '');
-          return !(Number.isFinite(end) && Date.now() > end);
+          if (passed(card.getAttribute('data-finishline-end'))) return false;
+          const showAfter = card.getAttribute('data-popup-show-after');
+          const hideAfter = card.getAttribute('data-popup-hide-after');
+          if (showAfter && !passed(showAfter)) return false;
+          if (hideAfter && passed(hideAfter)) return false;
+          return true;
         });
         const isScrollable = () => carousel.scrollWidth > carousel.clientWidth + 4;
 

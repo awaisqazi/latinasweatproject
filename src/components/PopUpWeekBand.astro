@@ -18,7 +18,7 @@
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
 import { activeSessions, locationInstructors, locationsSummary, weekPhase } from "@/data/popUpShared";
-import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
+import { activePopUpWeeks, popUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 
 interface Props {
   context: string;
@@ -28,10 +28,16 @@ interface Props {
 }
 const weeks = activePopUpWeeks();
 // Default heading per week: "This week LSP is pop-up" once that week is
-// live at build time; before that, the campaign headline (always true).
+// live at build time, and for every later band (a later band only shows
+// once the previous week has ended, i.e. while it is live); only a first
+// band that is still upcoming at build time uses the campaign headline.
 const { context, tone = "light", heading: headingProp, class: className = "" } = Astro.props;
-const headingFor = (week) =>
-  headingProp ?? (weekPhase(week) === "live" ? "This week LSP is pop-up" : week.headline);
+const headingFor = (week, i) =>
+  headingProp ?? (i > 0 || weekPhase(week) === "live" ? "This week LSP is pop-up" : week.headline);
+// "Coming up" teaser: the week after this band's week (any week in the
+// series, so Week 3's Southside Social shows a week early), deep-linked
+// with /popup?week=N.
+const nextWeekAfter = (week) => popUpWeeks[popUpWeeks.findIndex((w) => w.id === week.id) + 1];
 const base = import.meta.env.BASE_URL;
 const dark = tone === "dark";
 const nextLineData = (loc) =>
@@ -59,7 +65,7 @@ const nextLineData = (loc) =>
           ))}
         </p>
         <h2 class="popup-band-heading mt-2 font-sans text-2xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-3xl">
-          {headingFor(week).split("pop-up").map((part, i) => (
+          {headingFor(week, i).split("pop-up").map((part, i) => (
             <>{i > 0 && <span class="whitespace-nowrap">pop-up</span>}{part}</>
           ))}
         </h2>
@@ -117,6 +123,18 @@ const nextLineData = (loc) =>
             </div>
           ))}
         </div>
+
+        {[nextWeekAfter(week)].filter(Boolean).map((nw) => (
+            <a
+              href={`${base}${nw.pagePath}?week=${nw.number}`}
+              class="popup-band-next mt-4 block text-sm leading-snug underline-offset-4 hover:underline"
+              data-conversion-event="popup_page_click"
+              data-conversion-context={`${context}_next_week`}
+            >
+              <span class="popup-band-next-tag mr-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em]">Coming up</span>
+              {nw.title} · {nw.dateRangeShort} · {locationsSummary(nw).en} in {locationsSummary(nw).placesLabel}
+            </a>
+        ))}
 
         <a
           href={`${base}${week.pagePath}`}
@@ -177,6 +195,18 @@ const nextLineData = (loc) =>
   }
   .popup-band--dark .popup-band-body {
     color: rgba(243, 237, 228, 0.72);
+  }
+  .popup-band--light .popup-band-next {
+    color: rgba(30, 26, 23, 0.75);
+  }
+  .popup-band--dark .popup-band-next {
+    color: rgba(243, 237, 228, 0.72);
+  }
+  .popup-band-next-tag {
+    color: var(--pu-terracotta);
+  }
+  .popup-band--dark .popup-band-next-tag {
+    color: var(--pu-mustard);
   }
   .popup-mini--paper {
     background: var(--pu-paper);

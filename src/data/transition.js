@@ -71,7 +71,7 @@ export const studioTransition = {
     heading: "Where to move with us",
     body:
       "This fall, LSP is popping up across the neighborhood: classes and " +
-      "community programming around Pilsen. Reserve your spot for each " +
+      "community programming around Pilsen and nearby. Reserve your spot for each " +
       "class below.",
     // Shown once every dated pop-up has wrapped (and as the closing line
     // while they are live), so the section never reads as an empty box.
@@ -79,7 +79,7 @@ export const studioTransition = {
     moreLineTail: "on Instagram for new dates and locations.",
     pastBody:
       "This fall, LSP is popping up across the neighborhood: classes and " +
-      "community programming around Pilsen.",
+      "community programming around Pilsen and nearby.",
     instagramHandle: "@latinasweatproject",
     instagramUrl: "https://www.instagram.com/latinasweatproject/",
   },

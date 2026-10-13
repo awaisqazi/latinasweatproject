@@ -12,7 +12,7 @@ import {
 import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
-import { activePopUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
+import { activePopUpWeeks, popUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
 import { locationsSummary } from "@/data/popUpShared";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 import {
@@ -66,10 +66,17 @@ const abc7BylineEs = abc7Feature.bylineEs.split(" · ");
 const popUpWeeksActive = activePopUpWeeks();
 const popUpActive = popUpWeeksActive.length > 0;
 const popUpDayEs = { Mon: "Lun", Tue: "Mar", Wed: "Mié", Thu: "Jue", Fri: "Vie", Sat: "Sáb", Sun: "Dom" };
-const popUpRowEs = (s) => {
-  const [, day] = s.dateLabel.split(" ");
-  return `${popUpDayEs[s.dayShort] ?? s.dayShort} ${day} Oct · ${s.time}`;
-};
+// "Oct 12" -> "12 Oct", "Nov 1" -> "1 Nov" (the month comes from the data;
+// Week 4 ends Nov 1).
+const popUpDateEs = (label) => label.replace(/([A-Z][a-z]{2}) (\d+)/g, "$2 $1");
+const popUpRowEs = (s) => `${popUpDayEs[s.dayShort] ?? s.dayShort} ${popUpDateEs(s.dateLabel)} · ${s.time}`;
+// Range pill: "Oct 19 – 25" -> "19 – 25 Oct"; "Oct 26 – Nov 1" -> "26 Oct – 1 Nov".
+const popUpRangeEs = (range) =>
+  /^[A-Z][a-z]{2} \d+ – \d+$/.test(range)
+    ? range.replace(/^([A-Z][a-z]{2}) (\d+) – (\d+)$/, "$2 – $3 $1")
+    : popUpDateEs(range);
+// Next week after a week (the card's "Coming up" line, /popup?week=N).
+const popUpNextWeek = (week) => popUpWeeks[popUpWeeks.findIndex((w) => w.id === week.id) + 1];
 
 // The Collective Finish Line (Oct 5 – 14, 2026, marathon week): its card
 // and bubble sit SECOND (right after Pop Up Week 1) while the series is not
@@ -512,7 +519,7 @@ const getLinkConversionProvider = (url = "") => {
                   <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#e0a83a]"></span>
                 </span>
                 <span class="lang-en">{week.dateRangeShort}</span>
-                <span class="lang-es hidden">{week.dateRangeShort.replace(/^Oct (.+)$/, "$1 Oct")}</span>
+                <span class="lang-es hidden">{popUpRangeEs(week.dateRangeShort)}</span>
               </span>
             </div>
             <p class="mt-4 pr-16 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
@@ -520,8 +527,9 @@ const getLinkConversionProvider = (url = "") => {
               <span class="lang-es hidden">{week.title} · {locationsSummary(week).es}</span>
             </p>
             <h2 class="mt-1 pr-10 text-[1.9rem] font-black uppercase leading-[0.92] tracking-tight text-[#1e1a17] sm:text-4xl">
-              <span class="lang-en">LSP Pop Up · Pilsen</span>
-              <span class="lang-es hidden">LSP Pop Up · Pilsen</span>
+              {week.headline.length > 20
+                ? week.headline.split(" · ").map((part) => <span class="block">{part}</span>)
+                : week.headline}
             </h2>
             <p class="mt-3 text-sm font-semibold leading-relaxed text-[#1e1a17]/75">
               <span class="lang-en">Programming at our studio is paused, so this week the classes come to the neighborhood. {week.matsLine}</span>
@@ -619,6 +627,21 @@ const getLinkConversionProvider = (url = "") => {
               <span class="lang-en">{week.changeOfPlansLine}</span>
               <span class="lang-es hidden">Si cambian tus planes, escribe a {week.changeOfPlansEmail} para que otra persona de la comunidad pueda tomar tu lugar.</span>
             </p>
+            {[popUpNextWeek(week)].filter(Boolean).map((nw) => (
+              <a
+                href={`${withBase(nw.pagePath)}?week=${nw.number}`}
+                class="mt-3 block rounded-xl border border-[#1e1a17]/10 px-3.5 py-2.5 text-[12px] font-semibold leading-snug text-[#1e1a17]/75 transition hover:border-[#c4573a]/50"
+                data-conversion-event="popup_page_click"
+                data-conversion-context="links_popup_card_next_week"
+              >
+                <span class="mr-1 text-[9px] font-extrabold uppercase tracking-widest text-[#c4573a]">
+                  <span class="lang-en">Coming up</span>
+                  <span class="lang-es hidden">Próximamente</span>
+                </span>
+                <span class="lang-en">{nw.title} · {nw.dateRangeShort} · {locationsSummary(nw).en} in {locationsSummary(nw).placesLabel}</span>
+                <span class="lang-es hidden">{nw.title} · {popUpRangeEs(nw.dateRangeShort)} · {locationsSummary(nw).es} en {locationsSummary(nw).placesLabel}</span>
+              </a>
+            ))}
             <a
               href={withBase(week.pagePath)}
               class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"

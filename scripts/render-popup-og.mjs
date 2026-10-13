@@ -17,11 +17,17 @@
 //        node scripts/render-popup-og.mjs 2          (one week by number)
 //        node scripts/render-popup-og.mjs 2 --out <dir>  (write to <dir>
 //        instead of public/, keeping the relative paths; for comparisons)
+//
+// Two-location weeks keep the original layout (byte-identical). A
+// three-location week (Week 3 adds Southside Social) gets the count +
+// neighborhoods kicker from locationsSummary() and three two-line text
+// lockups (name over cross streets); venue names are text only, never logos.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { mkdirSync } from "node:fs";
 import { popUpWeeks } from "../src/data/popUpWeeks.js";
+import { locationsSummary } from "../src/data/popUpShared.js";
 import * as lsp from "/Users/fezqazi/.claude/skills/lsp-event-graphics/scripts/lsp_graphics.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,6 +61,30 @@ const outFile = (rel) => {
 const W1_PILL = "OCTOBER 5 – 11".length;
 const W1_HL_PILL = "OCT 5 – 11".length;
 
+// Three-location venue row: kicker + three equal cards (x 72 to 1128),
+// name on top, cross streets below. Ink card for a dark-theme location
+// (Sanctuary Health keeps its serif lockup), paper otherwise.
+const venueRow3 = (w) => {
+  const sum = locationsSummary(w);
+  const gap = 16, x0 = 72, total = 1128 - x0, n = w.locations.length;
+  const cw = (total - gap * (n - 1)) / n;
+  const kicker = `${sum.en} · ${sum.placesLabel}`.toUpperCase();
+  return [
+    t(kicker, 72, 516, 16, { fill: c.muted, weight: 700, tracking: 3 }),
+    ...w.locations.map((loc, i) => {
+      const x = x0 + i * (cw + gap);
+      const ink = loc.theme === "dark";
+      const serif = loc.id === "sanctuary-health";
+      const streets = String(loc.shortLabel).split(" · ").slice(-1)[0].toUpperCase();
+      return `<rect x="${x}" y="530" width="${cw}" height="76" rx="16" fill="${ink ? c.ink : c.paper}"/>
+  ${t(loc.name.toUpperCase().replace("DEPARTMENT", "DEPT"), x + 22, 564, 21, serif
+        ? { fill: c.cream, weight: 600, tracking: 3, family: "Georgia, serif" }
+        : { fill: c.ink, weight: 800, tracking: 2 })}
+  ${t(streets, x + 22, 588, 14, { fill: ink ? c.mustard : c.terracotta, weight: 800, tracking: 2 })}`;
+    }),
+  ].join("\n  ");
+};
+
 for (const w of weeks) {
 const [cad, sanc] = w.locations;
 const pill = w.datePill.toUpperCase();
@@ -73,13 +103,13 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" v
   ${t(`WEEK ${w.number}`, 64, 382, 170, { family: DISPLAY, weight: 700, tracking: -2 })}
   <rect x="72" y="412" width="${pillW}" height="56" rx="28" fill="${c.ink}"/>
   ${t(pill, 72 + pillW / 2, 449, 22, { fill: c.cream, weight: 800, tracking: 3, anchor: "middle" })}
-  ${t("TWO LOCATIONS IN PILSEN", 72, 520, 16, { fill: c.muted, weight: 700, tracking: 3 })}
+  ${w.locations.length > 2 ? venueRow3(w) : `${t("TWO LOCATIONS IN PILSEN", 72, 520, 16, { fill: c.muted, weight: 700, tracking: 3 })}
   <rect x="72" y="536" width="500" height="64" rx="16" fill="${c.paper}"/>
   ${t("CHICAGO ART DEPT", 96, 576, 22, { weight: 800, tracking: 2 })}
   ${t(cad.shortLabel.replace("Pilsen · ", "").toUpperCase(), 548, 576, 15, { fill: c.terracotta, weight: 800, tracking: 2, anchor: "end" })}
   <rect x="592" y="536" width="536" height="64" rx="16" fill="${c.ink}"/>
   ${t("SANCTUARY HEALTH", 616, 576, 22, { fill: c.cream, weight: 600, tracking: 4, family: "Georgia, serif" })}
-  ${t(sanc.shortLabel.replace("Pilsen · ", "").toUpperCase(), 1104, 576, 15, { fill: c.mustard, weight: 800, tracking: 2, anchor: "end" })}
+  ${t(sanc.shortLabel.replace("Pilsen · ", "").toUpperCase(), 1104, 576, 15, { fill: c.mustard, weight: 800, tracking: 2, anchor: "end" })}`}
 </svg>`;
 await sharp(Buffer.from(og)).flatten({ background: c.cream }).jpeg({ quality: 88, mozjpeg: true })
   .toFile(outFile(w.ogImage));

@@ -44,7 +44,7 @@ const heroWindow = (i) => popUpWeekWindow(weeks, i, { keepLast: true });
 // #sanctuary-health, later weeks a "-week-N" suffix.
 const anchorSuffix = (i) => (i === 0 ? "" : `-${weeks[i].id}`);
 // Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
-const headlineParts = lead.headline.split(" · ");
+const headlineParts = (week) => week.headline.split(" · ");
 const pageTitle = `${lead.title} · ${lead.dateRangeShort} | The Latina Sweat Project`;
 // Built from the lead week's locations (Week 3 has three).
 const leadVenues = lead.locations.map((l) => `${l.name} (${l.priceLine.toLowerCase()})`);
@@ -79,11 +79,23 @@ const pageDescription =
             ))}
           </p>
         ))}
+        {/* Headline and body flip with the week (Week 3 names Back of the
+            Yards and three locations), one windowed copy per week inside a
+            single h1 / p. */}
         <h1 class="pu-display mt-4 max-w-[11ch] text-[2.9rem] sm:text-7xl lg:text-8xl">
-          <span class="whitespace-nowrap">{headlineParts[0]}</span>{headlineParts[1] && <><br /><span>{headlineParts[1]}</span></>}
+          {weeks.map((week, w) => {
+            const [first, second] = headlineParts(week);
+            return (
+              <span class="block" {...heroWindow(w)}>
+                <span class="whitespace-nowrap">{first}</span>{second && <><br /><span>{second}</span></>}
+              </span>
+            );
+          })}
         </h1>
         <p class="mt-6 max-w-xl text-base leading-relaxed text-[color:var(--pu-ink-soft)] sm:text-lg">
-          {lead.body}
+          {weeks.map((week, w) => (
+            <span {...heroWindow(w)}>{week.body}</span>
+          ))}
         </p>
 
         <div class="mt-6 flex flex-wrap items-center gap-2">
@@ -170,7 +182,7 @@ const pageDescription =
         </p>
         <p class="mt-8 text-sm text-[color:var(--pu-cream)]/55">
           Programming at our 16th Street studio is paused while we are in the
-          process of being displaced. This fall LSP is popping up across Pilsen
+          process of being displaced. This fall LSP is popping up around Pilsen and nearby
           while we build our permanent home, opening early 2027.
           <a href={`${base}donate`} class="pu-mail font-bold underline underline-offset-4" data-conversion-event="donation_click" data-conversion-context="popup_page">Support the next studio.</a>
         </p>

@@ -22,6 +22,8 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import FinishLineClient from "@/components/FinishLineClient.astro";
+import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
+import { isPopUpSeriesActive, lastPopUpWeek } from "@/data/popUpWeeks";
 import {
   collectiveFinishLine as cfl,
   finishLineEvents,
@@ -37,6 +39,11 @@ const heroClip = finishLineTornClip(7, 60, 12);
 const expectClip = finishLineTornClip(29, 40, 9);
 const donateClip = finishLineTornClip(43, 56, 12);
 const donate = cfl.donate;
+// The weekly pop-up classes outlast marathon week (through Nov 1), so the
+// page always points to them while they are not past (build time +
+// data-popup-hide-when-past via PopUpWeekClient).
+const popUpsActive = isPopUpSeriesActive();
+const popUpsThrough = lastPopUpWeek.throughLabel.split(" through ")[1];
 const pageTitle = `${cfl.title} · Oct 5 – 14 | The Latina Sweat Project`;
 const pageDescription =
   "Chicago Marathon week with LSP: a pre-marathon yoga flow Mon Oct 5 and a restorative flow Wed Oct 14 at Chicago Art Department (pay what you can, suggested $10), plus our cheer zone at 18th & Peoria on marathon day.";
@@ -105,9 +112,10 @@ const pageDescription =
 
             {!isPast && (
               <div class="mt-8 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap" data-finishline-hide-when-past>
-                {events.map((ev) => (
+                {events.filter((ev) => !ev.done).map((ev) => (
                   <a
                     href={`#${ev.id}`}
+                    data-finishline-past-at={ev.endsAtISO}
                     class:list={["fl-jump inline-flex items-center justify-between gap-2 rounded-full px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2", ev.kind === "cheer" ? "fl-jump--marigold" : "fl-jump--char"]}
                   >
                     <span class="min-w-0">{ev.dayShort} {ev.dateLabel} · {ev.kind === "cheer" ? "Cheer zone" : ev.id === "oct5-flow" ? "Yoga flow" : "Restorative"}</span>
@@ -336,10 +344,17 @@ const pageDescription =
         <p class="mt-3 text-base leading-relaxed opacity-80">
           General Admission, one ticket = one space. {cfl.welcomeLine}
         </p>
+        {popUpsActive && (
+          <p class="mt-6 text-base font-semibold leading-relaxed" data-popup-hide-when-past>
+            LSP pop-up classes keep going every week through {popUpsThrough}.
+            <a href={`${base}popup`} class="fl-mail font-bold underline underline-offset-4" data-conversion-event="popup_page_click" data-conversion-context="finishline_popup_crosslink">See the pop-up schedule</a>
+          </p>
+        )}
       </div>
     </section>
 
     <FinishLineClient />
+    {popUpsActive && <PopUpWeekClient />}
   </main>
 </Layout>
 

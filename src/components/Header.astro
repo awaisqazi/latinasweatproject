@@ -2,6 +2,7 @@
 // src/components/Header.astro
 import { statusBanner } from "@/data/studioStatus.js";
 import { sweatFest, sweatFestColors } from "@/data/sweatFest";
+import { isPopUpSeriesActive } from "@/data/popUpWeeks";
 
 const base = import.meta.env.BASE_URL;
 
@@ -9,6 +10,11 @@ const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
 const isSweatFest = pathname.replace(/\/$/, "").endsWith("/sweatfest");
 const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
+
+// Pop-up classes are the class offering while studio programming is paused:
+// a "Pop-Ups" nav entry -> /popup while the series (Oct 5 to Nov 1, 2026)
+// is not past at build time.
+const showPopUpNav = isPopUpSeriesActive();
 
 const bannerHref = statusBanner.href.startsWith("/")
   ? base.replace(/\/$/, "") + statusBanner.href
@@ -122,6 +128,16 @@ const bannerHref = statusBanner.href.startsWith("/")
                     >
                         Classes
                     </a>
+                    {showPopUpNav && (
+                        <a
+                            href={`${base}popup`}
+                            class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
+                            data-conversion-event="popup_page_click"
+                            data-conversion-context="desktop_nav"
+                        >
+                            Pop-Ups
+                        </a>
+                    )}
                     <a
                         href={`${base}events`}
                         class="link-underline relative z-10 py-2 text-base font-medium text-medium-gray"
@@ -397,6 +413,16 @@ const bannerHref = statusBanner.href.startsWith("/")
         >
             Classes
         </a>
+        {showPopUpNav && (
+            <a
+                href={`${base}popup`}
+                class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
+                data-conversion-event="popup_page_click"
+                data-conversion-context="mobile_menu"
+            >
+                Pop-Up Classes
+            </a>
+        )}
         <a
             href={`${base}feedback`}
             class="mobile-link my-1 rounded-xl border border-accent-gold/50 bg-accent-gold/20 px-4 py-3 text-off-black shadow-sm transition-all hover:bg-accent-gold/30"

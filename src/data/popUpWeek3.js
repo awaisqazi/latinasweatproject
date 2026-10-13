@@ -37,6 +37,9 @@ export const popUpWeek3 = {
   ogImage: "images/popup/og-popup-week3.jpg",
   ogImageAlt:
     "Pop Up Week 3, October 19 – 25: LSP classes at Chicago Art Department and Sanctuary Health in Pilsen and Southside Social in Back of the Yards.",
+  // Week 3 reaches Back of the Yards (Southside Social), so the headline
+  // names both neighborhoods; every surface reads week.headline.
+  headline: "LSP Pop Up · Pilsen & Back of the Yards",
   // Week 1's body says "Two locations"; this week has three.
   body:
     "Programming at our studio is paused, so this week the classes come to the " +

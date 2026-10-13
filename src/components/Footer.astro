@@ -1,6 +1,9 @@
 ---
 // src/components/Footer.astro
+import { isPopUpSeriesActive } from "@/data/popUpWeeks";
 const base = import.meta.env.BASE_URL;
+// "Pop-Up Classes" -> /popup while the pop-up series is not past (build time).
+const showPopUpNav = isPopUpSeriesActive();
 ---
 
 <footer class="bg-off-black text-white">
@@ -215,6 +218,14 @@ const base = import.meta.env.BASE_URL;
                   href={`${base}schedule`}>Classes</a
                 >
               </li>
+              {showPopUpNav && (
+                <li>
+                  <a
+                    class="link-underline text-base text-slate-400"
+                    href={`${base}popup`}>Pop-Up Classes</a
+                  >
+                </li>
+              )}
               <li>
                 <a
                   class="link-underline text-base text-slate-400"
