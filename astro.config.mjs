@@ -29,6 +29,8 @@ export default defineConfig({
     '/volunteeradmin': '/admin',
     '/subsadmin': '/admin',
     '/electionadmin': '/admin',
+    // Short link for the Día de los Muertos 2026 teaser page
+    '/ddlm': '/diadelosmuertos',
   },
 
   // Your existing Vite config for Tailwind v4

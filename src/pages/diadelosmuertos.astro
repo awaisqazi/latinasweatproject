@@ -1,0 +1,770 @@
+---
+// /diadelosmuertos (alias /ddlm): public save-the-date teaser for LSP's
+// Día de los Muertos, Sunday, November 1, 2026, in La Villita (Little
+// Village). Only these public facts are allowed on the page: date, "La
+// Villita, Chicago", the CDPH Community-Centered Wellness Micro-Grant line.
+// No venue, address, time, tickets or program until they are announced.
+//
+// Identity: black + white grounds, one accent (cempasúchil #FF7A1A; flat
+// magenta #E6007E only on the papel picado flags), Rubik
+// only. The festival tent art carries the hero. On lg+ the text sits
+// lower-left over a dark gradient (the Catrina on horseback is right of
+// center, the banner top center); below lg the text block sits UNDER the
+// image so it never covers the art.
+//
+// Volunteer sign-up POSTs to a hidden Google Form (same no-cors pattern as
+// /townhall). See the GOOGLE FORM CONFIG block in the script below; option
+// strings must match the Google Form character for character.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+const base = import.meta.env.BASE_URL;
+const INSTAGRAM_URL = "https://www.instagram.com/latinasweatproject/";
+const CONTACT_EMAIL = "collab@latinasweatproject.com";
+
+const ROLE_OPTIONS = [
+    "Set-up and decorating (ofrendas, papel picado, marigolds)",
+    "Welcome table and check-in",
+    "Class and movement support",
+    "Kids and family activities",
+    "Food and refreshments",
+    "Photo and social media",
+    "Breakdown and clean-up",
+    "Wherever you need me",
+];
+const AVAILABILITY_OPTIONS = [
+    "The days before (prep)",
+    "Day of: morning",
+    "Day of: afternoon",
+    "Day of: evening",
+    "Breakdown after the event",
+];
+const LANGUAGE_OPTIONS = ["English", "Spanish", "Both"];
+const BEFORE_OPTIONS = ["Yes", "No, this is my first time"];
+
+const inputClass =
+    "mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-off-black focus:border-[#FF7A1A] focus:outline-none focus:ring-2 focus:ring-[#FF7A1A]/40";
+const optionClass =
+    "flex cursor-pointer items-start gap-3 rounded-lg border border-gray-300 px-4 py-3 text-off-black transition hover:border-[#FF7A1A] has-[:checked]:border-[#FF7A1A] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#FF7A1A]/40";
+const checkClass = "mt-0.5 h-4 w-4 shrink-0 accent-[#FF7A1A]";
+
+// ---------------------------------------------------------------------
+// Flair (flat cut-paper only): cempasúchil #FF7A1A plus ONE magenta,
+// #E6007E, which is reserved for the papel picado flags. No other colors.
+// ---------------------------------------------------------------------
+const ORANGE = "#FF7A1A";
+const MAGENTA = "#E6007E";
+
+// Papel picado: 13 flags in a 1280x52 viewBox, hung across the top edge of
+// the facts band. Widths vary so it never reads as a repeating tile. The
+// SVG uses "xMidYMin slice" at a fixed CSS height, so phones see fewer,
+// larger flags cropped at the sides (never a vertical squash). Cut-outs
+// are filled with the band's black ground.
+const PICADO_W = 1280;
+const PICADO_GAP = 16;
+const PICADO_WIDTHS = [78, 86, 74, 90, 80, 84, 76, 88, 72, 86, 80, 76, 84];
+const PICADO_MOTIFS = [
+    "ring",
+    "flower",
+    "lattice",
+    "diamond",
+    "ring",
+    "lattice",
+    "flower",
+    "diamond",
+    "lattice",
+    "flower",
+    "ring",
+    "diamond",
+    "flower",
+];
+const r2 = (n: number) => Math.round(n * 100) / 100;
+let picadoX =
+    (PICADO_W -
+        PICADO_WIDTHS.reduce((a, b) => a + b, 0) -
+        PICADO_GAP * (PICADO_WIDTHS.length - 1)) /
+    2;
+const PICADO_FLAGS = PICADO_WIDTHS.map((w, i) => {
+    const x = picadoX;
+    picadoX += w + PICADO_GAP;
+    // Body from y=2 to y=44, then a zig-zag cut edge down to y=50.
+    const teeth = Math.round(w / 9);
+    const tw = w / teeth;
+    let d = `M${r2(x)} 2H${r2(x + w)}V44`;
+    for (let k = 0; k < teeth; k++) {
+        d += `L${r2(x + w - (k + 0.5) * tw)} 50L${r2(x + w - (k + 1) * tw)} 44`;
+    }
+    d += "Z";
+    return {
+        d,
+        cx: r2(x + w / 2),
+        side: r2(w / 2 - 12),
+        fill: i % 2 === 0 ? ORANGE : MAGENTA,
+        motif: PICADO_MOTIFS[i],
+    };
+});
+const PETALS_8 = Array.from({ length: 8 }, (_, k) => {
+    const a = (k / 8) * Math.PI * 2;
+    return { x: r2(Math.cos(a) * 7.5), y: r2(Math.sin(a) * 7.5) };
+});
+const LATTICE = [-1, 0, 1].flatMap((a) =>
+    [-1, 0, 1].map((b) => ({ x: r2((a - b) * 5.5), y: r2((a + b) * 5.5) })),
+);
+const diamond = (x: number, y: number, h: number) =>
+    `${r2(x)},${r2(y - h)} ${r2(x + h)},${r2(y)} ${r2(x)},${r2(y + h)} ${r2(x - h)},${r2(y)}`;
+
+// Cempasúchil mark: three stacked scalloped layers (orange, ground,
+// orange) and a ground-colored center, like layered cut paper. Used
+// exactly twice: the "Guarda la fecha" eyebrow and the success state.
+function scallop(n: number, ringR: number, petalR: number, rot: number) {
+    return Array.from({ length: n }, (_, k) => {
+        const a = (k / n) * Math.PI * 2 + rot;
+        return `<circle cx="${r2(Math.cos(a) * ringR)}" cy="${r2(Math.sin(a) * ringR)}" r="${petalR}"/>`;
+    }).join("");
+}
+function cempasuchil(ground: string) {
+    return (
+        `<svg viewBox="-16 -16 32 32" class="block h-full w-full" aria-hidden="true" focusable="false">` +
+        `<g fill="${ORANGE}"><circle r="10.5"/>${scallop(12, 11, 4, 0)}</g>` +
+        `<g fill="${ground}"><circle r="6.8"/>${scallop(10, 7.2, 2.4, Math.PI / 10)}</g>` +
+        `<g fill="${ORANGE}"><circle r="4.2"/>${scallop(8, 4.6, 1.7, Math.PI / 8)}</g>` +
+        `<circle r="1.8" fill="${ground}"/>` +
+        `</svg>`
+    );
+}
+const CEMPA_ON_WHITE = cempasuchil("#FFFFFF");
+const CEMPA_ON_BLACK = cempasuchil("#000000");
+
+// Marigold petal path: one row of orange dots that fades out at both ends,
+// echoing the flower carpet in the hero art. Used once.
+const PETAL_R = [3, 3.6, 3, 4.2, 3.4, 4.6, 3.8, 4.4, 5, 4.4, 3.8, 4.6, 3.4, 4.2, 3, 3.6, 3];
+const PETAL_Y = [6, 5.5, 6.5, 6, 5.5, 6.5, 6, 5.5, 6, 6.5, 6, 5.5, 6.5, 6, 5.5, 6.5, 6];
+const PETAL_O = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.45, 0.3, 0.15];
+const PETAL_PATH = PETAL_R.map((r, i) => ({
+    x: 8 + i * 19,
+    y: PETAL_Y[i],
+    r,
+    o: PETAL_O[i],
+}));
+---
+
+<Layout
+    title="Día de los Muertos 2026 | The Latina Sweat Project"
+    description="Save the date: LSP's Día de los Muertos returns to La Villita on Sunday, November 1, 2026. Details soon. Volunteer sign-up open."
+    socialImage="images/ddlm/ddlm-2026-festival-og.jpg"
+    socialImageAlt="LSP Día de los Muertos Festival: a candlelit tent of ofrendas, marigolds and people moving together."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
+    twitterCard="summary_large_image"
+>
+    <Header />
+    <main class="font-rubik bg-white text-off-black">
+        {/* ============================ HERO ============================ */}
+        <section class="relative bg-black text-white">
+            <div
+                class="ddlm-hero-media relative aspect-[16/9] w-full overflow-hidden lg:aspect-auto"
+            >
+                <img
+                    src={`${base}images/ddlm/ddlm-2026-festival.jpg`}
+                    alt="LSP Día de los Muertos Festival: a candlelit tent strung with papel picado, rows of people moving together on mats between ofrendas, a mariachi stage, a marigold path with a Catrina on horseback, and long tables of families."
+                    width="1600"
+                    height="899"
+                    fetchpriority="high"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover object-[50%_30%]"
+                />
+                {/* Fades: below lg into the black text block; on lg+ a
+                    bottom and left wash for the overlaid text. */}
+                <div
+                    class="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black to-transparent lg:h-3/5 lg:from-black/90 lg:via-black/50"
+                    aria-hidden="true"
+                >
+                </div>
+                <div
+                    class="pointer-events-none absolute inset-y-0 left-0 hidden w-1/2 bg-gradient-to-r from-black/45 to-transparent lg:block"
+                    aria-hidden="true"
+                >
+                </div>
+            </div>
+
+            <div
+                class="relative mx-auto max-w-6xl px-4 pb-12 pt-2 sm:px-6 sm:pb-14 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-8 lg:pb-16 lg:pt-0"
+            >
+                <div class="max-w-xl lg:max-w-[34rem]">
+                    <p
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm"
+                    >
+                        Save the date · 11.01.26
+                    </p>
+                    <h1
+                        class="mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+                    >
+                        Día de los Muertos
+                    </h1>
+                    <p class="mt-4 text-base text-white/85 sm:text-lg">
+                        Returns to La Villita · Sunday, November 1, 2026
+                    </p>
+                    <div class="mt-7 flex flex-wrap items-center gap-3">
+                        <a
+                            href="#volunteer"
+                            class="inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            data-conversion-event="ddlm_volunteer_click"
+                            data-conversion-context="ddlm_hero"
+                        >
+                            I want to volunteer
+                        </a>
+                        <a
+                            href={INSTAGRAM_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-conversion-event="ddlm_follow_click"
+                            data-conversion-context="ddlm_hero"
+                            class="inline-block rounded-full border border-white/70 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        >
+                            Follow for details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* ========================= ANTICIPATION ========================= */}
+        <section class="bg-white px-4 py-16 sm:px-6 sm:py-20">
+            <div class="mx-auto max-w-2xl">
+                <div class="flex items-center gap-3">
+                    <span class="h-7 w-7 shrink-0" set:html={CEMPA_ON_WHITE} />
+                    <p
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
+                    >
+                        Guarda la fecha
+                    </p>
+                </div>
+                <p
+                    class="mt-4 text-2xl font-semibold leading-snug text-off-black sm:text-3xl"
+                >
+                    Our signature fall event returns to La Villita. Ofrendas,
+                    candlelight and cempasúchil, a day of movement, and a
+                    community remembering together.
+                </p>
+                <p class="mt-5 text-lg leading-relaxed text-medium-gray">
+                    This fall, while we're in the process of being displaced
+                    from our studio, we're gathering across the neighborhood.
+                    This is the one we wait for all year. Details soon. Follow
+                    <a
+                        href={INSTAGRAM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
+                        >@latinasweatproject</a
+                    >.
+                </p>
+            </div>
+        </section>
+
+        {/* ============================ FACTS ============================ */}
+        <section
+            class="relative bg-black px-4 pb-14 pt-16 text-white sm:px-6 sm:pb-16 sm:pt-20 lg:pt-24"
+        >
+            {/* Papel picado strung along the top edge of the band. Fixed
+                height per breakpoint (32 / 40 / 52px); the cord is a
+                full-width hairline so it never ends where the flags crop. */}
+            <div
+                class="pointer-events-none absolute inset-x-0 top-0 overflow-hidden"
+                aria-hidden="true"
+            >
+                <div class="absolute inset-x-0 top-[2px] h-px bg-white/40"></div>
+                <svg
+                    viewBox="0 0 1280 52"
+                    preserveAspectRatio="xMidYMin slice"
+                    class="relative mx-auto block h-8 w-full max-w-[1280px] sm:h-10 lg:h-[52px]"
+                    focusable="false"
+                >
+                    {PICADO_FLAGS.map((f) => (
+                        <g>
+                            <path d={f.d} fill={f.fill} />
+                            <g transform={`translate(${f.cx} 23)`} fill="#000">
+                                {f.motif === "flower" && (
+                                    <>
+                                        {PETALS_8.map((p) => (
+                                            <circle cx={p.x} cy={p.y} r="2.6" />
+                                        ))}
+                                        <circle r="3" />
+                                        <polygon points={diamond(-f.side, 0, 3.5)} />
+                                        <polygon points={diamond(f.side, 0, 3.5)} />
+                                    </>
+                                )}
+                                {f.motif === "diamond" && (
+                                    <>
+                                        <polygon points={diamond(0, 0, 12)} />
+                                        <circle r="3.2" fill={f.fill} />
+                                        <circle cx={-f.side} cy="-9" r="2" />
+                                        <circle cx={f.side} cy="-9" r="2" />
+                                        <circle cx={-f.side} cy="9" r="2" />
+                                        <circle cx={f.side} cy="9" r="2" />
+                                    </>
+                                )}
+                                {f.motif === "lattice" && (
+                                    <>
+                                        {LATTICE.map((p) => (
+                                            <polygon points={diamond(p.x, p.y, 2.7)} />
+                                        ))}
+                                        <circle cx={-f.side} r="3" />
+                                        <circle cx={f.side} r="3" />
+                                    </>
+                                )}
+                                {f.motif === "ring" && (
+                                    <>
+                                        <circle r="10" />
+                                        <circle r="5.5" fill={f.fill} />
+                                        <circle r="1.8" />
+                                        <polygon points={diamond(-f.side, 0, 3)} />
+                                        <polygon points={diamond(f.side, 0, 3)} />
+                                    </>
+                                )}
+                            </g>
+                        </g>
+                    ))}
+                </svg>
+            </div>
+            <dl class="mx-auto grid max-w-5xl gap-8 sm:grid-cols-3 sm:gap-6">
+                <div class="border-t border-white/20 pt-4">
+                    <dt
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
+                    >
+                        Cuándo · When
+                    </dt>
+                    <dd class="mt-2 text-lg font-semibold">
+                        Sunday, November 1, 2026
+                    </dd>
+                </div>
+                <div class="border-t border-white/20 pt-4">
+                    <dt
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
+                    >
+                        Dónde · Where
+                    </dt>
+                    <dd class="mt-2 text-lg font-semibold">
+                        La Villita, Chicago
+                    </dd>
+                </div>
+                <div class="border-t border-white/20 pt-4">
+                    <dt
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
+                    >
+                        Qué · What
+                    </dt>
+                    <dd class="mt-2 text-lg font-semibold">
+                        A community day of movement and remembrance
+                    </dd>
+                    <dd class="mt-1 text-sm text-white/60">Details soon.</dd>
+                </div>
+            </dl>
+        </section>
+
+        {/* =========================== VOLUNTEER =========================== */}
+        <section id="volunteer" class="scroll-mt-32 bg-white px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16">
+            {/* Marigold petal path (once on the page). */}
+            <div class="mx-auto mb-12 w-full max-w-[320px] sm:mb-16" aria-hidden="true">
+                <svg viewBox="0 0 320 12" class="block h-auto w-full" focusable="false">
+                    {PETAL_PATH.map((p) => (
+                        <circle cx={p.x} cy={p.y} r={p.r} fill={ORANGE} fill-opacity={p.o} />
+                    ))}
+                </svg>
+            </div>
+            <div class="mx-auto max-w-xl">
+                <div id="vol-card">
+                    <p
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
+                    >
+                        Ayúdanos · Volunteer
+                    </p>
+                    <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
+                        Volunteer with us
+                    </h2>
+                    <p class="mt-4 text-base leading-relaxed text-medium-gray">
+                        A day like this takes many hands: set-up, ofrendas,
+                        welcoming, classes and clean-up. Fill this in and we'll
+                        follow up by email with details and shifts as they're
+                        confirmed.
+                    </p>
+
+                    <form
+                        id="vol-form"
+                        class="relative mt-8 space-y-6 rounded-2xl p-6 ring-1 ring-black/10 sm:p-8"
+                        novalidate
+                    >
+                        <!-- Honeypot: off-screen field humans never see or fill.
+                             Bots that auto-fill every input trip it and get a
+                             silent "success" with nothing sent to the form. -->
+                        <div
+                            class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                            aria-hidden="true"
+                        >
+                            <label for="vol-website">Website</label>
+                            <input
+                                id="vol-website"
+                                name="website"
+                                type="text"
+                                tabindex="-1"
+                                autocomplete="off"
+                            />
+                        </div>
+                        <div>
+                            <label for="vol-name" class="block text-sm font-bold">
+                                Full name <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <input
+                                id="vol-name"
+                                name="fullName"
+                                type="text"
+                                required
+                                autocomplete="name"
+                                class={inputClass}
+                            />
+                        </div>
+
+                        <div>
+                            <label for="vol-email" class="block text-sm font-bold">
+                                Email <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <input
+                                id="vol-email"
+                                name="email"
+                                type="email"
+                                required
+                                autocomplete="email"
+                                class={inputClass}
+                            />
+                        </div>
+
+                        <div>
+                            <label for="vol-phone" class="block text-sm font-bold">
+                                Phone
+                            </label>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                Optional. For day-of coordination only.
+                            </p>
+                            <input
+                                id="vol-phone"
+                                name="phone"
+                                type="tel"
+                                autocomplete="tel"
+                                class={inputClass}
+                            />
+                        </div>
+
+                        <fieldset>
+                            <legend class="block text-sm font-bold">
+                                How would you like to help?
+                                <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                Pick as many as you like.
+                            </p>
+                            <div class="mt-2 space-y-2">
+                                {ROLE_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input
+                                            type="checkbox"
+                                            name="roles"
+                                            value={opt}
+                                            class={checkClass}
+                                        />
+                                        <span>{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="block text-sm font-bold">
+                                When are you available?
+                                <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                Pick as many as you like.
+                            </p>
+                            <div class="mt-2 space-y-2">
+                                {AVAILABILITY_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input
+                                            type="checkbox"
+                                            name="availability"
+                                            value={opt}
+                                            class={checkClass}
+                                        />
+                                        <span>{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="block text-sm font-bold">
+                                Languages you're comfortable volunteering in
+                                <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <div class="mt-2 grid gap-2 sm:grid-cols-3">
+                                {LANGUAGE_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input
+                                            type="radio"
+                                            name="languages"
+                                            value={opt}
+                                            required
+                                            class={checkClass}
+                                        />
+                                        <span>{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="block text-sm font-bold">
+                                Have you volunteered with LSP before?
+                                <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <div class="mt-2 space-y-2">
+                                {BEFORE_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input
+                                            type="radio"
+                                            name="before"
+                                            value={opt}
+                                            required
+                                            class={checkClass}
+                                        />
+                                        <span>{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+
+                        <div>
+                            <label for="vol-notes" class="block text-sm font-bold">
+                                Anything else we should know?
+                            </label>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                Accessibility needs, skills you'd like to offer,
+                                a friend you're signing up with. Optional.
+                            </p>
+                            <textarea
+                                id="vol-notes"
+                                name="notes"
+                                rows="4"
+                                class={inputClass}></textarea>
+                        </div>
+
+                        <p
+                            id="vol-error"
+                            role="alert"
+                            class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                        >
+                        </p>
+
+                        <button
+                            id="vol-submit"
+                            type="submit"
+                            class="w-full rounded-full bg-black px-8 py-3 text-sm font-bold text-white transition hover:bg-[#FF7A1A] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Sign me up
+                        </button>
+                    </form>
+                </div>
+
+                {/* Success state */}
+                <div
+                    id="vol-success"
+                    class="hidden rounded-2xl bg-black p-8 text-center text-white sm:p-10"
+                    tabindex="-1"
+                >
+                    <span class="mx-auto mb-5 block h-10 w-10" set:html={CEMPA_ON_BLACK} />
+                    <h2 class="text-3xl font-extrabold">Gracias! We got it.</h2>
+                    <p class="mt-3 text-white/80">
+                        We'll email you as shifts and details are confirmed.
+                        Hasta pronto.
+                    </p>
+                    <a
+                        href={INSTAGRAM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="mt-6 inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    >
+                        Follow @latinasweatproject
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        {/* ========================== SMALL PRINT ========================== */}
+        <section class="border-t border-black/10 bg-white px-4 py-10 sm:px-6">
+            <div class="mx-auto max-w-xl space-y-3 text-sm text-medium-gray">
+                <p>
+                    Made possible in part by the Chicago Department of Public
+                    Health's Community-Centered Wellness Micro-Grant.
+                </p>
+                <p>
+                    Questions? Email
+                    <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 break-all"
+                        >{CONTACT_EMAIL}</a
+                    >.
+                </p>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    /* lg+: full-bleed art capped to the viewport below the header, cropped
+       a little top and bottom (object-position keeps the banner and the
+       Catrina on horseback in frame). */
+    @media (min-width: 1024px) {
+        .ddlm-hero-media {
+            height: min(calc(100svh - 7rem), 56.25vw);
+            min-height: 34rem;
+        }
+    }
+</style>
+
+<script>
+    // ============================================================
+    // GOOGLE FORM CONFIG: replace these placeholders with the real
+    // form ID and entry IDs once the Google Form is created.
+    // Checkbox questions (roles, availability) send one repeated
+    // entry.N param per checked option.
+    // ============================================================
+    const FORM_ACTION_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSfhqTlMlI2BqoXsBAHhzUj1Tb82q0pgqHqZS3ci4dKd9bfy3w/formResponse";
+    const ENTRY_IDS = {
+        fullName: "entry.1659067104", // Full name (text)
+        email: "entry.642143810", // Email (text)
+        phone: "entry.548405429", // Phone (text, optional)
+        roles: "entry.1563299113", // How would you like to help? (checkboxes)
+        availability: "entry.2022023304", // When are you available? (checkboxes)
+        languages: "entry.893498704", // Languages you're comfortable volunteering in (radio)
+        before: "entry.1702278511", // Have you volunteered with LSP before? (radio)
+        notes: "entry.401444812", // Anything else we should know? (paragraph, optional)
+    };
+    // ============================================================
+
+    const NAME_STORAGE_KEY = "lsp_ddlm_vol_name";
+    const EMAIL_STORAGE_KEY = "lsp_ddlm_vol_email";
+    // Spam guard (no server, so no Turnstile): a honeypot field plus a
+    // minimum time-to-submit. Trips show the success state without posting.
+    const HONEYPOT_FIELD = "website";
+    const MIN_SUBMIT_MS = 3000;
+    const loadedAt = Date.now();
+
+    const form = document.getElementById("vol-form") as HTMLFormElement;
+    const card = document.getElementById("vol-card") as HTMLElement;
+    const success = document.getElementById("vol-success") as HTMLElement;
+    const errorEl = document.getElementById("vol-error") as HTMLElement;
+    const submitBtn = document.getElementById(
+        "vol-submit",
+    ) as HTMLButtonElement;
+    const nameInput = document.getElementById("vol-name") as HTMLInputElement;
+    const emailInput = document.getElementById("vol-email") as HTMLInputElement;
+
+    // Prefill from a previous sign-up on this device.
+    try {
+        nameInput.value = window.localStorage.getItem(NAME_STORAGE_KEY) || "";
+        emailInput.value = window.localStorage.getItem(EMAIL_STORAGE_KEY) || "";
+    } catch {
+        // localStorage may be unavailable (private mode); ignore.
+    }
+
+    function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorEl.classList.add("hidden");
+
+        const data = new FormData(form);
+
+        const honeypot = String(data.get(HONEYPOT_FIELD) || "").trim();
+        if (honeypot || Date.now() - loadedAt < MIN_SUBMIT_MS) {
+            // Looks automated: pretend it worked, send nothing.
+            card.classList.add("hidden");
+            success.classList.remove("hidden");
+            return;
+        }
+
+        const fullName = String(data.get("fullName") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const phone = String(data.get("phone") || "").trim();
+        const roles = data.getAll("roles").map(String);
+        const availability = data.getAll("availability").map(String);
+        const languages = String(data.get("languages") || "");
+        const before = String(data.get("before") || "");
+        const notes = String(data.get("notes") || "").trim();
+
+        if (!fullName) return showError("Please add your name.");
+        if (!email || !email.includes("@"))
+            return showError("Please add a valid email address.");
+        if (roles.length === 0)
+            return showError("Please pick at least one way you'd like to help.");
+        if (availability.length === 0)
+            return showError("Please pick at least one time you're available.");
+        if (!languages)
+            return showError(
+                "Please let us know which languages you're comfortable in.",
+            );
+        if (!before)
+            return showError(
+                "Please let us know if you've volunteered with LSP before.",
+            );
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const params = new URLSearchParams();
+        params.set(ENTRY_IDS.fullName, fullName);
+        params.set(ENTRY_IDS.email, email);
+        if (phone) params.set(ENTRY_IDS.phone, phone);
+        roles.forEach((r) => params.append(ENTRY_IDS.roles, r));
+        availability.forEach((a) => params.append(ENTRY_IDS.availability, a));
+        params.set(ENTRY_IDS.languages, languages);
+        params.set(ENTRY_IDS.before, before);
+        if (notes) params.set(ENTRY_IDS.notes, notes);
+
+        try {
+            // no-cors: Google doesn't send CORS headers on formResponse, so
+            // the response is opaque. A resolved fetch means it reached
+            // Google; client-side validation above covers required fields.
+            await fetch(FORM_ACTION_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+
+            try {
+                window.localStorage.setItem(NAME_STORAGE_KEY, fullName);
+                window.localStorage.setItem(EMAIL_STORAGE_KEY, email);
+            } catch {
+                // ignore
+            }
+
+            card.classList.add("hidden");
+            success.classList.remove("hidden");
+            success.scrollIntoView({ behavior: "smooth", block: "center" });
+            success.focus({ preventScroll: true });
+        } catch (e) {
+            console.error("DDLM volunteer submit failed:", e);
+            showError(
+                "We couldn't send your sign-up. Check your connection and try again.",
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Sign me up";
+        }
+    });
+</script>
