@@ -1,6 +1,6 @@
 ---
-// Compact Pop Up week band: eyebrow, heading, the two locations as
-// mini-cards (Chicago Art Dept = white card, Sanctuary Health = ink card,
+// Compact Pop Up week band: eyebrow, heading, the week's locations (two,
+// or three in Week 3) as mini-cards (Chicago Art Dept = white card, Sanctuary Health = ink card,
 // same as the campaign IG graphics), each with its "next up" class and a
 // direct Zeffy CTA, plus a link to the full /popup page. Cancelled
 // sessions are never offered as "next up" (activeSessions).
@@ -17,7 +17,7 @@
 // shows Week 2's band (and hides Week 1's) from Mon Oct 12 in the browser.
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import { activeSessions, locationInstructors, weekPhase } from "@/data/popUpShared";
+import { activeSessions, locationInstructors, locationsSummary, weekPhase } from "@/data/popUpShared";
 import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 
 interface Props {
@@ -64,11 +64,11 @@ const nextLineData = (loc) =>
           ))}
         </h2>
         <p class="popup-band-body mt-2 max-w-2xl text-sm leading-relaxed sm:text-base">
-          Two locations in Pilsen, 45-minute classes, {week.throughLabel}.
+          {locationsSummary(week).en} in {locationsSummary(week).placesLabel}, 45-minute classes, {week.throughLabel}.
           Reserve your spot. {week.matsLine}
         </p>
 
-        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+        <div class:list={["mt-5 grid gap-3 sm:grid-cols-2", week.locations.length >= 3 && "lg:grid-cols-3"]}>
           {week.locations.map((loc) => (
             <div class:list={["popup-mini rounded-2xl p-4 sm:p-5", loc.theme === "dark" ? "popup-mini--ink" : "popup-mini--paper"]}>
               <p class="popup-mini-name font-sans text-lg font-extrabold uppercase leading-tight tracking-tight">

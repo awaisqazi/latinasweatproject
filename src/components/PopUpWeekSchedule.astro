@@ -1,6 +1,6 @@
 ---
-// Pop Up Week 1 full schedule: the "Two locations" kicker and the two
-// location cards (Chicago Art Department = paper card, Sanctuary Health =
+// Pop Up week full schedule: the "Two locations" / "Three locations"
+// kicker (locationsSummary) and one card per location (Chicago Art Department = paper card, Sanctuary Health =
 // ink card), each with address, price/capacity chips, "Your teachers this
 // week" avatars, the day-by-day session list (time, class, instructor
 // avatars + names, "Next up" tag, "No classes" days, cancelled classes
@@ -16,8 +16,10 @@
 // Extracted from /popup (Oct 2, 2026) so /popup, /schedule and /classes
 // share one source. Used (one panel per week) by PopUpWeekSwitcher on
 // /popup and, via StudioTransitionSection, on /schedule and /classes.
-// Below md the two cards are a snap carousel with a location toggle
-// (script below); md and up they stack / sit side by side.
+// Below md the cards are a snap carousel with a location toggle
+// (script below; one segment per location, short `toggleLabel`s when a
+// week has three); md and up they stack / sit side by side (2-up at lg,
+// 3-up at lg for a three-location week such as Week 3).
 //
 // This component does NOT include PopUpWeekClient; the host page must
 // (it drives "Next up" via [data-popup-group] / [data-popup-starts] and
@@ -26,7 +28,7 @@
 // several weeks, the leading week gets the plain ids and later weeks pass a
 // suffix such as "-week-2".
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
-import { activeSessions, groupSessionsByDay, locationInstructors, weekPhase } from "@/data/popUpShared";
+import { activeSessions, groupSessionsByDay, locationInstructors, locationsSummary, weekPhase } from "@/data/popUpShared";
 import { currentPopUpWeek, popUpWeeks } from "@/data/popUpWeeks";
 import { collectiveFinishLine, finishLineClasses, getFinishLinePhase } from "@/data/collectiveFinishLine";
 
@@ -63,6 +65,8 @@ const {
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const isPast = weekPhase(week) === "past";
+const summary = locationsSummary(week);
+const three = week.locations.length >= 3;
 const locations = week.locations.map((loc) => ({
   ...loc,
   days: groupSessionsByDay(loc),
@@ -95,8 +99,8 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
 ---
 
 <div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined} data-pu-locs>
-  <p class="pu-kicker hidden text-[11px] font-extrabold uppercase tracking-[0.22em] md:block">Two locations</p>
-  {/* Phones: a two-button location toggle over a native snap carousel
+  <p class="pu-kicker hidden text-[11px] font-extrabold uppercase tracking-[0.22em] md:block">{summary.en}</p>
+  {/* Phones: a location toggle (one button per location) over a native snap carousel
       (one card per width). It scrolls to the chosen card and follows the
       scroll position (IntersectionObserver, script below). md and up: the
       cards stack / sit side by side as before and the toggle is hidden. */}
@@ -108,10 +112,10 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
         aria-controls={`${loc.id}${anchorSuffix}`}
         aria-pressed={i === 0 ? "true" : "false"}
         data-pu-loc-btn={i}
-      >{loc.shortName}</button>
+      >{three ? (loc.toggleLabel ?? loc.shortName) : loc.shortName}</button>
     ))}
   </div>
-  <div class="pu-loc-scroller mt-4 grid gap-6 lg:grid-cols-2 lg:items-start" data-pu-loc-scroller>
+  <div class:list={["pu-loc-scroller mt-4 grid gap-6 lg:items-start", three ? "pu-loc-scroller--3 lg:grid-cols-3 lg:gap-5" : "lg:grid-cols-2"]} data-pu-loc-scroller>
     {locations.map((loc, i) => {
       const ink = loc.theme === "dark";
       return (
@@ -249,7 +253,7 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
               </a>
             )}
             <p class="pu-card-foot mt-3 text-center text-xs font-semibold">
-              {activeSessions(loc).length} classes · {week.classLengthLabel} each · {week.matsLine}
+              {activeSessions(loc).length === 1 ? `1 class · ${week.classLengthLabel}` : `${activeSessions(loc).length} classes · ${week.classLengthLabel} each`} · {week.matsLine}
             </p>
           </div>
           {loc.id === "chicago-art-department" && finishLineActive && (
@@ -392,6 +396,17 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
   @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
     .pu-loc-scroller {
       transition: none;
+    }
+  }
+
+  /* Three-location week (Week 3), 3-up at lg: a narrower time column so
+     class names and teacher names keep room in the slimmer cards. */
+  @media (min-width: 1024px) {
+    .pu-loc-scroller--3 .pu-row {
+      grid-template-columns: 4.5rem 1fr;
+    }
+    .pu-loc-scroller--3 .pu-lockup {
+      font-size: 1.7rem;
     }
   }
 

@@ -160,3 +160,28 @@ export const weekPhase = (week, now = new Date()) => {
 
 // Classes going ahead (cancelled excluded).
 export const sessionCount = (locations) => locations.reduce((n, l) => n + activeSessions(l).length, 0);
+
+// How many locations a week has, for copy that must not hardcode "two"
+// (Week 3 has three: Southside Social joins for one class, Oct 12 2026).
+// Neighborhood = loc.neighborhood, else the part of shortLabel before " · "
+// ("Pilsen · Halsted & 19th" -> "Pilsen"). Returns
+// { count, en: "Three locations", es: "Tres lugares", places: [...],
+//   placesLabel: "Pilsen & Back of the Yards" }.
+const COUNT_EN = ["", "One", "Two", "Three", "Four", "Five", "Six"];
+const COUNT_ES = ["", "Un", "Dos", "Tres", "Cuatro", "Cinco", "Seis"];
+export const locationsSummary = (week) => {
+  const count = week.locations.length;
+  const places = [];
+  for (const l of week.locations) {
+    const n = l.neighborhood ?? String(l.shortLabel ?? "").split(" · ")[0];
+    if (n && !places.includes(n)) places.push(n);
+  }
+  const word = (list, n) => list[n] ?? String(n);
+  return {
+    count,
+    en: `${word(COUNT_EN, count)} location${count === 1 ? "" : "s"}`,
+    es: `${word(COUNT_ES, count)} lugar${count === 1 ? "" : "es"}`,
+    places,
+    placesLabel: places.join(" & "),
+  };
+};

@@ -13,6 +13,7 @@ import { pressArticles } from "@/data/press";
 import { abc7Feature } from "@/data/abc7WindyCity";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import { activePopUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
+import { locationsSummary } from "@/data/popUpShared";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 import {
   collectiveFinishLine,
@@ -515,8 +516,8 @@ const getLinkConversionProvider = (url = "") => {
               </span>
             </div>
             <p class="mt-4 pr-16 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
-              <span class="lang-en">{week.title} · Two locations</span>
-              <span class="lang-es hidden">{week.title} · Dos lugares</span>
+              <span class="lang-en">{week.title} · {locationsSummary(week).en}</span>
+              <span class="lang-es hidden">{week.title} · {locationsSummary(week).es}</span>
             </p>
             <h2 class="mt-1 pr-10 text-[1.9rem] font-black uppercase leading-[0.92] tracking-tight text-[#1e1a17] sm:text-4xl">
               <span class="lang-en">LSP Pop Up · Pilsen</span>

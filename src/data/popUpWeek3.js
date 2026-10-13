@@ -1,6 +1,7 @@
 // Pop Up Week 3: LSP's third pop-up class week, Oct 19 to Oct 25, 2026,
-// directly after Pop Up Week 2 (src/data/popUpWeek2.js), same two Pilsen
-// locations, same shape as that file. Listed in src/data/popUpWeeks.js,
+// directly after Pop Up Week 2 (src/data/popUpWeek2.js), the same two Pilsen
+// locations plus a third, Southside Social in Back of the Yards (one class,
+// Thu Oct 22 8 AM, added Oct 12 2026), same shape as that file. Listed in src/data/popUpWeeks.js,
 // which every surface reads.
 //
 // Facts are binding (marketing/popup-week3-4/BRIEF.md, Fez's "Interim Space
@@ -35,7 +36,13 @@ export const popUpWeek3 = {
   endsAtISO: "2026-10-25T23:59:59-05:00",
   ogImage: "images/popup/og-popup-week3.jpg",
   ogImageAlt:
-    "Pop Up Week 3, October 19 – 25: LSP classes at Chicago Art Department and Sanctuary Health in Pilsen.",
+    "Pop Up Week 3, October 19 – 25: LSP classes at Chicago Art Department and Sanctuary Health in Pilsen and Southside Social in Back of the Yards.",
+  // Week 1's body says "Two locations"; this week has three.
+  body:
+    "Programming at our studio is paused, so this week the classes come to the " +
+    "neighborhood. Three locations, one week, the same community. Pick a " +
+    "class and reserve your spot. Bring water and your mat, limited mats " +
+    "available for rent.",
   highlightImage: "images/highlights/hl_popup3.png",
   highlightLabel: { en: "Pop Up Wk 3", es: "Pop Up Sem 3" },
 };
@@ -46,6 +53,8 @@ const [cadBase, sancBase] = popUpWeek2Locations;
 export const popUpWeek3Locations = [
   {
     ...cadBase,
+    // Short phone-toggle label, used when a week has three locations.
+    toggleLabel: "Art Dept",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--3",
     // Own check-in form per week (never inherit Week 2's): /checkin.
     checkInFormId: "e06204c5-c967-406b-a6cb-28da0ff5a3a0",
@@ -71,6 +80,7 @@ export const popUpWeek3Locations = [
   },
   {
     ...sancBase,
+    toggleLabel: "Sanctuary",
     ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-sanctuary-health-week--3",
     checkInFormId: "b60b7dab-6277-485e-a97f-13c21c838c06",
     checkInUrl:
@@ -86,6 +96,39 @@ export const popUpWeek3Locations = [
       session("sanc", "10-22", "20:30", "8:30 PM", "Yoga Flow", ["Gigi Torres", "Efren Ramirez Jr"]),
       session("sanc", "10-23", "06:00", "6:00 AM", "Yoga Flow", ["Dinorah Zubieta"]),
       session("sanc", "10-25", "20:00", "8:00 PM", "Yoga Flow", ["Anabel Hernandez", "Jade Nguyen"]),
+    ],
+  },
+  // Southside Social (Back of the Yards): one class this week (Fez, Oct 12
+  // 2026). LSP held soft-launch classes here May to July 2026. Text lockup
+  // only (no venue logo in the repo; never fabricate one). Paper card.
+  {
+    id: "southside-social",
+    name: "Southside Social",
+    lockup: ["Southside", "Social"],
+    shortName: "Southside Social",
+    toggleLabel: "Southside",
+    shortLabel: "Back of the Yards · Ashland & 44th",
+    neighborhood: "Back of the Yards",
+    address: "4432 S Ashland Ave, Chicago, IL 60609",
+    mapsUrl:
+      "https://www.google.com/maps/search/?api=1&query=4432+S+Ashland+Ave+Chicago+IL+60609",
+    ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-southside-social",
+    checkInFormId: "75ebd835-7d20-4318-a9d4-ae1f71a0275b",
+    checkInUrl:
+      // southside-oct22: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNzVlYmQ4MzUtN2QyMC00MzE4LWE5ZDQtYWUxZjcxYTAyNzViIiwiaWF0IjoxNzkxODUwNDAzLCJleHAiOjE4MjMzODY0MDN9.Sxn7r2_YOVlNET2BRgF4TkC9UWNoLcl_9wBB0fltYv8",
+    ticketsLabel: "Reserve at Southside Social",
+    ticketsLabelEs: "Reserva en Southside Social",
+    conversionEvent: "class_booking_start",
+    trackingLocation: "southside_social",
+    priceLine: "Pay what you can",
+    priceLineEs: "Paga lo que puedas",
+    capacityLine: "Up to 40 mats",
+    capacityLineEs: "Hasta 40 mats",
+    theme: "light",
+    closedDays: [],
+    sessions: [
+      session("ssoc", "10-22", "08:00", "8:00 AM", "Yoga Sculpt", ["Andrea Fuentes"]),
     ],
   },
 ];

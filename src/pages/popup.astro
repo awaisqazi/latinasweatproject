@@ -28,6 +28,7 @@ import Header from "@/components/Header.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpWeekSwitcher from "@/components/PopUpWeekSwitcher.astro";
 import { activePopUpWeeks, lastPopUpWeek, popUpWeekWindow } from "@/data/popUpWeeks";
+import { locationsSummary } from "@/data/popUpShared";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 
 const base = import.meta.env.BASE_URL;
@@ -45,8 +46,10 @@ const anchorSuffix = (i) => (i === 0 ? "" : `-${weeks[i].id}`);
 // Headline renders as two lines: "LSP Pop Up" / "Pilsen" (split on the middle dot).
 const headlineParts = lead.headline.split(" · ");
 const pageTitle = `${lead.title} · ${lead.dateRangeShort} | The Latina Sweat Project`;
+// Built from the lead week's locations (Week 3 has three).
+const leadVenues = lead.locations.map((l) => `${l.name} (${l.priceLine.toLowerCase()})`);
 const pageDescription =
-  `LSP Pop Up · Pilsen, ${lead.dateRangeShort}: 45-minute classes at Chicago Art Department (pay what you can) and Sanctuary Health ($10 per mat, 12 mats). Reserve your spot.`;
+  `LSP Pop Up, ${lead.dateRangeShort}: 45-minute classes at ${leadVenues.slice(0, -1).join(", ")}${leadVenues.length > 2 ? "," : ""} and ${leadVenues[leadVenues.length - 1]}. Reserve your spot.`;
 ---
 
 <Layout
@@ -87,7 +90,9 @@ const pageDescription =
           {weeks.map((week, w) => (
             <span class="pu-pill-ink rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]" {...heroWindow(w)}>{week.datePill}</span>
           ))}
-          <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">Two locations · Pilsen</span>
+          {weeks.map((week, w) => (
+            <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]" {...heroWindow(w)}>{locationsSummary(week).en} · {locationsSummary(week).placesLabel}</span>
+          ))}
           <span class="pu-pill-line rounded-full px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]">{lead.classLengthLabel} classes</span>
         </div>
 
@@ -103,7 +108,7 @@ const pageDescription =
 
         {!isPast && weeks.map((week, w) => (
           <div data-popup-hide-when-past {...popUpWeekWindow(weeks, w)}>
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {week.locations.map((loc) => (
               <a
                 href={`#${loc.id}${anchorSuffix(w)}`}
