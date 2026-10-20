@@ -4,10 +4,10 @@
 //
 // Facts are binding (marketing/popup-week3-4/BRIEF.md, Oct 12 2026): FULL
 // NAMES exactly as on the MarianaTek roster; every class is 45 minutes.
-// The brief's CAD header says 10 classes but lists 9 (Mon-Fri); the 9
-// listed classes are what is here, pending Fez.
-// Chicago Art Dept has no weekend classes this week (Sat Oct 31 / Sun Nov
-// 1 are simply not listed; a notice line says so). Sanctuary has no
+// Chicago Art Dept is EVENING ONLY this week (Fez, Oct 20 2026): the four
+// 6:00 PM classes Mon Oct 26 to Thu Oct 29. The five 6:00 AM sessions
+// (Mon to Fri) were removed, so Fri Oct 30, Sat Oct 31 and Sun Nov 1 are
+// simply not listed (no "No classes" rows); a notice line says so. Sanctuary has no
 // classes Sat Oct 31. DST ends Sun Nov 1, so that day's instants are CST
 // (-06:00): makeSessionFactory picks the offset, and endsAtISO is
 // Nov 1 23:59:59 local (-06:00).
@@ -46,26 +46,25 @@ const [cadBase, sancBase] = popUpWeek2Locations;
 export const popUpWeek4Locations = [
   {
     ...cadBase,
-    ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--4",
+    // Rebuilt Zeffy form (Oct 20 2026; the first CAD Week 4 form was deleted
+    // by accident), hence the "-2" slug.
+    ticketsUrl: "https://www.zeffy.com/en-US/ticketing/lsp-at-chicago-art-department-week--4-2",
     // Own check-in form per week (never inherit Week 2's): /checkin.
-    checkInFormId: "6f61be34-6b5a-4dd0-b2af-2844e31ae677",
+    checkInFormId: "929718d4-b7ae-4652-a34e-e3580a0b3151",
     checkInUrl:
-      // cad-w4: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
-      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNmY2MWJlMzQtNmI1YS00ZGQwLWIyYWYtMjg0NGUzMWFlNjc3IiwiaWF0IjoxNzkxODQ5MTQ1LCJleHAiOjE4MjMzODUxNDV9.CBAI-qVzkzKQpj8qizQ8Y260bgaFZuijkOZSAilvXMs",
-    noticeLine: "No weekend classes at Chicago Art Dept this week.",
+      // cad-w4: signed Zeffy check-in manager link for the rebuilt form (see
+      // CHECK-IN LINKS in popUpShared.js). This link EXPIRES Oct 30 2026
+      // (JWT exp, 6:45 PM CDT), after the last CAD class on Thu Oct 29.
+      "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiOTI5NzE4ZDQtYjdhZS00NjUyLWEzNGUtZTM1ODBhMGIzMTUxIiwiaWF0IjoxNzkyNTM5ODgwLCJleHAiOjE3OTM0MDM5MDB9.9-ndxhto2w2hnwXOFm0SgzfX5P4pD1pVnZvd_Un5IS4",
+    noticeLine: "Evening classes only at Chicago Art Dept this week, 6:00 PM Monday to Thursday.",
     closedDays: [],
     sessions: [
-      session("cad", "10-26", "06:00", "6:00 AM", "Yoga Flow", ["Kellyn Mitchell", "Antonia Rosales"]),
       // Fabiola Saldaña (MarianaTek 6942, newest YTT cohort ids 6937-6953) is a working
       // assumption flagged for Fez; the other roster Fabiola is Fabiola Davila (6556).
       session("cad", "10-26", "18:00", "6:00 PM", "Yoga Flow", ["Courtney Luedke", "Fabiola Saldaña"]),
-      session("cad", "10-27", "06:00", "6:00 AM", "Yoga Sculpt", ["Yaritza Jurado"]),
       session("cad", "10-27", "18:00", "6:00 PM", "Yoga Sculpt", ["Vanessa Tirado"]),
-      session("cad", "10-28", "06:00", "6:00 AM", "Yoga Sculpt", ["Vero Quiñones"]),
       session("cad", "10-28", "18:00", "6:00 PM", "Yoga Sculpt", ["Alondra Alcazar"]),
-      session("cad", "10-29", "06:00", "6:00 AM", "Strength Training", ["Jay Pena"]),
       session("cad", "10-29", "18:00", "6:00 PM", "Yoga Sculpt", ["Juanita Barajas"]),
-      session("cad", "10-30", "06:00", "6:00 AM", "Yoga Flow", ["Marelin Enriquez", "Sarah Esparza"]),
     ],
   },
   {
