@@ -13,6 +13,10 @@
 // file (see CHECK-IN LINKS in src/data/popUpShared.js); a location whose
 // checkInUrl is null renders a disabled "Link coming" button.
 //
+// Oct 20, 2026: a "Fall events" group (Kids Halloween Yoga, Live Banda
+// Pilates + Yoga Sculpt, LSP Día de los Muertos; src/data/fallEvents.js)
+// sits under the current week with one check-in button per event.
+//
 // For volunteers, not the public: noindex, not in the nav, not on /links,
 // excluded from the sitemap (astro.config.mjs). No passcode (the old
 // kiosk had none either).
@@ -34,6 +38,8 @@ import { showVolunteerCheckIn } from "../data/volunteerCheckIn.js";
 import { popUpWeeks, currentPopUpWeek, popUpWeekPhase } from "../data/popUpWeeks.js";
 import { activeSessions } from "../data/popUpShared.js";
 import { finishLineClasses, collectiveFinishLine } from "../data/collectiveFinishLine.js";
+import { fallEvents } from "../data/fallEvents.js";
+import FallEventsClient from "../components/FallEventsClient.astro";
 
 const contactEmail = "collab@latinasweatproject.com";
 const current = currentPopUpWeek();
@@ -81,6 +87,30 @@ const weeks = popUpWeeks.map((week) => ({
   ],
 }));
 const byGroup = (g) => weeks.filter((w) => w.group === g);
+
+// Fall events (Oct 31 + Nov 1 2026 at La Villita Park, src/data/fallEvents.js):
+// one button per event with its signed Zeffy check-in link, in their own
+// group under the current week (never re-sorted by the week script). The
+// group hides once the last link has expired (Mon Nov 2, 9:00 PM CST).
+const fallGroup = {
+  week: {
+    id: "fall-events",
+    title: "Fall events",
+    dateRangeShort: "Oct 31 + Nov 1 · La Villita Park",
+    startsAtISO: fallEvents[0].startsAtISO,
+    endsAtISO: fallEvents[fallEvents.length - 1].endsAtISO,
+  },
+  buttons: fallEvents.map((e) => ({
+    key: e.id,
+    title: e.title,
+    sub: `${e.dayShort} ${e.dateLabel} · ${e.startTimeLabel} · ${e.venue}`,
+    url: e.checkInUrl,
+    dark: e.id === "dia-de-los-muertos",
+    times: { [e.date]: [e.startTimeLabel] },
+  })),
+};
+const fallCheckInExpiresISO = "2026-11-03T03:00:00Z";
+const fallCheckInLive = Date.now() <= Date.parse(fallCheckInExpiresISO);
 ---
 
 {showVolunteerCheckIn ? (
@@ -123,6 +153,12 @@ const byGroup = (g) => weeks.filter((w) => w.group === g);
 						<WeekBlock week={week} buttons={buttons} />
 					))}
 				</div>
+				{fallCheckInLive && (
+					<div class="mt-8" data-fall-past-at={fallCheckInExpiresISO}>
+						<WeekBlock week={fallGroup.week} buttons={fallGroup.buttons} sortable={false} />
+						<FallEventsClient />
+					</div>
+				)}
 				<p id="ci-none" class="ci-note" hidden={!!current}>
 					No pop-up week is scheduled right now. Past weeks are below.
 				</p>

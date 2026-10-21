@@ -1,0 +1,151 @@
+---
+// One fall 2026 event card (src/data/fallEvents.js): the Zeffy banner, date
+// and time, title, short summary, venue + address (Google Maps), price and
+// the Zeffy CTA.
+//
+// variant="events": /events #fall-events grid (full square banner).
+// variant="carousel": homepage #events-carousel (banner cropped to the
+//   carousel's 1200x630 image box; a div, so the CTA is never a nested
+//   link; must stay a DIRECT child of #events-carousel and carries
+//   data-fall-end so the dots script skips it once past).
+//
+// Identity: Option I (paper card, ink text, terracotta accent, Rubik) for
+// the Oct 31 classes; Día de los Muertos keeps its /diadelosmuertos look
+// (black ground, white text, cempasúchil #FF7A1A as the one accent).
+// Hidden at build time once past and in the browser via data-fall-past-at
+// (FallEventsClient, included by the host page). The markup sits inside a
+// {cond && (...)} expression, which trims whitespace between adjacent
+// expressions, so mixed text is built with template strings.
+import { fallConversionAttrs } from "@/data/fallEvents";
+
+interface Props {
+  event: any;
+  variant?: "events" | "carousel";
+  context: string;
+}
+const { event: e, variant = "events", context } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const ddlm = e.id === "dia-de-los-muertos";
+const carousel = variant === "carousel";
+const pageUrl = e.pagePath ? `${base}${e.pagePath}` : null;
+---
+
+{!e.isPast() && (
+  <article
+    id={carousel ? undefined : e.anchor}
+    class:list={[
+      "fe-card group flex flex-col overflow-hidden rounded-2xl",
+      ddlm ? "fe-card--ddlm" : "fe-card--paper",
+      carousel ? "w-[300px] flex-shrink-0 snap-start sm:w-[340px] lg:w-[390px]" : "scroll-mt-28",
+    ]}
+    data-fall-past-at={e.endsAtISO}
+    data-fall-end={carousel ? e.endsAtISO : undefined}
+  >
+    <a
+      href={e.ticketsUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={["fe-media block overflow-hidden", carousel ? "aspect-[1200/630]" : "aspect-square"]}
+      tabindex="-1"
+      aria-hidden="true"
+      {...fallConversionAttrs(e, context)}
+    >
+      <picture>
+        <source srcset={`${base}${e.banner.webp}`} type="image/webp" />
+        <img
+          src={`${base}${e.banner.jpg}`}
+          width={e.banner.width}
+          height={e.banner.height}
+          alt={e.banner.alt}
+          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+          decoding="async"
+        />
+      </picture>
+    </a>
+    <div class="flex flex-1 flex-col p-5 sm:p-6">
+      <p class="fe-when text-sm font-extrabold">
+        {`${e.dayShort} ${e.dateLabel} · ${e.timeLabel}`}
+      </p>
+      <h3 class="mt-1.5 text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
+        {pageUrl ? <a href={pageUrl} class="hover:underline underline-offset-4">{e.title}</a> : e.title}
+      </h3>
+      <p class="fe-body mt-2 text-sm leading-relaxed">{e.summary}</p>
+      <p class="fe-meta mt-3 text-sm leading-snug">
+        <span class="font-bold">{e.venue}</span>{" · "}
+        <a href={e.mapsUrl} target="_blank" rel="noopener noreferrer" class="underline underline-offset-2">{e.address}</a>
+      </p>
+      <p class="mt-1 text-sm font-extrabold">{e.priceLine}</p>
+      <div class="mt-auto pt-5">
+        <a
+          href={e.ticketsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="fe-cta flex items-center justify-between gap-3 rounded-full px-5 py-3 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          {...fallConversionAttrs(e, context)}
+        >
+          <span>{`${e.ticketsLabel} on Zeffy`}</span>
+          <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </a>
+        {pageUrl && !carousel && (
+          <a href={pageUrl} class="fe-more mt-3 inline-block text-sm font-bold underline underline-offset-4">
+            Program, volunteer sign-up and details
+          </a>
+        )}
+      </div>
+    </div>
+  </article>
+)}
+
+<style>
+  .fe-card--paper {
+    background: #fdfbf7;
+    color: #1e1a17;
+    box-shadow: 0 1px 0 rgba(30, 26, 23, 0.06), 0 18px 40px -24px rgba(30, 26, 23, 0.35);
+  }
+  .fe-card--paper .fe-media {
+    background: #f3ede4;
+  }
+  .fe-card--paper .fe-when {
+    color: #c4573a;
+  }
+  .fe-card--paper .fe-body,
+  .fe-card--paper .fe-meta {
+    color: rgba(30, 26, 23, 0.75);
+  }
+  .fe-card--paper .fe-cta {
+    background: #1e1a17;
+    color: #fdfbf7;
+    --tw-ring-color: #c4573a;
+  }
+  .fe-card--paper .fe-cta:hover {
+    background: #c4573a;
+  }
+  .fe-card--ddlm {
+    background: #000;
+    color: #fff;
+    box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.6);
+  }
+  .fe-card--ddlm .fe-media {
+    background: #000;
+  }
+  .fe-card--ddlm .fe-when {
+    color: #ff7a1a;
+  }
+  .fe-card--ddlm .fe-body,
+  .fe-card--ddlm .fe-meta,
+  .fe-card--ddlm .fe-more {
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .fe-card--ddlm .fe-cta {
+    background: #ff7a1a;
+    color: #000;
+    --tw-ring-color: #fff;
+    --tw-ring-offset-color: #000;
+  }
+  .fe-card--ddlm .fe-cta:hover {
+    background: #fff;
+  }
+</style>

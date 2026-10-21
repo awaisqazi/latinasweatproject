@@ -19,6 +19,9 @@
 //      past (Oct 5 to 11, 2026; auto-hides after Oct 11)
 //   9. Events carousel [L] (The Collective Finish Line card leads it while
 //      the series is not past, Oct 5 – 14 2026; auto-hides after Oct 14)
+//      (Oct 20 2026: after the current Pop Up week card come the three fall
+//      events at La Villita Park, Oct 31 + Nov 1, src/data/fallEvents.js;
+//      each hides itself after its end)
 //  10. Instagram [D]
 //  11. In The Press [L]
 // Desktop media zig-zag: Gala photo LEFT -> ABC7 video RIGHT -> Tee LEFT ->
@@ -54,6 +57,9 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 import FinishLineClient from "@/components/FinishLineClient.astro";
+import FallEventCard from "@/components/FallEventCard.astro";
+import FallEventsClient from "@/components/FallEventsClient.astro";
+import { fallEvents } from "@/data/fallEvents";
 import {
   collectiveFinishLine,
   finishLineEvents,
@@ -1524,6 +1530,16 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
             </a>
           ))}
 
+          {/* Fall 2026 events at La Villita Park (Sat Oct 31 Kids Halloween
+              Yoga + Live Banda Pilates + Yoga Sculpt, Sun Nov 1 Día de los
+              Muertos; src/data/fallEvents.js), right after the current Pop
+              Up week card. Each is a direct child of #events-carousel with
+              data-fall-end, so the dots script skips it once past;
+              FallEventsClient hides it in the browser. */}
+          {fallEvents.map((e) => (
+            <FallEventCard event={e} variant="carousel" context="home_events_carousel_fall" />
+          ))}
+
           {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the
               carousel while the series is not past. A div (not an <a>) so
               the two Zeffy CTAs are not nested links; it stays a DIRECT
@@ -1844,6 +1860,7 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
         </div>
       </div>
       <FinishLineClient />
+      <FallEventsClient />
     </section>
     {/* END: Events Section */}
 
@@ -1866,6 +1883,7 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
         };
         const cards = Array.from(carousel.children).filter((card) => {
           if (passed(card.getAttribute('data-finishline-end'))) return false;
+          if (passed(card.getAttribute('data-fall-end'))) return false;
           const showAfter = card.getAttribute('data-popup-show-after');
           const hideAfter = card.getAttribute('data-popup-hide-after');
           if (showAfter && !passed(showAfter)) return false;

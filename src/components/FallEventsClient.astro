@@ -1,0 +1,34 @@
+---
+// Fall 2026 events client behaviour (src/data/fallEvents.js), shared by
+// every surface that shows them. Astro bundles and dedupes this script, so
+// it is safe to include the component more than once per page. Mirrors
+// FinishLineClient.
+//
+// Surfaces check isPast() at build time; because the site is static, they
+// also carry [data-fall-past-at="<ISO>"] (an event's end instant, or the
+// last end of a group) and this script hides them in the browser once that
+// instant has passed, even without a rebuild. [data-fall-show-past-at]
+// elements are revealed instead.
+---
+
+<script>
+  (function () {
+    const now = Date.now();
+    const passed = (iso?: string) => {
+      const t = Date.parse(iso || "");
+      return Number.isFinite(t) && now > t;
+    };
+    document.querySelectorAll<HTMLElement>("[data-fall-past-at]").forEach((el) => {
+      if (passed(el.dataset.fallPastAt)) {
+        el.hidden = true;
+        el.style.display = "none";
+      }
+    });
+    document.querySelectorAll<HTMLElement>("[data-fall-show-past-at]").forEach((el) => {
+      if (passed(el.dataset.fallShowPastAt)) {
+        el.hidden = false;
+        el.style.removeProperty("display");
+      }
+    });
+  })();
+</script>

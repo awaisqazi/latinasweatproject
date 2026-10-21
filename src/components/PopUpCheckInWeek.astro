@@ -14,11 +14,14 @@ interface Button {
 interface Props {
   week: { id: string; title: string; dateRangeShort: string; startsAtISO: string; endsAtISO: string };
   buttons: Button[];
+  /** false: not a Pop Up week, so /checkin's script must not re-sort it
+   *  (no data-week-start / data-week-end). Used by the "Fall events" group. */
+  sortable?: boolean;
 }
-const { week, buttons } = Astro.props;
+const { week, buttons, sortable = true } = Astro.props;
 ---
 
-<section class="ci-week" data-week-start={week.startsAtISO} data-week-end={week.endsAtISO} aria-label={`${week.title}, ${week.dateRangeShort}`}>
+<section class="ci-week" data-week-start={sortable ? week.startsAtISO : undefined} data-week-end={sortable ? week.endsAtISO : undefined} aria-label={`${week.title}, ${week.dateRangeShort}`}>
   <h2 class="ci-week-label">{week.title} · {week.dateRangeShort}</h2>
   <div class="ci-buttons">
     {buttons.map((b) =>

@@ -19,6 +19,8 @@ import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import PopUpAvatars from "@/components/PopUpAvatars.astro";
 import { activeSessions, locationInstructors, locationsSummary, weekPhase } from "@/data/popUpShared";
 import { activePopUpWeeks, popUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
+import FallEventsClient from "@/components/FallEventsClient.astro";
+import { fallCrossLinkLines, lastFallEndISO } from "@/data/fallEvents";
 
 interface Props {
   context: string;
@@ -124,6 +126,25 @@ const nextLineData = (loc) =>
           ))}
         </div>
 
+        {/* "Also this week": the fall events at La Villita Park inside this
+            week (Week 4: Sat Oct 31 Halloween yoga, Sun Nov 1 Día de los
+            Muertos; src/data/fallEvents.js) -> /events#fall-events. Each
+            line hides after its own end (FallEventsClient). */}
+        {[fallCrossLinkLines(week)].filter((l) => l.length > 0).map((lines) => (
+          <a
+            href={`${base}events#fall-events`}
+            class="popup-band-next mt-4 block text-sm leading-snug underline-offset-4 hover:underline"
+            data-fall-past-at={lastFallEndISO}
+            data-conversion-event="events_page_click"
+            data-conversion-context={`${context}_fall_crosslink`}
+          >
+            <span class="popup-band-next-tag mr-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em]">Also this week</span>
+            {lines.map((l, i) => (
+              <span data-fall-past-at={l.pastAt}>{l.text}{i < lines.length - 1 && " · "}</span>
+            ))}
+          </a>
+        ))}
+
         {[nextWeekAfter(week)].filter(Boolean).map((nw) => (
             <a
               href={`${base}${nw.pagePath}?week=${nw.number}`}
@@ -152,6 +173,7 @@ const nextLineData = (loc) =>
   ))
 }
 {weeks.length > 0 && <PopUpWeekClient />}
+{weeks.some((w) => fallCrossLinkLines(w).length > 0) && <FallEventsClient />}
 
 <style>
   .popup-band {

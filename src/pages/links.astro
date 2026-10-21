@@ -15,6 +15,16 @@ import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import { activePopUpWeeks, popUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
 import { locationsSummary } from "@/data/popUpShared";
 import FinishLineClient from "@/components/FinishLineClient.astro";
+import FallEventsClient from "@/components/FallEventsClient.astro";
+import {
+  halloweenEvents,
+  halloweenAtLaVillita,
+  halloweenEndISO,
+  isHalloweenActive,
+  ddlmEvent,
+  fallConversionAttrs,
+  fallTicketEventFor,
+} from "@/data/fallEvents";
 import {
   collectiveFinishLine,
   finishLineEvents,
@@ -84,6 +94,14 @@ const popUpNextWeek = (week) => popUpWeeks[popUpWeeks.findIndex((w) => w.id === 
 // Oct 14). Rows come from src/data/collectiveFinishLine.js.
 const finishLineActive = getFinishLinePhase() !== "past";
 const finishLineCardClip = finishLineTornClip(13, 36, 9);
+
+// Fall 2026 events at La Villita Park (src/data/fallEvents.js): the Oct 31
+// double-header card (#halloween-card, both Zeffy forms) and the Día de los
+// Muertos card (#ddlm-card, Zeffy ticket form + /diadelosmuertos) sit right
+// after the Pop Up card while not past (build time; FallEventsClient hides
+// them in the browser via data-fall-past-at).
+const halloweenActive = isHalloweenActive();
+const ddlmActive = !ddlmEvent.isPast();
 
 // Define links data with English and Spanish translations
 const links = [
@@ -346,6 +364,8 @@ const getLinkConversionEvent = (url = "") => {
   // src/data/collectiveFinishLine.js): class registrations too.
   const finishLineEvent = finishLineTicketEventFor(url);
   if (finishLineEvent) return finishLineEvent;
+  const fallEvent = fallTicketEventFor(url);
+  if (fallEvent) return fallEvent;
   if (url.includes("/feedback")) return "feedback_start";
   if (url.includes("/schedule")) return "class_booking_start";
   if (url.includes("support-the-latina-sweat-project")) return "donation_click";
@@ -657,6 +677,138 @@ const getLinkConversionProvider = (url = "") => {
           </div>
           ))}
           <PopUpWeekClient />
+        </div>
+      )}
+
+
+      {/* Halloween at La Villita Park (Sat Oct 31, 2026): the two Oct 31
+          classes as rows with their own Zeffy CTAs. Option I cream /
+          paper / ink / terracotta. Every visible string has an EN/ES pair.
+          Rows hide after their own end, the card after the second class. */}
+      {halloweenActive && (
+        <div
+          id="halloween-card"
+          class="relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl p-4 pt-5 shadow-2xl shadow-black/30 sm:p-5 sm:pt-6"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 85ms; background: #f3ede4; color: #1e1a17;"
+          data-fall-past-at={halloweenEndISO}
+        >
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
+            <span class="lang-en">{halloweenAtLaVillita.dateLabel} · 2800 S Sacramento Ave</span>
+            <span class="lang-es hidden">{halloweenAtLaVillita.dateLabelEs} · 2800 S Sacramento Ave</span>
+          </p>
+          <h2 class="mt-1 text-[1.75rem] font-black uppercase leading-[0.95] tracking-tight sm:text-[2rem]">
+            <span class="lang-en">{halloweenAtLaVillita.title}</span>
+            <span class="lang-es hidden">{halloweenAtLaVillita.titleEs}</span>
+          </h2>
+          <div class="mt-4 space-y-3">
+            {halloweenEvents.filter((e) => !e.isPast()).map((e) => (
+              <div class="overflow-hidden rounded-xl bg-[#fdfbf7] shadow-[0_8px_20px_-14px_rgba(30,26,23,0.5)]" data-fall-past-at={e.endsAtISO}>
+                <div class="flex gap-3 p-3">
+                  <picture class="block h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#f3ede4]">
+                    <source srcset={`${base}${e.banner.webp}`} type="image/webp" />
+                    <img src={`${base}${e.banner.jpg}`} width="800" height="800" alt="" class="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  </picture>
+                  <div class="min-w-0">
+                    <p class="text-[11px] font-extrabold text-[#c4573a]">{e.timeLabel}</p>
+                    <p class="text-[14px] font-extrabold leading-snug">
+                      <span class="lang-en">{e.title}</span>
+                      <span class="lang-es hidden">{e.titleEs}</span>
+                    </p>
+                    <p class="mt-0.5 text-[11px] font-semibold leading-snug text-[#1e1a17]/70">
+                      <span class="lang-en">{e.summary}</span>
+                      <span class="lang-es hidden">{e.summaryEs}</span>
+                    </p>
+                    <p class="mt-1 text-[11px] font-extrabold">
+                      <span class="lang-en">{e.priceLine}</span>
+                      <span class="lang-es hidden">{e.priceLineEs}</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="px-3 pb-3">
+                  <a
+                    href={e.ticketsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-between rounded-lg bg-[#1e1a17] px-4 py-3 text-[#fdfbf7] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4573a] focus-visible:ring-offset-2"
+                    {...fallConversionAttrs(e, "links_halloween_card")}
+                  >
+                    <span class="text-sm font-extrabold">
+                      <span class="lang-en">{e.ticketsLabel} · {e.startTimeLabel}</span>
+                      <span class="lang-es hidden">{e.ticketsLabelEs} · {e.startTimeLabel}</span>
+                    </span>
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+          <a
+            href={`${withBase("events")}#fall-events`}
+            class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"
+          >
+            <span class="lang-en">Details on our events page</span>
+            <span class="lang-es hidden">Detalles en nuestra página de eventos</span>
+          </a>
+          <FallEventsClient />
+        </div>
+      )}
+
+      {/* LSP Día de los Muertos (Sun Nov 1, 2026): the Zeffy ticket form is
+          the primary CTA, /diadelosmuertos (program + volunteer sign-up)
+          second. Keeps the /diadelosmuertos look: black, white, one
+          cempasúchil accent. No end time is printed (Zeffy says 9 PM, the
+          run of show 8 PM; see src/data/fallEvents.js). */}
+      {ddlmActive && (
+        <div
+          id="ddlm-card"
+          class="relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl bg-black text-white shadow-2xl shadow-black/40"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 88ms;"
+          data-fall-past-at={ddlmEvent.endsAtISO}
+        >
+          <a href={withBase(ddlmEvent.pagePath)} class="block aspect-[16/9] overflow-hidden" aria-hidden="true" tabindex="-1">
+            <img src={`${base}images/ddlm/ddlm-2026-festival.jpg`} width="1600" height="899" alt="" class="h-full w-full object-cover object-[50%_30%]" loading="lazy" decoding="async" />
+          </a>
+          <div class="p-4 sm:p-5">
+            <p class="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#FF7A1A]">
+              <span class="lang-en">{ddlmEvent.dayShort} {ddlmEvent.dateLabel} · {ddlmEvent.timeLabel}</span>
+              <span class="lang-es hidden">{ddlmEvent.dayShortEs} {ddlmEvent.dateLabelEs} · {ddlmEvent.timeLabelEs}</span>
+            </p>
+            <h2 class="mt-1 text-[1.9rem] font-extrabold leading-[0.95] tracking-tight">Día de los Muertos</h2>
+            <p class="mt-2 text-[13px] font-semibold leading-relaxed text-white/75">
+              <span class="lang-en">{ddlmEvent.summary}</span>
+              <span class="lang-es hidden">{ddlmEvent.summaryEs}</span>
+            </p>
+            <p class="mt-2 text-[11px] font-extrabold">
+              <span class="lang-en">{ddlmEvent.venue} · {ddlmEvent.address} · {ddlmEvent.priceLine}</span>
+              <span class="lang-es hidden">{ddlmEvent.venue} · {ddlmEvent.address} · {ddlmEvent.priceLineEs}</span>
+            </p>
+            <a
+              href={ddlmEvent.ticketsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-4 flex items-center justify-between rounded-lg bg-[#FF7A1A] px-4 py-3 text-black transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              {...fallConversionAttrs(ddlmEvent, "links_ddlm_card")}
+            >
+              <span class="text-sm font-extrabold">
+                <span class="lang-en">Get tickets · $20</span>
+                <span class="lang-es hidden">Boletos · $20</span>
+              </span>
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+            <a
+              href={withBase(ddlmEvent.pagePath)}
+              class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/80 underline-offset-4 hover:underline"
+              data-conversion-event="ddlm_page_click"
+              data-conversion-context="links_ddlm_card"
+            >
+              <span class="lang-en">Program and volunteer sign-up</span>
+              <span class="lang-es hidden">Programa y voluntariado</span>
+            </a>
+          </div>
         </div>
       )}
 

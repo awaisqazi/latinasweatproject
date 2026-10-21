@@ -31,6 +31,8 @@ import PopUpAvatars from "@/components/PopUpAvatars.astro";
 import { activeSessions, groupSessionsByDay, locationInstructors, locationsSummary, weekPhase } from "@/data/popUpShared";
 import { currentPopUpWeek, popUpWeeks } from "@/data/popUpWeeks";
 import { collectiveFinishLine, finishLineClasses, getFinishLinePhase } from "@/data/collectiveFinishLine";
+import { fallCrossLinkLines, lastFallEndISO } from "@/data/fallEvents";
+import FallEventsClient from "@/components/FallEventsClient.astro";
 
 interface Props {
   /** data-conversion-context for the Zeffy reserve CTAs. */
@@ -96,6 +98,12 @@ const weekStartDate = week.startsAtISO.slice(0, 10);
 const finishLineInWeek = finishLineClasses.filter((e) => e.date >= weekStartDate);
 const finishLineDates = finishLineInWeek.map((e) => `${e.dayShort} ${e.dateLabel}`).join(" & ");
 const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.length > 0;
+// "Also this week" cross-link to the fall events at La Villita Park
+// (src/data/fallEvents.js) under the location cards of a week that holds
+// them (Week 4: Halloween yoga Sat Oct 31, Día de los Muertos Sun Nov 1).
+// Each line hides after its own end (data-fall-past-at), the block after
+// the last. Mirrors the Finish Line cross-link.
+const fallLines = fallCrossLinkLines(week);
 ---
 
 <div class="pu-sched" data-popup-hide-when-past={hideWhenPast ? "" : undefined} data-pu-locs>
@@ -277,7 +285,27 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
       );
     })}
   </div>
+  {[fallLines].filter((l) => l.length > 0).map((lines) => (
+    <a
+      href={`${base}events#fall-events`}
+      class="pu-fall-link group mt-5 flex items-center justify-between gap-3 rounded-2xl px-5 py-4 text-sm font-semibold leading-snug sm:px-7"
+      data-fall-past-at={lastFallEndISO}
+      data-conversion-event="events_page_click"
+      data-conversion-context={`${context}_fall_crosslink`}
+    >
+      <span>
+        <span class="pu-fall-kicker block text-[10px] font-extrabold uppercase tracking-[0.16em]">Also this week</span>
+        {lines.map((l) => (
+          <span class="block font-extrabold" data-fall-past-at={l.pastAt}>{l.text}</span>
+        ))}
+      </span>
+      <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      </svg>
+    </a>
+  ))}
 </div>
+{fallLines.length > 0 && <FallEventsClient />}
 
 <script>
   // Phone location carousel (below md): the toggle scrolls the snap
@@ -583,6 +611,20 @@ const finishLineActive = getFinishLinePhase() !== "past" && finishLineInWeek.len
   }
   .pu-cta:focus-visible {
     --tw-ring-color: var(--pu-terracotta);
+  }
+
+  /* "Also this week" cross-link to the fall events at La Villita Park
+     (outlined ink on the cream ground: a neighbouring event, not part of
+     this week's schedule). */
+  .pu-fall-link {
+    border: 1.5px solid rgba(30, 26, 23, 0.18);
+    color: var(--pu-ink, #1e1a17);
+  }
+  .pu-fall-link:hover {
+    border-color: #c4573a;
+  }
+  .pu-fall-kicker {
+    color: #c4573a;
   }
 
   /* Cross-link to The Collective Finish Line (its own marigold, so it reads
