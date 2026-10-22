@@ -14,10 +14,10 @@
 // is pictured in a banner.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
-// - Kids Halloween Yoga: the banner says "3800 S SACRAMENTO"; Zeffy (and
-//   the other two events, and La Villita Park itself) say 2800. The site
-//   uses 2800. The banner image still shows 3800 because it is the Zeffy
-//   art as published; swap the image if Fez fixes the banner.
+// - Kids Halloween Yoga: RESOLVED 2026-10-22, Fez confirmed the address is
+//   2800 S Sacramento Ave, Chicago, IL 60608 (La Villita Park). The banner
+//   art still prints "3800 S SACRAMENTO" because it is the Zeffy art as
+//   published; swap the image here once the Zeffy banner is fixed.
 // - Kids Halloween Yoga: no age range, and the Zeffy page says
 //   "child-parent class" but sells one free General Admission ticket, so it
 //   is unclear whether each child or each family registers. The site says
