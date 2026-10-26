@@ -40,6 +40,13 @@ import Header from "@/components/Header.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
 import DdlmCountdownChip from "@/components/DdlmCountdownChip.astro";
 import DdlmPicado from "@/components/DdlmPicado.astro";
+import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
+import DdlmVeladoras from "@/components/DdlmVeladoras.astro";
+import DdlmPetalLine from "@/components/DdlmPetalLine.astro";
+import DdlmReveal from "@/components/DdlmReveal.astro";
+import HalloweenFlair from "@/components/HalloweenFlair.astro";
+import PopUpAvatars from "@/components/PopUpAvatars.astro";
+import { existsSync } from "node:fs";
 import { ORANGE, cempasuchil } from "@/lib/ddlmFlair";
 import {
     ddlmEvent as ddlm,
@@ -50,6 +57,7 @@ import {
     fallEventById,
     fallConversionAttrs,
 } from "@/data/fallEvents";
+import { instructorInitials } from "@/data/popUpShared";
 
 const base = import.meta.env.BASE_URL;
 const INSTAGRAM_URL = "https://www.instagram.com/latinasweatproject/";
@@ -69,6 +77,22 @@ const satRows = halloweenProgram.map((row) => {
             : null,
     };
 });
+
+// Class leaders' avatars for the lineup ("Leading the classes"): each pair
+// as two 44px circles (PopUpAvatars), the 160px webp from
+// ddlmWeekend.classLeaders[].leaders[].avatar where there is one (plus the
+// full-size sibling for 2x screens when it exists), otherwise an initials
+// circle. Names come from the data only; nothing is read off a photo.
+const leaderPeople = (leaders) =>
+    (leaders ?? []).map((l) => {
+        const full = l.avatar ? l.avatar.replace(/-160\.webp$/, ".webp") : null;
+        return {
+            name: l.name,
+            initials: instructorInitials(l.name),
+            photoSmall: l.avatar,
+            photo: full && full !== l.avatar && existsSync(`public/${full}`) ? full : l.avatar,
+        };
+    });
 
 // The two program flyers (1080x1350, public/images/ddlm/). Alt text reads
 // the program; prices are on Zeffy (the flyers print "DONATION", which is
@@ -155,7 +179,12 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
     <Header />
     <main class="font-rubik bg-white text-off-black">
         {/* ============================ HERO ============================ */}
-        <section class="relative bg-black text-white">
+        {/* Flair (Oct 27): papel picado swaying along the top edge of the
+            art, the countdown chip as on the homepage, the self-drawing
+            petal line under the h1 and a copy rise-in (.ddlm-rise, keyed
+            off .ddlm-in on this section; DdlmReveal.astro, once). */}
+        <DdlmReveal />
+        <section class="ddlm-hero relative bg-black text-white" data-ddlm-reveal="0.2">
             <div
                 class="ddlm-hero-media relative aspect-[16/9] w-full overflow-hidden lg:aspect-auto"
             >
@@ -180,6 +209,13 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     aria-hidden="true"
                 >
                 </div>
+                {/* Top wash so the flags read on the tent art. */}
+                <div
+                    class="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/80 to-transparent sm:h-20 lg:h-32"
+                    aria-hidden="true"
+                >
+                </div>
+                <DdlmPicado ground="#000000" sway class="z-10" />
             </div>
 
             <div
@@ -190,7 +226,8 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         then Sunday only. The countdown chip is filled in the
                         browser (hidden without JS and after the weekend). */}
                     <p
-                        class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm"
+                        class="ddlm-rise flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm"
+                        style="--i: 0;"
                     >
                         {satActive && (
                             <span data-fall-past-at={halloweenEndISO}>
@@ -204,14 +241,16 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         >
                             {ddlm.dayShort} {ddlm.dateLabel} · {ddlm.venue}
                         </span>
-                        <DdlmCountdownChip class="border-l border-white/40 pl-3 text-white" />
+                        <DdlmCountdownChip class="rounded-full border border-white/30 bg-black/50 px-3 py-1 text-xs font-bold tracking-[0.14em] text-white" />
                     </p>
                     <h1
-                        class="mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+                        class="ddlm-rise mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+                        style="--i: 1;"
                     >
                         Día de los Muertos
                     </h1>
-                    <p class="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">
+                    <DdlmPetalLine self class="mt-3 w-[calc(100%+1rem)] sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+18rem)]" />
+                    <p class="ddlm-rise mt-4 text-base leading-relaxed text-white/90 sm:text-lg" style="--i: 2;">
                         {satActive && (
                             <span data-fall-past-at={halloweenEndISO}>
                                 Saturday morning, Halloween in the park with the
@@ -221,10 +260,10 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         Sunday evening, 4:00 – 8:00 PM, we remember and celebrate
                         our loved ones together.
                     </p>
-                    <p class="mt-2 text-sm text-white/70 sm:text-base">
+                    <p class="ddlm-rise mt-2 text-sm text-white/70 sm:text-base" style="--i: 3;">
                         {ddlm.venue} · {ddlm.address}
                     </p>
-                    <div class="mt-7 flex flex-wrap items-center gap-3">
+                    <div class="ddlm-rise mt-7 flex flex-wrap items-center gap-3" style="--i: 4;">
                         {!ddlmPast && (
                             <a
                                 href={ddlm.ticketsUrl}
@@ -289,12 +328,16 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
         {/* ============================ FACTS ============================ */}
         <section
-            class="relative bg-black px-4 pb-14 pt-16 text-white sm:px-6 sm:pb-16 sm:pt-20 lg:pt-24"
+            class="relative bg-black px-4 pb-20 pt-16 text-white sm:px-6 sm:pb-24 sm:pt-20 lg:pt-24"
         >
-            {/* Papel picado strung along the top edge of the band
+            {/* Papel picado strung along the top edge of the band, swaying
                 (src/components/DdlmPicado.astro: fixed height per
-                breakpoint, full-width cord). */}
-            <DdlmPicado ground="#000000" />
+                breakpoint, full-width cord), and a row of veladoras along
+                the bottom edge that light one by one when it scrolls into
+                view (DdlmVeladoras.astro; the bottom padding keeps them
+                clear of the copy). */}
+            <DdlmPicado ground="#000000" sway />
+            <DdlmVeladoras ground="#000000" phone="full" />
             <dl class="mx-auto grid max-w-5xl gap-8 sm:grid-cols-3 sm:gap-6">
                 <div class="border-t border-white/20 pt-4">
                     <dt
@@ -385,6 +428,10 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
                             Saturday, October 31
                         </h2>
+                        {/* Halloween spirit (Saturday only, hides with this
+                            block): yogis on their mats from the Oct 31 flyer,
+                            in cut paper, bats drifting over them. */}
+                        <HalloweenFlair layout="band" tone="light" ground="#FFFFFF" class="mt-4" />
                         <p class="mt-2 flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] text-medium-gray">
                             <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
                             {ddlmWeekend.saturdayLabel} · from 9:00 AM
@@ -424,8 +471,20 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
                 <div
                     id="sunday"
-                    class:list={["scroll-mt-32", satActive && "mt-14 border-t-4 border-black pt-10 sm:mt-16"]}
+                    class:list={["relative scroll-mt-32", satActive && "mt-14 border-t-4 border-black pt-10 sm:mt-16"]}
                 >
+                    {/* Two cempasúchil sitting on the black rule at the
+                        top-right corner (Sunday only: above the heading),
+                        blooming once on scroll. */}
+                    <DdlmMarigolds
+                        layout="corner"
+                        position={satActive ? "bottom-right" : "top-right"}
+                        size={satActive ? 64 : 44}
+                        count={2}
+                        ground="#FFFFFF"
+                        id="ddlm-mg-sun"
+                        class={satActive ? "bottom-[calc(100%-1.25rem)] right-0" : "-top-12 right-0"}
+                    />
                     <h2 class:list={["text-3xl font-extrabold sm:text-4xl", !satActive && "mt-3"]}>
                         Sunday, November 1
                     </h2>
@@ -469,7 +528,8 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         </section>
 
         {/* ============================ LINEUP ============================ */}
-        {/* Who's playing + who's leading, typographic only. Banda Cerro Azul
+        {/* Who's playing + who's leading (each leader pair with two 44px
+            avatars, photo or initials, see leaderPeople above). Banda Cerro Azul
             (Saturday) and the two Saturday class-leader pairs (Ariesna and
             Lucia, Vanessa and Veronica) hide with the Saturday block. First
             names only for the class leaders. Third and last use of the
@@ -505,9 +565,21 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         </p>
                         <ul class="mt-4 space-y-5">
                             {ddlmWeekend.classLeaders.filter((c) => c.day !== "saturday" || satActive).map((c) => (
-                                <li data-fall-past-at={c.pastAt ?? undefined}>
-                                    <p class="text-xl font-extrabold leading-tight">{c.names}</p>
-                                    <p class="mt-1 text-sm text-medium-gray">{c.detail}</p>
+                                <li class="flex items-center gap-4" data-fall-past-at={c.pastAt ?? undefined}>
+                                    <span class="shrink-0" aria-hidden="true">
+                                        <PopUpAvatars
+                                            people={leaderPeople(c.leaders)}
+                                            size={44}
+                                            ring="#000000"
+                                            bg="#FFFFFF"
+                                            initialsBg="#FFFFFF"
+                                            initialsFg={ORANGE}
+                                        />
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="text-xl font-extrabold leading-tight">{c.names}</p>
+                                        <p class="mt-1 text-sm text-medium-gray">{c.detail}</p>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -520,8 +592,11 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         {/* The two program flyers on black (the white-ground Oct 31 flyer and
             the ofrenda Nov 1 flyer both sit well on it). Each opens the
             full-size jpg. The Oct 31 flyer hides with the Saturday block. */}
-        <section class="bg-black px-4 py-16 text-white sm:px-6 sm:py-20">
-            <div class="mx-auto max-w-5xl">
+        <section class="relative overflow-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20">
+            {/* Loose cempasúchil petals drifting up behind the flyers
+                (DdlmMarigolds layout="petals"; hidden under reduced motion). */}
+            <DdlmMarigolds layout="petals" count={18} ground="#000000" id="ddlm-mg-fly" class="z-0" />
+            <div class="relative z-10 mx-auto max-w-5xl">
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]">
                     El programa
                 </p>
@@ -854,6 +929,28 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
     .ddlm-pill:focus-visible {
         outline: 2px solid #ff7a1a;
         outline-offset: 2px;
+    }
+    /* Hero copy rise-in: .ddlm-hero gets .ddlm-in once (DdlmReveal.astro);
+       the copy blocks rise 12px and fade in 80ms apart (--i). Waiting state
+       only with JS and motion allowed; transform/opacity only. */
+    @media (prefers-reduced-motion: no-preference) {
+        :global(html.js) .ddlm-hero:not(.ddlm-in) .ddlm-rise {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        .ddlm-hero.ddlm-in .ddlm-rise {
+            animation: ddlm-hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 80ms) both;
+        }
+    }
+    @keyframes ddlm-hero-rise {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     /* lg+: full-bleed art capped to the viewport below the header, cropped
        a little top and bottom (object-position keeps the banner and the

@@ -12,11 +12,21 @@
 // Identity: Option I (paper card, ink text, terracotta accent, Rubik) for
 // the Oct 31 classes; Día de los Muertos keeps its /diadelosmuertos look
 // (black ground, white text, cempasúchil #FF7A1A as the one accent).
+// Flair (Oct 27, light: no observers): the Día de los Muertos card gets a
+// thin static papel picado row across the top of its art
+// (DdlmPicado size="sm") and a static two-flower cempasúchil mark at the
+// right of its price line (DdlmMarigolds layout="mark"); the two Oct 31
+// cards get the Halloween bat + jack-o'-lantern pair there instead
+// (HalloweenFlair layout="pair": CSS-only flap and flicker, still under
+// reduced motion).
 // Hidden at build time once past and in the browser via data-fall-past-at
 // (FallEventsClient, included by the host page). The markup sits inside a
 // {cond && (...)} expression, which trims whitespace between adjacent
 // expressions, so mixed text is built with template strings.
 import { fallConversionAttrs } from "@/data/fallEvents";
+import DdlmPicado from "@/components/DdlmPicado.astro";
+import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
+import HalloweenFlair from "@/components/HalloweenFlair.astro";
 
 interface Props {
   event: any;
@@ -26,6 +36,7 @@ interface Props {
 const { event: e, variant = "events", context } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const ddlm = e.id === "dia-de-los-muertos";
+const halloween = e.date === "2026-10-31";
 const carousel = variant === "carousel";
 const pageUrl = e.pagePath ? `${base}${e.pagePath}` : null;
 // CTA carries the price and keeps "on Zeffy": "Get tickets · $20 on Zeffy",
@@ -37,7 +48,7 @@ const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticke
   <article
     id={carousel ? undefined : e.anchor}
     class:list={[
-      "fe-card group flex flex-col overflow-hidden rounded-2xl",
+      "fe-card group relative flex flex-col overflow-hidden rounded-2xl",
       ddlm ? "fe-card--ddlm" : "fe-card--paper",
       carousel ? "w-[300px] flex-shrink-0 snap-start sm:w-[340px] lg:w-[390px]" : "scroll-mt-28",
     ]}
@@ -66,6 +77,7 @@ const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticke
         />
       </picture>
     </a>
+    {ddlm && <DdlmPicado ground="#000000" size="sm" class="z-10" />}
     <div class="flex flex-1 flex-col p-5 sm:p-6">
       <p class="fe-when text-sm font-extrabold">
         {`${e.dayShort} ${e.dateLabel} · ${e.timeLabel}`}
@@ -78,7 +90,11 @@ const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticke
         <span class="font-bold">{e.venue}</span>{" · "}
         <a href={e.mapsUrl} target="_blank" rel="noopener noreferrer" class="underline underline-offset-2">{e.address}</a>
       </p>
-      <p class="mt-1 text-sm font-extrabold">{e.priceLine}</p>
+      <p class="mt-1 flex items-center justify-between gap-3 text-sm font-extrabold">
+        <span>{e.priceLine}</span>
+        {ddlm && <DdlmMarigolds layout="mark" size={28} ground="#000000" id="fe-mg" class="-my-1" />}
+        {halloween && <HalloweenFlair layout="pair" tone="light" ground="#fdfbf7" class="-my-1" />}
+      </p>
       <div class="mt-auto pt-5">
         <a
           href={e.ticketsUrl}

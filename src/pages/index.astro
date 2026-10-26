@@ -79,6 +79,7 @@ import DdlmPicado from "@/components/DdlmPicado.astro";
 import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
 import DdlmVeladoras from "@/components/DdlmVeladoras.astro";
 import DdlmPetalLine from "@/components/DdlmPetalLine.astro";
+import HalloweenFlair from "@/components/HalloweenFlair.astro";
 import { cempasuchil } from "@/lib/ddlmFlair";
 import {
   fallEvents,
@@ -296,7 +297,7 @@ const heroPopUpWeeks = popUpWeeksActive
         across and down to ~80% of the art, so a right-half panel would
         cover the horse. Animated SVG layer, all motion-safe, all keyed
         off ONE class, .ddlm-in, added once per [data-ddlm-reveal] host
-        when that host scrolls into view (script in DdlmMarigolds.astro):
+        when that host scrolls into view (script in DdlmReveal.astro):
         this section (copy entrance, .ddlm-rise below, and the petal path
         under the headline, DdlmPetalLine.astro), each blooming
         cempasúchil group + loose petals (DdlmMarigolds.astro) and the
@@ -407,6 +408,9 @@ const heroPopUpWeeks = popUpWeeksActive
                       <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white">
                         <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
                         Sat Oct 31
+                        {/* Halloween: a flapping bat + a flickering
+                            jack-o'-lantern (HalloweenFlair, no observer). */}
+                        <HalloweenFlair layout="pair" tone="dark" ground="#000000" class="-my-1 ml-1" />
                       </p>
                       <ul class="mt-3 space-y-1.5 text-sm">
                         {halloweenProgram.map((row) => (
@@ -2573,7 +2577,7 @@ const heroPopUpWeeks = popUpWeeksActive
 
       /* Día de los Muertos spotlight entrances. #ddlm-weekend gets
          .ddlm-in once, the first time it scrolls into view (script in
-         src/components/DdlmMarigolds.astro). The copy blocks rise 12px and
+         src/components/DdlmReveal.astro). The copy blocks rise 12px and
          fade in 80ms apart (--i). transform/opacity only, so no layout
          shift. The waiting state applies only with JS (html.js) and motion
          allowed; otherwise everything is simply there. */

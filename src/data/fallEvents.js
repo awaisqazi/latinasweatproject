@@ -34,8 +34,8 @@
 //   (Banda Pilates + Sculpt), first names only; the Saturday giveaways (hot
 //   drinks, Organic Life warm meals, Sharing Access grocery bags while
 //   supplies last) are confirmed. Leader avatars: ddlmWeekend.classLeaders
-//   carries an optional `avatar` per person (null = not sourced yet; not
-//   rendered anywhere yet).
+//   carries an optional `avatar` per person (null = not sourced yet,
+//   rendered as an initials circle in the /diadelosmuertos lineup).
 // - The green "SE" logo on the Oct 31 flyer is unidentified. It is left
 //   off the site (supporters are printed as text, see ddlmWeekend).
 // - Kids Halloween Yoga: no age range, and the Zeffy page says
@@ -389,8 +389,8 @@ export const ddlmWeekend = {
       day: "sunday",
       pastAt: null,
       leaders: [
-        { name: "Zoraida", avatar: null },
-        { name: "Luz", avatar: null },
+        { name: "Zoraida", avatar: "images/popup/instructors/zoraida-magana-160.webp" },
+        { name: "Luz", avatar: "images/popup/instructors/luz-rodriguez-160.webp" },
       ],
     },
     {
@@ -399,8 +399,8 @@ export const ddlmWeekend = {
       day: "saturday",
       pastAt: halloweenEndISO,
       leaders: [
-        { name: "Ariesna", avatar: null },
-        { name: "Lucia", avatar: null },
+        { name: "Ariesna", avatar: "images/popup/instructors/ariesna-garcia-sedano-160.webp" },
+        { name: "Lucia", avatar: "images/popup/instructors/lucia-del-rincon-martinez-160.webp" },
       ],
     },
     {

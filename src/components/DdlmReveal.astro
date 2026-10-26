@@ -1,0 +1,35 @@
+---
+// One-shot scroll reveals shared by every Día de los Muertos / Halloween
+// flair surface (homepage #ddlm-weekend, /diadelosmuertos, /events
+// #fall-events, /links). Renders nothing; its script adds `.ddlm-in` to
+// each [data-ddlm-reveal] host the first time that host is in view (the
+// attribute value is the IntersectionObserver threshold, default 0.15),
+// then stops observing it. Every entrance keys off that one class; nothing
+// here runs per frame. Hosts that are display:none at this width never
+// fire. Included by DdlmMarigolds, DdlmVeladoras, DdlmPetalLine and
+// HalloweenFlair (Astro bundles the script once per page), so a page that
+// uses any of them gets it; a page may also include it directly.
+---
+
+<script>
+  (function () {
+    const hosts = document.querySelectorAll<HTMLElement>("[data-ddlm-reveal]");
+    if (!hosts.length) return;
+    if (!("IntersectionObserver" in window)) {
+      hosts.forEach((h) => h.classList.add("ddlm-in"));
+      return;
+    }
+    hosts.forEach((host) => {
+      const threshold = Number(host.dataset.ddlmReveal) || 0.15;
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          host.classList.add("ddlm-in");
+          io.disconnect();
+        },
+        { threshold },
+      );
+      io.observe(host);
+    });
+  })();
+</script>

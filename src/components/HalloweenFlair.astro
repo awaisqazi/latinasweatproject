@@ -1,0 +1,321 @@
+---
+// Halloween spirit for the Sat Oct 31 surfaces: a sparse, deterministic
+// scatter of the cut-paper motifs in src/lib/halloweenFlair.ts (ghost in
+// tree pose, skeleton in warrior II, jack-o'-lantern on a mat, bats, candy
+// corn, sparkles), black + white + ORANGE only. Decoration only:
+// aria-hidden, pointer-events none, never over text or buttons (the host
+// reserves the room).
+//
+// layout:
+//   "band"   in-flow strip (`height`, default 72px) of yogis on their mats
+//            with bats drifting across; under the "Saturday, October 31"
+//            heading on /diadelosmuertos. 10 pieces, 8 on phones.
+//   "row"    the same idea, absolutely placed along the TOP edge of its
+//            host (`height`, default 46px); the /links #halloween-card.
+//   "corner" a small cluster in the host's bottom-right corner (absolute;
+//            placement overridable with `class`); the /events Saturday
+//            strip. 6 pieces, 3 on phones.
+//   "pair"   an inline bat + pumpkin (no observer); the homepage mini
+//            program's Saturday header and the Oct 31 event cards.
+// tone: "light" (black ink, white paper; cream or white grounds) or
+//   "dark" (white ink; black grounds). ground: the host's ground color,
+//   for the few cut lines (pumpkin ridges, bat eyes).
+//
+// Motion (prefers-reduced-motion: no-preference only): band / row /
+// corner are reveal hosts (data-ddlm-reveal, DdlmReveal.astro, once): the
+// pieces pop in one by one. Always running, compositor-only: bats drift
+// across (translateX, 20 to 30s) with a soft rise and fall and flap their
+// wings (scaleX); the ghost's sheet bobs (translateY, 3s); the pumpkin's
+// carved face flickers ORANGE to white (opacity of a white layer, like the
+// veladora glow); sparkles twinkle (opacity + scale). Reduced motion or no
+// JS: every piece is simply there, still; bats rest at their spot.
+import { HW_MOTIFS, hwColors, type HwName } from "@/lib/halloweenFlair";
+import DdlmReveal from "@/components/DdlmReveal.astro";
+import { r2 } from "@/lib/ddlmFlair";
+
+interface Props {
+  layout?: "band" | "row" | "corner" | "pair";
+  tone?: "light" | "dark";
+  ground?: string;
+  height?: number;
+  class?: string;
+}
+const { layout = "band", tone = "light", ground, height, class: className } = Astro.props;
+const colors = hwColors(tone, ground);
+
+type Piece = {
+  m: HwName;
+  x?: number; // band / row: center, % across the host
+  r?: number; // corner: px from the right edge
+  b: number; // px above the bottom edge (band / row / corner)
+  s: number; // height px
+  rot?: number;
+  phone?: boolean; // false: hidden below 640px
+  wide?: boolean; // false: shown below 640px only
+};
+type Bat = { top: number; s: number; dur: number; delay: number; rest: number; reverse?: boolean };
+
+const LAYOUTS: Record<string, { pieces: Piece[]; bats: Bat[]; h: number }> = {
+  band: {
+    h: 72,
+    pieces: [
+      { m: "ghost", x: 6, b: 0, s: 60 },
+      { m: "sparkle", x: 14, b: 48, s: 12, phone: false },
+      { m: "pumpkin", x: 24, b: 0, s: 36 },
+      { m: "candyCorn", x: 34, b: 34, s: 16, rot: -18, phone: false },
+      { m: "skeleton", x: 47, b: 0, s: 60 },
+      { m: "ghost", x: 72, b: 0, s: 50 },
+      { m: "sparkle", x: 82, b: 40, s: 13 },
+      { m: "pumpkin", x: 91, b: 0, s: 34 },
+    ],
+    bats: [
+      { top: 2, s: 14, dur: 24, delay: -6, rest: 58 },
+      { top: 20, s: 11, dur: 30, delay: -19, rest: 33, reverse: true },
+    ],
+  },
+  row: {
+    h: 46,
+    pieces: [
+      { m: "ghost", x: 9, b: 2, s: 38 },
+      { m: "sparkle", x: 19, b: 28, s: 9 },
+      { m: "pumpkin", x: 30, b: 2, s: 22 },
+      { m: "skeleton", x: 50, b: 2, s: 38 },
+      { m: "candyCorn", x: 66, b: 16, s: 12, rot: 14 },
+      { m: "sparkle", x: 75, b: 30, s: 8 },
+      { m: "ghost", x: 89, b: 2, s: 34 },
+    ],
+    bats: [
+      { top: 1, s: 11, dur: 20, delay: -5, rest: 40 },
+      { top: 13, s: 9, dur: 26, delay: -14, rest: 80, reverse: true },
+    ],
+  },
+  corner: {
+    h: 56,
+    pieces: [
+      { m: "pumpkin", r: 6, b: 4, s: 28 },
+      { m: "sparkle", r: 4, b: 38, s: 10 },
+      { m: "ghost", r: 54, b: 4, s: 46, phone: false },
+      { m: "bat", r: 96, b: 34, s: 12, phone: false },
+      { m: "candyCorn", r: 104, b: 6, s: 14, rot: -16, phone: false },
+      { m: "sparkle", r: 128, b: 26, s: 8, phone: false },
+      { m: "bat", r: 46, b: 14, s: 11, wide: false },
+    ],
+    bats: [],
+  },
+};
+const preset = LAYOUTS[layout];
+const H = height ?? preset?.h ?? 0;
+const width = (m: HwName, s: number) => r2((HW_MOTIFS[m].w / HW_MOTIFS[m].h) * s);
+const svgOf = (m: HwName) => HW_MOTIFS[m].svg(colors);
+
+const pieces = (preset?.pieces ?? []).map((p, i) => {
+  const w = width(p.m, p.s);
+  const pos =
+    p.x != null ? `left:calc(${p.x}% - ${r2(w / 2)}px);` : `right:${p.r}px;`;
+  return {
+    ...p,
+    w,
+    vis: p.phone === false ? "hidden sm:block" : p.wide === false ? "sm:hidden" : "",
+    style: `${pos}bottom:${p.b}px;width:${w}px;height:${p.s}px;--pop:${150 + i * 90}ms;--d:${r2(-((i * 0.83) % 3))}s;`,
+  };
+});
+const bats = (preset?.bats ?? []).map((b, i) => ({
+  ...b,
+  w: width("bat", b.s),
+  i,
+}));
+const cornerBox = layout === "corner" ? { w: 150, h: H } : null;
+const pair = layout === "pair";
+---
+
+{!pair && <DdlmReveal />}
+
+{!pair && preset && (
+  <div
+    class:list={[
+      "hw-host pointer-events-none overflow-hidden",
+      layout === "band" && "relative",
+      layout === "row" && "absolute inset-x-0",
+      layout === "row" && (className ?? "top-0"),
+      layout === "corner" && "absolute",
+      layout === "corner" && (className ?? "bottom-0 right-3"),
+      layout === "band" && className,
+    ]}
+    style={cornerBox ? `width:${cornerBox.w}px;height:${cornerBox.h}px;` : `height:${H}px;`}
+    aria-hidden="true"
+    data-ddlm-reveal="0.4"
+  >
+    {pieces.map((p) => (
+      <span class:list={["hw-pop absolute block", p.vis]} style={p.style}>
+        <span class:list={["block h-full w-full", p.m === "bat" && "hw-bob"]}>
+          <svg
+            viewBox={HW_MOTIFS[p.m].vb}
+            class="block h-full w-full overflow-visible"
+            style={p.rot ? `transform:rotate(${p.rot}deg)` : undefined}
+            focusable="false"
+            set:html={svgOf(p.m)}
+          />
+        </span>
+      </span>
+    ))}
+    {bats.map((b) => (
+      <span
+        class:list={["hw-drift absolute inset-x-0 block", b.reverse && "hw-drift--rev"]}
+        style={`top:${b.top}px;height:${b.s}px;--bw:${b.w}px;--rest:${b.rest}%;--dur:${b.dur}s;--delay:${b.delay}s;`}
+      >
+        <span class="hw-pop hw-bat absolute top-0 block" style={`width:${b.w}px;height:${b.s}px;--pop:${150 + (pieces.length + b.i) * 90}ms;`}>
+          <span class="hw-bob block h-full w-full" style={`--d:${-b.i * 1.3}s`}>
+            <svg viewBox={HW_MOTIFS.bat.vb} class="block h-full w-full overflow-visible" focusable="false" set:html={svgOf("bat")} />
+          </span>
+        </span>
+      </span>
+    ))}
+  </div>
+)}
+
+{pair && (
+  <span class:list={["pointer-events-none inline-flex shrink-0 items-end gap-1", className]} aria-hidden="true">
+    <span class="hw-bob block" style={`width:${width("bat", 10)}px;height:10px;margin-bottom:9px;`}>
+      <svg viewBox={HW_MOTIFS.bat.vb} class="block h-full w-full overflow-visible" focusable="false" set:html={svgOf("bat")} />
+    </span>
+    <span class="block" style={`width:${width("pumpkin", 17)}px;height:17px;`}>
+      <svg viewBox={HW_MOTIFS.pumpkin.vb} class="block h-full w-full overflow-visible" focusable="false" set:html={svgOf("pumpkin")} />
+    </span>
+  </span>
+)}
+
+<style is:global>
+  .hw-sheet,
+  .hw-wing,
+  .hw-twinkle {
+    transform-box: fill-box;
+  }
+  .hw-sheet {
+    transform-origin: 50% 100%;
+  }
+  .hw-wing {
+    transform-origin: 100% 45%;
+  }
+  .hw-twinkle {
+    transform-origin: 50% 50%;
+  }
+  /* Bats at rest (reduced motion / no motion): a fixed spot in the band. */
+  .hw-bat {
+    left: calc(var(--rest, 50%) - var(--bw, 30px) / 2);
+  }
+  .hw-glow {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Entrance: only when JS will reveal it. */
+    html.js .hw-host:not(.ddlm-in) .hw-pop {
+      opacity: 0;
+      transform: translateY(6px) scale(0.7);
+    }
+    .hw-host.ddlm-in .hw-pop {
+      animation: hw-pop 600ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--pop, 0ms) both;
+    }
+
+    /* Bats cross the whole host: the wrapper is host-wide, so 100% is
+       the host's width; the bat starts just off the left edge. */
+    .hw-drift {
+      animation: hw-drift var(--dur, 24s) linear var(--delay, 0s) infinite;
+    }
+    .hw-drift--rev {
+      animation-direction: reverse;
+    }
+    .hw-drift .hw-bat {
+      left: 0;
+    }
+    .hw-bob {
+      animation: hw-bob 2.6s ease-in-out var(--d, 0s) infinite;
+    }
+    .hw-wing {
+      animation: hw-flap 380ms ease-in-out infinite alternate;
+    }
+    .hw-sheet {
+      animation: hw-sheet 3s ease-in-out var(--d, 0s) infinite;
+    }
+    .hw-glow {
+      animation: hw-glow 2.4s ease-in-out var(--d, 0s) infinite;
+    }
+    .hw-twinkle {
+      animation: hw-twinkle 2.6s ease-in-out var(--d, 0s) infinite;
+    }
+  }
+
+  @keyframes hw-pop {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.7);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes hw-drift {
+    from {
+      transform: translateX(calc(var(--bw, 30px) * -1));
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes hw-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-4px);
+    }
+    70% {
+      transform: translateY(3px);
+    }
+  }
+  @keyframes hw-flap {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0.45);
+    }
+  }
+  @keyframes hw-sheet {
+    0%,
+    100% {
+      transform: translateY(2px);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes hw-glow {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.85;
+    }
+    55% {
+      opacity: 0.25;
+    }
+    80% {
+      opacity: 0.7;
+    }
+  }
+  @keyframes hw-twinkle {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(0.7);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

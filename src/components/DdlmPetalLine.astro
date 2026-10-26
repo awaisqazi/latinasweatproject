@@ -6,14 +6,18 @@
 // fixed 18px height and a width wider than the headline), so phones see
 // only the solid start running off the screen edge.
 // Motion (prefers-reduced-motion: no-preference): when the section gets
-// `.ddlm-in` (#ddlm-weekend, script in DdlmMarigolds.astro) the dots pop in one by one,
+// `.ddlm-in` (#ddlm-weekend, script in DdlmReveal.astro) the dots pop in one by one,
 // 40ms apart, then rest. Reduced motion / no JS: all dots shown.
+//   self: the line is its own reveal host (any page; e.g. under the
+//         /diadelosmuertos h1) instead of keying off #ddlm-weekend.
 import { ORANGE, r2 } from "@/lib/ddlmFlair";
+import DdlmReveal from "@/components/DdlmReveal.astro";
 
 interface Props {
   class?: string;
+  self?: boolean;
 }
-const { class: className } = Astro.props;
+const { class: className, self = false } = Astro.props;
 
 const R = [3, 3.6, 3, 4.2, 3.4, 4.6, 3.8, 4.4, 5, 4.4, 3.8];
 const SOLID = 20;
@@ -25,8 +29,10 @@ const dots = Array.from({ length: 47 }, (_, i) => ({
 }));
 ---
 
+{self && <DdlmReveal />}
 <svg
-  class:list={["block h-[18px]", className]}
+  class:list={["block h-[18px]", self && "ddlm-pl-self", className]}
+  data-ddlm-reveal={self ? "0.5" : undefined}
   viewBox="0 0 900 18"
   preserveAspectRatio="xMinYMid slice"
   aria-hidden="true"
@@ -48,7 +54,11 @@ const dots = Array.from({ length: 47 }, (_, i) => ({
     html.js #ddlm-weekend:not(.ddlm-in) .ddlm-dot {
       transform: scale(0);
     }
-    #ddlm-weekend.ddlm-in .ddlm-dot {
+    html.js .ddlm-pl-self:not(.ddlm-in) .ddlm-dot {
+      transform: scale(0);
+    }
+    #ddlm-weekend.ddlm-in .ddlm-dot,
+    .ddlm-pl-self.ddlm-in .ddlm-dot {
       animation: ddlm-dot-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(300ms + var(--d, 0) * 40ms) both;
     }
   }

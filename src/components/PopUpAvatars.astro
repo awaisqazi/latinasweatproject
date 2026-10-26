@@ -9,7 +9,9 @@
 //   size / sizeSm (px, phone / >=640px), ring (2px ring = the colour of the
 //   surface the stack sits on, so overlaps read as cut-outs), bg (circle
 //   ground behind the transparent cutout), tone ("light" | "dark", picks the
-//   "+N" chip colours).
+//   "+N" chip colours), initialsBg / initialsFg (the initials circle; default
+//   mustard ground, ink text; /diadelosmuertos uses white with an orange
+//   initial inside a black ring).
 import { instructorInfo } from "@/data/popUpWeek1";
 
 interface Props {
@@ -22,6 +24,8 @@ interface Props {
   ring?: string;
   bg?: string;
   tone?: "light" | "dark";
+  initialsBg?: string;
+  initialsFg?: string;
 }
 const {
   people,
@@ -33,6 +37,8 @@ const {
   ring = "#fdfbf7",
   bg = "#ece2d4",
   tone = "light",
+  initialsBg = "#e0a83a",
+  initialsFg = "#1e1a17",
 } = Astro.props;
 const dark = tone === "dark";
 const vars = [
@@ -42,6 +48,8 @@ const vars = [
   `--pa-bg:${bg}`,
   `--pa-more-bg:${dark ? "#f3ede4" : "#1e1a17"}`,
   `--pa-more-fg:${dark ? "#1e1a17" : "#f3ede4"}`,
+  `--pa-ini-bg:${initialsBg}`,
+  `--pa-ini-fg:${initialsFg}`,
 ].join(";");
 const base = import.meta.env.BASE_URL;
 const shown = people.slice(0, max);
@@ -135,8 +143,8 @@ const extra = people.length - shown.length;
     line-height: 1;
   }
   .pa-initials {
-    background: #e0a83a;
-    color: #1e1a17;
+    background: var(--pa-ini-bg, #e0a83a);
+    color: var(--pa-ini-fg, #1e1a17);
   }
   .pa-more {
     background: var(--pa-more-bg, #1e1a17);

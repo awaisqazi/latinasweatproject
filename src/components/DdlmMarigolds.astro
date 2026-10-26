@@ -1,10 +1,11 @@
 ---
-// Blooming cempasúchil layer for the homepage #ddlm-weekend spotlight.
-// Flat cut paper only: ORANGE petal rings (tints via fill-opacity) over
-// ground-colored cut lines, from MARIGOLD_RINGS in src/lib/ddlmFlair.ts.
+// Blooming cempasúchil layer. Flat cut paper only: ORANGE petal rings
+// (tints via fill-opacity) over ground-colored cut lines, from
+// MARIGOLD_RINGS in src/lib/ddlmFlair.ts. One component, four layouts:
 //
-// Layout (the host is the section: `position: relative; overflow: hidden`;
-// this layer is pointer-events: none and sits under the copy, z-[5]):
+// layout="home" (default): the homepage #ddlm-weekend spotlight. The host
+//   is the section (`position: relative; overflow: hidden`); this layer is
+//   pointer-events: none and sits under the copy, z-[5]:
 //   lg+   an 8-flower cluster anchored to the copy column's bottom-left
 //         (coordinates are relative to the left edge of the copy, inside a
 //         max-w-7xl px-8 frame that mirrors the section's container), kept
@@ -13,24 +14,54 @@
 //         under the papel picado.
 //   < lg  3 small flowers in the section's bottom-right corner, right of
 //         the buttons and text links.
-// Loose petals rise slowly out of the lg cluster (the section's ONLY petal
-// system; it replaced the old full-width drift).
+//   Loose petals rise slowly out of the lg cluster.
+// layout="corner": a small cluster (`count` 2 to 5 flowers, the largest
+//   `size` px) hugging one corner (`position`) of its own box. The box is
+//   absolutely positioned by `class` (e.g. "right-0 -top-8"; default: the
+//   host's matching corner) and does not clip, so flowers may straddle an
+//   edge. `petals`: a few loose petals rise out of it. Own reveal host.
+// layout="petals": loose petals only (`count`), drifting up across the
+//   whole host (`absolute inset-0`, clipped). Own reveal host.
+// layout="mark": a static two-flower mark (`size` = the large flower),
+//   inline-block, no observer, no motion: for cards.
 //
 // Motion (only under prefers-reduced-motion: no-preference, and only once
-// JS has marked the page `html.js`): each flower group is its own reveal
-// host and gets `.ddlm-in` the first time IT scrolls into view (script
-// below, IntersectionObserver, once). Then every flower blooms (scale 0.15 -> 1, springy, staggered 120ms)
-// while its rings unfurl from -35deg / +35deg (alternating) to 0; after
-// that the rings counter-rotate very slowly (40 to 70s a turn) and the
-// whole flower breathes 0.97 <-> 1.03 (12 to 20s). Reduced motion or no
-// JS: everything renders bloomed and still, petals hidden.
-//   ground: the color the cut lines are punched in (the section's ground).
+// JS has marked the page `html.js`): each group is its own reveal host
+// (data-ddlm-reveal) and gets `.ddlm-in` the first time IT scrolls into
+// view (DdlmReveal.astro, IntersectionObserver, once). Then every flower
+// blooms (scale 0.15 -> 1, springy, staggered 120ms) while its rings unfurl
+// from -35deg / +35deg (alternating) to 0; after that the rings
+// counter-rotate very slowly (40 to 70s a turn) and the whole flower
+// breathes 0.97 <-> 1.03 (12 to 20s). Reduced motion or no JS: everything
+// renders bloomed and still, petals hidden.
+//   ground: the color the cut lines are punched in (the host's ground).
+//   id:     prefix for the shared ring <defs>; give every extra instance on
+//           a page its own (the homepage spotlight keeps "ddlm-mg").
 import { ORANGE, MARIGOLD_RINGS, r2 } from "@/lib/ddlmFlair";
+import DdlmReveal from "@/components/DdlmReveal.astro";
 
+type Corner = "top-right" | "top-left" | "bottom-right" | "bottom-left";
 interface Props {
   ground?: string;
+  layout?: "home" | "corner" | "petals" | "mark";
+  position?: Corner;
+  size?: number;
+  count?: number;
+  petals?: boolean;
+  id?: string;
+  class?: string;
 }
-const { ground = "#000000" } = Astro.props;
+const {
+  ground = "#000000",
+  layout = "home",
+  position = "top-right",
+  size = layout === "mark" ? 30 : 96,
+  count,
+  petals: withPetals = false,
+  id = "ddlm-mg",
+  class: className,
+} = Astro.props;
+const home = layout === "home";
 
 type Flower = {
   s: number; // size px
@@ -83,41 +114,124 @@ const build = (f: Flower, pos: string, i: number) => {
       `${pos}width:${f.s}px;height:${f.s}px;` +
       `--bloom-delay:${i * 120}ms;--bloom-dur:${900 + ((i * 130) % 500)}ms;--breathe:${v.breathe}s;`,
     rings: MARIGOLD_RINGS.slice(0, f.rings ?? 4).map((_, k) => ({
-      id: `ddlm-mg-r${k}`,
+      id: `${id}-r${k}`,
       rot: v.rot[k],
       spin: v.spin[k],
       dir: k % 2 === 0 ? "cw" : "ccw",
     })),
   };
 };
-const cluster = lgCluster.map((f, i) =>
-  build(f, `left:${f.x! - f.s / 2}px;bottom:${f.y! - f.s / 2}px;`, i),
-);
-const corner = lgCorner.map((f, i) => build(f, `right:${f.right}px;top:${f.top}px;`, i));
-const mobile = smCorner.map((f, i) => build(f, `right:${f.right}px;bottom:${f.bottom}px;`, i));
+const cluster = home ? lgCluster.map((f, i) => build(f, `left:${f.x! - f.s / 2}px;bottom:${f.y! - f.s / 2}px;`, i)) : [];
+const corner = home ? lgCorner.map((f, i) => build(f, `right:${f.right}px;top:${f.top}px;`, i)) : [];
+const mobile = home ? smCorner.map((f, i) => build(f, `right:${f.right}px;bottom:${f.bottom}px;`, i)) : [];
 
 // Loose petals: small orange ellipses that leave the lg cluster after it
 // has bloomed and float up and away, slowly. Positive delays so they come
 // out one at a time; then they loop.
 const petalSources = lgCluster.filter((f) => f.s >= 58);
-const petals = Array.from({ length: 12 }, (_, i) => {
-  const src = petalSources[i % petalSources.length];
-  const w = 4 + (i % 4);
-  return {
-    left: src.x! + (((i * 29) % 40) - 20),
-    bottom: Math.max(6, src.y! + (((i * 17) % 30) - 5)),
-    w,
-    h: r2(w * 0.55),
-    peak: r2(0.25 + ((i * 3) % 5) * 0.08),
-    dur: 14 + ((i * 7) % 10),
-    delay: r2(1.4 + i * 1.15),
-    drift: (i % 2 === 0 ? 1 : -1) * (24 + ((i * 13) % 50)),
-    rise: 240 + ((i * 41) % 180),
-    spin: (i % 2 === 0 ? 1 : -1) * (120 + ((i * 47) % 200)),
-  };
-});
----
+const petals = home
+  ? Array.from({ length: 12 }, (_, i) => {
+      const src = petalSources[i % petalSources.length];
+      const w = 4 + (i % 4);
+      return {
+        left: src.x! + (((i * 29) % 40) - 20),
+        bottom: Math.max(6, src.y! + (((i * 17) % 30) - 5)),
+        w,
+        h: r2(w * 0.55),
+        peak: r2(0.25 + ((i * 3) % 5) * 0.08),
+        dur: 14 + ((i * 7) % 10),
+        delay: r2(1.4 + i * 1.15),
+        drift: (i % 2 === 0 ? 1 : -1) * (24 + ((i * 13) % 50)),
+        rise: 240 + ((i * 41) % 180),
+        spin: (i % 2 === 0 ? 1 : -1) * (120 + ((i * 47) % 200)),
+      };
+    })
+  : [];
+const petalStyle = (p: (typeof petals)[number], pos: string) =>
+  `${pos}width:${p.w}px;height:${p.h}px;background:${ORANGE};--peak:${p.peak};--drift:${p.drift}px;--rise:${p.rise}px;--spin-to:${p.spin}deg;animation-duration:${p.dur}s;animation-delay:${p.delay}s;`;
 
+// ---- layout="corner": dx / dy are the flower center's distance from the
+// chosen corner, in units of `size` (the largest flower).
+const CORNER_TEMPLATE = [
+  { k: 1, dx: 0.55, dy: 0.55 },
+  { k: 0.62, dx: 1.38, dy: 0.42 },
+  { k: 0.44, dx: 0.66, dy: 1.28 },
+  { k: 0.36, dx: 1.92, dy: 0.22 },
+  { k: 0.32, dx: 1.3, dy: 1.08 },
+];
+const [vEdge, hEdge] = position.split("-") as ["top" | "bottom", "left" | "right"];
+const cornerN = Math.max(1, Math.min(5, count ?? 3));
+const cornerFlowers =
+  layout === "corner"
+    ? CORNER_TEMPLATE.slice(0, cornerN).map((t, i) => {
+        const s = Math.round(size * t.k);
+        return build(
+          { s, rings: s < 48 ? 3 : 4 },
+          `${hEdge}:${r2(t.dx * size - s / 2)}px;${vEdge}:${r2(t.dy * size - s / 2)}px;`,
+          i,
+        );
+      })
+    : [];
+const cornerBox = {
+  w: Math.ceil(size * Math.max(...CORNER_TEMPLATE.slice(0, cornerN).map((t) => t.dx + t.k / 2))),
+  h: Math.ceil(size * Math.max(...CORNER_TEMPLATE.slice(0, cornerN).map((t) => t.dy + t.k / 2))),
+};
+const cornerPlace = className ?? `${vEdge}-0 ${hEdge}-0`;
+// Petals out of the corner cluster: they start on the main flower.
+const cornerPetals =
+  layout === "corner" && withPetals
+    ? Array.from({ length: 6 }, (_, i) => {
+        const w = 4 + (i % 3);
+        return {
+          w,
+          h: r2(w * 0.55),
+          x: r2(size * 0.55 + (((i * 23) % 30) - 15)),
+          y: r2(size * 0.55 + (((i * 17) % 20) - 10)),
+          peak: r2(0.3 + ((i * 3) % 4) * 0.08),
+          dur: 13 + ((i * 7) % 8),
+          delay: r2(1.6 + i * 1.7),
+          drift: (hEdge === "right" ? -1 : 1) * (30 + ((i * 13) % 40)), // inward
+          rise: (vEdge === "top" ? -1 : 1) * (160 + ((i * 41) % 120)),
+          spin: (i % 2 === 0 ? 1 : -1) * (120 + ((i * 47) % 200)),
+        };
+      })
+    : [];
+
+// ---- layout="petals": loose petals across the whole host.
+const fieldPetals =
+  layout === "petals"
+    ? Array.from({ length: count ?? 16 }, (_, i) => {
+        const w = 6 + (i % 5);
+        const dur = 18 + ((i * 7) % 12);
+        return {
+          w,
+          h: r2(w * 0.55),
+          left: r2(3 + ((i * 37) % 94)),
+          bottom: r2(-4 + ((i * 23) % 45)),
+          peak: r2(0.5 + ((i * 3) % 5) * 0.08),
+          dur,
+          // Negative delays: the field is already drifting when revealed.
+          delay: r2(-((i * 0.37 * dur) % dur)),
+          drift: (i % 2 === 0 ? 1 : -1) * (30 + ((i * 13) % 70)),
+          rise: 320 + ((i * 41) % 260),
+          spin: (i % 2 === 0 ? 1 : -1) * (120 + ((i * 47) % 200)),
+        };
+      })
+    : [];
+
+// ---- layout="mark": two static flowers, the small one tucked in front.
+const markFlowers =
+  layout === "mark"
+    ? [
+        { s: size, left: 0, top: 0, rot: [0, 12, -8, 20], outline: false },
+        { s: Math.round(size * 0.62), left: Math.round(size * 0.82), top: Math.round(size * 0.42), rot: [15, -10, 6, 0], outline: true },
+      ]
+    : [];
+const markBox = { w: Math.round(size * 1.44), h: Math.round(size * 1.04) };
+---
+<DdlmReveal />
+
+{home && (
 <div
   class="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
   aria-hidden="true"
@@ -127,7 +241,7 @@ const petals = Array.from({ length: 12 }, (_, i) => {
   <svg width="0" height="0" class="absolute" focusable="false">
     <defs>
       {MARIGOLD_RINGS.map((ring, k) => (
-        <g id={`ddlm-mg-r${k}`}>
+        <g id={`${id}-r${k}`}>
           {ring.cut && (
             <g fill={ground}>
               <circle r={ring.cut.disc} />
@@ -147,7 +261,7 @@ const petals = Array.from({ length: 12 }, (_, i) => {
           )}
         </g>
       ))}
-      <g id="ddlm-mg-core">
+      <g id={`${id}-core`}>
         <circle r="5.4" fill={ground} />
         <circle r="2" fill={ORANGE} />
       </g>
@@ -172,7 +286,7 @@ const petals = Array.from({ length: 12 }, (_, i) => {
                     <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
                   </g>
                 ))}
-                <use href="#ddlm-mg-core" />
+                <use href={`#${id}-core`} />
               </g>
             </g>
           </svg>
@@ -180,7 +294,7 @@ const petals = Array.from({ length: 12 }, (_, i) => {
         {petals.map((p) => (
           <span
             class="ddlm-mg-petal absolute block rounded-[50%]"
-            style={`left:${p.left}px;bottom:${p.bottom}px;width:${p.w}px;height:${p.h}px;background:${ORANGE};--peak:${p.peak};--drift:${p.drift}px;--rise:${p.rise}px;--spin-to:${p.spin}deg;animation-duration:${p.dur}s;animation-delay:${p.delay}s;`}
+            style={petalStyle(p, `left:${p.left}px;bottom:${p.bottom}px;`)}
           />
         ))}
       </div>
@@ -198,7 +312,7 @@ const petals = Array.from({ length: 12 }, (_, i) => {
                 <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
               </g>
             ))}
-            <use href="#ddlm-mg-core" />
+            <use href={`#${id}-core`} />
           </g>
         </g>
       </svg>
@@ -216,42 +330,148 @@ const petals = Array.from({ length: 12 }, (_, i) => {
                 <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
               </g>
             ))}
-            <use href="#ddlm-mg-core" />
+            <use href={`#${id}-core`} />
           </g>
         </g>
       </svg>
     ))}
   </div>
 </div>
+)}
 
-<script>
-  // One-shot reveals for the #ddlm-weekend spotlight: adds `.ddlm-in` to
-  // each [data-ddlm-reveal] host the first time that host is in view (the
-  // attribute value is the IntersectionObserver threshold, default 0.15).
-  // Hosts: the section (copy entrance + petal path), each marigold group,
-  // the veladora row. Every entrance keys off that class; nothing here
-  // runs per frame. Hosts that are display:none at this width never fire.
-  (function () {
-    const hosts = document.querySelectorAll<HTMLElement>("[data-ddlm-reveal]");
-    if (!hosts.length) return;
-    if (!("IntersectionObserver" in window)) {
-      hosts.forEach((h) => h.classList.add("ddlm-in"));
-      return;
-    }
-    hosts.forEach((host) => {
-      const threshold = Number(host.dataset.ddlmReveal) || 0.15;
-      const io = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((e) => e.isIntersecting)) return;
-          host.classList.add("ddlm-in");
-          io.disconnect();
-        },
-        { threshold },
-      );
-      io.observe(host);
-    });
-  })();
-</script>
+{layout === "corner" && (
+  <div
+    class:list={["ddlm-mg-host pointer-events-none absolute z-[5]", cornerPlace]}
+    style={`width:${cornerBox.w}px;height:${cornerBox.h}px;`}
+    aria-hidden="true"
+    data-ddlm-reveal="0.4"
+  >
+    {/* Shared ring shapes, referenced by every flower with <use>. Zero-size,
+        NOT display:none (some engines drop references into hidden SVGs). */}
+    <svg width="0" height="0" class="absolute" focusable="false">
+      <defs>
+        {MARIGOLD_RINGS.map((ring, k) => (
+          <g id={`${id}-r${k}`}>
+            {ring.cut && (
+              <g fill={ground}>
+                <circle r={ring.cut.disc} />
+                {ring.cutPetals.map((p) => (
+                  <circle cx={p.x} cy={p.y} r={p.r} />
+                ))}
+              </g>
+            )}
+            <g fill={ORANGE} fill-opacity={ring.o}>
+              <circle r={ring.disc} />
+              {ring.petals.map((p) => (
+                <circle cx={p.x} cy={p.y} r={p.r} />
+              ))}
+            </g>
+            {ring.slits && (
+              <path d={ring.slits} fill="none" stroke={ground} stroke-width={ring.slit} stroke-linecap="round" />
+            )}
+          </g>
+        ))}
+        <g id={`${id}-core`}>
+          <circle r="5.4" fill={ground} />
+          <circle r="2" fill={ORANGE} />
+        </g>
+      </defs>
+    </svg>
+    {cornerFlowers.map((f) => (
+      <svg class="absolute block overflow-visible" viewBox="-50 -50 100 100" style={f.style} focusable="false">
+        <g class="ddlm-mg-bloom">
+          <g class="ddlm-mg-breathe">
+            {f.rings.map((ring) => (
+              <g class={`ddlm-mg-ring ddlm-mg-${ring.dir}`} style={`--spin:${ring.spin}s`}>
+                <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
+              </g>
+            ))}
+            <use href={`#${id}-core`} />
+          </g>
+        </g>
+      </svg>
+    ))}
+    {cornerPetals.map((p) => (
+      <span
+        class="ddlm-mg-petal absolute block rounded-[50%]"
+        style={petalStyle(p, `${hEdge}:${p.x}px;${vEdge}:${p.y}px;`)}
+      />
+    ))}
+  </div>
+)}
+
+{layout === "petals" && (
+  <div
+    class:list={["ddlm-mg-host pointer-events-none absolute inset-0 overflow-hidden", className]}
+    aria-hidden="true"
+    data-ddlm-reveal="0.15"
+  >
+    {fieldPetals.map((p) => (
+      <span class="ddlm-mg-petal absolute block rounded-[50%]" style={petalStyle(p, `left:${p.left}%;bottom:${p.bottom}%;`)} />
+    ))}
+  </div>
+)}
+
+{layout === "mark" && (
+  <span
+    class:list={["pointer-events-none inline-block shrink-0", !className?.includes("absolute") && "relative", className]}
+    style={`width:${markBox.w}px;height:${markBox.h}px;`}
+    aria-hidden="true"
+  >
+    {/* Shared ring shapes, referenced by every flower with <use>. Zero-size,
+        NOT display:none (some engines drop references into hidden SVGs). */}
+    <svg width="0" height="0" class="absolute" focusable="false">
+      <defs>
+        {MARIGOLD_RINGS.map((ring, k) => (
+          <g id={`${id}-r${k}`}>
+            {ring.cut && (
+              <g fill={ground}>
+                <circle r={ring.cut.disc} />
+                {ring.cutPetals.map((p) => (
+                  <circle cx={p.x} cy={p.y} r={p.r} />
+                ))}
+              </g>
+            )}
+            <g fill={ORANGE} fill-opacity={ring.o}>
+              <circle r={ring.disc} />
+              {ring.petals.map((p) => (
+                <circle cx={p.x} cy={p.y} r={p.r} />
+              ))}
+            </g>
+            {ring.slits && (
+              <path d={ring.slits} fill="none" stroke={ground} stroke-width={ring.slit} stroke-linecap="round" />
+            )}
+          </g>
+        ))}
+        <g id={`${id}-core`}>
+          <circle r="5.4" fill={ground} />
+          <circle r="2" fill={ORANGE} />
+        </g>
+      </defs>
+    </svg>
+    {markFlowers.map((f) => (
+      <svg
+        class="absolute block overflow-visible"
+        viewBox="-50 -50 100 100"
+        style={`left:${f.left}px;top:${f.top}px;width:${f.s}px;height:${f.s}px;`}
+        focusable="false"
+      >
+        {f.outline && (
+          <g fill={ground}>
+            <circle r="40" />
+            {MARIGOLD_RINGS[0].petals.map((p) => (
+              <circle cx={p.x} cy={p.y} r={p.r + 4} />
+            ))}
+          </g>
+        )}
+        {MARIGOLD_RINGS.slice(0, f.s < 48 ? 3 : 4).map((_, k) => (
+          <use href={`#${id}-r${k}`} transform={`rotate(${f.rot[k]})`} />
+        ))}
+        <use href={`#${id}-core`} />
+      </svg>
+    ))}
+  </span>
+)}
 
 <style is:global>
   /* Every animated group transforms around the flower's center: (0, 0) in

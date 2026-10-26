@@ -13,18 +13,47 @@
 // row of links.
 //
 // Motion (prefers-reduced-motion: no-preference only): when this row gets
-// `.ddlm-in` (its own reveal host; script in DdlmMarigolds.astro), when
+// `.ddlm-in` (its own reveal host; script in DdlmReveal.astro), when
 // the bottom edge of the section scrolls into view, the candles light one after
 // another, left to right; then every flame flickers on its own clock
 // (scaleY 0.85 to 1.15, skewX up to 4deg, glow opacity; 1.7 to 3.1s, offset
 // delays), two of them more restlessly. Reduced motion: lit and still.
 //   ground: the section's ground color (the rim line and the wick).
+//
+// Props (the homepage spotlight uses the defaults):
+//   ground: the host's ground color (the rim line and the wick on dark).
+//   tone:   "dark" (default, white glass on a dark ground) or "light"
+//           (white glass with a black outline, rim and wick, for cream or
+//           white grounds).
+//   scale:  draws every candle smaller or larger (0.75 = 75%); the row's
+//           height and offsets scale with it.
+//   phone:  "left" (default: 6 candles over the left two thirds, leaving
+//           the bottom-right corner to the marigolds) or "full" (the same
+//           6 candles spread across the full width).
+//   id:     prefix for the shared flame / glow <defs> (unique per page).
+//   class:  extra classes for the row (z-index).
 import { ORANGE, r2 } from "@/lib/ddlmFlair";
+import DdlmReveal from "@/components/DdlmReveal.astro";
 
 interface Props {
   ground?: string;
+  tone?: "dark" | "light";
+  scale?: number;
+  phone?: "left" | "full";
+  id?: string;
+  class?: string;
 }
-const { ground = "#000000" } = Astro.props;
+const {
+  ground = "#000000",
+  tone = "dark",
+  scale = 1,
+  phone = "left",
+  id = "ddlm-vel",
+  class: className,
+} = Astro.props;
+const light = tone === "light";
+// Rim line + wick: punched in the ground on dark; drawn in black on light.
+const ink = light ? "#000000" : ground;
 
 const FLAME_CORE = "#FFC14D";
 
@@ -57,6 +86,7 @@ const candles = CANDLES.map((c, i) => {
     gw,
     top,
     viewBox: `${-W / 2} ${-H} ${W} ${H}`,
+    mx: phone === "full" ? (c.mx == null ? undefined : c.x) : c.mx,
     // Glass: straight sides, rounded (elliptical) foot.
     body: `M${-gw / 2} ${top}V-1.7A${gw / 2} 1.7 0 0 0 ${gw / 2} -1.7V${top}Z`,
     dur: r2(1.7 + ((i * 0.53) % 1.4)),
@@ -66,20 +96,23 @@ const candles = CANDLES.map((c, i) => {
 });
 ---
 
+<DdlmReveal />
+
 <div
-  class="ddlm-vel-host pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-24 overflow-hidden"
+  class:list={["ddlm-vel-host pointer-events-none absolute inset-x-0 bottom-0 z-[6] overflow-hidden", className]}
+  style={`height:${r2(96 * scale)}px;--vel-w:${r2(W * scale)}px;`}
   aria-hidden="true"
   data-ddlm-reveal="0.6"
 >
   <svg width="0" height="0" class="absolute" focusable="false">
     <defs>
-      <path id="ddlm-vel-flame" d="M0 -12C2.4 -8.4 3.8 -5.6 3.8 -3.6A3.8 3.8 0 0 1 -3.8 -3.6C-3.8 -5.6 -2.4 -8.4 0 -12Z" fill={ORANGE} />
-      <path id="ddlm-vel-core" d="M0 -7.2C1.3 -5.2 2 -3.8 2 -2.7A2 2 0 0 1 -2 -2.7C-2 -3.8 -1.3 -5.2 0 -7.2Z" fill={FLAME_CORE} />
-      <linearGradient id="ddlm-vel-in" x1="0" y1="0" x2="0" y2="1">
+      <path id={`${id}-flame`} d="M0 -12C2.4 -8.4 3.8 -5.6 3.8 -3.6A3.8 3.8 0 0 1 -3.8 -3.6C-3.8 -5.6 -2.4 -8.4 0 -12Z" fill={ORANGE} />
+      <path id={`${id}-core`} d="M0 -7.2C1.3 -5.2 2 -3.8 2 -2.7A2 2 0 0 1 -2 -2.7C-2 -3.8 -1.3 -5.2 0 -7.2Z" fill={FLAME_CORE} />
+      <linearGradient id={`${id}-in`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color={ORANGE} stop-opacity="0.45" />
         <stop offset="1" stop-color={ORANGE} stop-opacity="0" />
       </linearGradient>
-      <radialGradient id="ddlm-vel-glow">
+      <radialGradient id={`${id}-glow`}>
         <stop offset="0" stop-color={ORANGE} stop-opacity="0.35" />
         <stop offset="0.45" stop-color={ORANGE} stop-opacity="0.14" />
         <stop offset="1" stop-color={ORANGE} stop-opacity="0" />
@@ -93,21 +126,21 @@ const candles = CANDLES.map((c, i) => {
     <svg
       class:list={["ddlm-vel", c.mx == null && "ddlm-vel-lg"]}
       viewBox={c.viewBox}
-      width={W}
-      height={c.H}
-      style={`--x:${c.x}%;--mx:${c.mx ?? c.x}%;bottom:${c.b}px;--dur:${c.dur}s;--delay:${c.delay}s;--light:${c.light}ms`}
+      width={r2(W * scale)}
+      height={r2(c.H * scale)}
+      style={`--x:${c.x}%;--mx:${c.mx ?? c.x}%;bottom:${r2(c.b * scale)}px;--dur:${c.dur}s;--delay:${c.delay}s;--light:${c.light}ms`}
       focusable="false"
     >
-      <g class="ddlm-vel-lit"><circle class="ddlm-vel-glow" cy={c.top - 7} r="18" fill="url(#ddlm-vel-glow)" /></g>
-      <path d={c.body} fill="#FFFFFF" />
-      <rect x={-c.gw / 2} y={c.top} width={c.gw} height={r2(c.h * 0.7)} fill="url(#ddlm-vel-in)" />
-      <ellipse cy={c.top} rx={c.gw / 2} ry="1.7" fill="#FFFFFF" stroke={ground} stroke-width="0.8" />
-      <path d={`M0 ${c.top}V${c.top - 2.4}`} stroke={ground} stroke-width="0.9" />
+      <g class="ddlm-vel-lit"><circle class="ddlm-vel-glow" cy={c.top - 7} r="18" fill={`url(#${id}-glow)`} /></g>
+      <path d={c.body} fill="#FFFFFF" stroke={light ? ink : undefined} stroke-width={light ? 0.9 : undefined} />
+      <rect x={-c.gw / 2} y={c.top} width={c.gw} height={r2(c.h * 0.7)} fill={`url(#${id}-in)`} />
+      <ellipse cy={c.top} rx={c.gw / 2} ry="1.7" fill="#FFFFFF" stroke={ink} stroke-width="0.8" />
+      <path d={`M0 ${c.top}V${c.top - 2.4}`} stroke={ink} stroke-width="0.9" />
       <g transform={`translate(0 ${c.top - 1.2})`}>
         <g class="ddlm-vel-lit">
           <g class:list={["ddlm-vel-flame", c.wild && "ddlm-vel-wild"]}>
-            <use href="#ddlm-vel-flame" />
-            <use href="#ddlm-vel-core" />
+            <use href={`#${id}-flame`} />
+            <use href={`#${id}-core`} />
           </g>
         </g>
       </g>
@@ -118,14 +151,14 @@ const candles = CANDLES.map((c, i) => {
 <style is:global>
   .ddlm-vel {
     position: absolute;
-    left: calc(var(--mx) - 20px);
+    left: calc(var(--mx) - var(--vel-w, 40px) / 2);
   }
   .ddlm-vel-lg {
     display: none;
   }
   @media (min-width: 1024px) {
     .ddlm-vel {
-      left: calc(var(--x) - 20px);
+      left: calc(var(--x) - var(--vel-w, 40px) / 2);
     }
     .ddlm-vel-lg {
       display: block;

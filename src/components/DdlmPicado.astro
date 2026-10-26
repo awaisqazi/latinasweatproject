@@ -12,26 +12,36 @@
 //           the string; only under prefers-reduced-motion: no-preference.
 // Motifs (ddlmFlair.ts PICADO_MOTIFS): ring, flower, lattice, diamond and,
 // on every 4th flag, a calavera.
-// Used by /diadelosmuertos (facts band) and the homepage #ddlm-weekend.
+//   size:   "md" (default, 32 / 40 / 52px) or "sm" (a thin 20 / 24px row
+//           for cards: the DDLM event cards and the /links #ddlm-card).
+//   cord:   CSS color of the string (default white at 40%, for dark or
+//           photo grounds; pass an ink tint on cream).
+// Used by /diadelosmuertos (hero art + facts band), the homepage
+// #ddlm-weekend and DDLM card, /events #fall-events and /links #ddlm-card.
 import { PICADO_FLAGS, PETALS_8, LATTICE, CALAVERA, diamond, r2 } from "@/lib/ddlmFlair";
 
 interface Props {
   ground?: string;
   sway?: boolean;
+  size?: "md" | "sm";
+  cord?: string;
   class?: string;
 }
-const { ground = "#000000", sway = false, class: className } = Astro.props;
+const { ground = "#000000", sway = false, size = "md", cord, class: className } = Astro.props;
 ---
 
 <div
   class:list={["pointer-events-none absolute inset-x-0 top-0 overflow-hidden", className]}
   aria-hidden="true"
 >
-  <div class="absolute inset-x-0 top-[2px] h-px bg-white/40"></div>
+  <div class:list={["absolute inset-x-0 top-[2px] h-px", !cord && "bg-white/40"]} style={cord ? `background:${cord}` : undefined}></div>
   <svg
     viewBox="0 0 1280 52"
     preserveAspectRatio="xMidYMin slice"
-    class="relative mx-auto block h-8 w-full max-w-[1280px] sm:h-10 lg:h-[52px]"
+    class:list={[
+      "relative mx-auto block w-full max-w-[1280px]",
+      size === "sm" ? "h-5 sm:h-6" : "h-8 sm:h-10 lg:h-[52px]",
+    ]}
     focusable="false"
   >
     {PICADO_FLAGS.map((f, i) => (

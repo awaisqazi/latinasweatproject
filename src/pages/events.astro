@@ -7,6 +7,10 @@ import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import FinishLineBand from "@/components/FinishLineBand.astro";
 import FallEventCard from "@/components/FallEventCard.astro";
+import DdlmPicado from "@/components/DdlmPicado.astro";
+import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
+import DdlmVeladoras from "@/components/DdlmVeladoras.astro";
+import HalloweenFlair from "@/components/HalloweenFlair.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
 import {
   fallEvents,
@@ -133,14 +137,38 @@ const featuredSlugs = [
         after its own end (build time + FallEventsClient via
         data-fall-past-at); the section hides after the last one. Anchors:
         #fall-events, #kids-halloween-yoga, #live-banda-pilates-yoga-sculpt,
-        #dia-de-los-muertos. */}
+        #dia-de-los-muertos.
+        Flair (Oct 27): papel picado swaying along the top edge (cut-outs
+        punched in the cream), a cempasúchil cluster beside the heading and
+        a scaled-down row of veladoras along the bottom edge, both revealed
+        once on scroll (DdlmReveal.astro); the Saturday strip carries a small
+        Halloween cluster (HalloweenFlair) and hides with it. */}
     {fallActive && (
       <section
         id="fall-events"
-        class="fe-section scroll-mt-28 py-16 md:py-20"
+        class="fe-section relative scroll-mt-28 overflow-hidden pb-20 pt-20 md:pb-24 md:pt-24"
         data-fall-past-at={lastFallEndISO}
       >
-        <div class="mx-auto max-w-7xl px-4">
+        <DdlmPicado ground="#f3ede4" cord="rgba(30, 26, 23, 0.3)" sway />
+        <DdlmVeladoras ground="#f3ede4" tone="light" scale={0.75} phone="full" id="fe-vel" />
+        <div class="relative mx-auto max-w-7xl px-4">
+          <DdlmMarigolds
+            layout="corner"
+            size={110}
+            count={5}
+            petals
+            ground="#f3ede4"
+            id="fe-mg-lg"
+            class="right-4 top-0 hidden lg:block"
+          />
+          <DdlmMarigolds
+            layout="corner"
+            size={40}
+            count={2}
+            ground="#f3ede4"
+            id="fe-mg-sm"
+            class="-top-7 right-4 lg:hidden"
+          />
           <div class="max-w-2xl">
             <p class="text-sm font-extrabold text-[#c4573a]">{ddlmWeekend.dateLabel} · {ddlmEvent.venue}</p>
             <h2 class="mt-2 font-sans text-3xl font-extrabold tracking-tight text-[#1e1a17] sm:text-4xl md:text-5xl">
@@ -161,9 +189,10 @@ const featuredSlugs = [
           </div>
           {fallSatActive && (
             <div
-              class="mt-8 flex flex-col gap-3 rounded-2xl bg-[#fdfbf7] px-5 py-4 text-[#1e1a17] shadow-[0_1px_0_rgba(30,26,23,0.06),0_18px_40px_-24px_rgba(30,26,23,0.35)] sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+              class="relative mt-8 flex flex-col gap-3 overflow-hidden rounded-2xl bg-[#fdfbf7] px-5 pb-12 pt-4 text-[#1e1a17] shadow-[0_1px_0_rgba(30,26,23,0.06),0_18px_40px_-24px_rgba(30,26,23,0.35)] sm:min-h-[4.5rem] sm:flex-row sm:items-center sm:gap-6 sm:py-4 sm:pl-6 sm:pr-44"
               data-fall-past-at={halloweenEndISO}
             >
+              <HalloweenFlair layout="corner" tone="light" ground="#fdfbf7" />
               <p class="shrink-0 text-xs font-extrabold uppercase tracking-[0.16em] text-[#c4573a]">
                 Saturday, free and open to all
               </p>
