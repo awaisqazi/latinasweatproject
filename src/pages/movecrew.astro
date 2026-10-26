@@ -1,0 +1,950 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+// Move crew sign-up: volunteers for the week LSP packs up the old studio
+// (16th & Morgan) and carries everything into the new home. Shared by
+// direct link only (noindex, not in nav/homepage/links), like /townhall.
+// Submissions POST to a hidden Google Form (CONFIG block in the script).
+//
+// Order is deliberate: hook + ask, facts, the form, then the story. The
+// ask has to land in the first screen.
+//
+// Look: the "moving day" identity from the membership pause email
+// (scripts/render-pause-movingday.mjs), used with restraint: one typeface
+// (Rubik), cream and kraft grounds, ink text, one rubber stamp, and
+// packing tape (one strip on the Mural Park print, one on the label card).
+
+// Option VALUES below are the Google Form option labels: they must match
+// the form exactly or Google drops the answer. The `short` text is only
+// what the pill shows.
+// `date` lets the browser hide days that have already passed (Chicago time).
+const DAYS = [
+    { name: "mon", label: "Monday 10/26", date: "2026-10-26" },
+    { name: "tue", label: "Tuesday 10/27", date: "2026-10-27" },
+    { name: "wed", label: "Wednesday 10/28", date: "2026-10-28" },
+    { name: "thu", label: "Thursday 10/29", date: "2026-10-29" },
+    { name: "fri", label: "Friday 10/30", date: "2026-10-30" },
+];
+const SLOTS = [
+    { value: "5:30pm-6:00pm", short: "5:30-6" },
+    { value: "6:00pm-7:00pm", short: "6-7" },
+    { value: "7:00pm-8:00pm", short: "7-8" },
+    { value: "8:00pm-9:00pm", short: "8-9" },
+];
+const BRING_OPTIONS = [
+    "A car",
+    "A truck or van",
+    "A dolly or hand truck",
+    "Boxes or packing supplies",
+    "Just me and my energy",
+];
+
+const CONTACT_EMAIL = "collab@latinasweatproject.com";
+
+const inputClass =
+    "mc-input mt-2 w-full rounded-md border px-4 py-2.5 text-base";
+---
+
+<Layout
+    title="Move Crew | The Latina Sweat Project"
+    description="Help The Latina Sweat Project pack up the old studio and move into Mural Park, our new home in Pilsen, October 26 to 30. Pick an hour, bring a friend."
+    robots="noindex, nofollow"
+    socialImage="images/movecrew/movecrew-og.jpg"
+    socialImageAlt="Help LSP move into Mural Park. Our next chapter starts this week."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
+    twitterCard="summary_large_image"
+>
+    <Header />
+    <main class="mc-page min-h-screen overflow-x-hidden font-sans">
+        {/* ============================== HERO ============================== */}
+        <section class="px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14">
+            <div
+                class="mx-auto grid max-w-5xl items-center gap-y-12 lg:grid-cols-[1.1fr_1fr] lg:gap-x-14"
+            >
+                <div>
+                    <p class="mc-muted text-xs font-bold uppercase tracking-[0.2em]">
+                        Our next chapter starts this week
+                    </p>
+                    <h1
+                        class="mt-4 max-w-xl text-[2.6rem] font-extrabold leading-[1.05] sm:text-6xl"
+                    >
+                        Help us move LSP into Mural Park.
+                    </h1>
+                    <p class="mt-6 max-w-lg text-lg leading-relaxed sm:text-xl">
+                        Our studio ended faster than any of us wanted. This
+                        week we carry everything into Mural Park, our new home
+                        for a long-term residency in Pilsen, and we want you
+                        carrying a box with us.
+                    </p>
+                    <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+                        <a
+                            href="#signup"
+                            class="mc-btn inline-block rounded-full px-7 py-3 text-base font-bold"
+                        >
+                            Pick your shifts
+                        </a>
+                        <p class="mc-muted text-sm font-medium">
+                            Mon to Fri, Oct 26 to 30 · 5:30 to 9 pm · Pilsen
+                        </p>
+                    </div>
+                </div>
+
+                {/* Mural Park as a physical print taped to the page. The
+                    interior shot sits behind it on desktop only. Each img
+                    has a kraft background so the slot reads as a print
+                    even before the photo loads. */}
+                <figure class="mx-auto w-[72%] sm:w-[60%] lg:w-full">
+                    <div class="relative lg:pr-4 lg:pt-8">
+                        <div
+                            class="mc-print mc-print-back absolute right-0 top-0 hidden w-[68%] lg:block"
+                            aria-hidden="true"
+                        >
+                            <img
+                                src="/images/movecrew/muralpark-2.jpg"
+                                alt=""
+                                width="1200"
+                                height="900"
+                                loading="eager"
+                                decoding="async"
+                            />
+                        </div>
+                        <div class="mc-print mc-print-front relative z-10 lg:w-[86%]">
+                            <span class="mc-tape mc-tape-corner" aria-hidden="true"></span>
+                            <img
+                                src="/images/movecrew/muralpark-1.jpg"
+                                alt="The outside of Mural Park, the building in Pilsen that will be the new home of The Latina Sweat Project"
+                                width="1200"
+                                height="900"
+                                loading="eager"
+                                fetchpriority="high"
+                            />
+                        </div>
+
+                        {/* Rubber stamp: the one stamp on the page, pressed
+                            onto the corner of the print. */}
+                        <div
+                            class="mc-stamp absolute -bottom-5 -right-6 z-20 w-28 sm:w-32 lg:-bottom-6 lg:right-0 lg:w-36"
+                            aria-hidden="true"
+                        >
+                            <svg viewBox="0 0 180 96" class="block h-auto w-full" focusable="false">
+                                <rect x="3" y="3" width="174" height="90" rx="12" fill="none" stroke="currentColor" stroke-width="4" />
+                                <rect x="10" y="10" width="160" height="76" rx="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.65" />
+                                <text x="90" y="46" text-anchor="middle" font-family="Rubik, sans-serif" font-size="22" font-weight="800" textLength="136" lengthAdjust="spacingAndGlyphs" fill="currentColor">MOVE CREW</text>
+                                <text x="90" y="71" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="700" textLength="96" lengthAdjust="spacing" fill="currentColor">OCT 26 - 30</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <figcaption class="mc-muted mt-8 text-center text-sm lg:text-left">
+                        Mural Park, our new home. Peek inside:
+                        <a
+                            href="https://www.muralpark.com"
+                            target="_blank"
+                            rel="noopener"
+                            class="mc-link font-bold">muralpark.com</a
+                        >
+                    </figcaption>
+                </figure>
+            </div>
+
+            {/* Facts strip: the three things people need before they sign up. */}
+            <dl
+                class="mc-facts mx-auto mt-14 grid max-w-5xl text-base sm:mt-16 sm:grid-cols-3"
+            >
+                <div class="mc-fact">
+                    <dt class="mc-fact-label">When</dt>
+                    <dd>Mon to Fri, 5:30 to 9 pm. Pick any hour.</dd>
+                </div>
+                <div class="mc-fact">
+                    <dt class="mc-fact-label">Where</dt>
+                    <dd>Mural Park, Pilsen. We email the address and plan.</dd>
+                </div>
+                <div class="mc-fact">
+                    <dt class="mc-fact-label">Bring</dt>
+                    <dd>Clothes you can move in, and a friend.</dd>
+                </div>
+            </dl>
+        </section>
+
+        {/* ============================ SIGN-UP ============================ */}
+        {/* Kraft ground = the box; the form is the shipping label taped
+            onto it. */}
+        <section
+            id="signup"
+            class="mc-kraft scroll-mt-28 px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16"
+        >
+            <div class="mx-auto max-w-2xl">
+                <div class="text-center">
+                    <h2 class="text-3xl font-extrabold sm:text-4xl">
+                        Join the move crew
+                    </h2>
+                    <p class="mx-auto mt-3 max-w-md text-base leading-relaxed sm:text-lg">
+                        Pick the hours that work for you. It takes a minute.
+                    </p>
+                </div>
+
+                {/* What volunteering gets you: a real benefit, kept right
+                    next to the ask. */}
+                <div class="mc-perks mt-8 grid rounded-md text-[0.95rem] leading-snug sm:grid-cols-2 sm:text-base">
+                    <p class="px-5 py-4 sm:px-6">
+                        <strong>Your hours count.</strong> Every hour you
+                        volunteer this week counts toward the new volunteer
+                        membership program (4 volunteer hours) when
+                        memberships resume at Mural Park.
+                    </p>
+                    <p class="mc-perks-split px-5 py-4 sm:px-6">
+                        <strong>Instructors:</strong> volunteering this week
+                        boosts your priority for scheduling preferences in the
+                        new studio.
+                    </p>
+                </div>
+
+                <div class="relative mt-12">
+                    <span class="mc-tape" aria-hidden="true"></span>
+
+                    <div id="mc-card" class="mc-label rounded-md">
+                        <div class="mc-label-head grid grid-cols-2 text-xs">
+                            <div class="px-5 py-3 sm:px-8">
+                                <p class="mc-muted font-bold uppercase tracking-[0.18em]">From</p>
+                                <p class="mt-1 text-sm font-bold">You</p>
+                            </div>
+                            <div class="mc-label-split px-5 py-3 sm:px-8">
+                                <p class="mc-muted font-bold uppercase tracking-[0.18em]">Ship to</p>
+                                <p class="mt-1 text-sm font-bold">Mural Park, Pilsen</p>
+                            </div>
+                        </div>
+
+                        <form
+                            id="mc-form"
+                            class="relative space-y-8 px-5 pb-7 pt-7 sm:px-8 sm:pb-9"
+                            novalidate
+                        >
+                            <!-- Honeypot: off-screen field humans never see or fill.
+                                 Bots that auto-fill every input trip it and get a
+                                 silent "success" with nothing sent to the form. -->
+                            <div
+                                class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                                aria-hidden="true"
+                            >
+                                <label for="mc-website">Website</label>
+                                <input
+                                    id="mc-website"
+                                    name="website"
+                                    type="text"
+                                    tabindex="-1"
+                                    autocomplete="off"
+                                />
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="mc-name" class="block text-sm font-bold">
+                                        Full name <span class="mc-req">*</span>
+                                    </label>
+                                    <input
+                                        id="mc-name"
+                                        name="fullName"
+                                        type="text"
+                                        required
+                                        autocomplete="name"
+                                        class={inputClass}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label for="mc-email" class="block text-sm font-bold">
+                                        Email <span class="mc-req">*</span>
+                                    </label>
+                                    <input
+                                        id="mc-email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        autocomplete="email"
+                                        inputmode="email"
+                                        class={inputClass}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label for="mc-phone" class="block text-sm font-bold">
+                                        Phone
+                                    </label>
+                                    <p class="mc-muted mt-1 text-xs">
+                                        Optional, so we can text you day-of details.
+                                    </p>
+                                    <input
+                                        id="mc-phone"
+                                        name="phone"
+                                        type="tel"
+                                        autocomplete="tel"
+                                        class={inputClass}
+                                    />
+                                </div>
+                            </div>
+
+                            <fieldset>
+                                <legend class="block text-sm font-bold">
+                                    When can you help? <span class="mc-req">*</span>
+                                </legend>
+                                <p class="mc-muted mt-1 text-xs">
+                                    All times pm. Tap every slot that works,
+                                    any day or as many days as you like.
+                                </p>
+                                <div class="mt-4 space-y-4 sm:space-y-2.5">
+                                    {DAYS.map((day) => (
+                                        <div
+                                            class="sm:grid sm:grid-cols-[9.5rem_1fr] sm:items-center sm:gap-4"
+                                            role="group"
+                                            aria-label={day.label}
+                                            data-day-date={day.date}
+                                        >
+                                            <p class="text-sm font-bold" aria-hidden="true">
+                                                {day.label}
+                                            </p>
+                                            <div class="mt-1.5 grid grid-cols-4 gap-1.5 sm:mt-0 sm:gap-2">
+                                                {SLOTS.map((slot) => (
+                                                    <label class="mc-pill">
+                                                        <input
+                                                            type="checkbox"
+                                                            name={day.name}
+                                                            value={slot.value}
+                                                            class="sr-only"
+                                                            data-slot
+                                                        />
+                                                        <span class="sr-only">{day.label}, </span>
+                                                        <span aria-hidden="true">{slot.short}</span>
+                                                        <span class="sr-only">{slot.value}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p
+                                    id="mc-count"
+                                    class="mc-muted mt-4 text-sm font-medium"
+                                    aria-live="polite"
+                                >
+                                    No slots picked yet.
+                                </p>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend class="block text-sm font-bold">
+                                    What can you bring?
+                                </legend>
+                                <p class="mc-muted mt-1 text-xs">
+                                    Optional. Pick any that apply.
+                                </p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    {BRING_OPTIONS.map((opt) => (
+                                        <label class="mc-pill mc-pill-wide">
+                                            <input
+                                                type="checkbox"
+                                                name="bring"
+                                                value={opt}
+                                                class="sr-only"
+                                            />
+                                            <span>{opt}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+
+                            <div>
+                                <label for="mc-notes" class="block text-sm font-bold">
+                                    Notes
+                                </label>
+                                <p class="mc-muted mt-1 text-xs">
+                                    Anything we should know? Lifting limits,
+                                    questions, a friend you're bringing...
+                                </p>
+                                <textarea
+                                    id="mc-notes"
+                                    name="notes"
+                                    rows="4"
+                                    class={inputClass}></textarea>
+                            </div>
+
+                            <p
+                                id="mc-error"
+                                role="alert"
+                                class="hidden rounded-md border border-[#C0392B]/40 bg-[#C0392B]/10 px-4 py-3 text-sm font-medium"
+                            >
+                            </p>
+
+                            <button
+                                id="mc-submit"
+                                type="submit"
+                                class="mc-btn w-full rounded-full px-8 py-3.5 text-base font-bold disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Count me in
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Success state, same label card. */}
+                    <div
+                        id="mc-success"
+                        class="mc-label hidden rounded-md px-6 py-10 text-center sm:px-10 sm:py-12"
+                        tabindex="-1"
+                    >
+                        <p class="mc-muted text-xs font-bold uppercase tracking-[0.2em]">
+                            Gracias
+                        </p>
+                        <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
+                            You're on the crew.
+                        </h2>
+                        <p class="mx-auto mt-4 max-w-md text-base leading-relaxed sm:text-lg">
+                            We'll email <strong id="mc-success-email">you</strong>
+                            with the address and the plan for each shift you
+                            picked. Thank you for showing up for this
+                            community, again.
+                        </p>
+                        <div class="mc-rule mx-auto my-8 max-w-xs"></div>
+                        <p class="text-lg font-bold">One more favor: bring a friend.</p>
+                        <p class="mx-auto mt-2 max-w-md text-base leading-relaxed">
+                            Every extra pair of hands means one less trip.
+                            Copy the link and send it to someone who'd carry
+                            a box with you.
+                        </p>
+                        <button
+                            id="mc-copy"
+                            type="button"
+                            class="mc-btn mt-6 inline-block rounded-full px-7 py-3 text-base font-bold"
+                        >
+                            Copy the link
+                        </button>
+                        <p
+                            id="mc-copy-status"
+                            class="mt-3 min-h-[1.25rem] break-all text-sm"
+                            aria-live="polite"
+                        >
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* ===================== WHY + FOUNDERS (after the ask) ===================== */}
+        <section class="px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20">
+            <div class="mx-auto max-w-5xl">
+                <div class="max-w-2xl">
+                    <h2 class="text-2xl font-extrabold leading-tight sm:text-3xl">
+                        Why this week matters
+                    </h2>
+                    <div class="mt-6 space-y-4 text-lg leading-relaxed">
+                        <p>
+                            <strong>It ended fast.</strong> This summer the
+                            building changed hands, we lost more than half
+                            our space, and our last classes at 16th and Morgan
+                            were September 25. If that stung, you weren't
+                            alone.
+                        </p>
+                        <p>
+                            <strong>We didn't fold.</strong> We went pop-up,
+                            and you kept showing up.
+                        </p>
+                        <p>
+                            <strong>Now we carry it in.</strong> Every mat we
+                            move this week is one we'll roll out again at
+                            Mural Park when we reopen in early 2027.
+                        </p>
+                    </div>
+
+                    <div class="mc-rule my-12"></div>
+
+                    <p class="mc-muted text-xs font-bold uppercase tracking-[0.2em]">
+                        A note from our founders
+                    </p>
+                    <p class="mt-5 text-xl font-medium leading-relaxed sm:text-2xl">
+                        You turned our old studio into a home, and when it
+                        got smaller, you followed us across the
+                        neighborhood. Now we get to open the doors at Mural
+                        Park, and we can't imagine walking through them
+                        without you.
+                    </p>
+                    <p class="mt-6 text-base font-bold">
+                        With love, the founders of The Latina Sweat Project
+                    </p>
+                    <p class="mc-muted mt-10 text-sm">
+                        Questions? Email
+                        <a
+                            href={`mailto:${CONTACT_EMAIL}`}
+                            class="mc-link font-bold break-all">{CONTACT_EMAIL}</a
+                        >.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    /* Moving-day palette (scripts/render-pause-movingday.mjs). */
+    .mc-page {
+        --mc-kraft: #c79a66;
+        --mc-kraft-d: #b0824e;
+        --mc-ink: #3a2817;
+        --mc-cream: #fff6e6;
+        --mc-label: #fffdf6;
+        --mc-stamp: #c0392b;
+        --mc-tape: #ede0c4;
+        background-color: var(--mc-cream);
+        color: var(--mc-ink);
+    }
+    .mc-muted {
+        color: rgb(58 40 23 / 0.78);
+    }
+    /* No one-word last lines. */
+    .mc-page h1,
+    .mc-page h2 {
+        text-wrap: balance;
+    }
+    .mc-page p,
+    .mc-page dd {
+        text-wrap: pretty;
+    }
+    .mc-kraft {
+        background-color: var(--mc-kraft);
+        color: var(--mc-ink);
+    }
+    .mc-kraft .mc-label .mc-muted,
+    .mc-label .mc-muted {
+        color: rgb(58 40 23 / 0.72);
+    }
+    .mc-rule {
+        border-top: 2px dashed rgb(58 40 23 / 0.35);
+    }
+    .mc-req {
+        color: var(--mc-stamp);
+    }
+    .mc-link {
+        color: var(--mc-ink);
+        text-decoration: underline;
+        text-decoration-color: var(--mc-kraft-d);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+    }
+
+    /* Buttons: solid ink, cream type. */
+    .mc-btn {
+        background-color: var(--mc-ink);
+        color: var(--mc-cream);
+        transition: background-color 150ms, transform 150ms;
+    }
+    .mc-btn:hover:not(:disabled) {
+        background-color: #24180c;
+    }
+    .mc-btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+    .mc-btn:focus-visible {
+        outline: 3px solid var(--mc-stamp);
+        outline-offset: 3px;
+    }
+
+    /* Rubber stamp, hand-set at an angle. */
+    .mc-stamp {
+        color: var(--mc-stamp);
+        transform: rotate(-8deg);
+        opacity: 0.9;
+    }
+
+    /* Mural Park print: white border, soft shadow, set down at an angle. */
+    .mc-print {
+        background-color: #fff;
+        padding: 0.55rem;
+        box-shadow:
+            0 1px 2px rgb(58 40 23 / 0.18),
+            0 14px 30px -10px rgb(58 40 23 / 0.45);
+    }
+    .mc-print img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        background-color: var(--mc-kraft);
+    }
+    .mc-print-front {
+        transform: rotate(2.5deg);
+    }
+    .mc-print-back {
+        transform: rotate(-4deg);
+        opacity: 0.95;
+    }
+    @media (min-width: 640px) {
+        .mc-print {
+            padding: 0.7rem;
+        }
+    }
+
+    /* Facts strip: one dashed-ruled row (stacked on phones). */
+    .mc-facts {
+        border-top: 2px dashed rgb(58 40 23 / 0.35);
+        border-bottom: 2px dashed rgb(58 40 23 / 0.35);
+    }
+    .mc-fact {
+        display: grid;
+        grid-template-columns: 4rem 1fr;
+        gap: 0.75rem;
+        padding: 0.9rem 0;
+        line-height: 1.4;
+    }
+    .mc-fact + .mc-fact {
+        border-top: 1px dashed rgb(58 40 23 / 0.3);
+    }
+    .mc-fact-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding-top: 0.2rem;
+        color: rgb(58 40 23 / 0.78);
+    }
+    @media (min-width: 640px) {
+        .mc-fact {
+            display: block;
+            padding: 1.1rem 1.5rem;
+        }
+        .mc-fact:first-child {
+            padding-left: 0;
+        }
+        .mc-fact + .mc-fact {
+            border-top: 0;
+            border-left: 1px dashed rgb(58 40 23 / 0.3);
+        }
+        .mc-fact-label {
+            display: block;
+            margin-bottom: 0.3rem;
+            padding-top: 0;
+        }
+    }
+
+    /* Volunteer perks row, on the kraft ground right above the label. */
+    .mc-perks {
+        border: 2px dashed rgb(58 40 23 / 0.55);
+        background-color: rgb(255 246 230 / 0.22);
+    }
+    .mc-perks-split {
+        border-top: 2px dashed rgb(58 40 23 / 0.35);
+    }
+    @media (min-width: 640px) {
+        .mc-perks-split {
+            border-top: 0;
+            border-left: 2px dashed rgb(58 40 23 / 0.35);
+        }
+    }
+
+    /* Shipping label card. */
+    .mc-label {
+        position: relative;
+        background-color: var(--mc-label);
+        border: 2px solid var(--mc-ink);
+        box-shadow: 0 2px 0 rgb(58 40 23 / 0.25);
+    }
+    .mc-label-head {
+        border-bottom: 2px dashed rgb(58 40 23 / 0.4);
+    }
+    .mc-label-split {
+        border-left: 2px dashed rgb(58 40 23 / 0.4);
+    }
+
+    /* Packing tape strip holding the label to the box. */
+    .mc-tape {
+        position: absolute;
+        z-index: 2;
+        top: -1.1rem;
+        left: 50%;
+        width: 11rem;
+        height: 2.2rem;
+        transform: translateX(-50%) rotate(-3deg);
+        background-color: var(--mc-tape);
+        opacity: 0.9;
+        border-top: 3px solid rgb(255 255 255 / 0.55);
+        border-bottom: 3px solid rgb(176 130 78 / 0.45);
+        pointer-events: none;
+    }
+    /* Same tape, across the print's top-left corner. */
+    .mc-tape-corner {
+        top: 0.6rem;
+        left: -1.9rem;
+        width: 7.5rem;
+        height: 1.9rem;
+        transform: rotate(-40deg);
+    }
+
+    /* Inputs. */
+    .mc-input {
+        background-color: #fff;
+        border-color: rgb(58 40 23 / 0.35);
+        color: var(--mc-ink);
+    }
+    .mc-input:focus {
+        outline: none;
+        border-color: var(--mc-ink);
+        box-shadow: 0 0 0 3px rgb(192 57 43 / 0.25);
+    }
+
+    /* Pill toggles (time slots + bring). Picked = solid ink with a tick. */
+    .mc-pill {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        min-height: 2.75rem;
+        padding: 0.5rem 0.25rem;
+        border: 1.5px solid rgb(58 40 23 / 0.4);
+        border-radius: 9999px;
+        background-color: #fff;
+        color: var(--mc-ink);
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 120ms, border-color 120ms, color 120ms;
+    }
+    .mc-pill-wide {
+        padding: 0.5rem 1rem;
+        white-space: normal;
+    }
+    .mc-pill:hover {
+        border-color: var(--mc-ink);
+    }
+    .mc-pill:has(input:checked) {
+        background-color: var(--mc-ink);
+        border-color: var(--mc-ink);
+        color: var(--mc-cream);
+    }
+    .mc-pill:has(input:checked)::before {
+        content: "";
+        width: 0.7rem;
+        height: 0.4rem;
+        margin-top: -0.2rem;
+        border-left: 2.5px solid currentColor;
+        border-bottom: 2.5px solid currentColor;
+        transform: rotate(-45deg);
+        flex-shrink: 0;
+    }
+    .mc-pill:has(input:focus-visible) {
+        outline: 3px solid var(--mc-stamp);
+        outline-offset: 2px;
+    }
+    @media (min-width: 640px) {
+        .mc-pill {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<script>
+    // ============================================================
+    // GOOGLE FORM CONFIG: replace these placeholders with the real
+    // form ID and entry IDs once the Google Form is created.
+    // Checkbox questions (each day, bring) send one repeated
+    // entry.N param per checked option.
+    // ============================================================
+    const FORM_ACTION_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSf-jqUMnL5n9LurplCYKg9mul01mXjmTg5Ge6tmIqWq_3dVUw/formResponse";
+    const ENTRY_IDS = {
+        fullName: "entry.239945294", // Full name (text)
+        email: "entry.1232712061", // Email (text)
+        phone: "entry.287230232", // Phone (text, optional)
+        mon: "entry.1036223949", // Monday 10/26 (checkboxes)
+        tue: "entry.465589199", // Tuesday 10/27 (checkboxes)
+        wed: "entry.178621119", // Wednesday 10/28 (checkboxes)
+        thu: "entry.700101030", // Thursday 10/29 (checkboxes)
+        fri: "entry.2024900781", // Friday 10/30 (checkboxes)
+        bring: "entry.1374542322", // What can you bring? (checkboxes, optional)
+        notes: "entry.946313287", // Notes (paragraph, optional)
+    };
+    // ============================================================
+
+    const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri"] as const;
+    const NAME_STORAGE_KEY = "lsp_movecrew_name";
+    const EMAIL_STORAGE_KEY = "lsp_movecrew_email";
+    // Spam guard (no server, so no Turnstile): a honeypot field plus a
+    // minimum time-to-submit. Trips show the success state without posting.
+    const HONEYPOT_FIELD = "website";
+    const MIN_SUBMIT_MS = 3000;
+    const loadedAt = Date.now();
+
+    const form = document.getElementById("mc-form") as HTMLFormElement;
+    const card = document.getElementById("mc-card") as HTMLElement;
+    const success = document.getElementById("mc-success") as HTMLElement;
+    const successEmail = document.getElementById(
+        "mc-success-email",
+    ) as HTMLElement;
+    const errorEl = document.getElementById("mc-error") as HTMLElement;
+    const countEl = document.getElementById("mc-count") as HTMLElement;
+    const submitBtn = document.getElementById(
+        "mc-submit",
+    ) as HTMLButtonElement;
+    const copyBtn = document.getElementById("mc-copy") as HTMLButtonElement;
+    const copyStatus = document.getElementById(
+        "mc-copy-status",
+    ) as HTMLElement;
+    const nameInput = document.getElementById("mc-name") as HTMLInputElement;
+    const emailInput = document.getElementById("mc-email") as HTMLInputElement;
+    const slotInputs = Array.from(
+        form.querySelectorAll<HTMLInputElement>("input[data-slot]"),
+    );
+
+    // Prefill from a previous sign-up on this device.
+    try {
+        nameInput.value = window.localStorage.getItem(NAME_STORAGE_KEY) || "";
+        emailInput.value = window.localStorage.getItem(EMAIL_STORAGE_KEY) || "";
+    } catch {
+        // localStorage may be unavailable (private mode); ignore.
+    }
+
+    // Hide days that are already over (Chicago time), so nobody signs up
+    // for a shift that happened yesterday. If the whole week is past, say so
+    // and stop taking sign-ups.
+    const todayChicago = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Chicago",
+    }).format(new Date());
+    const dayGroups = Array.from(
+        form.querySelectorAll<HTMLElement>("[data-day-date]"),
+    );
+    let daysLeft = 0;
+    dayGroups.forEach((group) => {
+        if ((group.dataset.dayDate || "") < todayChicago) {
+            group.classList.add("hidden");
+            group
+                .querySelectorAll<HTMLInputElement>("input")
+                .forEach((i) => (i.checked = false));
+        } else {
+            daysLeft += 1;
+        }
+    });
+    const weekOver = daysLeft === 0;
+
+    // Live count of picked slots under the grid.
+    function updateCount() {
+        if (weekOver) {
+            countEl.textContent =
+                "This week's shifts have wrapped. Thank you to everyone who carried a box!";
+            submitBtn.disabled = true;
+            return;
+        }
+        const n = slotInputs.filter((i) => i.checked).length;
+        countEl.textContent =
+            n === 0
+                ? "No slots picked yet."
+                : n === 1
+                  ? "1 slot picked. Thank you!"
+                  : `${n} slots picked. Thank you!`;
+    }
+    slotInputs.forEach((i) => i.addEventListener("change", updateCount));
+    updateCount();
+
+    function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+        errorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function showSuccess(email: string) {
+        successEmail.textContent = email || "you";
+        card.classList.add("hidden");
+        success.classList.remove("hidden");
+        success.scrollIntoView({ behavior: "smooth", block: "center" });
+        success.focus({ preventScroll: true });
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorEl.classList.add("hidden");
+
+        const data = new FormData(form);
+
+        const honeypot = String(data.get(HONEYPOT_FIELD) || "").trim();
+        if (honeypot || Date.now() - loadedAt < MIN_SUBMIT_MS) {
+            // Looks automated: pretend it worked, send nothing.
+            showSuccess("");
+            return;
+        }
+
+        const fullName = String(data.get("fullName") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const phone = String(data.get("phone") || "").trim();
+        const days = DAY_KEYS.map((key) => ({
+            key,
+            slots: data.getAll(key).map(String),
+        }));
+        const bring = data.getAll("bring").map(String);
+        const notes = String(data.get("notes") || "").trim();
+
+        if (!fullName) return showError("Please add your name.");
+        if (!email || !email.includes("@"))
+            return showError("Please add a valid email address.");
+        if (days.every((d) => d.slots.length === 0))
+            return showError(
+                "Please pick at least one time slot you can help.",
+            );
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const params = new URLSearchParams();
+        params.set(ENTRY_IDS.fullName, fullName);
+        params.set(ENTRY_IDS.email, email);
+        if (phone) params.set(ENTRY_IDS.phone, phone);
+        days.forEach((d) =>
+            d.slots.forEach((s) => params.append(ENTRY_IDS[d.key], s)),
+        );
+        bring.forEach((b) => params.append(ENTRY_IDS.bring, b));
+        if (notes) params.set(ENTRY_IDS.notes, notes);
+
+        try {
+            // no-cors: Google doesn't send CORS headers on formResponse, so
+            // the response is opaque. A resolved fetch means it reached
+            // Google; client-side validation above covers required fields.
+            await fetch(FORM_ACTION_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+
+            try {
+                window.localStorage.setItem(NAME_STORAGE_KEY, fullName);
+                window.localStorage.setItem(EMAIL_STORAGE_KEY, email);
+            } catch {
+                // ignore
+            }
+
+            showSuccess(email);
+        } catch (e) {
+            console.error("Move crew submit failed:", e);
+            showError(
+                "We couldn't send your sign-up. Check your connection and try again.",
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Count me in";
+        }
+    });
+
+    // Share: copy the clean page URL; if the clipboard is blocked, show it
+    // so they can copy it by hand.
+    copyBtn.addEventListener("click", async () => {
+        const url = window.location.origin + window.location.pathname;
+        try {
+            await navigator.clipboard.writeText(url);
+            copyStatus.textContent = "Link copied. Send it to your crew!";
+        } catch {
+            copyStatus.textContent = `Copy this link: ${url}`;
+        }
+    });
+</script>
