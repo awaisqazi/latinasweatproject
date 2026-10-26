@@ -223,8 +223,8 @@ export const fallEvents = [
       alt: "LSP Día de los Muertos, November 1, 2026: the run of show over an ofrenda with marigolds and candles, with the Banda El Pueblo and Mariachi Sirenas logos.",
     },
     pagePath: "diadelosmuertos",
-    summary: "Our space to remember and celebrate our loved ones together: community altars, gentle yoga, grief meditation and sound bowls, banda, mariachi and danza azteca.",
-    summaryEs: "Nuestro espacio para recordar y celebrar juntos a nuestros seres queridos: altares comunitarios, yoga suave, meditación del duelo y cuencos de sonido, banda, mariachi y danza azteca.",
+    summary: "Our space to remember and celebrate our loved ones together: community altars, gentle yoga, grief meditation and sound bath, banda, mariachi and danza azteca.",
+    summaryEs: "Nuestro espacio para recordar y celebrar juntos a nuestros seres queridos: altares comunitarios, yoga suave, meditación del duelo y baño de sonido, banda, mariachi y danza azteca.",
     description: [
       "LSP Día de los Muertos is our space to remember and celebrate our loved ones together. We honor our ancestors through cultura, community, and greet them with our community altars.",
       "Your ticket includes full access to the program. Re-entry is allowed, and we encourage you to visit the neighborhood's local small businesses while in the area.",
@@ -239,7 +239,7 @@ export const fallEvents = [
       { time: "4:00 – 5:00 PM", title: "Banda El Pueblo", detail: "Ofrenda viewing" },
       { time: "5:00 – 5:30 PM", title: "Mariachi Sirenas + gentle yoga", detail: "With Yaritza and Savannah" },
       { time: "6:00 – 7:00 PM", title: "Danza Azteca", detail: "By Kalpulli Xochykalli" },
-      { time: "7:00 – 7:45 PM", title: "Stages of grief meditation + sound bowls", detail: "With Zoraida and Luz" },
+      { time: "7:00 – 7:45 PM", title: "Stages of grief meditation + sound bath", detail: "With Zoraida and Luz" },
       { time: "8:00 PM", title: "End", detail: "Hasta la próxima" },
     ],
     lineup: ["Banda El Pueblo", "Mariachi Sirenas", "Kalpulli Xochykalli (Danza Azteca)"],
@@ -354,9 +354,9 @@ export const ddlmWeekend = {
   sundayLabel: "Día de los Muertos",
   sundayLabelEs: "Día de los Muertos",
   summary:
-    "Saturday morning brings ofrendas, kids yoga, Banda Cerro Azul, a farmers market and trick or treat; Sunday evening we remember our loved ones with community altars, gentle yoga, grief meditation and sound bowls, banda, mariachi and danza azteca.",
+    "Saturday morning brings ofrendas, kids yoga, Banda Cerro Azul, a farmers market and trick or treat; Sunday evening we remember our loved ones with community altars, gentle yoga, grief meditation and sound bath, banda, mariachi and danza azteca.",
   summaryEs:
-    "El sábado por la mañana hay ofrendas, yoga para niñas y niños, Banda Cerro Azul, mercado de agricultores y dulce o truco; el domingo por la tarde recordamos a nuestros seres queridos con altares comunitarios, yoga suave, meditación del duelo y cuencos de sonido, banda, mariachi y danza azteca.",
+    "El sábado por la mañana hay ofrendas, yoga para niñas y niños, Banda Cerro Azul, mercado de agricultores y dulce o truco; el domingo por la tarde recordamos a nuestros seres queridos con altares comunitarios, yoga suave, meditación del duelo y baño de sonido, banda, mariachi y danza azteca.",
   supportersLine:
     "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from Organic Life and State Representative Edgar Gonzalez, Jr. (23rd House District).",
   lineup: {
@@ -385,7 +385,7 @@ export const ddlmWeekend = {
     },
     {
       names: "Zoraida and Luz",
-      detail: "Grief meditation + sound bowls · Sun 7:00 PM",
+      detail: "Grief meditation + sound bath · Sun 7:00 PM",
       day: "sunday",
       pastAt: null,
       leaders: [
