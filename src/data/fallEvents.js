@@ -20,9 +20,10 @@
 // Zoraida, Luz), instructors of the Oct 31 banda class are not named.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
-// - Both flyers print "DONATION" for Banda Pilates + Sculpt (Oct 31) and
-//   for Día de los Muertos (Nov 1); the live Zeffy forms charge $15 and
-//   $20. The site follows Zeffy and never prints "donation" as a price.
+// - RESOLVED 2026-10-26 (Fez): Zeffy is the source of truth for prices.
+//   Both flyers print "DONATION" for Banda Pilates + Sculpt and for Día de
+//   los Muertos, but the forms charge $15 and $20 and the site prints that;
+//   never print "donation" as a price.
 // - The green "SE" logo on the Oct 31 flyer is unidentified. It is left
 //   off the site (supporters are printed as text, see ddlmWeekend).
 // - Kids Halloween Yoga: no age range, and the Zeffy page says
