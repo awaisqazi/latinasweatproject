@@ -10,9 +10,9 @@
 //     link to their Zeffy forms (registration + waiver).
 //   Sun Nov 1, Día de los Muertos, 4:00 – 8:00 PM, $20 on Zeffy.
 // Order: hero (eyebrow + countdown chip, both days, tickets / program /
-// volunteer) -> Recordar juntos -> facts band (papel picado) -> #program
+// volunteer) -> Remembering together -> facts band (papel picado) -> #program
 // (#saturday + #sunday day blocks, price tag per row, inline Zeffy pills)
-// -> lineup (Quiénes) -> the two program flyers (black ground, full-size
+// -> lineup (Who's playing) -> the two program flyers (black ground, full-size
 // jpg links) -> #volunteer -> small print (supporters as text).
 // All facts and copy come from src/data/fallEvents.js (halloweenProgram,
 // ddlmWeekend, ddlmEvent); Zeffy wins over the flyers for prices (both
@@ -148,7 +148,7 @@ const checkClass = "mt-0.5 h-4 w-4 shrink-0 accent-[#FF7A1A]";
 // Shared with the homepage #ddlm-weekend spotlight: src/lib/ddlmFlair.ts
 // (colors, picado geometry, cempasúchil mark) + src/components/DdlmPicado.astro.
 // ---------------------------------------------------------------------
-// Cempasúchil mark, used three times: the "Recordar juntos" eyebrow, the
+// Cempasúchil mark, used three times: the "Remembering together" eyebrow, the
 // lineup eyebrow and the volunteer success state.
 const CEMPA_ON_WHITE = cempasuchil("#FFFFFF");
 const CEMPA_ON_BLACK = cempasuchil("#000000");
@@ -303,7 +303,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <p
                         class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
                     >
-                        Recordar juntos
+                        Remembering together · recordar juntos
                     </p>
                 </div>
                 <p
@@ -343,7 +343,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <dt
                         class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
                     >
-                        Cuándo · When
+                        When · cuándo
                     </dt>
                     {satActive && (
                         <dd class="mt-2 text-lg font-semibold" data-fall-past-at={halloweenEndISO}>
@@ -358,7 +358,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <dt
                         class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
                     >
-                        Dónde · Where
+                        Where · dónde
                     </dt>
                     <dd class="mt-2 text-lg font-semibold">
                         {ddlm.venue}
@@ -377,7 +377,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <dt
                         class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]"
                     >
-                        Boletos · Tickets
+                        Tickets · boletos
                     </dt>
                     <dd class="mt-2 text-lg font-semibold">
                         $20 Sunday{satActive && (
@@ -420,7 +420,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                 <p
                     class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
                 >
-                    Programa · Program
+                    Program · programa
                 </p>
 
                 {satActive && (
@@ -541,7 +541,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <p
                         class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
                     >
-                        Quiénes · Who's playing
+                        Who's playing · quiénes
                     </p>
                 </div>
                 <div class="mt-8 grid gap-10 sm:grid-cols-[1.4fr_1fr] sm:gap-12">
@@ -598,7 +598,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             <DdlmMarigolds layout="petals" count={18} ground="#000000" id="ddlm-mg-fly" class="z-0" />
             <div class="relative z-10 mx-auto max-w-5xl">
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]">
-                    El programa
+                    The program · el programa
                 </p>
                 <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
                     Save and share the program
@@ -657,7 +657,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <p
                         class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
                     >
-                        Ayúdanos · Volunteer
+                        Volunteer · ayúdanos
                     </p>
                     <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
                         Volunteer with us
