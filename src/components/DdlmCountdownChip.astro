@@ -1,0 +1,66 @@
+---
+// One-line countdown for the Día de los Muertos weekend (Sat Oct 31 from
+// 9:00 AM, Sun Nov 1 4:00 – 8:00 PM; src/data/fallEvents.js ddlmWeekend).
+// Plain text, computed in the browser in America/Chicago calendar days, so
+// a static build never shows a stale count: hidden until the script runs
+// and hidden again after the weekend ends (ddlmWeekend.endsAtISO). Styling
+// comes from the host via `class` (same type as the surrounding eyebrow,
+// no new colors). Astro dedupes the script; every chip on a page updates.
+import { ddlmWeekend, halloweenEndISO } from "@/data/fallEvents";
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span
+  class={className}
+  data-ddlm-countdown
+  data-sat={ddlmWeekend.startsAtISO}
+  data-sat-end={halloweenEndISO}
+  data-sun={ddlmWeekend.sundayStartsAtISO}
+  data-end={ddlmWeekend.endsAtISO}
+  hidden
+></span>
+
+<script>
+  (function () {
+    const fmt = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    // Whole calendar days between two instants, in Chicago.
+    const dayNum = (t: number) => Date.parse(`${fmt.format(new Date(t))}T00:00:00Z`) / 86400000;
+    const daysBetween = (a: number, b: number) => Math.round(dayNum(b) - dayNum(a));
+
+    document.querySelectorAll<HTMLElement>("[data-ddlm-countdown]").forEach((el) => {
+      const now = Date.now();
+      const sat = Date.parse(el.dataset.sat || "");
+      const satEnd = Date.parse(el.dataset.satEnd || "");
+      const sun = Date.parse(el.dataset.sun || "");
+      const end = Date.parse(el.dataset.end || "");
+      if (![sat, satEnd, sun, end].every(Number.isFinite) || now > end) {
+        el.hidden = true;
+        return;
+      }
+      let text = "";
+      if (now < sat) {
+        const d = daysBetween(now, sat);
+        if (d >= 2) text = `Starts in ${d} days`;
+        else if (d === 1) text = "Saturday is tomorrow";
+        else text = "Today from 9:00 AM";
+      } else if (now <= satEnd) {
+        text = "Today · Sunday at 4:00 PM";
+      } else if (now < sun) {
+        text = daysBetween(now, sun) >= 1 ? "Tomorrow at 4:00 PM" : "Today at 4:00 PM";
+      } else {
+        text = "Happening now";
+      }
+      el.textContent = text;
+      el.hidden = false;
+    });
+  })();
+</script>

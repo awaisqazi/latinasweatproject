@@ -1,40 +1,45 @@
 // Fall 2026 ticketed events at La Villita Park (2800 S Sacramento Ave):
 // two classes on Halloween (Sat Oct 31) and LSP Día de los Muertos (Sun
 // Nov 1). Single source of truth for every surface that shows them:
-// /events (#fall-events cards), the homepage events carousel, /links
-// (#halloween-card for the Oct 31 double-header, #ddlm-card), the Pop Up
-// Week 4 cross-link (PopUpWeekSchedule + PopUpWeekBand), /checkin ("Fall
-// events" group) and /diadelosmuertos (ticket CTA, facts, run of show).
+// /events (#fall-events cards), the homepage events carousel and the
+// homepage Día de los Muertos weekend spotlight, /links (#ddlm-card,
+// #halloween-card), the Pop Up Week 4 cross-link (PopUpWeekSchedule +
+// PopUpWeekBand), /checkin ("Fall events" group) and /diadelosmuertos (the
+// weekend page: Sat Oct 31 program, Sun Nov 1 program, lineup, flyers).
 //
 // Facts are binding: read straight off the live Zeffy forms (Latina Sweat
-// Cares) on Oct 20 2026, see marketing/fall-events/BRIEF.md + events.json.
-// Zeffy page values win over banner text. Copy rules: no em dashes (en
-// dash for ranges, "·"), never "free class(es)" (the kids class is "Free
-// registration"), no address beyond 2800 S Sacramento Ave, never guess who
-// is pictured in a banner.
+// Cares), first on Oct 20 2026 and re-read Oct 26 2026, plus the two
+// program flyers (marketing/fall-events/flyers/); see
+// marketing/fall-events/BRIEF.md and BRIEF-ddlm-weekend-2026-10-26.md.
+// Zeffy wins over flyer and banner text for prices. Copy rules: no em
+// dashes (en dash for ranges, "·"), never "free class(es)" (the kids class
+// is "Free registration"; the ofrendas and the market are "Free, open to
+// all"), never print "donation" as a price, no address beyond 2800 S
+// Sacramento Ave, never guess who is pictured in a banner, class leaders
+// by FIRST NAME only exactly as Zeffy writes them (Yaritza, Savannah,
+// Zoraida, Luz), instructors of the Oct 31 banda class are not named.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
-// - Kids Halloween Yoga: RESOLVED 2026-10-22, Fez confirmed the address is
-//   2800 S Sacramento Ave, Chicago, IL 60608 (La Villita Park). The banner
-//   art still prints "3800 S SACRAMENTO" because it is the Zeffy art as
-//   published; swap the image here once the Zeffy banner is fixed.
+// - Both flyers print "DONATION" for Banda Pilates + Sculpt (Oct 31) and
+//   for Día de los Muertos (Nov 1); the live Zeffy forms charge $15 and
+//   $20. The site follows Zeffy and never prints "donation" as a price.
+// - The green "SE" logo on the Oct 31 flyer is unidentified. It is left
+//   off the site (supporters are printed as text, see ddlmWeekend).
 // - Kids Halloween Yoga: no age range, and the Zeffy page says
 //   "child-parent class" but sells one free General Admission ticket, so it
 //   is unclear whether each child or each family registers. The site says
 //   only "Free registration" and does not invent a rule.
-// - Live Banda Pilates + Yoga Sculpt: Zeffy says 12:30 to 1:00 PM (30
-//   minutes). Shown as listed; confirm it is not a placeholder end time.
-// - Live Banda Pilates + Yoga Sculpt: the banner shows two instructor
-//   headshots with no names anywhere. Instructors are NOT named on the site.
-// - Día de los Muertos: the Zeffy header and ticket copy say 4 to 9 PM
-//   ("full access 4pm-9pm"), the run of show and banner say "8PM END". The
-//   site shows the 4:00 PM start only ("From 4:00 PM") and never promises
-//   an end time; endsAtISO uses 9 PM (Zeffy) so nothing hides early.
-// - Día de los Muertos: Zeffy names no venue, only the address, which is
-//   La Villita Park's address (same as the Oct 31 events).
-// - Día de los Muertos class leaders appear by FIRST NAME only on Zeffy
-//   (Yaritza, Savannah, Zoraida, Luz). Use them exactly as written; never
-//   expand to full names.
+// - Día de los Muertos end time: ANSWERED by the Nov 1 flyer and the Zeffy
+//   run of show ("8PM END"), so the site prints "4:00 – 8:00 PM" and an
+//   "8:00 PM · End" row. The Zeffy header still says 4 to 9 PM ("full
+//   access 4pm-9pm"); endsAtISO stays at 9 PM so nothing hides early. If
+//   9 PM is right, change timeLabel and the last runOfShow row.
+// - Live Banda Pilates + Yoga Sculpt banner: the Zeffy form still shows the
+//   Oct 20 art that prints "Banda La Enkantadora"; the site card now uses a
+//   crop of the Oct 31 program flyer instead. Zeffy needs a re-upload (Fez).
+// (Resolved and removed: the 2800 vs 3800 S Sacramento address, confirmed
+// 2800 on Oct 22, though the kids banner art still prints 3800; the 30
+// minute banda class, confirmed 12:30 to 1:00 PM by the Oct 31 flyer.)
 //
 // Check-in links are signed Zeffy bearer links (staff only): they appear
 // on the noindex /checkin page and nowhere public.
@@ -139,22 +144,26 @@ export const fallEvents = [
       jpg: "images/events/fall-2026/live-banda-pilates-yoga-sculpt.jpg",
       width: 800,
       height: 800,
-      // Two instructor headshots are on the art; never name or describe them.
-      alt: "Live Banda Pilates + Yoga Sculpt flyer: Banda La Enkantadora, 10.31.2026, 12:30 to 1:00 PM at La Villita Park.",
+      // Since Oct 26 this is a square crop of the Oct 31 program flyer
+      // (marketing/fall-events/flyers/oct31-halloween-program.png), which
+      // names Banda Cerro Azul. The Zeffy art saved Oct 20 printed the band
+      // announced then (Banda La Enkantadora) in large type, so it was
+      // retired here; Zeffy itself still shows it (re-upload = Fez).
+      alt: "Halloween at La Villita Park, October 31, 2026: the day's program on an illustrated Halloween yoga pattern, from the 9:00 AM ofrendas to Banda Pilates + Sculpt at 12:30 PM. Prices and registration on Zeffy.",
     },
-    summary: "A full-body workout with Banda La Enkantadora playing live.",
-    summaryEs: "Un entrenamiento de cuerpo completo con Banda La Enkantadora tocando en vivo.",
+    summary: "A full-body workout with Banda Cerro Azul playing live.",
+    summaryEs: "Un entrenamiento de cuerpo completo con Banda Cerro Azul tocando en vivo.",
     description: [
-      "Live Banda Pilates + Yoga Sculpt is a full-body workout with Banda La Enkantadora playing live.",
+      "Live Banda Pilates + Yoga Sculpt is a full-body workout with Banda Cerro Azul playing live.",
       "We move, sweat, and flow together, centering our community with love and intention.",
     ],
     descriptionEs: [
-      "Pilates + Yoga Sculpt con Banda La Enkantadora tocando en vivo: un entrenamiento de cuerpo completo.",
+      "Pilates + Yoga Sculpt con Banda Cerro Azul tocando en vivo: un entrenamiento de cuerpo completo.",
       "Nos movemos, sudamos y fluimos juntos, con la comunidad al centro, con amor e intención.",
     ],
     note: "Limited mats will be available for rent, first come first served.",
     noteEs: "Habrá pocos mats para rentar, por orden de llegada.",
-    lineup: ["Banda La Enkantadora"],
+    lineup: ["Banda Cerro Azul"],
     // Instructors deliberately not listed (see OPEN QUESTIONS).
     people: [],
     trackingKey: "live_banda_pilates",
@@ -166,8 +175,9 @@ export const fallEvents = [
     titleEs: "LSP Día de los Muertos",
     zeffyTitle: "LSP Dia de los Muertos",
     date: "2026-11-01",
-    // CST (-06:00) after DST ends. End = 9 PM per the Zeffy header (the run
-    // of show says 8 PM; the site never prints an end time).
+    // CST (-06:00) after DST ends. End = 9 PM per the Zeffy header so
+    // nothing hides early; the site PRINTS 8:00 PM (flyer + Zeffy run of
+    // show, see OPEN QUESTIONS).
     dateISO: { start: "2026-11-01T16:00:00-06:00", end: "2026-11-01T21:00:00-06:00" },
     day: "Sunday",
     dayShort: "Sun",
@@ -175,8 +185,9 @@ export const fallEvents = [
     dateLabel: "Nov 1",
     dateLabelEs: "1 Nov",
     dateLong: "Sunday, November 1",
-    timeLabel: "From 4:00 PM",
-    timeLabelEs: "Desde las 4:00 PM",
+    // 8 PM end per the flyer and the Zeffy run of show (see OPEN QUESTIONS).
+    timeLabel: "4:00 – 8:00 PM",
+    timeLabelEs: "4:00 – 8:00 PM",
     startTimeLabel: "4:00 PM",
     ...VENUE,
     price: 20,
@@ -208,13 +219,14 @@ export const fallEvents = [
       "Check-in for classes opens 15 minutes before class start and closes 5 minutes after the instructor begins.",
     note: "Limited mats will be available for rent, please bring your own if you can.",
     noteEs: "Habrá pocos mats para rentar, trae el tuyo si puedes.",
-    // Run of show as on Zeffy (the 5:30 to 6:00 PM gap is in the source;
-    // the "8PM END" row is left out, see OPEN QUESTIONS). First names only.
+    // Run of show as on Zeffy and the Nov 1 flyer (the 5:30 to 6:00 PM gap
+    // is in the source), ending with the "8PM END" row. First names only.
     runOfShow: [
       { time: "4:00 – 5:00 PM", title: "Banda El Pueblo", detail: "Ofrenda viewing" },
       { time: "5:00 – 5:30 PM", title: "Mariachi Sirenas + gentle yoga", detail: "With Yaritza and Savannah" },
       { time: "6:00 – 7:00 PM", title: "Danza Azteca", detail: "By Kalpulli Xochykalli" },
       { time: "7:00 – 7:45 PM", title: "Stages of grief meditation + sound bowls", detail: "With Zoraida and Luz" },
+      { time: "8:00 PM", title: "End", detail: "Hasta la próxima" },
     ],
     lineup: ["Banda El Pueblo", "Mariachi Sirenas", "Kalpulli Xochykalli (Danza Azteca)"],
     people: ["Yaritza", "Savannah", "Zoraida", "Luz"],
@@ -248,6 +260,106 @@ export const halloweenAtLaVillita = {
   dateLabelEs: "Sáb 31 Oct",
 };
 
+// Sat Oct 31 run of show at La Villita Park, in order, from the Oct 31
+// program flyer (marketing/fall-events/flyers/oct31-halloween-program.png).
+// Prices follow Zeffy, not the flyer (the flyer prints "DONATION" for the
+// banda class; Zeffy charges $15, see OPEN QUESTIONS). The two classes
+// point at their fall event (Zeffy form + waiver) via registration.eventId;
+// the ofrendas and the market have no form: "Free, open to all". `short`
+// is the compact title for the homepage spotlight's mini program.
+export const halloweenProgram = [
+  {
+    time: "9:00 – 10:30 AM",
+    title: "Ofrendas",
+    short: "Ofrendas",
+    titleEs: "Ofrendas",
+    detail: "Community altars",
+    detailEs: "Altares comunitarios",
+    price: "Free, open to all",
+    priceEs: "Gratis, abierto a todos",
+    registration: null,
+    startsAtISO: "2026-10-31T09:00:00-05:00",
+    endsAtISO: "2026-10-31T10:30:00-05:00",
+  },
+  {
+    time: "10:30 – 11:00 AM",
+    title: "Kids Yoga class",
+    short: "Kids yoga",
+    titleEs: "Clase de yoga para niñas y niños",
+    detail: "A child-parent class in costume. Registration and waiver on Zeffy.",
+    detailEs: "Una clase para compartir en familia, con disfraz. Registro y waiver en Zeffy.",
+    price: "Free registration",
+    priceEs: "Registro gratuito",
+    registration: { eventId: "kids-halloween-yoga" },
+    startsAtISO: "2026-10-31T10:30:00-05:00",
+    endsAtISO: "2026-10-31T11:00:00-05:00",
+  },
+  {
+    time: "11:00 AM – 12:30 PM",
+    title: "Banda Cerro Azul",
+    short: "Banda Cerro Azul + trick or treat",
+    titleEs: "Banda Cerro Azul",
+    detail: "Farmers market + trick or treat",
+    detailEs: "Mercado de agricultores + dulce o truco",
+    price: "Free, open to all",
+    priceEs: "Gratis, abierto a todos",
+    registration: null,
+    startsAtISO: "2026-10-31T11:00:00-05:00",
+    endsAtISO: "2026-10-31T12:30:00-05:00",
+  },
+  {
+    time: "12:30 – 1:00 PM",
+    title: "Banda Pilates + Sculpt",
+    short: "Banda Pilates + Sculpt",
+    titleEs: "Pilates + Sculpt con banda",
+    detail: "With Banda Cerro Azul playing live. Registration and waiver on Zeffy.",
+    detailEs: "Con Banda Cerro Azul tocando en vivo. Registro y waiver en Zeffy.",
+    price: "$15",
+    priceEs: "$15",
+    registration: { eventId: "live-banda-pilates-yoga-sculpt" },
+    startsAtISO: "2026-10-31T12:30:00-05:00",
+    endsAtISO: "2026-10-31T13:00:00-05:00",
+  },
+];
+
+// Shared copy for the Día de los Muertos weekend (Sat Oct 31 Halloween at
+// La Villita Park + Sun Nov 1 Día de los Muertos): /diadelosmuertos, the
+// homepage spotlight, /events #fall-events. Supporters are text only (no
+// logos; the "SE" mark on the Oct 31 flyer is unidentified and left off).
+export const ddlmWeekend = {
+  title: "Día de los Muertos weekend",
+  titleEs: "Fin de semana de Día de los Muertos",
+  dateLabel: "Oct 31 + Nov 1",
+  dateLabelEs: "31 Oct + 1 Nov",
+  saturdayLabel: "Halloween at La Villita Park",
+  saturdayLabelEs: "Halloween en La Villita Park",
+  sundayLabel: "Día de los Muertos",
+  sundayLabelEs: "Día de los Muertos",
+  summary:
+    "Saturday morning brings ofrendas, kids yoga, Banda Cerro Azul, a farmers market and trick or treat; Sunday evening we remember our loved ones with community altars, gentle yoga, grief meditation and sound bowls, banda, mariachi and danza azteca.",
+  summaryEs:
+    "El sábado por la mañana hay ofrendas, yoga para niñas y niños, Banda Cerro Azul, mercado de agricultores y dulce o truco; el domingo por la tarde recordamos a nuestros seres queridos con altares comunitarios, yoga suave, meditación del duelo y cuencos de sonido, banda, mariachi y danza azteca.",
+  supportersLine:
+    "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from Organic Life and State Representative Edgar Gonzalez, Jr. (23rd House District).",
+  lineup: {
+    saturday: [{ name: "Banda Cerro Azul", detail: "11:00 AM set + the 12:30 PM Banda Pilates + Sculpt" }],
+    sunday: [
+      { name: "Banda El Pueblo", detail: "4:00 PM · Ofrenda viewing" },
+      { name: "Mariachi Sirenas", detail: "5:00 PM · With gentle yoga" },
+      { name: "Kalpulli Xochykalli", detail: "6:00 PM · Danza Azteca" },
+    ],
+  },
+  // Class leaders by first name only, exactly as Zeffy writes them.
+  classLeaders: [
+    { names: "Yaritza and Savannah", detail: "Gentle yoga · Sun 5:00 PM" },
+    { names: "Zoraida and Luz", detail: "Grief meditation + sound bowls · Sun 7:00 PM" },
+  ],
+  startsAtISO: "2026-10-31T09:00:00-05:00",
+  endsAtISO: ddlmEvent.endsAtISO,
+  // Sunday doors (the countdown chips count to Saturday 9 AM, then to this).
+  sundayStartsAtISO: ddlmEvent.startsAtISO,
+};
+
 // "Also this week" cross-link lines for a Pop Up week (Week 4 holds both
 // days): one line per day that falls inside the week, each hiding once its
 // last event has ended. Links to /events#fall-events.
@@ -260,7 +372,10 @@ export const fallCrossLinkLines = (week, now = new Date()) => {
   };
   const lines = [];
   if (halloweenEvents.some(inWeek) && isHalloweenActive(now)) {
-    lines.push({ text: "Halloween yoga at La Villita Park, Sat Oct 31", pastAt: halloweenEndISO });
+    lines.push({
+      text: "Halloween at La Villita Park, Sat Oct 31: ofrendas, kids yoga, banda + trick or treat",
+      pastAt: halloweenEndISO,
+    });
   }
   if (inWeek(ddlmEvent) && !ddlmEvent.isPast(now)) {
     lines.push({ text: "Día de los Muertos at La Villita Park, Sun Nov 1", pastAt: ddlmEvent.endsAtISO });

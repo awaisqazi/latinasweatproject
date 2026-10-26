@@ -28,6 +28,9 @@ const base = import.meta.env.BASE_URL;
 const ddlm = e.id === "dia-de-los-muertos";
 const carousel = variant === "carousel";
 const pageUrl = e.pagePath ? `${base}${e.pagePath}` : null;
+// CTA carries the price and keeps "on Zeffy": "Get tickets · $20 on Zeffy",
+// "Get tickets · $15 on Zeffy", "Register on Zeffy, free".
+const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticketsLabel} · $${e.price} on Zeffy`;
 ---
 
 {!e.isPast() && (
@@ -84,14 +87,14 @@ const pageUrl = e.pagePath ? `${base}${e.pagePath}` : null;
           class="fe-cta flex items-center justify-between gap-3 rounded-full px-5 py-3 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           {...fallConversionAttrs(e, context)}
         >
-          <span>{`${e.ticketsLabel} on Zeffy`}</span>
+          <span>{ctaLabel}</span>
           <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
         </a>
         {pageUrl && !carousel && (
           <a href={pageUrl} class="fe-more mt-3 inline-block text-sm font-bold underline underline-offset-4">
-            Program, volunteer sign-up and details
+            Full weekend program and volunteer sign-up
           </a>
         )}
       </div>

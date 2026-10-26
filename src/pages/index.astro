@@ -3,6 +3,13 @@
 // below the crafted hero -> gala seam the light/dark cadence strictly
 // alternates:
 //   1. Hero [D]
+//   1b. Día de los Muertos weekend spotlight [L] (#ddlm-weekend, Oct 26
+//      2026 addition, media RIGHT): sits at slot 2 until the weekend is
+//      over (Nov 1 2026, 9 PM CST; build time + data-fall-past-at), so
+//      that week the cadence reads hero D, DDLM L, gala D, recap band L...
+//      and the hero -> gala gold seam below is interrupted BY DESIGN (the
+//      gala section's own seam styling is unchanged and returns on its own
+//      once this section is gone).
 //   2. Annual Gala 2026 recap spotlight [D]  <- crafted gold seam, the
 //      page's one deliberate dark/dark junction (documented exception).
 //      Post-gala (Sep 26 2026) the slot and theme are unchanged; only the
@@ -19,9 +26,9 @@
 //      past (Oct 5 to 11, 2026; auto-hides after Oct 11)
 //   9. Events carousel [L] (The Collective Finish Line card leads it while
 //      the series is not past, Oct 5 – 14 2026; auto-hides after Oct 14)
-//      (Oct 20 2026: after the current Pop Up week card come the three fall
-//      events at La Villita Park, Oct 31 + Nov 1, src/data/fallEvents.js;
-//      each hides itself after its end)
+//      (Oct 26 2026: the Día de los Muertos card LEADS the carousel, then
+//      the two Oct 31 cards, then the current Pop Up week card, then the
+//      rest; src/data/fallEvents.js; each hides itself after its end)
 //  10. Instagram [D]
 //  11. In The Press [L]
 // Desktop media zig-zag: Gala photo LEFT -> ABC7 video RIGHT -> Tee LEFT ->
@@ -43,6 +50,11 @@
 // "Pop Up Week 2 · Oct 12 – 18") and "Join a Class" goes to /popup; after
 // Oct 18 both fall back to the gala recap pill and /schedule (build time +
 // PopUpWeekClient in-browser).
+// Día de los Muertos weekend (Oct 26 2026 addition): while it is not past
+// (Nov 1 9 PM CST) the hero pill reads "Día de los Muertos · Oct 31 +
+// Nov 1 · La Villita Park" -> /diadelosmuertos and the Pop Up week pill is
+// rendered hidden, then revealed by FallEventsClient after the weekend
+// (see the pill markup for why the two scripts do not fight).
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
@@ -59,7 +71,17 @@ import { activePopUpWeeks, popUpWeekWindow } from "@/data/popUpWeeks";
 import FinishLineClient from "@/components/FinishLineClient.astro";
 import FallEventCard from "@/components/FallEventCard.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
-import { fallEvents } from "@/data/fallEvents";
+import DdlmCountdownChip from "@/components/DdlmCountdownChip.astro";
+import {
+  fallEvents,
+  ddlmEvent,
+  ddlmWeekend,
+  halloweenProgram,
+  halloweenEndISO,
+  isHalloweenActive,
+  fallEventById,
+  fallConversionAttrs,
+} from "@/data/fallEvents";
 import {
   collectiveFinishLine,
   finishLineEvents,
@@ -120,6 +142,38 @@ const finishLinePageUrl = withBase(collectiveFinishLine.pagePath);
 const finishLineOct5 = finishLineEvents.find((e) => e.id === "oct5-flow");
 const finishLineClasses = finishLineEvents.filter((e) => e.kind === "class");
 const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
+// Día de los Muertos weekend (Sat Oct 31 + Sun Nov 1 2026 at La Villita
+// Park; src/data/fallEvents.js): hero pill + slot-2 spotlight while not
+// past; the Saturday half hides after Oct 31 1:00 PM CDT.
+const ddlmActive = !ddlmEvent.isPast();
+const ddlmSatActive = isHalloweenActive();
+const ddlmPageUrl = withBase(ddlmEvent.pagePath);
+const ddlmKids = fallEventById("kids-halloween-yoga");
+const ddlmBanda = fallEventById("live-banda-pilates-yoga-sculpt");
+// "9:00 – 10:30 AM" -> "9:00 AM", "11:00 AM – 12:30 PM" -> "11:00 AM".
+const ddlmStartLabel = (range) => {
+  const [first, last = first] = range.split(" – ");
+  return /(AM|PM)$/.test(first) ? first : `${first} ${last.match(/(AM|PM)$/)?.[1] ?? ""}`.trim();
+};
+// Pop Up week pills while the DDLM pill shows: weeks that end before the
+// weekend does are dropped; the rest render hidden with NO
+// popUpWeekWindow attributes (PopUpWeekClient would otherwise re-show them
+// mid-weekend), carry data-fall-show-past-at = DDLM end (FallEventsClient
+// reveals them after Nov 1 9 PM CST) and data-fall-past-at = the week's
+// end (FallEventsClient never reveals them after that, and
+// data-popup-hide-when-past hides them too). Assumes at most one week
+// outlives the weekend (true: Week 4 ends Nov 1 11:59 PM CST).
+const heroPopUpPillAttrs = (i) =>
+  ddlmActive
+    ? {
+        hidden: true,
+        "data-fall-show-past-at": ddlmEvent.endsAtISO,
+        "data-fall-past-at": popUpWeeksActive[i].endsAtISO,
+      }
+    : popUpWeekWindow(popUpWeeksActive, i);
+const heroPopUpWeeks = popUpWeeksActive
+  .map((week, i) => ({ week, i }))
+  .filter(({ week }) => !ddlmActive || Date.parse(week.endsAtISO) > Date.parse(ddlmEvent.endsAtISO));
 ---
 
 <Layout title="The Latina Sweat Project | Home">
@@ -149,10 +203,25 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
       <div
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
-        {popUpWeeksActive.map((week, i) => (
+        {ddlmActive && (
+          <a
+            href={ddlmPageUrl}
+            class="group mb-5 inline-flex max-w-full items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-[#FF7A1A] hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
+            data-fall-past-at={ddlmEvent.endsAtISO}
+            data-conversion-event="ddlm_page_click"
+            data-conversion-context="home_hero_announcement"
+          >
+            <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+            <span>Día de los Muertos · {ddlmWeekend.dateLabel} · {ddlmEvent.venue}</span>
+            <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        )}
+        {heroPopUpWeeks.map(({ week, i }) => (
           <a
             href={popUpPageUrl}
-            {...popUpWeekWindow(popUpWeeksActive, i)}
+            {...heroPopUpPillAttrs(i)}
             class="group mb-5 inline-flex max-w-full items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-[#e0a83a] hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e0a83a] focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
             data-popup-hide-when-past
             data-conversion-event="popup_page_click"
@@ -202,6 +271,148 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
       <PopUpWeekClient />
     </section>
     {/* END: Hero Section */}
+
+    {/* START: Día de los Muertos weekend spotlight (Oct 26 2026; slot 2
+        until Nov 1 9 PM CST, see the section-order note at the top). LIGHT
+        on purpose: white ground, black Rubik, cempasúchil #FF7A1A as the
+        only accent, so the cadence below still alternates (hero D, this L,
+        gala D, recap band L). Media RIGHT on desktop (the festival art),
+        media on top on phones. Copy, mini program and prices come from
+        src/data/fallEvents.js (Zeffy prices). The Saturday column and the
+        two Saturday class links hide after Oct 31 1:00 PM CDT; the whole
+        section after Nov 1 9 PM CST (build time + FallEventsClient). */}
+    {ddlmActive && (
+      <section
+        id="ddlm-weekend"
+        class="relative scroll-mt-28 bg-white py-14 text-black sm:py-20"
+        data-fall-past-at={ddlmEvent.endsAtISO}
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+            {/* Media (RIGHT on desktop, first on phones) */}
+            <a
+              href={ddlmPageUrl}
+              class="block overflow-hidden rounded-2xl bg-black lg:order-2"
+              tabindex="-1"
+              aria-hidden="true"
+              data-conversion-event="ddlm_page_click"
+              data-conversion-context="home_ddlm_spotlight_image"
+            >
+              <img
+                src={`${base}images/ddlm/ddlm-2026-festival.jpg`}
+                width="1600"
+                height="899"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="aspect-[16/9] h-full w-full object-cover object-[50%_30%] transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </a>
+
+            {/* Copy (LEFT on desktop) */}
+            <div class="font-rubik lg:order-1">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-black/60 sm:text-sm">
+                {ddlmSatActive && (
+                  <span data-fall-past-at={halloweenEndISO}>
+                    {`${ddlmWeekend.dateLabel} · ${ddlmEvent.venue} · ${ddlmEvent.address}`}
+                  </span>
+                )}
+                <span
+                  hidden={ddlmSatActive}
+                  data-fall-show-past-at={halloweenEndISO}
+                  data-fall-past-at={ddlmEvent.endsAtISO}
+                >
+                  {`${ddlmEvent.dayShort} ${ddlmEvent.dateLabel} · ${ddlmEvent.venue} · ${ddlmEvent.address}`}
+                </span>
+              </p>
+              <h2 class="mt-3 text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
+                {ddlmWeekend.title}
+              </h2>
+              <p class="mt-3">
+                <DdlmCountdownChip class="inline-block rounded-full border border-black/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-black" />
+              </p>
+              <p class="mt-4 max-w-xl text-base leading-relaxed text-black/75 sm:text-lg">
+                {ddlmWeekend.summary}
+              </p>
+
+              {/* Mini program: Saturday | Sunday */}
+              <div class="mt-7 grid gap-6 border-y border-black/10 py-5 sm:grid-cols-2 sm:gap-8">
+                {ddlmSatActive && (
+                  <div data-fall-past-at={halloweenEndISO}>
+                    <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em]">
+                      <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                      Sat Oct 31
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-sm">
+                      {halloweenProgram.map((row) => (
+                        <li class="grid grid-cols-[5.25rem_1fr] gap-2">
+                          <span class="font-bold">{ddlmStartLabel(row.time)}</span>
+                          <span class="text-black/75">{row.short}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div>
+                  <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em]">
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                    Sun Nov 1
+                  </p>
+                  <ul class="mt-3 space-y-1.5 text-sm">
+                    {ddlmEvent.runOfShow.map((row) => (
+                      <li class="grid grid-cols-[5.25rem_1fr] gap-2">
+                        <span class="font-bold">{ddlmStartLabel(row.time)}</span>
+                        <span class="text-black/75">{row.title === "End" ? "End" : row.title.replace(/^Stages of grief meditation/, "Grief meditation")}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mt-7 flex flex-wrap items-center gap-3">
+                <a
+                  href={ddlmEvent.ticketsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-block rounded-full bg-[#FF7A1A] px-7 py-3 text-sm font-bold text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                  {...fallConversionAttrs(ddlmEvent, "home_ddlm_spotlight")}
+                >
+                  Get tickets · $20
+                </a>
+                <a
+                  href={ddlmPageUrl}
+                  class="inline-block rounded-full border border-black px-7 py-3 text-sm font-bold text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2"
+                  data-conversion-event="ddlm_page_click"
+                  data-conversion-context="home_ddlm_spotlight"
+                >
+                  Full program + volunteer
+                </a>
+              </div>
+              {ddlmSatActive && (
+                <p class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold" data-fall-past-at={halloweenEndISO}>
+                  {[
+                    { e: ddlmKids, label: "Kids yoga · free registration" },
+                    { e: ddlmBanda, label: "Banda Pilates + Sculpt · $15" },
+                  ].filter(({ e }) => !e.isPast()).map(({ e, label }) => (
+                    <a
+                      href={e.ticketsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black/70"
+                      data-fall-past-at={e.endsAtISO}
+                      {...fallConversionAttrs(e, "home_ddlm_spotlight")}
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+    {/* END: Día de los Muertos weekend spotlight */}
 
     {/* START: Annual Gala 2026 recap spotlight (post-gala, Sep 26 2026).
         Same slot, same theme as the pre-gala marquee so the documented
@@ -1481,10 +1692,22 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
 
           <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
 
+          {/* Día de los Muertos weekend at La Villita Park (Oct 26 2026,
+              src/data/fallEvents.js): the Sun Nov 1 Día de los Muertos card
+              LEADS the carousel, then the two Sat Oct 31 cards (Kids
+              Halloween Yoga, Live Banda Pilates + Yoga Sculpt), then the
+              current Pop Up week card. Each is a direct child of
+              #events-carousel with data-fall-end, so the dots script skips
+              it once past; FallEventsClient hides it in the browser. */}
+          {[ddlmEvent, ...fallEvents.filter((e) => e.id !== ddlmEvent.id)].map((e) => (
+            <FallEventCard event={e} variant="carousel" context="home_events_carousel_fall" />
+          ))}
+
           {/* Pop Up week card (current week only; one card per active week,
               windowed by popUpWeekWindow so the browser flips it Mon to Mon
-              with no rebuild). Leads the carousel: pop-ups are the class
-              offering while studio programming is paused. Option I cream /
+              with no rebuild). Pop-ups are the class
+              offering while studio programming is paused (Oct 26 2026: it
+              now follows the three fall event cards). Option I cream /
               terracotta / ink; image = the week's OG card. A direct child of
               #events-carousel; the dots script skips hidden cards. */}
           {popUpWeeksActive.map((week, i) => (
@@ -1528,16 +1751,6 @@ const showMondayMilesFinishLine = finishLineActive && !finishLineOct5.isPast();
                 </div>
               </div>
             </a>
-          ))}
-
-          {/* Fall 2026 events at La Villita Park (Sat Oct 31 Kids Halloween
-              Yoga + Live Banda Pilates + Yoga Sculpt, Sun Nov 1 Día de los
-              Muertos; src/data/fallEvents.js), right after the current Pop
-              Up week card. Each is a direct child of #events-carousel with
-              data-fall-end, so the dots script skips it once past;
-              FallEventsClient hides it in the browser. */}
-          {fallEvents.map((e) => (
-            <FallEventCard event={e} variant="carousel" context="home_events_carousel_fall" />
           ))}
 
           {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the

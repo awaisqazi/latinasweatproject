@@ -8,7 +8,16 @@ import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import FinishLineBand from "@/components/FinishLineBand.astro";
 import FallEventCard from "@/components/FallEventCard.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
-import { fallEvents, activeFallEvents, lastFallEndISO } from "@/data/fallEvents";
+import {
+  fallEvents,
+  activeFallEvents,
+  lastFallEndISO,
+  ddlmEvent,
+  ddlmWeekend,
+  halloweenProgram,
+  halloweenEndISO,
+  isHalloweenActive,
+} from "@/data/fallEvents";
 import {
   collectiveFinishLine,
   getFinishLinePhase,
@@ -42,6 +51,11 @@ const galaPageUrl = withBase(galaTeaser.recapPath);
 // Fall 2026 events at La Villita Park (Oct 31 + Nov 1; src/data/fallEvents.js):
 // featured while any of the three has not ended.
 const fallActive = activeFallEvents().length > 0;
+// Día de los Muertos first, then the two Oct 31 classes; the free Saturday
+// items (no Zeffy form) ride in a strip above the cards until Oct 31 1 PM.
+const fallEventsOrdered = [ddlmEvent, ...fallEvents.filter((e) => e.id !== ddlmEvent.id)];
+const fallSatActive = isHalloweenActive();
+const fallSatFree = halloweenProgram.filter((row) => !row.registration);
 // Local recap photo (album #69, dinner under the gold lanterns) and the
 // official Flickr album.
 const galaRecapPhoto = {
@@ -108,9 +122,12 @@ const featuredSlugs = [
     </section>
     {/* END: Page Header Section */}
 
-    {/* START: Fall events at La Villita Park (Sat Oct 31: Kids Halloween
-        Yoga + Live Banda Pilates + Yoga Sculpt; Sun Nov 1: LSP Día de los
-        Muertos). Option I cream ground, one card per event (Zeffy banner,
+    {/* START: Día de los Muertos weekend at La Villita Park (Oct 26 2026
+        framing; Sat Oct 31: Kids Halloween Yoga + Live Banda Pilates + Yoga
+        Sculpt, plus the free ofrendas and Banda Cerro Azul / farmers market
+        / trick or treat in a strip above the cards, hidden after Oct 31
+        1 PM; Sun Nov 1: LSP Día de los Muertos, whose card comes first).
+        Option I cream ground, one card per event (Zeffy banner,
         date, time, venue, price, Zeffy CTA); the Día de los Muertos card
         keeps the /diadelosmuertos black + cempasúchil look. Each card hides
         after its own end (build time + FallEventsClient via
@@ -125,17 +142,43 @@ const featuredSlugs = [
       >
         <div class="mx-auto max-w-7xl px-4">
           <div class="max-w-2xl">
-            <p class="text-sm font-extrabold text-[#c4573a]">Oct 31 + Nov 1 · La Villita Park</p>
+            <p class="text-sm font-extrabold text-[#c4573a]">{ddlmWeekend.dateLabel} · {ddlmEvent.venue}</p>
             <h2 class="mt-2 font-sans text-3xl font-extrabold tracking-tight text-[#1e1a17] sm:text-4xl md:text-5xl">
-              Halloween weekend in La Villita
+              {ddlmWeekend.title}
             </h2>
             <p class="mt-3 text-base leading-relaxed text-[#1e1a17]/75 sm:text-lg">
-              Two classes on Halloween morning, then Día de los Muertos on
-              Sunday. All three at 2800 S Sacramento Ave.
+              {ddlmWeekend.summary} All at {ddlmEvent.address}. Prices and
+              registration on Zeffy.
             </p>
+            <a
+              href={`${base}${ddlmEvent.pagePath}`}
+              class="mt-4 inline-block text-sm font-extrabold text-[#1e1a17] underline decoration-[#c4573a] decoration-2 underline-offset-4 hover:text-[#c4573a]"
+              data-conversion-event="ddlm_page_click"
+              data-conversion-context="events_fall_events"
+            >
+              Full weekend program, lineup and volunteer sign-up
+            </a>
           </div>
-          <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {fallEvents.map((e) => (
+          {fallSatActive && (
+            <div
+              class="mt-8 flex flex-col gap-3 rounded-2xl bg-[#fdfbf7] px-5 py-4 text-[#1e1a17] shadow-[0_1px_0_rgba(30,26,23,0.06),0_18px_40px_-24px_rgba(30,26,23,0.35)] sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+              data-fall-past-at={halloweenEndISO}
+            >
+              <p class="shrink-0 text-xs font-extrabold uppercase tracking-[0.16em] text-[#c4573a]">
+                Saturday, free and open to all
+              </p>
+              <ul class="flex flex-col gap-1.5 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6">
+                {fallSatFree.map((row) => (
+                  <li>
+                    <span class="font-extrabold">{row.time}</span>
+                    {` · ${row.title}, ${row.detail.toLowerCase()}`}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {fallEventsOrdered.map((e) => (
               <FallEventCard event={e} context="events_fall_events" />
             ))}
           </div>

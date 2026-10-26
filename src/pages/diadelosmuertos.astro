@@ -1,13 +1,29 @@
 ---
-// /diadelosmuertos (alias /ddlm): LSP's Día de los Muertos, Sunday,
-// November 1, 2026, at La Villita Park (2800 S Sacramento Ave). Started as
-// a save-the-date teaser (Oct 12); since Oct 20 the Zeffy ticket form
-// ($20 General Admission) is the primary CTA and the facts, run of show
-// and lineup come from src/data/fallEvents.js (read off the live Zeffy
-// page; Zeffy wins over the banner). Start time only, never an end time:
-// Zeffy's header says 4 to 9 PM, its run of show says "8PM END" (open
-// question for Fez). Class leaders are FIRST NAMES only, as on Zeffy.
-// The volunteer sign-up and the CDPH micro-grant line stay.
+// /diadelosmuertos (alias /ddlm): LSP's Día de los Muertos WEEKEND at La
+// Villita Park (2800 S Sacramento Ave). Started as a save-the-date teaser
+// (Oct 12); since Oct 20 the Zeffy ticket form ($20 General Admission) is
+// the primary CTA; since Oct 26 it is the weekend page for both days
+// (marketing/fall-events/BRIEF-ddlm-weekend-2026-10-26.md):
+//   Sat Oct 31, Halloween at La Villita Park (from 9:00 AM): ofrendas and
+//     Banda Cerro Azul + farmers market + trick or treat are "Free, open to
+//     all"; Kids Yoga (free registration) and Banda Pilates + Sculpt ($15)
+//     link to their Zeffy forms (registration + waiver).
+//   Sun Nov 1, Día de los Muertos, 4:00 – 8:00 PM, $20 on Zeffy.
+// Order: hero (eyebrow + countdown chip, both days, tickets / program /
+// volunteer) -> Recordar juntos -> facts band (papel picado) -> #program
+// (#saturday + #sunday day blocks, price tag per row, inline Zeffy pills)
+// -> lineup (Quiénes) -> the two program flyers (black ground, full-size
+// jpg links) -> #volunteer -> small print (supporters as text).
+// All facts and copy come from src/data/fallEvents.js (halloweenProgram,
+// ddlmWeekend, ddlmEvent); Zeffy wins over the flyers for prices (both
+// flyers print "DONATION"; never shown as a price). END TIME: the site
+// prints 8:00 PM (flyer + Zeffy run of show "8PM END"); the Zeffy header
+// still says 9 PM, so endsAtISO stays 9 PM and nothing hides early. Class
+// leaders are FIRST NAMES only, as on Zeffy.
+// Saturday-only content hides after Oct 31 1:00 PM CDT (halloweenEndISO:
+// build time + data-fall-past-at), so on Sunday the page reads as Sunday
+// only; the hero has a Sunday-only eyebrow revealed then
+// (data-fall-show-past-at). Everything ticketed hides after Nov 1 9 PM CST.
 //
 // Identity: black + white grounds, one accent (cempasúchil #FF7A1A; flat
 // magenta #E6007E only on the papel picado flags), Rubik
@@ -22,12 +38,57 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
-import { ddlmEvent as ddlm, fallConversionAttrs } from "@/data/fallEvents";
+import DdlmCountdownChip from "@/components/DdlmCountdownChip.astro";
+import {
+    ddlmEvent as ddlm,
+    ddlmWeekend,
+    halloweenProgram,
+    halloweenEndISO,
+    isHalloweenActive,
+    fallEventById,
+    fallConversionAttrs,
+} from "@/data/fallEvents";
 
 const base = import.meta.env.BASE_URL;
 const INSTAGRAM_URL = "https://www.instagram.com/latinasweatproject/";
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
 const ddlmPast = ddlm.isPast();
+// Saturday (Halloween at La Villita Park) shows until Oct 31 1:00 PM CDT.
+const satActive = isHalloweenActive();
+const satRows = halloweenProgram.map((row) => {
+    const event = row.registration ? fallEventById(row.registration.eventId) : null;
+    return {
+        ...row,
+        event,
+        cta: event
+            ? event.price === 0
+                ? "Register, free"
+                : `Get tickets · ${event.priceLine}`
+            : null,
+    };
+});
+
+// The two program flyers (1080x1350, public/images/ddlm/). Alt text reads
+// the program; prices are on Zeffy (the flyers print "DONATION", which is
+// never repeated as a price).
+const FLYERS = [
+    {
+        key: "oct31",
+        label: "Sat Oct 31 · Halloween at La Villita Park",
+        webp: "images/ddlm/program-oct31.webp",
+        jpg: "images/ddlm/program-oct31.jpg",
+        pastAt: halloweenEndISO,
+        alt: "October 31, 2026 program flyer with the LSP logo over a pattern of illustrated Halloween yoga poses: 9:00 to 10:30 AM, ofrendas, free and open to all; 10:30 to 11:00 AM, kids yoga class, free, register and sign the waiver; 11:00 AM to 12:30 PM, Banda Cerro Azul, farmers market and trick or treat, free and open to all; 12:30 to 1:00 PM, Banda Pilates + Sculpt, register and sign the waiver. Prices and registration are on Zeffy. latinasweatproject.com, with supporter logos along the bottom.",
+    },
+    {
+        key: "nov1",
+        label: "Sun Nov 1 · Día de los Muertos",
+        webp: "images/ddlm/program-nov1.webp",
+        jpg: "images/ddlm/program-nov1.jpg",
+        pastAt: ddlm.endsAtISO,
+        alt: "November 1, 2026 program flyer with the LSP logo over an ofrenda of marigolds and candles: 4:00 to 5:00 PM, Banda El Pueblo and ofrenda viewing; 5:00 to 5:30 PM, Mariachi Sirenas and a gentle yoga class; 6:00 to 7:00 PM, Danza Azteca by Kalpulli Xochykalli; 7:00 to 7:45 PM, stages of grief meditation and sound bowls; 8 PM end. Register and sign the waiver; tickets are on Zeffy. latinasweatproject.com, with the Banda El Pueblo, Mariachi Sirenas and Kalpulli Xochykalli logos.",
+    },
+];
 
 const ROLE_OPTIONS = [
     "Set-up and decorating (ofrendas, papel picado, marigolds)",
@@ -122,7 +183,8 @@ const diamond = (x: number, y: number, h: number) =>
 
 // Cempasúchil mark: three stacked scalloped layers (orange, ground,
 // orange) and a ground-colored center, like layered cut paper. Used
-// exactly twice: the "Recordar juntos" eyebrow and the success state.
+// three times: the "Recordar juntos" eyebrow, the lineup eyebrow and the
+// volunteer success state.
 function scallop(n: number, ringR: number, petalR: number, rot: number) {
     return Array.from({ length: n }, (_, k) => {
         const a = (k / n) * Math.PI * 2 + rot;
@@ -157,7 +219,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
 <Layout
     title="Día de los Muertos 2026 | The Latina Sweat Project"
-    description="LSP's Día de los Muertos at La Villita Park, Sunday, November 1, 2026, from 4:00 PM: ofrendas, gentle yoga, grief meditation and sound bowls, Banda El Pueblo, Mariachi Sirenas and Kalpulli Xochykalli. Tickets $20."
+    description="LSP's Día de los Muertos weekend at La Villita Park, 2800 S Sacramento Ave. Sat Oct 31 from 9:00 AM: ofrendas, Banda Cerro Azul, farmers market and trick or treat (free, open to all), kids yoga (free registration) and Banda Pilates + Sculpt ($15). Sun Nov 1, 4:00 – 8:00 PM: ofrendas, gentle yoga, grief meditation and sound bowls, Banda El Pueblo, Mariachi Sirenas and Kalpulli Xochykalli. Tickets $20."
     socialImage="images/ddlm/ddlm-2026-festival-og.jpg"
     socialImageAlt="LSP Día de los Muertos Festival: a candlelit tent of ofrendas, marigolds and people moving together."
     socialImageWidth={1200}
@@ -198,18 +260,43 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             <div
                 class="relative mx-auto max-w-6xl px-4 pb-12 pt-2 sm:px-6 sm:pb-14 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-8 lg:pb-16 lg:pt-0"
             >
-                <div class="max-w-xl lg:max-w-[34rem]">
+                <div class="max-w-xl lg:max-w-[36rem]">
+                    {/* Eyebrow: the weekend until Saturday's last class ends,
+                        then Sunday only. The countdown chip is filled in the
+                        browser (hidden without JS and after the weekend). */}
                     <p
-                        class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm"
+                        class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm"
                     >
-                        {ddlm.dateLong} · {ddlm.startTimeLabel}
+                        {satActive && (
+                            <span data-fall-past-at={halloweenEndISO}>
+                                {ddlmWeekend.dateLabel} · {ddlm.venue}
+                            </span>
+                        )}
+                        <span
+                            hidden={satActive}
+                            data-fall-show-past-at={halloweenEndISO}
+                            data-fall-past-at={ddlm.endsAtISO}
+                        >
+                            {ddlm.dayShort} {ddlm.dateLabel} · {ddlm.venue}
+                        </span>
+                        <DdlmCountdownChip class="border-l border-white/40 pl-3 text-white" />
                     </p>
                     <h1
                         class="mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
                     >
                         Día de los Muertos
                     </h1>
-                    <p class="mt-4 text-base text-white/85 sm:text-lg">
+                    <p class="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">
+                        {satActive && (
+                            <span data-fall-past-at={halloweenEndISO}>
+                                Saturday morning, Halloween in the park with the
+                                ofrendas.{" "}
+                            </span>
+                        )}
+                        Sunday evening, 4:00 – 8:00 PM, we remember and celebrate
+                        our loved ones together.
+                    </p>
+                    <p class="mt-2 text-sm text-white/70 sm:text-base">
                         {ddlm.venue} · {ddlm.address}
                     </p>
                     <div class="mt-7 flex flex-wrap items-center gap-3">
@@ -226,8 +313,14 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             </a>
                         )}
                         <a
-                            href="#volunteer"
+                            href="#program"
                             class="inline-block rounded-full border border-white/70 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        >
+                            See the full program
+                        </a>
+                        <a
+                            href="#volunteer"
+                            class="px-1 text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                             data-conversion-event="ddlm_volunteer_click"
                             data-conversion-context="ddlm_hero"
                         >
@@ -341,11 +434,13 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     >
                         Cuándo · When
                     </dt>
-                    <dd class="mt-2 text-lg font-semibold">
-                        Sunday, November 1, 2026
-                    </dd>
-                    <dd class="mt-1 text-sm text-white/60">
-                        {ddlm.timeLabel}
+                    {satActive && (
+                        <dd class="mt-2 text-lg font-semibold" data-fall-past-at={halloweenEndISO}>
+                            Sat Oct 31 · from 9:00 AM
+                        </dd>
+                    )}
+                    <dd class:list={["text-lg font-semibold", satActive ? "mt-1" : "mt-2"]}>
+                        Sun Nov 1 · {ddlm.timeLabel}
                     </dd>
                 </div>
                 <div class="border-t border-white/20 pt-4">
@@ -374,10 +469,17 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         Boletos · Tickets
                     </dt>
                     <dd class="mt-2 text-lg font-semibold">
-                        {ddlm.priceLine}
+                        $20 Sunday{satActive && (
+                            <span data-fall-past-at={halloweenEndISO}>{" · Saturday is free to attend"}</span>
+                        )}
                     </dd>
+                    {satActive && (
+                        <dd class="mt-1 text-sm text-white/60" data-fall-past-at={halloweenEndISO}>
+                            Kids yoga: free registration · Banda Pilates + Sculpt: $15
+                        </dd>
+                    )}
                     <dd class="mt-1 text-sm text-white/60">
-                        Full access to the program. Re-entry allowed.
+                        Sunday: full access to the program. Re-entry allowed.
                     </dd>
                     {!ddlmPast && (
                         <dd class="mt-4" data-fall-past-at={ddlm.endsAtISO}>
@@ -397,44 +499,201 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         </section>
 
         {/* ============================ PROGRAM ============================ */}
-        {/* Run of show as on Zeffy (no end row; see the header note). Class
-            leaders by first name only, exactly as Zeffy writes them. */}
-        <section id="program" class="scroll-mt-32 bg-white px-4 pb-4 pt-16 sm:px-6 sm:pt-20">
-            <div class="mx-auto max-w-2xl">
+        {/* Two day blocks. Saturday (#saturday) from halloweenProgram, hidden
+            after Oct 31 1:00 PM CDT; Sunday (#sunday) from ddlm.runOfShow,
+            ending with the 8:00 PM row. Every row carries a short price tag;
+            rows with a Zeffy form carry an inline pill. Prices are Zeffy's.
+            Class leaders by first name only, exactly as Zeffy writes them. */}
+        <section id="program" class="scroll-mt-32 bg-white px-4 pb-6 pt-16 sm:px-6 sm:pt-20">
+            <div class="mx-auto max-w-3xl">
                 <p
                     class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
                 >
                     Programa · Program
                 </p>
-                <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
-                    Sunday, November 1
-                </h2>
-                <ol class="mt-8 divide-y divide-black/10 border-y border-black/10">
-                    {ddlm.runOfShow.map((row) => (
-                        <li class="grid gap-1 py-4 sm:grid-cols-[9.5rem_1fr] sm:gap-6">
-                            <p class="text-sm font-bold text-off-black sm:pt-0.5">{row.time}</p>
-                            <div>
-                                <p class="text-lg font-semibold leading-snug">{row.title}</p>
-                                <p class="text-sm text-medium-gray">{row.detail}</p>
-                            </div>
-                        </li>
-                    ))}
-                </ol>
-                <p class="mt-6 text-base leading-relaxed text-medium-gray">
-                    {ddlm.checkInLine} {ddlm.note}
-                </p>
-                {!ddlmPast && (
-                    <a
-                        href={ddlm.ticketsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="mt-7 inline-block rounded-full bg-black px-7 py-3 text-sm font-bold text-white transition hover:bg-[#FF7A1A] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2"
-                        data-fall-past-at={ddlm.endsAtISO}
-                        {...fallConversionAttrs(ddlm, "ddlm_program")}
-                    >
-                        Get tickets · $20
-                    </a>
+
+                {satActive && (
+                    <div id="saturday" class="scroll-mt-32" data-fall-past-at={halloweenEndISO}>
+                        <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
+                            Saturday, October 31
+                        </h2>
+                        <p class="mt-2 flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] text-medium-gray">
+                            <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                            {ddlmWeekend.saturdayLabel} · from 9:00 AM
+                        </p>
+                        <ol class="mt-7 divide-y divide-black/10 border-y border-black/10">
+                            {satRows.map((row) => (
+                                <li class="grid gap-1 py-4 sm:grid-cols-[9.5rem_1fr_auto] sm:items-start sm:gap-6">
+                                    <p class="text-sm font-bold text-off-black sm:pt-0.5">{row.time}</p>
+                                    <div>
+                                        <p class="text-lg font-semibold leading-snug">{row.title}</p>
+                                        <p class="text-sm text-medium-gray">{row.detail}</p>
+                                    </div>
+                                    <div class="mt-2 flex flex-wrap items-center gap-2 sm:mt-0 sm:flex-col sm:items-end">
+                                        <span class="ddlm-tag">{row.price}</span>
+                                        {row.event && (
+                                            <a
+                                                href={row.event.ticketsUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="ddlm-pill"
+                                                {...fallConversionAttrs(row.event, "ddlm_program")}
+                                            >
+                                                {row.cta}
+                                            </a>
+                                        )}
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                        <p class="mt-5 text-base leading-relaxed text-medium-gray">
+                            Registration and waiver for the two classes are on
+                            Zeffy. Everything else on Saturday is free and open
+                            to all.
+                        </p>
+                    </div>
                 )}
+
+                <div
+                    id="sunday"
+                    class:list={["scroll-mt-32", satActive && "mt-14 border-t-4 border-black pt-10 sm:mt-16"]}
+                >
+                    <h2 class:list={["text-3xl font-extrabold sm:text-4xl", !satActive && "mt-3"]}>
+                        Sunday, November 1
+                    </h2>
+                    <p class="mt-2 flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] text-medium-gray">
+                        <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                        {ddlmWeekend.sundayLabel} · {ddlm.timeLabel}
+                    </p>
+                    <ol class="mt-7 divide-y divide-black/10 border-y border-black/10">
+                        {ddlm.runOfShow.map((row) => (
+                            <li class="grid gap-1 py-4 sm:grid-cols-[9.5rem_1fr_auto] sm:items-start sm:gap-6">
+                                <p class="text-sm font-bold text-off-black sm:pt-0.5">{row.time}</p>
+                                <div>
+                                    <p class="text-lg font-semibold leading-snug">{row.title}</p>
+                                    <p class="text-sm text-medium-gray">{row.detail}</p>
+                                </div>
+                                {row.title !== "End" && (
+                                    <div class="mt-2 sm:mt-0 sm:text-right">
+                                        <span class="ddlm-tag">$20 ticket</span>
+                                    </div>
+                                )}
+                            </li>
+                        ))}
+                    </ol>
+                    <p class="mt-6 text-base leading-relaxed text-medium-gray">
+                        {ddlm.checkInLine} {ddlm.note}
+                    </p>
+                    {!ddlmPast && (
+                        <a
+                            href={ddlm.ticketsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-7 inline-block rounded-full bg-black px-7 py-3 text-sm font-bold text-white transition hover:bg-[#FF7A1A] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2"
+                            data-fall-past-at={ddlm.endsAtISO}
+                            {...fallConversionAttrs(ddlm, "ddlm_program")}
+                        >
+                            Get tickets · $20
+                        </a>
+                    )}
+                </div>
+            </div>
+        </section>
+
+        {/* ============================ LINEUP ============================ */}
+        {/* Who's playing + who's leading, typographic only. Banda Cerro Azul
+            (Saturday) hides with the Saturday block. First names only for
+            the class leaders. Third and last use of the cempasúchil mark. */}
+        <section class="bg-white px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-16">
+            <div class="mx-auto max-w-3xl border-t border-black/10 pt-12 sm:pt-14">
+                <div class="flex items-center gap-3">
+                    <span class="h-7 w-7 shrink-0" set:html={CEMPA_ON_WHITE} />
+                    <p
+                        class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
+                    >
+                        Quiénes · Who's playing
+                    </p>
+                </div>
+                <div class="mt-8 grid gap-10 sm:grid-cols-[1.4fr_1fr] sm:gap-12">
+                    <ul class="space-y-5">
+                        {ddlmWeekend.lineup.sunday.map((act) => (
+                            <li>
+                                <p class="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">{act.name}</p>
+                                <p class="mt-1 text-sm text-medium-gray">Sun · {act.detail}</p>
+                            </li>
+                        ))}
+                        {satActive && ddlmWeekend.lineup.saturday.map((act) => (
+                            <li data-fall-past-at={halloweenEndISO}>
+                                <p class="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">{act.name}</p>
+                                <p class="mt-1 text-sm text-medium-gray">Sat · {act.detail}</p>
+                            </li>
+                        ))}
+                    </ul>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray">
+                            Leading the classes
+                        </p>
+                        <ul class="mt-4 space-y-5">
+                            {ddlmWeekend.classLeaders.map((c) => (
+                                <li>
+                                    <p class="text-xl font-extrabold leading-tight">{c.names}</p>
+                                    <p class="mt-1 text-sm text-medium-gray">{c.detail}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* ============================ FLYERS ============================ */}
+        {/* The two program flyers on black (the white-ground Oct 31 flyer and
+            the ofrenda Nov 1 flyer both sit well on it). Each opens the
+            full-size jpg. The Oct 31 flyer hides with the Saturday block. */}
+        <section class="bg-black px-4 py-16 text-white sm:px-6 sm:py-20">
+            <div class="mx-auto max-w-5xl">
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]">
+                    El programa
+                </p>
+                <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
+                    Save and share the program
+                </h2>
+                <div class="mt-10 flex flex-wrap justify-center gap-8 sm:gap-6">
+                    {FLYERS.filter((f) => f.key !== "oct31" || satActive).map((f) => (
+                        <figure class="w-full sm:w-[calc(50%-0.75rem)]" data-fall-past-at={f.pastAt}>
+                            <a
+                                href={`${base}${f.jpg}`}
+                                target="_blank"
+                                rel="noopener"
+                                class="group block overflow-hidden rounded-xl ring-1 ring-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                            >
+                                <picture class="block aspect-[4/5]">
+                                    <source srcset={`${base}${f.webp}`} type="image/webp" />
+                                    <img
+                                        src={`${base}${f.jpg}`}
+                                        width="1080"
+                                        height="1350"
+                                        alt={f.alt}
+                                        loading="lazy"
+                                        decoding="async"
+                                        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                    />
+                                </picture>
+                            </a>
+                            <figcaption class="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
+                                <span class="font-bold">{f.label}</span>
+                                <a
+                                    href={`${base}${f.jpg}`}
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="text-white/70 underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
+                                >
+                                    Open full size
+                                </a>
+                            </figcaption>
+                        </figure>
+                    ))}
+                </div>
             </div>
         </section>
 
@@ -677,10 +936,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         {/* ========================== SMALL PRINT ========================== */}
         <section class="border-t border-black/10 bg-white px-4 py-10 sm:px-6">
             <div class="mx-auto max-w-xl space-y-3 text-sm text-medium-gray">
-                <p>
-                    Made possible in part by the Chicago Department of Public
-                    Health's Community-Centered Wellness Micro-Grant.
-                </p>
+                <p>{ddlmWeekend.supportersLine}</p>
                 <p>
                     Questions? Email
                     <a
@@ -696,6 +952,39 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 </Layout>
 
 <style>
+    /* Program rows: a short price tag and, where there is a Zeffy form, an
+       inline pill. Black, white and the one accent only. */
+    .ddlm-tag {
+        display: inline-block;
+        border-radius: 9999px;
+        border: 1px solid rgb(0 0 0 / 0.15);
+        padding: 0.2rem 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+        color: #1e1e1e;
+    }
+    .ddlm-pill {
+        display: inline-block;
+        border-radius: 9999px;
+        background: #000;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        line-height: 1.3;
+        white-space: nowrap;
+        color: #fff;
+        transition: background-color 150ms, color 150ms;
+    }
+    .ddlm-pill:hover {
+        background: #ff7a1a;
+        color: #000;
+    }
+    .ddlm-pill:focus-visible {
+        outline: 2px solid #ff7a1a;
+        outline-offset: 2px;
+    }
     /* lg+: full-bleed art capped to the viewport below the header, cropped
        a little top and bottom (object-position keeps the banner and the
        Catrina on horseback in frame). */
