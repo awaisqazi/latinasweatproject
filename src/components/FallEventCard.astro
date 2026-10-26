@@ -19,6 +19,8 @@
 // cards get the Halloween bat + jack-o'-lantern pair there instead
 // (HalloweenFlair layout="pair": CSS-only flap and flicker, still under
 // reduced motion).
+// variant="events" only: a "Sign the waiver online before you come" line
+// under the price, linking to /waiver (one waiver covers the weekend).
 // Hidden at build time once past and in the browser via data-fall-past-at
 // (FallEventsClient, included by the host page). The markup sits inside a
 // {cond && (...)} expression, which trims whitespace between adjacent
@@ -95,6 +97,18 @@ const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticke
         {ddlm && <DdlmMarigolds layout="mark" size={28} ground="#000000" id="fe-mg" class="-my-1" />}
         {halloween && <HalloweenFlair layout="pair" tone="light" ground="#fdfbf7" class="-my-1" />}
       </p>
+      {!carousel && (
+        <p class="fe-meta mt-1 text-sm leading-snug">
+          <a
+            href={`${base}waiver`}
+            class="fe-waiver font-bold underline underline-offset-4"
+            data-conversion-event="waiver_click"
+            data-conversion-context={`${context}_card`}
+          >
+            Sign the waiver online before you come
+          </a>
+        </p>
+      )}
       <div class="mt-auto pt-5">
         <a
           href={e.ticketsUrl}
@@ -141,6 +155,12 @@ const ctaLabel = e.price === 0 ? `${e.ticketsLabel} on Zeffy, free` : `${e.ticke
   }
   .fe-card--paper .fe-cta:hover {
     background: #c4573a;
+  }
+  .fe-card--paper .fe-waiver {
+    text-decoration-color: #c4573a;
+  }
+  .fe-card--ddlm .fe-waiver {
+    text-decoration-color: #ff7a1a;
   }
   .fe-card--ddlm {
     background: #000;

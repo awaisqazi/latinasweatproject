@@ -62,6 +62,8 @@ import { instructorInitials } from "@/data/popUpShared";
 const base = import.meta.env.BASE_URL;
 const INSTAGRAM_URL = "https://www.instagram.com/latinasweatproject/";
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
+// One participant waiver for the weekend (/waiver, hidden Google Form).
+const WAIVER_URL = `${base}waiver`;
 const ddlmPast = ddlm.isPast();
 // Saturday (Halloween at La Villita Park) shows until Oct 31 1:00 PM CDT.
 const satActive = isHalloweenActive();
@@ -283,6 +285,15 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             See the full program
                         </a>
                         <a
+                            href={WAIVER_URL}
+                            data-fall-past-at={ddlm.endsAtISO}
+                            class="inline-block rounded-full border border-white/70 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            data-conversion-event="waiver_click"
+                            data-conversion-context="ddlm_hero"
+                        >
+                            Sign the waiver
+                        </a>
+                        <a
                             href="#volunteer"
                             class="px-1 text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                             data-conversion-event="ddlm_volunteer_click"
@@ -392,6 +403,16 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     <dd class="mt-1 text-sm text-white/60">
                         Sunday: full access to the program. Re-entry allowed.
                     </dd>
+                    <dd class="mt-3 text-sm font-semibold" data-fall-past-at={ddlm.endsAtISO}>
+                        <a
+                            href={WAIVER_URL}
+                            class="text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            data-conversion-event="waiver_click"
+                            data-conversion-context="ddlm_facts"
+                        >
+                            Sign the participant waiver before you come
+                        </a>
+                    </dd>
                     {!ddlmPast && (
                         <dd class="mt-4" data-fall-past-at={ddlm.endsAtISO}>
                             <a
@@ -462,9 +483,15 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             ))}
                         </ol>
                         <p class="mt-5 text-base leading-relaxed text-medium-gray">
-                            Registration and waiver for the two classes are on
-                            Zeffy. Everything else on Saturday is free and open
-                            to all.
+                            Everyone attending signs one participant waiver for
+                            the weekend:{" "}
+                            <a
+                                href={WAIVER_URL}
+                                class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
+                                data-conversion-event="waiver_click"
+                                data-conversion-context="ddlm_program_saturday"
+                                >sign it online before you come</a
+                            >.
                         </p>
                     </div>
                 )}
@@ -509,7 +536,15 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         ))}
                     </ol>
                     <p class="mt-6 text-base leading-relaxed text-medium-gray">
-                        {ddlm.checkInLine} {ddlm.note}
+                        {ddlm.checkInLine} {ddlm.note} One participant waiver
+                        covers the weekend:{" "}
+                        <a
+                            href={WAIVER_URL}
+                            class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
+                            data-conversion-event="waiver_click"
+                            data-conversion-context="ddlm_program_sunday"
+                            >sign it online before you come</a
+                        >.
                     </p>
                     {!ddlmPast && (
                         <a

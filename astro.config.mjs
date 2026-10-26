@@ -32,6 +32,8 @@ export default defineConfig({
     '/electionadmin': '/admin',
     // Short link for the Día de los Muertos 2026 teaser page
     '/ddlm': '/diadelosmuertos',
+    // Alias for the Halloween + Día de los Muertos weekend waiver
+    '/waivers': '/waiver',
   },
 
   // Your existing Vite config for Tailwind v4

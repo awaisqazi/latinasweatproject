@@ -176,7 +176,14 @@ const featuredSlugs = [
             </h2>
             <p class="mt-3 text-base leading-relaxed text-[#1e1a17]/75 sm:text-lg">
               {ddlmWeekend.summary} All at {ddlmEvent.address}. Prices and
-              registration on Zeffy.
+              registration on Zeffy. Everyone signs one participant waiver
+              for the weekend:{" "}
+              <a
+                href={`${base}waiver`}
+                class="font-extrabold text-[#1e1a17] underline decoration-[#c4573a] decoration-2 underline-offset-4 hover:text-[#c4573a]"
+                data-conversion-event="waiver_click"
+                data-conversion-context="events_fall_events_intro"
+              >sign it online before you come</a>.
             </p>
             <a
               href={`${base}${ddlmEvent.pagePath}`}

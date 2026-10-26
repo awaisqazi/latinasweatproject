@@ -1,0 +1,615 @@
+---
+// /waiver (alias /waivers): the LSP Participant Waiver and Release of
+// Liability for the Halloween + Día de los Muertos weekend at La Villita
+// Park (Sat Oct 31 + Sun Nov 1, 2026). One waiver covers the whole weekend;
+// a parent or guardian signs for a child. Linked from every Día de los
+// Muertos surface (/diadelosmuertos hero, facts band and program notes,
+// homepage #ddlm-weekend, /events #fall-events + FallEventCard, /links
+// #ddlm-card + #halloween-card) so people sign BEFORE they come.
+//
+// Waiver text: marketing/fall-events/waiver-text.txt (from
+// LSP-participant-waiver.docx), VERBATIM, English as the body and Spanish in
+// a collapsed <details>. The signature line of the paper form ("Participant
+// Name / Signature / Date") is replaced by the form fields below.
+// Spanish source typo fixed here (2026-10-27): "a T The Latina Sweat Cares
+// dba he Latina Sweat Project" -> "a The Latina Sweat Cares dba The Latina
+// Sweat Project". Nothing else in either text is edited.
+//
+// Signing POSTs to a hidden Google Form (same no-cors pattern as the
+// /diadelosmuertos volunteer form). See the GOOGLE FORM CONFIG block in the
+// script below; option strings must match the Google Form character for
+// character (marketing/fall-events/waiver-form.json). The form-side
+// questions are not required; this page validates.
+//
+// Identity: the /diadelosmuertos look. Black + white grounds, one accent
+// (cempasúchil #FF7A1A; magenta only inside the papel picado flags), Rubik
+// only, no em dashes.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import DdlmPicado from "@/components/DdlmPicado.astro";
+import { cempasuchil } from "@/lib/ddlmFlair";
+import { ddlmEvent as ddlm, fallEvents, fallConversionAttrs } from "@/data/fallEvents";
+
+const base = import.meta.env.BASE_URL;
+const CONTACT_EMAIL = "collab@latinasweatproject.com";
+const CEMPA_ON_BLACK = cempasuchil("#000000");
+
+// Zeffy forms for the success state (the ones not yet past at build time).
+const zeffyLinks = fallEvents
+    .filter((e) => !e.isPast())
+    .map((e) => ({
+        e,
+        label: `${e.title} · ${e.dayShort} ${e.dateLabel} · ${e.priceLine}`,
+    }));
+
+// ---------------------------------------------------------------------
+// Waiver text, verbatim (marketing/fall-events/waiver-text.txt).
+// ---------------------------------------------------------------------
+const WAIVER_TITLE = "LSP Participant Waiver and Release of Liability";
+const WAIVER_EN = [
+    "By signing below, I acknowledge that I am voluntarily participating in yoga, wellness, movement, fitness, meditation, breathwork, and related programming offered by The Latina Sweat Cares dba The Latina Sweat Project, its instructors, volunteers, employees, contractors, partner sites, shelters, schools, and community organizations.",
+    "I understand that participation in these activities involves inherent physical risks, including but not limited to muscle strain, sprains, falls, aggravation of pre-existing conditions, dizziness, emotional discomfort, and other bodily injury. I acknowledge that I am solely responsible for determining whether I am physically and medically able to participate.",
+    "I agree to participate at my own risk and voluntarily assume all known and unknown risks associated with participation, including risks that may arise from the condition of the premises, equipment used, travel to and from the activity, or my own physical limitations.",
+    "In consideration for being permitted to participate, I hereby release, waive, and discharge The Latina Sweat Cares dba The Latina Sweat Project, its officers, directors, instructors, volunteers, employees, contractors, agents, partner organizations, host facilities, schools, shelters, successors, and assigns from any and all claims, liabilities, demands, causes of action, damages, costs, or expenses arising out of or related to any injury, illness, loss, or damage that may occur as a result of my participation, except to the extent caused by willful misconduct or gross negligence as prohibited by applicable law.",
+    "I understand that The Latina Sweat Cares dba The Latina Sweat Project is not responsible for lost, stolen, or damaged personal property brought to any class or event.",
+    "I certify that I have read and fully understand this waiver, that I am signing it voluntarily, and that I am waiving certain legal rights by doing so.",
+];
+const WAIVER_ES_TITLE = "Exención de responsabilidad y liberación de reclamos de LSP";
+const WAIVER_ES = [
+    "Al firmar a continuación, reconozco que estoy participando voluntariamente en clases y programas de yoga, bienestar, movimiento, ejercicio físico, meditación, respiración y actividades relacionadas ofrecidas por The Latina Sweat Cares dba The Latina Sweat Project, sus instructoras(es), voluntarias(os), empleadas(os), contratistas, organizaciones asociadas, refugios, escuelas y otros espacios comunitarios.",
+    "Entiendo que la participación en estas actividades implica riesgos físicos inherentes, incluyendo, entre otros, tensión muscular, esguinces, caídas, agravamiento de condiciones médicas preexistentes, mareos, incomodidad emocional y otras lesiones corporales. Reconozco que soy la única persona responsable de determinar si me encuentro física y médicamente apta(o) para participar.",
+    "Acepto participar bajo mi propio riesgo y asumo voluntariamente todos los riesgos conocidos y desconocidos asociados con mi participación, incluyendo los riesgos que puedan surgir por las condiciones del lugar, el uso del equipo, el traslado hacia y desde la actividad, o mis propias limitaciones físicas.",
+    // Source typo fixed: "a T The Latina Sweat Cares dba he Latina Sweat
+    // Project" -> "a The Latina Sweat Cares dba The Latina Sweat Project".
+    "En consideración por permitirme participar, por la presente libero, exonero y deslindo de toda responsabilidad a The Latina Sweat Cares dba The Latina Sweat Project, así como a sus oficiales, directores, instructoras(es), voluntarias(os), empleadas(os), contratistas, agentes, organizaciones asociadas, instalaciones anfitrionas, escuelas, refugios, sucesores y cesionarios, de cualquier y todo reclamo, responsabilidad, demanda, causa de acción, daño, costo o gasto que surja de o esté relacionado con cualquier lesión, enfermedad, pérdida o daño que pueda ocurrir como resultado de mi participación, excepto en la medida en que sea causado por conducta dolosa o negligencia grave según lo permitido por la ley aplicable.",
+    "Entiendo que The Latina Sweat Cares dba The Latina Sweat Project no es responsable por pertenencias personales perdidas, robadas o dañadas que lleve conmigo a cualquier clase o evento.",
+    "Certifico que he leído y entiendo completamente esta exención, que la firmo voluntariamente y que al hacerlo estoy renunciando a ciertos derechos legales.",
+];
+
+// ---------------------------------------------------------------------
+// Option strings: VERBATIM from marketing/fall-events/waiver-form.json
+// (must match the Google Form character for character).
+// ---------------------------------------------------------------------
+const SIGNING_FOR_OPTIONS = ["Myself", "A child or minor in my care", "Myself and a child or minor in my care"];
+// Options that mean a child or minor is covered: the minors field shows
+// and becomes required when one of these is picked.
+const CHILD_OPTIONS = SIGNING_FOR_OPTIONS.filter((o) => /child|minor|kid/i.test(o));
+// value = the Google Form string (verbatim, "Dia" without the accent);
+// label = what the page shows ("Día", as everywhere else on the site).
+const ACTIVITY_OPTIONS = ["Kids Halloween Yoga, Sat Oct 31", "Banda Pilates + Sculpt, Sat Oct 31", "Dia de los Muertos, Sun Nov 1"];
+const activityLabel = (opt) => opt.replace(/^Dia de los Muertos/, "Día de los Muertos");
+const AGREEMENT_OPTION = "I have read and agree to the LSP Participant Waiver and Release of Liability, and I understand I am waiving certain legal rights.";
+
+const inputClass =
+    "mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-off-black focus:border-[#FF7A1A] focus:outline-none focus:ring-2 focus:ring-[#FF7A1A]/40 aria-[invalid=true]:border-red-500";
+const optionClass =
+    "flex cursor-pointer items-start gap-3 rounded-lg border border-gray-300 px-4 py-3 text-off-black transition hover:border-[#FF7A1A] has-[:checked]:border-[#FF7A1A] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#FF7A1A]/40";
+const checkClass = "mt-0.5 h-4 w-4 shrink-0 accent-[#FF7A1A]";
+const fieldErrorClass = "mt-2 hidden text-sm font-semibold text-red-700";
+---
+
+<Layout
+    title="Participant waiver | The Latina Sweat Project"
+    description="Sign the LSP participant waiver before the Halloween + Día de los Muertos weekend at La Villita Park, 2800 S Sacramento Ave (Sat Oct 31 + Sun Nov 1, 2026). One waiver covers the whole weekend; a parent or guardian signs for a child."
+    socialImage="images/ddlm/ddlm-2026-festival-og.jpg"
+    socialImageAlt="LSP Día de los Muertos Festival: a candlelit tent of ofrendas, marigolds and people moving together."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
+    twitterCard="summary_large_image"
+>
+    <Header />
+    <main class="font-rubik bg-white text-off-black">
+        {/* ============================ HEADER BAND ============================ */}
+        <section class="relative overflow-hidden bg-black px-4 pb-14 pt-20 text-white sm:px-6 sm:pb-16 sm:pt-24 lg:pt-28">
+            <DdlmPicado ground="#000000" sway />
+            <div class="mx-auto max-w-2xl">
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm">
+                    Halloween + Día de los Muertos weekend · Oct 31 + Nov 1 · {ddlm.venue}
+                </p>
+                <h1 class="mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl">
+                    Participant waiver
+                </h1>
+                <p class="mt-5 text-lg leading-relaxed text-white/90 sm:text-xl">
+                    Please sign before you arrive. It takes a minute and keeps
+                    check-in quick.
+                </p>
+                <p class="mt-3 text-base leading-relaxed text-white/70">
+                    One waiver covers the whole weekend, Saturday and Sunday. A
+                    parent or guardian signs for a child.
+                </p>
+                <a
+                    href="#waiver-form"
+                    class="mt-7 inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                >
+                    Go to the sign form
+                </a>
+            </div>
+        </section>
+
+        {/* ============================ WAIVER TEXT ============================ */}
+        <section class="bg-white px-4 pb-6 pt-14 sm:px-6 sm:pt-16">
+            <article class="mx-auto max-w-2xl">
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray">
+                    Read first · lee primero
+                </p>
+                <h2 class="mt-3 text-2xl font-extrabold leading-tight sm:text-3xl">
+                    {WAIVER_TITLE}
+                </h2>
+                <div class="mt-6 space-y-4 text-base leading-relaxed text-off-black/85">
+                    {WAIVER_EN.map((para) => <p>{para}</p>)}
+                </div>
+
+                <details class="waiver-es group mt-8 rounded-xl ring-1 ring-black/10" lang="es">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-bold text-off-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] rounded-xl">
+                        <span>Leer en español</span>
+                        <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <div class="border-t border-black/10 px-5 pb-6 pt-5">
+                        <h3 class="text-xl font-extrabold leading-tight">{WAIVER_ES_TITLE}</h3>
+                        <div class="mt-4 space-y-4 text-base leading-relaxed text-off-black/85">
+                            {WAIVER_ES.map((para) => <p>{para}</p>)}
+                        </div>
+                    </div>
+                </details>
+            </article>
+        </section>
+
+        {/* ============================ SIGN FORM ============================ */}
+        <section id="sign" class="bg-white px-4 pb-16 pt-10 sm:px-6 sm:pb-20">
+            <div class="mx-auto max-w-2xl">
+                <div id="waiver-card">
+                    <p class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray">
+                        Sign · firma
+                    </p>
+                    <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">Sign the waiver</h2>
+                    <p class="mt-3 text-base leading-relaxed text-medium-gray">
+                        Fields marked <span class="font-bold text-[#FF7A1A]">*</span> are required.
+                    </p>
+
+                    <form
+                        id="waiver-form"
+                        class="relative mt-8 scroll-mt-32 space-y-6 rounded-2xl p-5 ring-1 ring-black/10 sm:p-8"
+                        novalidate
+                    >
+                        <!-- Honeypot: off-screen field humans never see or fill.
+                             Bots that auto-fill every input trip it and get a
+                             silent "success" with nothing sent to the form. -->
+                        <div
+                            class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                            aria-hidden="true"
+                        >
+                            <label for="wv-website">Website</label>
+                            <input id="wv-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div>
+                            <label for="wv-name" class="block text-sm font-bold">
+                                Full name <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <input id="wv-name" name="fullName" type="text" required autocomplete="name" class={inputClass} aria-describedby="wv-name-err" />
+                            <p id="wv-name-err" class={fieldErrorClass}>Please add your full name.</p>
+                        </div>
+
+                        <div>
+                            <label for="wv-email" class="block text-sm font-bold">
+                                Email <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <input id="wv-email" name="email" type="email" required autocomplete="email" inputmode="email" class={inputClass} aria-describedby="wv-email-err" />
+                            <p id="wv-email-err" class={fieldErrorClass}>Please add a valid email address.</p>
+                        </div>
+
+                        <div>
+                            <label for="wv-phone" class="block text-sm font-bold">Phone</label>
+                            <p class="mt-1 text-xs text-medium-gray">Optional.</p>
+                            <input id="wv-phone" name="phone" type="tel" autocomplete="tel" class={inputClass} />
+                        </div>
+
+                        <fieldset aria-describedby="wv-for-err">
+                            <legend class="block text-sm font-bold">
+                                Who are you signing for? <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <div class="mt-2 space-y-2">
+                                {SIGNING_FOR_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input
+                                            type="radio"
+                                            name="signingFor"
+                                            value={opt}
+                                            required
+                                            class={checkClass}
+                                            data-child={CHILD_OPTIONS.includes(opt) ? "1" : undefined}
+                                        />
+                                        <span>{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <p id="wv-for-err" class={fieldErrorClass}>Please pick who you're signing for.</p>
+                        </fieldset>
+
+                        <div id="wv-minors-wrap" hidden>
+                            <label for="wv-minors" class="block text-sm font-bold">
+                                Child or minor's name(s) and ages <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                For example: Sofia, 6 · Mateo, 9. You're signing as
+                                their parent or guardian.
+                            </p>
+                            <textarea id="wv-minors" name="minors" rows="2" class={inputClass} aria-describedby="wv-minors-err"></textarea>
+                            <p id="wv-minors-err" class={fieldErrorClass}>Please add each child's name and age.</p>
+                        </div>
+
+                        <fieldset aria-describedby="wv-act-err">
+                            <legend class="block text-sm font-bold">
+                                Which activities? <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <p class="mt-1 text-xs text-medium-gray">Pick all that apply.</p>
+                            <div class="mt-2 space-y-2">
+                                {ACTIVITY_OPTIONS.map((opt) => (
+                                    <label class={optionClass}>
+                                        <input type="checkbox" name="activities" value={opt} class={checkClass} />
+                                        <span>{activityLabel(opt)}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <p id="wv-act-err" class={fieldErrorClass}>Please pick at least one activity.</p>
+                        </fieldset>
+
+                        <div>
+                            <label for="wv-emergency" class="block text-sm font-bold">
+                                Emergency contact name and phone <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <input id="wv-emergency" name="emergency" type="text" required class={inputClass} aria-describedby="wv-emergency-err" />
+                            <p id="wv-emergency-err" class={fieldErrorClass}>Please add an emergency contact name and phone.</p>
+                        </div>
+
+                        <fieldset aria-describedby="wv-agree-err">
+                            <legend class="block text-sm font-bold">
+                                Agreement <span class="text-[#FF7A1A]">*</span>
+                            </legend>
+                            <label class:list={[optionClass, "mt-2"]}>
+                                <input type="checkbox" name="agreement" value={AGREEMENT_OPTION} required class={checkClass} />
+                                <span>{AGREEMENT_OPTION}</span>
+                            </label>
+                            <p id="wv-agree-err" class={fieldErrorClass}>Please check the box to agree.</p>
+                        </fieldset>
+
+                        <div>
+                            <label for="wv-signature" class="block text-sm font-bold">
+                                Signature: type your full legal name <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <p class="mt-1 text-xs text-medium-gray">
+                                Typing your name here is your electronic signature.
+                            </p>
+                            <input
+                                id="wv-signature"
+                                name="signature"
+                                type="text"
+                                required
+                                autocomplete="name"
+                                autocapitalize="words"
+                                spellcheck="false"
+                                class:list={[inputClass, "py-3 text-2xl font-semibold tracking-tight sm:text-3xl"]}
+                                aria-describedby="wv-signature-err"
+                            />
+                            <p id="wv-signature-err" class={fieldErrorClass}>Please type your full legal name to sign.</p>
+                        </div>
+
+                        <div>
+                            <label for="wv-date" class="block text-sm font-bold">
+                                Date <span class="text-[#FF7A1A]">*</span>
+                            </label>
+                            <p class="mt-1 text-xs text-medium-gray">YYYY-MM-DD</p>
+                            <input
+                                id="wv-date"
+                                name="date"
+                                type="text"
+                                required
+                                inputmode="numeric"
+                                placeholder="YYYY-MM-DD"
+                                maxlength="10"
+                                class:list={[inputClass, "max-w-[12rem]"]}
+                                aria-describedby="wv-date-err"
+                            />
+                            <p id="wv-date-err" class={fieldErrorClass}>Please add the date as YYYY-MM-DD.</p>
+                        </div>
+
+                        <p id="wv-error" role="alert" class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+                        <button
+                            id="wv-submit"
+                            type="submit"
+                            class="w-full rounded-full bg-black px-8 py-3.5 text-base font-bold text-white transition hover:bg-[#FF7A1A] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Sign the waiver
+                        </button>
+                    </form>
+                </div>
+
+                {/* Success state */}
+                <div
+                    id="waiver-success"
+                    class="hidden rounded-2xl bg-black p-8 text-center text-white sm:p-10"
+                    tabindex="-1"
+                >
+                    <span class="mx-auto mb-5 block h-10 w-10" set:html={CEMPA_ON_BLACK} />
+                    <h2 class="text-3xl font-extrabold">Signed. Gracias.</h2>
+                    <p class="mt-3 text-white/80">
+                        You're set for the weekend. See you at {ddlm.venue}.
+                    </p>
+                    {zeffyLinks.length > 0 && (
+                        <div class="mt-6">
+                            <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A]">
+                                Registration and tickets on Zeffy
+                            </p>
+                            <ul class="mt-3 flex flex-col items-center gap-2">
+                                {zeffyLinks.map(({ e, label }) => (
+                                    <li>
+                                        <a
+                                            href={e.ticketsUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                            {...fallConversionAttrs(e, "waiver_success")}
+                                        >
+                                            {label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    <a
+                        href={`${base}${ddlm.pagePath}`}
+                        class="mt-7 inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        data-conversion-event="ddlm_page_click"
+                        data-conversion-context="waiver_success"
+                    >
+                        The weekend program
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        {/* ========================== SMALL PRINT ========================== */}
+        <section class="border-t border-black/10 bg-white px-4 py-10 sm:px-6">
+            <div class="mx-auto max-w-2xl text-sm text-medium-gray">
+                <p>
+                    Questions?{" "}
+                    <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 break-all"
+                        >{CONTACT_EMAIL}</a
+                    >
+                </p>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    .waiver-es summary::-webkit-details-marker {
+        display: none;
+    }
+</style>
+
+<script>
+    // ============================================================
+    // GOOGLE FORM CONFIG (marketing/fall-events/waiver-form.json):
+    // "Waiver: LSP Halloween + Dia de los Muertos 2026" in the
+    // collab@latinasweatproject.com account (edit id
+    // 16WVqeP1IIrOmeKfcJdLkvSv5gblZYN4JPlzxRzgP0T0).
+    // Checkbox questions (activities, agreement) send one repeated
+    // entry.N param per checked option; option strings must match the
+    // Google Form character for character (they live in the page
+    // frontmatter: SIGNING_FOR_OPTIONS, ACTIVITY_OPTIONS,
+    // AGREEMENT_OPTION). The form-side questions are not required;
+    // this page validates.
+    // ============================================================
+    const FORM_ACTION_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSclhyGURBPCEI1qZLwhGmHFCz0DqgSHoJ_C6XmCrPtsIJXwkg/formResponse";
+    const ENTRY_IDS = {
+        fullName: "entry.1829330187", // Full name (text)
+        email: "entry.1546816561", // Email (text)
+        phone: "entry.1295510835", // Phone (text, optional)
+        signingFor: "entry.2079841264", // Who are you signing for? (radio)
+        minors: "entry.2141439919", // Child or minor's name(s) and ages (paragraph, when a child option is picked)
+        activities: "entry.1676233702", // Which activities? (checkboxes)
+        emergency: "entry.1440435659", // Emergency contact name and phone (text)
+        agreement: "entry.1327574845", // Agreement (checkbox, one option)
+        signature: "entry.1368893833", // Signature: type your full legal name (text)
+        date: "entry.1557849337", // Date (text, YYYY-MM-DD)
+    };
+    // ============================================================
+
+    const NAME_STORAGE_KEY = "lsp_waiver_name";
+    const EMAIL_STORAGE_KEY = "lsp_waiver_email";
+    // Spam guard (no server, so no Turnstile): a honeypot field plus a
+    // minimum time-to-submit. Trips show the success state without posting.
+    const HONEYPOT_FIELD = "website";
+    const MIN_SUBMIT_MS = 3000;
+    const loadedAt = Date.now();
+
+    const form = document.getElementById("waiver-form") as HTMLFormElement;
+    const card = document.getElementById("waiver-card") as HTMLElement;
+    const success = document.getElementById("waiver-success") as HTMLElement;
+    const errorEl = document.getElementById("wv-error") as HTMLElement;
+    const submitBtn = document.getElementById("wv-submit") as HTMLButtonElement;
+    const nameInput = document.getElementById("wv-name") as HTMLInputElement;
+    const emailInput = document.getElementById("wv-email") as HTMLInputElement;
+    const dateInput = document.getElementById("wv-date") as HTMLInputElement;
+    const minorsWrap = document.getElementById("wv-minors-wrap") as HTMLElement;
+    const minorsInput = document.getElementById("wv-minors") as HTMLTextAreaElement;
+    const SUBMIT_LABEL = submitBtn.textContent?.trim() || "Sign the waiver";
+
+    // Today's date in Chicago as YYYY-MM-DD (en-CA formats that way).
+    function chicagoToday(): string {
+        try {
+            return new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Chicago",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }).format(new Date());
+        } catch {
+            return new Date().toISOString().slice(0, 10);
+        }
+    }
+    dateInput.value = chicagoToday();
+
+    // Prefill from a previous signature on this device.
+    try {
+        nameInput.value = window.localStorage.getItem(NAME_STORAGE_KEY) || "";
+        emailInput.value = window.localStorage.getItem(EMAIL_STORAGE_KEY) || "";
+    } catch {
+        // localStorage may be unavailable (private mode); ignore.
+    }
+
+    // Minors field: shown and required only for a child option.
+    function childPicked(): boolean {
+        const picked = form.querySelector<HTMLInputElement>('input[name="signingFor"]:checked');
+        return !!picked && picked.dataset.child === "1";
+    }
+    function syncMinors() {
+        const show = childPicked();
+        minorsWrap.hidden = !show;
+        minorsInput.required = show;
+        if (!show) setFieldError("wv-minors-err", minorsInput, false);
+    }
+    form.querySelectorAll<HTMLInputElement>('input[name="signingFor"]').forEach((r) =>
+        r.addEventListener("change", syncMinors),
+    );
+    syncMinors();
+
+    // Inline validation helpers.
+    function setFieldError(errId: string, input: HTMLElement | null, on: boolean) {
+        const el = document.getElementById(errId);
+        if (el) el.classList.toggle("hidden", !on);
+        if (input) {
+            if (on) input.setAttribute("aria-invalid", "true");
+            else input.removeAttribute("aria-invalid");
+        }
+    }
+    function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+    }
+    const DATE_RE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+    // Clear a field's error as soon as it is fixed.
+    form.addEventListener("input", (ev) => {
+        const t = ev.target as HTMLInputElement;
+        const err = t.getAttribute("aria-describedby") || t.closest("fieldset")?.getAttribute("aria-describedby");
+        if (err) setFieldError(err, t.matches("input[type=text],input[type=email],textarea") ? t : null, false);
+    });
+    form.addEventListener("change", (ev) => {
+        const fs = (ev.target as HTMLElement).closest("fieldset");
+        const err = fs?.getAttribute("aria-describedby");
+        if (err) setFieldError(err, null, false);
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorEl.classList.add("hidden");
+
+        const data = new FormData(form);
+
+        const honeypot = String(data.get(HONEYPOT_FIELD) || "").trim();
+        if (honeypot || Date.now() - loadedAt < MIN_SUBMIT_MS) {
+            // Looks automated: pretend it worked, send nothing.
+            card.classList.add("hidden");
+            success.classList.remove("hidden");
+            return;
+        }
+
+        const fullName = String(data.get("fullName") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const phone = String(data.get("phone") || "").trim();
+        const signingFor = String(data.get("signingFor") || "");
+        const minors = String(data.get("minors") || "").trim();
+        const activities = data.getAll("activities").map(String);
+        const emergency = String(data.get("emergency") || "").trim();
+        const agreement = String(data.get("agreement") || "");
+        const signature = String(data.get("signature") || "").trim();
+        const date = String(data.get("date") || "").trim();
+        const needsMinors = childPicked();
+
+        // Validate every field, mark each one, then focus the first.
+        const checks: Array<[boolean, string, string, string]> = [
+            [!!fullName, "wv-name-err", "wv-name", "Please add your full name."],
+            [/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), "wv-email-err", "wv-email", "Please add a valid email address."],
+            [!!signingFor, "wv-for-err", "", "Please pick who you're signing for."],
+            [!needsMinors || !!minors, "wv-minors-err", "wv-minors", "Please add each child's name and age."],
+            [activities.length > 0, "wv-act-err", "", "Please pick at least one activity."],
+            [!!emergency, "wv-emergency-err", "wv-emergency", "Please add an emergency contact name and phone."],
+            [!!agreement, "wv-agree-err", "", "Please check the box to agree."],
+            [!!signature, "wv-signature-err", "wv-signature", "Please type your full legal name to sign."],
+            [DATE_RE.test(date), "wv-date-err", "wv-date", "Please add the date as YYYY-MM-DD."],
+        ];
+        let first: HTMLElement | null = null;
+        let firstMsg = "";
+        for (const [ok, errId, inputId, msg] of checks) {
+            const input = inputId ? document.getElementById(inputId) : null;
+            setFieldError(errId, input, !ok);
+            if (!ok && !first) {
+                first =
+                    input ||
+                    (document.getElementById(errId)?.closest("fieldset")?.querySelector("input") as HTMLElement | null);
+                firstMsg = msg;
+            }
+        }
+        if (first) {
+            showError(firstMsg);
+            first.focus();
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Signing...";
+
+        const params = new URLSearchParams();
+        params.set(ENTRY_IDS.fullName, fullName);
+        params.set(ENTRY_IDS.email, email);
+        if (phone) params.set(ENTRY_IDS.phone, phone);
+        params.set(ENTRY_IDS.signingFor, signingFor);
+        if (needsMinors && minors) params.set(ENTRY_IDS.minors, minors);
+        activities.forEach((a) => params.append(ENTRY_IDS.activities, a));
+        params.set(ENTRY_IDS.emergency, emergency);
+        params.append(ENTRY_IDS.agreement, agreement);
+        params.set(ENTRY_IDS.signature, signature);
+        params.set(ENTRY_IDS.date, date);
+
+        try {
+            // no-cors: Google doesn't send CORS headers on formResponse, so
+            // the response is opaque. A resolved fetch means it reached
+            // Google; client-side validation above covers required fields.
+            await fetch(FORM_ACTION_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+
+            try {
+                window.localStorage.setItem(NAME_STORAGE_KEY, fullName);
+                window.localStorage.setItem(EMAIL_STORAGE_KEY, email);
+            } catch {
+                // ignore
+            }
+
+            card.classList.add("hidden");
+            success.classList.remove("hidden");
+            success.scrollIntoView({ behavior: "smooth", block: "center" });
+            success.focus({ preventScroll: true });
+        } catch (e) {
+            console.error("Waiver submit failed:", e);
+            showError("We couldn't send your waiver. Check your connection and try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = SUBMIT_LABEL;
+        }
+    });
+</script>

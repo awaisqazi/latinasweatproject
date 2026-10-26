@@ -458,9 +458,11 @@ const heroPopUpWeeks = popUpWeeksActive
                   Full program + volunteer
                 </a>
               </div>
-              {ddlmSatActive && (
-                <p class="ddlm-rise mt-3 flex flex-wrap gap-x-5 text-sm font-bold" style="--i: 6;" data-fall-past-at={halloweenEndISO}>
-                  {[
+              {/* Small text links: the two Saturday Zeffy forms (each hides
+                  after its own class) and the weekend waiver (/waiver). */}
+              <p class="ddlm-rise mt-3 flex flex-wrap gap-x-5 text-sm font-bold" style="--i: 6;">
+                {ddlmSatActive && (
+                  [
                     { e: ddlmKids, label: "Kids yoga · free registration" },
                     { e: ddlmBanda, label: "Banda Pilates + Sculpt · $15" },
                   ].filter(({ e }) => !e.isPast()).map(({ e, label }) => (
@@ -474,9 +476,17 @@ const heroPopUpWeeks = popUpWeeksActive
                     >
                       {label}
                     </a>
-                  ))}
-                </p>
-              )}
+                  ))
+                )}
+                <a
+                  href={`${base}waiver`}
+                  class="inline-flex min-h-11 items-center text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 transition hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  data-conversion-event="waiver_click"
+                  data-conversion-context="home_ddlm_spotlight"
+                >
+                  Sign the waiver before you come
+                </a>
+              </p>
             </div>
           </div>
         </div>
