@@ -1,0 +1,63 @@
+---
+// Marigold petal path under the homepage #ddlm-weekend headline (same idea
+// as PETAL_PATH on /diadelosmuertos): 47 orange dots on a gentle meander,
+// solid under the words, then thinning out to the right toward the art.
+// viewBox 900 x 18 drawn at 1:1 with "xMinYMid slice" (the host sets a
+// fixed 18px height and a width wider than the headline), so phones see
+// only the solid start running off the screen edge.
+// Motion (prefers-reduced-motion: no-preference): when the section gets
+// `.ddlm-in` (#ddlm-weekend, script in DdlmMarigolds.astro) the dots pop in one by one,
+// 40ms apart, then rest. Reduced motion / no JS: all dots shown.
+import { ORANGE, r2 } from "@/lib/ddlmFlair";
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+
+const R = [3, 3.6, 3, 4.2, 3.4, 4.6, 3.8, 4.4, 5, 4.4, 3.8];
+const SOLID = 20;
+const dots = Array.from({ length: 47 }, (_, i) => ({
+  x: 6 + i * 19,
+  y: r2(9 + Math.sin(i * 0.55) * 2.2),
+  r: r2(R[i % R.length] * (i < SOLID ? 1 : 1 - (i - SOLID) * 0.018)),
+  o: i < SOLID ? null : r2(Math.max(0.12, 1 - (i - SOLID) * 0.034)),
+}));
+---
+
+<svg
+  class:list={["block h-[18px]", className]}
+  viewBox="0 0 900 18"
+  preserveAspectRatio="xMinYMid slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g fill={ORANGE}>
+    {dots.map((d, i) => (
+      <circle class="ddlm-dot" cx={d.x} cy={d.y} r={d.r} fill-opacity={d.o ?? undefined} style={`--d:${i}`} />
+    ))}
+  </g>
+</svg>
+
+<style is:global>
+  .ddlm-dot {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html.js #ddlm-weekend:not(.ddlm-in) .ddlm-dot {
+      transform: scale(0);
+    }
+    #ddlm-weekend.ddlm-in .ddlm-dot {
+      animation: ddlm-dot-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(300ms + var(--d, 0) * 40ms) both;
+    }
+  }
+  @keyframes ddlm-dot-pop {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+</style>

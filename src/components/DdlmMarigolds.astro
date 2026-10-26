@@ -1,0 +1,381 @@
+---
+// Blooming cempasúchil layer for the homepage #ddlm-weekend spotlight.
+// Flat cut paper only: ORANGE petal rings (tints via fill-opacity) over
+// ground-colored cut lines, from MARIGOLD_RINGS in src/lib/ddlmFlair.ts.
+//
+// Layout (the host is the section: `position: relative; overflow: hidden`;
+// this layer is pointer-events: none and sits under the copy, z-[5]):
+//   lg+   an 8-flower cluster anchored to the copy column's bottom-left
+//         (coordinates are relative to the left edge of the copy, inside a
+//         max-w-7xl px-8 frame that mirrors the section's container), kept
+//         BELOW the text links (y < 70px) on the left and to the RIGHT of
+//         the buttons (x > 425px) higher up; plus 3 small flowers top-right
+//         under the papel picado.
+//   < lg  3 small flowers in the section's bottom-right corner, right of
+//         the buttons and text links.
+// Loose petals rise slowly out of the lg cluster (the section's ONLY petal
+// system; it replaced the old full-width drift).
+//
+// Motion (only under prefers-reduced-motion: no-preference, and only once
+// JS has marked the page `html.js`): each flower group is its own reveal
+// host and gets `.ddlm-in` the first time IT scrolls into view (script
+// below, IntersectionObserver, once). Then every flower blooms (scale 0.15 -> 1, springy, staggered 120ms)
+// while its rings unfurl from -35deg / +35deg (alternating) to 0; after
+// that the rings counter-rotate very slowly (40 to 70s a turn) and the
+// whole flower breathes 0.97 <-> 1.03 (12 to 20s). Reduced motion or no
+// JS: everything renders bloomed and still, petals hidden.
+//   ground: the color the cut lines are punched in (the section's ground).
+import { ORANGE, MARIGOLD_RINGS, r2 } from "@/lib/ddlmFlair";
+
+interface Props {
+  ground?: string;
+}
+const { ground = "#000000" } = Astro.props;
+
+type Flower = {
+  s: number; // size px
+  x?: number; // lg cluster: center x px from the copy column's left edge
+  y?: number; // lg cluster: center y px above the section's bottom edge
+  right?: number; // corner / mobile: px from the section's right edge
+  top?: number; // corner: px from the section's top edge
+  bottom?: number; // mobile: px from the section's bottom edge
+  rings?: number; // 3 or 4 rings (default 4)
+};
+
+const lgCluster: Flower[] = [
+  { s: 150, x: -34, y: -8 },
+  { s: 96, x: 92, y: 18 },
+  { s: 58, x: 178, y: -4, rings: 3 },
+  { s: 40, x: 246, y: 14, rings: 3 },
+  { s: 112, x: 528, y: 50 },
+  { s: 68, x: 616, y: 126 },
+  { s: 44, x: 458, y: 150, rings: 3 },
+  { s: 50, x: 648, y: 20, rings: 3 },
+];
+const lgCorner: Flower[] = [
+  { s: 70, right: 28, top: 70 },
+  { s: 44, right: 104, top: 112, rings: 3 },
+  { s: 36, right: 12, top: 146, rings: 3 },
+];
+const smCorner: Flower[] = [
+  { s: 80, right: -18, bottom: -6 },
+  { s: 50, right: 60, bottom: 14 },
+  { s: 38, right: 18, bottom: 80, rings: 3 },
+];
+
+// Deterministic per-flower variety: static ring offsets (so no two
+// flowers line their petals up the same way), spin and breathe periods.
+const vary = (i: number) => ({
+  rot: [0, 1, 2, 3].map((k) => r2(((i * 37 + k * 23) % 60) - 30)),
+  spin: [0, 1, 2, 3].map((k) => 40 + ((i * 11 + k * 7) % 31)),
+  breathe: 12 + ((i * 5) % 9),
+});
+
+// `i` staggers the bloom within its own group (each group reveals on
+// its own); `seed` keeps the look of every flower different.
+let seed = 0;
+const build = (f: Flower, pos: string, i: number) => {
+  const v = vary(seed++);
+  return {
+    ...f,
+    i,
+    style:
+      `${pos}width:${f.s}px;height:${f.s}px;` +
+      `--bloom-delay:${i * 120}ms;--bloom-dur:${900 + ((i * 130) % 500)}ms;--breathe:${v.breathe}s;`,
+    rings: MARIGOLD_RINGS.slice(0, f.rings ?? 4).map((_, k) => ({
+      id: `ddlm-mg-r${k}`,
+      rot: v.rot[k],
+      spin: v.spin[k],
+      dir: k % 2 === 0 ? "cw" : "ccw",
+    })),
+  };
+};
+const cluster = lgCluster.map((f, i) =>
+  build(f, `left:${f.x! - f.s / 2}px;bottom:${f.y! - f.s / 2}px;`, i),
+);
+const corner = lgCorner.map((f, i) => build(f, `right:${f.right}px;top:${f.top}px;`, i));
+const mobile = smCorner.map((f, i) => build(f, `right:${f.right}px;bottom:${f.bottom}px;`, i));
+
+// Loose petals: small orange ellipses that leave the lg cluster after it
+// has bloomed and float up and away, slowly. Positive delays so they come
+// out one at a time; then they loop.
+const petalSources = lgCluster.filter((f) => f.s >= 58);
+const petals = Array.from({ length: 12 }, (_, i) => {
+  const src = petalSources[i % petalSources.length];
+  const w = 4 + (i % 4);
+  return {
+    left: src.x! + (((i * 29) % 40) - 20),
+    bottom: Math.max(6, src.y! + (((i * 17) % 30) - 5)),
+    w,
+    h: r2(w * 0.55),
+    peak: r2(0.25 + ((i * 3) % 5) * 0.08),
+    dur: 14 + ((i * 7) % 10),
+    delay: r2(1.4 + i * 1.15),
+    drift: (i % 2 === 0 ? 1 : -1) * (24 + ((i * 13) % 50)),
+    rise: 240 + ((i * 41) % 180),
+    spin: (i % 2 === 0 ? 1 : -1) * (120 + ((i * 47) % 200)),
+  };
+});
+---
+
+<div
+  class="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+  aria-hidden="true"
+>
+  {/* Shared ring shapes, referenced by every flower with <use>. Zero-size,
+      NOT display:none (some engines drop references into hidden SVGs). */}
+  <svg width="0" height="0" class="absolute" focusable="false">
+    <defs>
+      {MARIGOLD_RINGS.map((ring, k) => (
+        <g id={`ddlm-mg-r${k}`}>
+          {ring.cut && (
+            <g fill={ground}>
+              <circle r={ring.cut.disc} />
+              {ring.cutPetals.map((p) => (
+                <circle cx={p.x} cy={p.y} r={p.r} />
+              ))}
+            </g>
+          )}
+          <g fill={ORANGE} fill-opacity={ring.o}>
+            <circle r={ring.disc} />
+            {ring.petals.map((p) => (
+              <circle cx={p.x} cy={p.y} r={p.r} />
+            ))}
+          </g>
+          {ring.slits && (
+            <path d={ring.slits} fill="none" stroke={ground} stroke-width={ring.slit} stroke-linecap="round" />
+          )}
+        </g>
+      ))}
+      <g id="ddlm-mg-core">
+        <circle r="5.4" fill={ground} />
+        <circle r="2" fill={ORANGE} />
+      </g>
+    </defs>
+  </svg>
+
+  {/* Each group is its own reveal host (data-ddlm-reveal, threshold in
+      the value): it blooms when IT comes into view, so the bottom cluster
+      is not spent while only the top of the section is on screen. */}
+
+  {/* lg+: cluster around the buttons, anchored to the copy column. The
+      host is a 160px strip along the bottom edge. */}
+  <div class="ddlm-mg-host absolute inset-x-0 bottom-0 hidden h-40 lg:block" data-ddlm-reveal="0.6">
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-8">
+      <div class="relative">
+        {cluster.map((f) => (
+          <svg class="absolute block overflow-visible" viewBox="-50 -50 100 100" style={f.style} focusable="false">
+            <g class="ddlm-mg-bloom">
+              <g class="ddlm-mg-breathe">
+                {f.rings.map((ring) => (
+                  <g class={`ddlm-mg-ring ddlm-mg-${ring.dir}`} style={`--spin:${ring.spin}s`}>
+                    <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
+                  </g>
+                ))}
+                <use href="#ddlm-mg-core" />
+              </g>
+            </g>
+          </svg>
+        ))}
+        {petals.map((p) => (
+          <span
+            class="ddlm-mg-petal absolute block rounded-[50%]"
+            style={`left:${p.left}px;bottom:${p.bottom}px;width:${p.w}px;height:${p.h}px;background:${ORANGE};--peak:${p.peak};--drift:${p.drift}px;--rise:${p.rise}px;--spin-to:${p.spin}deg;animation-duration:${p.dur}s;animation-delay:${p.delay}s;`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* lg+: a few small flowers top-right, under the papel picado. */}
+  <div class="ddlm-mg-host absolute right-0 top-0 hidden h-48 w-48 lg:block" data-ddlm-reveal="0.6">
+    {corner.map((f) => (
+      <svg class="absolute block overflow-visible" viewBox="-50 -50 100 100" style={f.style} focusable="false">
+        <g class="ddlm-mg-bloom">
+          <g class="ddlm-mg-breathe">
+            {f.rings.map((ring) => (
+              <g class={`ddlm-mg-ring ddlm-mg-${ring.dir}`} style={`--spin:${ring.spin}s`}>
+                <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
+              </g>
+            ))}
+            <use href="#ddlm-mg-core" />
+          </g>
+        </g>
+      </svg>
+    ))}
+  </div>
+
+  {/* < lg: three small flowers in the bottom-right corner. */}
+  <div class="ddlm-mg-host absolute bottom-0 right-0 h-32 w-40 lg:hidden" data-ddlm-reveal="0.6">
+    {mobile.map((f) => (
+      <svg class="absolute block overflow-visible" viewBox="-50 -50 100 100" style={f.style} focusable="false">
+        <g class="ddlm-mg-bloom">
+          <g class="ddlm-mg-breathe">
+            {f.rings.map((ring) => (
+              <g class={`ddlm-mg-ring ddlm-mg-${ring.dir}`} style={`--spin:${ring.spin}s`}>
+                <use href={`#${ring.id}`} transform={`rotate(${ring.rot})`} />
+              </g>
+            ))}
+            <use href="#ddlm-mg-core" />
+          </g>
+        </g>
+      </svg>
+    ))}
+  </div>
+</div>
+
+<script>
+  // One-shot reveals for the #ddlm-weekend spotlight: adds `.ddlm-in` to
+  // each [data-ddlm-reveal] host the first time that host is in view (the
+  // attribute value is the IntersectionObserver threshold, default 0.15).
+  // Hosts: the section (copy entrance + petal path), each marigold group,
+  // the veladora row. Every entrance keys off that class; nothing here
+  // runs per frame. Hosts that are display:none at this width never fire.
+  (function () {
+    const hosts = document.querySelectorAll<HTMLElement>("[data-ddlm-reveal]");
+    if (!hosts.length) return;
+    if (!("IntersectionObserver" in window)) {
+      hosts.forEach((h) => h.classList.add("ddlm-in"));
+      return;
+    }
+    hosts.forEach((host) => {
+      const threshold = Number(host.dataset.ddlmReveal) || 0.15;
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          host.classList.add("ddlm-in");
+          io.disconnect();
+        },
+        { threshold },
+      );
+      io.observe(host);
+    });
+  })();
+</script>
+
+<style is:global>
+  /* Every animated group transforms around the flower's center: (0, 0) in
+     the -50 -50 100 100 viewBox. */
+  .ddlm-mg-bloom,
+  .ddlm-mg-breathe,
+  .ddlm-mg-ring {
+    transform-box: view-box;
+    transform-origin: 0 0;
+  }
+  .ddlm-mg-petal {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Waiting state, only when JS will reveal it. */
+    html.js .ddlm-mg-host:not(.ddlm-in) .ddlm-mg-bloom {
+      opacity: 0;
+      transform: scale(0.15);
+    }
+    html.js .ddlm-mg-host:not(.ddlm-in) .ddlm-mg-ring.ddlm-mg-cw {
+      transform: rotate(-35deg);
+    }
+    html.js .ddlm-mg-host:not(.ddlm-in) .ddlm-mg-ring.ddlm-mg-ccw {
+      transform: rotate(35deg);
+    }
+
+    /* Bloom: springy scale while the rings unfurl in alternating
+       directions; then (second animation on the ring, starting when the
+       unfurl ends at 0deg) a very slow counter-rotation, plus a gentle
+       breathe on the whole flower. */
+    .ddlm-mg-host.ddlm-in .ddlm-mg-bloom {
+      animation: ddlm-mg-bloom var(--bloom-dur, 1100ms) cubic-bezier(0.34, 1.45, 0.5, 1)
+        var(--bloom-delay, 0ms) both;
+    }
+    .ddlm-mg-host.ddlm-in .ddlm-mg-ring.ddlm-mg-cw {
+      animation:
+        ddlm-mg-unfurl-cw var(--bloom-dur, 1100ms) cubic-bezier(0.22, 1, 0.36, 1) var(--bloom-delay, 0ms) both,
+        ddlm-mg-turn var(--spin, 55s) linear calc(var(--bloom-delay, 0ms) + var(--bloom-dur, 1100ms)) infinite;
+    }
+    .ddlm-mg-host.ddlm-in .ddlm-mg-ring.ddlm-mg-ccw {
+      animation:
+        ddlm-mg-unfurl-ccw var(--bloom-dur, 1100ms) cubic-bezier(0.22, 1, 0.36, 1) var(--bloom-delay, 0ms) both,
+        ddlm-mg-turn var(--spin, 55s) linear calc(var(--bloom-delay, 0ms) + var(--bloom-dur, 1100ms)) infinite
+          reverse;
+    }
+    .ddlm-mg-host.ddlm-in .ddlm-mg-breathe {
+      animation: ddlm-mg-breathe var(--breathe, 16s) ease-in-out
+        calc(var(--bloom-delay, 0ms) + var(--bloom-dur, 1100ms)) infinite;
+    }
+
+    /* Loose petals leave the cluster once it has bloomed. */
+    .ddlm-mg-host.ddlm-in .ddlm-mg-petal {
+      animation-name: ddlm-mg-petal;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-fill-mode: backwards;
+    }
+  }
+
+  @keyframes ddlm-mg-bloom {
+    0% {
+      opacity: 0;
+      transform: scale(0.15);
+    }
+    18% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes ddlm-mg-unfurl-cw {
+    from {
+      transform: rotate(-35deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes ddlm-mg-unfurl-ccw {
+    from {
+      transform: rotate(35deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes ddlm-mg-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes ddlm-mg-breathe {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    30% {
+      transform: scale(1.03);
+    }
+    70% {
+      transform: scale(0.97);
+    }
+  }
+  @keyframes ddlm-mg-petal {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0;
+    }
+    12% {
+      opacity: var(--peak, 0.35);
+    }
+    50% {
+      transform: translate(calc(var(--drift, 0px) * -0.35), calc(var(--rise, 300px) * -0.5))
+        rotate(calc(var(--spin-to, 180deg) * 0.5));
+    }
+    85% {
+      opacity: var(--peak, 0.35);
+    }
+    100% {
+      transform: translate(var(--drift, 0px), calc(var(--rise, 300px) * -1)) rotate(var(--spin-to, 180deg));
+      opacity: 0;
+    }
+  }
+</style>

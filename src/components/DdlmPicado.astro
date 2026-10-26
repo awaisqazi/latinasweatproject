@@ -7,10 +7,13 @@
 // cropped at the sides, never a vertical squash; the cord is a separate
 // full-width hairline so it never ends where the flags crop.
 //   ground: the color the cut-outs are punched in (the host's ground).
-//   sway:   each flag swings gently from its top edge (9s, staggered),
-//           only under prefers-reduced-motion: no-preference.
+//   sway:   each flag swings gently from its top edge (7s), each one
+//           0.35s behind its left neighbor so a slow wave travels along
+//           the string; only under prefers-reduced-motion: no-preference.
+// Motifs (ddlmFlair.ts PICADO_MOTIFS): ring, flower, lattice, diamond and,
+// on every 4th flag, a calavera.
 // Used by /diadelosmuertos (facts band) and the homepage #ddlm-weekend.
-import { PICADO_FLAGS, PETALS_8, LATTICE, diamond } from "@/lib/ddlmFlair";
+import { PICADO_FLAGS, PETALS_8, LATTICE, CALAVERA, diamond, r2 } from "@/lib/ddlmFlair";
 
 interface Props {
   ground?: string;
@@ -34,7 +37,7 @@ const { ground = "#000000", sway = false, class: className } = Astro.props;
     {PICADO_FLAGS.map((f, i) => (
       <g
         class:list={[sway && "ddlm-picado-flag"]}
-        style={sway ? `animation-delay: -${(i * 1.3) % 9}s;` : undefined}
+        style={sway ? `animation-delay: ${r2(i * 0.35 - 7)}s;` : undefined}
       >
         <path d={f.d} fill={f.fill} />
         <g transform={`translate(${f.cx} 23)`} fill={ground}>
@@ -67,6 +70,24 @@ const { ground = "#000000", sway = false, class: className } = Astro.props;
               <circle cx={f.side} r="3" />
             </>
           )}
+          {f.motif === "calavera" && (
+            <>
+              <path d={CALAVERA.skull} />
+              <g fill={f.fill}>
+                {CALAVERA.eyes.map((e) => (
+                  <circle cx={e.x} cy={e.y} r={e.r} />
+                ))}
+                <polygon points={CALAVERA.nose} />
+                {CALAVERA.teeth.map((t) => (
+                  <rect x={t.x} y={t.y} width={t.w} height={t.h} />
+                ))}
+              </g>
+              <circle cx={-f.side} cy="-9" r="2" />
+              <circle cx={-f.side} cy="9" r="2" />
+              <circle cx={f.side} cy="-9" r="2" />
+              <circle cx={f.side} cy="9" r="2" />
+            </>
+          )}
           {f.motif === "ring" && (
             <>
               <circle r="10" />
@@ -84,21 +105,28 @@ const { ground = "#000000", sway = false, class: className } = Astro.props;
 
 <style>
   /* Each flag swings from the middle of its top edge, like paper on a
-     string in a light breeze. Static under reduced motion. */
+     string in a light breeze; the per-flag delay (i * 0.35s) turns the
+     row into one travelling wave. Static under reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
     .ddlm-picado-flag {
       transform-box: fill-box;
       transform-origin: 50% 0;
-      animation: ddlm-picado-sway 9s ease-in-out infinite;
+      animation: ddlm-picado-sway 7s ease-in-out infinite;
     }
   }
   @keyframes ddlm-picado-sway {
     0%,
     100% {
-      transform: rotate(-2deg);
+      transform: rotate(-2.5deg) translateY(0);
+    }
+    25% {
+      transform: rotate(0deg) translateY(1px);
     }
     50% {
-      transform: rotate(2deg);
+      transform: rotate(2.5deg) translateY(0);
+    }
+    75% {
+      transform: rotate(0deg) translateY(-0.5px);
     }
   }
 </style>

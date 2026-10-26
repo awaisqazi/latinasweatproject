@@ -1,0 +1,230 @@
+---
+// Veladoras (glass candles) along the bottom edge of the homepage
+// #ddlm-weekend spotlight, like the candle rows on the ofrendas in the art.
+// White glass cylinder (elliptical mouth drawn as one thin ground-colored
+// rim line, the top of the glass warmed by an orange tint), an orange
+// teardrop flame with a warmer #FFC14D core (the ONLY place that color is
+// allowed) and a soft orange radial glow (SVG radialGradient, no filters).
+//
+// 12 candles spaced unevenly across the full width on lg; 6 of them on
+// phones, re-spaced over the left two thirds (the bottom-right corner
+// belongs to the marigolds). Heights
+// 18 to 30px; all sit inside the section's bottom padding, under the last
+// row of links.
+//
+// Motion (prefers-reduced-motion: no-preference only): when this row gets
+// `.ddlm-in` (its own reveal host; script in DdlmMarigolds.astro), when
+// the bottom edge of the section scrolls into view, the candles light one after
+// another, left to right; then every flame flickers on its own clock
+// (scaleY 0.85 to 1.15, skewX up to 4deg, glow opacity; 1.7 to 3.1s, offset
+// delays), two of them more restlessly. Reduced motion: lit and still.
+//   ground: the section's ground color (the rim line and the wick).
+import { ORANGE, r2 } from "@/lib/ddlmFlair";
+
+interface Props {
+  ground?: string;
+}
+const { ground = "#000000" } = Astro.props;
+
+const FLAME_CORE = "#FFC14D";
+
+// x: % across the section on lg; mx: % across on phones (omit = lg only).
+// h: glass height px; b: px above the section's bottom edge.
+const CANDLES = [
+  { x: 2.6, mx: 4, h: 24, b: 12 },
+  { x: 7.4, h: 30, b: 6 },
+  { x: 15.8, mx: 15, h: 20, b: 16 },
+  { x: 21.2, h: 26, b: 9 },
+  { x: 33.5, mx: 29, h: 22, b: 13, wild: true },
+  { x: 45.6, h: 28, b: 7 },
+  { x: 51.8, mx: 43, h: 19, b: 15 },
+  { x: 62.4, h: 25, b: 10 },
+  { x: 71.9, mx: 57, h: 30, b: 5 },
+  { x: 80.3, h: 21, b: 14, wild: true },
+  { x: 88.7, mx: 69, h: 27, b: 8 },
+  { x: 95.4, h: 23, b: 12 },
+];
+
+const W = 40; // svg width px; the glass is 12 to 14 px wide
+const candles = CANDLES.map((c, i) => {
+  const H = c.h + 34; // glass + flame + glow headroom
+  const gw = 12 + (i % 3); // glass width
+  const top = -c.h;
+  return {
+    ...c,
+    i,
+    H,
+    gw,
+    top,
+    viewBox: `${-W / 2} ${-H} ${W} ${H}`,
+    // Glass: straight sides, rounded (elliptical) foot.
+    body: `M${-gw / 2} ${top}V-1.7A${gw / 2} 1.7 0 0 0 ${gw / 2} -1.7V${top}Z`,
+    dur: r2(1.7 + ((i * 0.53) % 1.4)),
+    delay: r2(-((i * 0.71) % 2.6)),
+    light: 900 + i * 110,
+  };
+});
+---
+
+<div
+  class="ddlm-vel-host pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-24 overflow-hidden"
+  aria-hidden="true"
+  data-ddlm-reveal="0.6"
+>
+  <svg width="0" height="0" class="absolute" focusable="false">
+    <defs>
+      <path id="ddlm-vel-flame" d="M0 -12C2.4 -8.4 3.8 -5.6 3.8 -3.6A3.8 3.8 0 0 1 -3.8 -3.6C-3.8 -5.6 -2.4 -8.4 0 -12Z" fill={ORANGE} />
+      <path id="ddlm-vel-core" d="M0 -7.2C1.3 -5.2 2 -3.8 2 -2.7A2 2 0 0 1 -2 -2.7C-2 -3.8 -1.3 -5.2 0 -7.2Z" fill={FLAME_CORE} />
+      <linearGradient id="ddlm-vel-in" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color={ORANGE} stop-opacity="0.45" />
+        <stop offset="1" stop-color={ORANGE} stop-opacity="0" />
+      </linearGradient>
+      <radialGradient id="ddlm-vel-glow">
+        <stop offset="0" stop-color={ORANGE} stop-opacity="0.35" />
+        <stop offset="0.45" stop-color={ORANGE} stop-opacity="0.14" />
+        <stop offset="1" stop-color={ORANGE} stop-opacity="0" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  {/* One svg per candle; --x / --mx are its lg / phone positions (no --mx:
+      lg only, see .ddlm-vel-lg below). */}
+  {candles.map((c) => (
+    <svg
+      class:list={["ddlm-vel", c.mx == null && "ddlm-vel-lg"]}
+      viewBox={c.viewBox}
+      width={W}
+      height={c.H}
+      style={`--x:${c.x}%;--mx:${c.mx ?? c.x}%;bottom:${c.b}px;--dur:${c.dur}s;--delay:${c.delay}s;--light:${c.light}ms`}
+      focusable="false"
+    >
+      <g class="ddlm-vel-lit"><circle class="ddlm-vel-glow" cy={c.top - 7} r="18" fill="url(#ddlm-vel-glow)" /></g>
+      <path d={c.body} fill="#FFFFFF" />
+      <rect x={-c.gw / 2} y={c.top} width={c.gw} height={r2(c.h * 0.7)} fill="url(#ddlm-vel-in)" />
+      <ellipse cy={c.top} rx={c.gw / 2} ry="1.7" fill="#FFFFFF" stroke={ground} stroke-width="0.8" />
+      <path d={`M0 ${c.top}V${c.top - 2.4}`} stroke={ground} stroke-width="0.9" />
+      <g transform={`translate(0 ${c.top - 1.2})`}>
+        <g class="ddlm-vel-lit">
+          <g class:list={["ddlm-vel-flame", c.wild && "ddlm-vel-wild"]}>
+            <use href="#ddlm-vel-flame" />
+            <use href="#ddlm-vel-core" />
+          </g>
+        </g>
+      </g>
+    </svg>
+  ))}
+</div>
+
+<style is:global>
+  .ddlm-vel {
+    position: absolute;
+    left: calc(var(--mx) - 20px);
+  }
+  .ddlm-vel-lg {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .ddlm-vel {
+      left: calc(var(--x) - 20px);
+    }
+    .ddlm-vel-lg {
+      display: block;
+    }
+  }
+  .ddlm-vel-flame {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .ddlm-vel-lit {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Unlit until the section is revealed (only when JS will reveal it). */
+    html.js .ddlm-vel-host:not(.ddlm-in) .ddlm-vel-lit {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    .ddlm-vel-host.ddlm-in .ddlm-vel-lit {
+      animation: ddlm-vel-light 600ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--light, 900ms) both;
+    }
+    .ddlm-vel-flame {
+      animation: ddlm-vel-flicker var(--dur, 2.2s) ease-in-out var(--delay, 0s) infinite;
+    }
+    .ddlm-vel-flame.ddlm-vel-wild {
+      animation-name: ddlm-vel-flicker-wild;
+    }
+    .ddlm-vel-glow {
+      animation: ddlm-vel-glow var(--dur, 2.2s) ease-in-out var(--delay, 0s) infinite;
+    }
+  }
+
+  @keyframes ddlm-vel-light {
+    from {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes ddlm-vel-flicker {
+    0%,
+    100% {
+      transform: scaleY(1) skewX(0deg);
+    }
+    22% {
+      transform: scaleY(1.1) skewX(-2.5deg);
+    }
+    47% {
+      transform: scaleY(0.9) skewX(2deg);
+    }
+    71% {
+      transform: scaleY(1.05) skewX(3deg);
+    }
+    86% {
+      transform: scaleY(0.95) skewX(-1.5deg);
+    }
+  }
+  @keyframes ddlm-vel-flicker-wild {
+    0%,
+    100% {
+      transform: scaleY(1) skewX(0deg);
+    }
+    12% {
+      transform: scaleY(1.15) skewX(-4deg);
+    }
+    27% {
+      transform: scaleY(0.86) skewX(3deg);
+    }
+    41% {
+      transform: scaleY(1.1) skewX(4deg);
+    }
+    58% {
+      transform: scaleY(0.85) skewX(-3deg);
+    }
+    73% {
+      transform: scaleY(1.12) skewX(-1deg);
+    }
+    88% {
+      transform: scaleY(0.92) skewX(2deg);
+    }
+  }
+  @keyframes ddlm-vel-glow {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    30% {
+      opacity: 1;
+    }
+    55% {
+      opacity: 0.65;
+    }
+    80% {
+      opacity: 0.95;
+    }
+  }
+</style>

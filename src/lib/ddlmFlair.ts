@@ -12,19 +12,20 @@ export const r2 = (n: number) => Math.round(n * 100) / 100;
 export const PICADO_W = 1280;
 const PICADO_GAP = 16;
 const PICADO_WIDTHS = [78, 86, 74, 90, 80, 84, 76, 88, 72, 86, 80, 76, 84];
+// Every 4th flag (index 3, 7, 11) carries the calavera.
 const PICADO_MOTIFS = [
   "ring",
   "flower",
-  "lattice",
   "diamond",
+  "calavera",
+  "lattice",
   "ring",
-  "lattice",
   "flower",
+  "calavera",
   "diamond",
   "lattice",
-  "flower",
   "ring",
-  "diamond",
+  "calavera",
   "flower",
 ];
 let picadoX =
@@ -58,6 +59,27 @@ export const LATTICE = [-1, 0, 1].flatMap((a) =>
 export const diamond = (x: number, y: number, h: number) =>
   `${r2(x)},${r2(y - h)} ${r2(x + h)},${r2(y)} ${r2(x)},${r2(y + h)} ${r2(x - h)},${r2(y)}`;
 
+// Calavera cut-out for the picado flags, centered on (0, 0), about 20 x 24
+// in flag units: the skull (cranium + narrower jaw) is punched in the
+// ground color; the eyes, nose and toothy grin are left in the flag color
+// on top of it, so it reads as paper that stayed behind.
+export const CALAVERA = {
+  skull:
+    "M-10 -3A10 10 0 0 1 10 -3C10 2 8.6 4.6 6.6 5.8V10Q6.6 12 4.6 12H-4.6Q-6.6 12 -6.6 10V5.8C-8.6 4.6 -10 2 -10 -3Z",
+  eyes: [
+    { x: -4.2, y: -2.4, r: 3 },
+    { x: 4.2, y: -2.4, r: 3 },
+  ],
+  nose: "0,1.4 1.6,4.2 -1.6,4.2",
+  // Grin: one lip line plus three slits that split it into teeth.
+  teeth: [
+    { x: -4.6, y: 7.4, w: 9.2, h: 1 },
+    { x: -2.65, y: 6.2, w: 0.9, h: 4.4 },
+    { x: -0.45, y: 6.2, w: 0.9, h: 4.4 },
+    { x: 1.75, y: 6.2, w: 0.9, h: 4.4 },
+  ],
+};
+
 // Cempasúchil mark: three stacked scalloped layers (orange, ground,
 // orange) and a ground-colored center, like layered cut paper. Returns an
 // SVG string for set:html; size it with the host element.
@@ -67,6 +89,43 @@ function scallop(n: number, ringR: number, petalR: number, rot: number) {
     return `<circle cx="${r2(Math.cos(a) * ringR)}" cy="${r2(Math.sin(a) * ringR)}" r="${petalR}"/>`;
   }).join("");
 }
+// Same scallop geometry as plain data (for the layered marigold rings in
+// src/components/DdlmMarigolds.astro).
+export function scallopDots(n: number, ringR: number, petalR: number, rot = 0) {
+  return Array.from({ length: n }, (_, k) => {
+    const a = (k / n) * Math.PI * 2 + rot;
+    return { x: r2(Math.cos(a) * ringR), y: r2(Math.sin(a) * ringR), r: petalR };
+  });
+}
+
+// Layered cempasúchil for the homepage bloom (viewBox -50 -50 100 100).
+// Four petal rings, 12 / 10 / 8 / 6 petals, outer to inner. Each ring is
+// a ground-colored scalloped silhouette (the cut line between paper
+// layers) under an orange scalloped disc; the three outer rings also get
+// one short ground-colored slit per petal, cut in from the tip a hair off
+// center, which splits each petal into two ruffled lobes the way a
+// marigold petal looks and the way scissors leave it. The outer ring has
+// no silhouette (nothing under it but the section). `o` is the orange
+// fill-opacity (0.85 to 1, a tint).
+export const MARIGOLD_RINGS = [
+  { n: 12, disc: 36, ringR: 38, petalR: 11, cut: null, slit: 1.7, o: 0.85 },
+  { n: 10, disc: 28, ringR: 29, petalR: 7.2, cut: { disc: 30.5, ringR: 31, petalR: 8.8 }, slit: 1.4, o: 0.92 },
+  { n: 8, disc: 18, ringR: 19, petalR: 5.8, cut: { disc: 20.5, ringR: 21, petalR: 7.2 }, slit: 1.15, o: 1 },
+  { n: 6, disc: 9.5, ringR: 10.5, petalR: 4.2, cut: { disc: 11.5, ringR: 12, petalR: 5.4 }, slit: 0, o: 1 },
+].map((ring) => ({
+  ...ring,
+  petals: scallopDots(ring.n, ring.ringR, ring.petalR),
+  cutPetals: ring.cut ? scallopDots(ring.n, ring.cut.ringR, ring.cut.petalR) : [],
+  slits: ring.slit
+    ? Array.from({ length: ring.n }, (_, k) => {
+        const a = (k / ring.n) * Math.PI * 2 + 0.05 * (k % 2 === 0 ? 1 : -1);
+        const r0 = ring.ringR + ring.petalR * 0.3;
+        const r1 = ring.ringR + ring.petalR + 1;
+        return `M${r2(Math.cos(a) * r0)} ${r2(Math.sin(a) * r0)}L${r2(Math.cos(a) * r1)} ${r2(Math.sin(a) * r1)}`;
+      }).join("")
+    : "",
+}));
+
 export function cempasuchil(ground: string) {
   return (
     `<svg viewBox="-16 -16 32 32" class="block h-full w-full" aria-hidden="true" focusable="false">` +
