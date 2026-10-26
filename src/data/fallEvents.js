@@ -16,14 +16,26 @@
 // is "Free registration"; the ofrendas and the market are "Free, open to
 // all"), never print "donation" as a price, no address beyond 2800 S
 // Sacramento Ave, never guess who is pictured in a banner, class leaders
-// by FIRST NAME only exactly as Zeffy writes them (Yaritza, Savannah,
-// Zoraida, Luz), instructors of the Oct 31 banda class are not named.
+// by FIRST NAME only (Sunday: Yaritza, Savannah, Zoraida, Luz, exactly as
+// Zeffy writes them; Saturday: Ariesna and Lucia for kids yoga, Vanessa and
+// Veronica for Banda Pilates + Sculpt, confirmed by Fez 2026-10-26 from his
+// project tracker), never surnames. Saturday extras confirmed the same day
+// from the tracker's partners sheet: hot drinks at the ofrendas; warm meals
+// from Organic Life and grocery bags from Sharing Access (150 bags, so
+// always "while supplies last") during the 11:00 AM block.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
 // - RESOLVED 2026-10-26 (Fez): Zeffy is the source of truth for prices.
 //   Both flyers print "DONATION" for Banda Pilates + Sculpt and for Día de
 //   los Muertos, but the forms charge $15 and $20 and the site prints that;
 //   never print "donation" as a price.
+// - RESOLVED 2026-10-26 (Fez, from his project tracker): Saturday class
+//   leaders are Ariesna and Lucia (kids yoga) and Vanessa and Veronica
+//   (Banda Pilates + Sculpt), first names only; the Saturday giveaways (hot
+//   drinks, Organic Life warm meals, Sharing Access grocery bags while
+//   supplies last) are confirmed. Leader avatars: ddlmWeekend.classLeaders
+//   carries an optional `avatar` per person (null = not sourced yet; not
+//   rendered anywhere yet).
 // - The green "SE" logo on the Oct 31 flyer is unidentified. It is left
 //   off the site (supporters are printed as text, see ddlmWeekend).
 // - Kids Halloween Yoga: no age range, and the Zeffy page says
@@ -95,8 +107,8 @@ export const fallEvents = [
       // text does not repeat an address.
       alt: "Kids Halloween Yoga, October 31, 2026, 10:30 to 11:00 AM at La Villita Park: illustrated kids in costumes doing yoga poses.",
     },
-    summary: "A child-parent yoga class in costume: little ones move, breathe, and stretch in community.",
-    summaryEs: "Una clase de yoga para compartir en familia, con disfraz: los más peques se mueven, respiran y se estiran en comunidad.",
+    summary: "A child-parent yoga class in costume with Ariesna and Lucia: little ones move, breathe, and stretch in community.",
+    summaryEs: "Una clase de yoga para compartir en familia, con disfraz, con Ariesna y Lucia: los más peques se mueven, respiran y se estiran en comunidad.",
     // Zeffy description, verbatim minus the emoji.
     description: [
       "Kids Yoga with Latina Sweat Cares is a child-parent class where little ones move, breathe, and stretch in community. Kids are guided to explore balance, focus, and rest through simple poses, stories, and games.",
@@ -108,7 +120,8 @@ export const fallEvents = [
     note: "Wear a costume to receive a free kids mat while supplies last.",
     noteEs: "Ven disfrazado y recibe un mat para niños gratis mientras duren.",
     lineup: [],
-    people: [],
+    // Class leaders, first names only (Fez, 2026-10-26, project tracker).
+    people: ["Ariesna", "Lucia"],
     trackingKey: "kids_halloween_yoga",
   },
   {
@@ -152,8 +165,8 @@ export const fallEvents = [
       // retired here; Zeffy itself still shows it (re-upload = Fez).
       alt: "Halloween at La Villita Park, October 31, 2026: the day's program on an illustrated Halloween yoga pattern, from the 9:00 AM ofrendas to Banda Pilates + Sculpt at 12:30 PM. Prices and registration on Zeffy.",
     },
-    summary: "A full-body workout with Banda Cerro Azul playing live.",
-    summaryEs: "Un entrenamiento de cuerpo completo con Banda Cerro Azul tocando en vivo.",
+    summary: "A full-body workout with Vanessa and Veronica, and Banda Cerro Azul playing live.",
+    summaryEs: "Un entrenamiento de cuerpo completo con Vanessa y Veronica, y Banda Cerro Azul tocando en vivo.",
     description: [
       "Live Banda Pilates + Yoga Sculpt is a full-body workout with Banda Cerro Azul playing live.",
       "We move, sweat, and flow together, centering our community with love and intention.",
@@ -165,8 +178,8 @@ export const fallEvents = [
     note: "Limited mats will be available for rent, first come first served.",
     noteEs: "Habrá pocos mats para rentar, por orden de llegada.",
     lineup: ["Banda Cerro Azul"],
-    // Instructors deliberately not listed (see OPEN QUESTIONS).
-    people: [],
+    // Class leaders, first names only (Fez, 2026-10-26, project tracker).
+    people: ["Vanessa", "Veronica"],
     trackingKey: "live_banda_pilates",
   },
   {
@@ -267,15 +280,19 @@ export const halloweenAtLaVillita = {
 // banda class; Zeffy charges $15, see OPEN QUESTIONS). The two classes
 // point at their fall event (Zeffy form + waiver) via registration.eventId;
 // the ofrendas and the market have no form: "Free, open to all". `short`
-// is the compact title for the homepage spotlight's mini program.
+// is the compact title for the homepage spotlight's mini program. Leaders
+// and giveaways (hot drinks, Organic Life warm meals, Sharing Access grocery
+// bags while supplies last) confirmed by Fez 2026-10-26. `detail` keeps its
+// first word capitalised and any proper names as written (consumers that
+// fold it into a sentence lowercase the first letter only).
 export const halloweenProgram = [
   {
     time: "9:00 – 10:30 AM",
     title: "Ofrendas",
     short: "Ofrendas",
     titleEs: "Ofrendas",
-    detail: "Community altars",
-    detailEs: "Altares comunitarios",
+    detail: "Community altars + hot drinks",
+    detailEs: "Altares comunitarios + bebidas calientes",
     price: "Free, open to all",
     priceEs: "Gratis, abierto a todos",
     registration: null,
@@ -287,8 +304,8 @@ export const halloweenProgram = [
     title: "Kids Yoga class",
     short: "Kids yoga",
     titleEs: "Clase de yoga para niñas y niños",
-    detail: "A child-parent class in costume. Registration and waiver on Zeffy.",
-    detailEs: "Una clase para compartir en familia, con disfraz. Registro y waiver en Zeffy.",
+    detail: "With Ariesna and Lucia · a child-parent class in costume. Registration and waiver on Zeffy.",
+    detailEs: "Con Ariesna y Lucia · una clase para compartir en familia, con disfraz. Registro y waiver en Zeffy.",
     price: "Free registration",
     priceEs: "Registro gratuito",
     registration: { eventId: "kids-halloween-yoga" },
@@ -300,8 +317,8 @@ export const halloweenProgram = [
     title: "Banda Cerro Azul",
     short: "Banda Cerro Azul + trick or treat",
     titleEs: "Banda Cerro Azul",
-    detail: "Farmers market + trick or treat",
-    detailEs: "Mercado de agricultores + dulce o truco",
+    detail: "Farmers market + trick or treat · warm meals from Organic Life + grocery bags from Sharing Access, while supplies last",
+    detailEs: "Mercado de agricultores + dulce o truco · comida caliente de Organic Life + despensas de Sharing Access, mientras duren",
     price: "Free, open to all",
     priceEs: "Gratis, abierto a todos",
     registration: null,
@@ -313,8 +330,8 @@ export const halloweenProgram = [
     title: "Banda Pilates + Sculpt",
     short: "Banda Pilates + Sculpt",
     titleEs: "Pilates + Sculpt con banda",
-    detail: "With Banda Cerro Azul playing live. Registration and waiver on Zeffy.",
-    detailEs: "Con Banda Cerro Azul tocando en vivo. Registro y waiver en Zeffy.",
+    detail: "With Vanessa and Veronica · Banda Cerro Azul playing live. Registration and waiver on Zeffy.",
+    detailEs: "Con Vanessa y Veronica · Banda Cerro Azul tocando en vivo. Registro y waiver en Zeffy.",
     price: "$15",
     priceEs: "$15",
     registration: { eventId: "live-banda-pilates-yoga-sculpt" },
@@ -350,10 +367,52 @@ export const ddlmWeekend = {
       { name: "Kalpulli Xochykalli", detail: "6:00 PM · Danza Azteca" },
     ],
   },
-  // Class leaders by first name only, exactly as Zeffy writes them.
+  // Class leaders by first name only (Sunday exactly as Zeffy writes them;
+  // Saturday confirmed by Fez 2026-10-26 from his project tracker). `day`
+  // lets pages hide the Saturday pairs after halloweenEndISO (`pastAt`).
+  // `leaders[].avatar` is optional: a path under public/ (the Pop Up
+  // instructor headshots) or null until sourced; not rendered yet.
   classLeaders: [
-    { names: "Yaritza and Savannah", detail: "Gentle yoga · Sun 5:00 PM" },
-    { names: "Zoraida and Luz", detail: "Grief meditation + sound bowls · Sun 7:00 PM" },
+    {
+      names: "Yaritza and Savannah",
+      detail: "Gentle yoga · Sun 5:00 PM",
+      day: "sunday",
+      pastAt: null,
+      leaders: [
+        { name: "Yaritza", avatar: "images/popup/instructors/yaritza-jurado-160.webp" },
+        { name: "Savannah", avatar: "images/popup/instructors/savannah-alvarez-160.webp" },
+      ],
+    },
+    {
+      names: "Zoraida and Luz",
+      detail: "Grief meditation + sound bowls · Sun 7:00 PM",
+      day: "sunday",
+      pastAt: null,
+      leaders: [
+        { name: "Zoraida", avatar: null },
+        { name: "Luz", avatar: null },
+      ],
+    },
+    {
+      names: "Ariesna and Lucia",
+      detail: "Kids yoga · Sat 10:30 AM",
+      day: "saturday",
+      pastAt: halloweenEndISO,
+      leaders: [
+        { name: "Ariesna", avatar: null },
+        { name: "Lucia", avatar: null },
+      ],
+    },
+    {
+      names: "Vanessa and Veronica",
+      detail: "Banda Pilates + Sculpt · Sat 12:30 PM",
+      day: "saturday",
+      pastAt: halloweenEndISO,
+      leaders: [
+        { name: "Vanessa", avatar: "images/popup/instructors/vanessa-tirado-160.webp" },
+        { name: "Veronica", avatar: "images/popup/instructors/vero-quinones-160.webp" },
+      ],
+    },
   ],
   startsAtISO: "2026-10-31T09:00:00-05:00",
   endsAtISO: ddlmEvent.endsAtISO,

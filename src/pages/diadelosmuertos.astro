@@ -470,8 +470,10 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
         {/* ============================ LINEUP ============================ */}
         {/* Who's playing + who's leading, typographic only. Banda Cerro Azul
-            (Saturday) hides with the Saturday block. First names only for
-            the class leaders. Third and last use of the cempasúchil mark. */}
+            (Saturday) and the two Saturday class-leader pairs (Ariesna and
+            Lucia, Vanessa and Veronica) hide with the Saturday block. First
+            names only for the class leaders. Third and last use of the
+            cempasúchil mark. */}
         <section class="bg-white px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-16">
             <div class="mx-auto max-w-3xl border-t border-black/10 pt-12 sm:pt-14">
                 <div class="flex items-center gap-3">
@@ -502,8 +504,8 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             Leading the classes
                         </p>
                         <ul class="mt-4 space-y-5">
-                            {ddlmWeekend.classLeaders.map((c) => (
-                                <li>
+                            {ddlmWeekend.classLeaders.filter((c) => c.day !== "saturday" || satActive).map((c) => (
+                                <li data-fall-past-at={c.pastAt ?? undefined}>
                                     <p class="text-xl font-extrabold leading-tight">{c.names}</p>
                                     <p class="mt-1 text-sm text-medium-gray">{c.detail}</p>
                                 </li>

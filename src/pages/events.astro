@@ -171,7 +171,7 @@ const featuredSlugs = [
                 {fallSatFree.map((row) => (
                   <li>
                     <span class="font-extrabold">{row.time}</span>
-                    {` · ${row.title}, ${row.detail.toLowerCase()}`}
+                    {` · ${row.title}, ${row.detail.charAt(0).toLowerCase()}${row.detail.slice(1)}`}
                   </li>
                 ))}
               </ul>
