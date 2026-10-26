@@ -39,6 +39,8 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
 import DdlmCountdownChip from "@/components/DdlmCountdownChip.astro";
+import DdlmPicado from "@/components/DdlmPicado.astro";
+import { ORANGE, cempasuchil } from "@/lib/ddlmFlair";
 import {
     ddlmEvent as ddlm,
     ddlmWeekend,
@@ -119,88 +121,11 @@ const checkClass = "mt-0.5 h-4 w-4 shrink-0 accent-[#FF7A1A]";
 // ---------------------------------------------------------------------
 // Flair (flat cut-paper only): cempasúchil #FF7A1A plus ONE magenta,
 // #E6007E, which is reserved for the papel picado flags. No other colors.
+// Shared with the homepage #ddlm-weekend spotlight: src/lib/ddlmFlair.ts
+// (colors, picado geometry, cempasúchil mark) + src/components/DdlmPicado.astro.
 // ---------------------------------------------------------------------
-const ORANGE = "#FF7A1A";
-const MAGENTA = "#E6007E";
-
-// Papel picado: 13 flags in a 1280x52 viewBox, hung across the top edge of
-// the facts band. Widths vary so it never reads as a repeating tile. The
-// SVG uses "xMidYMin slice" at a fixed CSS height, so phones see fewer,
-// larger flags cropped at the sides (never a vertical squash). Cut-outs
-// are filled with the band's black ground.
-const PICADO_W = 1280;
-const PICADO_GAP = 16;
-const PICADO_WIDTHS = [78, 86, 74, 90, 80, 84, 76, 88, 72, 86, 80, 76, 84];
-const PICADO_MOTIFS = [
-    "ring",
-    "flower",
-    "lattice",
-    "diamond",
-    "ring",
-    "lattice",
-    "flower",
-    "diamond",
-    "lattice",
-    "flower",
-    "ring",
-    "diamond",
-    "flower",
-];
-const r2 = (n: number) => Math.round(n * 100) / 100;
-let picadoX =
-    (PICADO_W -
-        PICADO_WIDTHS.reduce((a, b) => a + b, 0) -
-        PICADO_GAP * (PICADO_WIDTHS.length - 1)) /
-    2;
-const PICADO_FLAGS = PICADO_WIDTHS.map((w, i) => {
-    const x = picadoX;
-    picadoX += w + PICADO_GAP;
-    // Body from y=2 to y=44, then a zig-zag cut edge down to y=50.
-    const teeth = Math.round(w / 9);
-    const tw = w / teeth;
-    let d = `M${r2(x)} 2H${r2(x + w)}V44`;
-    for (let k = 0; k < teeth; k++) {
-        d += `L${r2(x + w - (k + 0.5) * tw)} 50L${r2(x + w - (k + 1) * tw)} 44`;
-    }
-    d += "Z";
-    return {
-        d,
-        cx: r2(x + w / 2),
-        side: r2(w / 2 - 12),
-        fill: i % 2 === 0 ? ORANGE : MAGENTA,
-        motif: PICADO_MOTIFS[i],
-    };
-});
-const PETALS_8 = Array.from({ length: 8 }, (_, k) => {
-    const a = (k / 8) * Math.PI * 2;
-    return { x: r2(Math.cos(a) * 7.5), y: r2(Math.sin(a) * 7.5) };
-});
-const LATTICE = [-1, 0, 1].flatMap((a) =>
-    [-1, 0, 1].map((b) => ({ x: r2((a - b) * 5.5), y: r2((a + b) * 5.5) })),
-);
-const diamond = (x: number, y: number, h: number) =>
-    `${r2(x)},${r2(y - h)} ${r2(x + h)},${r2(y)} ${r2(x)},${r2(y + h)} ${r2(x - h)},${r2(y)}`;
-
-// Cempasúchil mark: three stacked scalloped layers (orange, ground,
-// orange) and a ground-colored center, like layered cut paper. Used
-// three times: the "Recordar juntos" eyebrow, the lineup eyebrow and the
-// volunteer success state.
-function scallop(n: number, ringR: number, petalR: number, rot: number) {
-    return Array.from({ length: n }, (_, k) => {
-        const a = (k / n) * Math.PI * 2 + rot;
-        return `<circle cx="${r2(Math.cos(a) * ringR)}" cy="${r2(Math.sin(a) * ringR)}" r="${petalR}"/>`;
-    }).join("");
-}
-function cempasuchil(ground: string) {
-    return (
-        `<svg viewBox="-16 -16 32 32" class="block h-full w-full" aria-hidden="true" focusable="false">` +
-        `<g fill="${ORANGE}"><circle r="10.5"/>${scallop(12, 11, 4, 0)}</g>` +
-        `<g fill="${ground}"><circle r="6.8"/>${scallop(10, 7.2, 2.4, Math.PI / 10)}</g>` +
-        `<g fill="${ORANGE}"><circle r="4.2"/>${scallop(8, 4.6, 1.7, Math.PI / 8)}</g>` +
-        `<circle r="1.8" fill="${ground}"/>` +
-        `</svg>`
-    );
-}
+// Cempasúchil mark, used three times: the "Recordar juntos" eyebrow, the
+// lineup eyebrow and the volunteer success state.
 const CEMPA_ON_WHITE = cempasuchil("#FFFFFF");
 const CEMPA_ON_BLACK = cempasuchil("#000000");
 
@@ -366,67 +291,10 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         <section
             class="relative bg-black px-4 pb-14 pt-16 text-white sm:px-6 sm:pb-16 sm:pt-20 lg:pt-24"
         >
-            {/* Papel picado strung along the top edge of the band. Fixed
-                height per breakpoint (32 / 40 / 52px); the cord is a
-                full-width hairline so it never ends where the flags crop. */}
-            <div
-                class="pointer-events-none absolute inset-x-0 top-0 overflow-hidden"
-                aria-hidden="true"
-            >
-                <div class="absolute inset-x-0 top-[2px] h-px bg-white/40"></div>
-                <svg
-                    viewBox="0 0 1280 52"
-                    preserveAspectRatio="xMidYMin slice"
-                    class="relative mx-auto block h-8 w-full max-w-[1280px] sm:h-10 lg:h-[52px]"
-                    focusable="false"
-                >
-                    {PICADO_FLAGS.map((f) => (
-                        <g>
-                            <path d={f.d} fill={f.fill} />
-                            <g transform={`translate(${f.cx} 23)`} fill="#000">
-                                {f.motif === "flower" && (
-                                    <>
-                                        {PETALS_8.map((p) => (
-                                            <circle cx={p.x} cy={p.y} r="2.6" />
-                                        ))}
-                                        <circle r="3" />
-                                        <polygon points={diamond(-f.side, 0, 3.5)} />
-                                        <polygon points={diamond(f.side, 0, 3.5)} />
-                                    </>
-                                )}
-                                {f.motif === "diamond" && (
-                                    <>
-                                        <polygon points={diamond(0, 0, 12)} />
-                                        <circle r="3.2" fill={f.fill} />
-                                        <circle cx={-f.side} cy="-9" r="2" />
-                                        <circle cx={f.side} cy="-9" r="2" />
-                                        <circle cx={-f.side} cy="9" r="2" />
-                                        <circle cx={f.side} cy="9" r="2" />
-                                    </>
-                                )}
-                                {f.motif === "lattice" && (
-                                    <>
-                                        {LATTICE.map((p) => (
-                                            <polygon points={diamond(p.x, p.y, 2.7)} />
-                                        ))}
-                                        <circle cx={-f.side} r="3" />
-                                        <circle cx={f.side} r="3" />
-                                    </>
-                                )}
-                                {f.motif === "ring" && (
-                                    <>
-                                        <circle r="10" />
-                                        <circle r="5.5" fill={f.fill} />
-                                        <circle r="1.8" />
-                                        <polygon points={diamond(-f.side, 0, 3)} />
-                                        <polygon points={diamond(f.side, 0, 3)} />
-                                    </>
-                                )}
-                            </g>
-                        </g>
-                    ))}
-                </svg>
-            </div>
+            {/* Papel picado strung along the top edge of the band
+                (src/components/DdlmPicado.astro: fixed height per
+                breakpoint, full-width cord). */}
+            <DdlmPicado ground="#000000" />
             <dl class="mx-auto grid max-w-5xl gap-8 sm:grid-cols-3 sm:gap-6">
                 <div class="border-t border-white/20 pt-4">
                     <dt

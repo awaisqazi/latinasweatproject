@@ -1,0 +1,104 @@
+---
+// Papel picado row (Día de los Muertos identity, src/lib/ddlmFlair.ts):
+// 13 flat orange/magenta flags strung on a full-width white/40 cord along
+// the TOP edge of the host. The host must be `position: relative` (and
+// should clip with overflow-hidden). Fixed height per breakpoint
+// (32 / 40 / 52px) with "xMidYMin slice", so phones see fewer, larger flags
+// cropped at the sides, never a vertical squash; the cord is a separate
+// full-width hairline so it never ends where the flags crop.
+//   ground: the color the cut-outs are punched in (the host's ground).
+//   sway:   each flag swings gently from its top edge (9s, staggered),
+//           only under prefers-reduced-motion: no-preference.
+// Used by /diadelosmuertos (facts band) and the homepage #ddlm-weekend.
+import { PICADO_FLAGS, PETALS_8, LATTICE, diamond } from "@/lib/ddlmFlair";
+
+interface Props {
+  ground?: string;
+  sway?: boolean;
+  class?: string;
+}
+const { ground = "#000000", sway = false, class: className } = Astro.props;
+---
+
+<div
+  class:list={["pointer-events-none absolute inset-x-0 top-0 overflow-hidden", className]}
+  aria-hidden="true"
+>
+  <div class="absolute inset-x-0 top-[2px] h-px bg-white/40"></div>
+  <svg
+    viewBox="0 0 1280 52"
+    preserveAspectRatio="xMidYMin slice"
+    class="relative mx-auto block h-8 w-full max-w-[1280px] sm:h-10 lg:h-[52px]"
+    focusable="false"
+  >
+    {PICADO_FLAGS.map((f, i) => (
+      <g
+        class:list={[sway && "ddlm-picado-flag"]}
+        style={sway ? `animation-delay: -${(i * 1.3) % 9}s;` : undefined}
+      >
+        <path d={f.d} fill={f.fill} />
+        <g transform={`translate(${f.cx} 23)`} fill={ground}>
+          {f.motif === "flower" && (
+            <>
+              {PETALS_8.map((p) => (
+                <circle cx={p.x} cy={p.y} r="2.6" />
+              ))}
+              <circle r="3" />
+              <polygon points={diamond(-f.side, 0, 3.5)} />
+              <polygon points={diamond(f.side, 0, 3.5)} />
+            </>
+          )}
+          {f.motif === "diamond" && (
+            <>
+              <polygon points={diamond(0, 0, 12)} />
+              <circle r="3.2" fill={f.fill} />
+              <circle cx={-f.side} cy="-9" r="2" />
+              <circle cx={f.side} cy="-9" r="2" />
+              <circle cx={-f.side} cy="9" r="2" />
+              <circle cx={f.side} cy="9" r="2" />
+            </>
+          )}
+          {f.motif === "lattice" && (
+            <>
+              {LATTICE.map((p) => (
+                <polygon points={diamond(p.x, p.y, 2.7)} />
+              ))}
+              <circle cx={-f.side} r="3" />
+              <circle cx={f.side} r="3" />
+            </>
+          )}
+          {f.motif === "ring" && (
+            <>
+              <circle r="10" />
+              <circle r="5.5" fill={f.fill} />
+              <circle r="1.8" />
+              <polygon points={diamond(-f.side, 0, 3)} />
+              <polygon points={diamond(f.side, 0, 3)} />
+            </>
+          )}
+        </g>
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  /* Each flag swings from the middle of its top edge, like paper on a
+     string in a light breeze. Static under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ddlm-picado-flag {
+      transform-box: fill-box;
+      transform-origin: 50% 0;
+      animation: ddlm-picado-sway 9s ease-in-out infinite;
+    }
+  }
+  @keyframes ddlm-picado-sway {
+    0%,
+    100% {
+      transform: rotate(-2deg);
+    }
+    50% {
+      transform: rotate(2deg);
+    }
+  }
+</style>

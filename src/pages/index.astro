@@ -3,13 +3,16 @@
 // below the crafted hero -> gala seam the light/dark cadence strictly
 // alternates:
 //   1. Hero [D]
-//   1b. Día de los Muertos weekend spotlight [L] (#ddlm-weekend, Oct 26
-//      2026 addition, media RIGHT): sits at slot 2 until the weekend is
-//      over (Nov 1 2026, 9 PM CST; build time + data-fall-past-at), so
-//      that week the cadence reads hero D, DDLM L, gala D, recap band L...
-//      and the hero -> gala gold seam below is interrupted BY DESIGN (the
-//      gala section's own seam styling is unchanged and returns on its own
-//      once this section is gone).
+//   1b. Día de los Muertos weekend spotlight [D] (#ddlm-weekend, Oct 26
+//      2026 addition; redesigned the same day as a DARK, full-bleed
+//      spotlight in the /diadelosmuertos identity: festival art behind,
+//      papel picado along the top edge, copy and program LEFT): sits at
+//      slot 2 until the weekend is over (Nov 1 2026, 9 PM CST; build time
+//      + data-fall-past-at). That week hero -> DDLM -> gala are THREE dark
+//      sections in a row, by design for the signature event (the picado
+//      row marks the hero seam; the gala section's own gold seam styling is
+//      unchanged). Once this section is gone the old cadence below returns
+//      on its own.
 //   2. Annual Gala 2026 recap spotlight [D]  <- crafted gold seam, the
 //      page's one deliberate dark/dark junction (documented exception).
 //      Post-gala (Sep 26 2026) the slot and theme are unchanged; only the
@@ -72,6 +75,8 @@ import FinishLineClient from "@/components/FinishLineClient.astro";
 import FallEventCard from "@/components/FallEventCard.astro";
 import FallEventsClient from "@/components/FallEventsClient.astro";
 import DdlmCountdownChip from "@/components/DdlmCountdownChip.astro";
+import DdlmPicado from "@/components/DdlmPicado.astro";
+import { cempasuchil } from "@/lib/ddlmFlair";
 import {
   fallEvents,
   ddlmEvent,
@@ -155,6 +160,22 @@ const ddlmStartLabel = (range) => {
   const [first, last = first] = range.split(" – ");
   return /(AM|PM)$/.test(first) ? first : `${first} ${last.match(/(AM|PM)$/)?.[1] ?? ""}`.trim();
 };
+// Cempasúchil mark (src/lib/ddlmFlair.ts), once in the spotlight eyebrow.
+const CEMPA_ON_BLACK = cempasuchil("#000000");
+// Drifting cempasúchil petals over the spotlight (desktop only,
+// motion-safe; same mechanism as galaMotes, flat orange, no glow). Sizes
+// 3 – 6px and opacity 0.15 – 0.45, echoing the /diadelosmuertos petal
+// path. Negative delays so the field is already scattered on load.
+const ddlmPetals = Array.from({ length: 16 }, (_, i) => ({
+  left: (i * 37 + 9) % 100,
+  bottom: (i * 23) % 45,
+  size: 3 + ((i * 7) % 4),
+  opacity: Math.round((0.15 + ((i * 5) % 7) * 0.05) * 100) / 100,
+  duration: 18 + (i % 5) * 3,
+  delay: -((i * 2.3) % 18).toFixed(1),
+  drift: (i % 2 === 0 ? 1 : -1) * (18 + (i % 4) * 12),
+  rise: 240 + (i % 3) * 90,
+}));
 // Pop Up week pills while the DDLM pill shows: weeks that end before the
 // weekend does are dropped; the rest render hidden with NO
 // popUpWeekWindow attributes (PopUpWeekClient would otherwise re-show them
@@ -273,99 +294,156 @@ const heroPopUpWeeks = popUpWeeksActive
     {/* END: Hero Section */}
 
     {/* START: Día de los Muertos weekend spotlight (Oct 26 2026; slot 2
-        until Nov 1 9 PM CST, see the section-order note at the top). LIGHT
-        on purpose: white ground, black Rubik, cempasúchil #FF7A1A as the
-        only accent, so the cadence below still alternates (hero D, this L,
-        gala D, recap band L). Media RIGHT on desktop (the festival art),
-        media on top on phones. Copy, mini program and prices come from
-        src/data/fallEvents.js (Zeffy prices). The Saturday column and the
-        two Saturday class links hide after Oct 31 1:00 PM CDT; the whole
-        section after Nov 1 9 PM CST (build time + FallEventsClient). */}
+        until Nov 1 9 PM CST, see the section-order note at the top). DARK,
+        full-bleed, in the /diadelosmuertos identity: true black, Rubik,
+        cempasúchil #FF7A1A as the one accent, flat magenta only inside the
+        papel picado flags (src/components/DdlmPicado.astro, strung along
+        the top edge, flags swaying when motion is allowed). The festival
+        art covers the section on lg (black washes: top for the flags,
+        bottom-up and left-to-right for the copy); on phones it is a 16:9
+        band fading into black with the copy below. Copy column LEFT
+        (type max ~34 – 38rem, panel up to 44rem on xl) with the program
+        panel UNDER it: the Catrina on horseback sits at about 63 – 72%
+        across and down to ~80% of the art, so a right-half panel would
+        cover the horse. Sparse orange petals drift up on lg (motion-safe,
+        .home-ddlm-petal below). Copy, mini program
+        and prices come from src/data/fallEvents.js (Zeffy prices). The
+        Saturday column and the two Saturday class links hide after Oct 31
+        1:00 PM CDT (the program grid is auto-fit, so it collapses to one
+        column on its own); the whole section after Nov 1 9 PM CST (build
+        time + FallEventsClient). The art is a link (mouse only, like the
+        old image tile); on lg the content layer passes clicks through
+        everywhere except the copy column. */}
     {ddlmActive && (
       <section
         id="ddlm-weekend"
-        class="relative scroll-mt-28 bg-white py-14 text-black sm:py-20"
+        class="relative isolate scroll-mt-28 overflow-hidden bg-black font-rubik text-white lg:flex lg:min-h-[80vh] lg:flex-col lg:justify-end"
         data-fall-past-at={ddlmEvent.endsAtISO}
       >
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
-            {/* Media (RIGHT on desktop, first on phones) */}
-            <a
-              href={ddlmPageUrl}
-              class="block overflow-hidden rounded-2xl bg-black lg:order-2"
-              tabindex="-1"
-              aria-hidden="true"
-              data-conversion-event="ddlm_page_click"
-              data-conversion-context="home_ddlm_spotlight_image"
-            >
-              <img
-                src={`${base}images/ddlm/ddlm-2026-festival.jpg`}
-                width="1600"
-                height="899"
-                alt=""
-                loading="lazy"
-                decoding="async"
-                class="aspect-[16/9] h-full w-full object-cover object-[50%_30%] transition-transform duration-500 hover:scale-[1.02]"
-              />
-            </a>
+        {/* Festival art: 16:9 band on phones, full-bleed cover on lg.
+            Eager: it sits right under the hero. */}
+        <a
+          href={ddlmPageUrl}
+          class="relative block aspect-[16/9] w-full overflow-hidden lg:absolute lg:inset-0 lg:aspect-auto"
+          tabindex="-1"
+          aria-hidden="true"
+          data-conversion-event="ddlm_page_click"
+          data-conversion-context="home_ddlm_spotlight_image"
+        >
+          <img
+            src={`${base}images/ddlm/ddlm-2026-festival.jpg`}
+            width="1600"
+            height="899"
+            alt=""
+            decoding="async"
+            class="absolute inset-0 h-full w-full object-cover object-[50%_30%]"
+          />
+          <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/80 to-transparent sm:h-20 lg:h-32"
+            aria-hidden="true"
+          >
+          </div>
+          <div
+            class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent lg:h-3/5 lg:via-black/40"
+            aria-hidden="true"
+          >
+          </div>
+          <div
+            class="pointer-events-none absolute inset-y-0 left-0 hidden w-2/3 bg-gradient-to-r from-black/70 to-transparent lg:block"
+            aria-hidden="true"
+          >
+          </div>
+        </a>
 
-            {/* Copy (LEFT on desktop) */}
-            <div class="font-rubik lg:order-1">
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-black/60 sm:text-sm">
-                {ddlmSatActive && (
-                  <span data-fall-past-at={halloweenEndISO}>
-                    {`${ddlmWeekend.dateLabel} · ${ddlmEvent.venue} · ${ddlmEvent.address}`}
+        <DdlmPicado ground="#000000" sway class="z-10" />
+
+        {/* Drifting cempasúchil petals: desktop only, invisible (static)
+            under prefers-reduced-motion, see .home-ddlm-petal below. */}
+        <div
+          class="pointer-events-none absolute inset-0 z-[5] hidden overflow-hidden lg:block"
+          aria-hidden="true"
+        >
+          {ddlmPetals.map((p) => (
+            <span
+              class="home-ddlm-petal absolute rounded-full bg-[#FF7A1A]"
+              style={`left: ${p.left}%; bottom: ${p.bottom}%; width: ${p.size}px; height: ${p.size}px; --drift: ${p.drift}px; --rise: ${p.rise}px; --peak: ${p.opacity}; animation-duration: ${p.duration}s; animation-delay: ${p.delay}s;`}
+            />
+          ))}
+        </div>
+
+        <div class="relative z-10 w-full lg:pointer-events-none">
+          <div class="mx-auto max-w-7xl px-4 pb-14 pt-1 sm:px-6 sm:pb-16 sm:pt-3 lg:px-8 lg:pb-20 lg:pt-32">
+            <div class="lg:pointer-events-auto lg:max-w-[38rem] xl:max-w-[44rem]">
+              {/* Eyebrow: the weekend until Saturday's last class ends,
+                  then Sunday only. The countdown chip is filled in the
+                  browser (hidden without JS and after the weekend). */}
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span class="h-7 w-7 shrink-0" set:html={CEMPA_ON_BLACK} />
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#FF7A1A] sm:text-sm">
+                  {ddlmSatActive && (
+                    <span data-fall-past-at={halloweenEndISO}>
+                      {`${ddlmWeekend.dateLabel} · ${ddlmEvent.venue}`}
+                    </span>
+                  )}
+                  <span
+                    hidden={ddlmSatActive}
+                    data-fall-show-past-at={halloweenEndISO}
+                    data-fall-past-at={ddlmEvent.endsAtISO}
+                  >
+                    {`${ddlmEvent.dayShort} ${ddlmEvent.dateLabel} · ${ddlmEvent.venue}`}
                   </span>
-                )}
-                <span
-                  hidden={ddlmSatActive}
-                  data-fall-show-past-at={halloweenEndISO}
-                  data-fall-past-at={ddlmEvent.endsAtISO}
-                >
-                  {`${ddlmEvent.dayShort} ${ddlmEvent.dateLabel} · ${ddlmEvent.venue} · ${ddlmEvent.address}`}
+                </p>
+                <DdlmCountdownChip class="rounded-full border border-white/30 bg-black/50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-white" />
+              </div>
+
+              <h2 class="mt-4 max-w-[34rem] text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
+                {ddlmWeekend.sundayLabel}
+                <span class="mt-3 block text-sm font-semibold uppercase leading-none tracking-[0.22em] text-white/80 sm:text-base">
+                  Fin de semana · weekend
                 </span>
-              </p>
-              <h2 class="mt-3 text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
-                {ddlmWeekend.title}
               </h2>
-              <p class="mt-3">
-                <DdlmCountdownChip class="inline-block rounded-full border border-black/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-black" />
-              </p>
-              <p class="mt-4 max-w-xl text-base leading-relaxed text-black/75 sm:text-lg">
+              <p class="mt-5 max-w-[38rem] text-base leading-relaxed text-white/85 sm:text-lg">
                 {ddlmWeekend.summary}
               </p>
+              <p class="mt-2 text-sm text-white/70">
+                {ddlmEvent.venue} · {ddlmEvent.address}
+              </p>
 
-              {/* Mini program: Saturday | Sunday */}
-              <div class="mt-7 grid gap-6 border-y border-black/10 py-5 sm:grid-cols-2 sm:gap-8">
-                {ddlmSatActive && (
-                  <div data-fall-past-at={halloweenEndISO}>
-                    <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em]">
+              {/* Mini program: Saturday | Sunday on a translucent panel.
+                  auto-fit columns: two side by side when there is room,
+                  one on phones, and one once Saturday has hidden itself. */}
+              <div class="mt-7 rounded-2xl bg-black/60 p-5 ring-1 ring-white/15 backdrop-blur-md sm:p-6">
+                <div class="grid grid-cols-[repeat(auto-fit,minmax(13.5rem,1fr))] gap-x-8 gap-y-6">
+                  {ddlmSatActive && (
+                    <div data-fall-past-at={halloweenEndISO}>
+                      <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white">
+                        <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                        Sat Oct 31
+                      </p>
+                      <ul class="mt-3 space-y-1.5 text-sm">
+                        {halloweenProgram.map((row) => (
+                          <li class="grid grid-cols-[4.5rem_1fr] gap-2">
+                            <span class="font-bold text-white">{ddlmStartLabel(row.time)}</span>
+                            <span class="text-white/85">{row.short}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div>
+                    <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white">
                       <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
-                      Sat Oct 31
+                      Sun Nov 1
                     </p>
                     <ul class="mt-3 space-y-1.5 text-sm">
-                      {halloweenProgram.map((row) => (
-                        <li class="grid grid-cols-[5.25rem_1fr] gap-2">
-                          <span class="font-bold">{ddlmStartLabel(row.time)}</span>
-                          <span class="text-black/75">{row.short}</span>
+                      {ddlmEvent.runOfShow.map((row) => (
+                        <li class="grid grid-cols-[4.5rem_1fr] gap-2">
+                          <span class="font-bold text-white">{ddlmStartLabel(row.time)}</span>
+                          <span class="text-white/85">{row.title === "End" ? "End" : row.title.replace(/^Stages of grief meditation/, "Grief meditation")}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                )}
-                <div>
-                  <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em]">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
-                    Sun Nov 1
-                  </p>
-                  <ul class="mt-3 space-y-1.5 text-sm">
-                    {ddlmEvent.runOfShow.map((row) => (
-                      <li class="grid grid-cols-[5.25rem_1fr] gap-2">
-                        <span class="font-bold">{ddlmStartLabel(row.time)}</span>
-                        <span class="text-black/75">{row.title === "End" ? "End" : row.title.replace(/^Stages of grief meditation/, "Grief meditation")}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               </div>
 
@@ -374,14 +452,14 @@ const heroPopUpWeeks = popUpWeeksActive
                   href={ddlmEvent.ticketsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-block rounded-full bg-[#FF7A1A] px-7 py-3 text-sm font-bold text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                  class="inline-flex min-h-11 items-center rounded-full bg-[#FF7A1A] px-7 py-3 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   {...fallConversionAttrs(ddlmEvent, "home_ddlm_spotlight")}
                 >
                   Get tickets · $20
                 </a>
                 <a
                   href={ddlmPageUrl}
-                  class="inline-block rounded-full border border-black px-7 py-3 text-sm font-bold text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2"
+                  class="inline-flex min-h-11 items-center rounded-full border border-white/70 px-7 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   data-conversion-event="ddlm_page_click"
                   data-conversion-context="home_ddlm_spotlight"
                 >
@@ -389,7 +467,7 @@ const heroPopUpWeeks = popUpWeeksActive
                 </a>
               </div>
               {ddlmSatActive && (
-                <p class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold" data-fall-past-at={halloweenEndISO}>
+                <p class="mt-3 flex flex-wrap gap-x-5 text-sm font-bold" data-fall-past-at={halloweenEndISO}>
                   {[
                     { e: ddlmKids, label: "Kids yoga · free registration" },
                     { e: ddlmBanda, label: "Banda Pilates + Sculpt · $15" },
@@ -398,7 +476,7 @@ const heroPopUpWeeks = popUpWeeksActive
                       href={e.ticketsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black/70"
+                      class="inline-flex min-h-11 items-center text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 transition hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                       data-fall-past-at={e.endsAtISO}
                       {...fallConversionAttrs(e, "home_ddlm_spotlight")}
                     >
@@ -2501,6 +2579,41 @@ const heroPopUpWeeks = popUpWeeksActive
         }
         100% {
           transform: translate(var(--drift, 0px), -320px);
+          opacity: 0;
+        }
+      }
+
+      /* Drifting cempasúchil petals over the Día de los Muertos spotlight.
+         Flat orange (no glow), invisible unless motion is allowed,
+         desktop-only in the markup. */
+      .home-ddlm-petal {
+        opacity: 0;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .home-ddlm-petal {
+          animation-name: home-ddlm-drift;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+      }
+
+      @keyframes home-ddlm-drift {
+        0% {
+          transform: translate(0, 0);
+          opacity: 0;
+        }
+        15% {
+          opacity: var(--peak, 0.3);
+        }
+        50% {
+          transform: translate(calc(var(--drift, 0px) * -0.4), calc(var(--rise, 280px) * -0.5));
+        }
+        85% {
+          opacity: var(--peak, 0.3);
+        }
+        100% {
+          transform: translate(var(--drift, 0px), calc(var(--rise, 280px) * -1));
           opacity: 0;
         }
       }
