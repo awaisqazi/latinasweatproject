@@ -74,3 +74,6 @@ docs/taxes-990-2025/
 
 # Gala 2026 planning docs (local only, may reference guest data)
 docs/gala-2026/
+
+# downloaded OFL fonts for local sharp/librsvg renders (fetched by scripts/render-committee-og.mjs)
+scripts/fonts/

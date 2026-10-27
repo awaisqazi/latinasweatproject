@@ -37,11 +37,54 @@
 // Every question except "Comments and/or questions" is required form-side,
 // so the page validates all of them before it sends.
 //
-// Look: the plain studio site. White ground, Rubik only, off-black text,
-// one accent (accent-gold #ffbd59) for the progress bar, focus rings,
-// selected options and the primary button. Sentence case, no em dashes.
+// IDENTITY: "candlelit rose" from /graduation (restyled 2026-10-27; the first
+// build was the plain white studio look and Fez called it "functional but
+// looks really boring"). The audience is the same cohort on its graduation
+// night, so the page reuses that night's look to say "you graduated, now come
+// build with us". The rules carried over from graduation.astro:
+//   - Display type is FRAUNCES (loaded globally in Layout.astro). Questions,
+//     labels and body stay Rubik.
+//   - NO hairline rules and NO gradient bars. Dividers are candle-bokeh dot
+//     rows (`.cm-sep`), the progress is a row of five candle dots, and the
+//     ornaments are soft glow orbs, cream photo mats and pill shapes.
+//   - Gold stays soft: #f0c57c for accents and glows, #d79b47 for CTA fills,
+//     checkbox/radio accents and selected options only.
+// Layout: deep rose-ink ground; a copy band (pill, headline, one line) and
+// BELOW it a full-width hero photo with only a light rose wash, so the cohort
+// is clearly seen; a cream form card that overlaps only the floor at the
+// bottom of that photo (2.5rem).
+// OVERLAY RULE (Fez): text and cards never cover faces. No copy sits on the
+// photo at any size, and the card overlaps only the floor. Re-check at 375
+// and 1440 if the photo or the hero heights in the style block change.
+//
+// PHOTOS (all from public/images/graduation/, the 2026-08-07 ceremony; every
+// file is under 400 KB, so no resized copies were needed). Never caption or
+// alt-text anyone by name.
+//   hero     hero.jpg  the 2025 + 2026 cohorts holding their certificates
+//   step 1   g02.jpg   arrivals: diploma folder, sunflowers, disco ball
+//   step 2   g14.jpg   the crowded group selfie
+//   step 3   g03.jpg   two people talking over coffee and a laptop
+//   step 4   g06.jpg   guests with hands over their hearts
+//   step 5   g09.jpg   the room applauding a hug
+//   success  g16.jpg   the whole group together in pink light
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+
+const base = import.meta.env.BASE_URL;
+const img = (file) => `${base}images/graduation/${file}`;
+
+// One candid per step, in step order (all landscape 1024x683).
+const STEP_PHOTOS = {
+    1: { file: "g02.jpg", pos: "50% 50%", alt: "A graduate holds her diploma folder, talking with two friends beside a counter of sunflowers, a disco ball overhead." },
+    2: { file: "g14.jpg", pos: "55% 50%", alt: "Graduates and guests pack into a group selfie, everyone leaning in and laughing." },
+    3: { file: "g03.jpg", pos: "55% 50%", alt: "Two people talk across a table of iced coffees, a sticker-covered laptop open between them." },
+    4: { file: "g06.jpg", pos: "62% 50%", alt: "Guests stand along the studio wall in pink light, hands pressed over their hearts." },
+    5: { file: "g09.jpg", pos: "45% 50%", alt: "The room applauds as two graduates embrace, candles glowing along the floor." },
+};
+const SUCCESS_PHOTO = {
+    file: "g16.jpg",
+    alt: "The graduating group poses together in warm pink light, gold and white balloons on the floor around them.",
+};
 
 // ---------------------------------------------------------------------
 // Committees and their leads (edit names here). `name` is the Google Form
@@ -105,59 +148,82 @@ const splitLabel = (opt) => {
 
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
 
-const inputClass =
-    "mt-2 block w-full rounded-lg border border-black/20 bg-white px-4 py-3 text-base text-off-black placeholder:text-black/40 focus:border-off-black focus:outline-none focus:ring-[3px] focus:ring-accent-gold/70 aria-[invalid=true]:border-red-600";
-const optionClass =
-    "flex w-full cursor-pointer items-start gap-3 rounded-lg border border-black/15 bg-white px-4 py-3.5 text-off-black transition-colors hover:border-black/40 has-[:checked]:border-accent-gold has-[:checked]:bg-accent-gold/10 has-[:checked]:shadow-[inset_0_0_0_1px_#ffbd59] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-accent-gold/70";
-const checkClass = "mt-1 h-4 w-4 shrink-0 accent-off-black";
-const labelClass = "block text-base font-bold";
-const legendClass = "text-base font-bold";
-const helpClass = "mt-1 text-sm text-medium-gray";
-const fieldErrorClass = "mt-2 hidden text-sm font-semibold text-red-700";
-const stepHeadingClass = "text-2xl font-extrabold tracking-tight focus:outline-none sm:text-3xl";
-const primaryBtn =
-    "rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black transition-colors hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
-const secondaryBtn =
-    "rounded-full border border-black/20 bg-white px-6 py-3 text-base font-bold text-off-black transition-colors hover:border-off-black focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 focus-visible:ring-offset-2";
-const textBtn =
-    "text-sm font-semibold text-medium-gray underline decoration-black/20 underline-offset-4 hover:text-off-black hover:decoration-accent-gold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 rounded";
+// Presentational classes (all defined in the style block below, scoped to
+// .cm-page / #cm-*). `hidden` on the error lines is the script's toggle.
+const inputClass = "cm-input mt-2 block w-full";
+const optionClass = "cm-option";
+const checkClass = "cm-check";
+const labelClass = "cm-label block";
+const legendClass = "cm-label";
+const helpClass = "cm-help mt-1";
+const fieldErrorClass = "cm-err mt-2 hidden";
+const stepHeadingClass = "cm-step-title";
+const primaryBtn = "cm-btn cm-btn--gold";
+const secondaryBtn = "cm-btn cm-btn--cream";
+const textBtn = "cm-textbtn";
 ---
 
 <Layout
     title="Committee interest | The Latina Sweat Project"
     description="For the YTT 2026 cohort: tell LSP leadership and the Junior Board where you'd fit on an LSP committee."
     robots="noindex, nofollow"
+    socialImage="images/committee/committee-og.jpg"
+    socialImageAlt="Join a committee: the LSP Yoga Teacher Training cohort holding their certificates at the studio in Pilsen."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
 >
     <Header />
-    <main class="min-h-screen overflow-x-clip bg-white font-sans text-off-black">
+    <main class="cm-page min-h-screen overflow-x-clip font-sans">
         {/* ============================== HERO ============================== */}
-        <section class="px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-12">
-            <div class="mx-auto max-w-2xl">
-                <p class="text-sm font-semibold text-medium-gray">YTT 2026 cohort</p>
-                <h1 class="mt-2 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
-                    Join a committee
-                </h1>
-                <p class="mt-4 text-lg leading-relaxed text-off-black/80">
-                    You asked to get more involved. Tell us where you'd fit, and
-                    LSP leadership and the Junior Board will place you.
+        <section class="cm-hero" aria-labelledby="cm-title">
+            {/* Candle bokeh in the ink band above the photo (never on the people). */}
+            <div class="cm-candles" aria-hidden="true">
+                <span style="--x: 7%; --y: 10%; --s: 13px; --o: 0.5;"></span>
+                <span style="--x: 22%; --y: 26%; --s: 8px; --o: 0.32;"></span>
+                <span style="--x: 74%; --y: 8%; --s: 10px; --o: 0.36;"></span>
+                <span style="--x: 90%; --y: 22%; --s: 15px; --o: 0.42;"></span>
+                <span style="--x: 58%; --y: 30%; --s: 7px; --o: 0.26;"></span>
+            </div>
+
+            <div class="cm-hero-copy">
+                <p class="cm-pill">YTT 2026 cohort</p>
+                <h1 id="cm-title" class="cm-hero-title">Join a <em>committee</em></h1>
+                <p class="cm-hero-lede">
+                    You graduated. Now come build with us: tell us where you'd
+                    fit, and we'll place you on a committee.
                 </p>
+            </div>
+
+            <div class="cm-hero-photo">
+                <img
+                    src={img("hero.jpg")}
+                    width="1024"
+                    height="683"
+                    alt="The 2025 and 2026 cohorts pose in two rows across the studio, nearly everyone holding a framed certificate."
+                    fetchpriority="high"
+                    decoding="async"
+                />
             </div>
         </section>
 
         {/* ============================== FORM ============================== */}
-        <section class="px-4 pb-16 sm:px-6 sm:pb-20">
-            <div class="mx-auto max-w-2xl">
-                <div id="cm-card">
+        <section class="cm-form-section">
+            <div class="cm-orb cm-orb--rose" aria-hidden="true"></div>
+            <div class="cm-orb cm-orb--gold" aria-hidden="true"></div>
+
+            <div class="cm-shell">
+                <div id="cm-card" class="cm-card">
                     {/* Draft banner: shown by the script when a saved draft is restored. */}
-                    <div id="cm-draft" hidden role="status" class="mb-6 rounded-xl border border-black/15 px-4 py-4 sm:px-5">
-                        <p class="text-base font-semibold">
+                    <div id="cm-draft" hidden role="status" class="cm-draft">
+                        <p class="cm-draft-text">
                             We saved your answers from <span id="cm-draft-when">a moment ago</span>.
                         </p>
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <button id="cm-draft-resume" type="button" class:list={[primaryBtn, "px-5 py-2 text-sm"]}>
+                            <button id="cm-draft-resume" type="button" class:list={[primaryBtn, "cm-btn--small"]}>
                                 Pick up where I left off
                             </button>
-                            <button id="cm-draft-reset" type="button" class:list={[secondaryBtn, "px-5 py-2 text-sm"]}>
+                            <button id="cm-draft-reset" type="button" class:list={[secondaryBtn, "cm-btn--small"]}>
                                 Start over
                             </button>
                         </div>
@@ -172,36 +238,47 @@ const textBtn =
                             <input id="cm-website" name="website" type="text" tabindex="-1" autocomplete="off" />
                         </div>
 
-                        {/* Progress: sticks under the fixed site header (top set by the script). */}
-                        <div id="cm-progress" class="cm-progress sticky z-30 -mx-4 bg-white px-4 pb-4 pt-3 sm:mx-0 sm:px-0">
-                            <p id="cm-progress-label" class="text-sm font-semibold text-medium-gray">
-                                Step 1 of 5 · About 2 minutes left
-                            </p>
-                            <div
-                                id="cm-progressbar"
-                                role="progressbar"
-                                aria-label="Form progress"
-                                aria-valuemin="1"
-                                aria-valuemax="5"
-                                aria-valuenow="1"
-                                aria-valuetext="Step 1 of 5: About you"
-                                class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/10"
-                            >
+                        {/* Progress: sticks under the fixed site header (top set by the script).
+                            The five candle dots live INSIDE the progressbar element and are
+                            driven purely by CSS from the aria-valuenow the script writes, so
+                            the script is unchanged. #cm-bar is kept (the script still sets its
+                            width) but is visually hidden: no gradient bars on this page. */}
+                        <div id="cm-progress" class="cm-progress sticky z-30">
+                            <div class="cm-progress-row">
                                 <div
-                                    id="cm-bar"
-                                    class="h-full rounded-full bg-accent-gold transition-[width] duration-500 ease-out motion-reduce:transition-none"
-                                    style="width: 20%"
+                                    id="cm-progressbar"
+                                    role="progressbar"
+                                    aria-label="Form progress"
+                                    aria-valuemin="1"
+                                    aria-valuemax="5"
+                                    aria-valuenow="1"
+                                    aria-valuetext="Step 1 of 5: About you"
+                                    class="cm-dots"
                                 >
+                                    <span class="cm-dot" aria-hidden="true"></span>
+                                    <span class="cm-dot" aria-hidden="true"></span>
+                                    <span class="cm-dot" aria-hidden="true"></span>
+                                    <span class="cm-dot" aria-hidden="true"></span>
+                                    <span class="cm-dot" aria-hidden="true"></span>
+                                    <div id="cm-bar" class="cm-bar" style="width: 20%"></div>
                                 </div>
+                                <p id="cm-progress-label" class="cm-progress-label">
+                                    Step 1 of 5 · About 2 minutes left
+                                </p>
                             </div>
                         </div>
 
-                        <div class="mt-4">
+                        <div class="mt-5">
                             {/* ======================= STEP 1: ABOUT YOU ======================= */}
                             <fieldset data-step="1" data-title="About you" aria-labelledby="cm-h-1" class="cm-step min-w-0 space-y-6">
-                                <div>
-                                    <h2 id="cm-h-1" tabindex="-1" class={stepHeadingClass}>About you</h2>
-                                    <p class={helpClass}>Every question is required unless it says optional.</p>
+                                <div class="cm-step-head">
+                                    <figure class="cm-mat">
+                                        <img src={img(STEP_PHOTOS[1].file)} width="1024" height="683" alt={STEP_PHOTOS[1].alt} loading="lazy" decoding="async" style={`object-position: ${STEP_PHOTOS[1].pos}`} />
+                                    </figure>
+                                    <div>
+                                        <h2 id="cm-h-1" tabindex="-1" class={stepHeadingClass}>About you</h2>
+                                        <p class={helpClass}>Every question is required unless it says optional.</p>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -222,17 +299,14 @@ const textBtn =
                                     <p id="cm-phone-err" class={fieldErrorClass}>Please add a phone number we can reach you at.</p>
                                 </div>
 
+                                <div class="cm-sep" aria-hidden="true"></div>
+
                                 <div>
                                     <label for="cm-contact" class={labelClass}>Best way to reach you</label>
                                     <p id="cm-contact-help" class={helpClass}>Tap one or type your own.</p>
                                     <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="Quick picks">
                                         {CONTACT_CHIPS.map((chip) => (
-                                            <button
-                                                type="button"
-                                                data-chip={chip}
-                                                aria-pressed="false"
-                                                class="rounded-full border border-black/20 bg-white px-4 py-1.5 text-sm font-semibold text-off-black transition-colors hover:border-off-black focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 aria-pressed:border-accent-gold aria-pressed:bg-accent-gold/15"
-                                            >
+                                            <button type="button" data-chip={chip} aria-pressed="false" class="cm-chip">
                                                 {chip}
                                             </button>
                                         ))}
@@ -244,7 +318,15 @@ const textBtn =
 
                             {/* ======================= STEP 2: COMMITTEES ======================= */}
                             <fieldset data-step="2" data-title="Committees" aria-labelledby="cm-h-2" class="cm-step min-w-0 space-y-8" hidden>
-                                <h2 id="cm-h-2" tabindex="-1" class={stepHeadingClass}>Committees</h2>
+                                <div class="cm-step-head">
+                                    <figure class="cm-mat">
+                                        <img src={img(STEP_PHOTOS[2].file)} width="1024" height="683" alt={STEP_PHOTOS[2].alt} loading="lazy" decoding="async" style={`object-position: ${STEP_PHOTOS[2].pos}`} />
+                                    </figure>
+                                    <div>
+                                        <h2 id="cm-h-2" tabindex="-1" class={stepHeadingClass}>Committees</h2>
+                                        <p class={helpClass}>Where you'd like to plug in.</p>
+                                    </div>
+                                </div>
 
                                 <fieldset class="min-w-0" aria-describedby="cm-committees-err">
                                     <legend class={legendClass}>Which committees interest you?</legend>
@@ -254,8 +336,8 @@ const textBtn =
                                             <label class={optionClass}>
                                                 <input type="checkbox" name="committees" value={c.name} class={checkClass} />
                                                 <span class="min-w-0">
-                                                    <span class="block font-semibold">{c.name}</span>
-                                                    <span class="mt-0.5 block text-sm text-medium-gray">{leadsLine(c.leads)}</span>
+                                                    <span class="cm-opt-head">{c.name}</span>
+                                                    <span class="cm-opt-sub">{leadsLine(c.leads)}</span>
                                                 </span>
                                             </label>
                                         ))}
@@ -267,6 +349,8 @@ const textBtn =
                                     <p id="cm-committees-err" class={fieldErrorClass}>Please pick at least one.</p>
                                 </fieldset>
 
+                                <div class="cm-sep" aria-hidden="true"></div>
+
                                 <div>
                                     <label for="cm-skills" class={labelClass}>Skills you'd like to offer LSP</label>
                                     <p id="cm-skills-help" class={helpClass}>For example: event setup, photography, translation, design.</p>
@@ -277,7 +361,15 @@ const textBtn =
 
                             {/* ======================= STEP 3: NEW IDEAS ======================= */}
                             <fieldset data-step="3" data-title="New ideas" aria-labelledby="cm-h-3" class="cm-step min-w-0 space-y-8" hidden>
-                                <h2 id="cm-h-3" tabindex="-1" class={stepHeadingClass}>New ideas</h2>
+                                <div class="cm-step-head">
+                                    <figure class="cm-mat">
+                                        <img src={img(STEP_PHOTOS[3].file)} width="1024" height="683" alt={STEP_PHOTOS[3].alt} loading="lazy" decoding="async" style={`object-position: ${STEP_PHOTOS[3].pos}`} />
+                                    </figure>
+                                    <div>
+                                        <h2 id="cm-h-3" tabindex="-1" class={stepHeadingClass}>New ideas</h2>
+                                        <p class={helpClass}>Anything you'd love LSP to start.</p>
+                                    </div>
+                                </div>
 
                                 <fieldset class="min-w-0" aria-describedby="cm-newc-err">
                                     <legend class={legendClass}>Is there a committee you'd like LSP to start?</legend>
@@ -298,6 +390,9 @@ const textBtn =
                                         <p id="cm-newc-text-err" class={fieldErrorClass}>Please tell us your committee idea.</p>
                                     </div>
                                 </fieldset>
+
+                                {/* Hidden by CSS (:has) while the role question below is hidden. */}
+                                <div class="cm-sep cm-sep--newrole" aria-hidden="true"></div>
 
                                 <fieldset id="cm-newrole-wrap" class="min-w-0" aria-describedby="cm-newrole-err" hidden>
                                     <legend class={legendClass}>What role would you take in it?</legend>
@@ -322,7 +417,15 @@ const textBtn =
 
                             {/* ======================= STEP 4: COMMITMENT ======================= */}
                             <fieldset data-step="4" data-title="Commitment" aria-labelledby="cm-h-4" class="cm-step min-w-0 space-y-8" hidden>
-                                <h2 id="cm-h-4" tabindex="-1" class={stepHeadingClass}>Commitment</h2>
+                                <div class="cm-step-head">
+                                    <figure class="cm-mat">
+                                        <img src={img(STEP_PHOTOS[4].file)} width="1024" height="683" alt={STEP_PHOTOS[4].alt} loading="lazy" decoding="async" style={`object-position: ${STEP_PHOTOS[4].pos}`} />
+                                    </figure>
+                                    <div>
+                                        <h2 id="cm-h-4" tabindex="-1" class={stepHeadingClass}>Commitment</h2>
+                                        <p class={helpClass}>What fits your life right now.</p>
+                                    </div>
+                                </div>
 
                                 <fieldset class="min-w-0" aria-describedby="cm-inv-err">
                                     <legend class={legendClass}>How much time can you realistically give?</legend>
@@ -333,15 +436,15 @@ const textBtn =
                                                 <label class={optionClass}>
                                                     <input type="radio" name="involvement" value={opt} class={checkClass} />
                                                     <span class="min-w-0">
-                                                        <span class="block font-semibold">{head}</span>
-                                                        {rest && <span class="mt-0.5 block text-sm text-medium-gray">{rest}</span>}
+                                                        <span class="cm-opt-head">{head}</span>
+                                                        {rest && <span class="cm-opt-sub">{rest}</span>}
                                                     </span>
                                                 </label>
                                             );
                                         })}
                                         <label class={optionClass}>
                                             <input type="radio" name="involvement" value={OTHER} class={checkClass} />
-                                            <span class="min-w-0 font-semibold">Other</span>
+                                            <span class="cm-opt-head min-w-0">Other</span>
                                         </label>
                                     </div>
                                     <p id="cm-inv-err" class={fieldErrorClass}>Please pick one.</p>
@@ -352,6 +455,8 @@ const textBtn =
                                     </div>
                                 </fieldset>
 
+                                <div class="cm-sep" aria-hidden="true"></div>
+
                                 <fieldset class="min-w-0" aria-describedby="cm-con-err">
                                     <legend class={legendClass}>How do you want to contribute?</legend>
                                     <p class={helpClass}>Pick one.</p>
@@ -359,12 +464,12 @@ const textBtn =
                                         {CONTRIBUTE_OPTIONS.map((opt) => (
                                             <label class={optionClass}>
                                                 <input type="radio" name="contribute" value={opt} class={checkClass} />
-                                                <span class="min-w-0 font-semibold">{opt}</span>
+                                                <span class="cm-opt-head min-w-0">{opt}</span>
                                             </label>
                                         ))}
                                         <label class={optionClass}>
                                             <input type="radio" name="contribute" value={OTHER} class={checkClass} />
-                                            <span class="min-w-0 font-semibold">Other</span>
+                                            <span class="cm-opt-head min-w-0">Other</span>
                                         </label>
                                     </div>
                                     <p id="cm-con-err" class={fieldErrorClass}>Please pick one.</p>
@@ -374,6 +479,8 @@ const textBtn =
                                         <p id="cm-con-other-err" class={fieldErrorClass}>Please describe how you'd contribute.</p>
                                     </div>
                                 </fieldset>
+
+                                <div class="cm-sep" aria-hidden="true"></div>
 
                                 <fieldset class="min-w-0" aria-describedby="cm-roles-err">
                                     <legend class={legendClass}>What roles would you feel comfortable taking on?</legend>
@@ -385,15 +492,15 @@ const textBtn =
                                                 <label class={optionClass}>
                                                     <input type="checkbox" name="roles" value={opt} class={checkClass} />
                                                     <span class="min-w-0">
-                                                        <span class:list={["block", rest ? "font-semibold" : ""]}>{head}</span>
-                                                        {rest && <span class="mt-0.5 block text-sm text-medium-gray">{rest}</span>}
+                                                        <span class:list={["block", rest ? "cm-opt-head" : ""]}>{head}</span>
+                                                        {rest && <span class="cm-opt-sub">{rest}</span>}
                                                     </span>
                                                 </label>
                                             );
                                         })}
                                         <label class={optionClass}>
                                             <input type="checkbox" name="roles" value={OTHER} class={checkClass} />
-                                            <span class="min-w-0 font-semibold">Other</span>
+                                            <span class="cm-opt-head min-w-0">Other</span>
                                         </label>
                                     </div>
                                     <p id="cm-roles-err" class={fieldErrorClass}>Please pick at least one.</p>
@@ -407,7 +514,15 @@ const textBtn =
 
                             {/* ======================= STEP 5: LAST THINGS ======================= */}
                             <fieldset data-step="5" data-title="Last things" aria-labelledby="cm-h-5" class="cm-step min-w-0 space-y-8" hidden>
-                                <h2 id="cm-h-5" tabindex="-1" class={stepHeadingClass}>Last things</h2>
+                                <div class="cm-step-head">
+                                    <figure class="cm-mat">
+                                        <img src={img(STEP_PHOTOS[5].file)} width="1024" height="683" alt={STEP_PHOTOS[5].alt} loading="lazy" decoding="async" style={`object-position: ${STEP_PHOTOS[5].pos}`} />
+                                    </figure>
+                                    <div>
+                                        <h2 id="cm-h-5" tabindex="-1" class={stepHeadingClass}>Last things</h2>
+                                        <p class={helpClass}>Almost done. Check your answers, then send.</p>
+                                    </div>
+                                </div>
 
                                 <div>
                                     <label for="cm-dates" class={labelClass}>Important dates you aren't available</label>
@@ -422,17 +537,20 @@ const textBtn =
                                     <textarea id="cm-comments" name="comments" rows="3" class={inputClass}></textarea>
                                 </div>
 
+                                <div class="cm-sep" aria-hidden="true"></div>
+
                                 <div>
-                                    <h3 class="text-lg font-bold">Review your answers</h3>
-                                    <div id="cm-review" class="mt-3 divide-y divide-black/10 rounded-xl border border-black/15"></div>
+                                    <h3 class="cm-review-title">Review your answers</h3>
+                                    <div id="cm-review" class="cm-review mt-3"></div>
                                 </div>
                             </fieldset>
                         </div>
 
-                        <p id="cm-error" role="alert" class="mt-6 hidden rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+                        <p id="cm-error" role="alert" class="mt-6 hidden rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
 
                         {/* Wizard footer */}
-                        <div class="mt-10 border-t border-black/10 pt-6">
+                        <div class="mt-10">
+                            <div class="cm-sep mb-7" aria-hidden="true"></div>
                             <div class="flex items-center gap-3">
                                 <button id="cm-back" type="button" class:list={[secondaryBtn, "shrink-0"]} hidden>Back</button>
                                 <button id="cm-next" type="button" class:list={[primaryBtn, "ml-auto flex-1 sm:flex-none sm:min-w-[9rem]"]}>Next</button>
@@ -446,53 +564,748 @@ const textBtn =
                 </div>
 
                 {/* Success state */}
-                <div id="cm-success" class="rounded-2xl border border-black/15 px-5 py-8 sm:px-8 sm:py-10" tabindex="-1" hidden>
-                    <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">You're in the loop</h2>
-                    <p class="mt-4 text-lg leading-relaxed text-off-black/85">
+                <div id="cm-success" class="cm-card cm-success" tabindex="-1" hidden>
+                    <div class="cm-success-orb" aria-hidden="true"></div>
+                    <figure class="cm-mat cm-mat--wide">
+                        <img src={img(SUCCESS_PHOTO.file)} width="1024" height="683" alt={SUCCESS_PHOTO.alt} loading="lazy" decoding="async" />
+                    </figure>
+                    <h2 class="cm-success-title">You're in the loop</h2>
+                    <p class="cm-success-lede">
                         Thanks<span id="cm-success-name"></span>. LSP leadership and
                         the Junior Board use these answers to place you in a
                         committee.
                     </p>
-                    <p class="mt-3 text-base leading-relaxed text-off-black/85">
+                    <p class="cm-success-body">
                         They'll reach out by your preferred method<span id="cm-success-method"></span>.
                     </p>
-                    <button id="cm-another" type="button" class:list={[textBtn, "mt-8"]}>Submit another response</button>
+                    <div class="cm-sep cm-sep--left mt-8" aria-hidden="true"></div>
+                    <button id="cm-another" type="button" class:list={[textBtn, "mt-6"]}>Submit another response</button>
                 </div>
             </div>
         </section>
 
         {/* ========================== SMALL PRINT ========================== */}
-        <section class="border-t border-black/10 px-4 py-10 sm:px-6">
-            <div class="mx-auto max-w-2xl text-sm text-medium-gray">
-                <p>
-                    Questions?{" "}
-                    <a
-                        href={`mailto:${CONTACT_EMAIL}`}
-                        class="break-all font-bold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4"
-                        >{CONTACT_EMAIL}</a
-                    >
-                </p>
-            </div>
+        <section class="cm-smallprint">
+            <div class="cm-sep cm-sep--ink" aria-hidden="true"></div>
+            <p>
+                Questions?{" "}
+                <a href={`mailto:${CONTACT_EMAIL}`} class="cm-mail">{CONTACT_EMAIL}</a>
+            </p>
         </section>
     </main>
 </Layout>
 
 <style is:global>
-    /* Global (all selectors are #cm-/.cm- scoped) so the review list the
-       script builds is covered too. */
+    /* Global so the review list the script builds is covered too. Every
+       selector is scoped under .cm-page or a #cm-* id. Tailwind v4 utilities
+       sit in a cascade layer, so these unlayered rules win where they
+       overlap: keep margins/display out of the component classes. */
+
+    /* ------------------------------------------------------------------
+       CANDLELIT ROSE tokens (from /graduation), plus a cream card ink.
+    ------------------------------------------------------------------ */
+    .cm-page {
+        --ink: #1e1216;
+        --ink-raised: #2b1520;
+        --paper: #f6efe3;
+        --paper-soft: rgba(246, 239, 227, 0.78);
+        --paper-faint: rgba(246, 239, 227, 0.5);
+        --gold: #d79b47;
+        --gold-light: #f0c57c;
+        --rose: #e08cb8;
+        --card: #fbf5ec;
+        --card-raised: #fffcf7;
+        --card-ink: #2a1820;
+        --card-muted: #75606a;
+        --rose-ink: #96376a;
+        --line-soft: rgba(42, 24, 32, 0.12);
+
+        position: relative;
+        isolation: isolate;
+        background:
+            radial-gradient(60rem 36rem at 12% 4%, rgba(224, 140, 184, 0.16), transparent 70%),
+            radial-gradient(50rem 34rem at 92% 40%, rgba(224, 140, 184, 0.1), transparent 72%),
+            radial-gradient(56rem 36rem at 50% 104%, rgba(240, 197, 124, 0.09), transparent 70%),
+            linear-gradient(176deg, var(--ink-raised) 0%, var(--ink) 40%, var(--ink) 100%);
+        color: var(--paper);
+        font-family: "Rubik", sans-serif;
+    }
+    /* Sticky fix, this page only. Layout.astro puts overflow-x: hidden on
+       BOTH <html> and <body>; that turns <body> into a (non-scrolling)
+       scroll container, so `position: sticky` inside it never sticks.
+       `clip` still stops horizontal scroll but is not a scroll container.
+       Browsers without `clip` ignore this and keep `hidden`. */
+    html:has(.cm-page),
+    html:has(.cm-page) body {
+        overflow-x: clip;
+    }
+    /* Component classes set display, which would otherwise beat the hidden
+       attribute the script toggles. */
+    .cm-page [hidden] {
+        display: none !important;
+    }
+
+    /* ------------------------------ Hero ------------------------------ */
+    /* STACKED at every size: the copy band sits on the ink ground, then the
+       photo starts BELOW it, so no text ever lands on the photo. The wash is
+       light (faint rose veil + a short top fade) so the cohort is clearly
+       seen; the card overlaps only the floor band at the bottom.
+       Phones: 4:3 at full width (min 14.5rem), object-position 50% 62%.
+       768+: a capped band, cropped from the ceiling so heads sit ~20-25%
+       down and the floor stays below the feet for the card's 2.5rem overlap.
+       If you change these heights, re-check the people at 375 and 1440. */
+    .cm-hero {
+        position: relative;
+        isolation: isolate;
+        padding-top: clamp(2.25rem, 6vw, 3.5rem);
+        text-align: center;
+    }
+    .cm-candles {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: clamp(14rem, 34vw, 22rem);
+        z-index: 2;
+        pointer-events: none;
+    }
+    .cm-candles span {
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        width: var(--s);
+        height: var(--s);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(240, 197, 124, 0.95), rgba(215, 155, 71, 0.28) 55%, transparent 72%);
+        opacity: var(--o);
+        filter: blur(5px);
+    }
+    .cm-hero-copy {
+        position: relative;
+        z-index: 3;
+        max-width: 40rem;
+        margin-inline: auto;
+        padding-inline: 1rem;
+    }
+    .cm-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: var(--paper);
+        padding: 0.4rem 0.95rem;
+        color: var(--rose-ink);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+        box-shadow: 0 0 1.6rem rgba(240, 197, 124, 0.25);
+    }
+    .cm-hero-title {
+        margin-top: 0.9rem;
+        color: var(--paper);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: clamp(2.6rem, 10vw, 4.6rem);
+        font-weight: 560;
+        letter-spacing: -0.012em;
+        line-height: 1.04;
+        text-shadow: 0 2px 22px rgba(30, 18, 22, 0.55);
+    }
+    .cm-hero-title em {
+        color: var(--gold-light);
+        font-style: italic;
+        font-weight: 450;
+    }
+    .cm-hero-lede {
+        max-width: 30rem;
+        margin: 0.9rem auto 0;
+        color: var(--paper-soft);
+        font-size: 1.05rem;
+        line-height: 1.6;
+        text-shadow: 0 1px 14px rgba(30, 18, 22, 0.7);
+    }
+    .cm-hero-photo {
+        position: relative;
+        z-index: 1;
+        aspect-ratio: 4 / 3;
+        min-height: 14.5rem;
+        margin-top: clamp(1.25rem, 3vw, 2rem);
+        margin-inline: auto;
+        max-width: 96rem;
+        overflow: hidden;
+        /* Fade the photo itself so it melts into the page gradient with no
+           seam: a short fade at the top, ~12% at the bottom into the card. */
+        -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%);
+        mask-image: linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%);
+    }
+    .cm-hero-photo img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 62%;
+    }
+    /* The rose wash, kept light: a faint rose veil over the whole shot and a
+       short ink fade (max 0.4) over the top 18%. Fully clear below that. */
+    .cm-hero-photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, rgba(30, 18, 22, 0.4) 0%, rgba(30, 18, 22, 0.16) 10%, transparent 18%),
+            linear-gradient(rgba(224, 140, 184, 0.14), rgba(224, 140, 184, 0.14));
+        pointer-events: none;
+    }
+    @media (min-width: 768px) {
+        .cm-hero-photo {
+            aspect-ratio: auto;
+            height: clamp(20rem, 42vw, 34rem);
+        }
+        .cm-hero-photo img {
+            object-position: 50% 73%;
+        }
+    }
+    /* Wide screens: the photo stops at 96rem and its sides melt away too. */
+    @media (min-width: 1280px) {
+        .cm-hero-photo {
+            -webkit-mask-image:
+                linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%),
+                linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image:
+                linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%),
+                linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+            mask-composite: intersect;
+        }
+    }
+
+    /* ---------------------------- Form card ---------------------------- */
+    /* Pulled up 2.5rem over the floor band at the bottom of the hero photo
+       only (never the people). */
+    .cm-form-section {
+        position: relative;
+        z-index: 1;
+        margin-top: -2.5rem;
+        padding: 0 1rem clamp(3.5rem, 8vw, 5.5rem);
+    }
+    .cm-orb {
+        position: absolute;
+        z-index: 0;
+        border-radius: 50%;
+        filter: blur(60px);
+        pointer-events: none;
+    }
+    .cm-orb--rose {
+        top: 4rem;
+        left: max(-8rem, calc(50% - 34rem));
+        width: 22rem;
+        height: 22rem;
+        background: radial-gradient(circle, rgba(224, 140, 184, 0.3), transparent 70%);
+    }
+    .cm-orb--gold {
+        bottom: 8rem;
+        right: max(-8rem, calc(50% - 34rem));
+        width: 20rem;
+        height: 20rem;
+        background: radial-gradient(circle, rgba(240, 197, 124, 0.2), transparent 70%);
+    }
+    .cm-shell {
+        position: relative;
+        z-index: 1;
+        max-width: 42rem;
+        margin-inline: auto;
+    }
+    .cm-card {
+        --cm-pad: 1.25rem;
+        position: relative;
+        border-radius: 1.75rem;
+        background: var(--card);
+        padding: 1.5rem var(--cm-pad) var(--cm-pad);
+        color: var(--card-ink);
+        box-shadow:
+            0 1.6rem 3.6rem rgba(10, 4, 7, 0.45),
+            0 0 4rem rgba(224, 140, 184, 0.12);
+    }
+    @media (min-width: 640px) {
+        .cm-card {
+            --cm-pad: 2.25rem;
+            padding-top: 1.75rem;
+        }
+    }
+
     /* Sticky progress sits under the fixed site header; --cm-top is the
        header's measured height (the script keeps it in sync). */
     .cm-progress {
         top: var(--cm-top, 7rem);
+        margin-inline: calc(-1 * var(--cm-pad));
+        padding: 0.85rem var(--cm-pad) 0.85rem;
+        background: var(--card);
     }
+    /* Soft fade under the bar: invisible at rest (cream on cream), it eases
+       the content out as it scrolls beneath the stuck bar. */
+    .cm-progress::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        height: 0.9rem;
+        background: linear-gradient(180deg, var(--card), rgba(251, 245, 236, 0));
+        pointer-events: none;
+    }
+    .cm-progress-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+    }
+    .cm-progress-label {
+        color: var(--card-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .cm-dots {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        height: 1.25rem;
+    }
+    .cm-dot {
+        display: block;
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 50%;
+        background: rgba(42, 24, 32, 0.13);
+        transition:
+            background-color 300ms ease,
+            box-shadow 300ms ease,
+            transform 300ms ease;
+    }
+    /* Kept for the script (it sets the width); never drawn. */
+    .cm-bar {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+    /* Done dots: soft gold glow. */
+    #cm-progressbar[aria-valuenow="2"] .cm-dot:nth-child(-n + 1),
+    #cm-progressbar[aria-valuenow="3"] .cm-dot:nth-child(-n + 2),
+    #cm-progressbar[aria-valuenow="4"] .cm-dot:nth-child(-n + 3),
+    #cm-progressbar[aria-valuenow="5"] .cm-dot:nth-child(-n + 4) {
+        background: var(--gold-light);
+        box-shadow: 0 0 0.6rem rgba(240, 197, 124, 0.85);
+    }
+    /* Current dot: candle gold, a touch bigger, with a slow pulse. */
+    #cm-progressbar[aria-valuenow="1"] .cm-dot:nth-child(1),
+    #cm-progressbar[aria-valuenow="2"] .cm-dot:nth-child(2),
+    #cm-progressbar[aria-valuenow="3"] .cm-dot:nth-child(3),
+    #cm-progressbar[aria-valuenow="4"] .cm-dot:nth-child(4),
+    #cm-progressbar[aria-valuenow="5"] .cm-dot:nth-child(5) {
+        background: var(--gold);
+        transform: scale(1.35);
+        box-shadow: 0 0 0.7rem rgba(215, 155, 71, 0.75);
+        animation: cm-candle 2.4s ease-in-out infinite;
+    }
+    @keyframes cm-candle {
+        0%,
+        100% {
+            box-shadow: 0 0 0.55rem rgba(215, 155, 71, 0.6);
+        }
+        50% {
+            box-shadow:
+                0 0 1.1rem rgba(240, 197, 124, 0.95),
+                0 0 0.3rem rgba(215, 155, 71, 0.9);
+        }
+    }
+
     #cm-form {
         scroll-margin-top: calc(var(--cm-top, 7rem) + 0.5rem);
     }
     /* Keep focused fields clear of the header + sticky progress. */
     #cm-form :is(input, textarea, button, h2) {
-        scroll-margin-top: calc(var(--cm-top, 7rem) + 5.5rem);
+        scroll-margin-top: calc(var(--cm-top, 7rem) + 6.5rem);
     }
 
+    /* ------------------------- Draft banner ------------------------- */
+    .cm-draft {
+        margin-bottom: 0.5rem;
+        border-radius: 1.25rem;
+        background: rgba(224, 140, 184, 0.14);
+        padding: 1rem 1.1rem;
+    }
+    .cm-draft-text {
+        color: var(--rose-ink);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    /* ---------------------- Step head + photo mats ---------------------- */
+    .cm-step-head {
+        display: grid;
+        gap: 1.1rem;
+    }
+    @media (min-width: 640px) {
+        .cm-step-head {
+            grid-template-columns: 11.5rem minmax(0, 1fr);
+            align-items: center;
+            gap: 1.5rem;
+        }
+    }
+    .cm-mat {
+        margin: 0;
+        border-radius: 1.25rem;
+        background: var(--card-raised);
+        padding: 0.45rem;
+        box-shadow:
+            0 0.9rem 2rem rgba(43, 21, 32, 0.16),
+            0 0 1.6rem rgba(240, 197, 124, 0.16);
+    }
+    .cm-mat img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        border-radius: 0.9rem;
+        background: rgba(224, 140, 184, 0.2);
+    }
+    .cm-mat--wide img {
+        aspect-ratio: 3 / 2;
+    }
+    .cm-step-title {
+        color: var(--card-ink);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: clamp(1.9rem, 6vw, 2.35rem);
+        font-weight: 560;
+        letter-spacing: -0.01em;
+        line-height: 1.08;
+    }
+    .cm-step-title:focus {
+        outline: none;
+    }
+
+    /* --------------------------- Questions --------------------------- */
+    .cm-label {
+        color: var(--card-ink);
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    .cm-help {
+        color: var(--card-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+    .cm-err {
+        color: #b42318;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    .cm-input {
+        border: 1.5px solid rgba(42, 24, 32, 0.14);
+        border-radius: 0.95rem;
+        background: var(--card-raised);
+        padding: 0.8rem 1rem;
+        color: var(--card-ink);
+        font-size: 1rem;
+        line-height: 1.5;
+        transition:
+            border-color 160ms ease,
+            box-shadow 160ms ease;
+    }
+    .cm-input::placeholder {
+        color: rgba(42, 24, 32, 0.4);
+    }
+    .cm-input:focus {
+        border-color: var(--gold);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(240, 197, 124, 0.42);
+    }
+    .cm-input[aria-invalid="true"] {
+        border-color: #c4382d;
+    }
+    textarea.cm-input {
+        resize: vertical;
+    }
+
+    /* Option rows: cream, rounded, full width; soft gold when picked. */
+    .cm-option {
+        display: flex;
+        width: 100%;
+        cursor: pointer;
+        align-items: flex-start;
+        gap: 0.8rem;
+        border: 1.5px solid rgba(42, 24, 32, 0.09);
+        border-radius: 1.1rem;
+        background: var(--card-raised);
+        padding: 0.95rem 1.05rem;
+        color: var(--card-ink);
+        line-height: 1.45;
+        transition:
+            border-color 160ms ease,
+            background-color 160ms ease,
+            box-shadow 160ms ease;
+    }
+    .cm-option:hover {
+        border-color: rgba(215, 155, 71, 0.5);
+    }
+    .cm-option:has(:checked) {
+        border-color: rgba(215, 155, 71, 0.9);
+        background: #fbeed6;
+        box-shadow: 0 0 1.2rem rgba(240, 197, 124, 0.3);
+    }
+    .cm-option:has(:focus-visible) {
+        outline: 3px solid rgba(215, 155, 71, 0.6);
+        outline-offset: 2px;
+    }
+    .cm-check {
+        flex-shrink: 0;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-top: 0.15rem;
+        accent-color: var(--gold);
+    }
+    .cm-opt-head {
+        display: block;
+        font-weight: 600;
+    }
+    .cm-opt-sub {
+        display: block;
+        margin-top: 0.15rem;
+        color: var(--card-muted);
+        font-size: 0.875rem;
+    }
+
+    /* Contact quick picks: cream pills, gold when picked. */
+    .cm-chip {
+        border: 1.5px solid rgba(42, 24, 32, 0.14);
+        border-radius: 999px;
+        background: var(--card-raised);
+        padding: 0.45rem 1rem;
+        color: var(--card-ink);
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition:
+            border-color 160ms ease,
+            background-color 160ms ease,
+            box-shadow 160ms ease;
+    }
+    .cm-chip:hover {
+        border-color: var(--gold);
+    }
+    .cm-chip[aria-pressed="true"] {
+        border-color: var(--gold);
+        background: var(--gold-light);
+        color: #24141a;
+        box-shadow: 0 0 1rem rgba(240, 197, 124, 0.45);
+    }
+    .cm-chip:focus-visible {
+        outline: 3px solid rgba(215, 155, 71, 0.6);
+        outline-offset: 2px;
+    }
+
+    /* ------------------- Candle-bokeh dot row divider ------------------- */
+    /* The graduation `.sep`, tuned for cream: same dots, a warmer glow. */
+    .cm-sep {
+        width: 122px;
+        height: 12px;
+        margin-inline: auto;
+        background-repeat: no-repeat;
+        background-image:
+            radial-gradient(circle 2.5px at 6px 6px, #f0c57c 0 58%, transparent 70%),
+            radial-gradient(circle 3.5px at 30px 6px, #e08cb8 0 56%, transparent 70%),
+            radial-gradient(circle 5px at 60px 6px, #f0c57c 0 56%, transparent 70%),
+            radial-gradient(circle 3.5px at 90px 6px, #e08cb8 0 56%, transparent 70%),
+            radial-gradient(circle 2.5px at 114px 6px, #f0c57c 0 58%, transparent 70%);
+        filter: drop-shadow(0 0 6px rgba(215, 155, 71, 0.45));
+    }
+    .cm-sep--left {
+        margin-inline: 0;
+    }
+    .cm-sep--ink {
+        filter: drop-shadow(0 0 7px rgba(240, 197, 124, 0.5));
+    }
+    /* No divider before the role question while it is hidden. */
+    .cm-sep--newrole:has(+ #cm-newrole-wrap[hidden]) {
+        display: none;
+    }
+
+    /* ---------------------------- Buttons ---------------------------- */
+    .cm-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 999px;
+        padding: 0.9rem 1.75rem;
+        font-family: "Rubik", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.2;
+        cursor: pointer;
+        transition:
+            transform 180ms ease,
+            background-color 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease;
+    }
+    .cm-btn--gold {
+        background: var(--gold);
+        color: #24141a;
+        box-shadow: 0 0.7rem 1.6rem rgba(215, 155, 71, 0.3);
+    }
+    .cm-btn--gold:hover {
+        background: #e0a957;
+        transform: translateY(-1px);
+        box-shadow: 0 0.9rem 2rem rgba(215, 155, 71, 0.38);
+    }
+    .cm-btn--cream {
+        border: 1.5px solid rgba(42, 24, 32, 0.16);
+        background: var(--card-raised);
+        color: var(--card-ink);
+    }
+    .cm-btn--cream:hover {
+        border-color: var(--gold);
+    }
+    .cm-btn--small {
+        padding: 0.6rem 1.15rem;
+        font-size: 0.875rem;
+    }
+    .cm-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+    }
+    .cm-btn:focus-visible {
+        outline: 3px solid var(--gold);
+        outline-offset: 3px;
+    }
+    .cm-textbtn {
+        border-radius: 0.35rem;
+        color: var(--card-muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: rgba(215, 155, 71, 0.55);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+    }
+    .cm-textbtn:hover {
+        color: var(--card-ink);
+        text-decoration-color: var(--gold);
+    }
+    .cm-textbtn:focus-visible {
+        outline: 3px solid rgba(215, 155, 71, 0.6);
+        outline-offset: 3px;
+    }
+
+    /* ------------------ Review list (built by the script) ------------------ */
+    .cm-review-title {
+        color: var(--card-ink);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 1.4rem;
+        font-weight: 560;
+        line-height: 1.15;
+    }
+    #cm-review {
+        display: grid;
+        gap: 0.6rem;
+    }
+    #cm-review > div {
+        border-radius: 1.1rem;
+        background: var(--card-raised);
+    }
+    #cm-review h4 {
+        color: var(--card-ink);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 1.05rem;
+        font-weight: 560;
+    }
+    #cm-review button {
+        text-decoration-color: var(--gold);
+    }
+    #cm-review dt {
+        color: var(--card-muted);
+    }
+    #cm-review dd {
+        color: var(--card-ink);
+    }
+
+    /* ---------------------------- Success ---------------------------- */
+    .cm-success {
+        overflow: hidden;
+        padding-top: var(--cm-pad);
+    }
+    .cm-success:focus {
+        outline: none;
+    }
+    .cm-success > * {
+        position: relative;
+        z-index: 1;
+    }
+    .cm-success > .cm-success-orb {
+        position: absolute;
+        z-index: 0;
+        top: 30%;
+        right: -7rem;
+        width: 20rem;
+        height: 20rem;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(240, 197, 124, 0.38), rgba(224, 140, 184, 0.16) 45%, transparent 70%);
+        filter: blur(40px);
+        pointer-events: none;
+    }
+    .cm-success-title {
+        margin-top: 1.6rem;
+        color: var(--card-ink);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: clamp(2.1rem, 7vw, 2.9rem);
+        font-weight: 560;
+        letter-spacing: -0.012em;
+        line-height: 1.05;
+    }
+    .cm-success-lede {
+        margin-top: 0.9rem;
+        color: var(--card-ink);
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    .cm-success-body {
+        margin-top: 0.6rem;
+        color: var(--card-muted);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    /* --------------------------- Small print --------------------------- */
+    .cm-smallprint {
+        padding: 0 1rem clamp(2.5rem, 6vw, 3.5rem);
+        color: var(--paper-faint);
+        font-size: 0.875rem;
+        text-align: center;
+    }
+    .cm-smallprint p {
+        margin-top: 1.25rem;
+    }
+    .cm-mail {
+        overflow-wrap: anywhere;
+        color: var(--paper);
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-color: var(--gold-light);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+    }
+    .cm-mail:focus-visible {
+        outline: 3px solid var(--gold-light);
+        outline-offset: 3px;
+        border-radius: 0.25rem;
+    }
+
+    /* ------------------------- Step transitions ------------------------- */
     /* Direction-aware step change: the incoming step starts offset and
        transparent (no transition), then the class is removed and it
        eases to rest. */
@@ -519,6 +1332,15 @@ const textBtn =
             transition: none;
             transform: none;
             opacity: 1;
+        }
+        .cm-page .cm-dot {
+            animation: none !important;
+            transition: none;
+        }
+        .cm-btn,
+        .cm-btn:hover {
+            transform: none;
+            transition: none;
         }
     }
 </style>
