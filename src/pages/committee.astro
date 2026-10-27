@@ -1,0 +1,1209 @@
+---
+// /committee: committee interest form for the YTT 2026 cohort (the 2026
+// yoga teacher training graduates who asked to get more involved). LSP
+// leadership and the Junior Board use the answers to place each person in
+// an existing committee. Shared by direct link only (noindex, excluded from
+// the sitemap in astro.config.mjs, not in nav/homepage/links), like
+// /movecrew and /townhall.
+//
+// A 5-step wizard inside ONE <form>: About you, Committees, New ideas,
+// Commitment, Last things (with a review list). Answers autosave to
+// localStorage["lsp_committee_draft"] (24 h) so a phone that drops the tab
+// can pick up where it left off.
+//
+// Submissions POST to a hidden Google Form (same no-cors pattern as
+// /waiver and /movecrew): "YTT 2026 Cohort Committee Interest Form", edit id
+// 1ewhCmWz9EsvvjYPoFO6qJ_f99agof9OHumOrlOSFBxg (it already had live
+// responses when this page was built, 2026-10-27). Endpoint, entry map and
+// verbatim options: marketing/committee-form/committee-form.json and the
+// GOOGLE FORM CONFIG block in the script below.
+//
+// Silent-breakage rules (no-cors responses are opaque, so nothing errors):
+// - Renaming a question or editing its description is SAFE (entry ids stay).
+// - Deleting and recreating a question, or changing an option's text, BREAKS
+//   it: the id or the option string no longer matches and Google drops the
+//   answer (or the whole response, since the questions are required).
+// - Adding a NEW REQUIRED question breaks every submission (the POST lacks
+//   it and Google silently drops the response).
+// - Switching email collection from "Responder input" to "Verified" breaks
+//   every submission (verified needs a signed-in Google session). The page
+//   sends the email as the param `emailAddress`.
+// - Settings > Responses > "Send responders a copy of their response" MUST
+//   stay Off. Always / When requested makes Google attach an invisible
+//   reCAPTCHA (the real UI posts a g-recaptcha-response token) and every
+//   POST from this page gets a 400 and is dropped. Switched Off 2026-10-27.
+// Re-derive ids: curl -sL https://docs.google.com/forms/d/<editId>/viewform
+// and parse the FB_PUBLIC_LOAD_DATA_ JSON (question[4][i][0] = entry id).
+// Every question except "Comments and/or questions" is required form-side,
+// so the page validates all of them before it sends.
+//
+// Look: the plain studio site. White ground, Rubik only, off-black text,
+// one accent (accent-gold #ffbd59) for the progress bar, focus rings,
+// selected options and the primary button. Sentence case, no em dashes.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+
+// ---------------------------------------------------------------------
+// Committees and their leads (edit names here). `name` is the Google Form
+// option string, VERBATIM. A lead of "Vacant" renders as "co-lead seat open".
+// ---------------------------------------------------------------------
+const COMMITTEES = [
+    { name: "General Committee", leads: ["Margarita", "Dinorah Zubieta"] },
+    { name: "Gala Sub Committee", leads: ["Vanessa Tirado", "Vacant"] },
+    { name: "Culture & Ethics", leads: ["Vanessa Tirado", "Yari Jurado"] },
+    { name: "Community Impact", leads: ["Lucia"] },
+    { name: "Queer Events", leads: ["Mateo", "Kayla"] },
+];
+
+// ---------------------------------------------------------------------
+// Option strings: VERBATIM from marketing/committee-form/committee-form.json
+// (must match the Google Form character for character: en dashes in "1–2"
+// and "3–5", straight apostrophes in the role options).
+// ---------------------------------------------------------------------
+const NOT_INTERESTED = "I am not interested in joining any of the listed committees";
+const NEW_COMMITTEE_NONE = "I do not have any new committee suggestions";
+const NEW_ROLE_NONE = "I did not suggest a new Committee";
+const INVOLVEMENT_OPTIONS = [
+    "Occasional involvement: I can contribute when my schedule allows.",
+    "Light involvement: I can dedicate 1–2 hours per month.",
+    "Moderate involvement: I can dedicate 3–5 hours per month.",
+    "Active involvement: I can dedicate 6+ hours per month.",
+];
+const CONTRIBUTE_OPTIONS = [
+    "Attending meetings and planning",
+    "Supporting events",
+    "Leading projects",
+    "Administrative tasks",
+    "Creating social media post",
+];
+const ROLE_OPTIONS = [
+    "Leadership: Helping guide the committee's priorities, facilitate meetings, and support decision-making",
+    "Project or initiative coordination: Organizing projects, tracking progress, and coordinating tasks",
+    "Event planning and support: Helping plan, organize, and facilitate events or activities",
+    "Volunteering and task-based support: Helping with specific tasks as needed",
+    "Research and resource development: Researching opportunities, gathering information, or developing materials",
+    "Communications and outreach: Supporting outreach, sharing updates, and engaging community members",
+    "I'm open to taking on different roles depending on the committee's needs",
+    "I'm interested in participating but am not ready to take on a leadership or coordination role",
+];
+// Quick picks for the free-text "Preferred method to contact you?" answer.
+const CONTACT_CHIPS = ["Text", "Call", "Email", "WhatsApp", "Instagram DM"];
+// Page-side value for an "Other" pick; the script sends it as
+// __other_option__ plus the write-in.
+const OTHER = "__other__";
+
+const leadsLine = (leads) => {
+    const named = leads.filter((l) => l !== "Vacant");
+    const open = leads.includes("Vacant");
+    return `Led by ${named.join(" & ")}${open ? " · co-lead seat open" : ""}`;
+};
+// "Head: rest" -> bold head, lighter second line.
+const splitLabel = (opt) => {
+    const i = opt.indexOf(": ");
+    return i > 0 ? { head: opt.slice(0, i), rest: opt.slice(i + 2) } : { head: opt, rest: "" };
+};
+
+const CONTACT_EMAIL = "collab@latinasweatproject.com";
+
+const inputClass =
+    "mt-2 block w-full rounded-lg border border-black/20 bg-white px-4 py-3 text-base text-off-black placeholder:text-black/40 focus:border-off-black focus:outline-none focus:ring-[3px] focus:ring-accent-gold/70 aria-[invalid=true]:border-red-600";
+const optionClass =
+    "flex w-full cursor-pointer items-start gap-3 rounded-lg border border-black/15 bg-white px-4 py-3.5 text-off-black transition-colors hover:border-black/40 has-[:checked]:border-accent-gold has-[:checked]:bg-accent-gold/10 has-[:checked]:shadow-[inset_0_0_0_1px_#ffbd59] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-accent-gold/70";
+const checkClass = "mt-1 h-4 w-4 shrink-0 accent-off-black";
+const labelClass = "block text-base font-bold";
+const legendClass = "text-base font-bold";
+const helpClass = "mt-1 text-sm text-medium-gray";
+const fieldErrorClass = "mt-2 hidden text-sm font-semibold text-red-700";
+const stepHeadingClass = "text-2xl font-extrabold tracking-tight focus:outline-none sm:text-3xl";
+const primaryBtn =
+    "rounded-full bg-accent-gold px-7 py-3 text-base font-bold text-off-black transition-colors hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+const secondaryBtn =
+    "rounded-full border border-black/20 bg-white px-6 py-3 text-base font-bold text-off-black transition-colors hover:border-off-black focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 focus-visible:ring-offset-2";
+const textBtn =
+    "text-sm font-semibold text-medium-gray underline decoration-black/20 underline-offset-4 hover:text-off-black hover:decoration-accent-gold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 rounded";
+---
+
+<Layout
+    title="Committee interest | The Latina Sweat Project"
+    description="For the YTT 2026 cohort: tell LSP leadership and the Junior Board where you'd fit on an LSP committee."
+    robots="noindex, nofollow"
+>
+    <Header />
+    <main class="min-h-screen overflow-x-clip bg-white font-sans text-off-black">
+        {/* ============================== HERO ============================== */}
+        <section class="px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-12">
+            <div class="mx-auto max-w-2xl">
+                <p class="text-sm font-semibold text-medium-gray">YTT 2026 cohort</p>
+                <h1 class="mt-2 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+                    Join a committee
+                </h1>
+                <p class="mt-4 text-lg leading-relaxed text-off-black/80">
+                    You asked to get more involved. Tell us where you'd fit, and
+                    LSP leadership and the Junior Board will place you.
+                </p>
+            </div>
+        </section>
+
+        {/* ============================== FORM ============================== */}
+        <section class="px-4 pb-16 sm:px-6 sm:pb-20">
+            <div class="mx-auto max-w-2xl">
+                <div id="cm-card">
+                    {/* Draft banner: shown by the script when a saved draft is restored. */}
+                    <div id="cm-draft" hidden role="status" class="mb-6 rounded-xl border border-black/15 px-4 py-4 sm:px-5">
+                        <p class="text-base font-semibold">
+                            We saved your answers from <span id="cm-draft-when">a moment ago</span>.
+                        </p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button id="cm-draft-resume" type="button" class:list={[primaryBtn, "px-5 py-2 text-sm"]}>
+                                Pick up where I left off
+                            </button>
+                            <button id="cm-draft-reset" type="button" class:list={[secondaryBtn, "px-5 py-2 text-sm"]}>
+                                Start over
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="cm-form" class="relative" novalidate>
+                        <!-- Honeypot: off-screen field humans never see or fill.
+                             Bots that auto-fill every input trip it and get a
+                             silent "success" with nothing sent to the form. -->
+                        <div class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                            <label for="cm-website">Website</label>
+                            <input id="cm-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        {/* Progress: sticks under the fixed site header (top set by the script). */}
+                        <div id="cm-progress" class="cm-progress sticky z-30 -mx-4 bg-white px-4 pb-4 pt-3 sm:mx-0 sm:px-0">
+                            <p id="cm-progress-label" class="text-sm font-semibold text-medium-gray">
+                                Step 1 of 5 · About 2 minutes left
+                            </p>
+                            <div
+                                id="cm-progressbar"
+                                role="progressbar"
+                                aria-label="Form progress"
+                                aria-valuemin="1"
+                                aria-valuemax="5"
+                                aria-valuenow="1"
+                                aria-valuetext="Step 1 of 5: About you"
+                                class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/10"
+                            >
+                                <div
+                                    id="cm-bar"
+                                    class="h-full rounded-full bg-accent-gold transition-[width] duration-500 ease-out motion-reduce:transition-none"
+                                    style="width: 20%"
+                                >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            {/* ======================= STEP 1: ABOUT YOU ======================= */}
+                            <fieldset data-step="1" data-title="About you" aria-labelledby="cm-h-1" class="cm-step min-w-0 space-y-6">
+                                <div>
+                                    <h2 id="cm-h-1" tabindex="-1" class={stepHeadingClass}>About you</h2>
+                                    <p class={helpClass}>Every question is required unless it says optional.</p>
+                                </div>
+
+                                <div>
+                                    <label for="cm-name" class={labelClass}>Full name</label>
+                                    <input id="cm-name" name="fullName" type="text" autocomplete="name" autocapitalize="words" class={inputClass} aria-describedby="cm-name-err" />
+                                    <p id="cm-name-err" class={fieldErrorClass}>Please add your full name.</p>
+                                </div>
+
+                                <div>
+                                    <label for="cm-email" class={labelClass}>Email</label>
+                                    <input id="cm-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" class={inputClass} aria-describedby="cm-email-err" />
+                                    <p id="cm-email-err" class={fieldErrorClass}>Please add a valid email address.</p>
+                                </div>
+
+                                <div>
+                                    <label for="cm-phone" class={labelClass}>Phone number</label>
+                                    <input id="cm-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" class={inputClass} aria-describedby="cm-phone-err" />
+                                    <p id="cm-phone-err" class={fieldErrorClass}>Please add a phone number we can reach you at.</p>
+                                </div>
+
+                                <div>
+                                    <label for="cm-contact" class={labelClass}>Best way to reach you</label>
+                                    <p id="cm-contact-help" class={helpClass}>Tap one or type your own.</p>
+                                    <div class="mt-3 flex flex-wrap gap-2" role="group" aria-label="Quick picks">
+                                        {CONTACT_CHIPS.map((chip) => (
+                                            <button
+                                                type="button"
+                                                data-chip={chip}
+                                                aria-pressed="false"
+                                                class="rounded-full border border-black/20 bg-white px-4 py-1.5 text-sm font-semibold text-off-black transition-colors hover:border-off-black focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70 aria-pressed:border-accent-gold aria-pressed:bg-accent-gold/15"
+                                            >
+                                                {chip}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input id="cm-contact" name="contactMethod" type="text" class={inputClass} aria-describedby="cm-contact-help cm-contact-err" />
+                                    <p id="cm-contact-err" class={fieldErrorClass}>Please tell us the best way to reach you.</p>
+                                </div>
+                            </fieldset>
+
+                            {/* ======================= STEP 2: COMMITTEES ======================= */}
+                            <fieldset data-step="2" data-title="Committees" aria-labelledby="cm-h-2" class="cm-step min-w-0 space-y-8" hidden>
+                                <h2 id="cm-h-2" tabindex="-1" class={stepHeadingClass}>Committees</h2>
+
+                                <fieldset class="min-w-0" aria-describedby="cm-committees-err">
+                                    <legend class={legendClass}>Which committees interest you?</legend>
+                                    <p class={helpClass}>Pick all that apply.</p>
+                                    <div class="mt-3 space-y-2">
+                                        {COMMITTEES.map((c) => (
+                                            <label class={optionClass}>
+                                                <input type="checkbox" name="committees" value={c.name} class={checkClass} />
+                                                <span class="min-w-0">
+                                                    <span class="block font-semibold">{c.name}</span>
+                                                    <span class="mt-0.5 block text-sm text-medium-gray">{leadsLine(c.leads)}</span>
+                                                </span>
+                                            </label>
+                                        ))}
+                                        <label class={optionClass}>
+                                            <input type="checkbox" name="committees" value={NOT_INTERESTED} data-exclusive="1" class={checkClass} />
+                                            <span class="min-w-0">{NOT_INTERESTED}</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-committees-err" class={fieldErrorClass}>Please pick at least one.</p>
+                                </fieldset>
+
+                                <div>
+                                    <label for="cm-skills" class={labelClass}>Skills you'd like to offer LSP</label>
+                                    <p id="cm-skills-help" class={helpClass}>For example: event setup, photography, translation, design.</p>
+                                    <input id="cm-skills" name="skills" type="text" class={inputClass} aria-describedby="cm-skills-help cm-skills-err" />
+                                    <p id="cm-skills-err" class={fieldErrorClass}>Please share at least one skill.</p>
+                                </div>
+                            </fieldset>
+
+                            {/* ======================= STEP 3: NEW IDEAS ======================= */}
+                            <fieldset data-step="3" data-title="New ideas" aria-labelledby="cm-h-3" class="cm-step min-w-0 space-y-8" hidden>
+                                <h2 id="cm-h-3" tabindex="-1" class={stepHeadingClass}>New ideas</h2>
+
+                                <fieldset class="min-w-0" aria-describedby="cm-newc-err">
+                                    <legend class={legendClass}>Is there a committee you'd like LSP to start?</legend>
+                                    <div class="mt-3 space-y-2">
+                                        <label class={optionClass}>
+                                            <input type="radio" name="newCommitteeChoice" value="none" class={checkClass} />
+                                            <span class="min-w-0">No new suggestions</span>
+                                        </label>
+                                        <label class={optionClass}>
+                                            <input type="radio" name="newCommitteeChoice" value="idea" class={checkClass} />
+                                            <span class="min-w-0">I have an idea</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-newc-err" class={fieldErrorClass}>Please pick one.</p>
+                                    <div id="cm-newc-text-wrap" class="mt-4" hidden>
+                                        <label for="cm-newc-text" class={labelClass}>What's the committee?</label>
+                                        <input id="cm-newc-text" name="newCommitteeText" type="text" class={inputClass} aria-describedby="cm-newc-text-err" />
+                                        <p id="cm-newc-text-err" class={fieldErrorClass}>Please tell us your committee idea.</p>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset id="cm-newrole-wrap" class="min-w-0" aria-describedby="cm-newrole-err" hidden>
+                                    <legend class={legendClass}>What role would you take in it?</legend>
+                                    <div class="mt-3 space-y-2">
+                                        <label class={optionClass}>
+                                            <input type="radio" name="newRoleChoice" value="none" class={checkClass} />
+                                            <span class="min-w-0">I'd rather not say</span>
+                                        </label>
+                                        <label class={optionClass}>
+                                            <input type="radio" name="newRoleChoice" value="idea" class={checkClass} />
+                                            <span class="min-w-0">I know the role I'd take</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-newrole-err" class={fieldErrorClass}>Please pick one.</p>
+                                    <div id="cm-newrole-text-wrap" class="mt-4" hidden>
+                                        <label for="cm-newrole-text" class={labelClass}>Your role</label>
+                                        <input id="cm-newrole-text" name="newRoleText" type="text" class={inputClass} aria-describedby="cm-newrole-text-err" />
+                                        <p id="cm-newrole-text-err" class={fieldErrorClass}>Please describe the role you'd take.</p>
+                                    </div>
+                                </fieldset>
+                            </fieldset>
+
+                            {/* ======================= STEP 4: COMMITMENT ======================= */}
+                            <fieldset data-step="4" data-title="Commitment" aria-labelledby="cm-h-4" class="cm-step min-w-0 space-y-8" hidden>
+                                <h2 id="cm-h-4" tabindex="-1" class={stepHeadingClass}>Commitment</h2>
+
+                                <fieldset class="min-w-0" aria-describedby="cm-inv-err">
+                                    <legend class={legendClass}>How much time can you realistically give?</legend>
+                                    <div class="mt-3 space-y-2">
+                                        {INVOLVEMENT_OPTIONS.map((opt) => {
+                                            const { head, rest } = splitLabel(opt);
+                                            return (
+                                                <label class={optionClass}>
+                                                    <input type="radio" name="involvement" value={opt} class={checkClass} />
+                                                    <span class="min-w-0">
+                                                        <span class="block font-semibold">{head}</span>
+                                                        {rest && <span class="mt-0.5 block text-sm text-medium-gray">{rest}</span>}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                        <label class={optionClass}>
+                                            <input type="radio" name="involvement" value={OTHER} class={checkClass} />
+                                            <span class="min-w-0 font-semibold">Other</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-inv-err" class={fieldErrorClass}>Please pick one.</p>
+                                    <div id="cm-inv-other-wrap" class="mt-4" hidden>
+                                        <label for="cm-inv-other" class={labelClass}>Your answer</label>
+                                        <input id="cm-inv-other" name="involvementOther" type="text" class={inputClass} aria-describedby="cm-inv-other-err" />
+                                        <p id="cm-inv-other-err" class={fieldErrorClass}>Please describe the time you can give.</p>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="min-w-0" aria-describedby="cm-con-err">
+                                    <legend class={legendClass}>How do you want to contribute?</legend>
+                                    <p class={helpClass}>Pick one.</p>
+                                    <div class="mt-3 space-y-2">
+                                        {CONTRIBUTE_OPTIONS.map((opt) => (
+                                            <label class={optionClass}>
+                                                <input type="radio" name="contribute" value={opt} class={checkClass} />
+                                                <span class="min-w-0 font-semibold">{opt}</span>
+                                            </label>
+                                        ))}
+                                        <label class={optionClass}>
+                                            <input type="radio" name="contribute" value={OTHER} class={checkClass} />
+                                            <span class="min-w-0 font-semibold">Other</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-con-err" class={fieldErrorClass}>Please pick one.</p>
+                                    <div id="cm-con-other-wrap" class="mt-4" hidden>
+                                        <label for="cm-con-other" class={labelClass}>Your answer</label>
+                                        <input id="cm-con-other" name="contributeOther" type="text" class={inputClass} aria-describedby="cm-con-other-err" />
+                                        <p id="cm-con-other-err" class={fieldErrorClass}>Please describe how you'd contribute.</p>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="min-w-0" aria-describedby="cm-roles-err">
+                                    <legend class={legendClass}>What roles would you feel comfortable taking on?</legend>
+                                    <p class={helpClass}>Pick all that apply.</p>
+                                    <div class="mt-3 space-y-2">
+                                        {ROLE_OPTIONS.map((opt) => {
+                                            const { head, rest } = splitLabel(opt);
+                                            return (
+                                                <label class={optionClass}>
+                                                    <input type="checkbox" name="roles" value={opt} class={checkClass} />
+                                                    <span class="min-w-0">
+                                                        <span class:list={["block", rest ? "font-semibold" : ""]}>{head}</span>
+                                                        {rest && <span class="mt-0.5 block text-sm text-medium-gray">{rest}</span>}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                        <label class={optionClass}>
+                                            <input type="checkbox" name="roles" value={OTHER} class={checkClass} />
+                                            <span class="min-w-0 font-semibold">Other</span>
+                                        </label>
+                                    </div>
+                                    <p id="cm-roles-err" class={fieldErrorClass}>Please pick at least one.</p>
+                                    <div id="cm-roles-other-wrap" class="mt-4" hidden>
+                                        <label for="cm-roles-other" class={labelClass}>Your answer</label>
+                                        <input id="cm-roles-other" name="rolesOther" type="text" class={inputClass} aria-describedby="cm-roles-other-err" />
+                                        <p id="cm-roles-other-err" class={fieldErrorClass}>Please describe the role.</p>
+                                    </div>
+                                </fieldset>
+                            </fieldset>
+
+                            {/* ======================= STEP 5: LAST THINGS ======================= */}
+                            <fieldset data-step="5" data-title="Last things" aria-labelledby="cm-h-5" class="cm-step min-w-0 space-y-8" hidden>
+                                <h2 id="cm-h-5" tabindex="-1" class={stepHeadingClass}>Last things</h2>
+
+                                <div>
+                                    <label for="cm-dates" class={labelClass}>Important dates you aren't available</label>
+                                    <p id="cm-dates-help" class={helpClass}>Trips, busy seasons, standing commitments. If none, write "None".</p>
+                                    <textarea id="cm-dates" name="unavailableDates" rows="3" class={inputClass} aria-describedby="cm-dates-help cm-dates-err"></textarea>
+                                    <p id="cm-dates-err" class={fieldErrorClass}>Please add your dates, or write "None".</p>
+                                </div>
+
+                                <div>
+                                    <label for="cm-comments" class={labelClass}>Comments or questions</label>
+                                    <p class={helpClass}>Optional.</p>
+                                    <textarea id="cm-comments" name="comments" rows="3" class={inputClass}></textarea>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-bold">Review your answers</h3>
+                                    <div id="cm-review" class="mt-3 divide-y divide-black/10 rounded-xl border border-black/15"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <p id="cm-error" role="alert" class="mt-6 hidden rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+                        {/* Wizard footer */}
+                        <div class="mt-10 border-t border-black/10 pt-6">
+                            <div class="flex items-center gap-3">
+                                <button id="cm-back" type="button" class:list={[secondaryBtn, "shrink-0"]} hidden>Back</button>
+                                <button id="cm-next" type="button" class:list={[primaryBtn, "ml-auto flex-1 sm:flex-none sm:min-w-[9rem]"]}>Next</button>
+                                <button id="cm-submit" type="submit" class:list={[primaryBtn, "ml-auto flex-1 sm:flex-none"]} hidden>Send my answers</button>
+                            </div>
+                            <div class="mt-5">
+                                <button id="cm-restart" type="button" class={textBtn} hidden>Restart form</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Success state */}
+                <div id="cm-success" class="rounded-2xl border border-black/15 px-5 py-8 sm:px-8 sm:py-10" tabindex="-1" hidden>
+                    <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">You're in the loop</h2>
+                    <p class="mt-4 text-lg leading-relaxed text-off-black/85">
+                        Thanks<span id="cm-success-name"></span>. LSP leadership and
+                        the Junior Board use these answers to place you in a
+                        committee.
+                    </p>
+                    <p class="mt-3 text-base leading-relaxed text-off-black/85">
+                        They'll reach out by your preferred method<span id="cm-success-method"></span>.
+                    </p>
+                    <button id="cm-another" type="button" class:list={[textBtn, "mt-8"]}>Submit another response</button>
+                </div>
+            </div>
+        </section>
+
+        {/* ========================== SMALL PRINT ========================== */}
+        <section class="border-t border-black/10 px-4 py-10 sm:px-6">
+            <div class="mx-auto max-w-2xl text-sm text-medium-gray">
+                <p>
+                    Questions?{" "}
+                    <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        class="break-all font-bold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4"
+                        >{CONTACT_EMAIL}</a
+                    >
+                </p>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style is:global>
+    /* Global (all selectors are #cm-/.cm- scoped) so the review list the
+       script builds is covered too. */
+    /* Sticky progress sits under the fixed site header; --cm-top is the
+       header's measured height (the script keeps it in sync). */
+    .cm-progress {
+        top: var(--cm-top, 7rem);
+    }
+    #cm-form {
+        scroll-margin-top: calc(var(--cm-top, 7rem) + 0.5rem);
+    }
+    /* Keep focused fields clear of the header + sticky progress. */
+    #cm-form :is(input, textarea, button, h2) {
+        scroll-margin-top: calc(var(--cm-top, 7rem) + 5.5rem);
+    }
+
+    /* Direction-aware step change: the incoming step starts offset and
+       transparent (no transition), then the class is removed and it
+       eases to rest. */
+    .cm-step {
+        transition:
+            opacity 260ms ease-out,
+            transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .cm-step.cm-from-right,
+    .cm-step.cm-from-left {
+        opacity: 0;
+        transition: none;
+    }
+    .cm-step.cm-from-right {
+        transform: translateX(32px);
+    }
+    .cm-step.cm-from-left {
+        transform: translateX(-32px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .cm-step,
+        .cm-step.cm-from-right,
+        .cm-step.cm-from-left {
+            transition: none;
+            transform: none;
+            opacity: 1;
+        }
+    }
+</style>
+
+<script>
+    // ============================================================
+    // GOOGLE FORM CONFIG (marketing/committee-form/committee-form.json):
+    // "YTT 2026 Cohort Committee Interest Form" (edit id
+    // 1ewhCmWz9EsvvjYPoFO6qJ_f99agof9OHumOrlOSFBxg). Email collection is
+    // "Responder input": the email goes as `emailAddress`, not an entry.
+    // Checkbox questions send one repeated entry.N per checked option. An
+    // "Other" write-in goes as entry.N=__other_option__ plus
+    // entry.N.other_option_response=<text>. Option strings must match the
+    // Google Form character for character (they live in the page
+    // frontmatter). Every question but `comments` is REQUIRED form-side:
+    // a POST missing one is silently dropped, so this page validates all.
+    // ============================================================
+    const FORM_ACTION_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLScQMyFHTr0Le7sTYigsXXRjxVgG_ALKeW8rBf10idrzGbrIIw/formResponse";
+    const EMAIL_PARAM = "emailAddress";
+    const ENTRY_IDS = {
+        fullName: "entry.1498135098", // Full Name (text)
+        phone: "entry.22703157", // Phone Number (text)
+        contactMethod: "entry.2129822580", // Preferred method to contact you? (text)
+        skills: "entry.626532673", // Skills you would like to offer LSP? (text)
+        committees: "entry.527642448", // Committee(s) you are interested in joining? (checkboxes)
+        newCommittee: "entry.56411502", // What committees would you like to see... (checkboxes + Other)
+        newCommitteeRole: "entry.1241575533", // From the Committee you suggested, what role... (checkboxes + Other)
+        involvement: "entry.982646062", // What level of involvement... (checkboxes + Other; page sends one)
+        contribute: "entry.1253488586", // How do you want to contribute? (multiple choice + Other)
+        roles: "entry.1113165915", // What type of role or level of responsibility... (checkboxes + Other)
+        unavailableDates: "entry.1580769427", // Important dates you aren't available? (paragraph)
+        comments: "entry.2606285", // Comments and/or questions (paragraph, optional)
+    };
+    const GF_OTHER = "__other_option__";
+    const OTHER_SUFFIX = ".other_option_response";
+    // Verbatim "no" answers (frontmatter NEW_COMMITTEE_NONE / NEW_ROLE_NONE).
+    const NEW_COMMITTEE_NONE = "I do not have any new committee suggestions";
+    const NEW_ROLE_NONE = "I did not suggest a new Committee";
+    // ============================================================
+
+    const PAGE_OTHER = "__other__";
+    const TOTAL = 5;
+    const SECONDS_PER_STEP = 25;
+    const DRAFT_KEY = "lsp_committee_draft";
+    const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+    const NAME_STORAGE_KEY = "lsp_committee_name";
+    const EMAIL_STORAGE_KEY = "lsp_committee_email";
+    // Spam guard (no server, so no Turnstile): a honeypot field plus a
+    // minimum time-to-submit. Trips show the success state without posting.
+    const HONEYPOT_FIELD = "website";
+    const MIN_SUBMIT_MS = 3000;
+    const loadedAt = Date.now();
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const form = $<HTMLFormElement>("cm-form");
+    const card = $("cm-card");
+    const success = $("cm-success");
+    const errorEl = $("cm-error");
+    const backBtn = $<HTMLButtonElement>("cm-back");
+    const nextBtn = $<HTMLButtonElement>("cm-next");
+    const submitBtn = $<HTMLButtonElement>("cm-submit");
+    const restartBtn = $<HTMLButtonElement>("cm-restart");
+    const progressLabel = $("cm-progress-label");
+    const progressbar = $("cm-progressbar");
+    const bar = $("cm-bar");
+    const review = $("cm-review");
+    const draftBanner = $("cm-draft");
+    const contactInput = $<HTMLInputElement>("cm-contact");
+    const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>("fieldset[data-step]"));
+    const chips = Array.from(form.querySelectorAll<HTMLButtonElement>("button[data-chip]"));
+    const SUBMIT_LABEL = submitBtn.textContent?.trim() || "Send my answers";
+
+    let current = 1;
+    let busy = false;
+    let saveTimer: number | undefined;
+    let submitted = false;
+
+    const reducedMotion = () => {
+        try {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        } catch {
+            return false;
+        }
+    };
+
+    // ------------------------------------------------------------
+    // Sticky progress offset: the site header is position: fixed and its
+    // height changes with the status banner, so measure it.
+    // ------------------------------------------------------------
+    const headerWrap = document.getElementById("header-wrapper");
+    function syncTop() {
+        const h = headerWrap ? headerWrap.offsetHeight : 112;
+        form.style.setProperty("--cm-top", `${h}px`);
+    }
+    syncTop();
+    if (headerWrap && "ResizeObserver" in window) new ResizeObserver(syncTop).observe(headerWrap);
+    else window.addEventListener("resize", syncTop, { passive: true });
+
+    // ------------------------------------------------------------
+    // Field helpers
+    // ------------------------------------------------------------
+    const val = (name: string) => {
+        const el = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+        return el && "value" in el ? String(el.value || "").trim() : "";
+    };
+    const radio = (name: string) =>
+        form.querySelector<HTMLInputElement>(`input[type="radio"][name="${name}"]:checked`)?.value || "";
+    const checked = (name: string) =>
+        Array.from(form.querySelectorAll<HTMLInputElement>(`input[type="checkbox"][name="${name}"]:checked`)).map(
+            (c) => c.value,
+        );
+    const firstOf = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]`);
+
+    function setFieldError(errId: string, input: HTMLElement | null, on: boolean) {
+        const el = document.getElementById(errId);
+        if (el) el.classList.toggle("hidden", !on);
+        if (input) {
+            if (on) input.setAttribute("aria-invalid", "true");
+            else input.removeAttribute("aria-invalid");
+        }
+    }
+    function clearAllErrors() {
+        form.querySelectorAll<HTMLElement>('p[id$="-err"]').forEach((p) => p.classList.add("hidden"));
+        form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
+        errorEl.classList.add("hidden");
+    }
+    function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+    }
+
+    // ------------------------------------------------------------
+    // Reveals, chips and the exclusive "not interested" committee option
+    // ------------------------------------------------------------
+    function reveal(wrapId: string, show: boolean, errIds: string[] = []) {
+        const wrap = document.getElementById(wrapId);
+        if (!wrap) return;
+        wrap.hidden = !show;
+        if (!show) errIds.forEach((e) => setFieldError(e, wrap.querySelector("input"), false));
+    }
+    function syncReveals() {
+        const idea = radio("newCommitteeChoice") === "idea";
+        reveal("cm-newc-text-wrap", idea, ["cm-newc-text-err"]);
+        reveal("cm-newrole-wrap", idea, ["cm-newrole-err", "cm-newrole-text-err"]);
+        reveal("cm-newrole-text-wrap", idea && radio("newRoleChoice") === "idea", ["cm-newrole-text-err"]);
+        reveal("cm-inv-other-wrap", radio("involvement") === PAGE_OTHER, ["cm-inv-other-err"]);
+        reveal("cm-con-other-wrap", radio("contribute") === PAGE_OTHER, ["cm-con-other-err"]);
+        reveal("cm-roles-other-wrap", checked("roles").includes(PAGE_OTHER), ["cm-roles-other-err"]);
+    }
+    function syncChips() {
+        const v = contactInput.value.trim().toLowerCase();
+        chips.forEach((c) => c.setAttribute("aria-pressed", String(v === (c.dataset.chip || "").toLowerCase())));
+    }
+    chips.forEach((chip) =>
+        chip.addEventListener("click", () => {
+            contactInput.value = chip.dataset.chip || "";
+            contactInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }),
+    );
+    form.addEventListener("change", (ev) => {
+        const t = ev.target as HTMLInputElement;
+        if (t.name !== "committees" || !t.checked) return;
+        form.querySelectorAll<HTMLInputElement>('input[name="committees"]').forEach((c) => {
+            if (c === t) return;
+            // Picking "not interested" clears the rest, and vice versa.
+            if (t.dataset.exclusive === "1" || c.dataset.exclusive === "1") c.checked = false;
+        });
+    });
+
+    // ------------------------------------------------------------
+    // Per-step validation. Each check: [ok, errId, element to mark/focus].
+    // ------------------------------------------------------------
+    type Check = [boolean, string, HTMLElement | null, boolean]; // last: mark aria-invalid on the element
+    function checksFor(step: number): Check[] {
+        const idea = radio("newCommitteeChoice") === "idea";
+        switch (step) {
+            case 1:
+                return [
+                    [!!val("fullName"), "cm-name-err", $("cm-name"), true],
+                    [EMAIL_RE.test(val("email")), "cm-email-err", $("cm-email"), true],
+                    [val("phone").replace(/\D/g, "").length >= 7, "cm-phone-err", $("cm-phone"), true],
+                    [!!val("contactMethod"), "cm-contact-err", contactInput, true],
+                ];
+            case 2:
+                return [
+                    [checked("committees").length > 0, "cm-committees-err", firstOf("committees"), false],
+                    [!!val("skills"), "cm-skills-err", $("cm-skills"), true],
+                ];
+            case 3:
+                return [
+                    [!!radio("newCommitteeChoice"), "cm-newc-err", firstOf("newCommitteeChoice"), false],
+                    [!idea || !!val("newCommitteeText"), "cm-newc-text-err", $("cm-newc-text"), true],
+                    [!idea || !!radio("newRoleChoice"), "cm-newrole-err", firstOf("newRoleChoice"), false],
+                    [
+                        !idea || radio("newRoleChoice") !== "idea" || !!val("newRoleText"),
+                        "cm-newrole-text-err",
+                        $("cm-newrole-text"),
+                        true,
+                    ],
+                ];
+            case 4:
+                return [
+                    [!!radio("involvement"), "cm-inv-err", firstOf("involvement"), false],
+                    [radio("involvement") !== PAGE_OTHER || !!val("involvementOther"), "cm-inv-other-err", $("cm-inv-other"), true],
+                    [!!radio("contribute"), "cm-con-err", firstOf("contribute"), false],
+                    [radio("contribute") !== PAGE_OTHER || !!val("contributeOther"), "cm-con-other-err", $("cm-con-other"), true],
+                    [checked("roles").length > 0, "cm-roles-err", firstOf("roles"), false],
+                    [!checked("roles").includes(PAGE_OTHER) || !!val("rolesOther"), "cm-roles-other-err", $("cm-roles-other"), true],
+                ];
+            case 5:
+                return [[!!val("unavailableDates"), "cm-dates-err", $("cm-dates"), true]];
+            default:
+                return [];
+        }
+    }
+    // Marks every check in the step; returns the first invalid element.
+    function validateStep(step: number): HTMLElement | null {
+        let first: HTMLElement | null = null;
+        for (const [ok, errId, el, mark] of checksFor(step)) {
+            setFieldError(errId, mark ? el : null, !ok);
+            if (!ok && !first) first = el;
+        }
+        return first;
+    }
+
+    // Clear a field's error as soon as it is touched.
+    function clearFor(t: HTMLElement) {
+        const own = t.getAttribute("aria-describedby");
+        if (own && t.matches("input[type=text],input[type=email],input[type=tel],textarea")) {
+            own.split(/\s+/)
+                .filter((id) => id.endsWith("-err"))
+                .forEach((id) => setFieldError(id, t, false));
+            return;
+        }
+        const fs = t.closest("fieldset[aria-describedby]");
+        const err = fs?.getAttribute("aria-describedby");
+        if (err) setFieldError(err, null, false);
+    }
+
+    // ------------------------------------------------------------
+    // Wizard chrome + step changes
+    // ------------------------------------------------------------
+    function timeLeft(step: number) {
+        if (step >= TOTAL) return "Under a minute";
+        const secs = (TOTAL - step + 1) * SECONDS_PER_STEP;
+        const mins = Math.round(secs / 60);
+        if (mins < 1) return "Under a minute";
+        return `About ${mins} minute${mins === 1 ? "" : "s"} left`;
+    }
+    function renderChrome() {
+        const title = steps[current - 1]?.dataset.title || "";
+        progressLabel.textContent = `Step ${current} of ${TOTAL} · ${timeLeft(current)}`;
+        progressbar.setAttribute("aria-valuenow", String(current));
+        progressbar.setAttribute("aria-valuetext", `Step ${current} of ${TOTAL}: ${title}`);
+        bar.style.width = `${(current / TOTAL) * 100}%`;
+        backBtn.hidden = current === 1;
+        nextBtn.hidden = current === TOTAL;
+        submitBtn.hidden = current !== TOTAL;
+        syncRestart();
+    }
+    function syncRestart() {
+        restartBtn.hidden = current === 1 && !hasAnyValue(serialize());
+    }
+    function focusStep(scroll: boolean) {
+        const heading = steps[current - 1]?.querySelector<HTMLElement>("h2");
+        heading?.focus({ preventScroll: true });
+        if (scroll) form.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
+    }
+    function goTo(n: number, opts: { focus?: boolean } = {}) {
+        const focus = opts.focus !== false;
+        n = Math.min(TOTAL, Math.max(1, n));
+        errorEl.classList.add("hidden");
+        draftBanner.hidden = true;
+        if (n !== current) {
+            const from = steps[current - 1];
+            const to = steps[n - 1];
+            const cls = n > current ? "cm-from-right" : "cm-from-left";
+            from.hidden = true;
+            from.classList.remove("cm-from-right", "cm-from-left");
+            current = n;
+            if (n === TOTAL) buildReview();
+            if (reducedMotion()) {
+                to.hidden = false;
+            } else {
+                to.classList.add(cls);
+                to.hidden = false;
+                void to.offsetWidth; // commit the offset start state
+                busy = true;
+                const done = () => {
+                    busy = false;
+                    to.removeEventListener("transitionend", done);
+                };
+                to.addEventListener("transitionend", done);
+                window.setTimeout(done, 320);
+                to.classList.remove("cm-from-right", "cm-from-left");
+            }
+            scheduleSave();
+        } else if (n === TOTAL) {
+            buildReview();
+        }
+        renderChrome();
+        if (focus) focusStep(true);
+    }
+    function next() {
+        if (busy) return;
+        const bad = validateStep(current);
+        if (bad) {
+            bad.focus();
+            return;
+        }
+        goTo(current + 1);
+    }
+    nextBtn.addEventListener("click", next);
+    backBtn.addEventListener("click", () => {
+        if (!busy) goTo(current - 1);
+    });
+
+    // Enter in a text field advances the step instead of submitting.
+    form.addEventListener("keydown", (ev) => {
+        if (ev.key !== "Enter" || ev.isComposing) return;
+        const t = ev.target as HTMLElement;
+        if (!(t instanceof HTMLInputElement)) return;
+        if (["button", "submit", "reset"].includes(t.type)) return;
+        if (current >= TOTAL) return;
+        ev.preventDefault();
+        next();
+    });
+
+    // ------------------------------------------------------------
+    // Review list (step 5): plain text grouped by step, each with Edit.
+    // ------------------------------------------------------------
+    const show = (v: string) => v || "Not answered";
+    const otherOr = (v: string, other: string) => (v === PAGE_OTHER ? `Other: ${other}` : v);
+    function reviewGroups(): Array<{ step: number; title: string; rows: Array<[string, string]> }> {
+        const idea = radio("newCommitteeChoice") === "idea";
+        const newc = radio("newCommitteeChoice");
+        const role = radio("newRoleChoice");
+        const rows3: Array<[string, string]> = [
+            ["New committee", newc === "idea" ? val("newCommitteeText") : newc === "none" ? "No new suggestions" : ""],
+        ];
+        if (idea) rows3.push(["Your role in it", role === "idea" ? val("newRoleText") : role === "none" ? "Rather not say" : ""]);
+        const roles = checked("roles").map((r) => (r === PAGE_OTHER ? `Other: ${val("rolesOther")}` : r));
+        return [
+            {
+                step: 1,
+                title: "About you",
+                rows: [
+                    ["Name", val("fullName")],
+                    ["Email", val("email")],
+                    ["Phone", val("phone")],
+                    ["Best way to reach you", val("contactMethod")],
+                ],
+            },
+            {
+                step: 2,
+                title: "Committees",
+                rows: [
+                    ["Committees", checked("committees").join(", ")],
+                    ["Skills", val("skills")],
+                ],
+            },
+            { step: 3, title: "New ideas", rows: rows3 },
+            {
+                step: 4,
+                title: "Commitment",
+                rows: [
+                    ["Time", otherOr(radio("involvement"), val("involvementOther"))],
+                    ["Contribute by", otherOr(radio("contribute"), val("contributeOther"))],
+                    ["Roles", roles.join("; ")],
+                ],
+            },
+        ];
+    }
+    function buildReview() {
+        review.replaceChildren();
+        for (const g of reviewGroups()) {
+            const section = document.createElement("div");
+            section.className = "px-4 py-4 sm:px-5";
+            const head = document.createElement("div");
+            head.className = "flex items-baseline justify-between gap-4";
+            const h = document.createElement("h4");
+            h.className = "text-sm font-bold";
+            h.textContent = g.title;
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.className =
+                "text-sm font-semibold text-off-black underline decoration-accent-gold decoration-2 underline-offset-4 rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent-gold/70";
+            edit.textContent = "Edit";
+            edit.setAttribute("aria-label", `Edit ${g.title}`);
+            edit.addEventListener("click", () => goTo(g.step));
+            head.append(h, edit);
+            const dl = document.createElement("dl");
+            dl.className = "mt-2 space-y-1.5 text-sm";
+            for (const [k, v] of g.rows) {
+                const row = document.createElement("div");
+                const dt = document.createElement("dt");
+                dt.className = "text-medium-gray";
+                dt.textContent = k;
+                const dd = document.createElement("dd");
+                dd.className = "break-words text-off-black";
+                dd.textContent = show(v);
+                row.append(dt, dd);
+                dl.append(row);
+            }
+            section.append(head, dl);
+            review.append(section);
+        }
+    }
+
+    // ------------------------------------------------------------
+    // Autosave draft (localStorage, 24 h)
+    // ------------------------------------------------------------
+    type Values = Record<string, string | string[]>;
+    function serialize(): Values {
+        const out: Values = {};
+        form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]").forEach((el) => {
+            const name = el.name;
+            if (name === HONEYPOT_FIELD) return;
+            if (el instanceof HTMLInputElement && el.type === "checkbox") {
+                const arr = (out[name] as string[]) || [];
+                if (el.checked) arr.push(el.value);
+                out[name] = arr;
+            } else if (el instanceof HTMLInputElement && el.type === "radio") {
+                if (!(name in out)) out[name] = "";
+                if (el.checked) out[name] = el.value;
+            } else {
+                out[name] = el.value;
+            }
+        });
+        return out;
+    }
+    function restore(values: Values) {
+        form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]").forEach((el) => {
+            const v = values[el.name];
+            if (v === undefined || el.name === HONEYPOT_FIELD) return;
+            if (el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio")) {
+                el.checked = Array.isArray(v) ? v.includes(el.value) : v === el.value;
+            } else if (typeof v === "string") {
+                el.value = v;
+            }
+        });
+    }
+    function hasAnyValue(values: Values) {
+        return Object.values(values).some((v) => (Array.isArray(v) ? v.length > 0 : String(v).trim() !== ""));
+    }
+    function saveNow() {
+        window.clearTimeout(saveTimer);
+        saveTimer = undefined;
+        if (submitted) return;
+        const values = serialize();
+        try {
+            if (!hasAnyValue(values)) window.localStorage.removeItem(DRAFT_KEY);
+            else window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ v: 1, savedAt: Date.now(), step: current, values }));
+        } catch {
+            // localStorage may be unavailable (private mode, quota); ignore.
+        }
+    }
+    function scheduleSave() {
+        window.clearTimeout(saveTimer);
+        saveTimer = window.setTimeout(saveNow, 300);
+    }
+    function clearDraft() {
+        window.clearTimeout(saveTimer);
+        saveTimer = undefined;
+        try {
+            window.localStorage.removeItem(DRAFT_KEY);
+        } catch {
+            // ignore
+        }
+    }
+    function readDraft(): { step: number; savedAt: number; values: Values } | null {
+        try {
+            const raw = window.localStorage.getItem(DRAFT_KEY);
+            if (!raw) return null;
+            const d = JSON.parse(raw);
+            if (!d || d.v !== 1 || typeof d.savedAt !== "number" || !d.values || typeof d.values !== "object") {
+                window.localStorage.removeItem(DRAFT_KEY);
+                return null;
+            }
+            if (Date.now() - d.savedAt > DRAFT_TTL_MS) {
+                window.localStorage.removeItem(DRAFT_KEY);
+                return null;
+            }
+            const step = Math.min(TOTAL, Math.max(1, Number(d.step) || 1));
+            return { step, savedAt: d.savedAt, values: d.values };
+        } catch {
+            return null;
+        }
+    }
+    function relativeTime(ts: number) {
+        const secs = Math.max(0, Math.round((Date.now() - ts) / 1000));
+        if (secs < 60) return "a moment ago";
+        const mins = Math.round(secs / 60);
+        if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+        const hrs = Math.round(mins / 60);
+        return `${hrs} hour${hrs === 1 ? "" : "s"} ago`;
+    }
+
+    form.addEventListener("input", (ev) => {
+        const t = ev.target as HTMLElement;
+        clearFor(t);
+        if (t === contactInput) syncChips();
+        if (current === TOTAL) buildReview();
+        syncRestart();
+        scheduleSave();
+    });
+    form.addEventListener("change", (ev) => {
+        clearFor(ev.target as HTMLElement);
+        syncReveals();
+        if (current === TOTAL) buildReview();
+        syncRestart();
+        scheduleSave();
+    });
+    window.addEventListener("pagehide", () => {
+        if (saveTimer !== undefined) saveNow();
+    });
+
+    // ------------------------------------------------------------
+    // Reset (Restart form, Start over, Submit another response)
+    // ------------------------------------------------------------
+    function resetAll(opts: { focus?: boolean } = {}) {
+        form.reset();
+        clearAllErrors();
+        clearDraft();
+        draftBanner.hidden = true;
+        submitBtn.disabled = false;
+        submitBtn.textContent = SUBMIT_LABEL;
+        syncReveals();
+        syncChips();
+        goTo(1, { focus: opts.focus !== false });
+        renderChrome();
+    }
+    restartBtn.addEventListener("click", () => {
+        if (window.confirm("Clear all your answers and start over?")) resetAll();
+    });
+
+    // ------------------------------------------------------------
+    // Load: restore a fresh draft, else prefill name/email.
+    // ------------------------------------------------------------
+    const draft = readDraft();
+    if (draft && hasAnyValue(draft.values)) {
+        restore(draft.values);
+        $("cm-draft-when").textContent = relativeTime(draft.savedAt);
+        draftBanner.hidden = false;
+        $("cm-draft-resume").addEventListener("click", () => {
+            draftBanner.hidden = true;
+            goTo(draft.step);
+        });
+        $("cm-draft-reset").addEventListener("click", () => resetAll());
+    } else {
+        try {
+            const name = window.localStorage.getItem(NAME_STORAGE_KEY) || "";
+            const email = window.localStorage.getItem(EMAIL_STORAGE_KEY) || "";
+            if (name) ($("cm-name") as HTMLInputElement).value = name;
+            if (email) ($("cm-email") as HTMLInputElement).value = email;
+        } catch {
+            // localStorage may be unavailable (private mode); ignore.
+        }
+    }
+    syncReveals();
+    syncChips();
+    renderChrome();
+
+    // ------------------------------------------------------------
+    // Submit
+    // ------------------------------------------------------------
+    function showSuccess(firstName: string, method: string) {
+        $("cm-success-name").textContent = firstName ? `, ${firstName}` : "";
+        $("cm-success-method").textContent = method ? `: ${method}` : "";
+        card.hidden = true;
+        success.hidden = false;
+        success.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
+        success.focus({ preventScroll: true });
+    }
+    $("cm-another").addEventListener("click", () => {
+        submitted = false;
+        success.hidden = true;
+        card.hidden = false;
+        resetAll();
+    });
+
+    function buildParams(): URLSearchParams {
+        const p = new URLSearchParams();
+        const addOther = (entry: string, text: string) => {
+            p.append(entry, GF_OTHER);
+            p.set(entry + OTHER_SUFFIX, text);
+        };
+
+        p.set(EMAIL_PARAM, val("email"));
+        p.set(ENTRY_IDS.fullName, val("fullName"));
+        p.set(ENTRY_IDS.phone, val("phone"));
+        p.set(ENTRY_IDS.contactMethod, val("contactMethod"));
+        p.set(ENTRY_IDS.skills, val("skills"));
+        checked("committees").forEach((c) => p.append(ENTRY_IDS.committees, c));
+
+        const idea = radio("newCommitteeChoice") === "idea";
+        if (idea) addOther(ENTRY_IDS.newCommittee, val("newCommitteeText"));
+        else p.append(ENTRY_IDS.newCommittee, NEW_COMMITTEE_NONE);
+        if (idea && radio("newRoleChoice") === "idea") addOther(ENTRY_IDS.newCommitteeRole, val("newRoleText"));
+        else p.append(ENTRY_IDS.newCommitteeRole, NEW_ROLE_NONE);
+
+        const inv = radio("involvement");
+        if (inv === PAGE_OTHER) addOther(ENTRY_IDS.involvement, val("involvementOther"));
+        else p.append(ENTRY_IDS.involvement, inv);
+
+        const con = radio("contribute");
+        if (con === PAGE_OTHER) addOther(ENTRY_IDS.contribute, val("contributeOther"));
+        else p.set(ENTRY_IDS.contribute, con);
+
+        const roles = checked("roles");
+        roles.filter((r) => r !== PAGE_OTHER).forEach((r) => p.append(ENTRY_IDS.roles, r));
+        if (roles.includes(PAGE_OTHER)) addOther(ENTRY_IDS.roles, val("rolesOther"));
+
+        p.set(ENTRY_IDS.unavailableDates, val("unavailableDates"));
+        const comments = val("comments");
+        if (comments) p.set(ENTRY_IDS.comments, comments);
+        return p;
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (current < TOTAL) {
+            next();
+            return;
+        }
+        if (busy || submitBtn.disabled) return;
+        errorEl.classList.add("hidden");
+
+        const fullName = val("fullName");
+        const firstName = fullName.split(/\s+/)[0] || "";
+        const method = val("contactMethod");
+
+        const honeypot = val(HONEYPOT_FIELD);
+        if (honeypot || Date.now() - loadedAt < MIN_SUBMIT_MS) {
+            // Looks automated: pretend it worked, send nothing.
+            showSuccess(firstName, method);
+            return;
+        }
+
+        // Re-check every step; jump to the first one with a problem.
+        for (let s = 1; s <= TOTAL; s++) {
+            const bad = validateStep(s);
+            if (bad) {
+                if (s !== current) goTo(s, { focus: false });
+                showError("A few answers still need attention.");
+                window.setTimeout(() => bad.focus(), reducedMotion() ? 0 : 280);
+                return;
+            }
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+        const params = buildParams();
+
+        try {
+            // no-cors: Google doesn't send CORS headers on formResponse, so
+            // the response is opaque. A resolved fetch means it reached
+            // Google; client-side validation above covers required fields.
+            await fetch(FORM_ACTION_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+
+            submitted = true;
+            clearDraft();
+            try {
+                window.localStorage.setItem(NAME_STORAGE_KEY, fullName);
+                window.localStorage.setItem(EMAIL_STORAGE_KEY, val("email"));
+            } catch {
+                // ignore
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = SUBMIT_LABEL;
+            showSuccess(firstName, method);
+        } catch (e) {
+            console.error("Committee form submit failed:", e);
+            showError("We couldn't send your answers. Check your connection and try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = SUBMIT_LABEL;
+        }
+    });
+</script>

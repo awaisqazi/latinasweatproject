@@ -1,0 +1,70 @@
+{
+  "title": "YTT 2026 Cohort Committee Interest Form",
+  "page": "/committee (src/pages/committee.astro, unlisted, noindex)",
+  "editId": "1ewhCmWz9EsvvjYPoFO6qJ_f99agof9OHumOrlOSFBxg",
+  "publicId": "1FAIpQLScQMyFHTr0Le7sTYigsXXRjxVgG_ALKeW8rBf10idrzGbrIIw",
+  "postUrl": "https://docs.google.com/forms/d/e/1FAIpQLScQMyFHTr0Le7sTYigsXXRjxVgG_ALKeW8rBf10idrzGbrIIw/formResponse",
+  "settings": "Collect email: Responder input (sent as the param emailAddress, not an entry.*); every question except comments is REQUIRED form-side, so a POST missing one is silently dropped; the form already had live responses when the page was built (2026-10-27), do not restructure it. Settings > Responses > 'Send responders a copy of their response' MUST stay Off: Always or When requested makes Google require an invisible reCAPTCHA token (g-recaptcha-response) and every POST from the page gets a 400 and is dropped (switched Off 2026-10-27)",
+  "otherConvention": "An Other write-in is sent as entry.N=__other_option__ plus entry.N.other_option_response=<text> (checkbox questions also repeat entry.N=<option> for each regular option checked)",
+  "rederive": "curl -sL https://docs.google.com/forms/d/<editId>/viewform and parse FB_PUBLIC_LOAD_DATA_",
+  "email": "emailAddress",
+  "entries": {
+    "fullName": { "id": "entry.1498135098", "title": "Full Name", "type": "short text", "required": true },
+    "phone": { "id": "entry.22703157", "title": "Phone Number ", "type": "short text", "required": true },
+    "contactMethod": { "id": "entry.2129822580", "title": "Preferred method to contact you?", "type": "short text", "required": true },
+    "skills": { "id": "entry.626532673", "title": "Skills you would like to offer LSP?", "type": "short text", "required": true },
+    "committees": { "id": "entry.527642448", "title": "Committee(s) you are interested in joining?", "type": "checkboxes", "required": true, "other": false },
+    "newCommittee": { "id": "entry.56411502", "title": "What committees would you like to see that LSP currently does not have? ", "type": "checkboxes", "required": true, "other": true },
+    "newCommitteeRole": { "id": "entry.1241575533", "title": "From the Committee you suggested, what role would you take in it? ", "type": "checkboxes", "required": true, "other": true },
+    "involvement": { "id": "entry.982646062", "title": "What level of involvement can you realistically commit to within the committee you selected?", "type": "checkboxes (page sends one value)", "required": true, "other": true },
+    "contribute": { "id": "entry.1253488586", "title": "How do you want to contribute? ", "type": "multiple choice", "required": true, "other": true },
+    "roles": { "id": "entry.1113165915", "title": "What type of role or level of responsibility would you feel comfortable taking on within your committee? Select all that apply", "type": "checkboxes", "required": true, "other": true },
+    "unavailableDates": { "id": "entry.1580769427", "title": "Important dates you aren't available? ", "type": "paragraph", "required": true },
+    "comments": { "id": "entry.2606285", "title": "Comments and/or questions", "type": "paragraph", "required": false }
+  },
+  "options": {
+    "committees": [
+      "General Committee",
+      "Gala Sub Committee",
+      "Culture & Ethics",
+      "Community Impact",
+      "Queer Events",
+      "I am not interested in joining any of the listed committees"
+    ],
+    "newCommittee": ["I do not have any new committee suggestions", "__other_option__"],
+    "newCommitteeRole": ["I did not suggest a new Committee", "__other_option__"],
+    "involvement": [
+      "Occasional involvement: I can contribute when my schedule allows.",
+      "Light involvement: I can dedicate 1–2 hours per month.",
+      "Moderate involvement: I can dedicate 3–5 hours per month.",
+      "Active involvement: I can dedicate 6+ hours per month.",
+      "__other_option__"
+    ],
+    "contribute": [
+      "Attending meetings and planning",
+      "Supporting events",
+      "Leading projects",
+      "Administrative tasks",
+      "Creating social media post",
+      "__other_option__"
+    ],
+    "roles": [
+      "Leadership: Helping guide the committee's priorities, facilitate meetings, and support decision-making",
+      "Project or initiative coordination: Organizing projects, tracking progress, and coordinating tasks",
+      "Event planning and support: Helping plan, organize, and facilitate events or activities",
+      "Volunteering and task-based support: Helping with specific tasks as needed",
+      "Research and resource development: Researching opportunities, gathering information, or developing materials",
+      "Communications and outreach: Supporting outreach, sharing updates, and engaging community members",
+      "I'm open to taking on different roles depending on the committee's needs",
+      "I'm interested in participating but am not ready to take on a leadership or coordination role",
+      "__other_option__"
+    ]
+  },
+  "committeeLeads": {
+    "General Committee": "Margarita & Dinorah Zubieta",
+    "Gala Sub Committee": "Vanessa Tirado & Vacant",
+    "Culture & Ethics": "Vanessa Tirado & Yari Jurado",
+    "Community Impact": "Lucia",
+    "Queer Events": "Mateo & Kayla"
+  }
+}
