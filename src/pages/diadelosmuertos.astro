@@ -942,9 +942,9 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             <p class="text-sm font-medium text-medium-gray">
                                 {group.label} <span class="text-medium-gray/70">· {group.labelEs}</span>
                             </p>
-                            <ul class="mt-5 flex flex-wrap items-center gap-x-10 gap-y-6">
+                            <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3 sm:gap-x-10 md:grid-cols-4">
                                 {group.items.map((s) => (
-                                    <li class="flex items-center">
+                                    <li class="flex h-16 items-center justify-start sm:h-20">
                                         {!s.logo ? (
                                             <span class="text-[18px] font-bold leading-tight text-off-black">{s.name}</span>
                                         ) : s.href ? (
@@ -953,7 +953,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 aria-label={s.name}
-                                                class="inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4"
+                                                class="block h-full w-full rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4"
                                             >
                                                 <img
                                                     src={`${base}${s.logo}`}
@@ -962,11 +962,11 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                                                     height={s.height}
                                                     loading="lazy"
                                                     decoding="async"
-                                                    class="block h-11 w-auto max-w-[200px] object-contain sm:h-14"
+                                                    class="block h-full w-full object-contain object-left"
                                                 />
                                             </a>
                                         ) : (
-                                            <span class="inline-flex">
+                                            <span class="block h-full w-full">
                                                 <img
                                                     src={`${base}${s.logo}`}
                                                     alt={s.alt}
@@ -974,7 +974,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                                                     height={s.height}
                                                     loading="lazy"
                                                     decoding="async"
-                                                    class="block h-11 w-auto max-w-[200px] object-contain sm:h-14"
+                                                    class="block h-full w-full object-contain object-left"
                                                 />
                                             </span>
                                         )}
