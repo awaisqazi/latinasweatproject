@@ -13,7 +13,8 @@
 // volunteer) -> Remembering together -> facts band (papel picado) -> #program
 // (#saturday + #sunday day blocks, price tag per row, inline Zeffy pills)
 // -> lineup (Who's playing) -> the two program flyers (black ground, full-size
-// jpg links) -> #volunteer -> small print (supporters as text).
+// jpg links) -> #volunteer -> #supporters (supportersLine + three logo rows
+// from ddlmWeekend.supporters, plain on white) -> small print (contact).
 // All facts and copy come from src/data/fallEvents.js (halloweenProgram,
 // ddlmWeekend, ddlmEvent); Zeffy wins over the flyers for prices (both
 // flyers print "DONATION"; never shown as a price). END TIME: the site
@@ -913,10 +914,85 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             </div>
         </section>
 
+        {/* ========================== SUPPORTERS ========================== */}
+        {/* Supported by (marketing/ddlm-supporters/BRIEF.md): the text credit
+            (ddlmWeekend.supportersLine, moved here from the small print so it
+            shows once) and three logo rows from ddlmWeekend.supporters. Plain
+            on white: no cards, borders, tints, filters or hover effects; each
+            logo capped at 44px (56px sm+) tall and 200px wide. Entries with an
+            href open in a new tab; href null renders a span; logo null renders
+            the name as text. One-time rise-in via DdlmReveal (.ddlm-in). */}
+        <section
+            id="supporters"
+            class="ddlm-supporters scroll-mt-32 bg-white px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16"
+            data-ddlm-reveal="0.15"
+        >
+            <div class="mx-auto max-w-3xl">
+                <div class="ddlm-rise" style="--i: 0;">
+                    <p class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray">
+                        Supported by · con el apoyo de
+                    </p>
+                    <p class="mt-4 max-w-2xl text-base leading-relaxed text-medium-gray">
+                        {ddlmWeekend.supportersLine}
+                    </p>
+                </div>
+                <div class="mt-10 space-y-10 sm:mt-12 sm:space-y-12">
+                    {ddlmWeekend.supporters.map((group, gi) => (
+                        <div class="ddlm-rise" style={`--i: ${gi + 1};`}>
+                            <p class="text-sm font-medium text-medium-gray">
+                                {group.label} <span class="text-medium-gray/70">· {group.labelEs}</span>
+                            </p>
+                            <ul class="mt-5 flex flex-wrap items-center gap-x-10 gap-y-6">
+                                {group.items.map((s) => (
+                                    <li class="flex items-center">
+                                        {!s.logo ? (
+                                            <span class="text-[18px] font-bold leading-tight text-off-black">{s.name}</span>
+                                        ) : s.href ? (
+                                            <a
+                                                href={s.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label={s.name}
+                                                class="inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4"
+                                            >
+                                                <img
+                                                    src={`${base}${s.logo}`}
+                                                    alt={s.alt}
+                                                    width={s.width}
+                                                    height={s.height}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    class="block h-11 w-auto max-w-[200px] object-contain sm:h-14"
+                                                />
+                                            </a>
+                                        ) : (
+                                            <span class="inline-flex">
+                                                <img
+                                                    src={`${base}${s.logo}`}
+                                                    alt={s.alt}
+                                                    width={s.width}
+                                                    height={s.height}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    class="block h-11 w-auto max-w-[200px] object-contain sm:h-14"
+                                                />
+                                            </span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                            {group.caption && (
+                                <p class="mt-3 text-xs text-medium-gray">{group.caption}</p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
         {/* ========================== SMALL PRINT ========================== */}
         <section class="border-t border-black/10 bg-white px-4 py-10 sm:px-6">
             <div class="mx-auto max-w-xl space-y-3 text-sm text-medium-gray">
-                <p>{ddlmWeekend.supportersLine}</p>
                 <p>
                     Questions? Email
                     <a
@@ -965,15 +1041,17 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         outline: 2px solid #ff7a1a;
         outline-offset: 2px;
     }
-    /* Hero copy rise-in: .ddlm-hero gets .ddlm-in once (DdlmReveal.astro);
-       the copy blocks rise 12px and fade in 80ms apart (--i). Waiting state
-       only with JS and motion allowed; transform/opacity only. */
+    /* Hero copy + #supporters rise-in: the section gets .ddlm-in once
+       (DdlmReveal.astro); the blocks rise 12px and fade in 80ms apart (--i).
+       Waiting state only with JS and motion allowed; transform/opacity only. */
     @media (prefers-reduced-motion: no-preference) {
-        :global(html.js) .ddlm-hero:not(.ddlm-in) .ddlm-rise {
+        :global(html.js) .ddlm-hero:not(.ddlm-in) .ddlm-rise,
+        :global(html.js) .ddlm-supporters:not(.ddlm-in) .ddlm-rise {
             opacity: 0;
             transform: translateY(12px);
         }
-        .ddlm-hero.ddlm-in .ddlm-rise {
+        .ddlm-hero.ddlm-in .ddlm-rise,
+        .ddlm-supporters.ddlm-in .ddlm-rise {
             animation: ddlm-hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 80ms) both;
         }
     }

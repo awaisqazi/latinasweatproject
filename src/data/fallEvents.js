@@ -21,7 +21,7 @@
 // Veronica for Banda Pilates + Sculpt, confirmed by Fez 2026-10-26 from his
 // project tracker), never surnames. Saturday extras confirmed the same day
 // from the tracker's partners sheet: hot drinks at the ofrendas; warm meals
-// from Organic Life and grocery bags from Sharing Access (150 bags, so
+// from Organic Life and grocery bags from Sharing Excess (150 bags, so
 // always "while supplies last") during the 11:00 AM block.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
@@ -32,7 +32,7 @@
 // - RESOLVED 2026-10-26 (Fez, from his project tracker): Saturday class
 //   leaders are Ariesna and Lucia (kids yoga) and Vanessa and Veronica
 //   (Banda Pilates + Sculpt), first names only; the Saturday giveaways (hot
-//   drinks, Organic Life warm meals, Sharing Access grocery bags while
+//   drinks, Organic Life warm meals, Sharing Excess grocery bags while
 //   supplies last) are confirmed. Leader avatars: ddlmWeekend.classLeaders
 //   carries an optional `avatar` per person (null = not sourced yet,
 //   rendered as an initials circle in the /diadelosmuertos lineup).
@@ -281,7 +281,7 @@ export const halloweenAtLaVillita = {
 // point at their fall event (Zeffy form + waiver) via registration.eventId;
 // the ofrendas and the market have no form: "Free, open to all". `short`
 // is the compact title for the homepage spotlight's mini program. Leaders
-// and giveaways (hot drinks, Organic Life warm meals, Sharing Access grocery
+// and giveaways (hot drinks, Organic Life warm meals, Sharing Excess grocery
 // bags while supplies last) confirmed by Fez 2026-10-26. `detail` keeps its
 // first word capitalised and any proper names as written (consumers that
 // fold it into a sentence lowercase the first letter only).
@@ -317,8 +317,8 @@ export const halloweenProgram = [
     title: "Banda Cerro Azul",
     short: "Banda Cerro Azul + trick or treat",
     titleEs: "Banda Cerro Azul",
-    detail: "Farmers market + trick or treat · warm meals from Organic Life + grocery bags from Sharing Access, while supplies last",
-    detailEs: "Mercado de agricultores + dulce o truco · comida caliente de Organic Life + despensas de Sharing Access, mientras duren",
+    detail: "Farmers market + trick or treat · warm meals from Organic Life + grocery bags from Sharing Excess, while supplies last",
+    detailEs: "Mercado de agricultores + dulce o truco · comida caliente de Organic Life + despensas de Sharing Excess, mientras duren",
     price: "Free, open to all",
     priceEs: "Gratis, abierto a todos",
     registration: null,
@@ -342,8 +342,12 @@ export const halloweenProgram = [
 
 // Shared copy for the Día de los Muertos weekend (Sat Oct 31 Halloween at
 // La Villita Park + Sun Nov 1 Día de los Muertos): /diadelosmuertos, the
-// homepage spotlight, /events #fall-events. Supporters are text only (no
-// logos; the "SE" mark on the Oct 31 flyer is unidentified and left off).
+// homepage spotlight, /events #fall-events. `supportersLine` is the text
+// credit; `supporters` drives the /diadelosmuertos #supporters logo section
+// (2026-10-28, marketing/ddlm-supporters/BRIEF.md): three groups in order,
+// each entry { name, logo (under public/images/ddlm/supporters/, or null
+// = text only), alt, href (null = no link), width, height (PNG px) }. The
+// "SE" mark on the Oct 31 flyer is Sharing Excess, the food-rescue nonprofit.
 export const ddlmWeekend = {
   title: "Día de los Muertos weekend",
   titleEs: "Fin de semana de Día de los Muertos",
@@ -358,7 +362,114 @@ export const ddlmWeekend = {
   summaryEs:
     "El sábado por la mañana hay ofrendas, yoga para niñas y niños, Banda Cerro Azul, mercado de agricultores y dulce o truco; el domingo por la tarde recordamos a nuestros seres queridos con altares comunitarios, yoga suave, meditación del duelo y baño de sonido, banda, mariachi y danza azteca.",
   supportersLine:
-    "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from Organic Life and State Representative Edgar Gonzalez, Jr. (23rd House District).",
+    "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from OrganicLife, Sharing Excess, State Representative Edgar Gonzalez, Jr. (23rd House District), the Office of the Mayor and the Office of the 25th Ward Alderman.",
+  supporters: [
+    {
+      label: "Made possible by",
+      labelEs: "gracias a",
+      caption: "Community-Centered Wellness Micro-Grant",
+      items: [
+        {
+          name: "Chicago Department of Public Health",
+          logo: "images/ddlm/supporters/cdph.png",
+          alt: "Chicago Department of Public Health (CDPH)",
+          href: "https://www.chicago.gov/city/en/depts/cdph.html",
+          width: 518,
+          height: 170,
+        },
+      ],
+    },
+    {
+      label: "With support from",
+      labelEs: "con el apoyo de",
+      caption: null,
+      items: [
+        {
+          name: "OrganicLife",
+          logo: "images/ddlm/supporters/organiclife.png",
+          alt: "OrganicLife, smart foodservice",
+          href: "https://www.organiclifeusa.com",
+          width: 869,
+          height: 244,
+        },
+        {
+          name: "Sharing Excess",
+          logo: "images/ddlm/supporters/sharing-excess.png",
+          alt: "Sharing Excess",
+          href: "https://www.sharingexcess.com",
+          width: 512,
+          height: 512,
+        },
+        {
+          // Official caucus page; never the campaign site.
+          name: "State Representative Edgar Gonzalez, Jr.",
+          logo: "images/ddlm/supporters/rep-edgar-gonzalez.png",
+          alt: "State Representative Edgar Gonzalez, Jr., 23rd House District",
+          href: "https://ilhousedems.com/project/edgar-gonzalez/",
+          width: 586,
+          height: 132,
+        },
+        {
+          name: "Office of the Mayor, City of Chicago",
+          logo: "images/ddlm/supporters/office-of-the-mayor.png",
+          alt: "City of Chicago, Mayor Brandon Johnson",
+          href: "https://www.chicago.gov/city/en/depts/mayor.html",
+          width: 696,
+          height: 179,
+        },
+        {
+          name: "Office of Alderman Byron Sigcho-López, 25th Ward",
+          logo: "images/ddlm/supporters/25th-ward-office.png",
+          alt: "Byron Sigcho-López, 25th Ward Alderman · Concejal del Distrito 25",
+          href: "https://25thward.org",
+          width: 800,
+          height: 249,
+        },
+      ],
+    },
+    {
+      // English first (Fez's standing rule), Spanish as the accent.
+      label: "Music and dance",
+      labelEs: "música y danza",
+      caption: null,
+      items: [
+        {
+          name: "Banda El Pueblo",
+          logo: "images/ddlm/supporters/banda-el-pueblo.png",
+          alt: "Banda El Pueblo",
+          href: "https://www.instagram.com/banda.elpueblo/",
+          width: 310,
+          height: 210,
+        },
+        {
+          name: "Mariachi Sirenas",
+          logo: "images/ddlm/supporters/mariachi-sirenas.png",
+          alt: "Mariachi Sirenas",
+          href: "https://www.mariachisirenas.com",
+          width: 432,
+          height: 414,
+        },
+        {
+          // No verified page yet: rendered without a link.
+          name: "Kalpulli Xochykalli",
+          logo: "images/ddlm/supporters/kalpulli-xochykalli.png",
+          alt: "Kalpulli Xochykalli, Danza Azteca",
+          href: null,
+          width: 220,
+          height: 198,
+        },
+        {
+          // Saturday's banda: no logo, plain name in the same row.
+          name: "Banda Cerro Azul",
+          logo: null,
+          alt: "Banda Cerro Azul",
+          href: null,
+          width: null,
+          height: null,
+        },
+      ],
+    },
+  ],
   lineup: {
     saturday: [{ name: "Banda Cerro Azul", detail: "11:00 AM set + the 12:30 PM Banda Pilates + Sculpt" }],
     sunday: [
