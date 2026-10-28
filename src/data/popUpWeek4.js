@@ -9,7 +9,8 @@
 // (Mon to Fri) were removed, so Fri Oct 30, Sat Oct 31 and Sun Nov 1 are
 // simply not listed (no "No classes" rows); a notice line says so.
 // Mon Oct 26 6:00 PM was cancelled (Fez, Oct 27 2026), leaving 3 CAD classes. Sanctuary has no
-// classes Sat Oct 31. DST ends Sun Nov 1, so that day's instants are CST
+// classes Sat Oct 31. Sun Nov 1 8:00 PM at Sanctuary (Efren Ramirez Jr, Ariel
+// Cervera) was cancelled (Fez, Oct 28 2026), leaving 6 Sanctuary classes. DST ends Sun Nov 1, so that day's instants are CST
 // (-06:00): makeSessionFactory picks the offset, and endsAtISO is
 // Nov 1 23:59:59 local (-06:00).
 // Copy rules: never call these "free classes"; no em dashes; no new address.
@@ -76,6 +77,7 @@ export const popUpWeek4Locations = [
     checkInUrl:
       // sanc-w4: signed Zeffy check-in manager link (see CHECK-IN LINKS in popUpShared.js).
       "https://www.zeffy.com/en-US/checkin-manager/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdhbml6YXRpb25JZCI6Ijc4MzFkYjM2LWJlNWQtNGU4My05OGZmLWVkMTdmZjViOWE0NSIsInRpY2tldGluZ0lkIjoiNmI5ZWIxNDAtNDYyZC00MGMxLWEwZDItN2VmNjE2NzVlMmRiIiwiaWF0IjoxNzkxODQ5MTQ3LCJleHAiOjE4MjMzODUxNDd9.8M35gd5O3lxs37Oa1YRwDP6D-5zclGZWNA9XQV_kCOM",
+    noticeLine: "Sunday's 8:00 PM class on Nov 1 is cancelled.",
     // Sat Oct 31: no classes at this location.
     closedDays: [closedDay("10-31")],
     sessions: [
@@ -85,7 +87,8 @@ export const popUpWeek4Locations = [
       session("sanc", "10-29", "06:00", "6:00 AM", "Yoga Flow", ["Rosa Ortega", "Ghazala Irshad"]),
       session("sanc", "10-29", "20:30", "8:30 PM", "Yoga Flow", ["Savannah Alvarez", "Xochyl Perez"]),
       session("sanc", "10-30", "06:00", "6:00 AM", "Yoga Flow", ["Dinorah Zubieta"]),
-      session("sanc", "11-01", "20:00", "8:00 PM", "Yoga Flow", ["Efren Ramirez Jr", "Ariel Cervera"]),
+      // Cancelled (Fez, Oct 28 2026): stays listed, struck through.
+      session("sanc", "11-01", "20:00", "8:00 PM", "Yoga Flow", ["Efren Ramirez Jr", "Ariel Cervera"], { cancelled: true }),
     ],
   },
 ];
