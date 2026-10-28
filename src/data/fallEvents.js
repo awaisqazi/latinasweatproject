@@ -375,7 +375,7 @@ export const ddlmWeekend = {
           alt: "Chicago Department of Public Health (CDPH)",
           href: "https://www.chicago.gov/city/en/depts/cdph.html",
           width: 518,
-          height: 170,
+          height: 182,
         },
       ],
     },
@@ -438,8 +438,8 @@ export const ddlmWeekend = {
           logo: "images/ddlm/supporters/banda-el-pueblo.png",
           alt: "Banda El Pueblo",
           href: "https://www.instagram.com/banda.elpueblo/",
-          width: 310,
-          height: 210,
+          width: 282,
+          height: 154,
         },
         {
           name: "Mariachi Sirenas",
@@ -455,8 +455,8 @@ export const ddlmWeekend = {
           logo: "images/ddlm/supporters/kalpulli-xochykalli.png",
           alt: "Kalpulli Xochykalli, Danza Azteca",
           href: null,
-          width: 220,
-          height: 198,
+          width: 202,
+          height: 190,
         },
         {
           // Saturday's banda: no logo, plain name in the same row.
