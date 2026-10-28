@@ -1,6 +1,9 @@
 ---
-// /committee: committee interest form for the YTT 2026 cohort (the 2026
-// yoga teacher training graduates who asked to get more involved). LSP
+// /committee: committee interest form for anyone LSP invites to join a
+// committee. Built 2026-10-27 for the YTT 2026 cohort (the graduates who
+// asked to get more involved), generalized 2026-10-28 (Fez: "broaden who
+// can join committees to engage more people"), so the copy no longer
+// addresses graduates; the photos still come from graduation night. LSP
 // leadership and the Junior Board use the answers to place each person in
 // an existing committee. Shared by direct link only (noindex, excluded from
 // the sitemap in astro.config.mjs, not in nav/homepage/links), like
@@ -39,9 +42,9 @@
 //
 // IDENTITY: "candlelit rose" from /graduation (restyled 2026-10-27; the first
 // build was the plain white studio look and Fez called it "functional but
-// looks really boring"). The audience is the same cohort on its graduation
-// night, so the page reuses that night's look to say "you graduated, now come
-// build with us". The rules carried over from graduation.astro:
+// looks really boring"). The look and photos are graduation night's; the copy
+// is for everyone ("come build with us"). The rules carried over from
+// graduation.astro:
 //   - Display type is FRAUNCES (loaded globally in Layout.astro). Questions,
 //     labels and body stay Rubik.
 //   - NO hairline rules and NO gradient bars. Dividers are candle-bokeh dot
@@ -165,10 +168,10 @@ const textBtn = "cm-textbtn";
 
 <Layout
     title="Committee interest | The Latina Sweat Project"
-    description="For the YTT 2026 cohort: tell LSP leadership and the Junior Board where you'd fit on an LSP committee."
+    description="Join an LSP committee: tell LSP leadership and the Junior Board where you'd fit, and they'll place you."
     robots="noindex, nofollow"
     socialImage="images/committee/committee-og.jpg"
-    socialImageAlt="Join a committee: the LSP Yoga Teacher Training cohort holding their certificates at the studio in Pilsen."
+    socialImageAlt="Join a committee: the LSP community gathered in two rows at the studio in Pilsen, many holding framed certificates."
     socialImageWidth={1200}
     socialImageHeight={630}
     socialImageType="image/jpeg"
@@ -187,11 +190,11 @@ const textBtn = "cm-textbtn";
             </div>
 
             <div class="cm-hero-copy">
-                <p class="cm-pill">YTT 2026 cohort</p>
+                <p class="cm-pill">Get involved</p>
                 <h1 id="cm-title" class="cm-hero-title">Join a <em>committee</em></h1>
                 <p class="cm-hero-lede">
-                    You graduated. Now come build with us: tell us where you'd
-                    fit, and we'll place you on a committee.
+                    Come build with us: tell us where you'd fit, and we'll
+                    place you on a committee.
                 </p>
             </div>
 

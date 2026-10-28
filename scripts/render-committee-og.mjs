@@ -3,7 +3,7 @@
 // rows as the only ornament, no hairlines, no gradient bars, generous radii, soft gold.
 // Display type is Fraunces, labels Rubik.
 //
-// Photo: public/images/graduation/hero.jpg (the YTT 2026 cohort holding certificates; 1024x683
+// Photo: public/images/graduation/hero.jpg (graduation night 2026, the group holding certificates; 1024x683
 // is the largest copy in the repo). The people fill the lower ~60 % of the frame, so every
 // layout keeps the whole row in frame and puts ALL text over the ceiling or in the ink bands,
 // never on faces.
@@ -163,7 +163,7 @@ function frame(W, H, body) {
 const orb = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#roseOrb)"/>`;
 const bokeh = (cx, cy, r, o) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#bokeh)" opacity="${o}"/>`;
 
-const EYEBROW = "YTT 2026 COHORT", HEAD = "Join a committee", URL = "latinasweatproject.com/committee";
+const EYEBROW = "GET INVOLVED", HEAD = "Join a committee", URL = "latinasweatproject.com/committee";
 const LINE = "Tell us where you'd fit. LSP leadership and the Junior Board will place you.";
 const LINE2 = ["Tell us where you'd fit.", "LSP leadership and the Junior Board will place you."];
 const LINE3 = ["Tell us where you'd fit.", "LSP leadership and the Junior Board", "will place you."];
