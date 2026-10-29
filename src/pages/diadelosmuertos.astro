@@ -12,7 +12,7 @@
 // Order: hero (eyebrow + countdown chip, both days, tickets / program /
 // volunteer) -> Remembering together -> facts band (papel picado) -> #program
 // (#saturday + #sunday day blocks, price tag per row, inline Zeffy pills)
-// -> lineup (Who's playing) -> the two program flyers (black ground, full-size
+// -> lineup (Who's playing) -> the program flyers (black ground, full-size
 // jpg links) -> #volunteer -> #supporters (supportersLine + three logo rows
 // from ddlmWeekend.supporters, plain on white) -> small print (contact).
 // All facts and copy come from src/data/fallEvents.js (halloweenProgram,
@@ -21,6 +21,7 @@
 // prints 8:00 PM (flyer + Zeffy run of show "8PM END"); the Zeffy header
 // still says 9 PM, so endsAtISO stays 9 PM and nothing hides early. Class
 // leaders are FIRST NAMES only, as on Zeffy.
+// 2026-10-30 (marketing/fall-events/SATURDAY-UPDATE-BRIEF.md): #saturday gains a warm-meal block (halloweenMeal: OrganicLife menu, Sharing Excess produce, the 27th St and Whipple entrance) and the flyers gain the Spanish Oct 31 program and the Spanish "cómo llegar" map flyer, all Saturday only.
 // Saturday-only content hides after Oct 31 1:00 PM CDT (halloweenEndISO:
 // build time + data-fall-past-at), so on Sunday the page reads as Sunday
 // only; the hero has a Sunday-only eyebrow revealed then
@@ -53,6 +54,7 @@ import {
     ddlmEvent as ddlm,
     ddlmWeekend,
     halloweenProgram,
+    halloweenMeal,
     halloweenEndISO,
     isHalloweenActive,
     fallEventById,
@@ -81,6 +83,17 @@ const satRows = halloweenProgram.map((row) => {
     };
 });
 
+// Saturday warm-meal block (halloweenMeal): the menu as one sentence
+// after a colon, each item's first letter lowercased, joined with ", "
+// plus " and " / " y " before the last. The entrance place name is the
+// VENUE.entrance line minus its verb ("27th St and Whipple").
+const joinList = (items, conj) =>
+    items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} ${conj} ${items[items.length - 1]}`;
+const lowerFirst = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+const mealMenu = joinList(halloweenMeal.menu.map(lowerFirst), "and");
+const mealMenuEs = joinList(halloweenMeal.menuEs.map(lowerFirst), "y");
+const entrancePlace = ddlm.entrance.replace(/^Enter at\s+/i, "");
+
 // Class leaders' avatars for the lineup ("Leading the classes"): each pair
 // as two 44px circles (PopUpAvatars), the 160px webp from
 // ddlmWeekend.classLeaders[].leaders[].avatar where there is one (plus the
@@ -97,7 +110,10 @@ const leaderPeople = (leaders) =>
         };
     });
 
-// The two program flyers (1080x1350, public/images/ddlm/). Alt text reads
+// The program flyers (1080x1350, public/images/ddlm/): Oct 31 in English
+// and Spanish, the Spanish Oct 31 map flyer, then Nov 1. Every oct31* entry
+// is Saturday only (dropped at build time when !satActive, hidden in the
+// browser after halloweenEndISO). Alt text reads
 // the program; prices are on Zeffy (the flyers print "DONATION", which is
 // never repeated as a price).
 const FLYERS = [
@@ -108,6 +124,22 @@ const FLYERS = [
         jpg: "images/ddlm/program-oct31.jpg",
         pastAt: halloweenEndISO,
         alt: "October 31, 2026 program flyer with the LSP logo over a pattern of illustrated Halloween yoga poses: 9:00 to 10:30 AM, ofrendas, free and open to all; 10:30 to 11:00 AM, kids yoga class, free, register and sign the waiver; 11:00 AM to 12:30 PM, Banda Cerro Azul, farmers market and trick or treat, free and open to all; 12:30 to 1:00 PM, Banda Pilates + Sculpt, register and sign the waiver. Prices and registration are on Zeffy. latinasweatproject.com, with supporter logos along the bottom.",
+    },
+    {
+        key: "oct31-es",
+        label: "Sáb 31 Oct · programa en español",
+        webp: "images/ddlm/program-oct31-es.webp",
+        jpg: "images/ddlm/program-oct31-es.jpg",
+        pastAt: halloweenEndISO,
+        alt: "Spanish version of the October 31, 2026 program flyer, same art and the same four blocks: 9:00 to 10:30 AM, ofrendas, free; 10:30 to 11:00 AM, yoga para niñas y niños, free, register and sign the waiver; 11:00 AM to 12:30 PM, Banda Cerro Azul with despensa gratis and dulces de Halloween, free; 12:30 to 1:00 PM, Pilates + Sculpt con banda, register and sign the waiver. Prices and registration are on Zeffy. With the supporter logos along the bottom.",
+    },
+    {
+        key: "oct31-map",
+        label: "Sáb 31 Oct · cómo llegar",
+        webp: "images/ddlm/map-oct31-es.webp",
+        jpg: "images/ddlm/map-oct31-es.jpg",
+        pastAt: halloweenEndISO,
+        alt: "Spanish flyer for Saturday, October 31 at Parque La Villita, 27th and Whipple: dulces, comida caliente, despensa 11 to 12:30, Banda Cerro Azul live, open to the public, with a park map marking the entrance at Whipple and 27th and the supporter logos.",
     },
     {
         key: "nov1",
@@ -171,7 +203,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
 <Layout
     title="Día de los Muertos 2026 | The Latina Sweat Project"
-    description="LSP's Día de los Muertos weekend at La Villita Park, 2800 S Sacramento Ave. Sat Oct 31 from 9:00 AM: ofrendas, Banda Cerro Azul, farmers market and trick or treat (free, open to all), kids yoga (free registration) and Banda Pilates + Sculpt ($15). Sun Nov 1, 4:00 – 8:00 PM: ofrendas, gentle yoga, grief meditation and sound bath, Banda El Pueblo, Mariachi Sirenas and Kalpulli Xochykalli. Tickets $20."
+    description="LSP's Día de los Muertos weekend at La Villita Park, 2800 S Sacramento Ave. Sat Oct 31 from 9:00 AM, free and open to all: ofrendas, Banda Cerro Azul, farmers market, trick or treat, warm meals and fresh produce, plus kids yoga (free registration) and Banda Pilates + Sculpt ($15). Sun Nov 1, 4:00 – 8:00 PM: ofrendas, gentle yoga, grief meditation, sound bath, banda, mariachi and danza azteca. Tickets $20."
     socialImage="images/ddlm/ddlm-2026-festival-og.jpg"
     socialImageAlt="LSP Día de los Muertos Festival: a candlelit tent of ofrendas, marigolds and people moving together."
     socialImageWidth={1200}
@@ -471,6 +503,18 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             >{ddlm.address}</a
                         >
                     </dd>
+                    {satActive && (
+                        <dd class="mt-1 text-sm text-white/60" data-fall-past-at={halloweenEndISO}>
+                            Saturday: enter at{" "}
+                            <a
+                                href={ddlm.entranceMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
+                                >{entrancePlace}</a
+                            >
+                        </dd>
+                    )}
                 </div>
                 <div class="border-t border-white/20 pt-4">
                     <dt
@@ -570,6 +614,32 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                                 </li>
                             ))}
                         </ol>
+                        {/* Warm meals (halloweenMeal, OrganicLife menu
+                            confirmed 2026-10-30) + Sharing Excess produce +
+                            the park entrance. Plain text; hides with
+                            #saturday. Never print a meal count. */}
+                        <p class="mt-7 flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] text-medium-gray">
+                            <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
+                            Warm meals · comida caliente
+                        </p>
+                        <p class="mt-3 text-base leading-relaxed text-medium-gray">
+                            {halloweenMeal.lead}, {halloweenMeal.window}: {mealMenu}.{" "}
+                            {halloweenMeal.produce}
+                        </p>
+                        <p class="mt-2 text-sm leading-relaxed text-medium-gray" lang="es">
+                            {halloweenMeal.leadEs}: {mealMenuEs}. {halloweenMeal.produceEs}
+                        </p>
+                        <p class="mt-3 text-base leading-relaxed text-medium-gray">
+                            Find us at the{" "}
+                            <a
+                                href={ddlm.entranceMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
+                                >{entrancePlace}</a
+                            >{" "}
+                            entrance<span class="text-sm" lang="es"> · {ddlm.entranceEs}</span>
+                        </p>
                         <p class="mt-5 text-base leading-relaxed text-medium-gray">
                             Everyone attending signs one participant waiver for
                             the weekend:{" "}
@@ -726,11 +796,24 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                 <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
                     Save and share the program
                 </h2>
+                <p class="mt-3 text-base text-white/70">
+                    Save them, send them to your group chat, print them for your school.
+                </p>
                 {/* Phones: a horizontal snap scroller (each flyer ~82vw);
-                    sm and up: side by side as before. */}
-                <div class="ddlm-flyers -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:mt-10 sm:snap-none sm:flex-wrap sm:justify-center sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0">
-                    {FLYERS.filter((f) => f.key !== "oct31" || satActive).map((f) => (
-                        <figure class="w-[82vw] shrink-0 snap-center sm:w-[calc(50%-0.75rem)] sm:shrink" data-fall-past-at={f.pastAt}>
+                    sm and up: two per row; lg and up: all four in one row
+                    while Saturday is on (a lone Nov 1 flyer stays 50% and
+                    centered, also after the browser hides the Saturday
+                    ones: see .ddlm-flyers in the style block). */}
+                <div class="ddlm-flyers -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:mt-10 sm:snap-none sm:flex-wrap sm:justify-center sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:gap-6">
+                    {FLYERS.filter((f) => !f.key.startsWith("oct31") || satActive).map((f) => (
+                        <figure
+                            class:list={[
+                                "w-[82vw] shrink-0 snap-center sm:w-[calc(50%-0.75rem)] sm:shrink",
+                                satActive && "lg:w-[calc(25%-1.125rem)]",
+                                f.key.startsWith("oct31") && "ddlm-flyer-sat",
+                            ]}
+                            data-fall-past-at={f.pastAt}
+                        >
                             <a
                                 href={`${base}${f.jpg}`}
                                 target="_blank"
@@ -1233,6 +1316,14 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
     }
     .ddlm-flyers::-webkit-scrollbar {
         display: none;
+    }
+    /* lg+: once the browser has hidden the Saturday flyers (after Oct 31
+       1:00 PM CDT, before a rebuild), the lone Nov 1 flyer goes back to
+       50% width, centered. */
+    @media (min-width: 1024px) {
+        .ddlm-flyers:not(:has(> .ddlm-flyer-sat:not([hidden]))) > figure {
+            width: calc(50% - 0.75rem);
+        }
     }
     /* Volunteer <details>: no native marker; the chevron turns when open and
        the one-line pitch gives way to the full one. */

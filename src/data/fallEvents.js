@@ -15,14 +15,19 @@
 // dashes (en dash for ranges, "·"), never "free class(es)" (the kids class
 // is "Free registration"; the ofrendas and the market are "Free, open to
 // all"), never print "donation" as a price, no address beyond 2800 S
-// Sacramento Ave, never guess who is pictured in a banner, class leaders
+// Sacramento Ave (plus the VENUE.entrance line, "Enter at 27th St and
+// Whipple", from the Oct 31 map flyer), never guess who is pictured in a
+// banner, class leaders
 // by FIRST NAME only (Sunday: Yaritza, Savannah, Zoraida, Luz, exactly as
 // Zeffy writes them; Saturday: Ariesna and Lucia for kids yoga, Vanessa and
 // Veronica for Banda Pilates + Sculpt, confirmed by Fez 2026-10-26 from his
 // project tracker), never surnames. Saturday extras confirmed the same day
 // from the tracker's partners sheet: hot drinks at the ofrendas; warm meals
-// from Organic Life and grocery bags from Sharing Excess (150 bags, so
-// always "while supplies last") during the 11:00 AM block.
+// from OrganicLife and grocery bags from Sharing Excess (150 bags, so
+// always "while supplies last") during the 11:00 AM block. Updated
+// 2026-10-30 from the team email: OrganicLife's menu is confirmed
+// (halloweenMeal) and Sharing Excess brings fresh fruits and vegetables;
+// never print meal or attendance counts.
 //
 // OPEN QUESTIONS (carried for Fez, do not "fix" without him):
 // - RESOLVED 2026-10-26 (Fez): Zeffy is the source of truth for prices.
@@ -32,7 +37,7 @@
 // - RESOLVED 2026-10-26 (Fez, from his project tracker): Saturday class
 //   leaders are Ariesna and Lucia (kids yoga) and Vanessa and Veronica
 //   (Banda Pilates + Sculpt), first names only; the Saturday giveaways (hot
-//   drinks, Organic Life warm meals, Sharing Excess grocery bags while
+//   drinks, OrganicLife warm meals, Sharing Excess grocery bags while
 //   supplies last) are confirmed. Leader avatars: ddlmWeekend.classLeaders
 //   carries an optional `avatar` per person (null = not sourced yet,
 //   rendered as an initials circle in the /diadelosmuertos lineup).
@@ -64,6 +69,14 @@ const VENUE = {
   neighborhood: "La Villita",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=2800+S+Sacramento+Ave+Chicago+IL+60608",
+  // Park entrance, from the Spanish Oct 31 map flyer (2026-10-30, "Entrada
+  // por Whipple y 27"). Printed for Saturday only (/diadelosmuertos
+  // #saturday + the facts Where column) until Fez confirms Sunday uses the
+  // same entrance.
+  entrance: "Enter at 27th St and Whipple",
+  entranceEs: "Entrada por la 27 y Whipple",
+  entranceMapsUrl:
+    "https://www.google.com/maps/search/?api=1&query=W+27th+St+and+S+Whipple+St+Chicago+IL",
 };
 
 const toMs = (now) => (now instanceof Date ? now.getTime() : new Date(now).getTime());
@@ -281,8 +294,9 @@ export const halloweenAtLaVillita = {
 // point at their fall event (Zeffy form + waiver) via registration.eventId;
 // the ofrendas and the market have no form: "Free, open to all". `short`
 // is the compact title for the homepage spotlight's mini program. Leaders
-// and giveaways (hot drinks, Organic Life warm meals, Sharing Excess grocery
-// bags while supplies last) confirmed by Fez 2026-10-26. `detail` keeps its
+// and giveaways (hot drinks, OrganicLife warm meals, Sharing Excess fresh
+// fruits and vegetables while supplies last) confirmed by Fez 2026-10-26,
+// produce wording updated 2026-10-30. `detail` keeps its
 // first word capitalised and any proper names as written (consumers that
 // fold it into a sentence lowercase the first letter only).
 export const halloweenProgram = [
@@ -317,8 +331,8 @@ export const halloweenProgram = [
     title: "Banda Cerro Azul",
     short: "Banda Cerro Azul + trick or treat",
     titleEs: "Banda Cerro Azul",
-    detail: "Farmers market + trick or treat · warm meals from Organic Life + grocery bags from Sharing Excess, while supplies last",
-    detailEs: "Mercado de agricultores + dulce o truco · comida caliente de Organic Life + despensas de Sharing Excess, mientras duren",
+    detail: "Farmers market + trick or treat · warm meals from OrganicLife + fresh fruits and vegetables from Sharing Excess, while supplies last",
+    detailEs: "Mercado de agricultores + dulce o truco · comida caliente de OrganicLife + frutas y verduras frescas de Sharing Excess, mientras duren",
     price: "Free, open to all",
     priceEs: "Gratis, abierto a todos",
     registration: null,
@@ -339,6 +353,22 @@ export const halloweenProgram = [
     endsAtISO: "2026-10-31T13:00:00-05:00",
   },
 ];
+
+// Sat Oct 31 warm meal, served during the 11:00 AM Banda Cerro Azul block.
+// Menu confirmed by OrganicLife on 2026-10-30 (their "Kids Halloween menu"
+// graphic: marketing/fall-events/flyers/oct31-organiclife-menu.webp/.pdf).
+// About 450 meals: NEVER print the count, always "while supplies last".
+// `produce` is the Sharing Excess grocery giveaway (fresh fruits and
+// vegetables). Rendered in the /diadelosmuertos #saturday block only.
+export const halloweenMeal = {
+  window: "11:00 AM – 12:30 PM",
+  lead: "Warm meals from OrganicLife, while supplies last",
+  leadEs: "Comida caliente de OrganicLife, mientras dure",
+  menu: ["Chicken tinga tostadas", "Fruit cup with limón and Tajín", "Black bean and roasted corn cup", "Whole grain pumpkin bread", "Infused water stations"],
+  menuEs: ["Tostadas de tinga de pollo", "Vaso de fruta con limón y Tajín", "Vaso de frijol negro y elote asado", "Pan integral de calabaza", "Estaciones de agua con fruta"],
+  produce: "Sharing Excess brings fresh fruits and vegetables for the community grocery giveaway.",
+  produceEs: "Sharing Excess trae frutas y verduras frescas para la despensa comunitaria.",
+};
 
 // Shared copy for the Día de los Muertos weekend (Sat Oct 31 Halloween at
 // La Villita Park + Sun Nov 1 Día de los Muertos): /diadelosmuertos, the
