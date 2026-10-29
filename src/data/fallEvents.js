@@ -499,21 +499,22 @@ export const ddlmWeekend = {
           height: 414,
         },
         {
-          // No verified page yet: rendered without a link.
+          // Official site of Kalpulli Xinachtli Xochikalli (Chicago-based, danza
+          // practice); verified 2026-10-30.
           name: "Kalpulli Xochykalli",
           logo: "images/ddlm/supporters/kalpulli-xochykalli.png",
           alt: "Kalpulli Xochykalli, Danza Azteca",
-          href: null,
+          href: "https://www.xochikalli.org",
           width: 202,
           height: 190,
         },
         {
           // Saturday's banda. Logo from Fez 2026-10-30 (white ground, trimmed);
-          // no verified page: rendered without a link.
+          // official Instagram (Banda Cerro Azul De Chicago Official), verified 2026-10-30.
           name: "Banda Cerro Azul",
           logo: "images/ddlm/supporters/banda-cerro-azul.png",
           alt: "Banda Cerro Azul de Chicago",
-          href: null,
+          href: "https://www.instagram.com/cerro_azul20oficial/",
           width: 853,
           height: 597,
         },
