@@ -300,9 +300,21 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         Sunday evening, 4:00 – 8:00 PM, we remember and celebrate
                         our loved ones together.
                     </p>
-                    <p class="ddlm-rise mt-1.5 text-[13px] text-white/70 sm:mt-2 sm:text-base" style="--i: 3;">
-                        {ddlm.venue} · {ddlm.address}
-                    </p>
+                    {/* Venue line as one tap to the park entrance in Google
+                        Maps (VENUE.entranceMapsUrl, both days). The street
+                        address stays in the facts band. */}
+                    <a
+                        href={ddlm.entranceMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="ddlm-rise ddlm-tap mt-1.5 flex min-h-[44px] flex-wrap items-center gap-x-2 text-[13px] text-white/80 sm:mt-2 sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        style="--i: 3;"
+                        data-conversion-event="ddlm_map_click"
+                        data-conversion-context="ddlm_hero"
+                    >
+                        <span>{ddlm.venue} · enter at {entrancePlace}</span>
+                        <span class="whitespace-nowrap font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4">Open in Google Maps</span>
+                    </a>
                     {/* Phones (below sm): one full-width 52px ticket button
                         and a row of three text links. The sticky bottom bar
                         (#ddlm-sticky) watches both hero ticket buttons
@@ -506,14 +518,19 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                     {/* Both days: the park entrance (VENUE.entrance, confirmed
                         for Sunday too by Fez 2026-10-30). */}
                     <dd class="mt-1 text-sm text-white/60">
-                        Enter at{" "}
+                        Enter at {entrancePlace}
+                    </dd>
+                    <dd class="mt-3">
                         <a
                             href={ddlm.entranceMapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
-                            >{entrancePlace}</a
+                            class="ddlm-tap inline-flex min-h-[44px] items-center rounded-full border border-white/70 px-5 text-sm font-bold text-white transition hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            data-conversion-event="ddlm_map_click"
+                            data-conversion-context="ddlm_facts"
                         >
+                            Open entrance in Google Maps
+                        </a>
                     </dd>
                 </div>
                 <div class="border-t border-white/20 pt-4">
