@@ -70,9 +70,9 @@ const VENUE = {
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=2800+S+Sacramento+Ave+Chicago+IL+60608",
   // Park entrance, from the Spanish Oct 31 map flyer (2026-10-30, "Entrada
-  // por Whipple y 27"). Printed for Saturday only (/diadelosmuertos
-  // #saturday + the facts Where column) until Fez confirms Sunday uses the
-  // same entrance.
+  // por Whipple y 27"). Both days (Fez confirmed 2026-10-30 that Sunday
+  // uses the same entrance): /diadelosmuertos facts Where column plus a
+  // line in each day block.
   entrance: "Enter at 27th St and Whipple",
   entranceEs: "Entrada por la 27 y Whipple",
   entranceMapsUrl:

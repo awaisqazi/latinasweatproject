@@ -503,18 +503,18 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             >{ddlm.address}</a
                         >
                     </dd>
-                    {satActive && (
-                        <dd class="mt-1 text-sm text-white/60" data-fall-past-at={halloweenEndISO}>
-                            Saturday: enter at{" "}
-                            <a
-                                href={ddlm.entranceMapsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
-                                >{entrancePlace}</a
-                            >
-                        </dd>
-                    )}
+                    {/* Both days: the park entrance (VENUE.entrance, confirmed
+                        for Sunday too by Fez 2026-10-30). */}
+                    <dd class="mt-1 text-sm text-white/60">
+                        Enter at{" "}
+                        <a
+                            href={ddlm.entranceMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
+                            >{entrancePlace}</a
+                        >
+                    </dd>
                 </div>
                 <div class="border-t border-white/20 pt-4">
                     <dt
@@ -703,6 +703,17 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             data-conversion-context="ddlm_program_sunday"
                             >sign it online before you come</a
                         >.
+                    </p>
+                    <p class="mt-3 text-base leading-relaxed text-medium-gray">
+                        Find us at the{" "}
+                        <a
+                            href={ddlm.entranceMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
+                            >{entrancePlace}</a
+                        >{" "}
+                        entrance<span class="text-sm" lang="es"> · {ddlm.entranceEs}</span>
                     </p>
                     {!ddlmPast && (
                         <a
