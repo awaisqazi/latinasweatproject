@@ -392,7 +392,7 @@ export const ddlmWeekend = {
   summaryEs:
     "El sábado por la mañana hay ofrendas, yoga para niñas y niños, Banda Cerro Azul, mercado de agricultores y dulce o truco; el domingo por la tarde recordamos a nuestros seres queridos con altares comunitarios, yoga suave, meditación del duelo y baño de sonido, banda, mariachi y danza azteca.",
   supportersLine:
-    "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from OrganicLife, Sharing Excess, State Representative Edgar Gonzalez, Jr. (23rd House District), the Office of the Mayor and the Office of the 25th Ward Alderman.",
+    "Made possible in part by the Chicago Department of Public Health's Community-Centered Wellness Micro-Grant, with support from OrganicLife, Sharing Excess, State Representative Edgar Gonzalez, Jr. (23rd House District), the Office of the Mayor, the Office of the 25th Ward Alderman, SGA Youth & Family Services and Hilario Dominguez for School Board President.",
   supporters: [
     {
       label: "Made possible by",
@@ -455,6 +455,25 @@ export const ddlmWeekend = {
           width: 800,
           height: 249,
         },
+        {
+          // Added 2026-10-30 (Fez). Logo from sga-youth.org (header SVG,
+          // background panel removed).
+          name: "SGA Youth & Family Services",
+          logo: "images/ddlm/supporters/sga-youth-family-services.png",
+          alt: "SGA Youth & Family Services",
+          href: "https://www.sga-youth.org",
+          width: 1000,
+          height: 179,
+        },
+        {
+          // Added 2026-10-30 (Fez). Campaign logo from hilarioforcps.com.
+          name: "Hilario Dominguez for School Board President",
+          logo: "images/ddlm/supporters/hilario-for-school-board-president.png",
+          alt: "Hilario for School Board President",
+          href: "https://hilarioforcps.com",
+          width: 1000,
+          height: 590,
+        },
       ],
     },
     {
@@ -489,13 +508,14 @@ export const ddlmWeekend = {
           height: 190,
         },
         {
-          // Saturday's banda: no logo, plain name in the same row.
+          // Saturday's banda. Logo from Fez 2026-10-30 (white ground, trimmed);
+          // no verified page: rendered without a link.
           name: "Banda Cerro Azul",
-          logo: null,
-          alt: "Banda Cerro Azul",
+          logo: "images/ddlm/supporters/banda-cerro-azul.png",
+          alt: "Banda Cerro Azul de Chicago",
           href: null,
-          width: null,
-          height: null,
+          width: 853,
+          height: 597,
         },
       ],
     },
