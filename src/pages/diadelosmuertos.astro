@@ -188,8 +188,11 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             off .ddlm-in on this section; DdlmReveal.astro, once). */}
         <DdlmReveal />
         <section class="ddlm-hero relative bg-black text-white" data-ddlm-reveal="0.2">
+            {/* Phones (below md): the art is capped at 38svh so the eyebrow,
+                h1, Sunday line, venue and the ticket button all fit in the
+                Instagram in-app browser (about 375 x 640 under the header). */}
             <div
-                class="ddlm-hero-media relative aspect-[16/9] w-full overflow-hidden lg:aspect-auto"
+                class="ddlm-hero-media relative aspect-[16/9] max-h-[38svh] w-full overflow-hidden md:max-h-none lg:aspect-auto"
             >
                 <img
                     src={`${base}images/ddlm/ddlm-2026-festival.jpg`}
@@ -222,7 +225,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             </div>
 
             <div
-                class="relative mx-auto max-w-6xl px-4 pb-12 pt-2 sm:px-6 sm:pb-14 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-8 lg:pb-16 lg:pt-0"
+                class="relative mx-auto max-w-6xl px-4 pb-8 pt-2 sm:px-6 sm:pb-14 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-8 lg:pb-16 lg:pt-0"
             >
                 <div class="max-w-xl lg:max-w-[36rem]">
                     {/* Eyebrow: the weekend until Saturday's last class ends,
@@ -247,15 +250,17 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         <DdlmCountdownChip class="rounded-full border border-white/30 bg-black/50 px-3 py-1 text-xs font-bold tracking-[0.14em] text-white" />
                     </p>
                     <h1
-                        class="ddlm-rise mt-3 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+                        class="ddlm-rise mt-2 text-[2.6rem] font-extrabold leading-[0.95] tracking-tight sm:mt-3 sm:text-6xl lg:text-7xl"
                         style="--i: 1;"
                     >
                         Día de los Muertos
                     </h1>
-                    <DdlmPetalLine self class="mt-3 w-[calc(100%+1rem)] sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+18rem)]" />
-                    <p class="ddlm-rise mt-4 text-base leading-relaxed text-white/90 sm:text-lg" style="--i: 2;">
+                    <DdlmPetalLine self class="mt-2.5 sm:mt-3 w-[calc(100%+1rem)] sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+18rem)]" />
+                    {/* Phones: the Sunday sentence only (the Saturday one
+                        returns at sm and up). */}
+                    <p class="ddlm-rise mt-3 text-[15px] leading-snug text-white/90 sm:mt-4 sm:text-lg sm:leading-relaxed" style="--i: 2;">
                         {satActive && (
-                            <span data-fall-past-at={halloweenEndISO}>
+                            <span class="hidden sm:inline" data-fall-past-at={halloweenEndISO}>
                                 Saturday morning, Halloween in the park with the
                                 ofrendas.{" "}
                             </span>
@@ -263,16 +268,62 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                         Sunday evening, 4:00 – 8:00 PM, we remember and celebrate
                         our loved ones together.
                     </p>
-                    <p class="ddlm-rise mt-2 text-sm text-white/70 sm:text-base" style="--i: 3;">
+                    <p class="ddlm-rise mt-1.5 text-[13px] text-white/70 sm:mt-2 sm:text-base" style="--i: 3;">
                         {ddlm.venue} · {ddlm.address}
                     </p>
-                    <div class="ddlm-rise mt-7 flex flex-wrap items-center gap-3" style="--i: 4;">
+                    {/* Phones (below sm): one full-width 52px ticket button
+                        and a row of three text links. The sticky bottom bar
+                        (#ddlm-sticky) watches both hero ticket buttons
+                        ([data-ddlm-hero-cta]). */}
+                    <div class="ddlm-rise mt-4 sm:hidden" style="--i: 3;">
                         {!ddlmPast && (
                             <a
                                 href={ddlm.ticketsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                class="ddlm-tap flex h-[52px] w-full items-center justify-between gap-3 rounded-full bg-[#FF7A1A] px-6 text-black transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                data-ddlm-hero-cta
+                                data-fall-past-at={ddlm.endsAtISO}
+                                {...fallConversionAttrs(ddlm, "ddlm_hero")}
+                            >
+                                <span class="text-base font-bold">Get tickets · $20</span>
+                                <span class="text-xs font-semibold text-black/70">Sunday Nov 1 · 4 PM</span>
+                            </a>
+                        )}
+                        <div class="flex items-center justify-between gap-2">
+                            <a
+                                href="#program"
+                                class="ddlm-tap inline-flex min-h-[44px] items-center text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A]"
+                            >
+                                Full program
+                            </a>
+                            <a
+                                href={WAIVER_URL}
+                                data-fall-past-at={ddlm.endsAtISO}
+                                class="ddlm-tap inline-flex min-h-[44px] items-center text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A]"
+                                data-conversion-event="waiver_click"
+                                data-conversion-context="ddlm_hero"
+                            >
+                                Sign the waiver
+                            </a>
+                            <a
+                                href="#volunteer"
+                                class="ddlm-tap inline-flex min-h-[44px] items-center text-sm font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A]"
+                                data-conversion-event="ddlm_volunteer_click"
+                                data-conversion-context="ddlm_hero"
+                            >
+                                Volunteer
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ddlm-rise mt-7 hidden flex-wrap items-center gap-3 sm:flex" style="--i: 4;">
+                        {!ddlmPast && (
+                            <a
+                                href={ddlm.ticketsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                data-ddlm-hero-cta
+                                class="ddlm-tap inline-block rounded-full bg-[#FF7A1A] px-6 py-2.5 text-sm font-bold text-black transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                 data-fall-past-at={ddlm.endsAtISO}
                                 {...fallConversionAttrs(ddlm, "ddlm_hero")}
                             >
@@ -307,8 +358,44 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             </div>
         </section>
 
+        {/* ======================= STICKY TICKET BAR ======================= */}
+        {/* Phones only (below md). Hidden until the hero ticket button has
+            scrolled up out of view; hidden again while another ticket button
+            (facts, end of the Sunday program) or the site footer is in view,
+            while a volunteer text field has focus, or while the mobile menu
+            is open. Script at the bottom of this file; one-shot class-driven
+            motion (.is-shown, .ddlm-beat). Not rendered after the event, and
+            data-fall-past-at hides it in the browser at the end instant. */}
+        {!ddlmPast && (
+            <aside
+                id="ddlm-sticky"
+                aria-label="Tickets"
+                class="ddlm-sticky ddlm-tap fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-black px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 font-rubik text-white md:hidden"
+                data-fall-past-at={ddlm.endsAtISO}
+            >
+                <div class="mx-auto flex max-w-xl items-center justify-between gap-4">
+                    <div class="min-w-0 leading-tight">
+                        <p class="truncate text-[15px] font-bold text-white">Día de los Muertos</p>
+                        <p class="mt-0.5 truncate text-xs text-white/70">
+                            {ddlm.dayShort} {ddlm.dateLabel} · 4 PM · $20
+                        </p>
+                    </div>
+                    <a
+                        href={ddlm.ticketsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="ddlm-sticky-pill inline-flex h-11 shrink-0 items-center rounded-full bg-[#FF7A1A] px-6 text-sm font-bold text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        data-ddlm-sticky-pill
+                        {...fallConversionAttrs(ddlm, "ddlm_sticky")}
+                    >
+                        Get tickets
+                    </a>
+                </div>
+            </aside>
+        )}
+
         {/* ========================= ANTICIPATION ========================= */}
-        <section class="bg-white px-4 py-16 sm:px-6 sm:py-20">
+        <section class="bg-white px-4 py-10 sm:px-6 sm:py-20">
             <div class="mx-auto max-w-2xl">
                 <div class="flex items-center gap-3">
                     <span class="h-7 w-7 shrink-0" set:html={CEMPA_ON_WHITE} />
@@ -340,7 +427,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
 
         {/* ============================ FACTS ============================ */}
         <section
-            class="relative bg-black px-4 pb-20 pt-16 text-white sm:px-6 sm:pb-24 sm:pt-20 lg:pt-24"
+            class="relative bg-black px-4 pb-20 pt-12 text-white sm:px-6 sm:pb-24 sm:pt-20 lg:pt-24"
         >
             {/* Papel picado strung along the top edge of the band, swaying
                 (src/components/DdlmPicado.astro: fixed height per
@@ -437,7 +524,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             ending with the 8:00 PM row. Every row carries a short price tag;
             rows with a Zeffy form carry an inline pill. Prices are Zeffy's.
             Class leaders by first name only, exactly as Zeffy writes them. */}
-        <section id="program" class="scroll-mt-32 bg-white px-4 pb-6 pt-16 sm:px-6 sm:pt-20">
+        <section id="program" class="scroll-mt-32 bg-white px-4 pb-6 pt-10 sm:px-6 sm:pt-20">
             <div class="mx-auto max-w-3xl">
                 <p
                     class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
@@ -570,8 +657,8 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             Lucia, Vanessa and Veronica) hide with the Saturday block. First
             names only for the class leaders. Third and last use of the
             cempasúchil mark. */}
-        <section class="bg-white px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-16">
-            <div class="mx-auto max-w-3xl border-t border-black/10 pt-12 sm:pt-14">
+        <section class="bg-white px-4 pb-10 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
+            <div class="mx-auto max-w-3xl border-t border-black/10 pt-10 sm:pt-14">
                 <div class="flex items-center gap-3">
                     <span class="h-7 w-7 shrink-0" set:html={CEMPA_ON_WHITE} />
                     <p
@@ -628,7 +715,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         {/* The two program flyers on black (the white-ground Oct 31 flyer and
             the ofrenda Nov 1 flyer both sit well on it). Each opens the
             full-size jpg. The Oct 31 flyer hides with the Saturday block. */}
-        <section class="relative overflow-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20">
+        <section class="relative overflow-hidden bg-black px-4 py-10 text-white sm:px-6 sm:py-20">
             {/* Loose cempasúchil petals drifting up behind the flyers
                 (DdlmMarigolds layout="petals"; hidden under reduced motion). */}
             <DdlmMarigolds layout="petals" count={18} ground="#000000" id="ddlm-mg-fly" class="z-0" />
@@ -639,9 +726,11 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                 <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
                     Save and share the program
                 </h2>
-                <div class="mt-10 flex flex-wrap justify-center gap-8 sm:gap-6">
+                {/* Phones: a horizontal snap scroller (each flyer ~82vw);
+                    sm and up: side by side as before. */}
+                <div class="ddlm-flyers -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:mt-10 sm:snap-none sm:flex-wrap sm:justify-center sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0">
                     {FLYERS.filter((f) => f.key !== "oct31" || satActive).map((f) => (
-                        <figure class="w-full sm:w-[calc(50%-0.75rem)]" data-fall-past-at={f.pastAt}>
+                        <figure class="w-[82vw] shrink-0 snap-center sm:w-[calc(50%-0.75rem)] sm:shrink" data-fall-past-at={f.pastAt}>
                             <a
                                 href={`${base}${f.jpg}`}
                                 target="_blank"
@@ -679,9 +768,9 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         </section>
 
         {/* =========================== VOLUNTEER =========================== */}
-        <section id="volunteer" class="scroll-mt-32 bg-white px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16">
+        <section id="volunteer" class="scroll-mt-32 bg-white px-4 pb-10 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
             {/* Marigold petal path (once on the page). */}
-            <div class="mx-auto mb-12 w-full max-w-[320px] sm:mb-16" aria-hidden="true">
+            <div class="mx-auto mb-8 w-full max-w-[320px] sm:mb-16" aria-hidden="true">
                 <svg viewBox="0 0 320 12" class="block h-auto w-full" focusable="false">
                     {PETAL_PATH.map((p) => (
                         <circle cx={p.x} cy={p.y} r={p.r} fill={ORANGE} fill-opacity={p.o} />
@@ -690,14 +779,36 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             </div>
             <div class="mx-auto max-w-xl">
                 <div id="vol-card">
-                    <p
-                        class="text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
-                    >
-                        Volunteer · ayúdanos
-                    </p>
-                    <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">
-                        Volunteer with us
-                    </h2>
+                    {/* Phones (below sm): the form sits behind a native
+                        <details>; the summary is the heading, a one-line
+                        pitch and a chevron. It renders open (no JS, sm and
+                        up) and the inline script below closes it on phones
+                        before paint unless the URL hash is #volunteer. sm and
+                        up: always open, summary inert (page script). */}
+                    <details id="vol-details" class="vol-details" open>
+                        <summary
+                            class="vol-summary relative block cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4 sm:cursor-default"
+                        >
+                            <span
+                                class="block text-xs font-bold uppercase tracking-[0.22em] text-medium-gray"
+                            >
+                                Volunteer · ayúdanos
+                            </span>
+                            <h2 class="mt-3 pr-14 text-3xl font-extrabold sm:pr-0 sm:text-4xl">
+                                Volunteer with us
+                            </h2>
+                            <span class="vol-pitch-short mt-2 block pr-14 text-[15px] leading-snug text-medium-gray sm:hidden">
+                                A day like this takes many hands.
+                            </span>
+                            <span
+                                class="vol-chevron absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black text-white sm:hidden"
+                                aria-hidden="true"
+                            >
+                                <svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                                    <path d="M5 7.5l5 5 5-5" />
+                                </svg>
+                            </span>
+                        </summary>
                     <p class="mt-4 text-base leading-relaxed text-medium-gray">
                         A day like this takes many hands: set-up, ofrendas,
                         welcoming, classes and clean-up. Fill this in and we'll
@@ -888,6 +999,13 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
                             Sign me up
                         </button>
                     </form>
+                    </details>
+                    <script is:inline>
+                        (function () {
+                            var d = document.getElementById("vol-details");
+                            if (d && window.matchMedia("(max-width: 639.98px)").matches && location.hash !== "#volunteer") d.open = false;
+                        })();
+                    </script>
                 </div>
 
                 {/* Success state */}
@@ -924,7 +1042,7 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             the name as text. One-time rise-in via DdlmReveal (.ddlm-in). */}
         <section
             id="supporters"
-            class="ddlm-supporters scroll-mt-32 bg-white px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16"
+            class="ddlm-supporters scroll-mt-32 bg-white px-4 pb-10 pt-10 sm:px-6 sm:pb-20 sm:pt-16"
             data-ddlm-reveal="0.15"
         >
             <div class="mx-auto max-w-3xl">
@@ -991,7 +1109,9 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         </section>
 
         {/* ========================== SMALL PRINT ========================== */}
-        <section class="border-t border-black/10 bg-white px-4 py-10 sm:px-6">
+        {/* Phones: 88px bottom padding so the sticky ticket bar never
+            covers the contact line. */}
+        <section class="border-t border-black/10 bg-white px-4 pb-[88px] pt-10 sm:px-6 md:pb-10">
             <div class="mx-auto max-w-xl space-y-3 text-sm text-medium-gray">
                 <p>
                     Questions? Email
@@ -1065,6 +1185,80 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
             transform: translateY(0);
         }
     }
+    /* Mobile refinement (Instagram in-app browser): no tap flash on the hero
+       buttons and the sticky bar. */
+    .ddlm-tap,
+    .ddlm-tap a {
+        -webkit-tap-highlight-color: transparent;
+    }
+    /* Sticky ticket bar (phones, below md). Shown by the page script with
+       .is-shown; without JS it simply stays put at the bottom. Hidden state
+       slides it down and fades it, then drops it from the tab order
+       (visibility after the transition). */
+    :global(html.js) .ddlm-sticky:not(.is-shown) {
+        transform: translateY(100%);
+        opacity: 0;
+        visibility: hidden;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .ddlm-sticky {
+            transition:
+                transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                visibility 0s linear 280ms;
+        }
+        .ddlm-sticky.is-shown {
+            transition:
+                transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                visibility 0s linear 0s;
+        }
+        /* One attention beat on the pill the first time the bar appears. */
+        .ddlm-sticky-pill.ddlm-beat {
+            animation: ddlm-beat 600ms cubic-bezier(0.2, 0.8, 0.2, 1) 220ms 1 both;
+        }
+    }
+    @keyframes ddlm-beat {
+        0%,
+        100% {
+            transform: scale(1);
+        }
+        45% {
+            transform: scale(1.04);
+        }
+    }
+    /* Flyer snap scroller on phones: no scrollbar chrome. */
+    .ddlm-flyers {
+        scrollbar-width: none;
+    }
+    .ddlm-flyers::-webkit-scrollbar {
+        display: none;
+    }
+    /* Volunteer <details>: no native marker; the chevron turns when open and
+       the one-line pitch gives way to the full one. */
+    .vol-summary {
+        list-style: none;
+    }
+    .vol-summary::-webkit-details-marker {
+        display: none;
+    }
+    .vol-summary::marker {
+        content: "";
+    }
+    .vol-details[open] .vol-pitch-short {
+        display: none;
+    }
+    .vol-chevron svg {
+        transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .vol-details[open] .vol-chevron svg {
+        transform: rotate(180deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .vol-chevron svg {
+            transition: none;
+        }
+    }
     /* lg+: full-bleed art capped to the viewport below the header, cropped
        a little top and bottom (object-position keeps the banner and the
        Catrina on horseback in frame). */
@@ -1075,6 +1269,131 @@ const PETAL_PATH = PETAL_R.map((r, i) => ({
         }
     }
 </style>
+
+<script>
+    // Mobile refinement (marketing/fall-events/ads-ddlm-final-push/
+    // MOBILE-BRIEF.md). Event-driven only (IntersectionObserver, focus,
+    // hashchange, media query); nothing runs per frame.
+
+    // --- Sticky ticket bar (phones, below md) ---------------------------
+    (function () {
+        const bar = document.getElementById("ddlm-sticky");
+        if (!bar || !("IntersectionObserver" in window)) return;
+        const pill = bar.querySelector<HTMLElement>("[data-ddlm-sticky-pill]");
+        const heroCtas = Array.from(
+            document.querySelectorAll<HTMLElement>("[data-ddlm-hero-cta]"),
+        );
+        // Zones that hide the bar while in view: every other ticket button
+        // on the page (facts band, end of the Sunday program) and the site
+        // footer, so two ticket buttons never stack and the footer is
+        // never covered.
+        const zones: Element[] = Array.from(
+            document.querySelectorAll(
+                '[data-conversion-event="ddlm_ticket_click"]:not([data-ddlm-hero-cta]):not([data-ddlm-sticky-pill])',
+            ),
+        );
+        const footer = document.querySelector("footer");
+        if (footer) zones.push(footer);
+        const volForm = document.getElementById("vol-form");
+        const overlay = document.getElementById("mobile-menu-overlay");
+        const inView = new Set<Element>();
+        let beaten = false;
+
+        const isTextField = (el: Element | null) =>
+            !!el &&
+            !!volForm &&
+            volForm.contains(el) &&
+            (el.matches("textarea") ||
+                el.matches('input[type="text"], input[type="email"], input[type="tel"]'));
+
+        function update() {
+            const hero = heroCtas.find((el) => el.getClientRects().length > 0);
+            const passed = !!hero && hero.getBoundingClientRect().bottom <= 0;
+            const menuOpen = !!overlay && !overlay.classList.contains("translate-x-full");
+            const show =
+                passed &&
+                inView.size === 0 &&
+                !isTextField(document.activeElement) &&
+                !menuOpen;
+            bar!.classList.toggle("is-shown", show);
+            if (show) bar!.removeAttribute("inert");
+            else bar!.setAttribute("inert", "");
+            if (show && !beaten && pill) {
+                beaten = true;
+                pill.classList.add("ddlm-beat");
+            }
+        }
+
+        const heroIo = new IntersectionObserver(update);
+        heroCtas.forEach((el) => heroIo.observe(el));
+        const zoneIo = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) inView.add(e.target);
+                else inView.delete(e.target);
+            });
+            update();
+        });
+        zones.forEach((el) => zoneIo.observe(el));
+        if (volForm) {
+            // Defer so moving between fields (focusout then focusin) never
+            // flashes the bar.
+            volForm.addEventListener("focusin", () => setTimeout(update, 0));
+            volForm.addEventListener("focusout", () => setTimeout(update, 0));
+        }
+        if (overlay) {
+            new MutationObserver(update).observe(overlay, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+        }
+        update();
+    })();
+
+    // --- Volunteer <details> --------------------------------------------
+    // Phones: collapsed unless the hash is #volunteer (an in-page link to
+    // #volunteer opens it too); opening it by tap focuses the first field.
+    // sm and up: always open and the summary does nothing.
+    (function () {
+        const d = document.getElementById("vol-details") as HTMLDetailsElement | null;
+        const summary = d?.querySelector("summary");
+        if (!d || !summary) return;
+        const wide = window.matchMedia("(min-width: 640px)");
+        let tapped = false;
+        function sync() {
+            if (wide.matches) {
+                d!.open = true;
+                summary!.tabIndex = -1;
+            } else {
+                summary!.removeAttribute("tabindex");
+            }
+        }
+        summary.addEventListener("click", (e) => {
+            if (wide.matches) {
+                e.preventDefault();
+                return;
+            }
+            tapped = true;
+        });
+        d.addEventListener("toggle", () => {
+            if (d.open && tapped) {
+                document.getElementById("vol-name")?.focus();
+            }
+            tapped = false;
+        });
+        const openFromHash = () => {
+            if (location.hash === "#volunteer") d.open = true;
+        };
+        window.addEventListener("hashchange", openFromHash);
+        document.querySelectorAll('a[href="#volunteer"]').forEach((a) =>
+            a.addEventListener("click", () => {
+                d.open = true;
+            }),
+        );
+        wide.addEventListener("change", sync);
+        openFromHash();
+        sync();
+    })();
+</script>
 
 <script>
     // ============================================================
