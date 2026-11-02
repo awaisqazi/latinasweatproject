@@ -1,324 +1,440 @@
 ---
 // /diadelosmuertos (alias /ddlm): the RECAP of record for LSP's Día de los
 // Muertos weekend at La Villita Park, Sat Oct 31 (Halloween at La Villita
-// Park) and Sun Nov 1, 2026. Built the night of Nov 1 from the weekend page;
-// the ticket buttons, sticky bar, waiver asks, volunteer form, flyers and
-// directions are gone (git history has them, including the volunteer form's
-// Google Form entry map). Nothing here sells and nothing is time-gated.
+// Park) and Sun Nov 1, 2026. Specified in marketing/ddlm-recap/REDESIGN-BRIEF.md.
+// Nothing here sells and nothing is time-gated; git history has the old ticket
+// buttons, waiver asks, volunteer form and directions.
 //
-// Order: hero (photo, thank-you line, link to the photos) -> #gracias ->
-// #photos (DdlmRecapAlbum: chapters in date order, then the shared lightbox
-// outside <main>) -> #supporters -> #program (the published program as a
-// record, on black, candles lighting at the bottom edge).
+// The story in one line: a neighborhood made its ofrendas with its own hands,
+// filled a park on Halloween morning, and came back Sunday night to remember.
+// The page goes from daylight to candlelight as you scroll: white for Saturday,
+// black for Sunday and everything after.
 //
-// Data: copy, program and lead picks in src/data/ddlmRecap2026.js; the album
-// in src/data/ddlmGallery2026.js, whose header explains how to add the Sunday
-// album by adding data only. Facts come from src/data/fallEvents.js only.
+// Order: hero + survey [black] -> #making, #saturday [white] -> #sunday, candles
+// along its bottom edge -> #gracias -> #program [black] -> #supporters [white]
+// -> #photos [black], closing survey line. The shared lightbox sits outside
+// <main>.
+//
+// Data: copy, program, survey and the photo essay in src/data/ddlmRecap2026.js;
+// the album in src/data/ddlmGallery2026.js, whose header explains how to add the
+// Sunday album by adding data only. Facts come from src/data/fallEvents.js only.
 // No attendance, dollars, quotes or outcomes, never the meal count, and never
-// caption who is pictured: class leaders are named in the text, never over a
-// photo.
+// caption who is pictured: class leaders are named in the text, never at a
+// photo, and photo credits name photographers only.
 //
-// Identity: black + white grounds, one accent (cempasúchil #FF7A1A; flat
-// magenta only on the papel picado flags), Rubik only, the animated marigolds,
-// picado and veladoras. Plain text on plain grounds: no gradients, tracked
-// labels, chips or dividers. Hero text sits under the photo at every width so
-// nothing covers a face.
+// Identity: Rubik only, grounds #000000 and #FFFFFF only, one accent
+// (cempasúchil #FF7A1A; flat magenta only inside the papel picado flags). Text
+// sits under photos and never over one. Motion is one load moment in the hero
+// and the candles at the bottom of #sunday; everything else is static.
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import DdlmPicado from "@/components/DdlmPicado.astro";
-import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
 import DdlmVeladoras from "@/components/DdlmVeladoras.astro";
-import DdlmPetalLine from "@/components/DdlmPetalLine.astro";
-import DdlmReveal from "@/components/DdlmReveal.astro";
+import DdlmStory from "@/components/DdlmStory.astro";
+import DdlmSurveyCta from "@/components/DdlmSurveyCta.astro";
 import DdlmRecapAlbum from "@/components/DdlmRecapAlbum.astro";
 import DdlmRecapLightbox from "@/components/DdlmRecapLightbox.astro";
 import { ddlmWeekend } from "@/data/fallEvents";
 import {
   ddlmAlbums,
   ddlmHasSundayPhotos,
-  ddlmSaturdayPhotos,
-  ddlmSundayPhotos,
+  ddlmPhotoCount,
 } from "@/data/ddlmGallery2026";
-import { ddlmRecap, ddlmRecapPhotos, ddlmRecapProgram } from "@/data/ddlmRecap2026";
+import { ddlmRecap, ddlmStory } from "@/data/ddlmRecap2026";
 
 const base = import.meta.env.BASE_URL;
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
 const HERO = `${base}images/ddlm/recap/hero`;
-const heroPhotographer = ddlmAlbums.saturday.photographer;
-const linkClass =
-    "font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+const heroSrcset = `${HERO}-900.webp 900w, ${HERO}-1600.webp 1600w, ${HERO}-2400.webp 2400w`;
+const saturdayAlbum = ddlmAlbums.saturday;
+const sundayAlbum = ddlmAlbums.sunday;
+const mayor = ddlmAlbums.mayor.photographer;
 
-// Credit lines: one per album that has photos.
-const credits = [
-    { day: "Saturday", album: ddlmAlbums.saturday, count: ddlmSaturdayPhotos.length },
-    ...(ddlmHasSundayPhotos
-        ? [{ day: "Sunday", album: ddlmAlbums.sunday, count: ddlmSundayPhotos.length }]
-        : []),
-];
+// Links on black: underlined in the accent. py-3.5 widens an inline link's tap
+// target to 44px without moving the line.
+const linkClass =
+  "py-3.5 font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+
+const makingMoment = {
+  time: ddlmRecap.making.captionTime,
+  text: ddlmRecap.making.captionText,
+  rows: [
+    {
+      layout: "grid",
+      frames: ddlmStory.making.map((id) => ({ id, alt: ddlmStory.makingAlt[id] })),
+    },
+  ],
+};
 ---
 
 <Layout
-    title="Día de los Muertos 2026 Recap | The Latina Sweat Project"
-    description={ddlmRecap.metaDescription}
-    socialImage="images/ddlm/recap/og-ddlm-recap.jpg"
-    socialImageAlt={ddlmRecapPhotos.heroAlt}
-    socialImageWidth={1200}
-    socialImageHeight={630}
-    socialImageType="image/jpeg"
-    twitterCard="summary_large_image"
+  title="Día de los Muertos 2026 Recap | The Latina Sweat Project"
+  description={ddlmRecap.metaDescription}
+  socialImage="images/ddlm/recap/og-ddlm-recap.jpg"
+  socialImageAlt={ddlmRecap.heroAlt}
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
 >
-    <Header />
-    <main class="font-rubik bg-white text-off-black">
-        {/* ============================ HERO ============================ */}
-        {/* The picado's cut-outs are punched in the tent's cream so the flags
-            read as paper hanging under the real ceiling. Phones show the whole
-            3:2 frame; lg+ caps the height so the h1 stays above the fold. */}
-        <DdlmReveal />
-        <section class="ddlm-hero relative bg-black text-white" data-ddlm-reveal="0.2">
-            <div class="ddlm-hero-media relative aspect-[3/2] w-full overflow-hidden lg:aspect-auto">
-                <img
-                    src={`${HERO}-1600.webp`}
-                    srcset={`${HERO}-900.webp 900w, ${HERO}-1600.webp 1600w, ${HERO}-2400.webp 2400w`}
-                    sizes="100vw"
-                    alt={ddlmRecapPhotos.heroAlt}
-                    width="2400"
-                    height="1600"
-                    fetchpriority="high"
-                    decoding="async"
-                    class="absolute inset-0 h-full w-full object-cover object-[50%_62%]"
-                />
-                <DdlmPicado ground="#E9DCBF" cord="rgb(0 0 0 / 0.3)" sway class="z-10" />
-            </div>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    imagesrcset={heroSrcset}
+    imagesizes="100vw"
+    fetchpriority="high"
+  />
+  <Header />
+  <main class="font-rubik bg-white text-off-black">
+    {/* ======================== HERO + SURVEY ======================== */}
+    {/* The picado's cut-outs are punched in the tent's cream so the flags read
+        as paper hanging under the real ceiling. Copy sits under the photo at
+        every width, so nothing covers a face. The survey is the first action
+        on every screen size. */}
+    <section class="ddlm-hero relative bg-black text-white">
+      <div class="ddlm-hero-media relative aspect-[3/2] w-full overflow-hidden lg:aspect-auto">
+        <img
+          src={`${HERO}-1600.webp`}
+          srcset={heroSrcset}
+          sizes="100vw"
+          alt={ddlmRecap.heroAlt}
+          width="2400"
+          height="1600"
+          fetchpriority="high"
+          decoding="async"
+          class="ddlm-hero-photo absolute inset-0 h-full w-full object-cover object-[50%_62%]"
+        />
+        <DdlmPicado ground="#E9DCBF" cord="rgb(0 0 0 / 0.3)" sway class="z-10" />
+      </div>
 
-            <div class="mx-auto max-w-6xl px-4 pb-8 pt-5 sm:px-6 sm:pb-10 sm:pt-7 lg:grid lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-start lg:gap-10 lg:px-8">
-                <div>
-                    <h1
-                        class="ddlm-rise text-[2.6rem] font-extrabold leading-[0.95] tracking-tight sm:text-6xl"
-                        style="--i: 0;"
-                    >
-                        {ddlmRecap.heading}
-                    </h1>
-                    <DdlmPetalLine self class="mt-3 w-full max-w-xl" />
-                </div>
-                <div class="mt-4 lg:mt-0">
-                    <p class="ddlm-rise text-balance text-xl font-semibold leading-snug sm:text-2xl" style="--i: 1;">
-                        {ddlmRecap.tagline}
-                    </p>
-                    <p class="ddlm-rise mt-2 text-[15px] leading-snug text-white/80 sm:text-base" style="--i: 2;">
-                        {ddlmRecap.dateLine}
-                    </p>
-                    <p class="ddlm-rise mt-2 flex flex-wrap items-center gap-x-6 text-[15px] sm:text-base" style="--i: 3;">
-                        <a href="#photos" class:list={[linkClass, "inline-flex min-h-[44px] items-center"]}>
-                            See the photos
-                        </a>
-                        <span class="text-white/70">
-                            Saturday photo by{" "}
-                            <a
-                                href={ddlmAlbums.saturday.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="underline decoration-[#FF7A1A] underline-offset-4 hover:text-white"
-                                >{heroPhotographer.name}</a
-                            >
-                        </span>
-                    </p>
-                </div>
-            </div>
-        </section>
+      <div class="mx-auto max-w-[80rem] px-4 pb-10 pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_30rem] lg:items-start lg:gap-x-12 lg:px-8 lg:pb-14 lg:pt-8">
+        <div>
+          <h1 class="ddlm-rise dr-h1" style="--i: 0;">{ddlmRecap.heading}</h1>
+          <p class="ddlm-rise dr-deck" style="--i: 1;">
+            {ddlmRecap.tagline}
+            <span class="dr-deck-date block">{ddlmRecap.dateLine}</span>
+          </p>
+        </div>
+        <div class="mt-7 lg:mt-0">
+          <div class="ddlm-rise" style="--i: 2;">
+            <DdlmSurveyCta variant="hero" context="ddlm_recap_hero" />
+          </div>
+          <p class="ddlm-rise mt-5 text-sm font-medium text-white/70" style="--i: 3;">
+            Saturday photos by{" "}
+            <a
+              href={saturdayAlbum.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="-my-3 inline-block py-3 underline decoration-[#FF7A1A] underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >{saturdayAlbum.photographer.name}</a
+            >
+          </p>
+        </div>
+      </div>
+    </section>
 
-        {/* ========================== THANK YOU ========================== */}
-        <section id="gracias" class="scroll-mt-32 bg-white px-4 py-12 sm:px-6 sm:py-20">
-            <div class="relative mx-auto max-w-2xl">
-                <DdlmMarigolds
-                    layout="corner"
-                    position="top-right"
-                    size={44}
-                    count={2}
-                    ground="#FFFFFF"
-                    id="ddlm-mg-thanks"
-                    class="-top-3 right-0"
-                />
-                <h2 class="pr-16 text-3xl font-extrabold sm:text-4xl">{ddlmRecap.thankYouHeading}</h2>
-                <p class="mt-5 text-xl font-semibold leading-snug sm:text-2xl">{ddlmRecap.thankYouLead}</p>
-                <div class="mt-5 space-y-4 text-lg leading-relaxed text-medium-gray">
-                    {ddlmRecap.thankYou.map((para) => <p>{para}</p>)}
-                </div>
-                <p class="mt-4 text-lg leading-relaxed text-medium-gray">
-                    {ddlmRecap.supportLine}{" "}
-                    <a
-                        href="#supporters"
-                        class="font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-black"
-                        >See everyone who supported the weekend</a
-                    >.
-                </p>
-                <p class="mt-6 text-lg font-semibold">{ddlmRecap.signoff}</p>
-            </div>
-        </section>
+    {/* ===================== THREE NIGHTS BEFORE ===================== */}
+    <section id="making" class="scroll-mt-28 bg-white py-14 lg:py-24">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <h2 class="dr-h2">{ddlmRecap.making.heading}</h2>
+        <p class="dr-date text-off-black/70">{ddlmRecap.making.dateLine}</p>
+      </div>
+      <div class="mx-auto mt-8 max-w-[80rem] sm:px-6 lg:px-8">
+        <DdlmStory set="making" moments={[makingMoment]} title={ddlmRecap.making.dateLine} />
+      </div>
+    </section>
 
-        {/* ============================ PHOTOS ============================ */}
-        {/* Every pro frame so far is Saturday's. The Sunday slot is data only
-            (src/data/ddlmGallery2026.js), and this block picks it up when it
-            fills: credit line, photo count and the intro's two-day wording. */}
-        <section id="photos" class="relative scroll-mt-28 bg-black px-4 pb-16 pt-16 text-white sm:px-6 sm:pb-24 sm:pt-24">
-            <DdlmPicado ground="#000000" sway />
-            <div class="mx-auto max-w-6xl">
-                <h2 class="text-3xl font-extrabold sm:text-4xl">{ddlmRecap.photosHeading}</h2>
-                <p class="mt-3 max-w-2xl text-lg leading-relaxed text-white/80">{ddlmRecap.photosIntro}</p>
-                {credits.map(({ day, album, count }) => (
-                    <p class="mt-2 max-w-2xl text-base leading-relaxed text-white/80">
-                        {day} photos by <a href={album.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{album.photographer?.name}</a>{album.photographer?.instagram && <> (<a href={album.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{album.photographer.instagram}</a>)</>}. <a href={album.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See all {count} on Flickr</a>
-                    </p>
+    {/* ========================== SATURDAY =========================== */}
+    {/* No intro paragraph: the captions are the story. */}
+    <section id="saturday" class="scroll-mt-28 bg-white py-16 lg:py-28">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <h2 class="dr-h2">{ddlmRecap.saturday.heading}</h2>
+        <p class="dr-date text-off-black/70">{ddlmRecap.saturday.dateLine}</p>
+      </div>
+      <div class="mx-auto mt-8 max-w-[80rem] sm:px-6 lg:mt-12 lg:px-8">
+        <DdlmStory set="saturday" moments={ddlmStory.saturday} title={ddlmRecap.saturday.heading} />
+      </div>
+    </section>
+
+    {/* =========================== SUNDAY ============================ */}
+    {/* Where the page turns to night. The only images here are the two Mayor's
+        office frames, credited and dated in the caption, and later rows from
+        ddlmSundayPhotos; DdlmStory fails the build on a Saturday stem. The
+        veladoras light left to right the first time they scroll into view:
+        the page's one orchestrated scroll moment, and its only candles. The
+        bottom padding clears them. */}
+    <section
+      id="sunday"
+      class="relative scroll-mt-28 overflow-hidden bg-black pb-28 pt-[72px] text-white lg:pb-40 lg:pt-28"
+    >
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <h2 class="dr-h2">{ddlmRecap.sunday.heading}</h2>
+        <p class="dr-date text-white/75">{ddlmRecap.sunday.dateLine}</p>
+        <p class="dr-body mt-6 text-white/85">{ddlmRecap.sunday.body}</p>
+      </div>
+      <div class="mx-auto mt-10 max-w-[80rem] sm:px-6 lg:mt-14 lg:px-8">
+        <DdlmStory
+          set="sunday"
+          moments={[ddlmStory.sundayOpener, ...ddlmStory.sunday]}
+          title={ddlmRecap.sunday.heading}
+        />
+      </div>
+      <DdlmVeladoras ground="#000000" phone="full" />
+    </section>
+
+    {/* ========================== THANK YOU ========================== */}
+    <section id="gracias" class="scroll-mt-28 bg-black py-20 text-white lg:py-[120px]">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[40rem]">
+          <h2 class="dr-h2">{ddlmRecap.thankYou.heading}</h2>
+          <p class="dr-pull mt-5">{ddlmRecap.thankYou.pullLine}</p>
+          <div class="dr-body mt-6 space-y-4 text-white/85">
+            {ddlmRecap.thankYou.body.map((para) => <p>{para}</p>)}
+          </div>
+          <p class="mt-6 text-[1.125rem] font-semibold">{ddlmRecap.thankYou.signoff}</p>
+        </div>
+      </div>
+    </section>
+
+    {/* ============================ PROGRAM ========================== */}
+    {/* The published program as a record, Saturday then Sunday, ending on the
+        run of show's own last row. */}
+    <section id="program" class="scroll-mt-28 bg-black pb-24 pt-6 text-white lg:pb-32 lg:pt-8">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <h2 class="dr-h2">{ddlmRecap.program.heading}</h2>
+        <div class="mt-8 grid gap-10 md:grid-cols-2 md:gap-12 lg:mt-10">
+          {ddlmRecap.program.days.map((day) => (
+            <div id={day.id} class="scroll-mt-28">
+              <h3 class="text-[1.25rem] font-extrabold leading-[1.2] lg:text-[1.5rem]">{day.day}</h3>
+              <p class="mt-1 text-base text-white/70">{day.label}</p>
+              <ul class="mt-5 space-y-4">
+                {day.rows.map((row) => (
+                  <li>
+                    <p class="text-[0.9375rem] font-bold">{row.time}</p>
+                    <p class="text-[1.125rem] font-semibold leading-snug">{row.title}</p>
+                    <p class="text-[0.9375rem] font-normal leading-normal text-white/70">{row.detail}</p>
+                  </li>
                 ))}
-                <div class="mt-10 sm:mt-14">
-                    <DdlmRecapAlbum />
-                </div>
+              </ul>
+              {day.note && <p class="mt-5 text-[0.9375rem] leading-normal text-white/70">{day.note}</p>}
             </div>
-        </section>
+          ))}
+        </div>
+        <p class="mt-10 text-sm text-white/70 lg:mt-12">
+          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`} class:list={[linkClass, "break-all"]}>{CONTACT_EMAIL}</a>.
+        </p>
+      </div>
+    </section>
 
-        {/* ========================== SUPPORTERS ========================== */}
-        {/* The text credit (ddlmWeekend.supportersLine) and three logo rows
-            from ddlmWeekend.supporters (marketing/ddlm-supporters/BRIEF.md).
-            Plain on white: no cards, borders, tints, filters or hover effects.
-            Entries with an href open in a new tab; href null renders a span;
-            logo null renders the name as text. One-time rise-in via
-            DdlmReveal (.ddlm-in). */}
-        <section
-            id="supporters"
-            class="ddlm-supporters scroll-mt-32 bg-white px-4 py-12 sm:px-6 sm:py-20"
-            data-ddlm-reveal="0.15"
-        >
-            <div class="mx-auto max-w-3xl">
-                <div class="ddlm-rise" style="--i: 0;">
-                    <h2 class="text-3xl font-extrabold sm:text-4xl">Supported by</h2>
-                    <p class="mt-4 max-w-2xl text-base leading-relaxed text-medium-gray">
-                        {ddlmWeekend.supportersLine}
-                    </p>
-                </div>
-                <div class="mt-10 space-y-10 sm:mt-12 sm:space-y-12">
-                    {ddlmWeekend.supporters.map((group, gi) => (
-                        <div class="ddlm-rise" style={`--i: ${gi + 1};`}>
-                            <p class="text-sm font-medium text-medium-gray">
-                                {group.label} <span class="text-medium-gray/70">· {group.labelEs}</span>
-                            </p>
-                            <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3 sm:gap-x-10 md:grid-cols-4">
-                                {group.items.map((s) => (
-                                    <li class="flex h-16 items-center justify-start sm:h-20">
-                                        {!s.logo ? (
-                                            <span class="text-[18px] font-bold leading-tight text-off-black">{s.name}</span>
-                                        ) : s.href ? (
-                                            <a
-                                                href={s.href}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                aria-label={s.name}
-                                                class="block h-full w-full rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4"
-                                            >
-                                                <img
-                                                    src={`${base}${s.logo}`}
-                                                    alt={s.alt}
-                                                    width={s.width}
-                                                    height={s.height}
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                    class="block h-full w-full object-contain object-left"
-                                                />
-                                            </a>
-                                        ) : (
-                                            <span class="block h-full w-full">
-                                                <img
-                                                    src={`${base}${s.logo}`}
-                                                    alt={s.alt}
-                                                    width={s.width}
-                                                    height={s.height}
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                    class="block h-full w-full object-contain object-left"
-                                                />
-                                            </span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                            {group.caption && (
-                                <p class="mt-3 text-xs text-medium-gray">{group.caption}</p>
-                            )}
-                        </div>
-                    ))}
-                </div>
+    {/* ========================== SUPPORTERS ========================= */}
+    {/* The text credit and three logo groups from ddlmWeekend.supporters. Plain
+        on white: no boxes, tints or hover effects. Entries with an href open in
+        a new tab; href null renders a span; logo null renders the name as text. */}
+    <section id="supporters" class="scroll-mt-28 bg-white py-16 lg:py-[104px]">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[48rem]">
+          <h2 class="dr-h2">{ddlmRecap.supporters.heading}</h2>
+          <p class="dr-body mt-5 !max-w-none text-off-black/70">{ddlmRecap.supporters.line}</p>
+        </div>
+        <div class="mt-10 space-y-10 lg:mt-14 lg:space-y-12">
+          {ddlmWeekend.supporters.map((group) => (
+            <div>
+              <p class="text-base font-semibold text-off-black">{group.label}</p>
+              <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-8 md:grid-cols-4">
+                {group.items.map((s) => (
+                  <li class="flex h-16 items-center justify-start sm:h-20">
+                    {!s.logo ? (
+                      <span class="text-[18px] font-bold leading-tight text-off-black">{s.name}</span>
+                    ) : s.href ? (
+                      <a
+                        href={s.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={s.name}
+                        class="block h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                      >
+                        <img
+                          src={`${base}${s.logo}`}
+                          alt={s.alt}
+                          width={s.width}
+                          height={s.height}
+                          loading="lazy"
+                          decoding="async"
+                          class="block h-full w-full object-contain object-left"
+                        />
+                      </a>
+                    ) : (
+                      <span class="block h-full w-full">
+                        <img
+                          src={`${base}${s.logo}`}
+                          alt={s.alt}
+                          width={s.width}
+                          height={s.height}
+                          loading="lazy"
+                          decoding="async"
+                          class="block h-full w-full object-contain object-left"
+                        />
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {group.caption && <p class="mt-3 text-sm text-off-black/70">{group.caption}</p>}
             </div>
-        </section>
+          ))}
+        </div>
+      </div>
+    </section>
 
-        {/* ============================ PROGRAM ============================ */}
-        {/* The published program as a record, Saturday then Sunday, ending on
-            the run of show's own last line. The veladoras light one by one
-            along the bottom edge (the bottom padding keeps them clear of the
-            copy). */}
-        <section
-            id="program"
-            class="relative scroll-mt-28 overflow-hidden bg-black px-4 pb-32 pt-12 text-white sm:px-6 sm:pb-36 sm:pt-20"
-        >
-            <div class="mx-auto max-w-5xl">
-                <h2 class="text-3xl font-extrabold sm:text-4xl">{ddlmRecap.programHeading}</h2>
-                <div class="mt-8 grid gap-10 md:grid-cols-2 md:gap-12">
-                    {ddlmRecapProgram.map((day) => (
-                        <div id={day.id} class="scroll-mt-32">
-                            <h3 class="text-xl font-extrabold sm:text-2xl">{day.day}</h3>
-                            <p class="mt-1 text-base text-white/70">{day.label}</p>
-                            <ul class="mt-5 space-y-4">
-                                {day.rows.map((row) => (
-                                    <li>
-                                        <p class="text-sm font-bold">{row.time}</p>
-                                        <p class="text-lg font-semibold leading-snug">{row.title}</p>
-                                        <p class="text-sm leading-relaxed text-white/70">{row.detail}</p>
-                                    </li>
-                                ))}
-                            </ul>
-                            {day.note && <p class="mt-5 text-sm leading-relaxed text-white/70">{day.note}</p>}
-                        </div>
-                    ))}
-                </div>
-                <p class="mt-10 text-2xl font-extrabold sm:mt-14 sm:text-3xl">{ddlmRecap.programClose}</p>
-                <p class="mt-3 text-sm text-white/70">
-                    Questions? Email <a href={`mailto:${CONTACT_EMAIL}`} class:list={[linkClass, "break-all"]}>{CONTACT_EMAIL}</a>.
-                </p>
-            </div>
-            <DdlmVeladoras ground="#000000" phone="full" />
-        </section>
-    </main>
-    <DdlmRecapLightbox />
+    {/* ========================== EVERY PHOTO ======================== */}
+    {/* One credit line per set that has photos, one wall per set, then the
+        closing survey line. No button here: one orange button per page. The
+        Sunday wall, credit and count arrive on their own with the album. */}
+    <section id="photos" class="scroll-mt-28 bg-black pb-12 pt-[72px] text-white lg:pb-16 lg:pt-28">
+      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <h2 class="dr-h2">{ddlmRecap.photos.heading}</h2>
+        <p class="dr-body mt-3 text-white/80">{ddlmPhotoCount} photos from the weekend.</p>
+        <div class="mt-3 space-y-1 text-[0.9375rem] leading-relaxed text-white/75">
+          <p>
+            Saturday photos by{" "}
+            <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.name}</a>{" "}
+            (<a href={saturdayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.instagram}</a>).{" "}
+            <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
+          </p>
+          <p>Wednesday photos by the LSP team.</p>
+          <p>
+            Sunday photos from the Office of the Mayor{" "}
+            (<a href={mayor.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{mayor.instagram}</a>).
+          </p>
+          {ddlmHasSundayPhotos && (
+            <p>
+              Sunday photos by{" "}
+              <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer?.name}</a>
+              {sundayAlbum.photographer?.instagram && (
+                <>
+                  {" "}
+                  (<a href={sundayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer.instagram}</a>)
+                </>
+              )}
+              .{" "}
+              <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
+            </p>
+          )}
+        </div>
+        <div class="mt-10 lg:mt-14">
+          <DdlmRecapAlbum />
+        </div>
+        <DdlmSurveyCta variant="closing" context="ddlm_recap_closing" class="mt-16" />
+      </div>
+    </section>
+  </main>
+  <DdlmRecapLightbox />
 </Layout>
 
 <style>
-    /* Hero copy + #supporters rise-in: the section gets .ddlm-in once
-       (DdlmReveal.astro); the blocks rise 12px and fade in 80ms apart (--i).
-       Waiting state only with JS and motion allowed; transform/opacity only. */
-    @media (prefers-reduced-motion: no-preference) {
-        :global(html.js) .ddlm-hero:not(.ddlm-in) .ddlm-rise,
-        :global(html.js) .ddlm-supporters:not(.ddlm-in) .ddlm-rise {
-            opacity: 0;
-            transform: translateY(12px);
-        }
-        .ddlm-hero.ddlm-in .ddlm-rise,
-        .ddlm-supporters.ddlm-in .ddlm-rise {
-            animation: ddlm-hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 80ms) both;
-        }
+  /* Type scale, Rubik only (the brief's section 4). */
+  .dr-h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  /* The deck holds one line each on phones, so the survey button lands inside
+     the first 820px at 375 wide (measured): 1.25rem and 1rem are the ceilings,
+     and the divisors are each line's width in ems. */
+  .dr-deck {
+    margin-top: 14px;
+    font-size: clamp(1.0625rem, calc((100vw - 2rem) / 17.7), 1.25rem);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .dr-deck-date {
+    margin-top: 4px;
+    font-size: clamp(0.875rem, calc((100vw - 2rem) / 23.6), 1rem);
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.75);
+  }
+  .dr-h2 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .dr-date {
+    margin-top: 8px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .dr-body {
+    max-width: 38rem;
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 1.55;
+  }
+  .dr-pull {
+    font-size: 1.625rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+  }
+  @media (min-width: 1024px) {
+    .dr-h1 {
+      font-size: 4.5rem;
     }
-    @keyframes ddlm-hero-rise {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .dr-deck {
+      font-size: 1.5rem;
     }
-    /* lg+: the photo is capped so the h1 and the thank-you line stay above the
-       fold; object-position keeps the faces and the papel picado in frame. */
-    @media (min-width: 1024px) {
-        .ddlm-hero-media {
-            height: min(calc(100svh - 15rem), 56.25vw);
-            min-height: 30rem;
-        }
+    .dr-deck-date {
+      font-size: 1.0625rem;
     }
+    .dr-h2 {
+      font-size: 3.25rem;
+    }
+    .dr-body {
+      font-size: 1.125rem;
+    }
+    .dr-pull {
+      max-width: 24ch;
+      font-size: 2.5rem;
+    }
+    /* The photo is capped so the survey stays in the first screen. */
+    .ddlm-hero-media {
+      height: clamp(26rem, calc(100svh - 24rem), 40rem);
+    }
+  }
+
+  /* One load moment: the photo settles (transform only, no opacity, so the LCP
+     image paints at once) and the hero copy rises 80ms apart, starting 250ms
+     after load. Pure CSS, so the survey never waits on a script. Reduced motion
+     or no JS: everything is simply there. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .ddlm-hero-photo {
+      animation: ddlm-hero-settle 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    :global(html.js) .ddlm-hero .ddlm-rise {
+      animation: ddlm-hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) calc(250ms + var(--i, 0) * 80ms) both;
+    }
+  }
+  @keyframes ddlm-hero-settle {
+    from {
+      transform: scale(1.03);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  @keyframes ddlm-hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>

@@ -1,0 +1,386 @@
+---
+// The photo essay on /diadelosmuertos: a list of moments in clock order, each
+// a one-line caption and one or more photo rows. Used by the "Three nights
+// before", Saturday and Sunday sections.
+//
+//   moments: [{ time, text, link?, credit?, rows: [{ layout?, caption?, frames }] }]
+//   set:     "saturday" | "sunday" | "making"
+//   title:   the section's heading, for the lightbox alt text
+//
+// Row grammar, one set of rules for every section:
+//   Phone (below sm): every frame is its own full-bleed block in row order.
+//     Landscapes 3:2, portraits 4:5 with a per-frame `phoneY` object-position.
+//   sm and up: rows are justified. Each frame's flex-grow is its aspect ratio
+//     and it keeps that ratio, so every frame in a row shares a height and
+//     nothing is cropped.
+//     "full": one landscape across the row at 1.6.
+//     "two-thirds": the frame spans columns 1 to 8, the caption columns 10 to
+//     12, bottom-aligned. The moment's caption is not printed twice.
+//     "grid" (the making row): 2 by 2 on phones, 4 across above, 3:4 cells.
+//
+// Every image is a [data-dl-photo] button. DdlmRecapLightbox (outside <main>)
+// numbers them in document order at runtime, so the story walks straight into
+// the walls. Credits sit on the row ([data-dl-credit], [data-dl-album]).
+//
+// The build fails if a stem is not in its set, if a "full" row has more than
+// one frame or a portrait, or if a Sunday row names a Saturday stem: nothing on
+// this page may imply a Saturday frame is from Sunday.
+import {
+  ddlmAlbums,
+  ddlmLocalBase,
+  ddlmMakingPhotos,
+  ddlmSaturdayPhotos,
+  ddlmSundayBase,
+  ddlmSundayGuestPhotos,
+  ddlmSundayPhotos,
+} from "@/data/ddlmGallery2026";
+
+interface Frame {
+  t?: string;
+  sun?: string;
+  guest?: string;
+  id?: string;
+  alt?: string;
+  phoneY?: number;
+}
+interface Row {
+  layout?: "justified" | "full" | "two-thirds" | "grid";
+  caption?: string;
+  frames: Frame[];
+}
+interface Moment {
+  time?: string;
+  text?: string;
+  link?: { text: string; href: string };
+  credit?: string;
+  rows: Row[];
+}
+interface Props {
+  moments: Moment[];
+  set: "saturday" | "sunday" | "making";
+  title: string;
+}
+const { moments, set, title } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const storyBase = `${base}images/ddlm/recap/story/`;
+const LANDSCAPE = 1.5;
+const PORTRAIT = 2 / 3;
+// The row's inner width at full size (the 1280 frame minus its gutters), and
+// the gap between frames there.
+const FRAME_W = 1216;
+const GAP = 8;
+
+const flickrId = (t: string) => t.split("/").pop()!.split("_")[0];
+
+// A Flickr row (Saturday or Sunday) as an image: two self-hosted renditions,
+// the lightbox stems, and its aspect.
+const flickrFrame = (frame: Frame, row: any) => {
+  const portrait = row.o === "p";
+  const id = flickrId(row.t);
+  return {
+    src: `${storyBase}${id}-800.webp`,
+    srcset: `${storyBase}${id}-800.webp ${portrait ? 533 : 800}w, ${storyBase}${id}-1600.webp ${portrait ? 1067 : 1600}w`,
+    width: portrait ? 1067 : 1600,
+    height: portrait ? 1600 : 1067,
+    ar: portrait ? PORTRAIT : LANDSCAPE,
+    portrait,
+    alt: frame.alt,
+    phoneY: frame.phoneY ?? 50,
+    attrs: { "data-stem": row.f, "data-base": row.t },
+  };
+};
+
+const resolve = (frame: Frame) => {
+  if (set === "making") {
+    const row = ddlmMakingPhotos.find((p) => p.id === frame.id);
+    if (!row) throw new Error(`DdlmStory: "${frame.id}" is not in ddlmMakingPhotos`);
+    return {
+      src: `${base}${ddlmLocalBase}${row.id}_c.webp`,
+      srcset: undefined,
+      width: row.w,
+      height: row.h,
+      ar: row.w / row.h,
+      portrait: true,
+      alt: frame.alt,
+      phoneY: 50,
+      attrs: { "data-set": "local", "data-id": row.id },
+    };
+  }
+  if (set === "saturday") {
+    const row = ddlmSaturdayPhotos.find((p) => p.t === frame.t);
+    if (!row) throw new Error(`DdlmStory: "${frame.t}" is not in ddlmSaturdayPhotos`);
+    return flickrFrame(frame, row);
+  }
+  // Sunday: the Mayor's office frames and, later, the Sunday album.
+  const stem = frame.t ?? frame.sun;
+  if (stem && ddlmSaturdayPhotos.some((p) => p.t === stem)) {
+    throw new Error(`DdlmStory: Sunday row names a Saturday stem, "${stem}"`);
+  }
+  if (frame.guest) {
+    const row = ddlmSundayGuestPhotos.find((p) => p.id === frame.guest);
+    if (!row) throw new Error(`DdlmStory: "${frame.guest}" is not in ddlmSundayGuestPhotos`);
+    const name = `${base}${ddlmSundayBase}${row.id}`;
+    return {
+      src: `${name}-540.webp`,
+      srcset: `${name}-540.webp 540w, ${name}-1080.webp 1080w`,
+      width: row.w,
+      height: row.h,
+      ar: row.w / row.h,
+      portrait: row.o === "p",
+      alt: row.alt,
+      phoneY: 50,
+      attrs: { "data-full": `${name}-1080.webp`, "data-fallback": `${name}-540.webp` },
+    };
+  }
+  const row = ddlmSundayPhotos.find((p) => p.t === frame.sun);
+  if (!row) throw new Error(`DdlmStory: "${stem}" is not in ddlmSundayPhotos`);
+  return flickrFrame(frame, row);
+};
+
+// sizes for one frame: its share of the row, full width on phones.
+const sizesFor = (ar: number, sum: number, layout: string) => {
+  const share = layout === "two-thirds" ? 2 / 3 : ar / sum;
+  const px = Math.round(share * FRAME_W);
+  return `(min-width: 1280px) ${px}px, (min-width: 640px) ${Math.round(share * 100)}vw, 100vw`;
+};
+
+const creditFor = (moment: Moment) => {
+  if (moment.credit) return { credit: moment.credit, album: ddlmAlbums.mayor?.url };
+  if (set === "making") return { credit: "Photo by the LSP team", album: undefined };
+  const album = ddlmAlbums[set];
+  const who = album?.photographer?.name;
+  return { credit: who ? `Photo by ${who}` : "", album: album?.url ?? undefined };
+};
+
+const items = moments.map((moment) => ({
+  ...moment,
+  ...creditFor(moment),
+  rows: moment.rows.map((row) => {
+    const layout = row.layout ?? "justified";
+    const frames = row.frames.map(resolve);
+    if (layout === "full" && (frames.length > 1 || frames[0].portrait)) {
+      throw new Error(`DdlmStory: a "full" row takes one landscape frame ("${title}")`);
+    }
+    const sum = frames.reduce((acc, f) => acc + f.ar, 0);
+    return {
+      layout,
+      caption: row.caption,
+      frames: frames.map((f) => ({
+        ...f,
+        sizes: f.srcset ? sizesFor(f.ar, sum, layout) : undefined,
+        // Portraits are 4:5 on phones, landscapes 3:2 (or their own shape).
+        phoneAr: f.portrait ? "4 / 5" : f.ar === LANDSCAPE ? "3 / 2" : String(f.ar),
+      })),
+    };
+  }),
+}));
+---
+
+<div class="ds">
+  {items.map((moment) => {
+    const firstIsBeside = moment.rows[0]?.layout === "two-thirds" && !moment.rows[0]?.caption;
+    const caption = moment.time || moment.text;
+    return (
+      <div class="ds-moment">
+        {caption && !firstIsBeside && (
+          <p class="ds-caption">
+            {moment.time && <b>{moment.time}</b>}{" "}
+            {moment.text}
+            {moment.link && (
+              <>
+                {" "}
+                <a href={moment.link.href} target="_blank" rel="noopener noreferrer">{moment.link.text}</a>.
+              </>
+            )}
+          </p>
+        )}
+        <div class="ds-rows">
+          {moment.rows.map((row, ri) => (
+            <div
+              class:list={["ds-row", `ds-row-${row.layout}`]}
+              data-dl-credit={moment.credit}
+              data-dl-album={moment.album}
+              data-dl-title={title}
+            >
+              {row.layout === "two-thirds" && (
+                <p class:list={["ds-caption", "ds-caption-beside", row.caption && "ds-caption-row"]}>
+                  {row.caption ? (
+                    row.caption
+                  ) : (
+                    <>
+                      {moment.time && <b>{moment.time}</b>}{" "}
+                      {moment.text}
+                    </>
+                  )}
+                </p>
+              )}
+              {row.frames.map((f) => (
+                <div class="ds-cell" data-dl-cell style={`--ar:${f.ar};--phone-ar:${f.phoneAr};--phone-y:${f.phoneY}%`}>
+                  <button type="button" class="ds-photo" data-dl-photo {...f.attrs} aria-label="View large">
+                    <img
+                      src={f.src}
+                      srcset={f.srcset}
+                      sizes={f.sizes}
+                      alt={f.alt}
+                      width={f.width}
+                      height={f.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+<style>
+  /* Moment gap 40 / 64px, caption to its first row 12 / 16px, row gap 6 / 8px. */
+  .ds-moment + .ds-moment {
+    margin-top: 40px;
+  }
+  .ds-caption {
+    max-width: 36rem;
+    margin-bottom: 12px;
+    padding: 0 16px;
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1.35;
+  }
+  .ds-caption b {
+    font-weight: 700;
+  }
+  .ds-caption a {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #ff7a1a;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    /* An inline link: the padding widens the tap target to 44px, not the line. */
+    padding-block: 12px;
+  }
+  .ds-caption a:focus-visible {
+    outline: 2px solid #ff7a1a;
+    outline-offset: 2px;
+  }
+  /* A row's own caption, inside a moment, sits 12px clear of the row above. */
+  .ds-caption-row {
+    margin-top: 6px;
+  }
+  .ds-rows,
+  .ds-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ds-cell {
+    min-width: 0;
+  }
+  .ds-row .ds-caption {
+    /* The row's gap is the frame gap; the caption keeps its own 12px. */
+    margin-bottom: 6px;
+  }
+
+  /* Phone: edge to edge, landscapes 3:2, portraits 4:5. */
+  .ds-photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--phone-ar);
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+  .ds-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% var(--phone-y, 50%);
+  }
+  .ds-photo:focus-visible {
+    outline: 2px solid #ff7a1a;
+    outline-offset: 2px;
+  }
+
+  /* The making row: 2 by 2 inside the page gutters, 3:4 cells. */
+  .ds-row-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 16px;
+  }
+  .ds-row-grid .ds-photo {
+    aspect-ratio: 3 / 4;
+  }
+
+  /* sm and up: justified rows inside the page frame. */
+  @media (min-width: 640px) {
+    .ds-rows {
+      gap: 8px;
+    }
+    .ds-row {
+      gap: 8px;
+    }
+    .ds-caption {
+      padding: 0;
+    }
+    .ds-row-justified {
+      flex-direction: row;
+    }
+    .ds-row-justified .ds-cell {
+      flex: var(--ar) 1 0%;
+    }
+    .ds-row-justified .ds-photo {
+      aspect-ratio: var(--ar);
+    }
+    .ds-row-justified .ds-photo img {
+      object-position: 50% 50%;
+    }
+    .ds-row-full .ds-photo {
+      aspect-ratio: 1.6;
+    }
+    .ds-row-full .ds-photo img {
+      object-position: 50% 50%;
+    }
+    .ds-row-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0;
+    }
+    .ds-row-two-thirds {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .ds-row-two-thirds .ds-cell {
+      grid-column: 1 / 9;
+      grid-row: 1;
+    }
+    .ds-row-two-thirds .ds-photo {
+      aspect-ratio: var(--ar);
+    }
+    .ds-row-two-thirds .ds-caption-beside {
+      grid-column: 10 / 13;
+      grid-row: 1;
+      align-self: end;
+      margin: 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .ds-moment + .ds-moment {
+      margin-top: 64px;
+    }
+    .ds-caption {
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+    }
+    .ds-row .ds-caption {
+      margin-bottom: 0;
+    }
+  }
+</style>

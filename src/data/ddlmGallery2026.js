@@ -1,14 +1,18 @@
 // Día de los Muertos weekend 2026 photo album for /diadelosmuertos.
 //
-// Three sets, one album on the page (src/components/DdlmRecapAlbum.astro):
-//   1. ddlmSaturdayPhotos: the 208 frames of Estevan Cruz's Flickr album, all
-//      shot Saturday Oct 31 between 10:22 AM and 1:02 PM, in album order
-//      (which is clock order). Served from the Flickr CDN.
+// Four sets, one recap page (the story in src/components/DdlmStory.astro, the
+// walls in src/components/DdlmRecapAlbum.astro):
+//   1. ddlmSaturdayPhotos: 191 of the 208 frames of Estevan Cruz's Flickr
+//      album, all shot Saturday Oct 31 between 10:22 AM and 1:02 PM, in album
+//      order (which is clock order). Served from the Flickr CDN. The story
+//      picks frames by stem (ddlmStory in ddlmRecap2026.js), never by index.
 //   2. ddlmMakingPhotos: 23 team phone photos from the Oct 28 ofrenda-making
 //      night, from the staff Discord (marketing/ddlm-recap/discord/
 //      ofrenda-making-oct28). Not on Flickr, so self-hosted as webp by
 //      marketing/ddlm-recap/prepare.mjs under public/images/ddlm/recap/album/.
-//   3. ddlmSundayPhotos: EMPTY. There are no Sunday photos yet.
+//   3. ddlmSundayGuestPhotos: the two photos the Office of the Mayor posted.
+//      Story frames only, never wall thumbs.
+//   4. ddlmSundayPhotos: EMPTY. There is no Sunday album yet.
 //
 // ADDING THE SUNDAY ALBUM (data only, no page or component edits):
 //   a. node scripts/pull-flickr-album.mjs <albumId> sunday
@@ -16,15 +20,12 @@
 //      dates taken: check they say 2026-11-01 before pasting. If the album
 //      mixes days, keep only the Sunday frames.
 //   b. Fill in ddlmAlbums.sunday (album url, photographer).
-//   c. Optional: pick lead frames in ddlmRecapPhotos.leads.sunday
-//      (src/data/ddlmRecap2026.js, `{ sun: <row index>, big: true, ... }`).
-//      With no leads the chapter renders as a plain thumbnail wall.
-//   d. Optional: split Sunday into more chapters by adding entries to
-//      ddlmAlbumChapters with day: "sunday" and changing each row's `c`.
-// The Sunday chapter appears, the photo total updates, the section heading,
-// intro and meta description switch to their two-day wording and the lightbox
-// carries the new credit on their own.
-// A row whose `c` matches no chapter fails the build.
+//   c. Pick Sunday moments in ddlmStory.sunday (src/data/ddlmRecap2026.js) by
+//      stem, 4 to 8 of them, by the same rules as Saturday: wide ofrenda
+//      frames only, no child, no names, no text over faces.
+//   d. Run marketing/ddlm-recap/prepare.mjs story.
+// The Sunday wall, the photo total, the credit line, the meta description and
+// the lightbox credit update on their own.
 //
 // Flickr rows, same format and same gotcha as galaGallery2026.js:
 //   t:  BASE stem, no size suffix. Append _q (150px square), _c (800px) or _b
@@ -33,16 +34,17 @@
 //       stem is stored whole and can never be derived from t.
 //   o:  orientation of the _c rendition, "l" (800x533) or "p" (533x800).
 //   at: HH:MM from Flickr's date_taken (camera clock, Chicago).
-//   c:  chapter key. Chapters are cut by what each frame shows, not by the
-//       clock: the ofrendas and the band turn up all morning.
+//   c:  what the frame shows (ofrendas, kids, banda, market, costume, pilates).
+//       Not used by the walls, which group by set; kept for later picks.
 // Pulled 2026-11-01 via flickr.photosets.getPhotos.
 //
-// Never caption who is pictured. Chapter labels name the moment or an act,
-// never a person, so class leaders are named in the program, not over photos.
+// Never caption who is pictured. Captions name the moment or an act, never a
+// person, so class leaders are named in the text, not over photos.
 
 export const ddlmCdnBase = "https://live.staticflickr.com/";
 // Under public/, prefixed with BASE_URL where it is used.
 export const ddlmLocalBase = "images/ddlm/recap/album/";
+export const ddlmSundayBase = "images/ddlm/recap/sunday/";
 
 export const ddlmPhotographer = {
   name: "Estevan Cruz",
@@ -50,7 +52,31 @@ export const ddlmPhotographer = {
   instagramUrl: "https://www.instagram.com/estevansta/",
 };
 
-// One entry per Flickr album. A set with no photos renders nothing.
+// Sunday, November 1: the two photos the Office of the Mayor posted
+// (Instagram post DfOCMkUjQ45), approved by Fez 2026-11-02. Self-hosted by
+// prepare.mjs under public/images/ddlm/recap/sunday/. Story frames only
+// (never wall thumbs); credit "Office of the Mayor, @chicagosmayor".
+export const ddlmMayorPost = "https://www.instagram.com/p/DfOCMkUjQ45/";
+export const ddlmSundayGuestPhotos = [
+  {
+    id: "mayor-group",
+    o: "l",
+    w: 1080,
+    h: 672,
+    c: "sunday",
+    alt: "A group in the tent at La Villita Park on Sunday evening, catrinas in flower crowns among them, papel picado above.",
+  },
+  {
+    id: "mayor-ofrenda",
+    o: "p",
+    w: 1080,
+    h: 1350,
+    c: "sunday",
+    alt: "A bouquet of marigolds being placed on the community altar, candles and a sugar skull beside it.",
+  },
+];
+
+// One entry per album. A set with no photos renders nothing.
 export const ddlmAlbums = {
   saturday: {
     url: "https://www.flickr.com/photos/88623248@N07/albums/72177720336422225",
@@ -62,69 +88,23 @@ export const ddlmAlbums = {
     url: null,
     photographer: null,
   },
+  mayor: {
+    url: ddlmMayorPost,
+    photographer: {
+      name: "Office of the Mayor",
+      instagram: "@chicagosmayor",
+      instagramUrl: "https://www.instagram.com/chicagosmayor/",
+    },
+  },
 };
 
-// The weekend in chapters, in date order. `key` matches each photo's `c`.
-// `album` picks the credit: "saturday", "sunday" or "team". A chapter with no
-// photos does not render.
+// The walls, one per set, in date order. `album` picks the credit:
+// "saturday", "sunday" or "team". A wall with no photos does not render, and
+// the Mayor's two frames are story frames, never wall thumbs.
 export const ddlmAlbumChapters = [
-  {
-    key: "making",
-    album: "team",
-    time: "Wednesday, October 28",
-    title: "Making the ofrendas",
-    detail: "Paint, paper and marigolds: the calaveras and crosses were made by hand before the weekend. Phone photos from the team.",
-  },
-  {
-    key: "ofrendas",
-    album: "saturday",
-    time: "Saturday, from 9:00 AM",
-    title: "The ofrendas",
-    detail: "Community altars and hot drinks to open the day.",
-  },
-  {
-    key: "kids",
-    album: "saturday",
-    time: "Saturday, 10:30 AM",
-    title: "Kids yoga",
-    detail: "A child-parent class in costume.",
-  },
-  {
-    key: "banda",
-    album: "saturday",
-    time: "Saturday, 11:00 AM",
-    title: "Banda Cerro Azul",
-    detail: "The 11:00 AM set, then back for the 12:30 PM class.",
-  },
-  {
-    key: "market",
-    album: "saturday",
-    time: "Saturday morning",
-    title: "Warm meals and fresh produce",
-    detail: "Warm meals from OrganicLife, and fresh fruits and vegetables from Sharing Excess for the community grocery giveaway.",
-  },
-  {
-    key: "costume",
-    album: "saturday",
-    time: "Saturday morning",
-    title: "Catrinas, costumes and trick or treat",
-    detail: "Flower crowns, face paint and the farmers market.",
-  },
-  {
-    key: "pilates",
-    album: "saturday",
-    time: "Saturday, 12:30 PM",
-    title: "Banda Pilates + Sculpt",
-    detail: "A full-body workout with Banda Cerro Azul playing live.",
-  },
-  // Empty until ddlmSundayPhotos is filled in.
-  {
-    key: "sunday",
-    album: "sunday",
-    time: "Sunday, November 1",
-    title: "Día de los Muertos",
-    detail: "Ofrenda viewing, gentle yoga, banda, mariachi, danza azteca, grief meditation and sound bath.",
-  },
+  { key: "making", album: "team", time: "Wednesday, October 28" },
+  { key: "saturday", album: "saturday", time: "Saturday, October 31" },
+  { key: "sunday", album: "sunday", time: "Sunday, November 1" },
 ];
 
 // Oct 28 ofrenda-making night, self-hosted. Renditions: <id>_q.webp (320
@@ -280,9 +260,11 @@ export const ddlmSaturdayPhotos = [
   { t: "65535/55624061334_f6d8d8a47f", f: "65535/55624061334_e228c700a6_h", o: "p", at: "11:57", c: "costume" },
   { t: "65535/55623990738_d21a5f4124", f: "65535/55623990738_04aabc539e_h", o: "l", at: "12:00", c: "costume" },
   { t: "65535/55623851911_c0b8bde45a", f: "65535/55623851911_47c93d95e1_h", o: "l", at: "12:01", c: "costume" },
-  { t: "65535/55622852117_8b6006a503", f: "65535/55622852117_006c9dcf5b_h", o: "p", at: "12:10", c: "costume" },
-  { t: "65535/55622852072_344ed171b4", f: "65535/55622852072_dfd17ca6ed_h", o: "p", at: "12:11", c: "costume" },
-  { t: "65535/55624061099_27b91c2e13", f: "65535/55624061099_03efb0d9dd_h", o: "p", at: "12:11", c: "costume" },
+  // 3 more frames of the same child and cart (Flickr ids 55622852117,
+  // 55622852072, 55624061099), the same sign with the child's first name and
+  // QR codes, removed 2026-11-02 for the same reason as the 14 below. They
+  // remain in the photographer's Flickr album. Re-add only with the family's OK
+  // (Fez).
   { t: "65535/55623990598_9f924b3ede", f: "65535/55623990598_f4c948863d_h", o: "l", at: "12:15", c: "costume" },
   { t: "65535/55624061059_b6ca0da460", f: "65535/55624061059_4c8d7f567d_h", o: "l", at: "12:17", c: "costume" },
   { t: "65535/55623990158_1bbb1d2c6d", f: "65535/55623990158_41e928adef_h", o: "p", at: "12:17", c: "costume" },
@@ -297,20 +279,10 @@ export const ddlmSaturdayPhotos = [
   { t: "65535/55624060644_400193efc7", f: "65535/55624060644_7a5ab2fac5_h", o: "l", at: "12:31", c: "costume" },
   { t: "65535/55623989798_09eede974c", f: "65535/55623989798_8fe8f4cc70_h", o: "l", at: "12:31", c: "costume" },
   { t: "65535/55623989718_3243c26719", f: "65535/55623989718_ef78773df7_h", o: "l", at: "12:31", c: "costume" },
-  { t: "65535/55623851071_7dbcc05699", f: "65535/55623851071_479687347c_h", o: "p", at: "12:32", c: "costume" },
-  { t: "65535/55623850986_8c1f560e6f", f: "65535/55623850986_9a2e467b85_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55624275440_e39939a4c2", f: "65535/55624275440_67e8b708d0_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55623851316_0ea09fd507", f: "65535/55623851316_ace07eae6b_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55624275605_179b5e3f0b", f: "65535/55624275605_14d458a409_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55623989518_98b8e8986c", f: "65535/55623989518_718681ac44_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55622851262_7e9ff42bc0", f: "65535/55622851262_d90c664abd_h", o: "p", at: "12:33", c: "costume" },
-  { t: "65535/55624060129_163cf1e5d6", f: "65535/55624060129_26d89b664d_h", o: "p", at: "12:34", c: "costume" },
-  { t: "65535/55622851042_2872d70a81", f: "65535/55622851042_2a18b2fd54_h", o: "p", at: "12:34", c: "costume" },
-  { t: "65535/55624059989_1d9721a3b8", f: "65535/55624059989_e06f52f84a_h", o: "p", at: "12:34", c: "costume" },
-  { t: "65535/55624274940_83a1b892cd", f: "65535/55624274940_13bd14c81f_h", o: "p", at: "12:35", c: "costume" },
-  { t: "65535/55623850766_a89c053974", f: "65535/55623850766_9bd9432cba_h", o: "p", at: "12:35", c: "costume" },
-  { t: "65535/55624274815_62d533d952", f: "65535/55624274815_020fa14f40_h", o: "p", at: "12:35", c: "costume" },
-  { t: "65535/55624271705_04ed3d7d0f", f: "65535/55624271705_9ecd1ac9cd_h", o: "p", at: "12:35", c: "costume" },
+  // 14 frames (a child with a tamale cart and a sign carrying the child's first
+  // name and QR codes) were removed from the site album on 2026-11-02; they
+  // remain in the photographer's Flickr album. Re-add only with the family's OK
+  // (Fez).
   { t: "65535/55622848152_ec8bc1d70f", f: "65535/55622848152_bc3d265758_h", o: "l", at: "12:36", c: "pilates" },
   { t: "65535/55623989028_6f7ac1df63", f: "65535/55623989028_c129b6ea61_h", o: "l", at: "12:36", c: "pilates" },
   { t: "65535/55623850661_2ecae643a1", f: "65535/55623850661_ce9f2fc2ae_h", o: "l", at: "12:36", c: "pilates" },
@@ -371,4 +343,7 @@ export const ddlmSundayPhotos = [];
 
 export const ddlmHasSundayPhotos = ddlmSundayPhotos.length > 0;
 export const ddlmPhotoCount =
-  ddlmMakingPhotos.length + ddlmSaturdayPhotos.length + ddlmSundayPhotos.length;
+  ddlmMakingPhotos.length +
+  ddlmSaturdayPhotos.length +
+  ddlmSundayGuestPhotos.length +
+  ddlmSundayPhotos.length;

@@ -6,22 +6,10 @@ import GalaPhotoFrame from "@/components/GalaPhotoFrame.astro";
 import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import FinishLineBand from "@/components/FinishLineBand.astro";
-import FallEventCard from "@/components/FallEventCard.astro";
 import DdlmPicado from "@/components/DdlmPicado.astro";
-import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
-import DdlmVeladoras from "@/components/DdlmVeladoras.astro";
-import HalloweenFlair from "@/components/HalloweenFlair.astro";
-import FallEventsClient from "@/components/FallEventsClient.astro";
-import {
-  fallEvents,
-  activeFallEvents,
-  lastFallEndISO,
-  ddlmEvent,
-  ddlmWeekend,
-  halloweenProgram,
-  halloweenEndISO,
-  isHalloweenActive,
-} from "@/data/fallEvents";
+import { ddlmEvent, ddlmWeekend } from "@/data/fallEvents";
+import { ddlmAlbums } from "@/data/ddlmGallery2026";
+import { ddlmRecap } from "@/data/ddlmRecap2026";
 import {
   collectiveFinishLine,
   getFinishLinePhase,
@@ -35,9 +23,8 @@ import {
   sweatFestCheckerUri,
 } from "@/data/sweatFest";
 // Section order (light/dark cadence): light page header (carrying the Pop
-// Up Week 1 strip, Oct 5 to 11 2026, until the week is past) -> fall
-// events at La Villita Park (#fall-events, cream, Oct 31 + Nov 1 2026,
-// until the last one is past) -> The
+// Up Week 1 strip, Oct 5 to 11 2026, until the week is past) -> Día de los
+// Muertos weekend recap (#fall-events, white, static since Nov 2 2026) -> The
 // Collective Finish Line featured section (#finishline, Oct 5 – 14 2026,
 // paper ground whose torn-paper top edge is the seam against the light
 // header; renders nothing once the series is past) -> dark Annual
@@ -52,14 +39,10 @@ const finishLineActive = getFinishLinePhase() !== "past";
 const finishLineUrl = withBase(collectiveFinishLine.pagePath);
 const finishLineSeam = finishLineTornClip(17, 80, 14);
 const galaPageUrl = withBase(galaTeaser.recapPath);
-// Fall 2026 events at La Villita Park (Oct 31 + Nov 1; src/data/fallEvents.js):
-// featured while any of the three has not ended.
-const fallActive = activeFallEvents().length > 0;
-// Día de los Muertos first, then the two Oct 31 classes; the free Saturday
-// items (no Zeffy form) ride in a strip above the cards until Oct 31 1 PM.
-const fallEventsOrdered = [ddlmEvent, ...fallEvents.filter((e) => e.id !== ddlmEvent.id)];
-const fallSatActive = isHalloweenActive();
-const fallSatFree = halloweenProgram.filter((row) => !row.registration);
+// Día de los Muertos weekend recap (Oct 31 + Nov 1 2026): the photo and the
+// recap page.
+const ddlmPageUrl = withBase(ddlmEvent.pagePath);
+const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/events-157-1200.webp`;
 // Local recap photo (album #69, dinner under the gold lanterns) and the
 // official Flickr album.
 const galaRecapPhoto = {
@@ -126,103 +109,70 @@ const featuredSlugs = [
     </section>
     {/* END: Page Header Section */}
 
-    {/* START: Día de los Muertos weekend at La Villita Park (Oct 26 2026
-        framing; Sat Oct 31: Kids Halloween Yoga + Live Banda Pilates + Yoga
-        Sculpt, plus the free ofrendas and Banda Cerro Azul / farmers market
-        / trick or treat in a strip above the cards, hidden after Oct 31
-        1 PM; Sun Nov 1: LSP Día de los Muertos, whose card comes first).
-        Option I cream ground, one card per event (Zeffy banner,
-        date, time, venue, price, Zeffy CTA); the Día de los Muertos card
-        keeps the /diadelosmuertos black + cempasúchil look. Each card hides
-        after its own end (build time + FallEventsClient via
-        data-fall-past-at); the section hides after the last one. Anchors:
-        #fall-events, #kids-halloween-yoga, #live-banda-pilates-yoga-sculpt,
-        #dia-de-los-muertos.
-        Flair (Oct 27): papel picado swaying along the top edge (cut-outs
-        punched in the cream), a cempasúchil cluster beside the heading and
-        a scaled-down row of veladoras along the bottom edge, both revealed
-        once on scroll (DdlmReveal.astro); the Saturday strip carries a small
-        Halloween cluster (HalloweenFlair) and hides with it. */}
-    {fallActive && (
-      <section
-        id="fall-events"
-        class="fe-section relative scroll-mt-28 overflow-hidden pb-20 pt-20 md:pb-24 md:pt-24"
-        data-fall-past-at={lastFallEndISO}
-      >
-        <DdlmPicado ground="#f3ede4" cord="rgba(30, 26, 23, 0.3)" sway />
-        <DdlmVeladoras ground="#f3ede4" tone="light" scale={0.75} phone="full" id="fe-vel" />
-        <div class="relative mx-auto max-w-7xl px-4">
-          <DdlmMarigolds
-            layout="corner"
-            size={110}
-            count={5}
-            petals
-            ground="#f3ede4"
-            id="fe-mg-lg"
-            class="right-4 top-0 hidden lg:block"
-          />
-          <DdlmMarigolds
-            layout="corner"
-            size={40}
-            count={2}
-            ground="#f3ede4"
-            id="fe-mg-sm"
-            class="-top-7 right-4 lg:hidden"
-          />
-          <div class="max-w-2xl">
-            <p class="text-sm font-extrabold text-[#c4573a]">{ddlmWeekend.dateLabel} · {ddlmEvent.venue}</p>
-            <h2 class="mt-2 font-sans text-3xl font-extrabold tracking-tight text-[#1e1a17] sm:text-4xl md:text-5xl">
-              {ddlmWeekend.title}
-            </h2>
-            <p class="mt-3 text-base leading-relaxed text-[#1e1a17]/75 sm:text-lg">
-              {ddlmWeekend.summary} All at {ddlmEvent.address}. Prices and
-              registration on Zeffy. Everyone signs one participant waiver
-              for the weekend:{" "}
-              <a
-                href={`${base}waiver`}
-                class="font-extrabold text-[#1e1a17] underline decoration-[#c4573a] decoration-2 underline-offset-4 hover:text-[#c4573a]"
-                data-conversion-event="waiver_click"
-                data-conversion-context="events_fall_events_intro"
-              >sign it online before you come</a>.
+    {/* START: Día de los Muertos weekend recap (static, Nov 2 2026), in the
+        slot of the time-gated fall events promo. White ground, a thin papel
+        picado row along the top edge, photo LEFT, copy RIGHT. No survey ask
+        here (the survey is on the recap and /links). Old anchors still land:
+        #fall-events and #dia-de-los-muertos. */}
+    <section
+      id="fall-events"
+      class="relative scroll-mt-28 overflow-hidden bg-white py-16 font-rubik text-off-black lg:py-24"
+    >
+      <span id="dia-de-los-muertos" class="absolute top-0 scroll-mt-28" aria-hidden="true"></span>
+      {/* The thin row keeps its flags whole only below about 590px wide; above
+          that the component crops them, so sm and up take the standard row. */}
+      <DdlmPicado ground="#FFFFFF" cord="rgba(30,30,30,0.3)" size="sm" sway class="sm:hidden" />
+      <DdlmPicado ground="#FFFFFF" cord="rgba(30,30,30,0.3)" sway class="hidden sm:block" />
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
+          <a
+            href={ddlmPageUrl}
+            class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:col-span-2"
+            aria-label="See the Día de los Muertos photos"
+            data-conversion-event="ddlm_page_click"
+            data-conversion-context="events_ddlm_recap_photo"
+          >
+            <img
+              src={ddlmRecapPhoto}
+              width="1200"
+              height="800"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="block aspect-[3/2] h-auto w-full object-cover"
+            />
+          </a>
+          <div class="lg:col-span-3">
+            <p class="text-[0.9375rem] font-bold text-off-black/70">{ddlmRecap.dateLine}</p>
+            <h2 class="mt-3 text-[2.25rem] font-extrabold leading-[1.05] text-off-black lg:text-[3rem]">{ddlmWeekend.title}</h2>
+            <p class="mt-4 max-w-[36rem] text-[1.0625rem] leading-relaxed text-off-black/70">
+              Saturday brought the ofrendas, kids yoga, Banda Cerro Azul, a farmers market and trick or treat to La Villita Park. Sunday evening we remembered our loved ones at the community altars. Every photo is on the recap.
             </p>
-            <a
-              href={`${base}${ddlmEvent.pagePath}`}
-              class="mt-4 inline-block text-sm font-extrabold text-[#1e1a17] underline decoration-[#c4573a] decoration-2 underline-offset-4 hover:text-[#c4573a]"
-              data-conversion-event="ddlm_page_click"
-              data-conversion-context="events_fall_events"
-            >
-              Full weekend program, lineup and volunteer sign-up
-            </a>
-          </div>
-          {fallSatActive && (
-            <div
-              class="relative mt-8 flex flex-col gap-3 overflow-hidden rounded-2xl bg-[#fdfbf7] px-5 pb-12 pt-4 text-[#1e1a17] shadow-[0_1px_0_rgba(30,26,23,0.06),0_18px_40px_-24px_rgba(30,26,23,0.35)] sm:min-h-[4.5rem] sm:flex-row sm:items-center sm:gap-6 sm:py-4 sm:pl-6 sm:pr-44"
-              data-fall-past-at={halloweenEndISO}
-            >
-              <HalloweenFlair layout="corner" tone="light" ground="#fdfbf7" />
-              <p class="shrink-0 text-xs font-extrabold uppercase tracking-[0.16em] text-[#c4573a]">
-                Saturday, free and open to all
-              </p>
-              <ul class="flex flex-col gap-1.5 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6">
-                {fallSatFree.map((row) => (
-                  <li>
-                    <span class="font-extrabold">{row.time}</span>
-                    {` · ${row.title}, ${row.detail.charAt(0).toLowerCase()}${row.detail.slice(1)}`}
-                  </li>
-                ))}
-              </ul>
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+              <a
+                href={ddlmPageUrl}
+                class="inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-black px-8 text-base font-bold text-white hover:bg-[#FF7A1A] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:w-auto"
+                data-conversion-event="ddlm_page_click"
+                data-conversion-context="events_ddlm_recap"
+              >
+                See the photos
+              </a>
+              <a
+                href={ddlmAlbums.saturday.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex min-h-[44px] items-center text-base font-bold text-off-black underline decoration-[#FF7A1A] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                data-conversion-event="ddlm_gallery_click"
+                data-conversion-context="events_ddlm_recap_flickr"
+              >
+                Full album on Flickr
+              </a>
             </div>
-          )}
-          <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {fallEventsOrdered.map((e) => (
-              <FallEventCard event={e} context="events_fall_events" />
-            ))}
           </div>
         </div>
-        <FallEventsClient />
-      </section>
-    )}
-    {/* END: Fall events */}
+      </div>
+    </section>
+    {/* END: Día de los Muertos weekend recap */}
 
     {/* START: The Collective Finish Line Featured Section (Oct 5 – 14,
         2026; design.md Option J torn-paper / marigold). Paper ground with a
@@ -894,9 +844,6 @@ const featuredSlugs = [
 </Layout>
 
 <style>
-  .fe-section {
-    background: #f3ede4;
-  }
   /* The Collective Finish Line featured section (design.md Option J). */
   .fl-ev {
     background: #f0f0ec;

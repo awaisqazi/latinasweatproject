@@ -15,19 +15,10 @@ import PopUpWeekClient from "@/components/PopUpWeekClient.astro";
 import { activePopUpWeeks, popUpWeeks, popUpWeekWindow, popUpTicketEventFor } from "@/data/popUpWeeks";
 import { locationsSummary } from "@/data/popUpShared";
 import FinishLineClient from "@/components/FinishLineClient.astro";
-import FallEventsClient from "@/components/FallEventsClient.astro";
 import DdlmPicado from "@/components/DdlmPicado.astro";
-import DdlmMarigolds from "@/components/DdlmMarigolds.astro";
-import HalloweenFlair from "@/components/HalloweenFlair.astro";
-import {
-  halloweenEvents,
-  halloweenAtLaVillita,
-  halloweenEndISO,
-  isHalloweenActive,
-  ddlmEvent,
-  fallConversionAttrs,
-  fallTicketEventFor,
-} from "@/data/fallEvents";
+import DdlmSurveyCta from "@/components/DdlmSurveyCta.astro";
+import { ddlmEvent, fallTicketEventFor } from "@/data/fallEvents";
+import { ddlmRecap } from "@/data/ddlmRecap2026";
 import {
   collectiveFinishLine,
   finishLineEvents,
@@ -98,14 +89,12 @@ const popUpNextWeek = (week) => popUpWeeks[popUpWeeks.findIndex((w) => w.id === 
 const finishLineActive = getFinishLinePhase() !== "past";
 const finishLineCardClip = finishLineTornClip(13, 36, 9);
 
-// Fall 2026 events at La Villita Park (src/data/fallEvents.js): since Oct
-// 26 2026 the Día de los Muertos card (#ddlm-card, Zeffy ticket form +
-// /diadelosmuertos) LEADS the card stack and the Oct 31 card
-// (#halloween-card, free items + both Zeffy forms) follows it, both before
-// the Pop Up card, while not past (build time; FallEventsClient hides
-// them in the browser via data-fall-past-at).
-const halloweenActive = isHalloweenActive();
-const ddlmActive = !ddlmEvent.isPast();
+// Día de los Muertos recap (Nov 2 2026): the static #ddlm-card LEADS the card
+// stack and its bubble leads the highlights bar. The survey sits first in the
+// card because Instagram stories will say "survey link in bio". Copy in
+// src/data/ddlmRecap2026.js; every visible string has an EN/ES pair.
+const ddlmPageUrl = withBase(ddlmEvent.pagePath);
+const ddlmCardPhoto = `${base}images/ddlm/recap/placements/links-119-900.webp`;
 
 // Define links data with English and Spanish translations
 const links = [
@@ -211,14 +200,25 @@ const links = [
   },
 ];
 
-// Highlight Stories Bar configuration. Pop Up Week 1 (Oct 5 to 11, the
-// live dated campaign) leads while it is not past, then The Collective
-// Finish Line (Oct 5 – 14) while it is not past; then the gala recap (Sep 25,
-// the newest story), then ABC7's Windy City Weekend segment (aired the
-// same day, before the gala), then the other recaps in reverse-chronological
+// Highlight Stories Bar configuration. The Día de los Muertos recap (Oct 31 +
+// Nov 1, the newest story) leads; then Pop Up Week 1 (Oct 5 to 11) while it is
+// not past, then The Collective Finish Line (Oct 5 – 14) while it is not past;
+// then the gala recap (Sep 25), then ABC7's Windy City Weekend segment (aired
+// the same day, before the gala), then the other recaps in reverse-chronological
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
+  {
+    title: {
+      en: "DDLM 2026",
+      es: "DDLM 2026"
+    },
+    target: "#ddlm-card",
+    image: `${base}images/highlights/hl_ddlm.png`,
+    scale: "scale-[1.0]",
+    hoverScale: "group-hover:scale-[1.12]",
+    color: "amber"
+  },
   ...popUpWeeksActive.map((week, i) => ({
     title: week.highlightLabel,
     target: "#popup-card",
@@ -516,181 +516,52 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* LSP Día de los Muertos (Sun Nov 1, 2026): LEADS the card stack
-          since Oct 26 2026 (the week's main push), #halloween-card right
-          after it, then the Pop Up card. The Zeffy ticket form is the
-          primary CTA, /diadelosmuertos (weekend program, lineup + volunteer
-          sign-up) second. Keeps the /diadelosmuertos look: black, white,
-          one cempasúchil accent. Prints 4:00 – 8:00 PM (flyer + Zeffy run
-          of show; the Zeffy header says 9 PM, see src/data/fallEvents.js).
-          Flair (Oct 27): a thin swaying papel picado row along the top of
-          the art and a static two-flower cempasúchil mark straddling the
-          art's bottom-right corner. */}
-      {ddlmActive && (
-        <div
-          id="ddlm-card"
-          class="relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl bg-black text-white shadow-2xl shadow-black/40"
-          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 75ms;"
-          data-fall-past-at={ddlmEvent.endsAtISO}
-        >
-          <a href={withBase(ddlmEvent.pagePath)} class="block aspect-[16/9] overflow-hidden" aria-hidden="true" tabindex="-1">
-            <img src={`${base}images/ddlm/ddlm-2026-festival.jpg`} width="1600" height="899" alt="" class="h-full w-full object-cover object-[50%_30%]" loading="lazy" decoding="async" />
+      {/* Día de los Muertos recap (static, Nov 2 2026): the first card, in the
+          recap's identity: black, white, one cempasúchil accent, a thin papel
+          picado row over the photo. Title lines, then the survey block, then
+          the photos button. The photo above the title already links to the
+          recap. Every visible string has an EN/ES pair. */}
+      <div
+        id="ddlm-card"
+        class="relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl bg-black font-rubik text-white"
+        style="animation: links-slide-up 0.5s ease backwards; animation-delay: 75ms;"
+      >
+        <a href={ddlmPageUrl} class="block aspect-[16/9] overflow-hidden" aria-hidden="true" tabindex="-1">
+          <img src={ddlmCardPhoto} width="900" height="506" alt="" class="h-full w-full object-cover" decoding="async" />
+        </a>
+        <DdlmPicado ground="#000000" size="sm" sway class="z-10" />
+        <div class="p-4 sm:p-5">
+          <p class="text-[0.75rem] font-bold text-white/70">
+            <span class="lang-en">{ddlmRecap.card.line}</span>
+            <span class="lang-es hidden">{ddlmRecap.card.lineEs}</span>
+          </p>
+          <h2 class="mt-1 text-[1.9rem] font-extrabold leading-[0.95]">{ddlmRecap.heading}</h2>
+          <p class="mt-2 text-[13px] font-semibold leading-relaxed text-white/75">
+            <span class="lang-en">{ddlmRecap.card.blurb}</span>
+            <span class="lang-es hidden">{ddlmRecap.card.blurbEs}</span>
+          </p>
+          <DdlmSurveyCta variant="card" bilingual context="links_ddlm_card" class="mt-5" />
+          <a
+            href={ddlmPageUrl}
+            class="mt-3 flex min-h-[48px] items-center justify-between rounded-lg bg-white px-4 text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            data-conversion-event="ddlm_page_click"
+            data-conversion-context="links_ddlm_card"
+          >
+            <span class="text-sm font-extrabold">
+              <span class="lang-en">{ddlmRecap.card.photosButton}</span>
+              <span class="lang-es hidden">{ddlmRecap.card.photosButtonEs}</span>
+            </span>
+            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
           </a>
-          <DdlmPicado ground="#000000" size="sm" sway class="z-10" />
-          <div class="relative p-4 sm:p-5">
-            <DdlmMarigolds layout="mark" size={34} ground="#000000" id="links-mg" class="absolute -top-5 right-3 z-10" />
-            <p class="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#FF7A1A]">
-              <span class="lang-en">{ddlmEvent.dayShort} {ddlmEvent.dateLabel} · {ddlmEvent.timeLabel}</span>
-              <span class="lang-es hidden">{ddlmEvent.dayShortEs} {ddlmEvent.dateLabelEs} · {ddlmEvent.timeLabelEs}</span>
-            </p>
-            <h2 class="mt-1 text-[1.9rem] font-extrabold leading-[0.95] tracking-tight">Día de los Muertos</h2>
-            <p class="mt-2 text-[13px] font-semibold leading-relaxed text-white/75">
-              <span class="lang-en">{ddlmEvent.summary}</span>
-              <span class="lang-es hidden">{ddlmEvent.summaryEs}</span>
-            </p>
-            <p class="mt-2 text-[11px] font-extrabold">
-              <span class="lang-en">{ddlmEvent.venue} · {ddlmEvent.address} · {ddlmEvent.priceLine}</span>
-              <span class="lang-es hidden">{ddlmEvent.venue} · {ddlmEvent.address} · {ddlmEvent.priceLineEs}</span>
-            </p>
-            <a
-              href={ddlmEvent.ticketsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="mt-4 flex items-center justify-between rounded-lg bg-[#FF7A1A] px-4 py-3 text-black transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              {...fallConversionAttrs(ddlmEvent, "links_ddlm_card")}
-            >
-              <span class="text-sm font-extrabold">
-                <span class="lang-en">Get tickets · $20</span>
-                <span class="lang-es hidden">Boletos · $20</span>
-              </span>
-              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
-            </a>
-            <a
-              href={withBase(ddlmEvent.pagePath)}
-              class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/80 underline-offset-4 hover:underline"
-              data-conversion-event="ddlm_page_click"
-              data-conversion-context="links_ddlm_card"
-            >
-              <span class="lang-en">Program, lineup and volunteer sign-up</span>
-              <span class="lang-es hidden">Programa, line-up y voluntariado</span>
-            </a>
-            <a
-              href={withBase("waiver")}
-              class="mt-2 flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#FF7A1A] underline-offset-4 hover:underline"
-              data-conversion-event="waiver_click"
-              data-conversion-context="links_ddlm_card"
-            >
-              <span class="lang-en">Sign the waiver</span>
-              <span class="lang-es hidden">Firma la exención</span>
-            </a>
-          </div>
-          <FallEventsClient />
         </div>
-      )}
-
-      {/* Halloween at La Villita Park (Sat Oct 31, 2026), second card
-          (after #ddlm-card): a "Free, open to all" line for the ofrendas
-          and Banda Cerro Azul / farmers market / trick or treat (no Zeffy
-          form; hot drinks, warm meals and grocery bags while supplies
-          last), then the two Oct 31 classes as rows with their own Zeffy
-          CTAs. Option I cream / paper / ink / terracotta. Every visible
-          string has an EN/ES pair. Rows hide after their own end, the card
-          after the second class. Halloween spirit (Oct 27): a row of the
-          cut-paper yogis from the Oct 31 flyer along the top edge, bats
-          drifting over them (HalloweenFlair layout="row"). */}
-      {halloweenActive && (
-        <div
-          id="halloween-card"
-          class="relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl p-4 pt-[3.75rem] shadow-2xl shadow-black/30 sm:p-5 sm:pt-16"
-          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 80ms; background: #f3ede4; color: #1e1a17;"
-          data-fall-past-at={halloweenEndISO}
-        >
-          <HalloweenFlair layout="row" tone="light" ground="#f3ede4" class="top-2" />
-          <p class="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#c4573a]">
-            <span class="lang-en">{halloweenAtLaVillita.dateLabel} · 2800 S Sacramento Ave</span>
-            <span class="lang-es hidden">{halloweenAtLaVillita.dateLabelEs} · 2800 S Sacramento Ave</span>
-          </p>
-          <h2 class="mt-1 text-[1.75rem] font-black uppercase leading-[0.95] tracking-tight sm:text-[2rem]">
-            <span class="lang-en">{halloweenAtLaVillita.title}</span>
-            <span class="lang-es hidden">{halloweenAtLaVillita.titleEs}</span>
-          </h2>
-          <p class="mt-3 text-[12px] font-semibold leading-snug" data-fall-past-at={halloweenEndISO}>
-            <span class="lang-en"><span class="font-extrabold">Free, open to all:</span> 9:00 AM ofrendas + hot drinks · 11:00 AM Banda Cerro Azul, farmers market + trick or treat, warm meals + grocery bags while supplies last</span>
-            <span class="lang-es hidden"><span class="font-extrabold">Gratis, abierto a todos:</span> 9:00 AM ofrendas + bebidas calientes · 11:00 AM Banda Cerro Azul, mercado de agricultores + dulce o truco, comida caliente + despensas mientras duren</span>
-          </p>
-          <div class="mt-4 space-y-3">
-            {halloweenEvents.filter((e) => !e.isPast()).map((e) => (
-              <div class="overflow-hidden rounded-xl bg-[#fdfbf7] shadow-[0_8px_20px_-14px_rgba(30,26,23,0.5)]" data-fall-past-at={e.endsAtISO}>
-                <div class="flex gap-3 p-3">
-                  <picture class="block h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#f3ede4]">
-                    <source srcset={`${base}${e.banner.webp}`} type="image/webp" />
-                    <img src={`${base}${e.banner.jpg}`} width="800" height="800" alt="" class="h-full w-full object-cover" loading="lazy" decoding="async" />
-                  </picture>
-                  <div class="min-w-0">
-                    <p class="text-[11px] font-extrabold text-[#c4573a]">{e.timeLabel}</p>
-                    <p class="text-[14px] font-extrabold leading-snug">
-                      <span class="lang-en">{e.title}</span>
-                      <span class="lang-es hidden">{e.titleEs}</span>
-                    </p>
-                    <p class="mt-0.5 text-[11px] font-semibold leading-snug text-[#1e1a17]/70">
-                      <span class="lang-en">{e.summary}</span>
-                      <span class="lang-es hidden">{e.summaryEs}</span>
-                    </p>
-                    <p class="mt-1 text-[11px] font-extrabold">
-                      <span class="lang-en">{e.priceLine}</span>
-                      <span class="lang-es hidden">{e.priceLineEs}</span>
-                    </p>
-                  </div>
-                </div>
-                <div class="px-3 pb-3">
-                  <a
-                    href={e.ticketsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center justify-between rounded-lg bg-[#1e1a17] px-4 py-3 text-[#fdfbf7] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4573a] focus-visible:ring-offset-2"
-                    {...fallConversionAttrs(e, "links_halloween_card")}
-                  >
-                    <span class="text-sm font-extrabold">
-                      <span class="lang-en">{e.ticketsLabel} · {e.startTimeLabel}</span>
-                      <span class="lang-es hidden">{e.ticketsLabelEs} · {e.startTimeLabel}</span>
-                    </span>
-                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div class="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            <a
-              href={`${withBase("events")}#fall-events`}
-              class="flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"
-            >
-              <span class="lang-en">Details on our events page</span>
-              <span class="lang-es hidden">Detalles en nuestra página de eventos</span>
-            </a>
-            <a
-              href={withBase("waiver")}
-              class="flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#c4573a] underline-offset-4 hover:underline"
-              data-conversion-event="waiver_click"
-              data-conversion-context="links_halloween_card"
-            >
-              <span class="lang-en">Sign the waiver</span>
-              <span class="lang-es hidden">Firma la exención</span>
-            </a>
-          </div>
-          <FallEventsClient />
-        </div>
-      )}
+      </div>
 
       {/* Pop Up week Featured Card (current week: Week 1 Oct 5 to 11, then
           Week 2 Oct 12 to 18, 2026; one copy per active week, flipped in
           the browser on Oct 12): the live dated
-          campaign (since Oct 26 2026 it follows #ddlm-card and
-          #halloween-card). Campaign identity from
+          campaign (it follows #ddlm-card). Campaign identity from
           the IG graphics (cream ground, terracotta sun, ink, mustard on
           dark): Chicago Art Dept as a white block, Sanctuary Health as an
           ink block, every session as a compact row carrying

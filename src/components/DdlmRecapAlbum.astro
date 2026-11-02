@@ -1,18 +1,17 @@
 ---
-// The Día de los Muertos weekend in photos: one album across three sets (the
-// team's Oct 28 phone photos, self-hosted; Estevan Cruz's Saturday frames on
-// the Flickr CDN; the Sunday slot, empty for now), in date-ordered chapters.
-// Each chapter opens with an editorial mosaic of hand-picked frames, then a
-// square thumbnail wall of the rest (first 16 visible, the remainder behind a
-// per-chapter expander). A chapter with no photos renders nothing.
+// Every photo from the Día de los Muertos weekend: one square thumbnail wall
+// per set, in date order (the team's Oct 28 phone photos, self-hosted; Estevan
+// Cruz's Saturday frames on the Flickr CDN; the Sunday album, empty for now).
+// Anything listed in ddlmStory is already on the page, so it leaves its wall.
+// The Mayor's two frames are story frames and never wall thumbs. A wall with
+// no photos renders nothing. First 24 visible, the rest behind an expander.
 //
-// Every photo is a button carrying one global index in RENDERED order, which
-// is the order DdlmRecapLightbox (outside <main>) walks. Flickr buttons carry
-// data-stem/data-base; self-hosted buttons carry data-set="local" + data-id.
-// Each chapter carries its credit and album link for the viewer.
+// Every photo is a [data-dl-photo] button; DdlmRecapLightbox (outside <main>)
+// numbers them in document order at runtime, after the story's frames. Flickr
+// buttons carry data-stem/data-base; self-hosted buttons carry data-set="local"
+// + data-id. Each wall carries its credit, album link and title for the viewer.
 //
-// Same grammar as /gala's RecapAlbum, without its gold frames, hairlines and
-// tracked labels. Data: src/data/ddlmGallery2026.js and ddlmRecap2026.js.
+// Data: src/data/ddlmGallery2026.js and ddlmRecap2026.js.
 import {
   ddlmAlbums,
   ddlmAlbumChapters,
@@ -21,25 +20,28 @@ import {
   ddlmMakingPhotos,
   ddlmPhotoCount,
   ddlmSaturdayPhotos,
+  ddlmSundayGuestPhotos,
   ddlmSundayPhotos,
 } from "@/data/ddlmGallery2026";
-import { ddlmRecapPhotos } from "@/data/ddlmRecap2026";
+import { ddlmStory } from "@/data/ddlmRecap2026";
 
 const base = import.meta.env.BASE_URL;
-const total = ddlmPhotoCount;
-const WALL_VISIBLE = 16;
+const WALL_VISIBLE = 24;
 const localBase = `${base}${ddlmLocalBase}`;
-const leadBase = `${base}images/ddlm/recap/`;
 
-// One list, all sets. `key` identifies a photo for lead matching.
-const everything = [
-  ...ddlmMakingPhotos.map((p) => ({ set: "local", p, key: `id:${p.id}` })),
-  ...ddlmSaturdayPhotos.map((p, i) => ({ set: "flickr", p, key: `i:${i}` })),
-  ...ddlmSundayPhotos.map((p, i) => ({ set: "flickr", p, key: `sun:${i}` })),
-];
+const framesOf = (moments) => moments.flatMap((m) => m.rows.flatMap((r) => r.frames));
+const inStory = new Set([
+  ...ddlmStory.making,
+  ...framesOf(ddlmStory.saturday).map((f) => f.t),
+  ...framesOf(ddlmStory.sunday).map((f) => f.sun),
+]);
 
-const pickKey = (l) =>
-  l.id ? `id:${l.id}` : l.sun !== undefined ? `sun:${l.sun}` : `i:${l.i}`;
+// The photos of each wall, by SET.
+const sets = {
+  making: ddlmMakingPhotos.map((p) => ({ set: "local", p, key: p.id })),
+  saturday: ddlmSaturdayPhotos.map((p) => ({ set: "flickr", p, key: p.t })),
+  sunday: ddlmSundayPhotos.map((p) => ({ set: "flickr", p, key: p.t })),
+};
 
 const credit = (chapter) => {
   if (chapter.album === "team") return { line: "Photo by the LSP team", url: null };
@@ -48,34 +50,23 @@ const credit = (chapter) => {
   return { line: who ? `Photo by ${who}` : "", url: album?.url ?? null };
 };
 
-let running = 0;
-const chapters = ddlmAlbumChapters.flatMap((chapter) => {
-  const all = everything.filter((x) => x.p.c === chapter.key);
+const walls = ddlmAlbumChapters.flatMap((chapter) => {
+  const all = sets[chapter.key] ?? [];
   if (!all.length) return [];
-  const byKey = new Map(all.map((x) => [x.key, x]));
-  const picks = ddlmRecapPhotos.leads[chapter.key] || [];
-  // Leads render in the order listed: the mosaic patterns depend on it.
-  const leads = picks.map((l) => {
-    const x = byKey.get(pickKey(l));
-    if (!x) throw new Error(`DdlmRecapAlbum: lead ${pickKey(l)} is not in "${chapter.key}"`);
-    return { ...x, big: !!l.big, src: l.src ?? null };
-  });
-  const leadKeys = new Set(leads.map((x) => x.key));
-  const wall = all.filter((x) => !leadKeys.has(x.key));
-  const withIndex = (list) => list.map((x) => ({ ...x, g: running++ }));
   return [
     {
       ...chapter,
       credit: credit(chapter),
       count: all.length,
-      leadItems: withIndex(leads),
-      wallItems: withIndex(wall),
+      items: all.filter((x) => !inStory.has(x.key)),
     },
   ];
 });
 
-if (running !== total) {
-  throw new Error(`DdlmRecapAlbum: rendered ${running} photos, album has ${total}. Check each row's chapter key.`);
+const rendered =
+  walls.reduce((acc, w) => acc + w.items.length, 0) + inStory.size + ddlmSundayGuestPhotos.length;
+if (rendered !== ddlmPhotoCount) {
+  throw new Error(`DdlmRecapAlbum: page holds ${rendered} photos, album has ${ddlmPhotoCount}. Check the stems in ddlmStory.`);
 }
 
 const attrs = (x) =>
@@ -83,95 +74,45 @@ const attrs = (x) =>
     ? { "data-set": "local", "data-id": x.p.id }
     : { "data-stem": x.p.f, "data-base": x.p.t };
 
-const mosaicImg = (x) => {
-  if (x.src) return { src: `${leadBase}${x.src}`, width: 1200, height: x.p.o === "p" ? 1800 : 800 };
-  if (x.set === "local") return { src: `${localBase}${x.p.id}_c.webp`, width: x.p.w, height: x.p.h };
-  return {
-    src: `${ddlmCdnBase}${x.p.t}_c.jpg`,
-    width: x.p.o === "p" ? 533 : 800,
-    height: x.p.o === "p" ? 800 : 533,
-  };
-};
-
 const thumbImg = (x) =>
   x.set === "local"
     ? { src: `${localBase}${x.p.id}_q.webp`, width: 320, height: 320 }
     : { src: `${ddlmCdnBase}${x.p.t}_q.jpg`, width: 150, height: 150 };
 ---
 
-<div class="space-y-16 sm:space-y-24">
+<div class="space-y-10 lg:space-y-14">
   {
-    chapters.map((chapter) => (
+    walls.map((wall) => (
       <article
-        id={`photos-${chapter.key}`}
+        id={`photos-${wall.key}`}
         class="scroll-mt-32"
-        aria-labelledby={`dl-chapter-${chapter.key}`}
-        data-dl-credit={chapter.credit.line}
-        data-dl-album={chapter.credit.url ?? undefined}
+        aria-labelledby={`dl-wall-${wall.key}`}
+        data-dl-credit={wall.credit.line}
+        data-dl-album={wall.credit.url ?? undefined}
+        data-dl-title={wall.time}
+        data-dl-wall
       >
-        <header>
-          <p class="text-sm font-semibold text-white/70 sm:text-base">{chapter.time}</p>
-          <h3 id={`dl-chapter-${chapter.key}`} class="mt-1 text-2xl font-extrabold leading-tight sm:text-3xl">
-            {chapter.title}
-          </h3>
-          <p class="mt-2 max-w-2xl text-base leading-relaxed text-white/80">{chapter.detail}</p>
-        </header>
-
-        {chapter.leadItems.length > 0 && (
-          <div class="dl-mosaic-wrap mt-6">
-            <ul class="dl-mosaic" role="list">
-              {chapter.leadItems.map((x) => (
-                <li
-                  class:list={["dl-tile", x.big && "is-big", !x.big && x.p.o === "p" && "is-tall"]}
-                  data-dl-cell
-                >
-                  <button
-                    type="button"
-                    class="dl-tile-btn"
-                    data-dl-photo
-                    data-index={x.g}
-                    {...attrs(x)}
-                    aria-label={`${chapter.title}, photo ${x.g + 1} of ${total}, view large`}
-                  >
-                    <img {...mosaicImg(x)} alt="" loading="lazy" decoding="async" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {chapter.wallItems.length > 0 && (
-          <div class="mt-1.5 sm:mt-2" data-dl-wall>
-            <ul class="dl-wall" role="list">
-              {chapter.wallItems.map((x, wi) => (
-                <li class="dl-wall-cell" data-dl-cell hidden={wi >= WALL_VISIBLE}>
-                  <button
-                    type="button"
-                    class="dl-thumb"
-                    data-dl-photo
-                    data-index={x.g}
-                    {...attrs(x)}
-                    aria-label={`${chapter.title}, photo ${x.g + 1} of ${total}, view large`}
-                  >
-                    <img {...thumbImg(x)} alt="" loading="lazy" decoding="async" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {chapter.wallItems.length > WALL_VISIBLE && (
-              <p class="mt-4">
-                <button
-                  type="button"
-                  class="dl-more inline-flex min-h-[44px] items-center text-base font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A]"
-                  data-dl-expand
-                  aria-expanded="false"
-                >
-                  Show all {chapter.count} photos
-                </button>
-              </p>
-            )}
-          </div>
+        <h3 id={`dl-wall-${wall.key}`} class="text-[1.125rem] font-bold text-white">{wall.time}</h3>
+        <ul class="dl-wall mt-3" role="list">
+          {wall.items.map((x, wi) => (
+            <li class="dl-wall-cell" data-dl-cell hidden={wi >= WALL_VISIBLE}>
+              <button type="button" class="dl-thumb" data-dl-photo {...attrs(x)} aria-label="View large">
+                <img {...thumbImg(x)} alt="" loading="lazy" decoding="async" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        {wall.items.length > WALL_VISIBLE && (
+          <p class="mt-4">
+            <button
+              type="button"
+              class="dl-more inline-flex min-h-[44px] items-center text-base font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A]"
+              data-dl-expand
+              aria-expanded="false"
+            >
+              Show all {wall.count} photos
+            </button>
+          </p>
         )}
       </article>
     ))
@@ -179,67 +120,7 @@ const thumbImg = (x) =>
 </div>
 
 <style>
-  /* Editorial lead mosaic. Cells are 3:2 (row height derived from the
-     container width via container query units), so a landscape frame fills a
-     1x1 or 2x2 exactly and a portrait sits in a 1x2 at 3:4. Patterns are
-     documented in ddlmRecap2026.js. */
-  .dl-mosaic-wrap {
-    container-type: inline-size;
-  }
-  .dl-mosaic {
-    --gap: 6px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: calc((100cqi - var(--gap)) / 2 * 2 / 3);
-    gap: var(--gap);
-  }
-  @media (min-width: 768px) {
-    .dl-mosaic {
-      --gap: 8px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      grid-auto-rows: calc((100cqi - 3 * var(--gap)) / 4 * 2 / 3);
-    }
-  }
-  .dl-tile.is-big {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-  .dl-tile.is-tall {
-    grid-row: span 2;
-  }
-  .dl-tile-btn {
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #161616;
-    cursor: zoom-in;
-  }
-  .dl-tile-btn img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  .dl-tile-btn:hover img {
-    transform: scale(1.03);
-  }
-  .dl-tile-btn:focus-visible,
-  .dl-thumb:focus-visible {
-    outline: 2px solid #ff7a1a;
-    outline-offset: 2px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .dl-tile-btn img {
-      transition: none;
-    }
-    .dl-tile-btn:hover img {
-      transform: none;
-    }
-  }
-
-  /* Square thumbnail wall: 4 across on phones, 8 on desktop. */
+  /* Square thumbnail wall: 4 across on phones, 8 at md. */
   .dl-wall {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -259,7 +140,6 @@ const thumbImg = (x) =>
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background: #161616;
     cursor: zoom-in;
   }
   .dl-thumb img {
@@ -267,19 +147,8 @@ const thumbImg = (x) =>
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
   }
-  .dl-thumb:hover img {
-    transform: scale(1.04);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .dl-thumb img {
-      transition: none;
-    }
-    .dl-thumb:hover img {
-      transform: none;
-    }
-  }
+  .dl-thumb:focus-visible,
   .dl-more:focus-visible {
     outline: 2px solid #ff7a1a;
     outline-offset: 2px;

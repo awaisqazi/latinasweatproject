@@ -3,10 +3,12 @@
 // RecapLightbox (same rendition ladder, same no-cascade failure handling), in
 // the black and white DDLM identity. It MUST be rendered OUTSIDE <main>: out
 // there it competes in the root stacking context, where z-index 1000 clears the
-// fixed site header. It walks every [data-dl-photo] button in #photos by the
-// data-index DdlmRecapAlbum assigns in rendered order, so prev/next crosses
-// chapters in date order and the counter matches the thumbnails' labels. Each
-// chapter's article carries the credit and album link for its photos.
+// fixed site header. It walks every [data-dl-photo] button on the page in
+// document order (the story frames, then the walls): the script writes each
+// button's data-index and its "photo N of T" label, so prev/next walks from the
+// essay straight into the walls. Credit and album link come from the nearest
+// [data-dl-credit] (story rows and wall articles both carry them), the title
+// from the nearest [data-dl-title].
 import { ddlmAlbums, ddlmCdnBase, ddlmLocalBase, ddlmPhotoCount } from "@/data/ddlmGallery2026";
 
 const base = import.meta.env.BASE_URL;
@@ -60,6 +62,19 @@ const base = import.meta.env.BASE_URL;
   }
   .dl-lb[hidden] {
     display: none !important;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .dl-lb:not([hidden]) {
+      animation: dl-lb-in 150ms linear both;
+    }
+  }
+  @keyframes dl-lb-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   .dl-lb-stage {
     display: flex;
@@ -149,8 +164,8 @@ const base = import.meta.env.BASE_URL;
 <script>
   (() => {
     const lb = document.getElementById("dl-lightbox");
-    const root = document.getElementById("photos");
-    if (!lb || !root) return;
+    if (!lb) return;
+    const root = document;
     const img = lb.querySelector<HTMLImageElement>("[data-dl-image]")!;
     const counter = lb.querySelector<HTMLElement>("[data-dl-counter]")!;
     const prevBtn = lb.querySelector<HTMLButtonElement>("[data-dl-prev]")!;
@@ -161,14 +176,23 @@ const base = import.meta.env.BASE_URL;
     const localBase = lb.dataset.localBase || "";
     const albumFallback = lb.dataset.albumFallback || "";
 
-    // Every photo button, keyed by its global rendered index.
-    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-dl-photo]"));
-    const byIndex: HTMLButtonElement[] = [];
-    for (const b of buttons) byIndex[Number(b.dataset.index)] = b;
-    const total = byIndex.length;
-    if (!total) return;
+    // Every photo button in document order: the index, the label and the
+    // walk are all assigned here, so the story and the walls share one order.
+    const byIndex = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-dl-photo]"));
+    const count = byIndex.length;
+    if (!count) return;
+    const total = Number(lb.dataset.total) || count;
+    const describe = (b: HTMLButtonElement) => b.querySelector("img")?.alt?.trim() || "";
+    const titleOf = (b?: HTMLButtonElement) =>
+      b?.closest<HTMLElement>("[data-dl-title]")?.dataset.dlTitle?.trim() || "";
+    const sentence = (t: string) => (!t || /[.!?]$/.test(t) ? t : `${t}.`);
+    byIndex.forEach((b, i) => {
+      b.dataset.index = String(i);
+      const lead = sentence(describe(b) || titleOf(b));
+      b.setAttribute("aria-label", `${lead ? `${lead} ` : ""}Photo ${i + 1} of ${total}, view large`);
+    });
 
-    const chapterOf = (b?: HTMLButtonElement) => b?.closest<HTMLElement>("article");
+    const creditOf = (b?: HTMLButtonElement) => b?.closest<HTMLElement>("[data-dl-credit]");
 
     const broken = new Set<number>();
     let current = -1;
@@ -178,9 +202,13 @@ const base = import.meta.env.BASE_URL;
     // Rendition ladder: the stored _h 1600px stem first, then _b 1024px and
     // _c 800px built from the base stem. Flickr occasionally throttles a
     // burst of full-size loads; stepping down keeps the photo on screen
-    // instead of marking it broken. Self-hosted photos: _h.webp, then _c.webp.
+    // instead of marking it broken. Self-hosted photos: _h.webp, then _c.webp;
+    // the Sunday guest frames carry their own two renditions.
     const sources = (i: number) => {
       const b = byIndex[i];
+      if (b?.dataset.full) {
+        return [b.dataset.full, b.dataset.fallback || ""].filter(Boolean);
+      }
       if (b?.dataset.set === "local") {
         const id = b.dataset.id;
         return id ? [`${localBase}${id}_h.webp`, `${localBase}${id}_c.webp`] : [];
@@ -204,12 +232,12 @@ const base = import.meta.env.BASE_URL;
     const msgLink = document.createElement("a");
     msgLink.target = "_blank";
     msgLink.rel = "noopener noreferrer";
-    msgLink.textContent = "open the album on Flickr";
+    msgLink.textContent = "open the album";
     msgLink.style.cssText = "color:#ff7a1a;text-decoration:underline;text-underline-offset:3px";
     msg.append("This photo did not load. Try the next one, or ", msgLink, ".");
     stage.style.position = stage.style.position || "relative";
     stage.appendChild(msg);
-    const wrap = (i: number) => ((i % total) + total) % total;
+    const wrap = (i: number) => ((i % count) + count) % count;
 
     // Broken thumbs retire their whole cell (error does not bubble, so listen
     // in the capture phase), and the viewer skips them.
@@ -233,7 +261,9 @@ const base = import.meta.env.BASE_URL;
     // Some engines never start `loading="lazy"` fetches for grid cells (seen
     // in embedded Chromium): nudge each image to eager as it nears the
     // viewport. Hidden cells are skipped until they are revealed.
-    const lazyImgs = Array.from(root.querySelectorAll<HTMLImageElement>("img[loading='lazy']"));
+    const lazyImgs = Array.from(
+      root.querySelectorAll<HTMLImageElement>("[data-dl-photo] img[loading='lazy']"),
+    );
     let nudge: IntersectionObserver | null = null;
     if ("IntersectionObserver" in window) {
       nudge = new IntersectionObserver(
@@ -265,19 +295,19 @@ const base = import.meta.env.BASE_URL;
     const show = (i: number, step = 1) => {
       let w = wrap(i);
       let guard = 0;
-      while (broken.has(w) && guard++ < total) w = wrap(w + step);
+      while (broken.has(w) && guard++ < count) w = wrap(w + step);
       if (broken.has(w)) return;
       current = w;
       tier = 0;
       msg.hidden = true;
       img.style.visibility = "";
       img.src = fullSrc(w);
-      const article = chapterOf(byIndex[w]);
-      const title = article?.querySelector("h3")?.textContent?.trim();
-      const credit = article?.dataset.dlCredit;
-      img.alt = `${title ? `${title}, ` : ""}photo ${w + 1} of ${total}`;
+      const holder = creditOf(byIndex[w]);
+      const title = sentence(describe(byIndex[w]) || titleOf(byIndex[w]));
+      const credit = holder?.dataset.dlCredit;
+      img.alt = `${title ? `${title} ` : ""}Photo ${w + 1} of ${total}`;
       counter.textContent = `${w + 1} of ${total}${credit ? ` · ${credit}` : ""}`;
-      msgLink.href = article?.dataset.dlAlbum || albumFallback;
+      msgLink.href = holder?.dataset.dlAlbum || albumFallback;
       preload(w + 1);
       preload(w - 1);
     };
@@ -329,9 +359,7 @@ const base = import.meta.env.BASE_URL;
       opener = null;
     };
 
-    for (const b of buttons) {
-      b.addEventListener("click", () => open(Number(b.dataset.index), b));
-    }
+    byIndex.forEach((b, i) => b.addEventListener("click", () => open(i, b)));
     prevBtn.addEventListener("click", () => show(current - 1, -1));
     nextBtn.addEventListener("click", () => show(current + 1, 1));
     closeBtn.addEventListener("click", close);

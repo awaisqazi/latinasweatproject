@@ -1,0 +1,123 @@
+---
+// The Día de los Muertos attendee survey: the single source of its markup.
+// Copy lives in ddlmSurvey (src/data/ddlmRecap2026.js).
+//   variant "hero":    the recap's main action, id="survey", h2, body, button, note
+//   variant "closing": the line at the end of the recap, with a text link
+//   variant "card":    the /links block; pass `bilingual` for EN/ES span pairs
+//   context:           data-conversion-context on the survey link
+// Static HTML: no script runs for this block. Plain text on its ground: no
+// panel, no border, no icon, no rule. Addressed to people who were there; no
+// invitation to anyone else, no coaching, no incentive, no deadline.
+import { ddlmSurvey } from "@/data/ddlmRecap2026";
+
+interface Props {
+  context: string;
+  variant?: "hero" | "closing" | "card";
+  bilingual?: boolean;
+  class?: string;
+}
+const { context, variant = "hero", bilingual = false, class: className } = Astro.props;
+
+// The two form choices print in bold, in every language.
+const choices = new RegExp(`(${ddlmSurvey.noteChoices.join("|")})`);
+const noteParts = (note) => note.split(choices);
+const link = {
+  href: ddlmSurvey.url,
+  target: "_blank",
+  rel: "noopener noreferrer",
+  "data-conversion-event": "ddlm_survey_click",
+  "data-conversion-context": context,
+};
+---
+
+{
+  variant === "hero" && (
+    <div id="survey" class:list={["scroll-mt-28", className]}>
+      <h2 class="text-[1.375rem] font-extrabold leading-[1.2] text-white lg:text-[1.625rem]">{ddlmSurvey.heading}</h2>
+      <p class="mt-2.5 max-w-[34em] text-base font-normal leading-normal text-white/85 lg:text-[1.0625rem]">
+        {ddlmSurvey.body}
+      </p>
+      <a
+        {...link}
+        class="mt-5 inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-[#FF7A1A] px-8 text-base font-bold text-black hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
+      >
+        {ddlmSurvey.button}
+      </a>
+      <p class="mt-3.5 max-w-[34em] text-[0.9375rem] font-normal leading-normal text-white/75">
+        {noteParts(ddlmSurvey.note).map((part, i) =>
+          i % 2 ? <strong class="font-bold text-white">{part}</strong> : part,
+        )}
+      </p>
+    </div>
+  )
+}
+
+{
+  variant === "closing" && (
+    <div class:list={["max-w-[34em]", className]}>
+      <p class="text-[1.0625rem] font-medium leading-normal text-white/85">{ddlmSurvey.closingLine}</p>
+      <a
+        {...link}
+        class="inline-flex min-h-[44px] items-center text-base font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      >
+        {ddlmSurvey.button}
+      </a>
+    </div>
+  )
+}
+
+{
+  variant === "card" && (
+    <div class={className}>
+      <h3 class="text-base font-extrabold leading-tight text-white">
+        <span class="lang-en">{ddlmSurvey.heading}</span>
+        {bilingual && <span class="lang-es hidden">{ddlmSurvey.headingEs}</span>}
+      </h3>
+      <p class="mt-1.5 text-[12px] font-semibold leading-relaxed text-white/75">
+        <span class="lang-en">{ddlmSurvey.bodyCard}</span>
+        {bilingual && <span class="lang-es hidden">{ddlmSurvey.bodyEs}</span>}
+      </p>
+      <p class="mt-2 text-[11px] font-semibold leading-relaxed text-white/70">
+        <span class="lang-en">
+          {noteParts(ddlmSurvey.note).map((part, i) =>
+            i % 2 ? <strong class="font-extrabold text-white">{part}</strong> : part,
+          )}
+        </span>
+        {bilingual && (
+          <span class="lang-es hidden">
+            {noteParts(ddlmSurvey.noteEs).map((part, i) =>
+              i % 2 ? <strong class="font-extrabold text-white">{part}</strong> : part,
+            )}
+          </span>
+        )}
+      </p>
+      <a
+        {...link}
+        class="mt-3 flex min-h-[48px] items-center justify-between rounded-lg bg-[#FF7A1A] px-4 text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      >
+        <span class="text-sm font-extrabold">
+          <span class="lang-en">{ddlmSurvey.button}</span>
+          {bilingual && <span class="lang-es hidden">{ddlmSurvey.buttonEs}</span>}
+        </span>
+        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
+  )
+}
+
+<style>
+  /* The /links language toggle is CSS only (.lang-active-en / -es on the page)
+     and its rules are scoped to links.astro, so they do not reach this
+     component's spans. The same three rules, for the card variant. */
+  :global(.lang-active-en) .lang-es {
+    display: none !important;
+  }
+  :global(.lang-active-es) .lang-en {
+    display: none !important;
+  }
+  :global(.lang-active-es) .lang-es {
+    display: inline;
+  }
+</style>
