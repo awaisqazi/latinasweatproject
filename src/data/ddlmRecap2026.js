@@ -155,15 +155,16 @@ export const ddlmSurvey = {
 
 // Story frames by Flickr stem (the `t` field in ddlmSaturdayPhotos), never by
 // index, so removing a row can never shift a pick. `rows` are ordered lists of
-// frames; `layout` is "justified" (default), "full" or "two-thirds". A
-// two-thirds row prints the moment's caption beside the photo, or its own
-// `caption` when it has one. `phoneY` is the object-position y for portraits
-// on phones (4:5 crop). `alt` describes the scene and never names anyone.
+// frames; `layout` is "justified" (default) or "full". Every row fills the
+// page's width and the moment's caption prints once, above its first row: no
+// side captions, no row with empty space beside it. `phoneY` is the
+// object-position y for portraits on phones (4:5 crop). `alt` describes the
+// scene and never names anyone.
 //
-// Rules: no child in a lead position; the one kids yoga frame shows children
-// from behind only and is never "full". Ofrendas carry families' framed
-// photos, so ofrenda frames are wide frames only and nothing crops in on one.
-// Sunday frames are `{ sun: "<stem>" }` from ddlmSundayPhotos; DdlmStory.astro
+// Rules: no child in a lead position; the kids yoga frames show children from
+// behind or small in a wide frame, and are never "full". Ofrendas carry
+// families' framed photos, so ofrenda frames are wide frames only and nothing
+// crops in on one. Sunday frames are `{ sun: "<stem>" }` from ddlmSundayPhotos; DdlmStory.astro
 // fails the build if a Sunday row names a Saturday stem.
 export const ddlmStory = {
   making: ["IMG_1156", "IMG_1146", "IMG_1155", "IMG_1138"],
@@ -197,8 +198,8 @@ export const ddlmStory = {
       text: "Kids yoga, in costume.",
       rows: [
         {
-          layout: "two-thirds",
           frames: [
+            { t: "65535/55624065799_e48302780c", alt: "The kids yoga class spread across the grass under the tent, mats and families seen from the side." },
             { t: "65535/55622856732_867ce6b02c", alt: "The kids yoga class seen from behind, facing the leaders at the front, marigold strands hanging from the tent." },
           ],
         },
@@ -211,14 +212,13 @@ export const ddlmStory = {
         {
           layout: "full",
           frames: [
-            { t: "65535/55623990868_af1f7cc8f7", alt: "The whole band standing under the big tent." },
+            { t: "65535/55624280325_2d20225f4f", alt: "Trumpet and clarinet players from the band on the grass outside the tent." },
           ],
         },
         {
-          layout: "two-thirds",
-          caption: "Trumpets and clarinets, outside the tent.",
+          layout: "full",
           frames: [
-            { t: "65535/55624280325_2d20225f4f", alt: "Trumpet and clarinet players from the band on the grass outside the tent." },
+            { t: "65535/55623990868_af1f7cc8f7", alt: "The whole band standing under the big tent." },
           ],
         },
       ],

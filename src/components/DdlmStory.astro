@@ -3,19 +3,18 @@
 // a one-line caption and one or more photo rows. Used by the "Three nights
 // before", Saturday and Sunday sections.
 //
-//   moments: [{ time, text, link?, credit?, rows: [{ layout?, caption?, frames }] }]
+//   moments: [{ time, text, link?, credit?, rows: [{ layout?, frames }] }]
 //   set:     "saturday" | "sunday" | "making"
 //   title:   the section's heading, for the lightbox alt text
 //
-// Row grammar, one set of rules for every section:
+// Row grammar, one set of rules for every section. The moment's caption always
+// sits above its first row, and every row runs the full width of the page:
 //   Phone (below sm): every frame is its own full-bleed block in row order.
 //     Landscapes 3:2, portraits 4:5 with a per-frame `phoneY` object-position.
 //   sm and up: rows are justified. Each frame's flex-grow is its aspect ratio
 //     and it keeps that ratio, so every frame in a row shares a height and
 //     nothing is cropped.
 //     "full": one landscape across the row at 1.6.
-//     "two-thirds": the frame spans columns 1 to 8, the caption columns 10 to
-//     12, bottom-aligned. The moment's caption is not printed twice.
 //     "grid" (the making row): 2 by 2 on phones, 4 across above, 3:4 cells.
 //
 // Every image is a [data-dl-photo] button. DdlmRecapLightbox (outside <main>)
@@ -44,8 +43,7 @@ interface Frame {
   phoneY?: number;
 }
 interface Row {
-  layout?: "justified" | "full" | "two-thirds" | "grid";
-  caption?: string;
+  layout?: "justified" | "full" | "grid";
   frames: Frame[];
 }
 interface Moment {
@@ -139,8 +137,8 @@ const resolve = (frame: Frame) => {
 };
 
 // sizes for one frame: its share of the row, full width on phones.
-const sizesFor = (ar: number, sum: number, layout: string) => {
-  const share = layout === "two-thirds" ? 2 / 3 : ar / sum;
+const sizesFor = (ar: number, sum: number) => {
+  const share = ar / sum;
   const px = Math.round(share * FRAME_W);
   return `(min-width: 1280px) ${px}px, (min-width: 640px) ${Math.round(share * 100)}vw, 100vw`;
 };
@@ -165,10 +163,9 @@ const items = moments.map((moment) => ({
     const sum = frames.reduce((acc, f) => acc + f.ar, 0);
     return {
       layout,
-      caption: row.caption,
       frames: frames.map((f) => ({
         ...f,
-        sizes: f.srcset ? sizesFor(f.ar, sum, layout) : undefined,
+        sizes: f.srcset ? sizesFor(f.ar, sum) : undefined,
         // Portraits are 4:5 on phones, landscapes 3:2 (or their own shape).
         phoneAr: f.portrait ? "4 / 5" : f.ar === LANDSCAPE ? "3 / 2" : String(f.ar),
       })),
@@ -179,11 +176,10 @@ const items = moments.map((moment) => ({
 
 <div class="ds">
   {items.map((moment) => {
-    const firstIsBeside = moment.rows[0]?.layout === "two-thirds" && !moment.rows[0]?.caption;
     const caption = moment.time || moment.text;
     return (
       <div class="ds-moment">
-        {caption && !firstIsBeside && (
+        {caption && (
           <p class="ds-caption">
             {moment.time && <b>{moment.time}</b>}{" "}
             {moment.text}
@@ -203,18 +199,6 @@ const items = moments.map((moment) => ({
               data-dl-album={moment.album}
               data-dl-title={title}
             >
-              {row.layout === "two-thirds" && (
-                <p class:list={["ds-caption", "ds-caption-beside", row.caption && "ds-caption-row"]}>
-                  {row.caption ? (
-                    row.caption
-                  ) : (
-                    <>
-                      {moment.time && <b>{moment.time}</b>}{" "}
-                      {moment.text}
-                    </>
-                  )}
-                </p>
-              )}
               {row.frames.map((f) => (
                 <div class="ds-cell" data-dl-cell style={`--ar:${f.ar};--phone-ar:${f.phoneAr};--phone-y:${f.phoneY}%`}>
                   <button type="button" class="ds-photo" data-dl-photo {...f.attrs} aria-label="View large">
@@ -268,10 +252,6 @@ const items = moments.map((moment) => ({
     outline: 2px solid #ff7a1a;
     outline-offset: 2px;
   }
-  /* A row's own caption, inside a moment, sits 12px clear of the row above. */
-  .ds-caption-row {
-    margin-top: 6px;
-  }
   .ds-rows,
   .ds-row {
     display: flex;
@@ -280,10 +260,6 @@ const items = moments.map((moment) => ({
   }
   .ds-cell {
     min-width: 0;
-  }
-  .ds-row .ds-caption {
-    /* The row's gap is the frame gap; the caption keeps its own 12px. */
-    margin-bottom: 6px;
   }
 
   /* Phone: edge to edge, landscapes 3:2, portraits 4:5. */
@@ -351,24 +327,6 @@ const items = moments.map((moment) => ({
       gap: 8px;
       padding: 0;
     }
-    .ds-row-two-thirds {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 8px;
-    }
-    .ds-row-two-thirds .ds-cell {
-      grid-column: 1 / 9;
-      grid-row: 1;
-    }
-    .ds-row-two-thirds .ds-photo {
-      aspect-ratio: var(--ar);
-    }
-    .ds-row-two-thirds .ds-caption-beside {
-      grid-column: 10 / 13;
-      grid-row: 1;
-      align-self: end;
-      margin: 0;
-    }
   }
 
   @media (min-width: 1024px) {
@@ -378,9 +336,6 @@ const items = moments.map((moment) => ({
     .ds-caption {
       margin-bottom: 16px;
       font-size: 1.25rem;
-    }
-    .ds-row .ds-caption {
-      margin-bottom: 0;
     }
   }
 </style>
