@@ -94,14 +94,14 @@ const bannerHref = statusBanner.href.startsWith("/")
         >
             {/* Logo */}
             <div class="flex-shrink-0 relative z-50">
-                <a href={base} class="flex items-center gap-3 group">
+                <a href={base} class="flex items-center gap-2 min-[420px]:gap-3 group">
                     <img
                         src={`${base}logo.png`}
                         alt="The Latina Sweat Project Logo"
                         class="h-8 w-8 md:h-10 md:w-10 transition-transform duration-300 group-hover:scale-110"
                     />
                     <span
-                        class="text-lg 2xl:text-xl font-bold text-off-black tracking-tight whitespace-nowrap group-hover:text-vibrant-pink transition-colors duration-300"
+                        class="text-[15px] min-[390px]:text-base min-[420px]:text-lg 2xl:text-xl font-bold text-off-black tracking-tight whitespace-nowrap group-hover:text-vibrant-pink transition-colors duration-300"
                         >The Latina Sweat Project</span
                     >
                 </a>
@@ -300,7 +300,7 @@ const bannerHref = statusBanner.href.startsWith("/")
             </div>
 
             {/* Mobile Menu Button */}
-            <div class="xl:hidden flex items-center gap-4">
+            <div class="xl:hidden flex items-center gap-2 min-[420px]:gap-4">
                 <a
                     href={`${base}schedule`}
                     class="btn inline-flex items-center h-9 rounded-full bg-vibrant-pink px-4 text-xs font-bold text-white shadow-sm max-[374px]:hidden sm:hidden"

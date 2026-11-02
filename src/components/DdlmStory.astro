@@ -12,9 +12,11 @@
 //   Phone (below sm): every frame is its own full-bleed block in row order.
 //     Landscapes 3:2, portraits 4:5 with a per-frame `phoneY` object-position.
 //   sm and up: rows are justified. Each frame's flex-grow is its aspect ratio
-//     and it keeps that ratio, so every frame in a row shares a height and
-//     nothing is cropped.
-//     "full": one landscape across the row at 1.6.
+//     and it keeps that ratio, so every frame in a row shares a height. A frame
+//     may set `crop` (its aspect here) and `y` (its object-position) to trim
+//     empty sky or tent ceiling; a landscape's crop carries to phones, capped
+//     at 1.75 so it never reads as a strip.
+//     "full": one landscape across the row at 1.85, or at its own `crop`.
 //     "grid" (the making row): 2 by 2 on phones, 4 across above, 3:4 cells.
 //
 // Every image is a [data-dl-photo] button. DdlmRecapLightbox (outside <main>)
@@ -41,6 +43,8 @@ interface Frame {
   id?: string;
   alt?: string;
   phoneY?: number;
+  crop?: number;
+  y?: number;
 }
 interface Row {
   layout?: "justified" | "full" | "grid";
@@ -63,6 +67,7 @@ const { moments, set, title } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const storyBase = `${base}images/ddlm/recap/story/`;
 const LANDSCAPE = 1.5;
+const FULL = 1.85;
 const PORTRAIT = 2 / 3;
 // The row's inner width at full size (the 1280 frame minus its gutters), and
 // the gap between frames there.
@@ -81,10 +86,12 @@ const flickrFrame = (frame: Frame, row: any) => {
     srcset: `${storyBase}${id}-800.webp ${portrait ? 533 : 800}w, ${storyBase}${id}-1600.webp ${portrait ? 1067 : 1600}w`,
     width: portrait ? 1067 : 1600,
     height: portrait ? 1600 : 1067,
-    ar: portrait ? PORTRAIT : LANDSCAPE,
+    ar: frame.crop ?? (portrait ? PORTRAIT : LANDSCAPE),
+    phoneAr: portrait ? "4 / 5" : frame.crop ? String(Math.min(frame.crop, 1.75)) : "3 / 2",
     portrait,
     alt: frame.alt,
-    phoneY: frame.phoneY ?? 50,
+    phoneY: frame.phoneY ?? frame.y ?? 50,
+    y: frame.y ?? 50,
     attrs: { "data-stem": row.f, "data-base": row.t },
   };
 };
@@ -102,6 +109,7 @@ const resolve = (frame: Frame) => {
       portrait: true,
       alt: frame.alt,
       phoneY: 50,
+      y: 50,
       attrs: { "data-set": "local", "data-id": row.id },
     };
   }
@@ -128,6 +136,7 @@ const resolve = (frame: Frame) => {
       portrait: row.o === "p",
       alt: row.alt,
       phoneY: 50,
+      y: 50,
       attrs: { "data-full": `${name}-1080.webp`, "data-fallback": `${name}-540.webp` },
     };
   }
@@ -160,6 +169,7 @@ const items = moments.map((moment) => ({
     if (layout === "full" && (frames.length > 1 || frames[0].portrait)) {
       throw new Error(`DdlmStory: a "full" row takes one landscape frame ("${title}")`);
     }
+    if (layout === "full" && frames[0].ar === LANDSCAPE) frames[0].ar = FULL;
     const sum = frames.reduce((acc, f) => acc + f.ar, 0);
     return {
       layout,
@@ -167,7 +177,7 @@ const items = moments.map((moment) => ({
         ...f,
         sizes: f.srcset ? sizesFor(f.ar, sum) : undefined,
         // Portraits are 4:5 on phones, landscapes 3:2 (or their own shape).
-        phoneAr: f.portrait ? "4 / 5" : f.ar === LANDSCAPE ? "3 / 2" : String(f.ar),
+        phoneAr: f.phoneAr ?? (f.portrait ? "4 / 5" : String(f.ar)),
       })),
     };
   }),
@@ -200,7 +210,7 @@ const items = moments.map((moment) => ({
               data-dl-title={title}
             >
               {row.frames.map((f) => (
-                <div class="ds-cell" data-dl-cell style={`--ar:${f.ar};--phone-ar:${f.phoneAr};--phone-y:${f.phoneY}%`}>
+                <div class="ds-cell" data-dl-cell style={`--ar:${f.ar};--phone-ar:${f.phoneAr};--phone-y:${f.phoneY}%;--y:${f.y}%`}>
                   <button type="button" class="ds-photo" data-dl-photo {...f.attrs} aria-label="View large">
                     <img
                       src={f.src}
@@ -229,12 +239,12 @@ const items = moments.map((moment) => ({
     margin-top: 40px;
   }
   .ds-caption {
-    max-width: 36rem;
     margin-bottom: 12px;
     padding: 0 16px;
     font-size: 1.125rem;
     font-weight: 400;
     line-height: 1.35;
+    text-wrap: pretty;
   }
   .ds-caption b {
     font-weight: 700;
@@ -310,17 +320,13 @@ const items = moments.map((moment) => ({
     .ds-row-justified .ds-cell {
       flex: var(--ar) 1 0%;
     }
-    .ds-row-justified .ds-photo {
+    .ds-row-justified .ds-photo,
+    .ds-row-full .ds-photo {
       aspect-ratio: var(--ar);
     }
-    .ds-row-justified .ds-photo img {
-      object-position: 50% 50%;
-    }
-    .ds-row-full .ds-photo {
-      aspect-ratio: 1.6;
-    }
+    .ds-row-justified .ds-photo img,
     .ds-row-full .ds-photo img {
-      object-position: 50% 50%;
+      object-position: 50% var(--y, 50%);
     }
     .ds-row-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -335,7 +341,7 @@ const items = moments.map((moment) => ({
     }
     .ds-caption {
       margin-bottom: 16px;
-      font-size: 1.25rem;
+      font-size: 1.375rem;
     }
   }
 </style>

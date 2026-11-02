@@ -56,8 +56,6 @@ const linkClass =
   "py-3.5 font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 const makingMoment = {
-  time: ddlmRecap.making.captionTime,
-  text: ddlmRecap.making.captionText,
   rows: [
     {
       layout: "grid",
@@ -100,15 +98,15 @@ const makingMoment = {
           sizes="100vw"
           alt={ddlmRecap.heroAlt}
           width="2400"
-          height="1600"
+          height="1739"
           fetchpriority="high"
           decoding="async"
-          class="ddlm-hero-photo absolute inset-0 h-full w-full object-cover object-[50%_62%]"
+          class="ddlm-hero-photo absolute inset-0 h-full w-full object-cover object-[50%_66%]"
         />
         <DdlmPicado ground="#E9DCBF" cord="rgb(0 0 0 / 0.3)" sway class="z-10" />
       </div>
 
-      <div class="mx-auto max-w-[80rem] px-4 pb-10 pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_30rem] lg:items-start lg:gap-x-12 lg:px-8 lg:pb-14 lg:pt-8">
+      <div class="mx-auto max-w-[80rem] px-4 pb-10 pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_30rem] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:px-8 lg:pb-14 lg:pt-8">
         <div>
           <h1 class="ddlm-rise dr-h1" style="--i: 0;">{ddlmRecap.heading}</h1>
           <p class="ddlm-rise dr-deck" style="--i: 1;">
@@ -116,31 +114,32 @@ const makingMoment = {
             <span class="dr-deck-date block">{ddlmRecap.dateLine}</span>
           </p>
         </div>
-        <div class="mt-7 lg:mt-0">
-          <div class="ddlm-rise" style="--i: 2;">
-            <DdlmSurveyCta variant="hero" context="ddlm_recap_hero" />
-          </div>
-          <p class="ddlm-rise mt-5 text-sm font-medium text-white/70" style="--i: 3;">
-            Saturday photos by{" "}
-            <a
-              href={saturdayAlbum.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="-my-3 inline-block py-3 underline decoration-[#FF7A1A] underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              >{saturdayAlbum.photographer.name}</a
-            >
-          </p>
+        <div class="ddlm-rise mt-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0" style="--i: 2;">
+          <DdlmSurveyCta variant="hero" context="ddlm_recap_hero" />
         </div>
+        <p class="ddlm-rise mt-8 text-sm font-medium text-white/70 lg:col-start-1 lg:row-start-2 lg:mt-0 lg:self-end" style="--i: 3;">
+          Saturday photos by{" "}
+          <a
+            href={saturdayAlbum.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="-my-3 inline-block py-3 underline decoration-[#FF7A1A] underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >{saturdayAlbum.photographer.name}</a
+          >
+        </p>
       </div>
     </section>
 
     {/* ===================== THREE NIGHTS BEFORE ===================== */}
     <section id="making" class="scroll-mt-28 bg-white py-14 lg:py-24">
-      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
-        <h2 class="dr-h2">{ddlmRecap.making.heading}</h2>
-        <p class="dr-date text-off-black/70">{ddlmRecap.making.dateLine}</p>
+      <div class="dr-split mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <div>
+          <h2 class="dr-h2">{ddlmRecap.making.heading}</h2>
+          <p class="dr-date text-off-black/70">{ddlmRecap.making.dateLine}</p>
+        </div>
+        <p class="dr-body">{ddlmRecap.making.captionText}</p>
       </div>
-      <div class="mx-auto mt-8 max-w-[80rem] sm:px-6 lg:px-8">
+      <div class="mx-auto mt-8 max-w-[80rem] sm:px-6 lg:mt-12 lg:px-8">
         <DdlmStory set="making" moments={[makingMoment]} title={ddlmRecap.making.dateLine} />
       </div>
     </section>
@@ -168,10 +167,12 @@ const makingMoment = {
       id="sunday"
       class="relative scroll-mt-28 overflow-hidden bg-black pb-28 pt-[72px] text-white lg:pb-40 lg:pt-28"
     >
-      <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
-        <h2 class="dr-h2">{ddlmRecap.sunday.heading}</h2>
-        <p class="dr-date text-white/75">{ddlmRecap.sunday.dateLine}</p>
-        <p class="dr-body mt-6 text-white/85">{ddlmRecap.sunday.body}</p>
+      <div class="dr-split mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
+        <div>
+          <h2 class="dr-h2">{ddlmRecap.sunday.heading}</h2>
+          <p class="dr-date text-white/75">{ddlmRecap.sunday.dateLine}</p>
+        </div>
+        <p class="dr-body text-white/85">{ddlmRecap.sunday.body}</p>
       </div>
       <div class="mx-auto mt-10 max-w-[80rem] sm:px-6 lg:mt-14 lg:px-8">
         <DdlmStory
@@ -180,19 +181,21 @@ const makingMoment = {
           title={ddlmRecap.sunday.heading}
         />
       </div>
-      <DdlmVeladoras ground="#000000" phone="full" />
+      <DdlmVeladoras ground="#000000" phone="full" scale={1.5} />
     </section>
 
     {/* ========================== THANK YOU ========================== */}
     <section id="gracias" class="scroll-mt-28 bg-black py-20 text-white lg:py-[120px]">
       <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
-        <div class="max-w-[40rem]">
-          <h2 class="dr-h2">{ddlmRecap.thankYou.heading}</h2>
-          <p class="dr-pull mt-5">{ddlmRecap.thankYou.pullLine}</p>
-          <div class="dr-body mt-6 space-y-4 text-white/85">
-            {ddlmRecap.thankYou.body.map((para) => <p>{para}</p>)}
+        <h2 class="dr-h2">{ddlmRecap.thankYou.heading}</h2>
+        <div class="dr-split mt-5 lg:mt-8">
+          <p class="dr-pull">{ddlmRecap.thankYou.pullLine}</p>
+          <div>
+            <div class="dr-body space-y-4 text-white/85">
+              {ddlmRecap.thankYou.body.map((para) => <p>{para}</p>)}
+            </div>
+            <p class="mt-6 text-[1.125rem] font-semibold">{ddlmRecap.thankYou.signoff}</p>
           </div>
-          <p class="mt-6 text-[1.125rem] font-semibold">{ddlmRecap.thankYou.signoff}</p>
         </div>
       </div>
     </section>
@@ -233,17 +236,17 @@ const makingMoment = {
         a new tab; href null renders a span; logo null renders the name as text. */}
     <section id="supporters" class="scroll-mt-28 bg-white py-16 lg:py-[104px]">
       <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
-        <div class="max-w-[48rem]">
+        <div class="dr-split">
           <h2 class="dr-h2">{ddlmRecap.supporters.heading}</h2>
-          <p class="dr-body mt-5 !max-w-none text-off-black/70">{ddlmRecap.supporters.line}</p>
+          <p class="dr-body text-off-black/70">{ddlmRecap.supporters.line}</p>
         </div>
         <div class="mt-10 space-y-10 lg:mt-14 lg:space-y-12">
           {ddlmWeekend.supporters.map((group) => (
             <div>
               <p class="text-base font-semibold text-off-black">{group.label}</p>
-              <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-8 md:grid-cols-4">
+              <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-8 md:grid-cols-4 lg:gap-x-12">
                 {group.items.map((s) => (
-                  <li class="flex h-16 items-center justify-start sm:h-20">
+                  <li class:list={["flex items-center justify-start", group.tall ? "h-24 sm:h-28" : "h-16 sm:h-20"]}>
                     {!s.logo ? (
                       <span class="text-[18px] font-bold leading-tight text-off-black">{s.name}</span>
                     ) : s.href ? (
@@ -293,34 +296,38 @@ const makingMoment = {
         Sunday wall, credit and count arrive on their own with the album. */}
     <section id="photos" class="scroll-mt-28 bg-black pb-12 pt-[72px] text-white lg:pb-16 lg:pt-28">
       <div class="mx-auto max-w-[80rem] px-4 sm:px-6 lg:px-8">
-        <h2 class="dr-h2">{ddlmRecap.photos.heading}</h2>
-        <p class="dr-body mt-3 text-white/80">{ddlmPhotoCount} photos from the weekend.</p>
-        <div class="mt-3 space-y-1 text-[0.9375rem] leading-relaxed text-white/75">
-          <p>
-            Saturday photos by{" "}
-            <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.name}</a>{" "}
-            (<a href={saturdayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.instagram}</a>).{" "}
-            <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
-          </p>
-          <p>Wednesday photos by the LSP team.</p>
-          <p>
-            Sunday photos from the Office of the Mayor{" "}
-            (<a href={mayor.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{mayor.instagram}</a>).
-          </p>
-          {ddlmHasSundayPhotos && (
+        <div class="dr-split">
+          <div>
+            <h2 class="dr-h2">{ddlmRecap.photos.heading}</h2>
+            <p class="dr-date text-white/75">{ddlmPhotoCount} photos from the weekend.</p>
+          </div>
+          <div class="space-y-1 text-[0.9375rem] leading-relaxed text-white/75 lg:text-base">
             <p>
-              Sunday photos by{" "}
-              <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer?.name}</a>
-              {sundayAlbum.photographer?.instagram && (
-                <>
-                  {" "}
-                  (<a href={sundayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer.instagram}</a>)
-                </>
-              )}
-              .{" "}
-              <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
+              Saturday photos by{" "}
+              <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.name}</a>{" "}
+              (<a href={saturdayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{saturdayAlbum.photographer.instagram}</a>).{" "}
+              <a href={saturdayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
             </p>
-          )}
+            <p>Wednesday photos by the LSP team.</p>
+            <p>
+              Sunday photos from the Office of the Mayor{" "}
+              (<a href={mayor.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{mayor.instagram}</a>).
+            </p>
+            {ddlmHasSundayPhotos && (
+              <p>
+                Sunday photos by{" "}
+                <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer?.name}</a>
+                {sundayAlbum.photographer?.instagram && (
+                  <>
+                    {" "}
+                    (<a href={sundayAlbum.photographer.instagramUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>{sundayAlbum.photographer.instagram}</a>)
+                  </>
+                )}
+                .{" "}
+                <a href={sundayAlbum.url} target="_blank" rel="noopener noreferrer" class={linkClass}>See the album on Flickr</a>.
+              </p>
+            )}
+          </div>
         </div>
         <div class="mt-10 lg:mt-14">
           <DdlmRecapAlbum />
@@ -381,6 +388,13 @@ const makingMoment = {
     line-height: 1.2;
     color: #fff;
   }
+  /* One grid for every block of text: stacked on phones; from lg, a title on
+     the left and its text from the page's midline, the same two columns as the
+     program and the third column of the supporter logos. */
+  .dr-split {
+    display: grid;
+    gap: 1.25rem;
+  }
   @media (min-width: 1024px) {
     .dr-h1 {
       font-size: 4.5rem;
@@ -398,8 +412,12 @@ const makingMoment = {
       font-size: 1.125rem;
     }
     .dr-pull {
-      max-width: 24ch;
       font-size: 2.5rem;
+    }
+    .dr-split {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 3rem;
+      align-items: start;
     }
     /* The photo is capped so the survey stays in the first screen. */
     .ddlm-hero-media {

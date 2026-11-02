@@ -61,7 +61,6 @@ export const ddlmRecap = {
   making: {
     heading: "Three nights before",
     dateLine: "Wednesday, October 28",
-    captionTime: "Wednesday, October 28.",
     captionText:
       "Paint, paper and marigolds: the calaveras and crosses were made by hand. Phone photos from the team.",
   },
@@ -136,6 +135,8 @@ export const ddlmRecap = {
 export const ddlmSurvey = {
   url: "https://forms.cloud.microsoft/pages/responsepage.aspx?id=_0n0vIiuoUOlaC-BT6ket-YzGzMkaeJEvjvZ0LuQOb5UMk5KR0tUTDRHU1NKTTVNN1A1NzVWOFhCOS4u&origin=QRCode&route=shorturl",
   heading: "Día de los Muertos: share your feedback",
+  // Under the recap's own "Día de los Muertos" h1, the name is already there.
+  headingHero: "Share your feedback",
   body: "If you joined us at La Villita Park on Saturday or Sunday, the funder behind the weekend has a short survey for you. It takes 2 to 3 minutes and it is anonymous. Funding is how events this size happen, and this survey is how the funder sees what the weekend meant.",
   button: "Take the survey",
   note: 'On the form, choose South Lawndale, then The Latina Sweat Project presents "Fall Sweat Festival". That is how the grant lists our weekend, so the form will not say Día de los Muertos.',
@@ -158,8 +159,9 @@ export const ddlmSurvey = {
 // frames; `layout` is "justified" (default) or "full". Every row fills the
 // page's width and the moment's caption prints once, above its first row: no
 // side captions, no row with empty space beside it. `phoneY` is the
-// object-position y for portraits on phones (4:5 crop). `alt` describes the
-// scene and never names anyone.
+// object-position y for portraits on phones (4:5 crop); `y` is the same above
+// phones, and `crop` an aspect that trims empty sky or tent ceiling (see
+// DdlmStory.astro). `alt` describes the scene and never names anyone.
 //
 // Rules: no child in a lead position; the kids yoga frames show children from
 // behind or small in a wide frame, and are never "full". Ofrendas carry
@@ -167,12 +169,12 @@ export const ddlmSurvey = {
 // crops in on one. Sunday frames are `{ sun: "<stem>" }` from ddlmSundayPhotos; DdlmStory.astro
 // fails the build if a Sunday row names a Saturday stem.
 export const ddlmStory = {
-  making: ["IMG_1156", "IMG_1146", "IMG_1155", "IMG_1138"],
+  making: ["IMG_1156", "IMG_1146", "IMG_1155", "IMG_1126"],
   makingAlt: {
     IMG_1156: "A gold calavera with marigold eyes.",
     IMG_1146: "A red cross with a heart, held up.",
     IMG_1155: "Orange and white calaveras on a chair.",
-    IMG_1138: "A green cross with a yellow flower.",
+    IMG_1126: "Two people painting at a table covered in paper crosses, paint and marigolds.",
   },
   saturday: [
     {
@@ -188,7 +190,7 @@ export const ddlmStory = {
         {
           frames: [
             { t: "65535/55623993918_47231b697b", alt: "A bunch of marigolds, close up." },
-            { t: "65535/55624277175_661a3d0a73", phoneY: 50, alt: "Marigolds laid on the grass in the shape of a cross, with candles around them." },
+            { t: "65535/55624277175_661a3d0a73", crop: 0.8, y: 0, phoneY: 0, alt: "Marigolds laid on the grass in the shape of a cross, with candles around them." },
           ],
         },
       ],
@@ -199,8 +201,8 @@ export const ddlmStory = {
       rows: [
         {
           frames: [
-            { t: "65535/55624065799_e48302780c", alt: "The kids yoga class spread across the grass under the tent, mats and families seen from the side." },
-            { t: "65535/55622856732_867ce6b02c", alt: "The kids yoga class seen from behind, facing the leaders at the front, marigold strands hanging from the tent." },
+            { t: "65535/55624065799_e48302780c", crop: 2.4, y: 100, alt: "The kids yoga class spread across the grass under the tent, mats and families seen from the side." },
+            { t: "65535/55622856732_867ce6b02c", crop: 1.8, y: 70, alt: "The kids yoga class seen from behind, facing the leaders at the front, marigold strands hanging from the tent." },
           ],
         },
       ],
@@ -212,25 +214,25 @@ export const ddlmStory = {
         {
           layout: "full",
           frames: [
-            { t: "65535/55624280325_2d20225f4f", alt: "Trumpet and clarinet players from the band on the grass outside the tent." },
+            { t: "65535/55624280325_2d20225f4f", crop: 2.25, y: 100, alt: "Trumpet and clarinet players from the band on the grass outside the tent." },
           ],
         },
         {
           layout: "full",
           frames: [
-            { t: "65535/55623990868_af1f7cc8f7", alt: "The whole band standing under the big tent." },
+            { t: "65535/55623990868_af1f7cc8f7", crop: 2.25, y: 82, alt: "The whole band standing under the big tent." },
           ],
         },
       ],
     },
     {
       time: "11:00 AM to 12:30 PM",
-      text: "Farmers market and trick or treat, warm meals from OrganicLife, fresh fruits and vegetables from Sharing Excess.",
+      text: "Farmers market and trick or treat, warm meals from OrganicLife, produce from Sharing Excess.",
       rows: [
         {
           layout: "full",
           frames: [
-            { t: "65535/55623993738_fd47afe43f", alt: "The produce line under the canopies, a queue along the boxes." },
+            { t: "65535/55623993738_fd47afe43f", y: 85, alt: "The produce line under the canopies, a queue along the boxes." },
           ],
         },
         {
@@ -249,7 +251,7 @@ export const ddlmStory = {
         {
           layout: "full",
           frames: [
-            { t: "65535/55623852581_769b00f5d9", alt: "Five catrinas in the tent facing the camera, papel picado above them." },
+            { t: "65535/55623990598_9f924b3ede", crop: 2.25, y: 83, alt: "Catrinas and friends in street clothes standing together under the tent, the ofrenda behind them." },
           ],
         },
         {
@@ -273,7 +275,7 @@ export const ddlmStory = {
         {
           layout: "full",
           frames: [
-            { t: "65535/55623850661_2ecae643a1", alt: "The whole tent: people on mats, the crowd at the back, the altar table in the foreground." },
+            { t: "65535/55623850661_2ecae643a1", y: 100, alt: "The whole tent: people on mats, the crowd at the back, the altar table in the foreground." },
           ],
         },
         {

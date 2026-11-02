@@ -167,7 +167,7 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
           data-conversion-context="home_hero_announcement"
         >
           <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
-          <span>Día de los Muertos · thank you, La Villita · see the photos</span>
+          <span>Día de los Muertos photos</span>
           <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
@@ -225,8 +225,15 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
           <div class="lg:col-span-3">
-            <p class="text-[0.9375rem] font-bold text-white/80">{ddlmRecap.dateLine}</p>
-            <h2 class="mt-3 text-[3rem] font-extrabold leading-[0.98] lg:text-[4rem]">{ddlmRecap.thankYou.heading}</h2>
+            <p class="text-[0.9375rem] font-bold text-white/80">
+              {ddlmRecap.dateLine.split(" · ").map((part, i) => (
+                <>
+                  {i > 0 && " · "}
+                  <span class="whitespace-nowrap">{part}</span>
+                </>
+              ))}
+            </p>
+            <h2 class="mt-3 text-[3rem] font-extrabold leading-[0.98] text-balance lg:text-[4rem]">{ddlmRecap.thankYou.heading}</h2>
             <p class="mt-5 max-w-[36rem] text-[1.0625rem] leading-relaxed text-white/80">
               Día de los Muertos weekend, in photos: the ofrendas, kids yoga, Banda Cerro Azul, the farmers market, and Sunday evening at the community altars.
             </p>

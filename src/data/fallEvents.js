@@ -479,6 +479,8 @@ export const ddlmWeekend = {
     {
       // English first (Fez's standing rule), Spanish as the accent.
       label: "Music and dance",
+      // Round and script marks: they need more height to match the wide logos.
+      tall: true,
       labelEs: "música y danza",
       caption: null,
       items: [
