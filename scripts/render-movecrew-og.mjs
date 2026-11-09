@@ -139,7 +139,7 @@ async function compose(W,H,L){
   </defs>${s}</svg>`;
 }
 
-const SUB = ["Our next chapter starts this week.", "Pick an hour, Oct 26 to 30."];
+const SUB = ["Clean and organize before opening week.", "Tuesday, Nov 10, 10 am to 3 pm."];
 const EXT = "muralpark-1.jpg", INT = "muralpark-2.jpg", LOUNGE = "muralpark-3.jpg";
 
 // Note: librsvg (sharp) does not see the Condensed face inside the system .ttc, so this stack
@@ -147,7 +147,7 @@ const EXT = "muralpark-1.jpg", INT = "muralpark-2.jpg", LOUNGE = "muralpark-3.jp
 const og = await compose(1200, 630, {
   logo: { x: 92, y: 74, r: 34 },
   eyebrow: { x: 142, y: 82, s: 21, anchor: "start" },
-  head: { lines: ["HELP LSP", "MOVE INTO", "MURAL PARK"], x: 58, y: 192, s: 74, lh: 0.97, anchor: "start", rot: 0 },
+  head: { lines: ["HELP LSP", "SET UP", "MURAL PARK"], x: 58, y: 192, s: 74, lh: 0.97, anchor: "start", rot: 0 },
   sub: { lines: SUB, x: 61, y: 416, s: 27, anchor: "start" },
   url: { x: 58, y: 486, s: 22 },
   prints: [
@@ -155,12 +155,12 @@ const og = await compose(1200, 630, {
     { file: EXT,    cx: 900, cy: 205, w: 384, h: 288, rot: 3,  border: 13, tapes: ["tl", "tr"] },
     { file: INT,    cx: 1020, cy: 470, w: 280, h: 210, rot: -3, border: 11, tapes: ["br"] },
   ],
-  stamp: [562, 160, 196, 66, -8, ["THIS WEEK"], 32],
+  stamp: [562, 160, 150, 66, -8, ["NOV 10"], 32],
 });
 const square = await compose(1080, 1080, {
   logo: { x: 96, y: 92, r: 38 },
   eyebrow: { x: 150, y: 101, s: 23, anchor: "start" },
-  head: { lines: ["HELP LSP", "MOVE INTO", "MURAL PARK"], x: 62, y: 236, s: 100, lh: 0.97, anchor: "start", rot: 0 },
+  head: { lines: ["HELP LSP", "SET UP", "MURAL PARK"], x: 62, y: 236, s: 100, lh: 0.97, anchor: "start", rot: 0 },
   sub: { lines: SUB, x: 65, y: 918, s: 32, anchor: "start" },
   url: { x: 62, y: 975, s: 26 },
   prints: [ // exterior drawn last so the skyline stays visible
@@ -168,12 +168,12 @@ const square = await compose(1080, 1080, {
     { file: INT,    cx: 865, cy: 720, w: 320, h: 240, rot: -3, border: 13, tapes: ["tr", "br"] },
     { file: EXT,    cx: 560, cy: 650, w: 420, h: 315, rot: 3,  border: 15, tapes: ["tc"] },
   ],
-  stamp: [800, 205, 236, 80, -7, ["THIS WEEK"], 38],
+  stamp: [800, 205, 184, 80, -7, ["NOV 10"], 38],
 });
 const story = await compose(1080, 1920, {
   logo: { x: 540, y: 300, r: 46 },
   eyebrow: { x: 540, y: 392, s: 26, anchor: "middle" },
-  head: { lines: ["HELP LSP", "MOVE INTO", "MURAL PARK"], x: 540, y: 520, s: 128, lh: 0.95, anchor: "middle", rot: -2 },
+  head: { lines: ["HELP LSP", "SET UP", "MURAL PARK"], x: 540, y: 520, s: 128, lh: 0.95, anchor: "middle", rot: -2 },
   sub: { lines: SUB, x: 540, y: 1508, s: 36, anchor: "middle" },
   url: { x: 540, y: 1570, s: 26, anchor: "middle" },
   prints: [
@@ -181,7 +181,7 @@ const story = await compose(1080, 1920, {
     { file: EXT,    cx: 560, cy: 1150, w: 500, h: 375, rot: 3, border: 17, tapes: ["tl", "tr"] },
     { file: INT,    cx: 800, cy: 1310, w: 330, h: 248, rot: -3, border: 14, tapes: ["br"] },
   ],
-  stamp: [540, 850, 300, 86, -4, ["THIS WEEK"], 42],
+  stamp: [540, 850, 232, 86, -4, ["NOV 10"], 42],
 });
 
 for (const [svg, w, h, name] of [[og,1200,630,"movecrew-og"],[square,1080,1080,"movecrew-square"],[story,1080,1920,"movecrew-story"]]) {

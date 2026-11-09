@@ -2,10 +2,16 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 
-// Move crew sign-up: volunteers for the week LSP packs up the old studio
-// (16th & Morgan) and carries everything into the new home. Shared by
-// direct link only (noindex, not in nav/homepage/links), like /townhall.
-// Submissions POST to a hidden Google Form (CONFIG block in the script).
+// Move Crew sign-up, round two: set-up week. The first round (Oct 26 to
+// 30, evenings) carried everything from the old studio (16th & Morgan)
+// into Mural Park. This round cleans and organizes the new space before
+// the first week of classes (Monday, Nov 16): Tuesday, Nov 10, 10 am to
+// 3 pm, one-hour slots. Shared by direct link only (noindex, not in
+// nav/homepage/links), like /townhall. Submissions POST to a hidden
+// Google Form (CONFIG block in the script). Confirmation is automatic: an
+// Apps Script trigger on the response sheet emails each volunteer their
+// hours, the address, the plan, Vero's number and a calendar invite. See
+// marketing/movecrew-confirm/. More days can be added to DAYS later.
 //
 // Order is deliberate: hook + ask, facts, the form, then the story. The
 // ask has to land in the first screen.
@@ -19,25 +25,14 @@ import Header from "@/components/Header.astro";
 // the form exactly or Google drops the answer. The `short` text is only
 // what the pill shows.
 // `date` lets the browser hide days that have already passed (Chicago time).
-const DAYS = [
-    { name: "mon", label: "Monday 10/26", date: "2026-10-26" },
-    { name: "tue", label: "Tuesday 10/27", date: "2026-10-27" },
-    { name: "wed", label: "Wednesday 10/28", date: "2026-10-28" },
-    { name: "thu", label: "Thursday 10/29", date: "2026-10-29" },
-    { name: "fri", label: "Friday 10/30", date: "2026-10-30" },
-];
+// Each `name` needs a matching key in ENTRY_IDS and DAY_KEYS (script).
+const DAYS = [{ name: "tue", label: "Tuesday 11/10", date: "2026-11-10" }];
 const SLOTS = [
-    { value: "5:30pm-6:00pm", short: "5:30-6" },
-    { value: "6:00pm-7:00pm", short: "6-7" },
-    { value: "7:00pm-8:00pm", short: "7-8" },
-    { value: "8:00pm-9:00pm", short: "8-9" },
-];
-const BRING_OPTIONS = [
-    "A car",
-    "A truck or van",
-    "A dolly or hand truck",
-    "Boxes or packing supplies",
-    "Just me and my energy",
+    { value: "10:00am-11:00am", short: "10-11" },
+    { value: "11:00am-12:00pm", short: "11-12" },
+    { value: "12:00pm-1:00pm", short: "12-1" },
+    { value: "1:00pm-2:00pm", short: "1-2" },
+    { value: "2:00pm-3:00pm", short: "2-3" },
 ];
 
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
@@ -48,10 +43,10 @@ const inputClass =
 
 <Layout
     title="Move Crew | The Latina Sweat Project"
-    description="Help The Latina Sweat Project pack up the old studio and move into Mural Park, our new home in Pilsen, October 26 to 30. Pick an hour, bring a friend."
+    description="Help The Latina Sweat Project clean and organize Mural Park, our new home in Pilsen, before our first week of classes. Tuesday, November 10, 10 am to 3 pm. Pick an hour."
     robots="noindex, nofollow"
     socialImage="images/movecrew/movecrew-og.jpg"
-    socialImageAlt="Help LSP move into Mural Park. Our next chapter starts this week."
+    socialImageAlt="Help LSP get Mural Park ready. Our first week of classes starts Monday, November 16."
     socialImageWidth={1200}
     socialImageHeight={630}
     socialImageType="image/jpeg"
@@ -66,28 +61,29 @@ const inputClass =
             >
                 <div>
                     <p class="mc-muted text-xs font-bold uppercase tracking-[0.2em]">
-                        Our next chapter starts this week
+                        Opening week starts Monday, November 16
                     </p>
                     <h1
                         class="mt-4 max-w-xl text-[2.6rem] font-extrabold leading-[1.05] sm:text-6xl"
                     >
-                        Help us move LSP into Mural Park.
+                        Help us get Mural Park ready.
                     </h1>
                     <p class="mt-6 max-w-lg text-lg leading-relaxed sm:text-xl">
-                        Our studio ended faster than any of us wanted. This
-                        week we carry everything into Mural Park, our new home
-                        for a long-term residency in Pilsen, and we want you
-                        carrying a box with us.
+                        The boxes made it. Now the new space needs cleaning
+                        and organizing before our first week of classes at
+                        Mural Park, our new home for a long-term residency in
+                        Pilsen. Kathy and Rut will be there Tuesday from 10 am
+                        to 3 pm. Come for an hour, or stay the day.
                     </p>
                     <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                         <a
                             href="#signup"
                             class="mc-btn inline-block rounded-full px-7 py-3 text-base font-bold"
                         >
-                            Pick your shifts
+                            Pick your hours
                         </a>
                         <p class="mc-muted text-sm font-medium">
-                            Mon to Fri, Oct 26 to 30 · 5:30 to 9 pm · Pilsen
+                            Tuesday, Nov 10 · 10 am to 3 pm · Mural Park, Pilsen
                         </p>
                     </div>
                 </div>
@@ -133,7 +129,7 @@ const inputClass =
                                 <rect x="3" y="3" width="174" height="90" rx="12" fill="none" stroke="currentColor" stroke-width="4" />
                                 <rect x="10" y="10" width="160" height="76" rx="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.65" />
                                 <text x="90" y="46" text-anchor="middle" font-family="Rubik, sans-serif" font-size="22" font-weight="800" textLength="136" lengthAdjust="spacingAndGlyphs" fill="currentColor">MOVE CREW</text>
-                                <text x="90" y="71" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="700" textLength="96" lengthAdjust="spacing" fill="currentColor">OCT 26 - 30</text>
+                                <text x="90" y="71" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="700" textLength="60" lengthAdjust="spacing" fill="currentColor">NOV 10</text>
                             </svg>
                         </div>
                     </div>
@@ -155,15 +151,15 @@ const inputClass =
             >
                 <div class="mc-fact">
                     <dt class="mc-fact-label">When</dt>
-                    <dd>Mon to Fri, 5:30 to 9 pm. Pick any hour.</dd>
+                    <dd>Tuesday, Nov 10, 10 am to 3 pm. Pick any hour.</dd>
                 </div>
                 <div class="mc-fact">
                     <dt class="mc-fact-label">Where</dt>
-                    <dd>Mural Park, Pilsen. We email the address and plan.</dd>
+                    <dd>Mural Park, 924 W 19th&nbsp;Place, Pilsen.</dd>
                 </div>
                 <div class="mc-fact">
-                    <dt class="mc-fact-label">Bring</dt>
-                    <dd>Clothes you can move in, and a friend.</dd>
+                    <dt class="mc-fact-label">Wear</dt>
+                    <dd>Clothes you can clean in. Kathy and Rut will show you where to start.</dd>
                 </div>
             </dl>
         </section>
@@ -178,26 +174,21 @@ const inputClass =
             <div class="mx-auto max-w-2xl">
                 <div class="text-center">
                     <h2 class="text-3xl font-extrabold sm:text-4xl">
-                        Join the move crew
+                        Join the Move Crew
                     </h2>
                     <p class="mx-auto mt-3 max-w-md text-base leading-relaxed sm:text-lg">
-                        Pick the hours that work for you. It takes a minute.
+                        Pick the hours that work for you. Your confirmation
+                        and calendar invite arrive by email right away.
                     </p>
                 </div>
 
                 {/* What volunteering gets you: a real benefit, kept right
                     next to the ask. */}
-                <div class="mc-perks mt-8 grid rounded-md text-[0.95rem] leading-snug sm:grid-cols-2 sm:text-base">
+                <div class="mc-perks mt-8 rounded-md text-[0.95rem] leading-snug sm:text-base">
                     <p class="px-5 py-4 sm:px-6">
                         <strong>Your hours count.</strong> Every hour you
-                        volunteer this week counts toward the new volunteer
-                        membership program (4 volunteer hours) when
-                        memberships resume at Mural Park.
-                    </p>
-                    <p class="mc-perks-split px-5 py-4 sm:px-6">
-                        <strong>Instructors:</strong> volunteering this week
-                        boosts your priority for scheduling preferences in the
-                        new studio.
+                        volunteer counts toward the new volunteer membership
+                        program when memberships resume at Mural Park.
                     </p>
                 </div>
 
@@ -257,6 +248,9 @@ const inputClass =
                                     <label for="mc-email" class="block text-sm font-bold">
                                         Email <span class="mc-req">*</span>
                                     </label>
+                                    <p class="mc-muted mt-1 text-xs">
+                                        Your confirmation and calendar invite go here.
+                                    </p>
                                     <input
                                         id="mc-email"
                                         name="email"
@@ -273,7 +267,7 @@ const inputClass =
                                         Phone
                                     </label>
                                     <p class="mc-muted mt-1 text-xs">
-                                        Optional, so we can text you day-of details.
+                                        Optional, so Vero can text you day-of details.
                                     </p>
                                     <input
                                         id="mc-phone"
@@ -290,8 +284,8 @@ const inputClass =
                                     When can you help? <span class="mc-req">*</span>
                                 </legend>
                                 <p class="mc-muted mt-1 text-xs">
-                                    All times pm. Tap every slot that works,
-                                    any day or as many days as you like.
+                                    Tuesday, November 10, 10 am to 3 pm. Tap
+                                    every hour that works for you.
                                 </p>
                                 <div class="mt-4 space-y-4 sm:space-y-2.5">
                                     {DAYS.map((day) => (
@@ -304,7 +298,7 @@ const inputClass =
                                             <p class="text-sm font-bold" aria-hidden="true">
                                                 {day.label}
                                             </p>
-                                            <div class="mt-1.5 grid grid-cols-4 gap-1.5 sm:mt-0 sm:gap-2">
+                                            <div class="mt-1.5 grid grid-cols-3 gap-1.5 sm:mt-0 sm:grid-cols-5 sm:gap-2">
                                                 {SLOTS.map((slot) => (
                                                     <label class="mc-pill">
                                                         <input
@@ -328,30 +322,8 @@ const inputClass =
                                     class="mc-muted mt-4 text-sm font-medium"
                                     aria-live="polite"
                                 >
-                                    No slots picked yet.
+                                    No hours picked yet.
                                 </p>
-                            </fieldset>
-
-                            <fieldset>
-                                <legend class="block text-sm font-bold">
-                                    What can you bring?
-                                </legend>
-                                <p class="mc-muted mt-1 text-xs">
-                                    Optional. Pick any that apply.
-                                </p>
-                                <div class="mt-3 flex flex-wrap gap-2">
-                                    {BRING_OPTIONS.map((opt) => (
-                                        <label class="mc-pill mc-pill-wide">
-                                            <input
-                                                type="checkbox"
-                                                name="bring"
-                                                value={opt}
-                                                class="sr-only"
-                                            />
-                                            <span>{opt}</span>
-                                        </label>
-                                    ))}
-                                </div>
                             </fieldset>
 
                             <div>
@@ -359,8 +331,9 @@ const inputClass =
                                     Notes
                                 </label>
                                 <p class="mc-muted mt-1 text-xs">
-                                    Anything we should know? Lifting limits,
-                                    questions, a friend you're bringing...
+                                    Anything we should know? Questions, a
+                                    friend you're bringing, how long you can
+                                    stay...
                                 </p>
                                 <textarea
                                     id="mc-notes"
@@ -399,17 +372,18 @@ const inputClass =
                             You're on the crew.
                         </h2>
                         <p class="mx-auto mt-4 max-w-md text-base leading-relaxed sm:text-lg">
-                            We'll email <strong id="mc-success-email">you</strong>
-                            with the address and the plan for each shift you
-                            picked. Thank you for showing up for this
-                            community, again.
+                            Check your inbox: we just emailed
+                            <strong id="mc-success-email">you</strong> a
+                            confirmation with your hours, the address, the plan
+                            and a calendar invite. Vero's number for day-of
+                            questions is in there too.
                         </p>
                         <div class="mc-rule mx-auto my-8 max-w-xs"></div>
                         <p class="text-lg font-bold">One more favor: bring a friend.</p>
                         <p class="mx-auto mt-2 max-w-md text-base leading-relaxed">
-                            Every extra pair of hands means one less trip.
-                            Copy the link and send it to someone who'd carry
-                            a box with you.
+                            Every extra pair of hands gets the space ready
+                            faster. Copy the link and send it to someone who'd
+                            grab a broom with you.
                         </p>
                         <button
                             id="mc-copy"
@@ -449,9 +423,11 @@ const inputClass =
                             and you kept showing up.
                         </p>
                         <p>
-                            <strong>Now we carry it in.</strong> Every mat we
-                            move this week is one we'll roll out again at
-                            Mural Park when we reopen in early 2027.
+                            <strong>Now we open the doors.</strong> Our first
+                            week of classes at Mural Park starts Monday,
+                            November 16. Every shelf we set and every floor we
+                            sweep this week is for the first person who walks
+                            in.
                         </p>
                     </div>
 
@@ -630,15 +606,6 @@ const inputClass =
         border: 2px dashed rgb(58 40 23 / 0.55);
         background-color: rgb(255 246 230 / 0.22);
     }
-    .mc-perks-split {
-        border-top: 2px dashed rgb(58 40 23 / 0.35);
-    }
-    @media (min-width: 640px) {
-        .mc-perks-split {
-            border-top: 0;
-            border-left: 2px dashed rgb(58 40 23 / 0.35);
-        }
-    }
 
     /* Shipping label card. */
     .mc-label {
@@ -690,7 +657,7 @@ const inputClass =
         box-shadow: 0 0 0 3px rgb(192 57 43 / 0.25);
     }
 
-    /* Pill toggles (time slots + bring). Picked = solid ink with a tick. */
+    /* Pill toggles (time slots). Picked = solid ink with a tick. */
     .mc-pill {
         position: relative;
         display: flex;
@@ -711,10 +678,6 @@ const inputClass =
         cursor: pointer;
         user-select: none;
         transition: background-color 120ms, border-color 120ms, color 120ms;
-    }
-    .mc-pill-wide {
-        padding: 0.5rem 1rem;
-        white-space: normal;
     }
     .mc-pill:hover {
         border-color: var(--mc-ink);
@@ -749,8 +712,8 @@ const inputClass =
     // ============================================================
     // GOOGLE FORM CONFIG: replace these placeholders with the real
     // form ID and entry IDs once the Google Form is created.
-    // Checkbox questions (each day, bring) send one repeated
-    // entry.N param per checked option.
+    // Checkbox questions (each day) send one repeated entry.N param
+    // per checked option.
     // ============================================================
     const FORM_ACTION_URL =
         "https://docs.google.com/forms/d/e/1FAIpQLSf-jqUMnL5n9LurplCYKg9mul01mXjmTg5Ge6tmIqWq_3dVUw/formResponse";
@@ -758,17 +721,13 @@ const inputClass =
         fullName: "entry.239945294", // Full name (text)
         email: "entry.1232712061", // Email (text)
         phone: "entry.287230232", // Phone (text, optional)
-        mon: "entry.1036223949", // Monday 10/26 (checkboxes)
-        tue: "entry.465589199", // Tuesday 10/27 (checkboxes)
-        wed: "entry.178621119", // Wednesday 10/28 (checkboxes)
-        thu: "entry.700101030", // Thursday 10/29 (checkboxes)
-        fri: "entry.2024900781", // Friday 10/30 (checkboxes)
-        bring: "entry.1374542322", // What can you bring? (checkboxes, optional)
+        tue: "entry.1345462713", // Tuesday 11/10 (checkboxes): filled in after the form question is created
         notes: "entry.946313287", // Notes (paragraph, optional)
     };
     // ============================================================
 
-    const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri"] as const;
+    // Keep in sync with DAYS in the frontmatter (one key per day name).
+    const DAY_KEYS = ["tue"] as const;
     const NAME_STORAGE_KEY = "lsp_movecrew_name";
     const EMAIL_STORAGE_KEY = "lsp_movecrew_email";
     // Spam guard (no server, so no Turnstile): a honeypot field plus a
@@ -807,7 +766,7 @@ const inputClass =
     }
 
     // Hide days that are already over (Chicago time), so nobody signs up
-    // for a shift that happened yesterday. If the whole week is past, say so
+    // for a shift that happened yesterday. If every day is past, say so
     // and stop taking sign-ups.
     const todayChicago = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Chicago",
@@ -832,17 +791,17 @@ const inputClass =
     function updateCount() {
         if (weekOver) {
             countEl.textContent =
-                "This week's shifts have wrapped. Thank you to everyone who carried a box!";
+                "This round of shifts has wrapped. Thank you to everyone who helped get Mural Park ready!";
             submitBtn.disabled = true;
             return;
         }
         const n = slotInputs.filter((i) => i.checked).length;
         countEl.textContent =
             n === 0
-                ? "No slots picked yet."
+                ? "No hours picked yet."
                 : n === 1
-                  ? "1 slot picked. Thank you!"
-                  : `${n} slots picked. Thank you!`;
+                  ? "1 hour picked. Thank you!"
+                  : `${n} hours picked. Thank you!`;
     }
     slotInputs.forEach((i) => i.addEventListener("change", updateCount));
     updateCount();
@@ -881,7 +840,6 @@ const inputClass =
             key,
             slots: data.getAll(key).map(String),
         }));
-        const bring = data.getAll("bring").map(String);
         const notes = String(data.get("notes") || "").trim();
 
         if (!fullName) return showError("Please add your name.");
@@ -889,7 +847,7 @@ const inputClass =
             return showError("Please add a valid email address.");
         if (days.every((d) => d.slots.length === 0))
             return showError(
-                "Please pick at least one time slot you can help.",
+                "Please pick at least one hour you can help.",
             );
 
         submitBtn.disabled = true;
@@ -902,7 +860,6 @@ const inputClass =
         days.forEach((d) =>
             d.slots.forEach((s) => params.append(ENTRY_IDS[d.key], s)),
         );
-        bring.forEach((b) => params.append(ENTRY_IDS.bring, b));
         if (notes) params.set(ENTRY_IDS.notes, notes);
 
         try {
