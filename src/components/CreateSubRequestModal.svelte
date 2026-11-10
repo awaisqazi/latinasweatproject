@@ -26,7 +26,7 @@
     let timeInput = ""; // User-entered start time (flexible format)
     let endTimeInput = ""; // User-entered end time (coordinator only)
     let duration = 60;
-    let location = "949 W 16th St, Chicago, IL 60608";
+    let location = "Mural Park, 924 W 19th Place, Chicago, IL";
     let notes = "";
 
     // Confirmation step state
@@ -208,7 +208,7 @@
         timeInput = "";
         endTimeInput = "";
         duration = 60;
-        location = "949 W 16th St, Chicago, IL 60608";
+        location = "Mural Park, 924 W 19th Place, Chicago, IL";
         notes = "";
         showConfirmation = false;
     }

@@ -428,7 +428,7 @@
                 type="text"
                 class="input"
                 bind:value={locationDraft}
-                placeholder="949 W 16th St, Chicago"
+                placeholder="924 W 19th Place, Chicago"
                 disabled={isSaving}
                 onblur={saveDetails}
               />

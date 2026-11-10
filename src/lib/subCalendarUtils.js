@@ -43,7 +43,7 @@ export function generateSubCalendarLink(request) {
     `Substituting for ${request.requestedBy?.name || "Instructor"}. ${request.notes || ""}`,
   );
   const location = encodeURIComponent(
-    request.location || "949 W 16th St, Chicago, IL 60608",
+    request.location || "Mural Park, 924 W 19th Place, Chicago, IL",
   );
 
   const start = formatFloating(request.date);
@@ -63,7 +63,7 @@ export function generateSubICSFile(request) {
       ? "Coordinator Shift Coverage - Latina Sweat Project"
       : `Sub: ${request.className} - Latina Sweat Project`;
   const description = `Substituting for ${request.requestedBy?.name || "Instructor"}. ${request.notes || ""}`;
-  const location = request.location || "949 W 16th St, Chicago, IL 60608";
+  const location = request.location || "Mural Park, 924 W 19th Place, Chicago, IL";
 
   const start = formatFloating(request.date);
   const endDate = computeEndDate(request);

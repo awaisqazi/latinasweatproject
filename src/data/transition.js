@@ -40,6 +40,12 @@ export const showMarianaSchedule = true;
 // them always shows what is actually for sale. Set to true to show them.
 export const showStudioPriceCards = false;
 
+// STALE SINCE NOV 9, 2026: the copy below describes the fall 2026 pause
+// (16th Street paused, booking closed, "opening early 2027", "permanent
+// home of our own"). None of it renders while showMarianaSchedule is true.
+// Classes resume Mon Nov 16, 2026 at Mural Park, 924 W 19th Place (a
+// long-term residency, never "permanent"). Rewrite this copy before ever
+// flipping the toggle back to false.
 export const studioTransition = {
   eyebrow: "A new chapter · Un nuevo capítulo",
   heading: "Our studio is paused. Our community keeps moving.",

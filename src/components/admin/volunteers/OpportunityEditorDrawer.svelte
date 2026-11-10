@@ -227,7 +227,7 @@
             id="opportunity-location"
             type="text"
             class="input"
-            placeholder="949 W 16th St, Chicago"
+            placeholder="924 W 19th Place, Chicago"
             bind:value={location}
             disabled={isSaving}
           />
