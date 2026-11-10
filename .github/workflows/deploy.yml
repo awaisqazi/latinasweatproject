@@ -8,6 +8,15 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Rebuilds on the two mornings the homepage link share card changes by
+  # date (homeShareCard in src/data/studioOpening.js): Monday Nov 16, 2026
+  # just after the first class at Mural Park (5:30 AM Central = 11:30 UTC),
+  # and one week later for the long-term card. Times are UTC. It repeats on
+  # those dates each year, which is only a harmless rebuild; delete this
+  # block once the long-term card is live.
+  schedule:
+    - cron: "45 11 16,23 11 *"
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read

@@ -92,9 +92,12 @@ import {
 // Merch drop and Monday Miles are hidden for now (see the flags in
 // src/data/transition.js).
 import { showMerchDrop, showMondayMiles } from "@/data/transition";
-import { showOpeningHero } from "@/data/studioOpening";
+import { showOpeningHero, homeShareCard } from "@/data/studioOpening";
 import OpeningHero from "@/components/OpeningHero.astro";
 import NewHomeSection from "@/components/NewHomeSection.astro";
+// Link share card for the homepage: the opening announcement, then the
+// long-term card, by date (see homeShareCard).
+const shareCard = homeShareCard();
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 
@@ -156,7 +159,16 @@ const ddlmPageUrl = withBase(ddlmEvent.pagePath);
 const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
 ---
 
-<Layout title="The Latina Sweat Project | Home">
+<Layout
+  title="The Latina Sweat Project | Home"
+  description={shareCard.description}
+  socialImage={shareCard.image}
+  socialImageAlt={shareCard.alt}
+  socialImageWidth={shareCard.width}
+  socialImageHeight={shareCard.height}
+  socialImageType={shareCard.type}
+  twitterCard="summary_large_image"
+>
   <Header />
   <main>
 

@@ -42,6 +42,45 @@ export const studioOpening = {
 export const isStudioOpen = (now = new Date()) =>
   now.getTime() >= Date.parse(studioOpening.opensAtISO);
 
+// Homepage link share card (Open Graph image + description), by date. Link
+// previews are baked in at build time, so the deploy workflow rebuilds the
+// site on the two mornings this changes (the `schedule` block in
+// .github/workflows/deploy.yml: Nov 16 and Nov 23). Each phase has its own
+// file name so apps that cached the old preview fetch the new one. Images
+// are drawn by scripts/render-opening-share-cards.mjs.
+//   until the first class, Mon Nov 16 2026   "Doors open Monday, November 16."
+//   opening week, to Mon Nov 23 2026         "Doors are open."
+//   after that                               the long-term card
+export const shareCardLongTermFromISO = "2026-11-23T05:30:00-06:00";
+const shareCardBase = { width: 1200, height: 630, type: "image/png" };
+export const homeShareCard = (now = new Date()) => {
+  if (!isStudioOpen(now)) {
+    return {
+      ...shareCardBase,
+      image: "images/og/opening-soon.png",
+      alt: "Pilsen, we're back. Doors open Monday, November 16. LSP at Mural Park, 924 W 19th Place, 4th floor.",
+      description:
+        "Pilsen, we're back. Doors open Monday, November 16 at Mural Park, 924 W 19th Place, 4th floor. Book a class.",
+    };
+  }
+  if (now.getTime() < Date.parse(shareCardLongTermFromISO)) {
+    return {
+      ...shareCardBase,
+      image: "images/og/opening-open.png",
+      alt: "Pilsen, we're back. Doors are open. LSP at Mural Park, 924 W 19th Place, 4th floor.",
+      description:
+        "Pilsen, we're back. Doors are open at Mural Park, 924 W 19th Place, 4th floor. Book a class.",
+    };
+  }
+  return {
+    ...shareCardBase,
+    image: "images/og/home.png",
+    alt: "Latina Sweat Project: empowering through movement. Yoga, fitness and community wellness in Pilsen, at Mural Park, 924 W 19th Place.",
+    // undefined = the site's standard description (Layout.astro).
+    description: undefined,
+  };
+};
+
 // Palette and format colors, copied from the schedule post generator.
 export const openingPalette = {
   ground: "#17241D",
