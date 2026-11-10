@@ -58,6 +58,7 @@ export const homeShareCard = (now = new Date()) => {
     return {
       ...shareCardBase,
       image: "images/og/opening-soon.png",
+      title: "Pilsen, we're back",
       alt: "Pilsen, we're back. Doors open Monday, November 16. LSP at Mural Park, 924 W 19th Place, 4th floor.",
       description:
         "Pilsen, we're back. Doors open Monday, November 16 at Mural Park, 924 W 19th Place, 4th floor. Book a class.",
@@ -67,6 +68,7 @@ export const homeShareCard = (now = new Date()) => {
     return {
       ...shareCardBase,
       image: "images/og/opening-open.png",
+      title: "Pilsen, we're back",
       alt: "Pilsen, we're back. Doors are open. LSP at Mural Park, 924 W 19th Place, 4th floor.",
       description:
         "Pilsen, we're back. Doors are open at Mural Park, 924 W 19th Place, 4th floor. Book a class.",
@@ -75,6 +77,7 @@ export const homeShareCard = (now = new Date()) => {
   return {
     ...shareCardBase,
     image: "images/og/home.png",
+    title: "Yoga, fitness and community wellness in Pilsen",
     alt: "Latina Sweat Project: empowering through movement. Yoga, fitness and community wellness in Pilsen, at Mural Park, 924 W 19th Place.",
     // undefined = the site's standard description (Layout.astro).
     description: undefined,
