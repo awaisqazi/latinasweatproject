@@ -37,7 +37,7 @@ export const galaRecap = {
   // site's ask is now the new-home campaign.
   giveHeading: "The night is over. The work is not.",
   giveBody:
-    "Programming at our 16th Street studio is paused while we are in the process of being displaced. This fall LSP goes pop-up across the neighborhood while we build a permanent home in Pilsen, opening early 2027. Every gift keeps classes accessible and teacher training tuition-free until we get there.",
+    "Programming at Morgan Street Studio is paused while we are in the process of being displaced. This fall LSP goes pop-up across the neighborhood while we build a permanent home in Pilsen, opening early 2027. Every gift keeps classes accessible and teacher training tuition-free until we get there.",
   givePath: "/donate",
   giveLabel: "Support the new home",
 };

@@ -61,7 +61,7 @@ export const studioTransition = {
   eyebrow: "A new chapter · Un nuevo capítulo",
   heading: "Our studio is paused. Our community keeps moving.",
   body: [
-    "All programming at our 16th Street studio is paused, so online class booking is closed for now. Recurring memberships will not renew, and there are no further charges.",
+    "All programming at Morgan Street Studio is paused, so online class booking is closed for now. Recurring memberships will not renew, and there are no further charges.",
     "We are building toward our next home in Pilsen, opening early 2027. Until then, pop-up classes keep us moving together around the neighborhood.",
   ],
   questionsLead: "Questions about your membership? Email",
