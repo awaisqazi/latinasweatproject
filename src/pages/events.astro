@@ -7,6 +7,8 @@ import SweatFestArtwork from "@/components/SweatFestArtwork.astro";
 import PopUpWeekBand from "@/components/PopUpWeekBand.astro";
 import FinishLineBand from "@/components/FinishLineBand.astro";
 import DdlmPicado from "@/components/DdlmPicado.astro";
+// Monday Miles is hidden for now (flag in src/data/transition.js).
+import { showMondayMiles } from "@/data/transition";
 import { ddlmEvent, ddlmWeekend } from "@/data/fallEvents";
 import { ddlmAlbums } from "@/data/ddlmGallery2026";
 import { ddlmRecap } from "@/data/ddlmRecap2026";
@@ -578,6 +580,7 @@ const featuredSlugs = [
 
     {/* START: Monday Miles Featured Section (light sand; restyled from dark so
         the page cadence never depends on the Supabase island above rendering) */}
+    {showMondayMiles && (
     <section class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#fff7e8] py-16 md:py-20">
       {/* Subtle track lines background */}
       <div class="absolute inset-0 opacity-[0.05]">
@@ -820,6 +823,7 @@ const featuredSlugs = [
         </div>
       </div>
     </section>
+    )}
     {/* END: Monday Miles Featured Section */}
 
     {/* START: Stay Connected Section */}

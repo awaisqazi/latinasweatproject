@@ -19,6 +19,7 @@ import DdlmPicado from "@/components/DdlmPicado.astro";
 import DdlmSurveyCta from "@/components/DdlmSurveyCta.astro";
 import { ddlmEvent, fallTicketEventFor } from "@/data/fallEvents";
 import { ddlmRecap } from "@/data/ddlmRecap2026";
+import OpeningLinksCard from "@/components/OpeningLinksCard.astro";
 import {
   collectiveFinishLine,
   finishLineEvents,
@@ -208,6 +209,18 @@ const links = [
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
+  // The Mural Park opening leads (Nov 9 2026); it jumps to #studio-card.
+  {
+    title: {
+      en: "New Studio",
+      es: "Nuevo Estudio"
+    },
+    target: "#studio-card",
+    image: `${base}images/highlights/hl_muralpark.jpg`,
+    scale: "scale-[1.0]",
+    hoverScale: "group-hover:scale-[1.12]",
+    color: "amber"
+  },
   {
     title: {
       en: "DDLM 2026",
@@ -516,7 +529,11 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* Día de los Muertos recap (static, Nov 2 2026): the first card, in the
+      {/* The Mural Park opening (Nov 9 2026): the first card on the page. */}
+      <OpeningLinksCard />
+
+      {/* Día de los Muertos recap (static, Nov 2 2026): the first recap card
+          (it led the page until the opening card took the top slot), in the
           recap's identity: black, white, one cempasúchil accent, a thin papel
           picado row over the photo. Title lines, then the survey block, then
           the photos button. The photo above the title already links to the

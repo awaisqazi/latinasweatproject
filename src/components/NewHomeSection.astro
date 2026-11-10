@@ -1,0 +1,201 @@
+---
+// Homepage "Our new home" section (the former dark "A New Chapter" band),
+// directly under the opening hero. Same facts and links as before, now in the
+// opening look: cream ground, deep green ink, Public Sans (palette from
+// src/data/studioOpening.js). Mural Park is never called permanent.
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="nh">
+  <div class="nh-wrap">
+    <div class="nh-copy">
+      <p class="nh-label">A new chapter</p>
+      <h2 class="nh-head">Our new home is Mural Park.</h2>
+      <div class="nh-body">
+        <p>
+          Find us at 924 W 19th Place, 4th floor, in Pilsen, with two
+          studios: Gage Park Studio and Little Village Studio. Gracias to
+          everyone who made our 16th Street room ours.
+        </p>
+        <p>
+          This fall, LSP went pop-up across the neighborhood, with classes
+          and community programming around Pilsen and nearby.
+        </p>
+        <p>
+          <a
+            href="#abc7-windy-city"
+            class="nh-link"
+            data-conversion-event="press_abc7_click"
+            data-conversion-context="home_new_chapter"
+          >Hear Yari and Savannah tell the story on ABC7.</a>
+        </p>
+      </div>
+      <blockquote class="nh-quote">
+        <p>
+          The Latina Sweat Project was never these walls. It has always been
+          the people.
+        </p>
+        <footer>Margarita Quiñones-Peña, Founder</footer>
+      </blockquote>
+      <div class="nh-cta">
+        <a
+          href={`${base}schedule`}
+          class="nh-btn nh-btn--solid"
+          data-conversion-event="class_booking_start"
+          data-conversion-context="home_studio_section"
+          data-conversion-booking-path="schedule_page"
+        >Book a class</a>
+        <a
+          href={`${base}donate`}
+          class="nh-btn nh-btn--line"
+          data-conversion-event="donation_click"
+          data-conversion-context="home_new_chapter"
+        >Support the next studio</a>
+      </div>
+      <p class="nh-note">
+        Booking is open for classes at Mural Park. Start with
+        <a
+          href={`${base}pricing`}
+          class="nh-link"
+          data-conversion-event="membership_purchase_start"
+          data-conversion-context="home_new_chapter_free_week"
+        >New Studio Free Week</a>.
+      </p>
+    </div>
+    <div class="nh-photo">
+      <img
+        src={`${base}images/mural-park.jpg`}
+        alt="The outside of Mural Park, a brick loft building in Pilsen, with the Chicago skyline behind it"
+        width="1200"
+        height="900"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .nh {
+    --cream: #faf7ef;
+    --ink: #1d3329;
+    --hair: #c2b498;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: "Public Sans", "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .nh-wrap {
+    display: grid;
+    gap: 2.5rem;
+    margin: 0 auto;
+    max-width: 80rem;
+    padding: 3rem 1rem;
+  }
+  .nh-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .nh-head {
+    margin-top: 0.8rem;
+    font-size: clamp(2.3rem, 9.4vw, 3.4rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+  .nh-body {
+    margin-top: 1.4rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.55;
+  }
+  .nh-body p + p { margin-top: 0.9rem; }
+  .nh-link {
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+  .nh-link:hover { text-decoration-color: #dca4aa; }
+  .nh-quote {
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    background: #b6c7a6;
+    padding: 1.1rem 1.25rem 1.05rem;
+  }
+  .nh-quote p {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+  .nh-quote footer {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .nh-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+  }
+  .nh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1rem;
+    border-radius: 999px;
+    padding: 0 1.45rem;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+  .nh-btn--solid { background: var(--ink); color: var(--cream); }
+  .nh-btn--solid:hover { background: #2f4f3d; transform: translateY(-2px); }
+  .nh-btn--line { box-shadow: inset 0 0 0 2px var(--ink); }
+  .nh-btn--line:hover { background: var(--ink); color: var(--cream); transform: translateY(-2px); }
+  .nh-btn:focus-visible,
+  .nh-link:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .nh-note {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .nh-photo {
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .nh-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 640px) {
+    .nh-wrap { padding: 4rem 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .nh-wrap {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 4.5rem;
+      align-items: center;
+      padding: 5rem 2rem;
+    }
+    .nh-head { font-size: clamp(3rem, 4.4vw, 4.2rem); }
+    .nh-body { font-size: 1.18rem; }
+    .nh-btn { min-height: 3.4rem; padding: 0 1.75rem; font-size: 1.1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nh-btn { transition: none; }
+  }
+</style>

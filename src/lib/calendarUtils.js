@@ -1,7 +1,7 @@
 export function generateGoogleCalendarLink(shift) {
     const title = encodeURIComponent("Volunteer Shift - Latina Sweat Project");
     const details = encodeURIComponent("Thank you for volunteering! Please arrive on time.");
-    const location = encodeURIComponent("Mural Park, 924 W 19th Place, Chicago, IL");
+    const location = encodeURIComponent("Mural Park, 924 W 19th Place, Chicago, IL 60608");
 
     // Format dates to YYYYMMDDTHHmmSSZ
     const formatDate = (date) => {
@@ -17,7 +17,7 @@ export function generateGoogleCalendarLink(shift) {
 export function generateICSFile(shift) {
     const title = "Volunteer Shift - Latina Sweat Project";
     const description = "Thank you for volunteering! Please arrive on time.";
-    const location = "Mural Park, 924 W 19th Place, Chicago, IL";
+    const location = "Mural Park, 924 W 19th Place, Chicago, IL 60608";
 
     // Format dates to YYYYMMDDTHHmmSSZ
     const formatDate = (date) => {

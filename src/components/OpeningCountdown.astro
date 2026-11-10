@@ -1,0 +1,43 @@
+---
+// Countdown + state flip for the Mural Park opening surfaces (OpeningHero on
+// the homepage, OpeningLinksCard on /links). Safe to include more than once:
+// it starts a single timer per page.
+//
+// Contract: a container with data-opening-root and data-opens-at (ISO).
+// Inside it, [data-opening-unit="d|h|m|s"] get the remaining time,
+// [data-opening-before] show until the moment and [data-opening-after] from
+// it on. The build already renders the right state; this keeps it right in
+// the browser with no rebuild.
+---
+
+<script is:inline>
+  (function () {
+    if (window.__lspOpeningTimer) return;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var tick = function () {
+      var roots = document.querySelectorAll("[data-opening-root]");
+      var anySoon = false;
+      roots.forEach(function (root) {
+        var left = Date.parse(root.getAttribute("data-opens-at")) - Date.now();
+        var open = !(left > 0);
+        root.setAttribute("data-opening-state", open ? "open" : "soon");
+        root.querySelectorAll("[data-opening-before]").forEach(function (el) { el.hidden = open; });
+        root.querySelectorAll("[data-opening-after]").forEach(function (el) { el.hidden = !open; });
+        if (open) return;
+        anySoon = true;
+        var s = Math.floor(left / 1000);
+        var v = { d: Math.floor(s / 86400), h: Math.floor((s % 86400) / 3600), m: Math.floor((s % 3600) / 60), s: s % 60 };
+        root.querySelectorAll("[data-opening-unit]").forEach(function (el) {
+          var k = el.getAttribute("data-opening-unit");
+          var text = k === "d" ? String(v.d) : pad(v[k]);
+          if (el.textContent !== text) el.textContent = text;
+        });
+      });
+      if (!anySoon && window.__lspOpeningTimer) {
+        clearInterval(window.__lspOpeningTimer);
+      }
+    };
+    tick();
+    window.__lspOpeningTimer = setInterval(tick, 1000);
+  })();
+</script>

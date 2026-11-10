@@ -1,0 +1,385 @@
+---
+// Homepage opening hero (Nov 2026): the Mural Park reopening, in the look of
+// the schedule announcement posts (Public Sans, deep green ground, cream
+// type, one flat color per class format). Everything comes from
+// src/data/studioOpening.js. Toggle: showOpeningHero in that file.
+//
+// Moving parts: the headline rises in, the week's classes drop into the
+// mosaic one bar at a time and then ripple Monday to Sunday, and the
+// countdown runs to the first class (OpeningCountdown). All motion stops
+// under prefers-reduced-motion. After the first class starts the countdown
+// goes away and the line reads "Doors are open." with no rebuild.
+import OpeningCountdown from "@/components/OpeningCountdown.astro";
+import {
+  studioOpening as o,
+  isStudioOpen,
+  openingFormats,
+  openingFormatColor,
+  openingWeek,
+} from "@/data/studioOpening";
+
+const base = import.meta.env.BASE_URL;
+const open = isStudioOpen();
+const [headA, ...headRest] = o.headline.split(" ");
+const headB = headRest.join(" ");
+const units = [
+  { key: "d", label: "days" },
+  { key: "h", label: "hrs" },
+  { key: "m", label: "min" },
+  { key: "s", label: "sec" },
+];
+---
+
+<section
+  class="op-hero"
+  data-opening-root
+  data-opens-at={o.opensAtISO}
+  data-opening-state={open ? "open" : "soon"}
+>
+  <div class="op-wrap">
+    <p class="op-label">
+      {o.label.map((part, i) => (
+        <span>{i > 0 && <span class="op-dot" aria-hidden="true">·</span>}{part}</span>
+      ))}
+    </p>
+
+    <h1 class="op-head">
+      <span class="op-line"><span>{headA}</span></span>
+      <span class="op-line"><span>{headB}</span></span>
+    </h1>
+
+    <div class="op-grid">
+      <div class="op-copy">
+        <p class="op-sub" data-opening-before hidden={open}>{o.soon}</p>
+        <p class="op-sub" data-opening-after hidden={!open}>{o.open}</p>
+        <p class="op-stats">
+          {o.stats.map((s, i) => (
+            <>{i > 0 && <span class="op-slash" aria-hidden="true">/</span>}<span>{s}</span></>
+          ))}
+        </p>
+
+        <div class="op-count" data-opening-before hidden={open} role="timer" aria-label="Time until the first class at Mural Park">
+          {units.map((u) => (
+            <div class={`op-tile op-tile--${u.key}`}>
+              <span class="op-num" data-opening-unit={u.key}>--</span>
+              <span class="op-unit">{u.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div class="op-cta">
+          <a
+            href={`${base}${o.bookPath}`}
+            class="op-btn op-btn--solid"
+            data-conversion-event="class_booking_start"
+            data-conversion-context="home_opening_hero"
+            data-conversion-booking-path="schedule_page"
+          >{o.bookLabel}</a>
+          <a
+            href={`${base}${o.freeWeekPath}`}
+            class="op-btn op-btn--line"
+            data-conversion-event="membership_purchase_start"
+            data-conversion-context="home_opening_hero_free_week"
+          >{o.freeWeekLabel}</a>
+        </div>
+      </div>
+
+      <div class="op-week">
+        <a
+          href={`${base}${o.bookPath}`}
+          class="op-mosaic"
+          aria-label="A week of classes at Mural Park, Monday to Sunday. See the full schedule."
+          data-conversion-event="class_booking_start"
+          data-conversion-context="home_opening_hero_mosaic"
+          data-conversion-booking-path="schedule_page"
+        >
+          {openingWeek.map((d, di) => (
+            <div class="op-col" style={`--d:${di}`}>
+              <span class="op-day">{d.day}</span>
+              {d.classes.map(([time, name], i) => (
+                <span
+                  class="op-bar"
+                  style={`--i:${i};background:${openingFormatColor[name]}`}
+                  title={`${d.day} ${time} · ${name}`}
+                ></span>
+              ))}
+            </div>
+          ))}
+        </a>
+        <ul class="op-key" aria-label="Class formats">
+          {openingFormats.map((f) => (
+            <li><span class="op-sw" style={`background:${f.color}`}></span>{f.name}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <p class="op-foot">
+      <span class="op-word">Latina Sweat Project</span>
+      <span>{o.tagline}</span>
+    </p>
+  </div>
+  <OpeningCountdown />
+</section>
+
+<style>
+  .op-hero {
+    --g: #17241d;
+    --cream: #faf7ef;
+    --ink: #1d3329;
+    --hair: #c0ab7f;
+    background: var(--g);
+    color: var(--cream);
+    font-family: "Public Sans", "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  .op-wrap {
+    margin: 0 auto;
+    max-width: 80rem;
+    padding: 2.25rem 1rem 1.5rem;
+  }
+  .op-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+  .op-dot { margin-right: 0.5em; }
+  /* Phone: the venue name takes its own line so no line starts with a dot. */
+  @media (max-width: 639px) {
+    .op-btn { flex: 1 1 100%; }
+    .op-label > span:first-child { flex-basis: 100%; }
+    .op-label > span:nth-child(2) .op-dot { display: none; }
+  }
+  .op-head {
+    margin-top: 0.6rem;
+    font-size: clamp(3.1rem, 15.2vw, 4.6rem);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+  }
+  .op-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.1em;
+  }
+  .op-line > span {
+    display: inline-block;
+    animation: op-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .op-line:nth-child(2) > span { animation-delay: 0.12s; }
+  .op-grid {
+    display: grid;
+    gap: 2.25rem;
+    margin-top: 1.1rem;
+  }
+  .op-sub {
+    font-size: clamp(1.4rem, 6.2vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .op-stats {
+    margin-top: 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+  .op-slash {
+    padding: 0 0.45em;
+    color: var(--hair);
+    font-weight: 600;
+  }
+  .op-count {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+    max-width: 27rem;
+  }
+  .op-count[hidden] { display: none; }
+  .op-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    border-radius: 8px;
+    padding: 0.8rem 0.75rem 0.7rem;
+    color: var(--ink);
+  }
+  .op-tile--d { background: #b6c7a6; }
+  .op-tile--h { background: #2f4f3d; color: var(--cream); }
+  .op-tile--m { background: #dca4aa; }
+  .op-tile--s { background: #e4c26e; }
+  .op-num {
+    font-size: clamp(1.9rem, 9vw, 2.9rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+  .op-unit {
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .op-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .op-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1rem;
+    border-radius: 999px;
+    padding: 0 1.45rem;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+  .op-btn--solid { background: var(--cream); color: var(--ink); }
+  .op-btn--solid:hover { background: #e4c26e; transform: translateY(-2px); }
+  .op-btn--line { box-shadow: inset 0 0 0 2px var(--cream); color: var(--cream); }
+  .op-btn--line:hover { background: var(--cream); color: var(--ink); transform: translateY(-2px); }
+  .op-btn:focus-visible,
+  .op-mosaic:focus-visible {
+    outline: 2px solid #e4c26e;
+    outline-offset: 3px;
+  }
+
+  .op-mosaic {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0 0.35rem;
+    align-items: start;
+  }
+  .op-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .op-day {
+    margin-bottom: 0.35rem;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .op-bar {
+    display: block;
+    height: 13px;
+    border-radius: 4px;
+    animation:
+      op-drop 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+      op-wave 6.3s ease-in-out 2;
+    animation-delay:
+      calc(0.35s + var(--d) * 70ms + var(--i) * 34ms),
+      calc(2.6s + var(--d) * 0.16s + var(--i) * 0.05s);
+  }
+  .op-key {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.9rem;
+    margin-top: 1.15rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .op-key li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .op-sw {
+    flex: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    border-radius: 4px;
+  }
+  .op-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--hair);
+    padding-top: 0.95rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+  .op-word { font-style: italic; }
+
+  @media (min-width: 640px) {
+    .op-wrap { padding: 3rem 1.5rem 1.75rem; }
+    .op-label { font-size: 0.8rem; }
+    .op-head { font-size: clamp(4.6rem, 12vw, 6rem); }
+    .op-bar { height: 16px; border-radius: 5px; }
+    .op-col { gap: 4px; }
+    .op-mosaic { gap: 0 0.55rem; }
+    .op-day { font-size: 0.74rem; }
+    .op-key { grid-template-columns: repeat(3, minmax(0, 1fr)); font-size: 0.86rem; }
+  }
+  @media (min-width: 1024px) {
+    .op-wrap { padding: 3.5rem 2rem 2rem; }
+    .op-label { font-size: 0.86rem; }
+    /* One line across the page, like the cover post's headline. */
+    .op-head { font-size: min(10.4vw, 8.6rem); }
+    .op-line { display: inline; overflow: visible; padding: 0; }
+    .op-line > span { animation-name: op-rise-soft; }
+    .op-grid {
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap: 4.5rem;
+      align-items: start;
+      margin-top: 1.9rem;
+    }
+    .op-sub { font-size: clamp(2rem, 3vw, 2.6rem); }
+    .op-stats { font-size: 1.3rem; margin-top: 0.9rem; }
+    .op-count { margin-top: 2.1rem; gap: 0.5rem; max-width: 29rem; }
+    .op-num { font-size: clamp(2.6rem, 4vw, 3.5rem); }
+    .op-unit { font-size: 0.92rem; }
+    .op-cta { margin-top: 2.1rem; }
+    .op-btn { min-height: 3.4rem; padding: 0 1.75rem; font-size: 1.1rem; }
+    .op-bar { height: 17px; }
+    .op-key { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1.4rem; gap: 0.55rem 1.25rem; font-size: 0.9rem; }
+    .op-foot { margin-top: 2.75rem; font-size: 1rem; }
+  }
+
+  @media (min-width: 1280px) {
+    .op-key { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .op-bar { height: 19px; }
+  }
+
+  @keyframes op-rise {
+    from { transform: translateY(105%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes op-rise-soft {
+    from { opacity: 0; transform: translateY(0.35em); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes op-drop {
+    from { opacity: 0; transform: translateY(-18px) scaleX(0.5); }
+    to { opacity: 1; transform: translateY(0) scaleX(1); }
+  }
+  @keyframes op-wave {
+    0%, 12%, 100% { transform: translateY(0); }
+    6% { transform: translateY(-3px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .op-line > span,
+    .op-bar { animation: none; }
+    .op-btn { transition: none; }
+  }
+</style>

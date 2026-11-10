@@ -1,15 +1,12 @@
 ---
 // src/components/Header.astro
 import { statusBanner } from "@/data/studioStatus.js";
-import { sweatFest, sweatFestColors } from "@/data/sweatFest";
 import { isPopUpSeriesActive } from "@/data/popUpWeeks";
 
 const base = import.meta.env.BASE_URL;
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === base || pathname === `${base}/`;
-const isSweatFest = pathname.replace(/\/$/, "").endsWith("/sweatfest");
-const sweatFestGradient = `linear-gradient(90deg, ${sweatFestColors.sunrise}, ${sweatFestColors.ember}, ${sweatFestColors.dusk})`;
 
 // Pop-up classes are the class offering while studio programming is paused:
 // a "Pop-Ups" nav entry -> /popup while the series (Oct 5 to Nov 1, 2026)
@@ -187,22 +184,6 @@ const bannerHref = statusBanner.href.startsWith("/")
                             <div
                                 class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden p-2"
                             >
-                                <a
-                                    href={`${base}sweatfest`}
-                                    aria-current={isSweatFest ? "page" : undefined}
-                                    class="relative mb-1 block overflow-hidden rounded-lg border border-[#ff6b52]/35 bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] px-4 pb-3 pt-4 text-off-black shadow-sm transition hover:border-[#ff6b52]/70 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c81e63]"
-                                    data-conversion-event="sweatfest_explore_click"
-                                    data-conversion-context="desktop_header_more"
-                                >
-                                    <span class="absolute inset-x-0 top-0 h-1" style={`background: ${sweatFestGradient};`} aria-hidden="true"></span>
-                                    <span class="flex items-center justify-between gap-2">
-                                        <span class="font-extrabold">Sweat Fest</span>
-                                        <span class="rounded-full bg-[#ffbd59]/25 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#7a4c00]">
-                                            Recap
-                                        </span>
-                                    </span>
-                                    <span class="mt-1 block text-xs text-medium-gray">Run · Sweat · Pachanga</span>
-                                </a>
                                 <a
                                     href={`${base}feedback`}
                                     class="mb-1 block rounded-lg border border-accent-gold/40 bg-accent-gold/15 px-4 py-3 text-sm text-off-black transition-all hover:border-accent-gold hover:bg-accent-gold/25"
@@ -437,20 +418,6 @@ const bannerHref = statusBanner.href.startsWith("/")
             class="text-xl font-bold text-off-black hover:text-vibrant-pink transition-colors mobile-link py-1"
         >
             Events
-        </a>
-        <a
-            href={`${base}sweatfest`}
-            aria-current={isSweatFest ? "page" : undefined}
-            class="mobile-link relative my-1 overflow-hidden rounded-2xl border border-[#ff6b52]/40 bg-gradient-to-br from-[#fff8ef] via-white to-[#ffefe2] px-5 py-4 text-off-black shadow-md transition-all hover:border-[#ff6b52]/70 hover:shadow-lg"
-            data-conversion-event="sweatfest_explore_click"
-            data-conversion-context="mobile_header"
-        >
-            <span class="absolute inset-x-0 top-0 h-1" style={`background: ${sweatFestGradient};`} aria-hidden="true"></span>
-            <span class="flex items-center justify-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#9b2c18]">
-                Recap · {sweatFest.shortDateLabel}
-            </span>
-            <span class="mt-1 block text-2xl font-extrabold">Sweat Fest</span>
-            <span class="mt-1 block text-sm font-semibold text-medium-gray">Run · Sweat · Pachanga</span>
         </a>
         <a
             href={`${base}pricing`}

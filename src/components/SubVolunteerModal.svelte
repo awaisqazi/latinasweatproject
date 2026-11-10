@@ -173,7 +173,7 @@
                                 </p>
                                 <p class="font-medium text-gray-900">
                                     {request.location ||
-                                        "Mural Park, 924 W 19th Place, Chicago, IL"}
+                                        "Mural Park, 924 W 19th Place, Chicago, IL 60608"}
                                 </p>
                             </div>
                         </div>

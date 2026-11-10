@@ -1,0 +1,250 @@
+---
+// /links: the Mural Park opening card, the first card on the page (Nov 2026).
+// Same look and data as the homepage OpeningHero (src/data/studioOpening.js):
+// deep green ground, cream type, Public Sans, the week's classes as a bar
+// mosaic, a live countdown that flips to "Doors are open" by itself.
+// Every visible string has an EN/ES pair (the page's language switch shows
+// .lang-en or .lang-es); the offer name "New Studio Free Week" is a product
+// name and stays as is.
+import OpeningCountdown from "@/components/OpeningCountdown.astro";
+import {
+  studioOpening as o,
+  isStudioOpen,
+  openingFormatColor,
+  openingWeek,
+} from "@/data/studioOpening";
+
+const base = import.meta.env.BASE_URL;
+const open = isStudioOpen();
+const units = [
+  { key: "d", en: "days", es: "días" },
+  { key: "h", en: "hrs", es: "h" },
+  { key: "m", en: "min", es: "min" },
+  { key: "s", en: "sec", es: "s" },
+];
+const dayEs = { Mon: "Lun", Tue: "Mar", Wed: "Mié", Thu: "Jue", Fri: "Vie", Sat: "Sáb", Sun: "Dom" };
+---
+
+<div
+  id="studio-card"
+  class="olc relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl"
+  style="animation: links-slide-up 0.5s ease backwards; animation-delay: 72ms;"
+  data-opening-root
+  data-opens-at={o.opensAtISO}
+  data-opening-state={open ? "open" : "soon"}
+>
+  <div class="olc-in">
+    <p class="olc-label">{o.label.slice(0, 2).join(" · ")}</p>
+    <h2 class="olc-head">
+      <span class="lang-en">{o.headline}</span>
+      <span class="lang-es hidden">{o.headlineEs}</span>
+    </h2>
+    <p class="olc-sub" data-opening-before hidden={open}>
+      <span class="lang-en">{o.soon}</span>
+      <span class="lang-es hidden">{o.soonEs}</span>
+    </p>
+    <p class="olc-sub" data-opening-after hidden={!open}>
+      <span class="lang-en">{o.open}</span>
+      <span class="lang-es hidden">{o.openEs}</span>
+    </p>
+
+    <div class="olc-count" data-opening-before hidden={open} role="timer">
+      {units.map((u) => (
+        <div class={`olc-tile olc-tile--${u.key}`}>
+          <span class="olc-num" data-opening-unit={u.key}>--</span>
+          <span class="olc-unit">
+            <span class="lang-en">{u.en}</span>
+            <span class="lang-es hidden">{u.es}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <div class="olc-mosaic" aria-hidden="true">
+      {openingWeek.map((d, di) => (
+        <div class="olc-col" style={`--d:${di}`}>
+          <span class="olc-day">
+            <span class="lang-en">{d.day}</span>
+            <span class="lang-es hidden">{dayEs[d.day]}</span>
+          </span>
+          {d.classes.map(([, name], i) => (
+            <span class="olc-bar" style={`--i:${i};background:${openingFormatColor[name]}`}></span>
+          ))}
+        </div>
+      ))}
+    </div>
+    <p class="olc-stats">
+      <span class="lang-en">{o.stats.join(" / ")}</span>
+      <span class="lang-es hidden">{o.statsEs.join(" / ")}</span>
+    </p>
+
+    <a
+      href={`${base}${o.bookPath}`}
+      class="olc-btn olc-btn--solid"
+      data-conversion-event="class_booking_start"
+      data-conversion-context="links_opening_card"
+      data-conversion-booking-path="schedule_page"
+    >
+      <span>
+        <span class="lang-en">{o.bookLabel}</span>
+        <span class="lang-es hidden">{o.bookLabelEs}</span>
+      </span>
+      <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      </svg>
+    </a>
+    <a
+      href={`${base}${o.freeWeekPath}`}
+      class="olc-btn olc-btn--line"
+      data-conversion-event="membership_purchase_start"
+      data-conversion-context="links_opening_card_free_week"
+    >
+      <span>{o.freeWeekLabel}</span>
+      <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      </svg>
+    </a>
+  </div>
+  <OpeningCountdown />
+</div>
+
+<style>
+  .olc {
+    --cream: #faf7ef;
+    --ink: #1d3329;
+    background: #17241d;
+    color: var(--cream);
+    font-family: "Public Sans", "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .olc-in { padding: 1.25rem 1rem 1rem; }
+  .olc-label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+  .olc-head {
+    margin-top: 0.45rem;
+    font-size: clamp(2.5rem, 13.2vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    text-wrap: balance;
+  }
+  .olc-sub {
+    margin-top: 0.7rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .olc-count {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
+    margin-top: 1rem;
+  }
+  .olc-count[hidden] { display: none; }
+  .olc-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-radius: 8px;
+    padding: 0.65rem 0.6rem 0.6rem;
+    color: var(--ink);
+  }
+  .olc-tile--d { background: #b6c7a6; }
+  .olc-tile--h { background: #2f4f3d; color: var(--cream); }
+  .olc-tile--m { background: #dca4aa; }
+  .olc-tile--s { background: #e4c26e; }
+  .olc-num {
+    font-size: 1.9rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+  .olc-unit {
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .olc-mosaic {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0 0.3rem;
+    align-items: start;
+    margin-top: 1.15rem;
+  }
+  .olc-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .olc-day {
+    margin-bottom: 0.3rem;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .olc-bar {
+    display: block;
+    height: 7px;
+    border-radius: 2.5px;
+    animation:
+      olc-drop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+      olc-wave 6.3s ease-in-out 2;
+    animation-delay:
+      calc(0.5s + var(--d) * 60ms + var(--i) * 28ms),
+      calc(2.6s + var(--d) * 0.16s + var(--i) * 0.05s);
+  }
+  .olc-stats {
+    margin-top: 0.8rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .olc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    margin-top: 0.6rem;
+    border-radius: 8px;
+    padding: 0 1rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .olc-stats + .olc-btn { margin-top: 1rem; }
+  .olc-btn--solid { background: var(--cream); color: var(--ink); }
+  .olc-btn--solid:hover { background: #e4c26e; }
+  .olc-btn--line { box-shadow: inset 0 0 0 2px var(--cream); color: var(--cream); }
+  .olc-btn--line:hover { background: var(--cream); color: var(--ink); }
+  .olc-btn:focus-visible {
+    outline: 2px solid #e4c26e;
+    outline-offset: 2px;
+  }
+  @media (min-width: 640px) {
+    .olc-in { padding: 1.5rem 1.25rem 1.25rem; }
+    .olc-head { font-size: 3.6rem; }
+    .olc-bar { height: 8px; }
+  }
+  @keyframes olc-drop {
+    from { opacity: 0; transform: translateY(-10px) scaleX(0.5); }
+    to { opacity: 1; transform: translateY(0) scaleX(1); }
+  }
+  @keyframes olc-wave {
+    0%, 12%, 100% { transform: translateY(0); }
+    6% { transform: translateY(-2px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .olc-bar { animation: none; }
+    .olc-btn { transition: none; }
+  }
+</style>

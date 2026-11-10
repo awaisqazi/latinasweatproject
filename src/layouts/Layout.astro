@@ -101,8 +101,8 @@ const MARIANA_ROUTES = showMarianaSchedule
     <!-- Local SEO: Geo & Keywords -->
     <meta name="geo.region" content="US-IL" />
     <meta name="geo.placename" content="Pilsen, Chicago" />
-    <meta name="geo.position" content="41.8584;-87.6510" />
-    <meta name="ICBM" content="41.8584, -87.6510" />
+    <meta name="geo.position" content="41.8561;-87.6485" />
+    <meta name="ICBM" content="41.8561, -87.6485" />
     <meta
       name="keywords"
       content="yoga Pilsen Chicago, free yoga classes Chicago, Latina wellness, community yoga Southwest Side, nonprofit yoga studio Pilsen, fitness classes Pilsen, yoga teacher training Chicago, BIPOC yoga Chicago, wellness events Pilsen, Latina Sweat Project"
@@ -419,7 +419,7 @@ const MARIANA_ROUTES = showMarianaSchedule
           "Free community yoga, fitness classes, and wellness events empowering Pilsen and Chicago's Southwest Side through movement, culture, and community.",
         url: "https://latinasweatproject.com",
         logo: "https://latinasweatproject.com/logo2.png",
-        image: "https://latinasweatproject.com/images/studio.png",
+        image: "https://latinasweatproject.com/images/mural-park.jpg",
         telephone: "",
         address: {
           "@type": "PostalAddress",
@@ -431,8 +431,8 @@ const MARIANA_ROUTES = showMarianaSchedule
         },
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 41.8584,
-          longitude: -87.651,
+          latitude: 41.8561,
+          longitude: -87.6485,
         },
         areaServed: [
           { "@type": "Place", name: "Pilsen, Chicago, IL" },
@@ -444,20 +444,41 @@ const MARIANA_ROUTES = showMarianaSchedule
           "https://www.tiktok.com/@latinasweatproject",
         ],
         priceRange: "Free - $",
-        openingHoursSpecification: {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ],
-          opens: "06:00",
-          closes: "21:00",
-        },
+        // First class start to last class end, by day, from the Mural Park
+        // schedule on MarianaTek (Nov 16 to Dec 31, 2026). Update when the
+        // schedule changes.
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Monday",
+            opens: "05:30",
+            closes: "21:15",
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Tuesday", "Wednesday", "Thursday"],
+            opens: "05:30",
+            closes: "20:45",
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Friday",
+            opens: "05:30",
+            closes: "19:15",
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Saturday",
+            opens: "07:30",
+            closes: "11:15",
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Sunday",
+            opens: "07:30",
+            closes: "19:15",
+          },
+        ],
         hasOfferCatalog: {
           "@type": "OfferCatalog",
           name: "Yoga & Fitness Classes",

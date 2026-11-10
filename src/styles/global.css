@@ -44,6 +44,45 @@
   font-display: swap;
 }
 
+/* Public Sans: the face of the Mural Park schedule and opening posts (Nov
+   2026), used by the opening hero and the /links opening card. Self-hosted
+   woff2, OFL (license beside the files). */
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans/public-sans-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans/public-sans-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans/public-sans-latin-700-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans/public-sans-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans/public-sans-latin-900-normal.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-vibrant-pink: #b5a18d;
   --color-accent-gold: #ffbd59;

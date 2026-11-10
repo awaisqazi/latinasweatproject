@@ -26,7 +26,7 @@
   export let refreshKey = 0;
   export let onAssignTask = () => {};
 
-  const DEFAULT_LOCATION = "Mural Park, 924 W 19th Place, Chicago, IL";
+  const DEFAULT_LOCATION = "Mural Park, 924 W 19th Place, Chicago, IL 60608";
   const requestColumns =
     "id, kind, class_name, date, start_time, end_time, duration_minutes, location, notes, requested_by_name, requested_by_email, status, assigned_sub_name, assigned_sub_email, assigned_sub_phone, assigned_at, created_at, sub_volunteers(id, name, email, phone, created_at)";
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

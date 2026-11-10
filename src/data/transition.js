@@ -40,6 +40,17 @@ export const showMarianaSchedule = true;
 // them always shows what is actually for sale. Set to true to show them.
 export const showStudioPriceCards = false;
 
+// Nov 9, 2026 (Fez): hidden for now, not needed at the moment. Both were
+// written for the 16th Street studio (tee pickup "in studio"; Monday Miles
+// meeting "at the studio" / "in the cafe", Mondays at 6:30 PM) and neither
+// is confirmed for Mural Park. Set a flag to true to bring that surface back
+// exactly as it was, after checking its place and time.
+//   showMerchDrop    homepage "Monday Miles Tee" merch section
+//   showMondayMiles  homepage Monday Miles section and events carousel card,
+//                    and the Monday Miles band on /events
+export const showMerchDrop = false;
+export const showMondayMiles = false;
+
 // STALE SINCE NOV 9, 2026: the copy below describes the fall 2026 pause
 // (16th Street paused, booking closed, "opening early 2027", "permanent
 // home of our own"). None of it renders while showMarianaSchedule is true.

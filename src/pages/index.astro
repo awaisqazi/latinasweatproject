@@ -1,4 +1,21 @@
 ---
+// CURRENT ORDER (Nov 9 2026, Mural Park opening; supersedes the numbered list
+// below, which is kept as the history of each section):
+//   1. Opening hero [D green] (OpeningHero, flag showOpeningHero in
+//      src/data/studioOpening.js; the video hero is the fallback)
+//   2. Our new home [L cream] (NewHomeSection, the former A New Chapter)
+//   3. Annual Gala 2026 recap [D]
+//   4. Relive the summer [L]
+//   5. ABC7 Windy City Weekend [D]
+//   6. Events carousel [L]
+//   7. 40 Under 40 [D]
+//   8. Día de los Muertos recap [D] (moved down from slot 2 and its hero pill
+//      removed, Fez Nov 9 2026; its papel picado row marks the seam)
+//   9. In The Press [L]
+//  10. Instagram [D]
+// Hidden for now (flags in src/data/transition.js): Monday Miles Tee merch,
+// Monday Miles community runs and its carousel card.
+//
 // Homepage section order (Sep 2026 gala-forward refresh). Theme in brackets;
 // below the crafted hero -> gala seam the light/dark cadence strictly
 // alternates:
@@ -72,6 +89,12 @@ import {
   finishLineEvents,
   getFinishLinePhase,
 } from "@/data/collectiveFinishLine";
+// Merch drop and Monday Miles are hidden for now (see the flags in
+// src/data/transition.js).
+import { showMerchDrop, showMondayMiles } from "@/data/transition";
+import { showOpeningHero } from "@/data/studioOpening";
+import OpeningHero from "@/components/OpeningHero.astro";
+import NewHomeSection from "@/components/NewHomeSection.astro";
 const base = import.meta.env.BASE_URL;
 const withBase = (path) => `${base}${path.replace(/^\//, "")}`;
 
@@ -137,7 +160,15 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
   <Header />
   <main>
 
-    {/* START: Hero Section */}
+    {/* START: Hero Section. While showOpeningHero is true (src/data/studioOpening.js)
+        the Mural Park opening hero stands in for the video hero below; the
+        video hero comes back unchanged when the flag is turned off. */}
+    {showOpeningHero ? (
+      <>
+        <OpeningHero />
+        <PopUpWeekClient />
+      </>
+    ) : (
     <section class="relative h-[60vh] min-h-[480px] w-full sm:h-screen">
       <div class="absolute inset-0 bg-black/50"></div>
 
@@ -160,18 +191,6 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
       <div
         class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white"
       >
-        <a
-          href={ddlmPageUrl}
-          class="group mb-5 inline-flex max-w-full items-center gap-2.5 rounded-full border border-white/35 bg-off-black/45 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white shadow-lg backdrop-blur-md transition hover:border-[#FF7A1A] hover:bg-off-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-4 focus-visible:ring-offset-off-black sm:text-sm"
-          data-conversion-event="ddlm_page_click"
-          data-conversion-context="home_hero_announcement"
-        >
-          <span class="h-2 w-2 shrink-0 rounded-full bg-[#FF7A1A]" aria-hidden="true"></span>
-          <span>Día de los Muertos photos</span>
-          <svg class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-          </svg>
-        </a>
         {popUpWeeksActive.map((week, i) => (
           <a
             href={popUpPageUrl}
@@ -210,75 +229,14 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
       </div>
       <PopUpWeekClient />
     </section>
+    )}
     {/* END: Hero Section */}
 
-    {/* START: Día de los Muertos recap spotlight (static, Nov 2 2026; slot 2,
-        see the section-order note at the top). In the recap's identity: black,
-        white, Rubik, one accent (#FF7A1A), papel picado along the top edge.
-        Copy LEFT, photo RIGHT, so the gala photo LEFT below keeps the
-        zig-zag. Copy and the survey line come from src/data/ddlmRecap2026.js. */}
-    <section
-      id="ddlm-recap"
-      class="relative scroll-mt-28 overflow-hidden bg-black pb-16 pt-20 font-rubik text-white sm:pb-20 sm:pt-24 lg:py-28"
-    >
-      <DdlmPicado ground="#000000" sway class="z-10" />
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
-          <div class="lg:col-span-3">
-            <p class="text-[0.9375rem] font-bold text-white/80">
-              {ddlmRecap.dateLine.split(" · ").map((part, i) => (
-                <>
-                  {i > 0 && " · "}
-                  <span class="whitespace-nowrap">{part}</span>
-                </>
-              ))}
-            </p>
-            <h2 class="mt-3 text-[3rem] font-extrabold leading-[0.98] text-balance lg:text-[4rem]">{ddlmRecap.thankYou.heading}</h2>
-            <p class="mt-5 max-w-[36rem] text-[1.0625rem] leading-relaxed text-white/80">
-              Día de los Muertos weekend, in photos: the ofrendas, kids yoga, Banda Cerro Azul, the farmers market, and Sunday evening at the community altars.
-            </p>
-            <a
-              href={ddlmPageUrl}
-              class="mt-7 inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-[#FF7A1A] px-8 text-base font-bold text-black hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
-              data-conversion-event="ddlm_page_click"
-              data-conversion-context="home_ddlm_recap"
-            >
-              See the photos
-            </a>
-            <p class="mt-5 text-[0.9375rem] leading-relaxed text-white/80">
-              {ddlmSurvey.homeLine}
-              <a
-                href={ddlmSurvey.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="py-3.5 font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                data-conversion-event="ddlm_survey_click"
-                data-conversion-context="home_ddlm_recap"
-                >{ddlmSurvey.homeLink}</a
-              >
-            </p>
-          </div>
-          <a
-            href={ddlmPageUrl}
-            class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black lg:col-span-2"
-            aria-label="See the Día de los Muertos photos"
-            data-conversion-event="ddlm_page_click"
-            data-conversion-context="home_ddlm_recap_photo"
-          >
-            <img
-              src={ddlmRecapPhoto}
-              width="1200"
-              height="800"
-              alt=""
-              loading="lazy"
-              decoding="async"
-              class="block aspect-[3/2] h-auto w-full object-cover"
-            />
-          </a>
-        </div>
-      </div>
-    </section>
-    {/* END: Día de los Muertos recap spotlight */}
+    {/* START: Our New Home Section (the former dark "A New Chapter" band, now
+        directly under the opening hero and in the opening look; see
+        src/components/NewHomeSection.astro) */}
+    <NewHomeSection />
+    {/* END: Our New Home Section */}
 
     {/* START: Annual Gala 2026 recap spotlight (post-gala, Sep 26 2026).
         Same slot, same theme as the pre-gala marquee so the documented
@@ -744,6 +702,7 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
     {/* END: ABC7 Windy City Weekend Spotlight Section */}
 
     {/* START: Merch Drop — Monday Miles Tee Section */}
+    {showMerchDrop && (
     <section
       class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50 py-16 sm:py-20 lg:py-24"
     >
@@ -1037,7 +996,553 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
         </div>
       </div>
     </section>
+    )}
     {/* END: Merch Drop — Monday Miles Tee Section */}
+
+    {/* START: Events Section */}
+    <section class="bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-12 sm:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <p
+              class="text-sm font-bold uppercase tracking-widest text-accent-gold"
+            >
+              What's Happening
+            </p>
+            <h2
+              class="mt-1 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
+            >
+              Events at LSP
+            </h2>
+          </div>
+          <a
+            href={`${base}events`}
+            class="inline-flex items-center gap-1 font-sans font-bold text-off-black transition-colors hover:text-vibrant-pink"
+          >
+            View All
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+
+        {/* Horizontal scrollable carousel */}
+        <div class="relative">
+          {/* Swipe/Scroll hint pill */}
+          <div id="events-swipe-hint" class="pointer-events-none absolute top-1/2 -translate-y-1/2 right-3 sm:right-4 z-20 flex items-center gap-1.5 rounded-full bg-off-black/85 backdrop-blur-sm px-3.5 py-2 text-xs font-bold text-white shadow-xl animate-swipe-pulse opacity-0">
+            <span class="hidden sm:inline">Scroll</span>
+            <span class="sm:hidden">Swipe</span>
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </div>
+
+          <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
+
+          {/* Pop Up week card (current week only; one card per active week,
+              windowed by popUpWeekWindow so the browser flips it Mon to Mon
+              with no rebuild). Pop-ups are the class
+              offering while studio programming is paused. Option I cream /
+              terracotta / ink; image = the week's OG card. A direct child of
+              #events-carousel; the dots script skips hidden cards. */}
+          {popUpWeeksActive.map((week, i) => (
+            <a
+              href={popUpPageUrl}
+              class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+              {...popUpWeekWindow(popUpWeeksActive, i)}
+              data-popup-hide-when-past
+              data-conversion-event="popup_page_click"
+              data-conversion-context="home_events_carousel_popup"
+            >
+              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f3ede4] text-[#1e1a17] shadow-xl shadow-off-black/15 ring-1 ring-[#1e1a17]/10 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                <div class="relative aspect-[1200/630] overflow-hidden bg-[#f3ede4]">
+                  <img
+                    src={`${base}${week.ogImage}`}
+                    width="1200"
+                    height="630"
+                    alt={week.ogImageAlt}
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-center gap-2 text-sm font-bold text-[#c4573a]">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {week.dateRangeShort}
+                  </div>
+                  <h3 class="mt-2 text-xl font-extrabold uppercase leading-tight tracking-tight">{week.title}</h3>
+                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#1e1a17]/75">
+                    45-minute classes at {week.locations.map((l) => l.name).join(", ").replace(/, ([^,]*)$/, " and $1")}. Reserve one class at a time.
+                  </p>
+                  <span class="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-[#c4573a] transition-all group-hover:gap-2">
+                    See the schedule
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+
+          {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the
+              carousel while the series is not past. A div (not an <a>) so
+              the two Zeffy CTAs are not nested links; it stays a DIRECT
+              child of #events-carousel, and data-finishline-end lets the
+              dots script skip it once hidden after Oct 14. */}
+          {finishLineActive && (
+            <div
+              class="group flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+              data-finishline-hide-when-past
+              data-finishline-end={collectiveFinishLine.endsAtISO}
+            >
+              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f7f6f1] text-[#484848] shadow-xl shadow-off-black/15 ring-1 ring-[#484848]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                <a
+                  href={finishLinePageUrl}
+                  class="block"
+                  data-conversion-event="finishline_page_click"
+                  data-conversion-context="home_events_carousel_finishline"
+                >
+                  <div class="relative aspect-[1200/630] overflow-hidden bg-[#f0f0ec]">
+                    <img
+                      src={`${base}${collectiveFinishLine.ogImage}`}
+                      width="1200"
+                      height="630"
+                      alt="The Collective Finish Line: yoga flows Oct 5 and Oct 14, cheer zone Oct 11"
+                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </a>
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-center gap-2 text-sm font-bold text-[#7d6f60]">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Oct 5 · Oct 11 · Oct 14
+                  </div>
+                  <h3 class="mt-2 text-xl font-extrabold leading-tight">
+                    <a href={finishLinePageUrl} class="hover:underline" data-conversion-event="finishline_page_click" data-conversion-context="home_events_carousel_finishline">{collectiveFinishLine.title}</a>
+                  </h3>
+                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#484848]/75">
+                    Chicago Marathon week: two yoga flows at Chicago Art Department
+                    ({collectiveFinishLine.priceLine}) and our cheer zone at 18th & Peoria on marathon day.
+                  </p>
+                  <div class="mt-4 grid gap-2">
+                    {finishLineClasses.map((ev) => (
+                      <a
+                        href={ev.ticketsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center justify-between gap-2 rounded-full bg-[#484848] px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#2f2f2f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#efbd62] focus-visible:ring-offset-2"
+                        data-finishline-past-at={ev.endsAtISO}
+                        data-conversion-event="class_booking_start"
+                        data-conversion-context="home_events_carousel_finishline"
+                        data-conversion-provider="zeffy"
+                        data-conversion-booking-path="finishline_zeffy"
+                        data-conversion-finishline-event={ev.trackingKey}
+                      >
+                        <span>{ev.dayShort} {ev.dateLabel} · {ev.kind === "class" && ev.id === "oct5-flow" ? "Yoga flow" : "Restorative flow"}</span>
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Annual Gala 2026 recap card (leads the carousel). Post-gala
+              (Sep 26 2026): no ticket hooks, links to the /gala recap. */}
+          <a
+            href={galaPageUrl}
+            class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
+            data-conversion-event="gala_recap_click"
+            data-conversion-context="home_events_carousel_gala"
+          >
+            <div
+              class="relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent-gold/35 bg-off-black text-white shadow-xl shadow-off-black/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent-gold/20"
+            >
+              <div class="relative h-52 overflow-hidden bg-gradient-to-br from-[#171717] via-off-black to-[#2a241d]">
+                <GalaPhotoFrame
+                  slot={galaRecapPhoto}
+                  variant="carousel"
+                  label={false}
+                />
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
+                    <span class="h-1.5 w-1.5 rotate-45 bg-off-black" aria-hidden="true"></span>
+                    Recap
+                  </span>
+                  <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                    {galaAllPhotoCount} photos
+                  </span>
+                </div>
+              </div>
+              <div class="flex flex-1 flex-col p-5">
+                <div class="flex items-center gap-2 text-sm font-semibold text-accent-gold">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path>
+                  </svg>
+                  {galaRecapCard.dateLine}
+                </div>
+                <h3 class="mt-2 font-display text-2xl font-bold leading-tight">
+                  <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala 2026
+                </h3>
+                <p class="mt-2 text-sm font-semibold text-white/70">
+                  {galaTeaser.venueName}
+                </p>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
+                  We gathered for cocktails on the terrace, dinner and honors,
+                  the paddle raise, the fashion show, and dancing until
+                  midnight. Gracias, comunidad.
+                </p>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
+                  <span>{galaTeaser.recapLabel}</span>
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Monday Miles event card */}
+          {showMondayMiles && (
+          <a
+            href={`${base}schedule`}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event="class_booking_start"
+            data-conversion-context="home_events_monday_miles"
+            data-conversion-booking-path="schedule_page"
+          >
+            <div
+              class="relative overflow-hidden rounded-2xl bg-off-black text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20 h-full"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/monday-miles-runner.png`}
+                  alt="Monday Miles community run"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/40 to-off-black/10"
+                >
+                </div>
+                <div class="absolute top-3 left-3 flex gap-2">
+                  <span
+                    class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
+                    >Weekly</span
+                  >
+                  <span
+                    class="rounded-full bg-off-black/50 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-white drop-shadow-sm"
+                    >Free</span
+                  >
+                </div>
+              </div>
+              <div class="p-5">
+                <div
+                  class="flex items-center gap-2 text-sm text-accent-gold font-semibold"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Every Monday at 6:30 PM
+                </div>
+                <h3
+                  class="mt-2 text-xl font-bold transition-colors group-hover:text-accent-gold"
+                >
+                  Monday Miles
+                </h3>
+                <p class="mt-2 text-sm text-white/60 leading-relaxed">
+                  Walk 1 mile or jog/run 2. You set the pace. All levels
+                  welcome. Meet in the cafe and warm up together.
+                </p>
+                <div
+                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2"
+                >
+                  Join the Run Club
+                  <svg
+                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+          )}
+
+          {/* Graduation 2026 Gallery card (recap: photos from the Aug 7 YTT
+              ceremony; graduation candlelit-rose identity) */}
+          <a
+            href={graduationPageUrl}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event="graduation_spotlight_click"
+            data-conversion-context="home_events_carousel_graduation"
+          >
+            <div
+              class="relative h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2b1520] to-[#1e1216] text-[#f6efe3] shadow-lg shadow-[#d79b47]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#d79b47]/20"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <img
+                  src={`${base}images/graduation/g15.jpg`}
+                  width="1024"
+                  height="683"
+                  alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#2b1520] via-[#2b1520]/25 to-transparent"></div>
+                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span class="rounded-full bg-[#d79b47] px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
+                    Recap
+                  </span>
+                  <span class="rounded-full bg-[#2b1520]/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#f6efe3] backdrop-blur-sm">
+                    Fri, Aug 7
+                  </span>
+                </div>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-sm font-semibold text-[#f0c57c]">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  Fri, Aug 7 · LSP Studio, Pilsen
+                </div>
+                <h3 class="mt-2 text-2xl leading-tight transition-colors [font-family:Fraunces,serif] [font-weight:650] group-hover:text-[#f0c57c]">
+                  Graduation <span class="italic text-[#f0c57c]">2026</span> Gallery
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-[#f6efe3]/60">
+                  The YTT 2025 and 2026 cohorts received their certificates.
+                  Nearly 100 teachers strong, casi 100 maestras: relive
+                  graduation night with us.
+                </p>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#f0c57c] transition-all group-hover:gap-2">
+                  Relive the night
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Sweat Fest event card */}
+          <a
+            href={sweatFestPrimaryUrl}
+            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
+            data-conversion-event="sweatfest_explore_click"
+            data-conversion-context="home_events_carousel"
+          >
+            <div
+              class="relative overflow-hidden rounded-2xl bg-[#f4f7dc] text-[#123f36] shadow-lg ring-1 ring-[#123f36]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ee3083]/25 h-full"
+            >
+              <SweatFestArtwork variant="lockup" className="h-52 w-full" />
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b23c14]">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  Recap · {sweatFest.shortDateLabel}
+                </div>
+                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b23c14]">
+                  LSP's first all-day festival
+                </h3>
+                <p class="mt-2 text-sm text-medium-gray leading-relaxed">
+                  That's a wrap: a sunrise 5K, two stages of classes, and the
+                  closing Pachanga. Relive the day and see every photo.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {sweatFestDay.map((phase, i) => (
+                    <span
+                      class="sf-tag inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-off-black"
+                      style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
+                    >
+                      <span class="inline-block h-1.5 w-1.5 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
+                      {phase.title}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b23c14] transition-all group-hover:gap-2">
+                  {sweatFestPrimaryLabel}
+                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+          </div>
+
+          {/* Pagination dots (desktop only — quick jump between cards) */}
+          <div
+            id="events-dots"
+            class="hidden sm:flex items-center justify-center gap-2.5 mt-8"
+            role="tablist"
+            aria-label="Jump to event"
+          >
+          </div>
+        </div>
+      </div>
+      <FinishLineClient />
+    </section>
+    {/* END: Events Section */}
+
+    <script>
+      // Wiggle + swipe hint + pagination dots for events carousel
+      (function initEventsCarousel() {
+        const carousel = document.getElementById('events-carousel');
+        const hint = document.getElementById('events-swipe-hint');
+        const dotsContainer = document.getElementById('events-dots');
+        if (!carousel) return;
+
+        // Skip a campaign card that the page auto-hides once its series is
+        // past (data-finishline-end) or that is outside its Pop Up week
+        // window (data-popup-show-after / -hide-after, the same rule as
+        // PopUpWeekClient), so the dots match the visible cards whichever
+        // script runs first.
+        const passed = (iso) => {
+          const t = Date.parse(iso || '');
+          return Number.isFinite(t) && Date.now() > t;
+        };
+        const cards = Array.from(carousel.children).filter((card) => {
+          if (passed(card.getAttribute('data-finishline-end'))) return false;
+          const showAfter = card.getAttribute('data-popup-show-after');
+          const hideAfter = card.getAttribute('data-popup-hide-after');
+          if (showAfter && !passed(showAfter)) return false;
+          if (hideAfter && passed(hideAfter)) return false;
+          return true;
+        });
+        const isScrollable = () => carousel.scrollWidth > carousel.clientWidth + 4;
+
+        const DOT_INACTIVE = 'events-dot h-2 w-2 rounded-full bg-off-black/25 transition-all duration-300 hover:bg-accent-gold/70 focus:outline-none focus:ring-2 focus:ring-accent-gold/40 focus:ring-offset-2 focus:ring-offset-[#f7efe3]';
+        const DOT_ACTIVE = 'events-dot h-2 w-8 rounded-full bg-off-black transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent-gold/40 focus:ring-offset-2 focus:ring-offset-[#f7efe3]';
+
+        const dots = [];
+
+        const cardOffset = (card) =>
+          card.getBoundingClientRect().left -
+          carousel.getBoundingClientRect().left +
+          carousel.scrollLeft;
+
+        const updateActiveDot = () => {
+          if (!dots.length) return;
+          const scrollLeft = carousel.scrollLeft;
+          let closestIndex = 0;
+          let closestDist = Infinity;
+          cards.forEach((card, i) => {
+            const dist = Math.abs(scrollLeft - cardOffset(card));
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestIndex = i;
+            }
+          });
+          dots.forEach((dot, i) => {
+            dot.className = i === closestIndex ? DOT_ACTIVE : DOT_INACTIVE;
+            dot.setAttribute('aria-selected', i === closestIndex ? 'true' : 'false');
+          });
+        };
+
+        // Build dots
+        if (dotsContainer && cards.length > 1) {
+          cards.forEach((card, i) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = DOT_INACTIVE;
+            dot.setAttribute('role', 'tab');
+            dot.setAttribute('aria-label', `Go to event ${i + 1}`);
+            dot.addEventListener('click', () => {
+              carousel.scrollTo({ left: cardOffset(card), behavior: 'smooth' });
+            });
+            dotsContainer.appendChild(dot);
+            dots.push(dot);
+          });
+          updateActiveDot();
+        }
+
+        // Wiggle hint on first view
+        if (isScrollable()) {
+          let hinted = false;
+          const triggerHint = () => {
+            if (hinted) return;
+            hinted = true;
+            if (hint) {
+              hint.style.opacity = '1';
+              hint.style.transition = 'opacity 0.4s ease';
+            }
+            setTimeout(() => {
+              carousel.scrollTo({ left: 90, behavior: 'smooth' });
+              setTimeout(() => {
+                carousel.scrollTo({ left: 0, behavior: 'smooth' });
+              }, 700);
+            }, 350);
+            setTimeout(() => {
+              if (hint) hint.style.opacity = '0';
+            }, 4500);
+          };
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  triggerHint();
+                  observer.disconnect();
+                }
+              });
+            },
+            { threshold: 0.25 }
+          );
+          observer.observe(carousel);
+        }
+
+        carousel.addEventListener(
+          'scroll',
+          () => {
+            if (carousel.scrollLeft > 30 && hint) {
+              hint.style.opacity = '0';
+            }
+            updateActiveDot();
+          },
+          { passive: true }
+        );
+
+        window.addEventListener('resize', updateActiveDot, { passive: true });
+      })();
+    </script>
 
     {/* START: 40 Under 40 Spotlight */}
     <section
@@ -1139,6 +1644,7 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
     {/* END: 40 Under 40 Spotlight */}
 
     {/* START: Monday Miles — Community Runs Section */}
+    {showMondayMiles && (
     <section
       class="relative overflow-hidden bg-gradient-to-br from-[#f7efe3] via-white to-[#fff7e8] py-16 sm:py-20 lg:py-24"
     >
@@ -1404,689 +1910,76 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
         </div>
       </div>
     </section>
+    )}
     {/* END: Monday Miles — Community Runs Section */}
 
-    {/* START: A New Chapter Section (former Grand Opening). Copy updated
-        Nov 9, 2026 for the reopening: classes resume Mon Nov 16, 2026 at
-        Mural Park, 924 W 19th Place (a long-term residency, never
-        "permanent"). Slot, dark theme, and RIGHT media side unchanged. */}
-    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24"
-        >
-          {/* Copy left / image RIGHT on desktop (Sep 2026 reorder): the
-              photo swings right so it zig-zags with the Monday Miles runs
-              visual on the left directly above */}
-          <div class="lg:order-1">
-            <p
-              class="font-sans text-base font-semibold uppercase tracking-wider text-vibrant-pink"
-            >
-              A New Chapter
+    {/* START: Día de los Muertos recap spotlight (static, Nov 2 2026; slot 2,
+        see the section-order note at the top). In the recap's identity: black,
+        white, Rubik, one accent (#FF7A1A), papel picado along the top edge.
+        Copy LEFT, photo RIGHT, so the gala photo LEFT below keeps the
+        zig-zag. Copy and the survey line come from src/data/ddlmRecap2026.js. */}
+    <section
+      id="ddlm-recap"
+      class="relative scroll-mt-28 overflow-hidden bg-black pb-16 pt-20 font-rubik text-white sm:pb-20 sm:pt-24 lg:py-28"
+    >
+      <DdlmPicado ground="#000000" sway class="z-10" />
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
+          <div class="lg:col-span-3">
+            <p class="text-[0.9375rem] font-bold text-white/80">
+              {ddlmRecap.dateLine.split(" · ").map((part, i) => (
+                <>
+                  {i > 0 && " · "}
+                  <span class="whitespace-nowrap">{part}</span>
+                </>
+              ))}
             </p>
-            <h2
-              class="mt-2 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
+            <h2 class="mt-3 text-[3rem] font-extrabold leading-[0.98] text-balance lg:text-[4rem]">{ddlmRecap.thankYou.heading}</h2>
+            <p class="mt-5 max-w-[36rem] text-[1.0625rem] leading-relaxed text-white/80">
+              Día de los Muertos weekend, in photos: the ofrendas, kids yoga, Banda Cerro Azul, the farmers market, and Sunday evening at the community altars.
+            </p>
+            <a
+              href={ddlmPageUrl}
+              class="mt-7 inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-[#FF7A1A] px-8 text-base font-bold text-black hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
+              data-conversion-event="ddlm_page_click"
+              data-conversion-context="home_ddlm_recap"
             >
-              Classes resume Monday, November 16 <span class="whitespace-nowrap">at Mural Park.</span>
-            </h2>
-            <div class="mt-6 space-y-4 font-body text-lg text-white/65">
-              <p>
-                Our new home is Mural Park, 924 W 19th Place, in Pilsen, with
-                two rooms. Gracias to everyone who made our 16th Street room
-                ours.
-              </p>
-              <p>
-                This fall, LSP went pop-up across the neighborhood, with classes
-                and community programming around Pilsen and nearby.
-              </p>
-              <p>
-                <a
-                  href="#abc7-windy-city"
-                  data-conversion-event="press_abc7_click"
-                  data-conversion-context="home_new_chapter"
-                  class="text-accent-gold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-off-black"
-                >Hear Yari and Savannah tell the story on ABC7.</a>
-              </p>
-            </div>
-            <blockquote
-              class="mt-6 border-l-2 border-accent-gold/60 pl-4 font-body italic text-white/80"
-            >
-              <p>
-                The Latina Sweat Project was never these walls. It has always
-                been the people.
-              </p>
-              <footer class="mt-1 text-sm not-italic text-white/50">
-                Margarita Quiñones-Peña, Founder
-              </footer>
-            </blockquote>
-            <div
-              class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
-            >
+              See the photos
+            </a>
+            <p class="mt-5 text-[0.9375rem] leading-relaxed text-white/80">
+              {ddlmSurvey.homeLine}
               <a
-                href={`${base}schedule`}
-                class="btn rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
-                data-conversion-event="class_booking_start"
-                data-conversion-context="home_studio_section"
-                data-conversion-booking-path="schedule_page"
+                href={ddlmSurvey.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="py-3.5 font-bold text-white underline decoration-[#FF7A1A] decoration-2 underline-offset-4 hover:text-[#FF7A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                data-conversion-event="ddlm_survey_click"
+                data-conversion-context="home_ddlm_recap"
+                >{ddlmSurvey.homeLink}</a
               >
-                Book a class
-              </a>
-              <a
-                href={`${base}donate`}
-                class="btn rounded-full border border-accent-gold/50 bg-white/[0.04] px-8 py-3 text-base font-bold text-accent-gold transition hover:border-accent-gold hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-accent-gold focus:ring-offset-2 focus:ring-offset-off-black"
-                data-conversion-event="donation_click"
-                data-conversion-context="home_new_chapter"
-              >
-                Support the next studio
-              </a>
-            </div>
-            <p class="mt-4 text-center text-sm text-white/45 lg:text-left">
-              Booking is open for classes at Mural Park.
             </p>
           </div>
-          <div class="order-last w-full overflow-hidden rounded-lg shadow-xl lg:order-2">
+          <a
+            href={ddlmPageUrl}
+            class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A1A] focus-visible:ring-offset-2 focus-visible:ring-offset-black lg:col-span-2"
+            aria-label="See the Día de los Muertos photos"
+            data-conversion-event="ddlm_page_click"
+            data-conversion-context="home_ddlm_recap_photo"
+          >
             <img
-              src={`${base}images/studio.png`}
-              alt="Inside the Latina Sweat Project's first studio at 949 W 16th St in Pilsen"
-              class="h-full w-full object-cover"
+              src={ddlmRecapPhoto}
+              width="1200"
+              height="800"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="block aspect-[3/2] h-auto w-full object-cover"
             />
-          </div>
-        </div>
-
-        {/* Companion band: the current Pop Up week (Week 1 Oct 5 to 11,
-            Week 2 Oct 12 to 18, 2026; flips on Oct 12). It is this
-            section's story in action (studio programming paused, the classes go
-            pop-up), so it rides INSIDE the dark A New Chapter room, like the
-            YTT '26 Trio band did inside Graduation: no new section, so the
-            light/dark alternation and the zig-zag are untouched. Campaign
-            identity (cream / terracotta / ink, CAD white card + Sanctuary ink
-            card), each card with its own Zeffy CTA. PopUpWeekBand renders
-            nothing once the week is past and hides itself in the browser
-            after Oct 11. */}
-        <PopUpWeekBand context="home_new_chapter_popup" tone="dark" class="mt-12 sm:mt-16" />
-      </div>
-    </section>
-    {/* END: A New Chapter Section */}
-
-    {/* START: Events Section */}
-    <section class="bg-gradient-to-br from-[#f7efe3] via-white to-[#f5ede3] py-12 sm:py-16">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between mb-10">
-          <div>
-            <p
-              class="text-sm font-bold uppercase tracking-widest text-accent-gold"
-            >
-              What's Happening
-            </p>
-            <h2
-              class="mt-1 font-sans text-3xl font-bold tracking-tight text-off-black sm:text-4xl"
-            >
-              Events at LSP
-            </h2>
-          </div>
-          <a
-            href={`${base}events`}
-            class="inline-flex items-center gap-1 font-sans font-bold text-off-black transition-colors hover:text-vibrant-pink"
-          >
-            View All
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
           </a>
-        </div>
-
-        {/* Horizontal scrollable carousel */}
-        <div class="relative">
-          {/* Swipe/Scroll hint pill */}
-          <div id="events-swipe-hint" class="pointer-events-none absolute top-1/2 -translate-y-1/2 right-3 sm:right-4 z-20 flex items-center gap-1.5 rounded-full bg-off-black/85 backdrop-blur-sm px-3.5 py-2 text-xs font-bold text-white shadow-xl animate-swipe-pulse opacity-0">
-            <span class="hidden sm:inline">Scroll</span>
-            <span class="sm:hidden">Swipe</span>
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </div>
-
-          <div id="events-carousel" class="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" role="list">
-
-          {/* Pop Up week card (current week only; one card per active week,
-              windowed by popUpWeekWindow so the browser flips it Mon to Mon
-              with no rebuild). Pop-ups are the class
-              offering while studio programming is paused. Option I cream /
-              terracotta / ink; image = the week's OG card. A direct child of
-              #events-carousel; the dots script skips hidden cards. */}
-          {popUpWeeksActive.map((week, i) => (
-            <a
-              href={popUpPageUrl}
-              class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
-              {...popUpWeekWindow(popUpWeeksActive, i)}
-              data-popup-hide-when-past
-              data-conversion-event="popup_page_click"
-              data-conversion-context="home_events_carousel_popup"
-            >
-              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f3ede4] text-[#1e1a17] shadow-xl shadow-off-black/15 ring-1 ring-[#1e1a17]/10 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
-                <div class="relative aspect-[1200/630] overflow-hidden bg-[#f3ede4]">
-                  <img
-                    src={`${base}${week.ogImage}`}
-                    width="1200"
-                    height="630"
-                    alt={week.ogImageAlt}
-                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div class="flex flex-1 flex-col p-5">
-                  <div class="flex items-center gap-2 text-sm font-bold text-[#c4573a]">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    {week.dateRangeShort}
-                  </div>
-                  <h3 class="mt-2 text-xl font-extrabold uppercase leading-tight tracking-tight">{week.title}</h3>
-                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#1e1a17]/75">
-                    45-minute classes at {week.locations.map((l) => l.name).join(", ").replace(/, ([^,]*)$/, " and $1")}. Reserve one class at a time.
-                  </p>
-                  <span class="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-[#c4573a] transition-all group-hover:gap-2">
-                    See the schedule
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                    </svg>
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
-
-          {/* The Collective Finish Line card (Oct 5 – 14, 2026) leads the
-              carousel while the series is not past. A div (not an <a>) so
-              the two Zeffy CTAs are not nested links; it stays a DIRECT
-              child of #events-carousel, and data-finishline-end lets the
-              dots script skip it once hidden after Oct 14. */}
-          {finishLineActive && (
-            <div
-              class="group flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
-              data-finishline-hide-when-past
-              data-finishline-end={collectiveFinishLine.endsAtISO}
-            >
-              <div class="relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#f7f6f1] text-[#484848] shadow-xl shadow-off-black/15 ring-1 ring-[#484848]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-                <a
-                  href={finishLinePageUrl}
-                  class="block"
-                  data-conversion-event="finishline_page_click"
-                  data-conversion-context="home_events_carousel_finishline"
-                >
-                  <div class="relative aspect-[1200/630] overflow-hidden bg-[#f0f0ec]">
-                    <img
-                      src={`${base}${collectiveFinishLine.ogImage}`}
-                      width="1200"
-                      height="630"
-                      alt="The Collective Finish Line: yoga flows Oct 5 and Oct 14, cheer zone Oct 11"
-                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                </a>
-                <div class="flex flex-1 flex-col p-5">
-                  <div class="flex items-center gap-2 text-sm font-bold text-[#7d6f60]">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Oct 5 · Oct 11 · Oct 14
-                  </div>
-                  <h3 class="mt-2 text-xl font-extrabold leading-tight">
-                    <a href={finishLinePageUrl} class="hover:underline" data-conversion-event="finishline_page_click" data-conversion-context="home_events_carousel_finishline">{collectiveFinishLine.title}</a>
-                  </h3>
-                  <p class="mt-2 flex-1 text-sm leading-relaxed text-[#484848]/75">
-                    Chicago Marathon week: two yoga flows at Chicago Art Department
-                    ({collectiveFinishLine.priceLine}) and our cheer zone at 18th & Peoria on marathon day.
-                  </p>
-                  <div class="mt-4 grid gap-2">
-                    {finishLineClasses.map((ev) => (
-                      <a
-                        href={ev.ticketsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="flex items-center justify-between gap-2 rounded-full bg-[#484848] px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#2f2f2f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#efbd62] focus-visible:ring-offset-2"
-                        data-finishline-past-at={ev.endsAtISO}
-                        data-conversion-event="class_booking_start"
-                        data-conversion-context="home_events_carousel_finishline"
-                        data-conversion-provider="zeffy"
-                        data-conversion-booking-path="finishline_zeffy"
-                        data-conversion-finishline-event={ev.trackingKey}
-                      >
-                        <span>{ev.dayShort} {ev.dateLabel} · {ev.kind === "class" && ev.id === "oct5-flow" ? "Yoga flow" : "Restorative flow"}</span>
-                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                        </svg>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Annual Gala 2026 recap card (leads the carousel). Post-gala
-              (Sep 26 2026): no ticket hooks, links to the /gala recap. */}
-          <a
-            href={galaPageUrl}
-            class="group block flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[390px] snap-start"
-            data-conversion-event="gala_recap_click"
-            data-conversion-context="home_events_carousel_gala"
-          >
-            <div
-              class="relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent-gold/35 bg-off-black text-white shadow-xl shadow-off-black/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent-gold/20"
-            >
-              <div class="relative h-52 overflow-hidden bg-gradient-to-br from-[#171717] via-off-black to-[#2a241d]">
-                <GalaPhotoFrame
-                  slot={galaRecapPhoto}
-                  variant="carousel"
-                  label={false}
-                />
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                  <span class="inline-flex items-center gap-1.5 rounded-[3px] bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black shadow-md">
-                    <span class="h-1.5 w-1.5 rotate-45 bg-off-black" aria-hidden="true"></span>
-                    Recap
-                  </span>
-                  <span class="rounded-[3px] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                    {galaAllPhotoCount} photos
-                  </span>
-                </div>
-              </div>
-              <div class="flex flex-1 flex-col p-5">
-                <div class="flex items-center gap-2 text-sm font-semibold text-accent-gold">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path>
-                  </svg>
-                  {galaRecapCard.dateLine}
-                </div>
-                <h3 class="mt-2 font-display text-2xl font-bold leading-tight">
-                  <span class="gala-foil">{galaTeaser.shortTitle}</span> Gala 2026
-                </h3>
-                <p class="mt-2 text-sm font-semibold text-white/70">
-                  {galaTeaser.venueName}
-                </p>
-                <p class="mt-2 flex-1 text-sm leading-relaxed text-white/55">
-                  We gathered for cocktails on the terrace, dinner and honors,
-                  the paddle raise, the fashion show, and dancing until
-                  midnight. Gracias, comunidad.
-                </p>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2">
-                  <span>{galaTeaser.recapLabel}</span>
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Monday Miles event card */}
-          <a
-            href={`${base}schedule`}
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="class_booking_start"
-            data-conversion-context="home_events_monday_miles"
-            data-conversion-booking-path="schedule_page"
-          >
-            <div
-              class="relative overflow-hidden rounded-2xl bg-off-black text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent-gold/20 h-full"
-            >
-              <div class="relative h-52 overflow-hidden">
-                <img
-                  src={`${base}images/monday-miles-runner.png`}
-                  alt="Monday Miles community run"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                  class="absolute inset-0 bg-gradient-to-t from-off-black via-off-black/40 to-off-black/10"
-                >
-                </div>
-                <div class="absolute top-3 left-3 flex gap-2">
-                  <span
-                    class="rounded-full bg-accent-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black"
-                    >Weekly</span
-                  >
-                  <span
-                    class="rounded-full bg-off-black/50 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-white drop-shadow-sm"
-                    >Free</span
-                  >
-                </div>
-              </div>
-              <div class="p-5">
-                <div
-                  class="flex items-center gap-2 text-sm text-accent-gold font-semibold"
-                >
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Every Monday at 6:30 PM
-                </div>
-                <h3
-                  class="mt-2 text-xl font-bold transition-colors group-hover:text-accent-gold"
-                >
-                  Monday Miles
-                </h3>
-                <p class="mt-2 text-sm text-white/60 leading-relaxed">
-                  Walk 1 mile or jog/run 2. You set the pace. All levels
-                  welcome. Meet in the cafe and warm up together.
-                </p>
-                <div
-                  class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent-gold transition-all group-hover:gap-2"
-                >
-                  Join the Run Club
-                  <svg
-                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Graduation 2026 Gallery card (recap: photos from the Aug 7 YTT
-              ceremony; graduation candlelit-rose identity) */}
-          <a
-            href={graduationPageUrl}
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="graduation_spotlight_click"
-            data-conversion-context="home_events_carousel_graduation"
-          >
-            <div
-              class="relative h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2b1520] to-[#1e1216] text-[#f6efe3] shadow-lg shadow-[#d79b47]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#d79b47]/20"
-            >
-              <div class="relative h-52 overflow-hidden">
-                <img
-                  src={`${base}images/graduation/g15.jpg`}
-                  width="1024"
-                  height="683"
-                  alt="YTT graduates celebrating at the 2026 graduation ceremony at LSP Studio"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-[#2b1520] via-[#2b1520]/25 to-transparent"></div>
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                  <span class="rounded-full bg-[#d79b47] px-3 py-1 text-xs font-bold uppercase tracking-wider text-off-black">
-                    Recap
-                  </span>
-                  <span class="rounded-full bg-[#2b1520]/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#f6efe3] backdrop-blur-sm">
-                    Fri, Aug 7
-                  </span>
-                </div>
-              </div>
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-sm font-semibold text-[#f0c57c]">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Fri, Aug 7 · LSP Studio, Pilsen
-                </div>
-                <h3 class="mt-2 text-2xl leading-tight transition-colors [font-family:Fraunces,serif] [font-weight:650] group-hover:text-[#f0c57c]">
-                  Graduation <span class="italic text-[#f0c57c]">2026</span> Gallery
-                </h3>
-                <p class="mt-2 text-sm leading-relaxed text-[#f6efe3]/60">
-                  The YTT 2025 and 2026 cohorts received their certificates.
-                  Nearly 100 teachers strong, casi 100 maestras: relive
-                  graduation night with us.
-                </p>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#f0c57c] transition-all group-hover:gap-2">
-                  Relive the night
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Sweat Fest event card */}
-          <a
-            href={sweatFestPrimaryUrl}
-            class="group block flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] snap-start"
-            data-conversion-event="sweatfest_explore_click"
-            data-conversion-context="home_events_carousel"
-          >
-            <div
-              class="relative overflow-hidden rounded-2xl bg-[#f4f7dc] text-[#123f36] shadow-lg ring-1 ring-[#123f36]/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#ee3083]/25 h-full"
-            >
-              <SweatFestArtwork variant="lockup" className="h-52 w-full" />
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#b23c14]">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Recap · {sweatFest.shortDateLabel}
-                </div>
-                <h3 class="mt-2 font-slab text-xl uppercase tracking-wide leading-tight transition-colors group-hover:text-[#b23c14]">
-                  LSP's first all-day festival
-                </h3>
-                <p class="mt-2 text-sm text-medium-gray leading-relaxed">
-                  That's a wrap: a sunrise 5K, two stages of classes, and the
-                  closing Pachanga. Relive the day and see every photo.
-                </p>
-                <div class="mt-4 flex flex-wrap gap-2">
-                  {sweatFestDay.map((phase, i) => (
-                    <span
-                      class="sf-tag inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-off-black"
-                      style={`transform: rotate(${[-1.2, 0.8, -0.6][i % 3]}deg);`}
-                    >
-                      <span class="inline-block h-1.5 w-1.5 rotate-45" style={`background-color: ${sweatFestDeepAccents[phase.accent]};`} aria-hidden="true"></span>
-                      {phase.title}
-                    </span>
-                  ))}
-                </div>
-                <div class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#b23c14] transition-all group-hover:gap-2">
-                  {sweatFestPrimaryLabel}
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </a>
-          </div>
-
-          {/* Pagination dots (desktop only — quick jump between cards) */}
-          <div
-            id="events-dots"
-            class="hidden sm:flex items-center justify-center gap-2.5 mt-8"
-            role="tablist"
-            aria-label="Jump to event"
-          >
-          </div>
-        </div>
-      </div>
-      <FinishLineClient />
-    </section>
-    {/* END: Events Section */}
-
-    <script>
-      // Wiggle + swipe hint + pagination dots for events carousel
-      (function initEventsCarousel() {
-        const carousel = document.getElementById('events-carousel');
-        const hint = document.getElementById('events-swipe-hint');
-        const dotsContainer = document.getElementById('events-dots');
-        if (!carousel) return;
-
-        // Skip a campaign card that the page auto-hides once its series is
-        // past (data-finishline-end) or that is outside its Pop Up week
-        // window (data-popup-show-after / -hide-after, the same rule as
-        // PopUpWeekClient), so the dots match the visible cards whichever
-        // script runs first.
-        const passed = (iso) => {
-          const t = Date.parse(iso || '');
-          return Number.isFinite(t) && Date.now() > t;
-        };
-        const cards = Array.from(carousel.children).filter((card) => {
-          if (passed(card.getAttribute('data-finishline-end'))) return false;
-          const showAfter = card.getAttribute('data-popup-show-after');
-          const hideAfter = card.getAttribute('data-popup-hide-after');
-          if (showAfter && !passed(showAfter)) return false;
-          if (hideAfter && passed(hideAfter)) return false;
-          return true;
-        });
-        const isScrollable = () => carousel.scrollWidth > carousel.clientWidth + 4;
-
-        const DOT_INACTIVE = 'events-dot h-2 w-2 rounded-full bg-off-black/25 transition-all duration-300 hover:bg-accent-gold/70 focus:outline-none focus:ring-2 focus:ring-accent-gold/40 focus:ring-offset-2 focus:ring-offset-[#f7efe3]';
-        const DOT_ACTIVE = 'events-dot h-2 w-8 rounded-full bg-off-black transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent-gold/40 focus:ring-offset-2 focus:ring-offset-[#f7efe3]';
-
-        const dots = [];
-
-        const cardOffset = (card) =>
-          card.getBoundingClientRect().left -
-          carousel.getBoundingClientRect().left +
-          carousel.scrollLeft;
-
-        const updateActiveDot = () => {
-          if (!dots.length) return;
-          const scrollLeft = carousel.scrollLeft;
-          let closestIndex = 0;
-          let closestDist = Infinity;
-          cards.forEach((card, i) => {
-            const dist = Math.abs(scrollLeft - cardOffset(card));
-            if (dist < closestDist) {
-              closestDist = dist;
-              closestIndex = i;
-            }
-          });
-          dots.forEach((dot, i) => {
-            dot.className = i === closestIndex ? DOT_ACTIVE : DOT_INACTIVE;
-            dot.setAttribute('aria-selected', i === closestIndex ? 'true' : 'false');
-          });
-        };
-
-        // Build dots
-        if (dotsContainer && cards.length > 1) {
-          cards.forEach((card, i) => {
-            const dot = document.createElement('button');
-            dot.type = 'button';
-            dot.className = DOT_INACTIVE;
-            dot.setAttribute('role', 'tab');
-            dot.setAttribute('aria-label', `Go to event ${i + 1}`);
-            dot.addEventListener('click', () => {
-              carousel.scrollTo({ left: cardOffset(card), behavior: 'smooth' });
-            });
-            dotsContainer.appendChild(dot);
-            dots.push(dot);
-          });
-          updateActiveDot();
-        }
-
-        // Wiggle hint on first view
-        if (isScrollable()) {
-          let hinted = false;
-          const triggerHint = () => {
-            if (hinted) return;
-            hinted = true;
-            if (hint) {
-              hint.style.opacity = '1';
-              hint.style.transition = 'opacity 0.4s ease';
-            }
-            setTimeout(() => {
-              carousel.scrollTo({ left: 90, behavior: 'smooth' });
-              setTimeout(() => {
-                carousel.scrollTo({ left: 0, behavior: 'smooth' });
-              }, 700);
-            }, 350);
-            setTimeout(() => {
-              if (hint) hint.style.opacity = '0';
-            }, 4500);
-          };
-
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  triggerHint();
-                  observer.disconnect();
-                }
-              });
-            },
-            { threshold: 0.25 }
-          );
-          observer.observe(carousel);
-        }
-
-        carousel.addEventListener(
-          'scroll',
-          () => {
-            if (carousel.scrollLeft > 30 && hint) {
-              hint.style.opacity = '0';
-            }
-            updateActiveDot();
-          },
-          { passive: true }
-        );
-
-        window.addEventListener('resize', updateActiveDot, { passive: true });
-      })();
-    </script>
-
-    {/* START: Instagram Section */}
-    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2
-            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
-          >
-            Join Our Community Online
-          </h2>
-          <p class="mt-4 font-body text-lg text-white/65">
-            See our community in action! Follow us on Instagram for daily
-            inspiration, class updates, and behind-the-scenes moments that
-            celebrate our culture and movement.
-          </p>
-          <div class="mt-8">
-            <a
-              href="https://www.instagram.com/latinasweatproject/"
-              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
-            >
-              <svg
-                class="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                ><path
-                  fill-rule="evenodd"
-                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
-                  clip-rule="evenodd"></path></svg
-              >
-              Follow @LatinaSweatProject
-            </a>
-          </div>
         </div>
       </div>
     </section>
-    {/* END: Instagram Section */}
+    {/* END: Día de los Muertos recap spotlight */}
 
     {/* START: In The Press Section */}
     <section class="bg-gradient-to-br from-white via-[#f8f1e7] to-white py-16 sm:py-20 lg:py-24">
@@ -2253,6 +2146,43 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
       </div>
     </section>
     {/* END: In The Press Section */}
+
+    {/* START: Instagram Section */}
+    <section class="bg-off-black py-12 sm:py-16 lg:py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2
+            class="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            Join Our Community Online
+          </h2>
+          <p class="mt-4 font-body text-lg text-white/65">
+            See our community in action! Follow us on Instagram for daily
+            inspiration, class updates, and behind-the-scenes moments that
+            celebrate our culture and movement.
+          </p>
+          <div class="mt-8">
+            <a
+              href="https://www.instagram.com/latinasweatproject/"
+              class="btn inline-flex items-center gap-2 rounded-full bg-vibrant-pink px-8 py-3 text-base font-bold text-white shadow-lg transition hover:scale-105 hover:bg-accent-gold focus:outline-none focus:ring-2 focus:ring-vibrant-pink focus:ring-offset-2 focus:ring-offset-off-black"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                ><path
+                  fill-rule="evenodd"
+                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.792 2.792c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.792 2.792c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.792-2.792c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 012.792-2.792c.636.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+                  clip-rule="evenodd"></path></svg
+              >
+              Follow @LatinaSweatProject
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    {/* END: Instagram Section */}
 
 
 
