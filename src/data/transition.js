@@ -28,7 +28,17 @@
 // address. "Opening early 2027" is reused verbatim from existing site copy
 // (homepage A New Chapter, /popup, /about).
 
-export const showMarianaSchedule = false;
+// Nov 9, 2026: flipped to true. The Mural Park schedule (Nov 16 to Dec 31)
+// is loaded on MarianaTek, so the schedule and buy widgets are back.
+export const showMarianaSchedule = true;
+
+// /pricing only: the six hand-written price cards (drop-in, class packs,
+// monthly, 6-month, new member week) predate the move and have not been
+// checked against what MarianaTek sells now (several of those products are
+// inactive and the intro offer changed). They stay hidden until the
+// reopening price list is confirmed; the live MarianaTek buy widget below
+// them always shows what is actually for sale. Set to true to show them.
+export const showStudioPriceCards = false;
 
 export const studioTransition = {
   eyebrow: "A new chapter · Un nuevo capítulo",

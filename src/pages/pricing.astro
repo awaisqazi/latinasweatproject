@@ -4,7 +4,7 @@ import Header from '@/components/Header.astro';
 import StudioTransitionSection from '@/components/StudioTransitionSection.astro';
 // Toggle lives in src/data/transition.js: false = studio transition section
 // in place of the MarianaTek buy widget; true = the original pricing page.
-import { showMarianaSchedule, studioTransition } from '@/data/transition';
+import { showMarianaSchedule, showStudioPriceCards, studioTransition } from '@/data/transition';
 
 const pricingOptions = [
   {
@@ -109,8 +109,10 @@ const pricingOptions = [
 
     {/* Price cards: every option is a MarianaTek product, so they hide
         while studio programming is paused (showMarianaSchedule in src/data/transition.js);
-        the hero carries the paused note instead. */}
-    {showMarianaSchedule && (
+        the hero carries the paused note instead. After reopening they also
+        wait on showStudioPriceCards until the price list is confirmed; the
+        live buy widget at the bottom of the page shows current products. */}
+    {showMarianaSchedule && showStudioPriceCards && (
     <section class="px-4 py-12">
       <div class="mx-auto max-w-6xl">
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -173,7 +175,7 @@ const pricingOptions = [
                 Pilsen
               </p>
               <p class="mt-2 text-sm leading-6 text-medium-gray">
-                Classes are pop-up around Pilsen and nearby this fall, <a href={`${import.meta.env.BASE_URL}popup`} class="text-vibrant-pink underline underline-offset-2">see /popup</a>.
+                Classes meet at Mural Park, 924 W 19th Place, in Pilsen.
               </p>
             </div>
           </div>
