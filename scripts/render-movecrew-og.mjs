@@ -139,7 +139,7 @@ async function compose(W,H,L){
   </defs>${s}</svg>`;
 }
 
-const SUB = ["Help us get ready for the ribbon cutting.", "Thu, Sat and Sun, Nov 12 to 15. Pick an hour."];
+const SUB = ["Help us get ready for the ribbon cutting.", "Fri, Sat and Sun, Nov 13 to 15. Pick an hour."];
 const EXT = "muralpark-1.jpg", INT = "muralpark-2.jpg", LOUNGE = "muralpark-3.jpg";
 
 // Note: librsvg (sharp) does not see the Condensed face inside the system .ttc, so this stack
