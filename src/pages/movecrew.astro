@@ -5,13 +5,20 @@ import Header from "@/components/Header.astro";
 // Move Crew sign-up, round two: set-up week. The first round (Oct 26 to
 // 30, evenings) carried everything from the old studio (16th & Morgan)
 // into Mural Park. This round cleans and organizes the new space before
-// the first week of classes (Monday, Nov 16): Tuesday, Nov 10, 10 am to
-// 3 pm, one-hour slots. Shared by direct link only (noindex, not in
-// nav/homepage/links), like /townhall. Submissions POST to a hidden
-// Google Form (CONFIG block in the script). Confirmation is automatic: an
-// Apps Script trigger on the response sheet emails each volunteer their
-// hours, the address, the plan, Vero's number and a calendar invite. See
-// marketing/movecrew-confirm/. More days can be added to DAYS later.
+// the first week of classes (Monday, Nov 16). It started with Tuesday,
+// Nov 10, 10 am to 3 pm; on Nov 11 four more days were added: Thursday
+// Nov 12 (8 to 9 am), Friday Nov 13 (6 to 8 pm), Saturday Nov 14 and
+// Sunday Nov 15 (9 am to 4 pm). Each day carries its own one-hour slots
+// (DAYS below); past days hide themselves. The page is framed around the
+// ribbon cutting (Sunday Nov 15, 6 pm Chicago, BY INVITATION ONLY: the
+// page asks for help getting ready, it never invites volunteers to it),
+// with a typographic countdown under the H1 (RIBBON_AT; script mirrors
+// OpeningCountdown.astro) and a text link to /schedule for opening week. Shared by direct link only
+// (noindex, not in nav/homepage/links), like /townhall. Submissions POST
+// to a hidden Google Form (CONFIG block in the script). Confirmation is
+// automatic: an Apps Script trigger on the response sheet emails each
+// volunteer their hours, the address, the plan, Vero's number and a
+// calendar invite. See marketing/movecrew-confirm/.
 //
 // Order is deliberate: hook + ask, facts, the form, then the story. The
 // ask has to land in the first screen.
@@ -26,16 +33,67 @@ import Header from "@/components/Header.astro";
 // what the pill shows.
 // `date` lets the browser hide days that have already passed (Chicago time).
 // Each `name` needs a matching key in ENTRY_IDS and DAY_KEYS (script).
-const DAYS = [{ name: "tue", label: "Tuesday 11/10", date: "2026-11-10" }];
-const SLOTS = [
+const NINE_TO_FOUR = [
+    { value: "9:00am-10:00am", short: "9-10" },
     { value: "10:00am-11:00am", short: "10-11" },
     { value: "11:00am-12:00pm", short: "11-12" },
     { value: "12:00pm-1:00pm", short: "12-1" },
     { value: "1:00pm-2:00pm", short: "1-2" },
     { value: "2:00pm-3:00pm", short: "2-3" },
+    { value: "3:00pm-4:00pm", short: "3-4" },
+];
+const DAYS = [
+    {
+        name: "tue",
+        label: "Tuesday 11/10",
+        hours: "10 am to 3 pm",
+        date: "2026-11-10",
+        slots: [
+            { value: "10:00am-11:00am", short: "10-11" },
+            { value: "11:00am-12:00pm", short: "11-12" },
+            { value: "12:00pm-1:00pm", short: "12-1" },
+            { value: "1:00pm-2:00pm", short: "1-2" },
+            { value: "2:00pm-3:00pm", short: "2-3" },
+        ],
+    },
+    {
+        name: "thu",
+        label: "Thursday 11/12",
+        hours: "8 to 9 am",
+        date: "2026-11-12",
+        slots: [{ value: "8:00am-9:00am", short: "8-9" }],
+    },
+    {
+        name: "fri",
+        label: "Friday 11/13",
+        hours: "6 to 8 pm",
+        date: "2026-11-13",
+        slots: [
+            { value: "6:00pm-7:00pm", short: "6-7" },
+            { value: "7:00pm-8:00pm", short: "7-8" },
+        ],
+    },
+    {
+        name: "sat",
+        label: "Saturday 11/14",
+        hours: "9 am to 4 pm",
+        date: "2026-11-14",
+        slots: NINE_TO_FOUR,
+    },
+    {
+        name: "sun",
+        label: "Sunday 11/15",
+        hours: "9 am to 4 pm",
+        date: "2026-11-15",
+        slots: NINE_TO_FOUR,
+    },
 ];
 
 const CONTACT_EMAIL = "collab@latinasweatproject.com";
+
+// Ribbon cutting: Sunday, Nov 15 2026, 6 pm Chicago. Invitation only.
+const RIBBON_AT = "2026-11-15T18:00:00-06:00";
+const ribbonCut = Date.now() >= Date.parse(RIBBON_AT);
 
 const inputClass =
     "mc-input mt-2 w-full rounded-md border px-4 py-2.5 text-base";
@@ -43,10 +101,10 @@ const inputClass =
 
 <Layout
     title="Move Crew | The Latina Sweat Project"
-    description="Help The Latina Sweat Project clean and organize Mural Park, our new home in Pilsen, before our first week of classes. Tuesday, November 10, 10 am to 3 pm. Pick an hour."
+    description="Help The Latina Sweat Project get Mural Park ready for our ribbon cutting and first week of classes. Thursday to Sunday, November 12 to 15. Pick an hour."
     robots="noindex, nofollow"
     socialImage="images/movecrew/movecrew-og.jpg"
-    socialImageAlt="Help LSP get Mural Park ready. Our first week of classes starts Monday, November 16."
+    socialImageAlt="Help LSP get Mural Park ready for the ribbon cutting. Thursday to Sunday, November 12 to 15."
     socialImageWidth={1200}
     socialImageHeight={630}
     socialImageType="image/jpeg"
@@ -61,19 +119,54 @@ const inputClass =
             >
                 <div>
                     <p class="mc-muted text-xs font-bold uppercase tracking-[0.2em]">
-                        Opening week starts Monday, November 16
+                        Ribbon cutting Sunday, November 15 at 6 pm
                     </p>
                     <h1
                         class="mt-4 max-w-xl text-[2.6rem] font-extrabold leading-[1.05] sm:text-6xl"
                     >
-                        Help us get Mural Park ready.
+                        Help us get ready for the ribbon cutting.
                     </h1>
-                    <p class="mt-6 max-w-lg text-lg leading-relaxed sm:text-xl">
-                        The boxes made it. Now the new space needs cleaning
-                        and organizing before our first week of classes at
-                        Mural Park, our new home for a long-term residency in
-                        Pilsen. Kathy and Rut will be there Tuesday from 10 am
-                        to 3 pm. Come for an hour, or stay the day.
+
+                    {/* Countdown to the ribbon cutting: type only, no boxes.
+                        Server renders the date; the script swaps in the
+                        ticking line. aria-live off + an sr-only sentence so
+                        screen readers are not read a new number every
+                        second. */}
+                    <div
+                        id="mc-cd"
+                        class="mt-5"
+                        aria-live="off"
+                        data-ribbon-at={RIBBON_AT}
+                    >
+                        <p class="sr-only">
+                            The ribbon cutting is on Sunday, November 15 at 6 pm.
+                        </p>
+                        {ribbonCut ? (
+                            <p class="text-xl font-bold sm:text-2xl" aria-hidden="true">
+                                The ribbon is cut. Opening week starts Monday.
+                            </p>
+                        ) : (
+                            <p class="mc-cd" aria-hidden="true">
+                                <span class="mc-muted block text-sm font-medium">
+                                    Ribbon cutting in
+                                </span>
+                                <span
+                                    id="mc-cd-time"
+                                    class="mc-cd-time mt-0.5 block text-xl font-bold sm:text-2xl"
+                                >
+                                    Sunday, November 15 at 6 pm
+                                </span>
+                            </p>
+                        )}
+                    </div>
+
+                    <p class="mt-5 max-w-lg text-lg leading-relaxed sm:mt-6 sm:text-xl">
+                        We cut the ribbon at Mural Park, our new home in
+                        Pilsen, on Sunday evening, and our first week of
+                        classes starts Monday, November 16. Before then the
+                        new space needs cleaning and organizing. We're there
+                        Thursday morning, Friday evening and both weekend
+                        days. Come for an hour, or stay the day.
                     </p>
                     <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                         <a
@@ -83,9 +176,13 @@ const inputClass =
                             Pick your hours
                         </a>
                         <p class="mc-muted text-sm font-medium">
-                            Tuesday, Nov 10 · 10 am to 3 pm · Mural Park, Pilsen
+                            Thu to Sun, Nov 12 to 15 · Mural Park, Pilsen
                         </p>
                     </div>
+                    <p class="mt-5 text-base leading-relaxed">
+                        <span class="block [text-wrap:balance]">Opening week classes are on the schedule now.</span>
+                        <a href="/schedule" class="mc-link whitespace-nowrap font-bold">Book your first class</a>
+                    </p>
                 </div>
 
                 {/* Mural Park as a physical print taped to the page. The
@@ -129,7 +226,7 @@ const inputClass =
                                 <rect x="3" y="3" width="174" height="90" rx="12" fill="none" stroke="currentColor" stroke-width="4" />
                                 <rect x="10" y="10" width="160" height="76" rx="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.65" />
                                 <text x="90" y="46" text-anchor="middle" font-family="Rubik, sans-serif" font-size="22" font-weight="800" textLength="136" lengthAdjust="spacingAndGlyphs" fill="currentColor">MOVE CREW</text>
-                                <text x="90" y="71" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="700" textLength="60" lengthAdjust="spacing" fill="currentColor">NOV 10</text>
+                                <text x="90" y="71" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="700" textLength="116" lengthAdjust="spacing" fill="currentColor">NOV 12 TO 15</text>
                             </svg>
                         </div>
                     </div>
@@ -151,7 +248,7 @@ const inputClass =
             >
                 <div class="mc-fact">
                     <dt class="mc-fact-label">When</dt>
-                    <dd>Tuesday, Nov 10, 10 am to 3 pm. Pick any hour.</dd>
+                    <dd>Thu 8 to 9 am · Fri 6 to 8 pm · Sat and Sun 9 am to 4 pm. Pick any hour.</dd>
                 </div>
                 <div class="mc-fact">
                     <dt class="mc-fact-label">Where</dt>
@@ -159,7 +256,7 @@ const inputClass =
                 </div>
                 <div class="mc-fact">
                     <dt class="mc-fact-label">Wear</dt>
-                    <dd>Clothes you can clean in. Kathy and Rut will show you where to start.</dd>
+                    <dd>Clothes you can clean in. The LSP team will show you where to start.</dd>
                 </div>
             </dl>
         </section>
@@ -177,8 +274,10 @@ const inputClass =
                         Join the Move Crew
                     </h2>
                     <p class="mx-auto mt-3 max-w-md text-base leading-relaxed sm:text-lg">
-                        Pick the hours that work for you. Your confirmation
-                        and calendar invite arrive by email right away.
+                        Help us get the space ready for Sunday's ribbon
+                        cutting. Pick the hours that work for you. Your
+                        confirmation and calendar invite arrive by email
+                        right away.
                     </p>
                 </div>
 
@@ -284,22 +383,24 @@ const inputClass =
                                     When can you help? <span class="mc-req">*</span>
                                 </legend>
                                 <p class="mc-muted mt-1 text-xs">
-                                    Tuesday, November 10, 10 am to 3 pm. Tap
-                                    every hour that works for you.
+                                    Tap every hour that works for you, on any
+                                    day.
                                 </p>
-                                <div class="mt-4 space-y-4 sm:space-y-2.5">
+                                <div class="mt-4 space-y-5">
                                     {DAYS.map((day) => (
                                         <div
-                                            class="sm:grid sm:grid-cols-[9.5rem_1fr] sm:items-center sm:gap-4"
                                             role="group"
-                                            aria-label={day.label}
+                                            aria-label={`${day.label}, ${day.hours}`}
                                             data-day-date={day.date}
                                         >
                                             <p class="text-sm font-bold" aria-hidden="true">
                                                 {day.label}
+                                                <span class="mc-muted font-medium">
+                                                    · {day.hours}
+                                                </span>
                                             </p>
-                                            <div class="mt-1.5 grid grid-cols-3 gap-1.5 sm:mt-0 sm:grid-cols-5 sm:gap-2">
-                                                {SLOTS.map((slot) => (
+                                            <div class="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-5 sm:gap-2">
+                                                {day.slots.map((slot) => (
                                                     <label class="mc-pill">
                                                         <input
                                                             type="checkbox"
@@ -398,6 +499,14 @@ const inputClass =
                             aria-live="polite"
                         >
                         </p>
+                        <div class="mc-rule mx-auto my-8 max-w-xs"></div>
+                        <p class="text-lg font-bold">
+                            Opening week starts Monday, November 16.
+                        </p>
+                        <p class="mx-auto mt-2 max-w-md text-base leading-relaxed">
+                            <span class="block">Classes are on the schedule now.</span>
+                            <a href="/schedule" class="mc-link whitespace-nowrap font-bold">Book your first class</a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -423,9 +532,10 @@ const inputClass =
                             and you kept showing up.
                         </p>
                         <p>
-                            <strong>Now we open the doors.</strong> Our first
-                            week of classes at Mural Park starts Monday,
-                            November 16. Every shelf we set and every floor we
+                            <strong>Now we open the doors.</strong> We cut the
+                            ribbon Sunday evening, and our first week of
+                            classes at Mural Park starts Monday, November 16.
+                            Every shelf we set and every floor we
                             sweep this week is for the first person who walks
                             in.
                         </p>
@@ -521,6 +631,13 @@ const inputClass =
     .mc-btn:focus-visible {
         outline: 3px solid var(--mc-stamp);
         outline-offset: 3px;
+    }
+
+    /* Ribbon-cutting countdown: plain type, digits that never shift. */
+    .mc-cd-time {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        letter-spacing: -0.005em;
     }
 
     /* Rubber stamp, hand-set at an angle. */
@@ -721,13 +838,52 @@ const inputClass =
         fullName: "entry.239945294", // Full name (text)
         email: "entry.1232712061", // Email (text)
         phone: "entry.287230232", // Phone (text, optional)
-        tue: "entry.1345462713", // Tuesday 11/10 (checkboxes): filled in after the form question is created
+        tue: "entry.1345462713", // Tuesday 11/10 (checkboxes)
+        // Thursday to Sunday (checkboxes): the orchestrator fills these in
+        // from the form once the four questions exist.
+        thu: "entry.211421592", // Thursday 11/12
+        fri: "entry.1263380572", // Friday 11/13
+        sat: "entry.476888330", // Saturday 11/14
+        sun: "entry.815669480", // Sunday 11/15
         notes: "entry.946313287", // Notes (paragraph, optional)
     };
     // ============================================================
 
+    // Ribbon-cutting countdown (same math as OpeningCountdown.astro):
+    // ticks every second, then swaps the whole line once the moment passes.
+    const cdRoot = document.getElementById("mc-cd") as HTMLElement | null;
+    const cdTime = document.getElementById("mc-cd-time");
+    if (cdRoot && cdTime) {
+        const target = Date.parse(cdRoot.dataset.ribbonAt || "");
+        const pad = (n: number) => (n < 10 ? "0" : "") + n;
+        let cdTimer = 0;
+        const tick = () => {
+            const left = target - Date.now();
+            if (!(left > 0)) {
+                const done = document.createElement("p");
+                done.className = "text-xl font-bold sm:text-2xl";
+                done.setAttribute("aria-hidden", "true");
+                done.textContent =
+                    "The ribbon is cut. Opening week starts Monday.";
+                cdRoot.querySelector(".mc-cd")?.replaceWith(done);
+                window.clearInterval(cdTimer);
+                return;
+            }
+            const s = Math.floor(left / 1000);
+            const d = Math.floor(s / 86400);
+            const text =
+                `${d} ${d === 1 ? "day" : "days"} ` +
+                `${pad(Math.floor((s % 86400) / 3600))} hrs ` +
+                `${pad(Math.floor((s % 3600) / 60))} min ` +
+                `${pad(s % 60)} sec`;
+            if (cdTime.textContent !== text) cdTime.textContent = text;
+        };
+        tick();
+        cdTimer = window.setInterval(tick, 1000);
+    }
+
     // Keep in sync with DAYS in the frontmatter (one key per day name).
-    const DAY_KEYS = ["tue"] as const;
+    const DAY_KEYS = ["tue", "thu", "fri", "sat", "sun"] as const;
     const NAME_STORAGE_KEY = "lsp_movecrew_name";
     const EMAIL_STORAGE_KEY = "lsp_movecrew_email";
     // Spam guard (no server, so no Turnstile): a honeypot field plus a
