@@ -6,9 +6,10 @@ import Header from "@/components/Header.astro";
 // 30, evenings) carried everything from the old studio (16th & Morgan)
 // into Mural Park. This round cleans and organizes the new space before
 // the first week of classes (Monday, Nov 16). It started with Tuesday,
-// Nov 10, 10 am to 3 pm; on Nov 11 four more days were added: Thursday
-// Nov 12 (8 to 9 am), Friday Nov 13 (6 to 8 pm), Saturday Nov 14 and
-// Sunday Nov 15 (9 am to 4 pm). Each day carries its own one-hour slots
+// Nov 10, 10 am to 3 pm; on Nov 11 more days were added: Thursday
+// Nov 12 (8 to 9 am), Saturday Nov 14 and Sunday Nov 15 (9 am to 4 pm).
+// A Friday Nov 13 evening was added and removed the same day (Fez's call;
+// nobody had signed up). Each day carries its own one-hour slots
 // (DAYS below); past days hide themselves. The page is framed around the
 // ribbon cutting (Sunday Nov 15, 6 pm Chicago, BY INVITATION ONLY: the
 // page asks for help getting ready, it never invites volunteers to it),
@@ -64,16 +65,6 @@ const DAYS = [
         slots: [{ value: "8:00am-9:00am", short: "8-9" }],
     },
     {
-        name: "fri",
-        label: "Friday 11/13",
-        hours: "6 to 8 pm",
-        date: "2026-11-13",
-        slots: [
-            { value: "6:00pm-7:00pm", short: "6-7" },
-            { value: "7:00pm-8:00pm", short: "7-8" },
-        ],
-    },
-    {
         name: "sat",
         label: "Saturday 11/14",
         hours: "9 am to 4 pm",
@@ -101,10 +92,10 @@ const inputClass =
 
 <Layout
     title="Move Crew | The Latina Sweat Project"
-    description="Help The Latina Sweat Project get Mural Park ready for our ribbon cutting and first week of classes. Thursday to Sunday, November 12 to 15. Pick an hour."
+    description="Help The Latina Sweat Project get Mural Park ready for our ribbon cutting and first week of classes. Thursday, Saturday and Sunday, November 12 to 15. Pick an hour."
     robots="noindex, nofollow"
     socialImage="images/movecrew/movecrew-og.jpg"
-    socialImageAlt="Help LSP get Mural Park ready for the ribbon cutting. Thursday to Sunday, November 12 to 15."
+    socialImageAlt="Help LSP get Mural Park ready for the ribbon cutting. Thursday, Saturday and Sunday, November 12 to 15."
     socialImageWidth={1200}
     socialImageHeight={630}
     socialImageType="image/jpeg"
@@ -165,8 +156,8 @@ const inputClass =
                         Pilsen, on Sunday evening, and our first week of
                         classes starts Monday, November 16. Before then the
                         new space needs cleaning and organizing. We're there
-                        Thursday morning, Friday evening and both weekend
-                        days. Come for an hour, or stay the day.
+                        Thursday morning and both weekend days. Come for an
+                        hour, or stay the day.
                     </p>
                     <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                         <a
@@ -176,7 +167,7 @@ const inputClass =
                             Pick your hours
                         </a>
                         <p class="mc-muted text-sm font-medium">
-                            Thu to Sun, Nov 12 to 15 · Mural Park, Pilsen
+                            Thu, Sat and Sun · Nov 12 to 15 · Mural Park, Pilsen
                         </p>
                     </div>
                     <p class="mt-5 text-base leading-relaxed">
@@ -248,7 +239,7 @@ const inputClass =
             >
                 <div class="mc-fact">
                     <dt class="mc-fact-label">When</dt>
-                    <dd>Thu 8 to 9 am · Fri 6 to 8 pm · Sat and Sun 9 am to 4 pm. Pick any hour.</dd>
+                    <dd>Thu 8 to 9 am · Sat and Sun 9 am to 4 pm. Pick any hour.</dd>
                 </div>
                 <div class="mc-fact">
                     <dt class="mc-fact-label">Where</dt>
@@ -839,10 +830,8 @@ const inputClass =
         email: "entry.1232712061", // Email (text)
         phone: "entry.287230232", // Phone (text, optional)
         tue: "entry.1345462713", // Tuesday 11/10 (checkboxes)
-        // Thursday to Sunday (checkboxes): the orchestrator fills these in
-        // from the form once the four questions exist.
+        // Thursday, Saturday, Sunday (checkboxes).
         thu: "entry.211421592", // Thursday 11/12
-        fri: "entry.1263380572", // Friday 11/13
         sat: "entry.476888330", // Saturday 11/14
         sun: "entry.815669480", // Sunday 11/15
         notes: "entry.946313287", // Notes (paragraph, optional)
@@ -883,7 +872,7 @@ const inputClass =
     }
 
     // Keep in sync with DAYS in the frontmatter (one key per day name).
-    const DAY_KEYS = ["tue", "thu", "fri", "sat", "sun"] as const;
+    const DAY_KEYS = ["tue", "thu", "sat", "sun"] as const;
     const NAME_STORAGE_KEY = "lsp_movecrew_name";
     const EMAIL_STORAGE_KEY = "lsp_movecrew_email";
     // Spam guard (no server, so no Turnstile): a honeypot field plus a
