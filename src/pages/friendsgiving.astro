@@ -1,0 +1,144 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import FriendsgivingApp from "@/components/FriendsgivingApp.svelte";
+
+// Unlisted "what are you bringing" board for the LSP team Friendsgiving. The
+// link lives in the Partiful invite (RSVPs happen there), so the page stays
+// out of search, the sitemap, and every nav/listing. Event details, courses,
+// ideas and the repeat-dish matching live in src/data/friendsgiving.js; the
+// live board renders client-side in FriendsgivingApp.svelte.
+//
+// No location anywhere on this page, by the owner's request.
+
+// Fireflies: [left %, top %, size px, blur px, drift s, twinkle s, delay s]
+const fireflies = [
+    [6, 14, 6, 2, 22, 4.2, 0],
+    [14, 62, 10, 5, 26, 5.6, 1.2],
+    [22, 32, 4, 1, 18, 3.4, 2.4],
+    [31, 84, 7, 3, 24, 6.1, 0.6],
+    [44, 8, 5, 2, 20, 4.8, 3.1],
+    [57, 46, 12, 7, 30, 6.8, 1.8],
+    [63, 74, 4, 1, 17, 3.1, 0.3],
+    [72, 22, 8, 4, 25, 5.2, 2.7],
+    [81, 56, 5, 2, 21, 4.4, 1.5],
+    [89, 12, 11, 6, 28, 6.4, 0.9],
+    [94, 70, 6, 2, 23, 3.9, 2.2],
+    [38, 58, 4, 1, 19, 4.6, 3.6],
+    [10, 92, 9, 4, 27, 5.9, 2.9],
+    [76, 92, 5, 2, 22, 4.1, 0.4],
+];
+---
+
+<Layout
+    title="Friendsgiving: What Are You Bringing? | The Latina Sweat Project"
+    socialTitle="Friendsgiving: What Are You Bringing?"
+    description="See what everyone is bringing to the LSP team Friendsgiving and add your dish, so nobody doubles up."
+    robots="noindex, nofollow"
+>
+    <link
+        slot="head"
+        href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap"
+        rel="stylesheet"
+    />
+    <Header />
+    <main class="fg-page">
+        <div class="fg-fireflies" aria-hidden="true">
+            {
+                fireflies.map(([x, y, s, b, d, t, delay]) => (
+                    <span
+                        style={`--x:${x}%;--y:${y}%;--s:${s}px;--b:${b}px;--d:${d}s;--t:${t}s;--delay:-${delay}s`}
+                    />
+                ))
+            }
+        </div>
+        <FriendsgivingApp client:only="svelte" />
+    </main>
+</Layout>
+
+<style>
+    .fg-page {
+        --fg-night: #1c0606;
+        --fg-ember: #430707;
+        --fg-paper: #f4ede2;
+        --fg-ink: #2a1a12;
+        --fg-bronze: #5b4a1f;
+        --fg-firefly: #f7d774;
+        --fg-leaf-orange: #d8601f;
+        --fg-leaf-red: #a3301c;
+        --fg-leaf-gold: #e0a030;
+        --fg-leaf-olive: #8b8a2f;
+        --fg-cream: #f6ecdd;
+
+        position: relative;
+        isolation: isolate;
+        /* Clips the fixed firefly layer to this section, so it never
+           drifts over the site header or footer. */
+        clip-path: inset(0);
+        overflow-x: clip;
+        min-height: calc(100vh - 7rem);
+        padding-bottom: 100px;
+        background-color: var(--fg-night);
+        background-image: linear-gradient(
+            90deg,
+            var(--fg-ember) 0%,
+            var(--fg-night) 30%,
+            var(--fg-night) 70%,
+            var(--fg-ember) 100%
+        );
+        color: var(--fg-cream);
+    }
+    @media (min-width: 1024px) {
+        .fg-page {
+            padding-bottom: 96px;
+        }
+
+        /* The site sets overflow-x: hidden on both html and body. That makes
+           body a scroll container that never scrolls, which silently turns
+           off position: sticky for everything inside it. On desktop this
+           page needs the form to follow the menu down, so here body clips
+           instead: same protection against sideways scroll, without
+           becoming a scroll container. Browsers that lack overflow: clip
+           ignore this line and simply get a form that stays put. */
+        :global(body:has(.fg-page)) {
+            overflow-x: clip;
+        }
+    }
+
+    .fg-fireflies {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .fg-fireflies span {
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        width: var(--s);
+        height: var(--s);
+        border-radius: 50%;
+        background: radial-gradient(circle, #fff3c4 0%, var(--fg-firefly) 45%, rgba(247, 215, 116, 0) 72%);
+        filter: blur(var(--b));
+        box-shadow: 0 0 calc(var(--s) * 2) calc(var(--s) * 0.6) rgba(247, 215, 116, 0.28);
+        opacity: 0.7;
+        animation:
+            fg-drift var(--d) ease-in-out var(--delay) infinite alternate,
+            fg-twinkle var(--t) ease-in-out var(--delay) infinite;
+    }
+    @keyframes fg-drift {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(14px, -22px); }
+        100% { transform: translate(-10px, -40px); }
+    }
+    @keyframes fg-twinkle {
+        0%, 100% { opacity: 0.35; }
+        50% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .fg-fireflies span {
+            animation: none;
+            opacity: 0.55;
+        }
+    }
+</style>

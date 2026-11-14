@@ -19,7 +19,7 @@ export default defineConfig({
           '/intake', '/donate', '/lspgala', '/galaraffle',
           '/silentauction', '/teachertrainingclasses', '/teach/',
           '/potluck', '/eventsrequest', '/adobe', '/galaseating',
-          '/movecrew', '/committee',
+          '/movecrew', '/committee', '/friendsgiving',
         ];
         return !excluded.some((path) => page.includes(path));
       },
