@@ -269,4 +269,5 @@
   employee={drawerEmployee}
   onClose={() => (drawerOpen = false)}
   onSaved={handleSaved}
+  {onChanged}
 />

@@ -4,7 +4,12 @@
   // New employees are created with a PENDING:<uuid> rfid_tag sentinel rather
   // than a blank one, because that is what puts them in the iPad's onboarding
   // queue for card assignment. The portal never assigns a real card.
-  import { IdCard, Trash2 } from "@lucide/svelte";
+  //
+  // It can take one away, though. "Remove badge" swaps a real badge number
+  // for a fresh PENDING:<uuid>, which frees a lost badge (and, since the
+  // database allows a real badge on only one live employee, is how a
+  // duplicate gets resolved) without anyone having to be at the studio.
+  import { IdCard, Trash2, Unlink } from "@lucide/svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
@@ -26,6 +31,9 @@
   export let employee = null; // null = create mode
   export let onClose = () => {};
   export let onSaved = () => {};
+  // Something changed on the server while the drawer stays open (a badge was
+  // removed): the parent should reload its list but not close us.
+  export let onChanged = () => {};
 
   let drawerOpen = false;
   let formKey = "";
@@ -34,6 +42,14 @@
   let confirmingDelete = false;
   let errorMessage = "";
   let fieldError = "";
+
+  // The badge as this drawer last knew it. Kept apart from `employee`
+  // because the parent's row object goes stale the moment a badge is removed
+  // while the drawer is still open on it.
+  let rfidTag = "";
+  let confirmingBadgeRemoval = false;
+  let isRemovingBadge = false;
+  let badgeNotice = "";
 
   let firstName = "";
   let lastName = "";
@@ -46,7 +62,7 @@
   $: isCreate = !employee?.id;
 
   $: syncFromProps(open, employee);
-  $: if (!open && drawerOpen && !isSaving && !isDeleting) {
+  $: if (!open && drawerOpen && !isSaving && !isDeleting && !isRemovingBadge) {
     drawerOpen = false;
   }
 
@@ -63,6 +79,9 @@
     errorMessage = "";
     fieldError = "";
     confirmingDelete = false;
+    confirmingBadgeRemoval = false;
+    badgeNotice = "";
+    rfidTag = target?.rfid_tag || "";
 
     firstName = target?.first_name || "";
     lastName = target?.last_name || "";
@@ -74,7 +93,7 @@
   }
 
   function requestClose() {
-    if (isSaving || isDeleting) return;
+    if (isSaving || isDeleting || isRemovingBadge) return;
     drawerOpen = false;
   }
 
@@ -95,7 +114,50 @@
         String(other.email || "").trim().toLowerCase() === normalizedEmail,
     );
 
-  $: needsCard = isCreate || isPendingRfid(employee?.rfid_tag);
+  $: needsCard = isCreate || isPendingRfid(rfidTag);
+
+  // Takes this person's badge away by putting a fresh PENDING:<uuid> in its
+  // place: the same placeholder a new portal employee starts with, so the
+  // iPad drops the badge on its next sync and lists them as waiting for one.
+  // The portal still never writes a real badge number.
+  async function removeBadge() {
+    if (!employee?.id || isRemovingBadge || isPendingRfid(rfidTag)) return;
+    isRemovingBadge = true;
+    errorMessage = "";
+    badgeNotice = "";
+
+    const removed = rfidTag;
+    const placeholder = pendingRfidTag();
+
+    // Compare-and-set on the badge we showed. If the iPad gave this person
+    // a different badge since the roster loaded, removing "their badge"
+    // would silently wipe the new one, so the write matches nothing instead.
+    const { data, error } = await supabase
+      .from("timeclock_employees")
+      .update({ rfid_tag: placeholder })
+      .eq("id", employee.id)
+      .eq("rfid_tag", removed)
+      .is("deleted_at", null)
+      .select("id");
+
+    isRemovingBadge = false;
+    confirmingBadgeRemoval = false;
+
+    if (error) {
+      errorMessage = error.message;
+      return;
+    }
+    if (!data?.length) {
+      errorMessage =
+        "Nothing was changed: this person's badge is no longer the one shown here, most likely because it was changed at the iPad. Close this panel to load the current roster, then try again.";
+      onChanged();
+      return;
+    }
+
+    rfidTag = placeholder;
+    badgeNotice = `Badge ${removed} was removed. It stops working for this person the next time the studio iPad syncs, and can then be given to someone else.`;
+    onChanged();
+  }
 
   function validate() {
     if (!firstName.trim() && !lastName.trim() && !normalizedEmail) {
@@ -204,7 +266,7 @@
     ? "New roster entry"
     : `${PROFILE_ROLE_LABELS[employee?.profile_role] || "Instructor"} · ${employee?.is_active ? "Active" : "Inactive"}`}
   closeLabel="Close employee editor"
-  closeDisabled={isSaving || isDeleting}
+  closeDisabled={isSaving || isDeleting || isRemovingBadge}
   onClose={requestClose}
   onClosed={handleClosed}
 >
@@ -292,21 +354,43 @@
     <div class="rounded-control border border-ink/8 bg-canvas/60 p-4">
       <div class="flex items-center gap-2">
         <IdCard class="h-4 w-4 text-accent" aria-hidden="true" />
-        <span class="text-xs font-bold uppercase tracking-[0.12em] text-ink/55">RFID card</span>
+        <span class="text-xs font-bold uppercase tracking-[0.12em] text-ink/55">RFID badge</span>
       </div>
+      {#if badgeNotice}
+        <Banner
+          tone="success"
+          message={badgeNotice}
+          class="mt-3"
+          onDismiss={() => (badgeNotice = "")}
+        />
+      {/if}
       {#if needsCard}
         <p class="mt-2 text-sm leading-6 text-ink/65">
-          {isCreate ? "They'll appear" : "They're waiting"} in the iPad's onboarding
-          queue to get a card. Tap their name at the studio and scan a blank card
-          to finish. Cards are never assigned from the portal.
+          {isCreate ? "They'll appear" : "They're waiting"} in the iPad's queue
+          to get a badge. Tap their name at the studio and scan a blank badge
+          to finish. Badges are never assigned from the portal.
         </p>
       {:else}
-        <p class="mt-2 flex items-center gap-2 text-sm text-ink/65">
-          <Badge tone="green" size="xs">Assigned</Badge>
-          <span class="font-mono text-xs">{employee?.rfid_tag}</span>
-        </p>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <p class="flex items-center gap-2 text-sm text-ink/65">
+            <Badge tone="green" size="xs">Assigned</Badge>
+            <span class="font-mono text-xs">{rfidTag}</span>
+          </p>
+          <Button
+            size="sm"
+            variant="danger"
+            icon={Unlink}
+            disabled={isSaving || isDeleting}
+            loading={isRemovingBadge}
+            onclick={() => (confirmingBadgeRemoval = true)}
+          >
+            Remove badge
+          </Button>
+        </div>
         <p class="mt-2 text-xs leading-5 text-ink/50">
-          To replace a lost card, re-enroll this person at the iPad.
+          Lost or handed back? Remove it here so it stops working for this
+          person, then scan their replacement at the iPad. A new badge is
+          always assigned at the iPad, never from the portal.
         </p>
       {/if}
     </div>
@@ -322,17 +406,21 @@
         <Button
           variant="danger"
           icon={Trash2}
-          disabled={isSaving}
+          disabled={isSaving || isRemovingBadge}
           onclick={() => (confirmingDelete = true)}
         >
           Delete
         </Button>
       {/if}
       <div class="flex items-center gap-2">
-        <Button variant="ghost" disabled={isSaving || isDeleting} onclick={requestClose}>
+        <Button
+          variant="ghost"
+          disabled={isSaving || isDeleting || isRemovingBadge}
+          onclick={requestClose}
+        >
           Cancel
         </Button>
-        <Button variant="primary" loading={isSaving} onclick={save}>
+        <Button variant="primary" loading={isSaving} disabled={isRemovingBadge} onclick={save}>
           {isCreate ? "Add employee" : "Save changes"}
         </Button>
       </div>
@@ -349,4 +437,15 @@
   busy={isDeleting}
   onConfirm={softDelete}
   onCancel={() => (confirmingDelete = false)}
+/>
+
+<ConfirmDialog
+  open={confirmingBadgeRemoval}
+  title={`Remove ${employeeLabel(employee)}'s badge?`}
+  message={`Badge ${rfidTag} will stop clocking them in once the studio iPad next syncs; if the iPad is offline, that is when it reconnects. They go back to waiting for a badge, and this one can be given to someone else. Their shifts, PIN and details are not touched. To undo it, scan a badge for them again at the iPad.`}
+  confirmLabel="Remove badge"
+  tone="danger"
+  busy={isRemovingBadge}
+  onConfirm={removeBadge}
+  onCancel={() => (confirmingBadgeRemoval = false)}
 />

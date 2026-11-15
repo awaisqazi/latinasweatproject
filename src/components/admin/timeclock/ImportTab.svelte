@@ -21,6 +21,7 @@
     IMPORT_COLUMNS,
     IMPORT_FORMAT_LABELS,
     buildEmployeeIndexes,
+    employeeLabel,
     formatChicagoDateTimeLabel,
     isPendingRfid,
     matchEmployee,
@@ -28,6 +29,7 @@
     normalizeNameKey,
     parseKioskCsv,
     pendingRfidTag,
+    planImportBadges,
     rowIdentifiesEmployee,
   } from "../../../lib/dashboard/timeclock";
 
@@ -214,6 +216,34 @@
       resolved.push({ row, employeeId: employee.id });
     }
 
+    // The database allows one live employee per real badge number, and a
+    // single violation fails the whole 200-row insert with a 23505. So any
+    // badge this file would write is checked first. The roster is read
+    // fresh rather than taken from the `employees` prop: a badge handed out
+    // at the iPad a minute ago is exactly the one that would collide, and
+    // inactive staff still hold theirs. Someone who loses the check is still
+    // added, without the badge, so their shifts are not dropped.
+    let plannedEmployees = employeesToCreate;
+    let badgeConflicts = [];
+    if (employeesToCreate.some((draft) => !isPendingRfid(draft.rfid_tag))) {
+      const badgeHolders = await fetchAllPages(
+        () =>
+          supabase
+            .from("timeclock_employees")
+            .select("id,rfid_tag,first_name,last_name,email,is_active")
+            .is("deleted_at", null)
+            .order("id", { ascending: true }),
+        () => {
+          throw new Error(
+            "The roster is too large to check this file's badge numbers against. Ask support before importing.",
+          );
+        },
+      );
+      const badgePlan = planImportBadges(employeesToCreate, badgeHolders);
+      plannedEmployees = badgePlan.drafts;
+      badgeConflicts = badgePlan.conflicts;
+    }
+
     // Look up the punches that already exist for the employees this file
     // touches, over the window the file covers, so dedupe is one query rather
     // than one per row.
@@ -326,7 +356,8 @@
           .filter((item) => indexes.byId.has(String(item.employeeId).toLowerCase()))
           .map((item) => item.employeeId),
       ).size,
-      employeesToCreate,
+      employeesToCreate: plannedEmployees,
+      badgeConflicts,
       punchesToInsert,
       duplicates,
       openShifts: punchesToInsert.filter((punch) => !punch.clock_out_at).length,
@@ -367,7 +398,14 @@
         .upsert(chunk, { onConflict: "id", ignoreDuplicates: true })
         .select("id");
       if (error) {
-        errorMessage = `The import stopped while adding people: ${error.message}. Nothing is lost — upload the same file again to continue, duplicates are skipped.`;
+        // 23505 here can only be the one-badge-per-person index (ids are
+        // handled by ignoreDuplicates): a badge in this file was handed to
+        // someone else after the preview checked it. Re-reading the file
+        // re-runs that check, so the fix is the usual one.
+        errorMessage =
+          error.code === "23505"
+            ? "The import stopped while adding people: a badge number in this file was given to someone else after this preview was made. Nothing is lost — choose the same file again to re-check it, duplicates are skipped."
+            : `The import stopped while adding people: ${error.message}. Nothing is lost — upload the same file again to continue, duplicates are skipped.`;
         failed = true;
         break;
       }
@@ -419,7 +457,13 @@
     });
 
     if (!failed) {
-      importResult = { importedPunches, createdEmployees, alreadyPresent, rejected };
+      importResult = {
+        importedPunches,
+        createdEmployees,
+        alreadyPresent,
+        rejected,
+        withoutBadge: plan.badgeConflicts.length,
+      };
       plan = null;
       fileName = "";
     }
@@ -462,7 +506,7 @@
       <Banner
         tone="success"
         class="mt-4"
-        message={`Import complete: ${importResult.importedPunches.toLocaleString()} shift${importResult.importedPunches === 1 ? "" : "s"} added, ${importResult.createdEmployees.toLocaleString()} new ${importResult.createdEmployees === 1 ? "person" : "people"} on the roster, ${importResult.alreadyPresent.toLocaleString()} row${importResult.alreadyPresent === 1 ? "" : "s"} skipped as already present, ${importResult.rejected.toLocaleString()} row${importResult.rejected === 1 ? "" : "s"} skipped as unreadable or unmatched.`}
+        message={`Import complete: ${importResult.importedPunches.toLocaleString()} shift${importResult.importedPunches === 1 ? "" : "s"} added, ${importResult.createdEmployees.toLocaleString()} new ${importResult.createdEmployees === 1 ? "person" : "people"} on the roster, ${importResult.alreadyPresent.toLocaleString()} row${importResult.alreadyPresent === 1 ? "" : "s"} skipped as already present, ${importResult.rejected.toLocaleString()} row${importResult.rejected === 1 ? "" : "s"} skipped as unreadable or unmatched.${importResult.withoutBadge ? ` ${importResult.withoutBadge.toLocaleString()} ${importResult.withoutBadge === 1 ? "person was" : "people were"} added without a badge because the number in the file already belongs to someone else.` : ""}`}
       />
     {/if}
 
@@ -529,8 +573,49 @@
                 : ""}.
             </p>
             <p class="mt-1.5 text-xs leading-5 text-amber-800">
-              Anyone without a card in the file joins the iPad's onboarding
-              queue so a card can be scanned for them at the studio.
+              Anyone without a badge in the file joins the iPad's queue so a
+              badge can be scanned for them at the studio.
+            </p>
+          </div>
+        {/if}
+
+        {#if plan.badgeConflicts.length}
+          <div class="mt-3 rounded-control border border-amber-200 bg-amber-50/70 px-3.5 py-3">
+            <p class="text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
+              Badges already in use
+            </p>
+            <p class="mt-1.5 text-sm leading-6 text-amber-900">
+              {plan.badgeConflicts.length.toLocaleString()}
+              {plan.badgeConflicts.length === 1
+                ? "person in this file has"
+                : "people in this file have"}
+              a badge number that already belongs to someone else. They will be
+              added without a badge, and their shifts still import.
+            </p>
+            <ul class="mt-1.5 space-y-0.5 text-sm leading-6 text-amber-900">
+              {#each plan.badgeConflicts.slice(0, 8) as conflict (conflict.draft.id)}
+                <li>
+                  <span class="font-semibold">{employeeLabel(conflict.draft)}</span>:
+                  badge <span class="font-mono text-xs">{conflict.badge}</span>
+                  {#if conflict.source === "roster"}
+                    belongs to {employeeLabel(conflict.heldBy)}{conflict.heldBy?.is_active === false
+                      ? " (inactive)"
+                      : ""}
+                  {:else}
+                    is also listed for {employeeLabel(conflict.heldBy)} earlier in this file
+                  {/if}
+                </li>
+              {/each}
+            </ul>
+            {#if plan.badgeConflicts.length > 8}
+              <p class="mt-1 text-sm leading-6 text-amber-900">
+                And {(plan.badgeConflicts.length - 8).toLocaleString()} more.
+              </p>
+            {/if}
+            <p class="mt-1.5 text-xs leading-5 text-amber-800">
+              One badge can only belong to one person. If the file is right and
+              the roster is out of date, open the current holder on the Roster
+              tab, choose Remove badge, then choose this file again.
             </p>
           </div>
         {/if}

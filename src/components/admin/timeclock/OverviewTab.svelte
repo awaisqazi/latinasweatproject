@@ -36,6 +36,7 @@
     formatHours,
     isPendingRfid,
     kioskFreshness,
+    kioskHeartbeat,
     loggedHours,
     relativeTime,
     startOfWeekDate,
@@ -57,6 +58,10 @@
 
   let forceOutTarget = null;
   let forcingOut = false;
+
+  // A row that has waited longer than the window in which the iPad counts as
+  // "Online" is no longer just in the queue between two syncs.
+  const STALE_PENDING_MS = 15 * 60000;
 
   // "Elapsed" and "last seen" are wall-clock derived, so tick them.
   let nowMs = Date.now();
@@ -155,10 +160,14 @@
   $: missedRows = onSiteRows.filter((row) => row.ageHours > MISSED_PUNCH_HOURS);
   $: currentRows = onSiteRows.filter((row) => row.ageHours <= MISSED_PUNCH_HOURS);
 
+  // `health` is everything read out of the heartbeat's free-form detail
+  // json. Older kiosk builds send little or none of it; kioskHeartbeat
+  // turns whatever is missing into blanks so the card just shows less.
   $: kioskRows = kioskDevices.map((device) => ({
     device,
     freshness: kioskFreshness(device.last_seen_at, nowMs),
     seen: relativeTime(device.last_seen_at, nowMs),
+    health: kioskHeartbeat(device, nowMs),
   }));
 
   function nameFor(employee) {
@@ -291,9 +300,29 @@
                   class="h-2.5 w-2.5 shrink-0 rounded-full {row.freshness.dot}"
                   aria-hidden="true"
                 ></span>
-                <span class="font-bold text-ink">{row.device.id}</span>
+                <span class="min-w-0 break-words font-bold text-ink">{row.health.title}</span>
                 <Badge tone={row.freshness.tone} size="xs">{row.freshness.label}</Badge>
+                {#if row.health.held > 0}
+                  <Badge tone="red" size="xs">
+                    Holding {row.health.held.toLocaleString()} row{row.health.held === 1 ? "" : "s"}
+                  </Badge>
+                {/if}
               </div>
+              {#if row.health.label || row.health.model || row.health.osVersion}
+                <p class="mt-1 text-xs text-ink/50">
+                  {#if row.health.label}
+                    <span class="font-mono">{row.device.id}</span>
+                  {/if}
+                  {#if row.health.model || row.health.osVersion}
+                    {row.health.label ? "· " : ""}{[
+                      row.health.model,
+                      row.health.osVersion ? `iPadOS ${row.health.osVersion}` : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  {/if}
+                </p>
+              {/if}
               <dl class="mt-2 grid gap-1.5 text-xs text-ink/65 sm:grid-cols-2">
                 <div class="flex items-baseline gap-1.5">
                   <dt class="font-semibold uppercase tracking-wide text-ink/45">Last sync</dt>
@@ -309,14 +338,47 @@
                     {row.device.pending_push ?? 0}
                   </dd>
                 </div>
+                {#if row.health.oldestPendingLabel}
+                  <div class="flex items-baseline gap-1.5">
+                    <dt class="font-semibold uppercase tracking-wide text-ink/45">Oldest waiting</dt>
+                    <dd class="font-semibold tabular-nums {row.health.oldestPendingMs > STALE_PENDING_MS ? 'text-amber-700' : 'text-ink/80'}">
+                      {row.health.oldestPendingLabel}
+                    </dd>
+                  </div>
+                {/if}
+                {#if row.health.held > 0}
+                  <div class="flex items-baseline gap-1.5">
+                    <dt class="font-semibold uppercase tracking-wide text-ink/45">Held by server</dt>
+                    <dd class="font-semibold tabular-nums text-red-700">
+                      {row.health.held.toLocaleString()}
+                    </dd>
+                  </div>
+                {/if}
               </dl>
+              {#if row.health.lastError}
+                <div class="mt-2 rounded-control border border-amber-200 bg-amber-50/70 px-3 py-2">
+                  <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-800">
+                    Last sync problem{row.health.failingStageLabel
+                      ? ` · ${row.health.failingStageLabel}`
+                      : ""}{row.health.consecutiveFailures > 1
+                      ? ` · ${row.health.consecutiveFailures.toLocaleString()} syncs in a row`
+                      : ""}
+                  </p>
+                  <p class="mt-1 break-words text-xs leading-5 text-amber-900">
+                    {row.health.lastError}
+                  </p>
+                </div>
+              {/if}
             </div>
           {/each}
         </div>
         <p class="mt-3 text-xs leading-5 text-ink/45">
           Green means the iPad synced in the last 15 minutes, amber within a
           day, red longer than that. Punches taken while it is offline are
-          still safe on the device and arrive when it reconnects.
+          still safe on the device and arrive when it reconnects. "Held by
+          server" counts rows the database refused, such as a badge that
+          already belongs to someone else; they stay on the iPad until
+          someone fixes them there, under Cloud Sync.
         </p>
       {/if}
     </Panel>

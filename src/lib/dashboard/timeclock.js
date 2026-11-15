@@ -449,6 +449,103 @@ export function kioskFreshness(lastSeenAt, now = Date.now()) {
   return { tone: "red", label: "Offline", dot: "bg-red-500" };
 }
 
+// "under a minute", "45m", "6h 12m", "3d 4h".
+export function durationLabel(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return "";
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "under a minute";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h ${minutes % 60}m`;
+  return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+// What the kiosk calls each step of a sync, for the stage a failure names.
+const KIOSK_STAGE_LABELS = {
+  auth: "signing in",
+  "push.deletions": "uploading deletions",
+  "push.employees": "uploading employees",
+  "push.punches": "uploading punches",
+  "push.receipts": "uploading read receipts",
+  "push.quarantine-retry": "retrying held rows",
+  "pull.employees": "downloading employees",
+  "pull.punches": "downloading punches",
+  "pull.messages": "downloading messages",
+  heartbeat: "reporting in",
+};
+
+const KIOSK_ERROR_MAX_CHARS = 400;
+
+// Reads one timeclock_kiosk_status row into what the Overview card shows.
+//
+// `detail` is free-form jsonb written by whichever kiosk build synced last,
+// so nothing in it can be assumed. Rows from older builds carry only the
+// upload counts and maybe last_error; a build that has never synced since
+// the columns were added carries {}. Every field here therefore degrades to
+// "not reported" (empty string, 0, or null) rather than throwing or showing
+// "undefined", and the card renders the same as it always did for those rows.
+//
+// The age of the oldest unsent row is recomputed against `now` instead of
+// trusting the kiosk's own figure, because the case that matters most is a
+// kiosk that stopped syncing: its last report would otherwise stay frozen at
+// "12 minutes" for days.
+export function kioskHeartbeat(device, now = Date.now()) {
+  const raw = device?.detail;
+  const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+
+  const text = (value) => (typeof value === "string" ? value.trim() : "");
+  const count = (value) => {
+    const parsed = typeof value === "number" ? value : Number.parseInt(String(value ?? ""), 10);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+  };
+
+  const id = String(device?.id ?? "").trim();
+  // The kiosk writes device_label; `label` is accepted too so a build that
+  // shortens the key keeps working.
+  const label = text(detail.device_label) || text(detail.label);
+
+  let lastError = text(detail.last_error);
+  if (lastError.length > KIOSK_ERROR_MAX_CHARS) {
+    lastError = `${lastError.slice(0, KIOSK_ERROR_MAX_CHARS).trimEnd()}…`;
+  }
+  const stage = text(detail.failing_stage) || text(detail.stage);
+
+  // Timestamps arrive as ISO strings. Anything else (a bare number would be
+  // read as milliseconds since 1970) is ignored in favour of the age figure.
+  const oldestAt = typeof detail.oldest_pending_at === "string" ? toDate(detail.oldest_pending_at) : null;
+  const reportedAgeS =
+    typeof detail.oldest_pending_age_s === "number" && Number.isFinite(detail.oldest_pending_age_s)
+      ? Math.max(0, detail.oldest_pending_age_s)
+      : null;
+  const seenAt = toDate(device?.last_seen_at);
+
+  let oldestPendingMs = null;
+  if (oldestAt) {
+    oldestPendingMs = Math.max(0, now - oldestAt.getTime());
+  } else if (reportedAgeS !== null) {
+    // The row was already that old when the kiosk last reported.
+    const sinceReport = seenAt ? Math.max(0, now - seenAt.getTime()) : 0;
+    oldestPendingMs = reportedAgeS * 1000 + sinceReport;
+  }
+
+  return {
+    id,
+    label,
+    title: label || id || "Unnamed kiosk",
+    model: text(detail.device_model),
+    osVersion: text(detail.os_version),
+    lastError,
+    failingStage: stage,
+    failingStageLabel: KIOSK_STAGE_LABELS[stage] || stage,
+    consecutiveFailures: count(detail.consecutive_failures),
+    // Rows the server refused (a duplicate badge, a broken reference) that
+    // the kiosk is holding on the device instead of uploading.
+    held: count(detail.quarantined),
+    oldestPendingMs,
+    oldestPendingLabel: oldestPendingMs === null ? "" : durationLabel(oldestPendingMs),
+  };
+}
+
 // ── Employees ──────────────────────────────────────────────────
 
 // '' or 'PENDING:<uuid>' both mean "this person still needs a card".
@@ -461,6 +558,67 @@ export function isPendingRfid(tag) {
 // picks them up for card assignment.
 export function pendingRfidTag() {
   return `PENDING:${newId()}`;
+}
+
+// Import planning: which of the people a file would create can keep the
+// badge number the file gives them?
+//
+// The database allows one live employee per real badge (the partial unique
+// index timeclock_employees_live_badge_key), and a single violation fails
+// the whole insert chunk with a 23505. So every drafted employee's badge is
+// checked first, against the live roster and against the other drafts from
+// the same file. A draft that loses is still imported, with a fresh PENDING:
+// tag in place of the badge, so their shifts are kept and they land in the
+// iPad's queue to be given one.
+//
+// `liveEmployees` must be every employee that is not tombstoned, inactive
+// staff included: that is exactly the set the index covers. Matching is
+// exact string equality, the same comparison the index makes. The kiosk
+// deliberately never folds case or strips leading zeros either, so neither
+// does this.
+//
+// Returns { drafts, conflicts } without mutating its input. Each conflict is
+// { draft, badge, heldBy, source } where source is "roster" (a live employee
+// already holds it) or "file" (an earlier row of this file claimed it).
+export function planImportBadges(drafts, liveEmployees, makePendingTag = pendingRfidTag) {
+  const idKey = (value) => String(value ?? "").toLowerCase();
+
+  const liveIds = new Set();
+  const holders = new Map();
+  for (const employee of liveEmployees || []) {
+    liveIds.add(idKey(employee?.id));
+    const tag = String(employee?.rfid_tag ?? "");
+    if (isPendingRfid(tag) || holders.has(tag)) continue;
+    holders.set(tag, employee);
+  }
+
+  const claimed = new Map(); // badge -> the first draft in this file to carry it
+  const conflicts = [];
+
+  const planned = (drafts || []).map((draft) => {
+    const tag = String(draft?.rfid_tag ?? "");
+    if (isPendingRfid(tag)) return draft;
+    // Already on the roster under this id: the insert skips the row
+    // (on conflict do nothing), so its badge is never written.
+    if (liveIds.has(idKey(draft.id))) return draft;
+
+    const holder = holders.get(tag);
+    const earlier = claimed.get(tag);
+    if (!holder && !earlier) {
+      claimed.set(tag, draft);
+      return draft;
+    }
+
+    conflicts.push({
+      draft,
+      badge: tag,
+      heldBy: holder || earlier,
+      source: holder ? "roster" : "file",
+    });
+    return { ...draft, rfid_tag: makePendingTag() };
+  });
+
+  return { drafts: planned, conflicts };
 }
 
 // The one spelling of a name used as a lookup key, applied identically to
