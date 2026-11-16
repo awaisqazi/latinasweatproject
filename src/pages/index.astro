@@ -95,6 +95,8 @@ import { showMerchDrop, showMondayMiles } from "@/data/transition";
 import { showOpeningHero, homeShareCard } from "@/data/studioOpening";
 import OpeningHero from "@/components/OpeningHero.astro";
 import NewHomeSection from "@/components/NewHomeSection.astro";
+// First-visit ribbon cutting moment (flag showRibbonIntro, src/data/studioOpening.js).
+import RibbonIntro from "@/components/RibbonIntro.astro";
 // Link share card for the homepage: the opening announcement, then the
 // long-term card, by date (see homeShareCard).
 const shareCard = homeShareCard();
@@ -170,6 +172,7 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
   socialImageType={shareCard.type}
   twitterCard="summary_large_image"
 >
+  <RibbonIntro />
   <Header />
   <main>
 

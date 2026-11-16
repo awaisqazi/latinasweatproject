@@ -21,6 +21,12 @@ import { ddlmEvent, fallTicketEventFor } from "@/data/fallEvents";
 import { ddlmRecap } from "@/data/ddlmRecap2026";
 import OpeningLinksCard from "@/components/OpeningLinksCard.astro";
 import {
+  showRibbonLinksCard,
+  isRibbonCuttingLive,
+  ribbonCuttingEndISO,
+  ribbonCuttingPagePath,
+} from "@/data/studioOpening";
+import {
   collectiveFinishLine,
   finishLineEvents,
   getFinishLinePhase,
@@ -96,6 +102,15 @@ const finishLineCardClip = finishLineTornClip(13, 36, 9);
 // src/data/ddlmRecap2026.js; every visible string has an EN/ES pair.
 const ddlmPageUrl = withBase(ddlmEvent.pagePath);
 const ddlmCardPhoto = `${base}images/ddlm/recap/placements/links-119-900.webp`;
+
+// The ribbon cutting (Sun Nov 15 2026): the #ribbon-card LEADS the card stack
+// and its bubble leads the highlights bar, one slot above the Mural Park
+// opening card. Turn both off with showRibbonLinksCard in
+// src/data/studioOpening.js; both also step back by themselves after
+// ribbonCuttingEndISO (end of Nov 30 2026), at build time and in the browser.
+const ribbonActive = showRibbonLinksCard && isRibbonCuttingLive();
+const ribbonPageUrl = withBase(ribbonCuttingPagePath);
+const ribbonCardPhoto = `${base}images/ribbon-cutting/cut-04-arms-up-900.webp`;
 
 // Define links data with English and Spanish translations
 const links = [
@@ -209,7 +224,25 @@ const links = [
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
-  // The Mural Park opening leads (Nov 9 2026); it jumps to #studio-card.
+  // The ribbon cutting leads while ribbonActive (Nov 16 2026); it jumps to
+  // #ribbon-card and is hidden in the browser after the end date.
+  ...(ribbonActive
+    ? [
+        {
+          title: {
+            en: "Ribbon Cutting",
+            es: "Corte de Listón"
+          },
+          target: "#ribbon-card",
+          image: ribbonCardPhoto,
+          scale: "scale-[1.0]",
+          hoverScale: "group-hover:scale-[1.12]",
+          color: "amber",
+          ribbonEnds: ribbonCuttingEndISO
+        },
+      ]
+    : []),
+  // The Mural Park opening (Nov 9 2026); it jumps to #studio-card.
   {
     title: {
       en: "New Studio",
@@ -503,6 +536,7 @@ const getLinkConversionProvider = (url = "") => {
                 data-popup-hide-when-past={story.popup ? "" : undefined}
                 {...(story.popupWindow ?? {})}
                 data-finishline-hide-when-past={story.finishline ? "" : undefined}
+                data-ribbon-ends={story.ribbonEnds}
               >
                 {/* Glow story ring */}
                 <div class="relative w-[66px] h-[66px] flex items-center justify-center flex-shrink-0 rounded-full bg-gradient-to-tr from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_15px_rgba(255,189,89,0.4)] shadow-md">
@@ -529,7 +563,71 @@ const getLinkConversionProvider = (url = "") => {
         </div>
       </div>
 
-      {/* The Mural Park opening (Nov 9 2026): the first card on the page. */}
+      {/* The ribbon cutting (Nov 16 2026): the lead card while ribbonActive, in
+          the campaign's own look (marketing/ribbon-cutting/CONTENT-PLAN.md):
+          Warm White, Fraunces with one #FFDE59 highlighted word, Rubik, black.
+          Built like #ddlm-card: the photo links to the page (hidden from the
+          tab order), then the title, one line and the button. Every visible
+          string has an EN/ES pair. */}
+      {ribbonActive && (
+        <div
+          id="ribbon-card"
+          class="ribbon-card relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl font-rubik"
+          style="animation: links-slide-up 0.5s ease backwards; animation-delay: 72ms;"
+          data-ribbon-ends={ribbonCuttingEndISO}
+        >
+          <a href={ribbonPageUrl} class="block aspect-[16/9] overflow-hidden" aria-hidden="true" tabindex="-1">
+            <img
+              src={ribbonCardPhoto}
+              width="900"
+              height="506"
+              alt=""
+              class="h-full w-full object-cover"
+              decoding="async"
+            />
+          </a>
+          <div class="px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
+            <h2 class="ribbon-card-head">
+              <span class="lang-en"><span class="ribbon-card-l1">We cut the</span> <span class="ribbon-card-hl">ribbon.</span></span>
+              <span class="lang-es hidden"><span class="ribbon-card-l1">Cortamos el</span> <span class="ribbon-card-hl">listón.</span></span>
+            </h2>
+            <p class="mt-2 text-[15px] leading-snug text-[#4e4f50]">
+              <span class="lang-en">Our new home at Mural Park, in Pilsen.</span>
+              <span class="lang-es hidden">Nuestro nuevo hogar en Mural Park, en Pilsen.</span>
+            </p>
+            <a
+              href={ribbonPageUrl}
+              class="mt-4 flex min-h-[48px] items-center justify-between rounded-lg bg-black px-4 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3eeea]"
+              data-conversion-event="ribboncutting_page_click"
+              data-conversion-context="links_ribbon_card"
+            >
+              <span class="text-sm font-bold">
+                <span class="lang-en">See the night</span>
+                <span class="lang-es hidden">Revive la noche</span>
+              </span>
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      )}
+      {ribbonActive && (
+        <script is:inline>
+          // Step the ribbon card and bubble back once the end date passes,
+          // without waiting for a rebuild.
+          (function () {
+            try {
+              document.querySelectorAll("[data-ribbon-ends]").forEach(function (el) {
+                if (Date.now() >= Date.parse(el.getAttribute("data-ribbon-ends"))) el.remove();
+              });
+            } catch (e) {}
+          })();
+        </script>
+      )}
+
+      {/* The Mural Park opening (Nov 9 2026): the first card on the page until
+          the ribbon cutting card above took the lead (Nov 16 2026). */}
       <OpeningLinksCard />
 
       {/* Día de los Muertos recap (static, Nov 2 2026): the first recap card
@@ -1834,6 +1932,29 @@ const getLinkConversionProvider = (url = "") => {
   @keyframes links-float-3 {
     0%, 100% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(-20px, -45px) scale(1.05); }
+  }
+
+  /* Ribbon cutting card (#ribbon-card): the campaign's Warm White, Fraunces
+     headline with one yellow-highlighted word. */
+  .ribbon-card {
+    background: #f3eeea;
+    color: #000;
+  }
+  .ribbon-card-head {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-size: clamp(2.1rem, 10.4vw, 2.6rem);
+    font-weight: 450;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .ribbon-card-hl {
+    display: inline-block;
+    margin-top: 0.08em;
+    padding: 0 0.14em 0.04em;
+    border-radius: 0.2em;
+    background: #ffde59;
+    font-weight: 650;
   }
 
   /* Link Card slide-up animation */

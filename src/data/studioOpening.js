@@ -20,6 +20,22 @@
 // first `highlights` entry in src/pages/links.astro.
 export const showOpeningHero = true;
 
+// The ribbon cutting (Sun Nov 15 2026) on the homepage and /links, pointing at
+// the recap page /ribboncutting. Both pieces stop by themselves after
+// ribbonCuttingEndISO (the end of Nov 30 2026, Chicago time), at build time
+// and in the browser.
+// TURN OFF the homepage first-visit ribbon animation and its "See the night"
+//   note: set showRibbonIntro to false (src/components/RibbonIntro.astro).
+// TURN OFF the lead "We cut the ribbon." card and its story bubble on /links:
+//   set showRibbonLinksCard to false (the opening card then leads again).
+// To end both on another day, change ribbonCuttingEndISO.
+export const showRibbonIntro = true;
+export const showRibbonLinksCard = true;
+export const ribbonCuttingEndISO = "2026-12-01T00:00:00-06:00";
+export const ribbonCuttingPagePath = "ribboncutting";
+export const isRibbonCuttingLive = (now = new Date()) =>
+  now.getTime() < Date.parse(ribbonCuttingEndISO);
+
 export const studioOpening = {
   opensAtISO: "2026-11-16T05:30:00-06:00",
   label: ["LSP at Mural Park", "924 W 19th Place", "4th floor"],

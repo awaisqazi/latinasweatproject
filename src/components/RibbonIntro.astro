@@ -1,0 +1,577 @@
+---
+// Homepage first-visit ribbon cutting moment (Nov 16 2026, the day the doors
+// opened at Mural Park; the ribbon was cut the night before).
+//
+// What a first-time visitor sees, about 2.5 s: a Warm White veil with
+// "We cut the / ribbon." and a satin-red ribbon across it, gold scissors drop
+// in and snip, the two halves swing down, the veil opens like two doors onto
+// the homepage, and a small black note settles in a corner ("We cut the
+// ribbon." + "See the night", which goes to /ribboncutting) until the visitor
+// closes it. Campaign identity from marketing/ribbon-cutting/CONTENT-PLAN.md:
+// Fraunces with one #FFDE59 highlighted word, Rubik, Warm White #f3eeea, black.
+// Ribbon red and the darker fold red are sampled from the event photos.
+//
+// Safety rules (do not loosen):
+// - Nothing here is in the server HTML except this <style> and one inline
+//   script: crawlers, link previews and no-JS visitors get the normal page.
+// - Plays once per visitor: localStorage "lsp-ribbon-intro-v1" is written
+//   BEFORE it plays. If storage is unavailable it never plays (the note only).
+// - Skipped instantly by any click, tap, key, wheel or scroll. The page under
+//   it is fully rendered the whole time and scroll is never locked.
+// - Ends by itself at 2.5 s (CSS hides it even if the script dies) and a hard
+//   timer removes it at 4 s no matter what.
+// - prefers-reduced-motion: no animation, the note only.
+// - ?noribbon on the URL: nothing at all (for QA and for anyone who needs it).
+//
+// TURN IT OFF: set showRibbonIntro to false in src/data/studioOpening.js. It
+// also stops by itself after ribbonCuttingEndISO (end of Nov 30 2026, Chicago),
+// at build time and in the browser.
+import {
+  showRibbonIntro,
+  isRibbonCuttingLive,
+  ribbonCuttingEndISO,
+  ribbonCuttingPagePath,
+} from "@/data/studioOpening";
+
+const base = import.meta.env.BASE_URL;
+const active = showRibbonIntro && isRibbonCuttingLive();
+const cfg = {
+  endISO: ribbonCuttingEndISO,
+  href: `${base}${ribbonCuttingPagePath}`,
+};
+---
+
+{active && (
+  <script is:inline define:vars={{ cfg }}>
+    (function () {
+      var root = null;
+      var hard = 0;
+      function kill() {
+        if (root && root.parentNode) root.parentNode.removeChild(root);
+        root = null;
+      }
+      try {
+        if (!(Date.now() < Date.parse(cfg.endISO))) return;
+        if (/[?&]noribbon(?:[=&]|$)/.test(window.location.search)) return;
+
+        var KEY = "lsp-ribbon-intro-v1";
+        var NOTE_KEY = "lsp-ribbon-note-v1";
+        var store = null;
+        try {
+          store = window.localStorage;
+          store.setItem("lsp-ribbon-probe", "1");
+          store.removeItem("lsp-ribbon-probe");
+        } catch (e) {
+          store = null;
+        }
+        // Fail closed: without working storage it counts as already seen.
+        var seen = true;
+        var noteClosed = false;
+        if (store) {
+          try {
+            seen = store.getItem(KEY) === "1";
+            if (!seen) {
+              store.setItem(KEY, "1");
+              if (store.getItem(KEY) !== "1") seen = true;
+            }
+            noteClosed = store.getItem(NOTE_KEY) === "1";
+          } catch (e) {
+            seen = true;
+          }
+        }
+        var reduce =
+          !window.matchMedia ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        var noteShown = false;
+        function showNote(delayed) {
+          if (noteShown || noteClosed) return;
+          noteShown = true;
+          var build = function () {
+            try {
+              var note = document.createElement("aside");
+              note.className = "rbs" + (delayed ? " rbs--late" : "");
+              note.setAttribute("aria-label", "Ribbon cutting");
+              note.innerHTML =
+                '<a class="rbs-link" data-conversion-event="ribboncutting_page_click" data-conversion-context="home_ribbon_note">' +
+                '<span class="rbs-h">We cut the <span class="rbs-hl">ribbon.</span></span>' +
+                '<span class="rbs-sub">Our new home at Mural Park is open. <span class="rbs-cta">See the night</span></span>' +
+                "</a>" +
+                '<button type="button" class="rbs-x" aria-label="Close">' +
+                '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' +
+                "</button>";
+              note.querySelector("a").setAttribute("href", cfg.href);
+              var remember = function () {
+                if (store) {
+                  try { store.setItem(NOTE_KEY, "1"); } catch (e) {}
+                }
+              };
+              note.querySelector("a").addEventListener("click", remember);
+              note.querySelector("button").addEventListener("click", function () {
+                remember();
+                if (note.parentNode) note.parentNode.removeChild(note);
+              });
+              document.body.appendChild(note);
+            } catch (e) {}
+          };
+          // Append after the page so it is last in the tab order.
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", build);
+          } else {
+            build();
+          }
+        }
+
+        if (seen || reduce) {
+          showNote(true);
+          return;
+        }
+
+        var segs = "";
+        for (var i = 8; i >= 1; i--) {
+          segs = '<div class="rbi-seg rbi-s' + i + '"><i class="rbi-cloth"></i>' + segs + "</div>";
+        }
+        var half = '<div class="rbi-half">' + segs + "</div>";
+        root = document.createElement("div");
+        root.className = "rbi";
+        root.setAttribute("aria-hidden", "true");
+        root.innerHTML =
+          '<div class="rbi-door rbi-door--l">' + half + "</div>" +
+          '<div class="rbi-door rbi-door--r"><div class="rbi-mirror">' + half + "</div></div>" +
+          '<i class="rbi-bridge"></i>' +
+          '<p class="rbi-h"><span class="rbi-l1">We cut the</span><span class="rbi-l2"><span class="rbi-hl">ribbon.</span></span></p>' +
+          '<div class="rbi-sc"><svg viewBox="0 0 120 270" width="100%" height="100%">' +
+          '<g class="rbi-b rbi-b--back"><g transform="matrix(-1 0 0 1 120 0)" fill="#a9832b" stroke="#a9832b">' +
+          '<path stroke="none" d="M54 104 C66 101 76 112 75 134 L65 242 C63.6 254 61.8 261 60 267 C58.4 258 57 248 56.4 236 Z"/>' +
+          '<path fill="none" stroke-width="11" stroke-linecap="round" d="M60 112 L44 70"/>' +
+          '<circle fill="none" stroke-width="10" cx="37" cy="44" r="23"/></g></g>' +
+          '<g class="rbi-b rbi-b--front" fill="#c9a13f" stroke="#c9a13f">' +
+          '<path stroke="none" d="M54 104 C66 101 76 112 75 134 L65 242 C63.6 254 61.8 261 60 267 C58.4 258 57 248 56.4 236 Z"/>' +
+          '<path fill="none" stroke-width="11" stroke-linecap="round" d="M60 112 L44 70"/>' +
+          '<circle fill="none" stroke-width="10" cx="37" cy="44" r="23"/></g>' +
+          '<circle cx="60" cy="118" r="5.5" fill="#6f5419"/>' +
+          "</svg></div>";
+        document.body.appendChild(root);
+
+        // Hard stop: whatever happens, the overlay is gone after 4 s.
+        hard = window.setTimeout(kill, 4000);
+
+        // Show the type once Fraunces is ready (or after 450 ms with the
+        // fallback), so the headline never visibly swaps faces.
+        var ready = function () { if (root) root.classList.add("rbi--ready"); };
+        window.setTimeout(ready, 450);
+        try {
+          if (document.fonts && document.fonts.load) {
+            Promise.all([
+              document.fonts.load('450 100px "Fraunces"'),
+              document.fonts.load('650 100px "Fraunces"'),
+            ]).then(ready, ready);
+          } else {
+            ready();
+          }
+        } catch (e) { ready(); }
+
+        var events = ["pointerdown", "keydown", "wheel", "touchstart", "scroll"];
+        var done = false;
+        var finish = function (skipped) {
+          if (done) return;
+          done = true;
+          for (var k = 0; k < events.length; k++) {
+            window.removeEventListener(events[k], onSkip, true);
+          }
+          if (skipped && root) {
+            root.classList.add("rbi--skip");
+            window.setTimeout(kill, 200);
+          } else {
+            kill();
+          }
+          window.clearTimeout(hard);
+          hard = window.setTimeout(kill, 400);
+          showNote(false);
+        };
+        var onSkip = function (e) {
+          // Only the page's own scroll counts, not a carousel scrolling itself.
+          if (e && e.type === "scroll" && e.target !== document && e.target !== window) return;
+          finish(true);
+        };
+        for (var j = 0; j < events.length; j++) {
+          window.addEventListener(events[j], onSkip, { capture: true, passive: true });
+        }
+        window.setTimeout(function () { finish(false); }, 2500);
+      } catch (e) {
+        kill();
+      }
+    })();
+  </script>
+)}
+
+<style is:global>
+  /* ---------- the intro (only ever created by the script above) ---------- */
+  .rbi {
+    --warm: #f3eeea;
+    --ribbon: #b31f38;
+    --ribbon-fold: #8a0d22;
+    --ribbon-sheen: #cf3a52;
+    --rh: clamp(26px, 3.3vw, 50px);
+    --ry: 64%;
+    --sh: clamp(220px, 40vmin, 380px);
+    --dur: 2.5s;
+    position: fixed;
+    inset: 0;
+    z-index: 9990;
+    overflow: hidden;
+    pointer-events: auto;
+    cursor: pointer;
+    contain: strict;
+    animation: rbi-root var(--dur) linear both;
+  }
+  .rbi--skip {
+    opacity: 0;
+    transition: opacity 0.18s ease-out;
+    pointer-events: none;
+  }
+  .rbi-door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: var(--warm);
+    will-change: transform;
+    animation: rbi-door-l var(--dur) both;
+  }
+  .rbi-door--l { left: 0; width: calc(50% + 1px); }
+  .rbi-door--r { left: 50%; animation-name: rbi-door-r; }
+  .rbi-mirror {
+    position: absolute;
+    inset: 0;
+    transform: scaleX(-1);
+  }
+  .rbi-half {
+    position: absolute;
+    left: 0;
+    top: var(--ry);
+    width: 50vw;
+    height: var(--rh);
+    animation: rbi-part var(--dur) both;
+  }
+  .rbi-seg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(50vw / 8);
+    height: var(--rh);
+    transform-origin: 0 50%;
+    animation: rbi-s1 var(--dur) both;
+  }
+  .rbi-seg .rbi-seg { left: 100%; }
+  .rbi-s2 { animation-name: rbi-s2; }
+  .rbi-s3 { animation-name: rbi-s3; }
+  .rbi-s4 { animation-name: rbi-s4; }
+  .rbi-s5 { animation-name: rbi-s5; }
+  .rbi-s6 { animation-name: rbi-s6; }
+  .rbi-s7 { animation-name: rbi-s7; }
+  .rbi-s8 { animation-name: rbi-s8; }
+  /* The cloth runs past each joint so bends read as folds, never gaps.
+     Flat bands only: a darker fold at each edge and one satin sheen. */
+  .rbi-cloth,
+  .rbi-bridge {
+    background:
+      linear-gradient(
+        to bottom,
+        var(--ribbon-fold) 0 9%,
+        var(--ribbon) 9% 30%,
+        var(--ribbon-sheen) 30% 41%,
+        var(--ribbon) 41% 86%,
+        var(--ribbon-fold) 86% 100%
+      );
+  }
+  .rbi-cloth {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: calc(var(--rh) * -0.4);
+  }
+  /* The cut end: 2px under the other half so no seam shows before the snip. */
+  .rbi-s8 > .rbi-cloth { right: -2px; }
+  /* A short piece over the seam between the two doors until the snip, so the
+     taut ribbon reads as one piece of cloth at every width. */
+  .rbi-bridge {
+    position: absolute;
+    left: 50%;
+    top: var(--ry);
+    width: calc(var(--rh) * 2);
+    height: var(--rh);
+    margin-left: calc(var(--rh) * -1);
+    animation: rbi-bridge var(--dur) step-end both;
+  }
+
+  .rbi-h {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--ry) - var(--rh) * 0.55 - var(--sh) * 0.437 - clamp(20px, 3.5vh, 40px));
+    transform: translate(-50%, -100%);
+    margin: 0;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    color: #000;
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-size: clamp(48px, 8.2vw, 128px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-align: center;
+    visibility: hidden;
+  }
+  .rbi--ready .rbi-h {
+    visibility: visible;
+    animation: rbi-type var(--dur) both;
+  }
+  .rbi-l1, .rbi-l2 { display: block; }
+  .rbi-l1 { font-weight: 450; }
+  .rbi-l2 { font-weight: 650; margin-top: 0.06em; }
+  .rbi-hl, .rbs-hl {
+    background: #ffde59;
+    border-radius: 0.2em;
+    padding: 0 0.14em 0.04em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .rbi-sc {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--ry) - var(--rh) * 0.55 - var(--sh) * 0.437);
+    width: calc(var(--sh) * 0.444);
+    height: var(--sh);
+    margin-left: calc(var(--sh) * -0.222);
+    transform-origin: 50% 43.7%;
+    animation: rbi-sc var(--dur) both;
+  }
+  .rbi-sc svg { display: block; overflow: visible; }
+  .rbi-b {
+    transform-box: view-box;
+    transform-origin: 60px 118px;
+    animation: rbi-front var(--dur) both;
+  }
+  .rbi-b--back { animation-name: rbi-back; }
+
+  @keyframes rbi-bridge {
+    0% { visibility: visible; }
+    36%, 100% { visibility: hidden; }
+  }
+  @keyframes rbi-part {
+    0%, 36% { transform: translateX(0); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+    41%, 100% { transform: translateX(-0.5vw); }
+  }
+  @keyframes rbi-root {
+    0%, 99.9% { visibility: visible; }
+    100% { visibility: hidden; }
+  }
+  @keyframes rbi-door-l {
+    0%, 53% { transform: translateX(0); animation-timing-function: cubic-bezier(0.7, 0, 0.25, 1); }
+    94%, 100% { transform: translateX(-102%); }
+  }
+  @keyframes rbi-door-r {
+    0%, 53% { transform: translateX(0); animation-timing-function: cubic-bezier(0.7, 0, 0.25, 1); }
+    94%, 100% { transform: translateX(102%); }
+  }
+  @keyframes rbi-type {
+    0% { opacity: 0; transform: translate(-50%, calc(-100% + 0.12em)); animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+    14% { opacity: 1; transform: translate(-50%, -100%); }
+    48% { opacity: 1; transform: translate(-50%, -100%); animation-timing-function: ease-in; }
+    57%, 100% { opacity: 0; transform: translate(-50%, calc(-100% - 0.1em)); }
+  }
+  @keyframes rbi-sc {
+    0%, 3% { transform: translate(55vw, 6vh) rotate(28deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.25, 1); }
+    24% { transform: translate(0, 0) rotate(0deg); }
+    34% { transform: translate(0, 0) rotate(0deg); animation-timing-function: ease-out; }
+    37% { transform: translate(0, 6px) rotate(0deg); animation-timing-function: ease-in-out; }
+    42% { transform: translate(0, 0) rotate(0deg); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.3); }
+    56%, 100% { transform: translate(60vw, 8vh) rotate(30deg); opacity: 0; }
+  }
+  @keyframes rbi-front {
+    0%, 24% { transform: rotate(-18deg); animation-timing-function: ease-out; }
+    31% { transform: rotate(-22deg); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+    36%, 100% { transform: rotate(0deg); }
+  }
+  @keyframes rbi-back {
+    0%, 24% { transform: rotate(18deg); animation-timing-function: ease-out; }
+    31% { transform: rotate(22deg); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+    36%, 100% { transform: rotate(0deg); }
+  }
+  @keyframes rbi-s1 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(16.00deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(44.00deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(70.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(84.00deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(79.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(83.00deg); }
+  }
+  @keyframes rbi-s2 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s3 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s4 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.30deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s5 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.50deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s6 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(0.80deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s7 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(1.20deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+  @keyframes rbi-s8 {
+    0% { transform: rotate(0.00deg); }
+    36% { transform: rotate(0.00deg); animation-timing-function: cubic-bezier(.3,0,.6,.4); }
+    39% { transform: rotate(1.60deg); animation-timing-function: cubic-bezier(.45,0,.85,.5); }
+    46% { transform: rotate(-1.60deg); animation-timing-function: cubic-bezier(.4,0,.8,.6); }
+    53% { transform: rotate(-3.20deg); animation-timing-function: cubic-bezier(.3,.3,.6,1); }
+    61% { transform: rotate(3.00deg); animation-timing-function: ease-out; }
+    68% { transform: rotate(1.60deg); animation-timing-function: ease-in-out; }
+    78% { transform: rotate(1.00deg); animation-timing-function: ease-in-out; }
+    100% { transform: rotate(0.80deg); }
+  }
+
+
+  /* ---------- the note that stays (closable) ---------- */
+  .rbs {
+    position: fixed;
+    z-index: 9980;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: flex-start;
+    max-width: 23rem;
+    background: #000;
+    color: #fff;
+    border-radius: 14px;
+    animation: rbs-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .rbs--late { animation-delay: 0.8s; }
+  .rbs-link {
+    flex: 1 1 auto;
+    display: block;
+    padding: 14px 4px 15px 18px;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 14px;
+  }
+  .rbs-h {
+    display: block;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 450;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .rbs-hl {
+    color: #000;
+    font-weight: 650;
+  }
+  .rbs-sub {
+    display: block;
+    margin-top: 6px;
+    font-family: "Rubik", system-ui, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .rbs-cta {
+    color: #fff;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+  .rbs-link:hover .rbs-cta { text-decoration-thickness: 2px; }
+  .rbs-x {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: 4px 4px 0 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+  }
+  .rbs-x:hover { color: #fff; }
+  .rbs-link:focus-visible,
+  .rbs-x:focus-visible {
+    outline: 2px solid #ffde59;
+    outline-offset: -4px;
+  }
+  /* Desktop: bottom-right, clear of the homepage's left-aligned headings. */
+  @media (min-width: 640px) {
+    .rbs { left: auto; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  }
+  @keyframes rbs-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rbs { animation: none; }
+    .rbi { display: none; }
+  }
+</style>
