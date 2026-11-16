@@ -46,7 +46,9 @@ export const RIBBON_CUTTING_SLUG = "ribboncutting";
 
 export const ribbonCuttingVideo = {
   fullRemarks: {
-    youtubeId: null,
+    // Unlisted on The Latina Sweat Project channel (uploaded 2026-11-16); unlisted videos
+    // play when embedded. Same id once it is switched to Public.
+    youtubeId: "AhSnyhw1fpg",
     title: "The remarks and the ribbon cutting at Mural Park",
     duration: "7 min",
     poster: "DSC09765",
