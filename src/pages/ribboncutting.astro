@@ -1,0 +1,976 @@
+---
+// /ribboncutting: the Mural Park ribbon cutting (Sunday, November 15, 2026)
+// and the grand reopening (Monday, November 16, 2026). The route name lives in
+// RIBBON_CUTTING_SLUG (src/data/ribbonCutting.js); rename this file with it.
+// Not linked from the nav or homepage yet.
+//
+// Story order: the moment (hero) -> the remarks in the speakers' words ->
+// [watch: full remarks + reels, only when YouTube ids exist] -> the night in
+// photos -> gracias to the partners -> we're open (address + booking).
+//
+// Identity: the Mural Park opening campaign carried onto the site: Warm White
+// #f3eeea ground, black Fraunces headlines (Regular, Bold, Black), Rubik body
+// in Gray #4e4f50, one key word on the #FFDE59 highlight (two on the page:
+// "ribbon." in the hero and "Open" at the close), black for the night in
+// photos. No cards, chips, rules or gradients. Type never sits on a photo.
+//
+// All copy, quotes, photo lists and video ids: src/data/ribbonCutting.js.
+// Photo derivatives: scripts/prepare-ribboncutting-photos.mjs. Share card:
+// scripts/render-ribboncutting-og.mjs.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import RibbonCuttingVideo from "@/components/RibbonCuttingVideo.astro";
+import sizes from "@/data/ribbonCuttingPhotoSizes.json";
+import {
+  RIBBON_CUTTING_SLUG,
+  ribbonCutting as rc,
+  ribbonCuttingHero as hero,
+  ribbonCuttingPhotos as photos,
+  ribbonCuttingStory as story,
+  ribbonCuttingRemarks as remarks,
+  ribbonCuttingPartners as partners,
+  ribbonCuttingVideo as video,
+  UNNAMED_SPEAKER,
+  PHOTO_DIR,
+  PHOTO_WIDTHS,
+  HERO_WIDTHS,
+} from "@/data/ribbonCutting";
+
+const base = import.meta.env.BASE_URL;
+const dir = `${base}${PHOTO_DIR}`;
+const dims = (id: string) => {
+  const d = (sizes as Record<string, [number, number]>)[id];
+  if (!d) throw new Error(`ribboncutting: no derivative for ${id}; run scripts/prepare-ribboncutting-photos.mjs`);
+  return d;
+};
+const srcset = (id: string, widths: number[]) => {
+  const [w] = dims(id);
+  return widths.map((x) => `${dir}/${id}-${x}.webp ${Math.min(x, w)}w`).join(", ");
+};
+for (const ch of story) for (const row of ch.rows) for (const id of row) {
+  if (!photos[id as keyof typeof photos]) throw new Error(`ribboncutting: ${id} has no alt text`);
+}
+
+const heroSrcset = srcset(hero.id, HERO_WIDTHS);
+const [heroW, heroH] = dims(hero.id);
+
+// Justified rows: each photo's flex-grow is its aspect ratio, so every photo
+// in a row is the same height and none is cropped. On phones a row stays side
+// by side only if the sum of aspect ratios is small enough to keep each photo
+// at a readable height; otherwise it stacks full width.
+const ar = (id: string) => {
+  const [w, h] = dims(id);
+  return w / h;
+};
+// The lightbox walks every story photo in page order.
+const order = story.flatMap((ch) => ch.rows.flat());
+const MAX_ROW = 1280; // px, the page's content width at desktop
+
+const hasFull = Boolean(video.fullRemarks.youtubeId);
+const reels = video.highlights.filter((h) => h.youtubeId);
+const hasWatch = hasFull || reels.length > 0;
+
+const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
+---
+
+<Layout
+  title={rc.metaTitle}
+  socialTitle={rc.socialTitle}
+  description={rc.metaDescription}
+  socialImage={`${PHOTO_DIR}/ribboncutting-og.jpg`}
+  socialImageAlt="We cut the ribbon. Our new home at Mural Park, in Pilsen. Latina Sweat Project."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&display=swap"
+    rel="stylesheet"
+  />
+  <link slot="head" rel="preload" as="image" imagesrcset={heroSrcset} imagesizes="100vw" fetchpriority="high" />
+  <Header />
+  <main class="rc-page font-rubik" data-page-url={pageUrl}>
+    {/* ============================ THE MOMENT ============================ */}
+    <section class="rc-hero" aria-labelledby="rc-title">
+      <div class="rc-wrap rc-hero-text">
+        <h1 id="rc-title" class="rc-display">
+          <span class="block">{rc.headline[0]}</span>
+          <span class="rc-mark">{rc.headline[1]}</span>
+        </h1>
+        <div class="rc-hero-side">
+          <p class="rc-sub">{rc.sub}</p>
+          <p class="rc-date">{rc.dateLine}</p>
+          <p class="rc-intro">{rc.intro}</p>
+        </div>
+      </div>
+      <div class="rc-hero-media">
+        <img
+          src={`${dir}/${hero.id}-1600.webp`}
+          srcset={heroSrcset}
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          width={heroW}
+          height={heroH}
+          alt={hero.alt}
+          fetchpriority="high"
+          decoding="async"
+          style={`aspect-ratio: ${hero.aspect ?? "16 / 9"}; object-position: ${hero.position};`}
+        />
+      </div>
+    </section>
+
+    {/* ============================ THE REMARKS =========================== */}
+    <section id="remarks" class="rc-remarks" aria-labelledby="rc-remarks-title">
+      <div class="rc-wrap">
+        <div class="rc-split">
+          <h2 id="rc-remarks-title" class="rc-h2">{rc.remarks.heading}</h2>
+          <p class="rc-lede">{rc.remarks.sub}</p>
+        </div>
+        <ol class="rc-quotes">
+          {remarks.map((r) => (
+            <li class="rc-quote">
+              <div class="rc-who">
+                <p class="rc-name">{r.name ?? UNNAMED_SPEAKER}</p>
+                {r.name && r.role && <p class="rc-role">{r.role}</p>}
+              </div>
+              <blockquote>
+                <p class="rc-lead">“{r.lead}”</p>
+                {r.more.map((m) => <p class="rc-more">“{m}”</p>)}
+              </blockquote>
+            </li>
+          ))}
+        </ol>
+        <p class="rc-coda">{rc.remarks.coda}</p>
+      </div>
+    </section>
+
+    {/* ============================== WATCH =============================== */}
+    {hasWatch && (
+      <section id="watch" class="rc-dark rc-watch" aria-labelledby="rc-watch-title">
+        <div class="rc-wrap">
+          <h2 id="rc-watch-title" class="rc-h2">{rc.watch.heading}</h2>
+          {hasFull && (
+            <div class="rc-full">
+              <RibbonCuttingVideo
+                youtubeId={video.fullRemarks.youtubeId!}
+                title={video.fullRemarks.title}
+                poster={video.fullRemarks.poster}
+                imgSizes="(min-width: 1280px) 1216px, 100vw"
+                context="ribboncutting_full_remarks"
+              >
+                <p class="rc-vid-title">
+                  {video.fullRemarks.title}
+                  {video.fullRemarks.duration && <span class="rc-vid-meta"> · {video.fullRemarks.duration}</span>}
+                </p>
+              </RibbonCuttingVideo>
+            </div>
+          )}
+          {reels.length > 0 && (
+            <div class="rc-reels-block">
+              {hasFull && <h3 class="rc-h3">{rc.watch.reelsHeading}</h3>}
+              <ul class="rc-reels" style={`--n:${reels.length}`}>
+                {reels.map((h, i) => (
+                  <li>
+                    <RibbonCuttingVideo
+                      youtubeId={h.youtubeId!}
+                      title={h.title}
+                      aspect="9/16"
+                      poster={h.poster}
+                      imgSizes="(min-width: 1024px) 240px, 70vw"
+                      posterPosition={h.posterPosition}
+                      context={`ribboncutting_reel_${i + 1}`}
+                    >
+                      <p class="rc-vid-title">{h.title}</p>
+                      {h.speaker && <p class="rc-vid-meta">{h.speaker}</p>}
+                    </RibbonCuttingVideo>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    {/* ========================= THE NIGHT IN PHOTOS ====================== */}
+    <section id="photos" class="rc-dark rc-photos" aria-labelledby="rc-photos-title">
+      <div class="rc-wrap">
+        <h2 id="rc-photos-title" class="rc-h2">{rc.photos.heading}</h2>
+        {story.map((ch) => (
+          <div class="rc-chapter" id={`photos-${ch.key}`}>
+            <h3 class="rc-h3">{ch.label}</h3>
+            {ch.rows.map((row) => {
+              const sum = row.reduce((n, id) => n + ar(id), 0);
+              const stack = sum > 1;
+              // Portrait-only rows: cap the width so the photos stay about 600 px tall.
+              const cap = row.every((id) => ar(id) < 1) && sum < 2 ? Math.round(sum * 600) : null;
+              const rowW = cap ?? MAX_ROW;
+              return (
+                <div class:list={["rc-row", { "rc-row--stack": stack, "rc-row--cap": cap }]} style={cap ? `--cap:${cap}px` : undefined}>
+                  {row.map((id) => {
+                    const p = photos[id as keyof typeof photos] as { alt: string; caption?: string; phoneCrop?: string; phonePosition?: string };
+                    const [w, h] = dims(id);
+                    const share = ar(id) / sum;
+                    const desk = Math.round(rowW * share);
+                    const sizesAttr = stack
+                      ? `(min-width: 1312px) ${desk}px, (min-width: 640px) ${Math.round(share * 100)}vw, 100vw`
+                      : `(min-width: 1312px) ${desk}px, ${Math.round(share * 100)}vw`;
+                    return (
+                      <figure
+                        class:list={{ "rc-crop": p.phoneCrop }}
+                        style={`--ar:${(w / h).toFixed(4)}` + (p.phoneCrop ? `;--crop:${p.phoneCrop};--pos:${p.phonePosition ?? "50% 50%"}` : "")}
+                      >
+                        <button
+                          type="button"
+                          class="rc-ph"
+                          data-rc-open={order.indexOf(id)}
+                          aria-label={`Open photo: ${p.alt}`}
+                        >
+                          <img
+                            src={`${dir}/${id}-1080.webp`}
+                            srcset={srcset(id, PHOTO_WIDTHS)}
+                            sizes={sizesAttr}
+                            width={w}
+                            height={h}
+                            alt={p.alt}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </button>
+                        {p.caption && <figcaption>{p.caption}</figcaption>}
+                      </figure>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+        {video.albumUrl && (
+          <p class="rc-album">
+            <a href={video.albumUrl} target="_blank" rel="noopener noreferrer" data-conversion-event="ribboncutting_album_click" data-conversion-context="ribboncutting_photos">
+              {rc.photos.albumLabel}
+            </a>
+          </p>
+        )}
+      </div>
+    </section>
+
+    {/* =============================== GRACIAS ============================ */}
+    <section id="gracias" class="rc-dark rc-thanks" aria-labelledby="rc-thanks-title">
+      <div class="rc-wrap rc-split">
+        <div>
+          <h2 id="rc-thanks-title" class="rc-h2">{rc.thanks.heading}</h2>
+          <p class="rc-lede">{rc.thanks.line}</p>
+        </div>
+        <ul class="rc-partners">
+          {partners.map((p) => <li>{p}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    {/* ============================== WE'RE OPEN ========================== */}
+    <section id="open" class="rc-open" aria-labelledby="rc-open-title">
+      <div class="rc-wrap rc-open-grid">
+        <div>
+          <h2 id="rc-open-title" class="rc-black">
+            <span class="block">{rc.open.heading[0]}</span>
+            <span class="block">{rc.open.heading[1]}</span>
+          </h2>
+          <p class="rc-place">{rc.open.place.map((line, i) => (i ? <><br />{line}</> : line))}</p>
+          <div class="rc-cta">
+            <a
+              href={`${base}${rc.open.bookPath}`}
+              class="rc-btn"
+              data-conversion-event="class_booking_start"
+              data-conversion-context="ribboncutting_open"
+              data-conversion-booking-path="schedule_page"
+            >{rc.open.bookLabel}</a>
+            <a href={rc.open.directionsUrl} class="rc-link" target="_blank" rel="noopener noreferrer">{rc.open.directionsLabel}</a>
+          </div>
+          <p class="rc-signoff">{rc.open.signoff}</p>
+        </div>
+        <p class="rc-open-word" aria-hidden="true"><span class="rc-mark">{rc.open.word}</span></p>
+      </div>
+    </section>
+  </main>
+
+  {/* Lightbox, outside <main> so no stacking context traps it under the header. */}
+  <dialog class="rc-lb" aria-label="Photos" data-rc-lb>
+    <figure>
+      <img alt="" data-rc-lb-img />
+      <figcaption data-rc-lb-cap></figcaption>
+    </figure>
+    <button type="button" class="rc-lb-btn rc-lb-close" data-rc-lb-close aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+    <button type="button" class="rc-lb-btn rc-lb-prev" data-rc-lb-step="-1" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <button type="button" class="rc-lb-btn rc-lb-next" data-rc-lb-step="1" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"></path></svg>
+    </button>
+    <p class="rc-lb-count" data-rc-lb-count></p>
+  </dialog>
+  <script
+    type="application/json"
+    id="rc-lb-data"
+    set:html={JSON.stringify(
+      order.map((id) => {
+        const p = photos[id as keyof typeof photos] as { alt: string; caption?: string };
+        return { src: `${dir}/${id}-1600.webp`, srcset: srcset(id, PHOTO_WIDTHS), alt: p.alt, caption: p.caption ?? "" };
+      }),
+    )}
+  />
+</Layout>
+
+<style>
+  .rc-page {
+    --rc-warm: #f3eeea;
+    --rc-gray: #4e4f50;
+    --rc-taupe: #b5a18d;
+    --rc-hi: #ffde59;
+    background: var(--rc-warm);
+    color: #000;
+  }
+  .rc-wrap {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  @media (min-width: 640px) {
+    .rc-wrap {
+      padding: 0 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .rc-wrap {
+      padding: 0 2rem;
+    }
+  }
+
+  /* ---------- type ---------- */
+  .rc-display,
+  .rc-h2,
+  .rc-black,
+  .rc-lead,
+  .rc-coda,
+  .rc-partners,
+  .rc-signoff,
+  .rc-open-word {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+  }
+  .rc-display {
+    font-weight: 400;
+    font-size: clamp(3.25rem, 13vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  /* The campaign's highlight: Fraunces Bold on #FFDE59 with soft corners,
+     the yellow hanging a little left of the glyphs. */
+  .rc-mark {
+    display: inline-block;
+    margin-left: -0.08em;
+    margin-top: 0.06em;
+    padding: 0.02em 0.14em 0.1em 0.08em;
+    border-radius: 0.2em;
+    background: var(--rc-hi);
+    font-weight: 700;
+  }
+  .rc-h2 {
+    font-weight: 400;
+    font-size: clamp(2.25rem, 9vw, 2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .rc-h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .rc-lede {
+    text-wrap: pretty;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    color: var(--rc-gray);
+    max-width: 34rem;
+  }
+  .rc-split {
+    display: grid;
+    gap: 1rem;
+  }
+
+  /* ---------- hero ---------- */
+  .rc-hero {
+    padding-top: 2.5rem;
+  }
+  .rc-hero-text {
+    display: grid;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+  }
+  .rc-sub {
+    text-wrap: balance;
+    font-size: 1.375rem;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+  .rc-date {
+    margin-top: 0.25rem;
+    font-size: 1.0625rem;
+    color: var(--rc-gray);
+  }
+  .rc-intro {
+    margin-top: 1.25rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--rc-gray);
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+  .rc-hero-media {
+    max-width: 90rem;
+    margin: 0 auto;
+  }
+  .rc-hero-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  /* ---------- remarks ---------- */
+  .rc-remarks {
+    padding: 4.5rem 0 5rem;
+  }
+  .rc-quotes {
+    margin-top: 3rem;
+    display: grid;
+    gap: 3.25rem;
+  }
+  .rc-quote {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .rc-who {
+    order: 2;
+  }
+  .rc-name {
+    font-weight: 600;
+    font-size: 1.0625rem;
+  }
+  .rc-role {
+    font-size: 0.9375rem;
+    color: var(--rc-gray);
+  }
+  .rc-lead {
+    font-weight: 400;
+    font-size: clamp(1.875rem, 7.5vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    text-indent: -0.4em;
+  }
+  .rc-more {
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.45;
+    color: var(--rc-gray);
+    max-width: 38rem;
+  }
+  .rc-coda {
+    margin-top: 4rem;
+    font-style: italic;
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
+    line-height: 1.15;
+    color: var(--rc-gray);
+  }
+
+  /* ---------- dark sections ---------- */
+  .rc-dark {
+    background: #000;
+    color: #fff;
+  }
+  .rc-dark .rc-lede {
+    color: rgb(255 255 255 / 0.75);
+  }
+  .rc-watch {
+    padding: 4.5rem 0 1rem;
+  }
+  .rc-full {
+    margin-top: 2rem;
+  }
+  .rc-vid-title {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .rc-vid-meta {
+    font-weight: 400;
+    font-size: 0.9375rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+  .rc-reels-block {
+    margin-top: 3rem;
+  }
+  .rc-full + .rc-reels-block .rc-h3 {
+    margin-bottom: 1.25rem;
+  }
+  .rc-reels {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 68%;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    margin: 0 -1rem;
+    padding: 0 1rem 0.5rem;
+    scrollbar-width: none;
+  }
+  .rc-reels::-webkit-scrollbar {
+    display: none;
+  }
+  .rc-reels > li {
+    scroll-snap-align: start;
+  }
+  .rc-full + .rc-reels-block,
+  .rc-reels-block:first-child {
+    margin-top: 2rem;
+  }
+
+  .rc-photos {
+    padding: 4.5rem 0 4rem;
+  }
+  .rc-chapter {
+    margin-top: 3rem;
+  }
+  .rc-chapter .rc-h3 {
+    margin-bottom: 1rem;
+    color: rgb(255 255 255 / 0.85);
+  }
+  .rc-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .rc-row--stack {
+    flex-direction: column;
+  }
+  @media (min-width: 640px) {
+    .rc-row--cap {
+      max-width: var(--cap);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  .rc-row figure {
+    flex: var(--ar) 1 0%;
+    min-width: 0;
+  }
+  .rc-ph {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: #111;
+    cursor: zoom-in;
+  }
+  .rc-ph img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--ar);
+  }
+  /* Phones only: a wide frame whose subject is small (the group photo) is
+     cropped tighter. Desktop always shows the whole frame. */
+  @media (max-width: 639px) {
+    .rc-crop .rc-ph img {
+      aspect-ratio: var(--crop);
+      object-fit: cover;
+      object-position: var(--pos);
+    }
+  }
+  .rc-ph:focus-visible {
+    outline: 3px solid var(--rc-hi);
+    outline-offset: 2px;
+  }
+  .rc-row figcaption {
+    margin-top: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.8);
+  }
+  .rc-row--stack figcaption {
+    margin-bottom: 0.75rem;
+  }
+  .rc-album {
+    margin-top: 2.5rem;
+  }
+  .rc-album a,
+  .rc-link {
+    display: inline-block;
+    padding: 0.75rem 0;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    text-decoration: underline;
+    text-decoration-color: var(--rc-hi);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+
+  .rc-thanks {
+    padding: 3rem 0 5rem;
+  }
+  .rc-thanks .rc-split {
+    gap: 2rem;
+  }
+  .rc-thanks .rc-lede {
+    margin-top: 0.5rem;
+  }
+  .rc-partners {
+    display: grid;
+    gap: 0.9rem;
+    font-size: clamp(1.5rem, 6vw, 1.875rem);
+    line-height: 1.2;
+  }
+
+  /* ---------- open ---------- */
+  .rc-open {
+    padding: 4.5rem 0 4.5rem;
+  }
+  .rc-open-grid {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .rc-black {
+    font-weight: 900;
+    font-size: clamp(3rem, 13vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .rc-place {
+    margin-top: 1.25rem;
+    font-size: 1.1875rem;
+    line-height: 1.45;
+    color: var(--rc-gray);
+  }
+  .rc-cta {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.75rem;
+  }
+  .rc-btn {
+    display: inline-block;
+    padding: 0.95rem 1.6rem;
+    border-radius: 6px;
+    background: #000;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .rc-btn:hover,
+  .rc-btn:focus-visible {
+    background: var(--rc-hi);
+    color: #000;
+  }
+  .rc-btn:focus-visible,
+  .rc-link:focus-visible,
+  .rc-album a:focus-visible {
+    outline: 3px solid #000;
+    outline-offset: 3px;
+  }
+  .rc-signoff {
+    margin-top: 2.25rem;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.75rem;
+  }
+  .rc-open-word {
+    font-size: clamp(6rem, 30vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .rc-open-word .rc-mark {
+    padding: 0.04em 0.16em 0.14em 0.1em;
+    border-radius: 0.17em;
+  }
+
+  /* ---------- tablet and up ---------- */
+  @media (min-width: 768px) {
+    .rc-reels {
+      grid-auto-columns: 40%;
+    }
+  }
+  @media (min-width: 1024px) {
+    .rc-hero {
+      padding-top: 4rem;
+    }
+    .rc-hero-text {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: end;
+      padding-bottom: 3rem;
+    }
+    .rc-display {
+      font-size: 6.5rem;
+    }
+    .rc-hero-side {
+      padding-bottom: 0.9rem;
+    }
+    .rc-sub {
+      font-size: 1.625rem;
+    }
+    .rc-intro {
+      font-size: 1.125rem;
+    }
+    .rc-split {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: end;
+    }
+    .rc-h2 {
+      font-size: 4rem;
+    }
+    .rc-remarks {
+      padding: 7rem 0 7.5rem;
+    }
+    .rc-quotes {
+      margin-top: 5rem;
+      gap: 4.5rem;
+    }
+    .rc-quote {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+      column-gap: 3rem;
+      align-items: start;
+    }
+    .rc-who {
+      order: 0;
+      padding-top: 0.85rem;
+    }
+    .rc-lead {
+      font-size: 3rem;
+      line-height: 1.1;
+    }
+    .rc-more {
+      font-size: 1.25rem;
+    }
+    .rc-coda {
+      margin-top: 5.5rem;
+      font-size: 3rem;
+      padding-left: calc(25% + 0.75rem);
+    }
+    .rc-watch {
+      padding: 7rem 0 1rem;
+    }
+    .rc-full {
+      margin-top: 3rem;
+    }
+    .rc-reels {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-columns: auto;
+      overflow: visible;
+      margin: 0;
+      padding: 0;
+    }
+    .rc-photos {
+      padding: 7rem 0 5rem;
+    }
+    .rc-chapter {
+      margin-top: 4.5rem;
+    }
+    .rc-row {
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .rc-thanks {
+      padding: 4rem 0 7rem;
+    }
+    .rc-thanks .rc-split {
+      align-items: start;
+    }
+    .rc-thanks .rc-lede {
+      margin-top: 1rem;
+      font-size: 1.375rem;
+    }
+    .rc-partners {
+      font-size: 2.125rem;
+      gap: 1rem;
+    }
+    .rc-open {
+      padding: 7rem 0 7rem;
+    }
+    .rc-open-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: end;
+    }
+    .rc-black {
+      font-size: 6rem;
+    }
+    .rc-open-word {
+      font-size: 12rem;
+      justify-self: start;
+    }
+  }
+  /* Phones: a row stays side by side only when it is narrow (see the page
+     script); every other row stacks. From 640 every row is justified. */
+  @media (min-width: 640px) {
+    .rc-row--stack {
+      flex-direction: row;
+    }
+    .rc-row--stack figcaption {
+      margin-bottom: 0;
+    }
+  }
+
+  /* ---------- lightbox ---------- */
+  .rc-lb {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #000;
+    color: #fff;
+    font-family: Rubik, sans-serif;
+  }
+  .rc-lb::backdrop {
+    background: #000;
+  }
+  .rc-lb[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rc-lb figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 3.5rem 0.5rem 3rem;
+  }
+  .rc-lb img {
+    max-width: 100%;
+    max-height: calc(100dvh - 9rem);
+    object-fit: contain;
+  }
+  .rc-lb figcaption {
+    margin-top: 0.75rem;
+    min-height: 1.4em;
+    padding: 0 1rem;
+    font-size: 0.9375rem;
+    color: rgb(255 255 255 / 0.85);
+    text-align: center;
+  }
+  .rc-lb-btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.55);
+    color: #fff;
+  }
+  .rc-lb-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .rc-lb-btn:focus-visible {
+    outline: 3px solid #ffde59;
+  }
+  .rc-lb-close {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .rc-lb-prev {
+    left: 0.5rem;
+    top: 50%;
+    margin-top: -1.5rem;
+  }
+  .rc-lb-next {
+    right: 0.5rem;
+    top: 50%;
+    margin-top: -1.5rem;
+  }
+  .rc-lb-count {
+    position: absolute;
+    top: 1.1rem;
+    left: 1rem;
+    font-size: 0.875rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+  @media (max-width: 639px) {
+    .rc-lb-prev,
+    .rc-lb-next {
+      top: auto;
+      bottom: 0.5rem;
+      margin-top: 0;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("[data-rc-lb]");
+  const dataEl = document.getElementById("rc-lb-data");
+  if (dialog && dataEl) {
+    const items: { src: string; srcset: string; alt: string; caption: string }[] = JSON.parse(dataEl.textContent || "[]");
+    const img = dialog.querySelector<HTMLImageElement>("[data-rc-lb-img]")!;
+    const cap = dialog.querySelector<HTMLElement>("[data-rc-lb-cap]")!;
+    const count = dialog.querySelector<HTMLElement>("[data-rc-lb-count]")!;
+    let i = 0;
+    let opener: HTMLElement | null = null;
+    const show = (n: number) => {
+      i = (n + items.length) % items.length;
+      const it = items[i];
+      img.srcset = it.srcset;
+      img.sizes = "100vw";
+      img.src = it.src;
+      img.alt = it.alt;
+      cap.textContent = it.caption;
+      count.textContent = `${i + 1} of ${items.length}`;
+    };
+    document.querySelectorAll<HTMLElement>("[data-rc-open]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        opener = btn;
+        show(Number(btn.dataset.rcOpen));
+        dialog.showModal();
+      });
+    });
+    dialog.querySelector("[data-rc-lb-close]")?.addEventListener("click", () => dialog.close());
+    dialog.querySelectorAll<HTMLElement>("[data-rc-lb-step]").forEach((b) =>
+      b.addEventListener("click", () => show(i + Number(b.dataset.rcLbStep))),
+    );
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") show(i + 1);
+      if (e.key === "ArrowLeft") show(i - 1);
+    });
+    // Tap on the black around the photo closes.
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    let x0: number | null = null;
+    dialog.addEventListener("touchstart", (e) => (x0 = e.touches[0].clientX), { passive: true });
+    dialog.addEventListener("touchend", (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+      x0 = null;
+    });
+    dialog.addEventListener("close", () => opener?.focus({ preventScroll: true }));
+  }
+</script>

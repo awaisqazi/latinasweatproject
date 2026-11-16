@@ -1,0 +1,192 @@
+---
+/*
+ * Click-to-load YouTube player for /ribboncutting (same facade pattern as
+ * Abc7Segment.astro, in the page's plain look): the page ships only a local
+ * poster photo and a play button; YouTube's player (youtube-nocookie.com)
+ * is injected when the visitor presses play. Works for any number of
+ * instances on a page.
+ *
+ * `aspect` "16/9" for the full remarks, "9/16" for the vertical reels.
+ * `poster` is a photo id from src/data/ribbonCutting.js (served from
+ * images/ribbon-cutting/<id>-<w>.webp) or a public path.
+ */
+import sizes from "@/data/ribbonCuttingPhotoSizes.json";
+import { PHOTO_DIR, PHOTO_WIDTHS } from "@/data/ribbonCutting";
+
+interface Props {
+  youtubeId: string;
+  title: string;
+  aspect?: "16/9" | "9/16";
+  poster?: string | null;
+  /** CSS object-position for the poster crop. */
+  posterPosition?: string;
+  /** The `sizes` attribute for the poster. */
+  imgSizes?: string;
+  context: string;
+  class?: string;
+}
+
+const {
+  youtubeId,
+  title,
+  aspect = "16/9",
+  poster = null,
+  posterPosition = "50% 40%",
+  imgSizes = "100vw",
+  context,
+  class: className = "",
+} = Astro.props;
+
+if (!/^[A-Za-z0-9_-]{11}$/.test(youtubeId)) {
+  throw new Error(`RibbonCuttingVideo: "${youtubeId}" is not an 11-character YouTube id`);
+}
+
+const base = import.meta.env.BASE_URL;
+const isPhotoId = poster && !poster.includes("/") && poster in sizes;
+const posterSrc = isPhotoId
+  ? `${base}${PHOTO_DIR}/${poster}-1080.webp`
+  : poster
+    ? `${base}${poster.replace(/^\//, "")}`
+    : `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+const posterSrcset = isPhotoId
+  ? PHOTO_WIDTHS.map((w) => `${base}${PHOTO_DIR}/${poster}-${w}.webp ${Math.min(w, sizes[poster][0])}w`).join(", ")
+  : undefined;
+const embed = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
+const watchUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+---
+
+<div class:list={["rcv", className]} data-rcv data-embed-src={embed} data-embed-title={title}>
+  <div class="rcv-stage" style={`aspect-ratio: ${aspect};`} data-rcv-stage>
+    <button
+      type="button"
+      class="rcv-poster"
+      data-rcv-play
+      data-conversion-event="ribboncutting_video_play"
+      data-conversion-context={context}
+      aria-label={`Play: ${title}`}
+    >
+      <img
+        src={posterSrc}
+        srcset={posterSrcset}
+        sizes={imgSizes}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        style={`object-position: ${posterPosition};`}
+      />
+      <span class="rcv-play" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"></path></svg>
+      </span>
+    </button>
+  </div>
+  <slot />
+  <a class="rcv-fallback" href={watchUrl} target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+</div>
+
+<style>
+  .rcv-stage {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #000;
+  }
+  .rcv-poster {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: #000;
+  }
+  .rcv-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.82;
+    transition: opacity 200ms ease;
+  }
+  .rcv-poster:hover img,
+  .rcv-poster:focus-visible img {
+    opacity: 1;
+  }
+  .rcv-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin: -2.25rem 0 0 -2.25rem;
+    border-radius: 999px;
+    background: #ffde59;
+    color: #000;
+    transition: transform 200ms ease;
+  }
+  .rcv-play svg {
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-left: 4px;
+  }
+  .rcv-poster:hover .rcv-play,
+  .rcv-poster:focus-visible .rcv-play {
+    transform: scale(1.06);
+  }
+  .rcv-poster:focus-visible {
+    outline: 3px solid #ffde59;
+    outline-offset: 3px;
+  }
+  .rcv-stage :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .rcv-fallback {
+    display: inline-block;
+    margin-top: 0.125rem;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: inherit;
+    opacity: 0.7;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rcv-fallback:hover {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-rcv]").forEach((root) => {
+    root.querySelector("[data-rcv-play]")?.addEventListener("click", () => {
+      if (root.dataset.rcvLoaded === "true") return;
+      const stage = root.querySelector<HTMLElement>("[data-rcv-stage]");
+      const src = root.dataset.embedSrc;
+      if (!stage || !src) return;
+      root.dataset.rcvLoaded = "true";
+      // Pause any other player on the page that is already running.
+      document.querySelectorAll<HTMLElement>("[data-rcv][data-rcv-loaded='true']").forEach((other) => {
+        if (other === root) return;
+        other.querySelector("iframe")?.contentWindow?.postMessage(
+          JSON.stringify({ event: "command", func: "pauseVideo", args: [] }),
+          "*",
+        );
+      });
+      const iframe = document.createElement("iframe");
+      iframe.src = `${src}&enablejsapi=1`;
+      iframe.title = root.dataset.embedTitle || "Video";
+      iframe.allow = "autoplay; encrypted-media; fullscreen; picture-in-picture";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      stage.appendChild(iframe);
+      root.querySelector("[data-rcv-play]")?.remove();
+      iframe.focus({ preventScroll: true });
+    });
+  });
+</script>
