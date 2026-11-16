@@ -5,20 +5,29 @@
 // (scripts/prepare-ribboncutting-photos.mjs).
 //
 // Facts come from marketing/ribbon-cutting/BRIEF.md and the recorded remarks.
-// Copy rules: Mural Park is a long-term residency, so LSP copy says "our new home at Mural Park" and nothing stronger; no em-dashes;
-// English first; the old studio is "Morgan Street Studio"; quotes are the
-// speakers' own words. The five people who spoke (Margarita Quiñones-Peña,
-// Vanessa Tirado, Veronica Peña, Javier Yanez, Alderman Byron Sigcho-Lopez;
-// names confirmed by Fez 2026-11-15) are named in `ribbonCuttingRemarks`; a
-// speaker whose `name` is set to null shows UNNAMED_SPEAKER instead. The two
-// unidentified men in the ribbon line are never named.
+// Copy rules: Mural Park is a long-term residency, so LSP copy says "our new
+// home at Mural Park" and nothing stronger (never "permanent", "for good",
+// "forever", "ours", "a home of our own"); no em-dashes; English first; the
+// old studio is "Morgan Street Studio"; nothing about leases or landlords;
+// quotes are the speakers' own words, checked against the proofread captions
+// (marketing/ribbon-cutting/remarks/LSP-Ribbon-Cutting-Remarks.en.srt) and the
+// master transcript. `t` on a quote is its time in the full remarks (m:ss).
+//
+// WHO IS WHO (confirmed by Fez, 2026-11-15 and 2026-11-16). The ribbon line,
+// left to right as the room saw it: Greg (Mural Park; red jacket), Alderman
+// Byron Sigcho-Lopez (25th Ward; patterned sweater), Vanessa Tirado (LSP; long
+// dark coat), Margarita Quiñones-Peña (LSP founder; black dress, gold
+// scissors), Veronica Peña (LSP; grey top, glasses), Javier Yanez (president,
+// Pilsen Chamber of Commerce; olive fleece, navy cap), William (City of Chicago
+// BACP; mustard sweater). Greg and William: first names only. Nobody else in
+// any photo is ever named.
 //
 // ---------------------------------------------------------------------------
 // VIDEO AND ALBUM: fill these in and rebuild. Anything left null does not
 // render at all (no placeholder boxes).
 //   fullRemarks.youtubeId  the 11-character YouTube id of the full remarks
 //                          (from https://youtu.be/<id>). Renders a 16:9
-//                          click-to-load player.
+//                          click-to-load player at the end of "In their words".
 //   highlights[].youtubeId one per reel (Shorts ids work the same way). Renders
 //                          a row of 9:16 click-to-load players; only reels
 //                          with an id appear. `speaker` null renders no line.
@@ -27,8 +36,9 @@
 //                          path such as "images/ribbon-cutting/poster-cut.jpg".
 //   posterPosition         CSS object-position of the poster crop (the reels
 //                          crop photos to 9:16, so aim it at the speaker).
-//   albumUrl               a shared Google Photos album link. Renders a "See
-//                          every photo" link under the photos.
+//   albumUrl / albumCount  the shared Google Photos album and how many photos
+//                          it holds. Renders "See all <n> photos from the
+//                          night" after the gallery.
 // ---------------------------------------------------------------------------
 
 /** Rename the page by changing this (and the file name in src/pages). */
@@ -48,20 +58,31 @@ export const ribbonCuttingVideo = {
     { youtubeId: null, title: "This is your win.", speaker: "Javier Yanez, Pilsen Chamber of Commerce", poster: "IMG_5919", posterPosition: "82% 50%" },
     { youtubeId: null, title: "For us, by us.", speaker: "Veronica Peña, Latina Sweat Project", poster: "DSC09770", posterPosition: "52% 50%" },
   ],
-  albumUrl: null,
+  albumUrl: "https://photos.app.goo.gl/BfT9TapqvEAGUwoC8",
+  albumCount: 102,
 };
 
 // ---------------------------------------------------------------------------
-// HERO. To swap in a frame from the 4K video later: put the JPEG anywhere in
-// the repo, point `source` at it, give it a new `id`, re-run
-// `node scripts/prepare-ribboncutting-photos.mjs`, and update `alt`.
-// `position` is the CSS object-position used when the frame is cropped.
+// HERO: a muted loop of the cut from the 4K landscape master (IMG_5937, T 428
+// to 436.3), cut so the file opens on the cheer (T 434.07 to 436.3) and then
+// runs the countdown and the cut (T 428 to 434.07); looped, the cheer follows
+// the cut without a seam. The first frame is the poster and the still that
+// visitors who ask for reduced motion see.
+//   wide: 1600x900, the whole frame (desktop and tablets in landscape)
+//   tall: 720x960, a 3:4 crop centred on the scissors (phones)
+// Made with ffmpeg (libx264, CRF 25, no audio track, faststart); recipe in
+// marketing/ribbon-cutting/qa/page-v2/README.md.
+//
+// `ribbonCuttingHero` is the still the share card is built from (unchanged).
 // ---------------------------------------------------------------------------
+export const ribbonCuttingHeroLoop = {
+  wide: { src: "videos/ribbon-cutting/the-cut-wide.mp4", poster: "images/ribbon-cutting/the-cut-wide", posterWidths: [1600, 2400], size: [1600, 900] },
+  tall: { src: "videos/ribbon-cutting/the-cut-tall.mp4", poster: "images/ribbon-cutting/the-cut-tall", posterWidths: [720, 1080], size: [720, 960] },
+  alt: "The ribbon cutting at Mural Park: the founder throws both arms up with the gold scissors overhead as the ribbon line cheers, then the countdown, the cut and the cheer again.",
+};
+
 export const ribbonCuttingHero = {
-  // 4K frame of the cut (T 7:14 on the master clock), the frame the Instagram
-  // carousel cover uses. The man at the far right edge is half out of the
-  // source frame, so the hero shows it at 8:5 anchored left, which trims him
-  // off cleanly and keeps the raised scissors inside the top edge.
+  // 4K frame of the cut (T 7:14 on the master clock), used by the share card.
   id: "cut-04-arms-up",
   source: "marketing/ribbon-cutting/clips/stills/cut-04-arms-up-cheer_T434.07.jpg",
   alt: "The moment after the cut: the founder throws both arms up with the gold scissors overhead as the ribbon line cheers and the cut ends of the red ribbon fall.",
@@ -77,13 +98,39 @@ export const ribbonCutting = {
   headline: ["We cut the", "ribbon."],
   sub: "Our new home at Mural Park, in Pilsen.",
   dateLine: "Sunday, November 15, 2026",
-  intro:
-    "We gathered our instructors, our community and the partners who spoke up for us, and cut the ribbon on our new studio at Mural Park. Classes started the next morning, Monday, November 16.",
+  pauseLabel: "Pause the video",
+  playLabel: "Play the video",
+
+  story: {
+    heading: "How we got here.",
+    beats: [
+      {
+        key: "morgan",
+        title: "Morgan Street Studio",
+        quote: "As you all know, we lost our space a little while ago, and it took a lot, a lot of people to advocate, to speak up, to show up.",
+        who: "Margarita Quiñones-Peña",
+        t: "1:17",
+      },
+      {
+        key: "popup",
+        title: "Four Pop Up Weeks",
+        body: "Through October we kept teaching, with pop-up classes around Pilsen and nearby.",
+      },
+      {
+        key: "muralpark",
+        title: "Mural Park",
+        body: "On Sunday, November 15, our instructors, our community and our partners filled our new home for the ribbon cutting. Classes started the next morning.",
+        quote: "We have a home, and we’re kicking off tomorrow.",
+        who: "Margarita Quiñones-Peña",
+        t: "1:38",
+      },
+    ],
+  },
 
   remarks: {
     heading: "In their words.",
-    sub: "The remarks, in the order they were spoken.",
-    coda: "Five, four, three, two, one.",
+    countdown: "Five, four, three, two, one.",
+    countdownWho: "The room, at 6:39 pm",
   },
 
   watch: {
@@ -93,12 +140,22 @@ export const ribbonCutting = {
 
   photos: {
     heading: "The night in photos.",
-    albumLabel: "See every photo",
   },
 
-  thanks: {
-    heading: "Gracias.",
-    line: "You stood up for us in rooms we were not in.",
+  album: {
+    // `{n}` is replaced with albumCount.
+    label: "See all {n} photos from the night",
+    note: "Our Google Photos album opens in a new tab.",
+  },
+
+  line: {
+    heading: "The ribbon line.",
+    quote: "These men up here stood up and were speaking of us in rooms that we were not in.",
+    who: "Margarita Quiñones-Peña",
+    t: "1:29",
+    from: "From left",
+    thanks:
+      "Thank you to Mural Park, the Pilsen Chamber of Commerce, Alderman Byron Sigcho-Lopez and the City of Chicago Department of Business Affairs and Consumer Protection.",
   },
 
   open: {
@@ -116,92 +173,135 @@ export const ribbonCutting = {
 /** Shown in place of a speaker's name while `name` is null. */
 export const UNNAMED_SPEAKER = "From the LSP team";
 
-// The remarks, in the order they were spoken. Every line is checked word for
-// word against remotion-video/ribbon-cutting/transcripts/master_transcript.md
-// (2026-11-15); a line may be a fragment of a longer sentence but never
-// reworded. "¡Sí se puede!" is the crowd's chant, not the Alderman's, so it is
-// not quoted. `lead` is the large line, `more` the supporting lines.
+// The remarks, in the order they were spoken, one large line each. Every line
+// is word for word from the proofread captions (t = m:ss into the full
+// remarks); a line may be a fragment of a longer sentence but is never
+// reworded. `portrait` is a photo id (a frame of the 4K video or a photo from
+// the moment), `more` are smaller supporting lines. An entry with no `name`
+// and a `room` label is the room's own voice.
 export const ribbonCuttingRemarks = [
-  {
-    key: "margarita-welcome",
-    name: "Margarita Quiñones-Peña",
-    role: "Founder, Latina Sweat Project",
-    lead: "We have a home and we’re kicking off tomorrow.",
-    more: ["As you all know, we lost our space a little while ago."],
-  },
   {
     key: "vanessa",
     name: "Vanessa Tirado",
     role: "Latina Sweat Project",
     lead: "I’m so happy. I’m thrilled.",
-    more: ["It’s been such a journey to have and be able to meet every single one of you, your souls."],
+    t: "1:49",
+    portrait: "speaker-vanessa",
+    portraitAlt: "Vanessa Tirado, in a long dark coat, smiling and clapping at the ribbon.",
   },
   {
     key: "veronica",
     name: "Veronica Peña",
     role: "Latina Sweat Project",
     lead: "This is for us, by us.",
-    more: ["So many of you have spoken in rooms that we were never even a part of."],
+    t: "2:52",
+    more: [{ text: "So many of you have spoken in rooms that we were never even a part of.", t: "2:07" }],
+    portrait: "speaker-veronica",
+    portraitAlt: "Veronica Peña, in a grey top and glasses, speaking at the ribbon.",
   },
   {
     key: "javier",
     name: "Javier Yanez",
     role: "President, Pilsen Chamber of Commerce",
-    lead: "This is your win. You know, own it.",
-    more: [
-      "You guys are creating miracles.",
-      "I’m from Pilsen, born and raised. So seeing this here, stay here in Pilsen is something that moves me.",
-    ],
+    lead: "So in reality, this is your win. You know, own it.",
+    t: "4:04",
+    more: [{ text: "I’m from Pilsen, born and raised. So seeing this here, stay here in Pilsen is something that moves me.", t: "4:17" }],
+    portrait: "speaker-javier",
+    portraitAlt: "Javier Yanez, in an olive fleece and navy cap, with his hand on his heart as he speaks.",
   },
   {
     key: "alderman",
     name: "Alderman Byron Sigcho-Lopez",
     role: "25th Ward",
-    lead: "It really takes a village.",
-    more: ["This just shows how powerful the power of the people is."],
+    lead: "This just shows how powerful the power of the people is.",
+    t: "5:26",
+    portrait: "speaker-alderman",
+    portraitAlt: "Alderman Byron Sigcho-Lopez, in a patterned sweater and glasses, speaking with the red ribbon in his hands.",
   },
   {
-    key: "margarita-closing",
+    key: "room",
+    room: "The room, right after",
+    lead: "¡Sí se puede!",
+    t: "5:39",
+  },
+  {
+    key: "margarita",
     name: "Margarita Quiñones-Peña",
     role: "Founder, Latina Sweat Project",
     lead: "The power of the people is we have 20,000 square feet to flow.",
-    more: ["Our mission is liberation.", "Let’s cut this ribbon."],
+    t: "5:49",
+    more: [
+      { text: "I’ve never seen a room full of people from our community be in a space of wellness.", t: "6:09" },
+      { text: "81 people that we have here leading, and you all are just leaders.", t: "6:22" },
+    ],
+    portrait: "speaker-margarita",
+    portraitAlt: "Margarita Quiñones-Peña, in a black dress with the gold scissors in hand, smiling as she speaks.",
   },
 ];
 
-export const ribbonCuttingPartners = [
-  "Mural Park",
-  "Pilsen Chamber of Commerce",
-  "Alderman Byron Sigcho-Lopez, 25th Ward",
-  "City of Chicago Business Affairs and Consumer Protection",
-];
+// The seven people in the ribbon line, left to right as they stand in the
+// photo used for the thank-you (IMG_5942, after the cut, behind the LSP X:
+// the order there is the reverse of the ribbon line at the ends, so it was
+// labelled by wardrobe: mustard sweater = William, red jacket = Greg).
+export const ribbonCuttingLinePhoto = {
+  id: "IMG_5942",
+  alt: "The seven people from the ribbon line laughing together with raised glasses behind the black LSP X sculpture.",
+  people: [
+    { name: "William", role: "City of Chicago BACP" },
+    { name: "Alderman Byron Sigcho-Lopez", role: "25th Ward" },
+    { name: "Vanessa Tirado", role: "Latina Sweat Project" },
+    { name: "Veronica Peña", role: "Latina Sweat Project" },
+    { name: "Margarita Quiñones-Peña", role: "Founder, Latina Sweat Project" },
+    { name: "Javier Yanez", role: "Pilsen Chamber of Commerce" },
+    { name: "Greg", role: "Mural Park" },
+  ],
+};
+
+// The cut itself, full-bleed after the countdown: a 4K frame of the master
+// (T 432.53, the ribbon falling).
+export const ribbonCuttingCutStill = {
+  id: "cut-03-ribbon-falling",
+  alt: "The instant after the cut: the two ends of the red ribbon fall away as the ribbon line starts to cheer.",
+};
 
 // ---------------------------------------------------------------------------
-// PHOTOS: every photo on the page except the hero, by id (the file name in
-// marketing/ribbon-cutting/photos-edited without .jpg). Alt text describes
-// the scene and never names anyone. `caption` names a speaker only during
+// PHOTOS: every photo on the page, by id. Most are the file name in
+// marketing/ribbon-cutting/photos-edited without .jpg; ids listed in
+// `ribbonCuttingSources` come from another file (video frames and portrait
+// crops). Alt text describes the scene and never names anyone except a
+// speaker during their own remarks. `caption` names a speaker only during
 // their own remarks. `phoneCrop` (an aspect ratio such as "1/1") and
 // `phonePosition` crop a photo on phones only, where tall frames with a lot
 // of ceiling would otherwise fill several screens; desktop shows every frame
-// whole.
+// whole unless it has `crop` (an aspect ratio for every width, with
+// `position`), used where a frame has a lot of empty ceiling or wall.
 // ---------------------------------------------------------------------------
+export const ribbonCuttingSources = {
+  "speaker-vanessa": "marketing/ribbon-cutting/clips/stills/speaker-vanessa_DSC09764.jpg",
+  "speaker-veronica": "marketing/ribbon-cutting/clips/stills/speaker-veronica_IMG5917_T175.20.jpg",
+  "speaker-javier": "marketing/ribbon-cutting/clips/stills/speaker-javier_T262.00.jpg",
+  "speaker-alderman": "marketing/ribbon-cutting/clips/stills/speaker-alderman_T327.50.jpg",
+  "speaker-margarita": "marketing/ribbon-cutting/clips/stills/speaker-margarita_T377.30.jpg",
+  "cut-03-ribbon-falling": "marketing/ribbon-cutting/clips/stills/cut-03-ribbon-falling_T432.53.jpg",
+};
+
 export const ribbonCuttingPhotos = {
   DSC09733: { alt: "Guests laughing at the check-in desk, a white desk with a black X cut into its front." },
-  DSC09724: { alt: "A guest in a Latina Sweat Project sweatshirt smiling on a leather sofa." },
+  DSC09724: { phoneCrop: "4/5", phonePosition: "50% 45%", alt: "A guest in a Latina Sweat Project sweatshirt smiling on a leather sofa." },
   DSC09720: { alt: "Four friends smiling behind a table set with rows of coupe glasses." },
   DSC09721: { alt: "A couple on a leather sofa with their small dog, the black LSP X sculpture on the brick wall behind them." },
-  DSC09727: { alt: "A guest in an olive LSP sweatshirt smiling, phone and water bottle in hand." },
   DSC09736: { alt: "Three guests smiling by the elevators under a hand-painted sign that reads Thank you for supporting the hood." },
   DSC09745: { alt: "Four friends talking and laughing by the elevators." },
-  DSC09754: { alt: "The loft before the remarks: a hand-lettered Welcome Home! board, the black LSP X sculpture, plants and a striped table of framed photos." },
-  IMG_5907: { alt: "A woman in a black dress beams with a bottle of prosecco raised in each hand in front of the Power to the People and Welcome Home! signs." },
   DSC09747: { alt: "Three guests smiling with coupe glasses in the open loft." },
-  IMG_5915: { alt: "The view from the crowd: guests holding up phones as the ribbon line stands across the front of the room." },
+  DSC09754: { alt: "The loft before the remarks: a bottle raised overhead beside the hand-lettered Welcome Home! board, the black LSP X sculpture, plants and a striped table of framed photos." },
+  DSC09756: { phoneCrop: "4/5", phonePosition: "50% 30%", alt: "A woman in a black dress laughing with an open bottle in one hand and the cork in the other." },
+  IMG_5907: { phoneCrop: "4/5", phonePosition: "50% 55%", alt: "A woman in a black dress beams with a bottle of prosecco raised in each hand in front of the Power to the People and Welcome Home! signs." },
+  IMG_5915: { crop: "16/9", position: "50% 88%", alt: "The view from the crowd: guests holding up phones as the ribbon line stands across the front of the room." },
+  DSC09764: { alt: "The ribbon line laughing and clapping, a long red ribbon sweeping across the frame." },
   DSC09768: {
     alt: "The founder speaks with gold scissors in hand, two women in the ribbon line smiling beside her.",
     caption: "Margarita Quiñones-Peña, founder, welcoming the room.",
   },
-  DSC09764: { alt: "The ribbon line laughing and clapping, a long red ribbon sweeping across the frame." },
   IMG_5919: {
     phoneCrop: "1/1",
     phonePosition: "50% 52%",
@@ -224,9 +324,7 @@ export const ribbonCuttingPhotos = {
     phonePosition: "50% 80%",
     alt: "Seven people from the ribbon line shoulder to shoulder with their glasses up.",
   },
-  IMG_5942: {
-    alt: "Seven people from the ribbon line laughing together with raised glasses behind the black LSP X sculpture.",
-  },
+  IMG_5942: { alt: ribbonCuttingLinePhoto.alt },
   DSC09777: { alt: "The toast: the ribbon line laughing with glasses raised." },
   DSC09779: { alt: "Three people in conversation during the toast, glasses in hand." },
   DSC09782: { alt: "A guest in a patterned sweater smiling with a coupe glass as the room mingles." },
@@ -234,53 +332,58 @@ export const ribbonCuttingPhotos = {
   DSC09791: { alt: "Three friends smiling close together with coupe glasses." },
   DSC09794: {
     alt: "Everyone together: a large group kneeling and standing around glowing LSP marquee letters, candles along the brick wall.",
-    // On phones the group is small in the wide frame, so it is cropped to 4:3 there.
+    // The group fills the lower two thirds of the frame: trim the wall above.
+    crop: "2/1",
+    position: "50% 80%",
     phoneCrop: "4/3",
-    phonePosition: "50% 60%",
+    phonePosition: "50% 70%",
   },
 };
 
-// The story, in the order of the night. Each row is laid out as a justified
-// row at desktop (every photo the same height, nothing cropped); on phones a
-// photo takes the full width. A row of portraits alone is capped so its photos
-// are no taller than about 600 px at desktop.
+// The night, in order. `time` is when the chapter's first frame was taken
+// (camera clocks corrected, Chicago time). The first row of each chapter is
+// its lead photo, shown large; later rows are justified at desktop (every
+// photo in a row the same height, nothing cropped) and stack on phones.
 export const ribbonCuttingStory = [
   {
     key: "arriving",
     label: "Arriving",
-    rows: [["DSC09733", "DSC09724"], ["DSC09720", "DSC09721"], ["DSC09727", "DSC09736"]],
+    time: "5:47 pm",
+    rows: [["DSC09733"], ["DSC09720", "DSC09724"], ["DSC09721", "DSC09736"], ["DSC09745", "DSC09747"]],
   },
   {
-    key: "ready",
-    label: "The room, ready",
-    rows: [["DSC09754", "IMG_5907"], ["DSC09745", "DSC09747"]],
+    key: "pour",
+    label: "The first bottles",
+    time: "6:21 pm",
+    rows: [["DSC09754"], ["DSC09756", "IMG_5907"]],
   },
   {
-    key: "line",
-    label: "The ribbon line",
-    rows: [["IMG_5915", "DSC09768"], ["DSC09764"], ["IMG_5919", "IMG_5921"]],
-  },
-  {
-    key: "cut",
-    label: "After the cut",
-    rows: [["IMG_5926", "IMG_5942"]],
+    key: "remarks",
+    label: "The remarks",
+    time: "6:32 pm",
+    rows: [["IMG_5915"], ["DSC09764", "DSC09768"], ["IMG_5919", "IMG_5921"]],
   },
   {
     key: "toast",
-    label: "Salud",
-    rows: [["IMG_5928", "DSC09777"], ["DSC09779", "DSC09782"], ["DSC09785", "DSC09791"]],
+    label: "The toast",
+    time: "6:39 pm",
+    rows: [["DSC09777"], ["IMG_5926", "IMG_5928"], ["DSC09779", "DSC09782"], ["DSC09785", "DSC09791"]],
   },
   {
     key: "together",
     label: "Everyone together",
+    time: "6:48 pm",
     rows: [["DSC09794"]],
   },
 ];
 
-/** Every photo id the page uses (hero first), for the derivative script. */
+/** Every photo id the page uses, for the derivative script. */
 export const ribbonCuttingPhotoIds = () => {
   const ids = new Set();
   for (const ch of ribbonCuttingStory) for (const row of ch.rows) for (const id of row) ids.add(id);
+  for (const r of ribbonCuttingRemarks) if (r.portrait) ids.add(r.portrait);
+  ids.add(ribbonCuttingLinePhoto.id);
+  ids.add(ribbonCuttingCutStill.id);
   for (const v of [ribbonCuttingVideo.fullRemarks, ...ribbonCuttingVideo.highlights]) {
     if (v.poster && !v.poster.includes("/")) ids.add(v.poster);
   }

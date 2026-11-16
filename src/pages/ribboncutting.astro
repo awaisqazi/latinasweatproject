@@ -2,21 +2,26 @@
 // /ribboncutting: the Mural Park ribbon cutting (Sunday, November 15, 2026)
 // and the grand reopening (Monday, November 16, 2026). The route name lives in
 // RIBBON_CUTTING_SLUG (src/data/ribbonCutting.js); rename this file with it.
-// Not linked from the nav or homepage yet.
 //
-// Story order: the moment (hero) -> the remarks in the speakers' words ->
-// [watch: full remarks + reels, only when YouTube ids exist] -> the night in
-// photos -> gracias to the partners -> we're open (address + booking).
+// Story order: the cut, moving (hero loop, a red ribbon across it that parts
+// as the page arrives) -> how we got here (three beats on a ribbon thread) ->
+// in their words (one large line per speaker, each with a frame of them from
+// the night) -> the countdown and the cut, full bleed -> [watch: full remarks
+// + reels, only when YouTube ids exist] -> the night in photos (five chapters
+// by the clock) -> the album -> the ribbon line, named -> we're open.
 //
 // Identity: the Mural Park opening campaign carried onto the site: Warm White
-// #f3eeea ground, black Fraunces headlines (Regular, Bold, Black), Rubik body
-// in Gray #4e4f50, one key word on the #FFDE59 highlight (two on the page:
-// "ribbon." in the hero and "Open" at the close), black for the night in
-// photos. No cards, chips, rules or gradients. Type never sits on a photo.
+// #f3eeea and black grounds, Fraunces headlines and quotes, Rubik body, the
+// #FFDE59 highlight on exactly two words ("ribbon." and "Open"), plus this
+// page's own accent, ribbon red #c3201f (sampled from the photos), used only
+// as the ribbon itself: the band across the hero, the thread through the
+// story, the underline on the album link. No cards, chips, rules or gradients.
+// Type never sits on a face.
 //
 // All copy, quotes, photo lists and video ids: src/data/ribbonCutting.js.
 // Photo derivatives: scripts/prepare-ribboncutting-photos.mjs. Share card:
-// scripts/render-ribboncutting-og.mjs.
+// scripts/render-ribboncutting-og.mjs. Hero loop recipe:
+// marketing/ribbon-cutting/qa/page-v2/README.md.
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import RibbonCuttingVideo from "@/components/RibbonCuttingVideo.astro";
@@ -24,16 +29,16 @@ import sizes from "@/data/ribbonCuttingPhotoSizes.json";
 import {
   RIBBON_CUTTING_SLUG,
   ribbonCutting as rc,
-  ribbonCuttingHero as hero,
+  ribbonCuttingHeroLoop as loop,
   ribbonCuttingPhotos as photos,
   ribbonCuttingStory as story,
   ribbonCuttingRemarks as remarks,
-  ribbonCuttingPartners as partners,
+  ribbonCuttingLinePhoto as line,
+  ribbonCuttingCutStill as cut,
   ribbonCuttingVideo as video,
   UNNAMED_SPEAKER,
   PHOTO_DIR,
   PHOTO_WIDTHS,
-  HERO_WIDTHS,
 } from "@/data/ribbonCutting";
 
 const base = import.meta.env.BASE_URL;
@@ -43,7 +48,7 @@ const dims = (id: string) => {
   if (!d) throw new Error(`ribboncutting: no derivative for ${id}; run scripts/prepare-ribboncutting-photos.mjs`);
   return d;
 };
-const srcset = (id: string, widths: number[]) => {
+const srcset = (id: string, widths: number[] = PHOTO_WIDTHS) => {
   const [w] = dims(id);
   return widths.map((x) => `${dir}/${id}-${x}.webp ${Math.min(x, w)}w`).join(", ");
 };
@@ -51,24 +56,36 @@ for (const ch of story) for (const row of ch.rows) for (const id of row) {
   if (!photos[id as keyof typeof photos]) throw new Error(`ribboncutting: ${id} has no alt text`);
 }
 
-const heroSrcset = srcset(hero.id, HERO_WIDTHS);
-const [heroW, heroH] = dims(hero.id);
+// Hero loop: posters (the loop's first frame) for both crops.
+const posterSet = (p: { poster: string; posterWidths: number[] }) =>
+  p.posterWidths.map((w) => `${base}${p.poster}-${w}.webp ${w}w`).join(", ");
+const wideSet = posterSet(loop.wide);
+const tallSet = posterSet(loop.tall);
 
-// Justified rows: each photo's flex-grow is its aspect ratio, so every photo
-// in a row is the same height and none is cropped. On phones a row stays side
-// by side only if the sum of aspect ratios is small enough to keep each photo
-// at a readable height; otherwise it stacks full width.
+type Photo = { alt: string; caption?: string; phoneCrop?: string; phonePosition?: string; crop?: string; position?: string };
+const ratio = (r: string) => {
+  const [a, b] = r.split("/").map(Number);
+  return a / b;
+};
+// A photo's displayed aspect: its own, or its `crop` when it has one.
 const ar = (id: string) => {
+  const p = photos[id as keyof typeof photos] as Photo;
+  if (p?.crop) return ratio(p.crop);
   const [w, h] = dims(id);
   return w / h;
 };
 // The lightbox walks every story photo in page order.
 const order = story.flatMap((ch) => ch.rows.flat());
-const MAX_ROW = 1280; // px, the page's content width at desktop
+const MAX_ROW = 1376; // px, the gallery's content width at desktop
 
 const hasFull = Boolean(video.fullRemarks.youtubeId);
 const reels = video.highlights.filter((h) => h.youtubeId);
 const hasWatch = hasFull || reels.length > 0;
+const albumLabel = rc.album.label.replace("{n}", String(video.albumCount ?? "")).replace("all  ", "all ");
+
+const cutSet = srcset(cut.id, [...PHOTO_WIDTHS, 2400]);
+const [cutW, cutH] = dims(cut.id);
+const [lineW, lineH] = dims(line.id);
 
 const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
 ---
@@ -89,10 +106,11 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&display=swap"
     rel="stylesheet"
   />
-  <link slot="head" rel="preload" as="image" imagesrcset={heroSrcset} imagesizes="100vw" fetchpriority="high" />
+  <link slot="head" rel="preload" as="image" imagesrcset={wideSet} imagesizes="100vw" media="(min-width: 768px)" fetchpriority="high" />
+  <link slot="head" rel="preload" as="image" imagesrcset={tallSet} imagesizes="100vw" media="(max-width: 767px)" fetchpriority="high" />
   <Header />
   <main class="rc-page font-rubik" data-page-url={pageUrl}>
-    {/* ============================ THE MOMENT ============================ */}
+    {/* ============================ THE CUT =============================== */}
     <section class="rc-hero" aria-labelledby="rc-title">
       <div class="rc-wrap rc-hero-text">
         <h1 id="rc-title" class="rc-display">
@@ -102,54 +120,118 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
         <div class="rc-hero-side">
           <p class="rc-sub">{rc.sub}</p>
           <p class="rc-date">{rc.dateLine}</p>
-          <p class="rc-intro">{rc.intro}</p>
         </div>
       </div>
-      <div class="rc-hero-media">
-        <img
-          src={`${dir}/${hero.id}-1600.webp`}
-          srcset={heroSrcset}
-          sizes="(min-width: 1440px) 1440px, 100vw"
-          width={heroW}
-          height={heroH}
-          alt={hero.alt}
-          fetchpriority="high"
-          decoding="async"
-          style={`aspect-ratio: ${hero.aspect ?? "16 / 9"}; object-position: ${hero.position};`}
-        />
+      <div class="rc-stage" data-rc-stage data-wide={`${base}${loop.wide.src}`} data-tall={`${base}${loop.tall.src}`}>
+        <picture>
+          <source media="(max-width: 767px)" srcset={tallSet} sizes="100vw" width={loop.tall.size[0]} height={loop.tall.size[1]} />
+          <img
+            class="rc-stage-media"
+            src={`${base}${loop.wide.poster}-1600.webp`}
+            srcset={wideSet}
+            sizes="100vw"
+            width={loop.wide.size[0]}
+            height={loop.wide.size[1]}
+            alt={loop.alt}
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+        <video class="rc-stage-media rc-stage-video" muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture data-rc-video></video>
+        <div class="rc-ribbon" aria-hidden="true">
+          <span class="rc-ribbon-half rc-ribbon-l"></span>
+          <span class="rc-ribbon-half rc-ribbon-r"></span>
+        </div>
+        <button type="button" class="rc-pp" data-rc-pp hidden aria-label={rc.pauseLabel} data-label-pause={rc.pauseLabel} data-label-play={rc.playLabel}>
+          <svg class="rc-pp-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg>
+          <svg class="rc-pp-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"></path></svg>
+        </button>
       </div>
     </section>
 
-    {/* ============================ THE REMARKS =========================== */}
-    <section id="remarks" class="rc-remarks" aria-labelledby="rc-remarks-title">
+    {/* ========================== HOW WE GOT HERE ========================= */}
+    <section id="story" class="rc-story" aria-labelledby="rc-story-title">
       <div class="rc-wrap">
-        <div class="rc-split">
-          <h2 id="rc-remarks-title" class="rc-h2">{rc.remarks.heading}</h2>
-          <p class="rc-lede">{rc.remarks.sub}</p>
+        <h2 id="rc-story-title" class="rc-h2">{rc.story.heading}</h2>
+        <div class="rc-thread-row">
+          <span class="rc-thread" aria-hidden="true"></span>
+          <ol class="rc-beats">
+            {rc.story.beats.map((b) => (
+              <li class="rc-beat">
+                <h3 class="rc-beat-title">{b.title}</h3>
+                {b.body && <p class="rc-beat-body">{b.body}</p>}
+                {b.quote && (
+                  <figure class="rc-beat-quote">
+                    <blockquote><p>“{b.quote}”</p></blockquote>
+                    <figcaption>{b.who}</figcaption>
+                  </figure>
+                )}
+              </li>
+            ))}
+          </ol>
         </div>
-        <ol class="rc-quotes">
-          {remarks.map((r) => (
-            <li class="rc-quote">
-              <div class="rc-who">
-                <p class="rc-name">{r.name ?? UNNAMED_SPEAKER}</p>
-                {r.name && r.role && <p class="rc-role">{r.role}</p>}
-              </div>
-              <blockquote>
-                <p class="rc-lead">“{r.lead}”</p>
-                {r.more.map((m) => <p class="rc-more">“{m}”</p>)}
-              </blockquote>
-            </li>
-          ))}
-        </ol>
-        <p class="rc-coda">{rc.remarks.coda}</p>
       </div>
     </section>
 
-    {/* ============================== WATCH =============================== */}
-    {hasWatch && (
-      <section id="watch" class="rc-dark rc-watch" aria-labelledby="rc-watch-title">
-        <div class="rc-wrap">
-          <h2 id="rc-watch-title" class="rc-h2">{rc.watch.heading}</h2>
+    {/* ============================ IN THEIR WORDS ======================== */}
+    <section id="remarks" class="rc-dark rc-words" aria-labelledby="rc-words-title">
+      <div class="rc-wrap">
+        <h2 id="rc-words-title" class="rc-h2">{rc.remarks.heading}</h2>
+        <div class="rc-quotes">
+          {remarks.map((r) =>
+            r.room ? (
+              <figure class="rc-q rc-q--room">
+                <blockquote><p class="rc-q-lead">{r.lead}</p></blockquote>
+                <figcaption class="rc-q-who"><span class="rc-q-role">{r.room}</span></figcaption>
+              </figure>
+            ) : (
+              <figure class="rc-q">
+                {r.portrait && (
+                  <div class="rc-q-photo">
+                    <img
+                      src={`${dir}/${r.portrait}-640.webp`}
+                      srcset={srcset(r.portrait)}
+                      sizes="(min-width: 1024px) 352px, 60vw"
+                      width={dims(r.portrait)[0]}
+                      height={dims(r.portrait)[1]}
+                      alt={r.portraitAlt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+                <div class="rc-q-body">
+                  <blockquote>
+                    <p class="rc-q-lead">“{r.lead}”</p>
+                    {r.more?.map((m) => <p class="rc-q-more">“{m.text}”</p>)}
+                  </blockquote>
+                  <figcaption class="rc-q-who">
+                    <span class="rc-q-name">{r.name ?? UNNAMED_SPEAKER}</span>
+                    {r.name && r.role && <span class="rc-q-role">{r.role}</span>}
+                  </figcaption>
+                </div>
+              </figure>
+            ),
+          )}
+        </div>
+        <p class="rc-count">{rc.remarks.countdown}</p>
+      </div>
+      <figure class="rc-cut">
+        <img
+          src={`${dir}/${cut.id}-1600.webp`}
+          srcset={cutSet}
+          sizes="100vw"
+          width={cutW}
+          height={cutH}
+          alt={cut.alt}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+
+      {hasWatch && (
+        <div id="watch" class="rc-wrap rc-watch">
+          <h2 class="rc-h2 rc-watch-title">{rc.watch.heading}</h2>
           {hasFull && (
             <div class="rc-full">
               <RibbonCuttingVideo
@@ -190,36 +272,45 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
             </div>
           )}
         </div>
-      </section>
-    )}
+      )}
+    </section>
 
     {/* ========================= THE NIGHT IN PHOTOS ====================== */}
     <section id="photos" class="rc-dark rc-photos" aria-labelledby="rc-photos-title">
       <div class="rc-wrap">
         <h2 id="rc-photos-title" class="rc-h2">{rc.photos.heading}</h2>
+      </div>
+      <div class="rc-gallery">
         {story.map((ch) => (
           <div class="rc-chapter" id={`photos-${ch.key}`}>
-            <h3 class="rc-h3">{ch.label}</h3>
-            {ch.rows.map((row) => {
+            <h3 class="rc-ch-title">
+              {ch.label}
+              <span class="rc-ch-time">{ch.time}</span>
+            </h3>
+            {ch.rows.map((row, ri) => {
               const sum = row.reduce((n, id) => n + ar(id), 0);
+              const lead = ri === 0 && row.length === 1;
               const stack = sum > 1;
-              // Portrait-only rows: cap the width so the photos stay about 600 px tall.
-              const cap = row.every((id) => ar(id) < 1) && sum < 2 ? Math.round(sum * 600) : null;
+              // A lone landscape that is not the lead keeps a little air at its sides.
+              const cap = !lead && row.length === 1 ? 1088 : null;
               const rowW = cap ?? MAX_ROW;
               return (
-                <div class:list={["rc-row", { "rc-row--stack": stack, "rc-row--cap": cap }]} style={cap ? `--cap:${cap}px` : undefined}>
+                <div
+                  class:list={["rc-row", { "rc-row--stack": stack, "rc-row--lead": lead, "rc-row--cap": cap }]}
+                  style={cap ? `--cap:${cap}px` : undefined}
+                >
                   {row.map((id) => {
-                    const p = photos[id as keyof typeof photos] as { alt: string; caption?: string; phoneCrop?: string; phonePosition?: string };
+                    const p = photos[id as keyof typeof photos] as Photo;
                     const [w, h] = dims(id);
                     const share = ar(id) / sum;
                     const desk = Math.round(rowW * share);
-                    const sizesAttr = stack
-                      ? `(min-width: 1312px) ${desk}px, (min-width: 640px) ${Math.round(share * 100)}vw, 100vw`
-                      : `(min-width: 1312px) ${desk}px, ${Math.round(share * 100)}vw`;
+                    const sizesAttr = `(min-width: 1440px) ${desk}px, (min-width: 640px) ${Math.round(share * 100)}vw, 100vw`;
                     return (
                       <figure
-                        class:list={{ "rc-crop": p.phoneCrop }}
-                        style={`--ar:${(w / h).toFixed(4)}` + (p.phoneCrop ? `;--crop:${p.phoneCrop};--pos:${p.phonePosition ?? "50% 50%"}` : "")}
+                        class:list={{ "rc-crop": p.phoneCrop, "rc-fixed": p.crop }}
+                        style={`--ar:${ar(id).toFixed(4)}` +
+                          (p.crop ? `;--dpos:${p.position ?? "50% 50%"}` : "") +
+                          (p.phoneCrop ? `;--crop:${p.phoneCrop};--pos:${p.phonePosition ?? "50% 50%"}` : "")}
                       >
                         <button
                           type="button"
@@ -229,7 +320,7 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
                         >
                           <img
                             src={`${dir}/${id}-1080.webp`}
-                            srcset={srcset(id, PHOTO_WIDTHS)}
+                            srcset={srcset(id)}
                             sizes={sizesAttr}
                             width={w}
                             height={h}
@@ -247,26 +338,52 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
             })}
           </div>
         ))}
-        {video.albumUrl && (
-          <p class="rc-album">
-            <a href={video.albumUrl} target="_blank" rel="noopener noreferrer" data-conversion-event="ribboncutting_album_click" data-conversion-context="ribboncutting_photos">
-              {rc.photos.albumLabel}
-            </a>
-          </p>
-        )}
       </div>
+      {video.albumUrl && (
+        <div class="rc-wrap rc-album">
+          <a
+            href={video.albumUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-conversion-event="ribboncutting_album_click"
+            data-conversion-context="ribboncutting_photos"
+          >{albumLabel}</a>
+          <p class="rc-album-note">{rc.album.note}</p>
+        </div>
+      )}
     </section>
 
-    {/* =============================== GRACIAS ============================ */}
-    <section id="gracias" class="rc-dark rc-thanks" aria-labelledby="rc-thanks-title">
-      <div class="rc-wrap rc-split">
-        <div>
-          <h2 id="rc-thanks-title" class="rc-h2">{rc.thanks.heading}</h2>
-          <p class="rc-lede">{rc.thanks.line}</p>
+    {/* =========================== THE RIBBON LINE ======================== */}
+    <section id="ribbon-line" class="rc-line" aria-labelledby="rc-line-title">
+      <div class="rc-wrap">
+        <div class="rc-line-head">
+          <h2 id="rc-line-title" class="rc-h2">{rc.line.heading}</h2>
+          <figure class="rc-line-quote">
+            <blockquote><p>“{rc.line.quote}”</p></blockquote>
+            <figcaption>{rc.line.who}</figcaption>
+          </figure>
         </div>
-        <ul class="rc-partners">
-          {partners.map((p) => <li>{p}</li>)}
-        </ul>
+        <figure class="rc-line-photo">
+          <img
+            src={`${dir}/${line.id}-1600.webp`}
+            srcset={srcset(line.id)}
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            width={lineW}
+            height={lineH}
+            alt={line.alt}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>
+            <p class="rc-line-from">{rc.line.from}</p>
+            <ol class="rc-line-names">
+              {line.people.map((p) => (
+                <li><span class="rc-line-name">{p.name}</span> <span class="rc-line-role">{p.role}</span></li>
+              ))}
+            </ol>
+          </figcaption>
+        </figure>
+        <p class="rc-line-thanks">{rc.line.thanks}</p>
       </div>
     </section>
 
@@ -278,7 +395,7 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
             <span class="block">{rc.open.heading[0]}</span>
             <span class="block">{rc.open.heading[1]}</span>
           </h2>
-          <p class="rc-place">{rc.open.place.map((line, i) => (i ? <><br />{line}</> : line))}</p>
+          <p class="rc-place">{rc.open.place.map((l, i) => (i ? <><br />{l}</> : l))}</p>
           <div class="rc-cta">
             <a
               href={`${base}${rc.open.bookPath}`}
@@ -319,7 +436,7 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     set:html={JSON.stringify(
       order.map((id) => {
         const p = photos[id as keyof typeof photos] as { alt: string; caption?: string };
-        return { src: `${dir}/${id}-1600.webp`, srcset: srcset(id, PHOTO_WIDTHS), alt: p.alt, caption: p.caption ?? "" };
+        return { src: `${dir}/${id}-1600.webp`, srcset: srcset(id), alt: p.alt, caption: p.caption ?? "" };
       }),
     )}
   />
@@ -329,8 +446,9 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   .rc-page {
     --rc-warm: #f3eeea;
     --rc-gray: #4e4f50;
-    --rc-taupe: #b5a18d;
     --rc-hi: #ffde59;
+    /* Ribbon red, sampled from the ribbon in the photos and the 4K frames. */
+    --rc-red: #c3201f;
     background: var(--rc-warm);
     color: #000;
   }
@@ -354,9 +472,14 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   .rc-display,
   .rc-h2,
   .rc-black,
-  .rc-lead,
-  .rc-coda,
-  .rc-partners,
+  .rc-beat-title,
+  .rc-beat-quote p,
+  .rc-q-lead,
+  .rc-q-more,
+  .rc-count,
+  .rc-ch-title,
+  .rc-album a,
+  .rc-line-quote p,
   .rc-signoff,
   .rc-open-word {
     font-family: "Fraunces", Georgia, serif;
@@ -364,12 +487,11 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   }
   .rc-display {
     font-weight: 400;
-    font-size: clamp(3.25rem, 13vw, 4.25rem);
-    line-height: 1.02;
-    letter-spacing: -0.015em;
+    font-size: clamp(3.5rem, 15vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
-  /* The campaign's highlight: Fraunces Bold on #FFDE59 with soft corners,
-     the yellow hanging a little left of the glyphs. */
+  /* The campaign's highlight: Fraunces Bold on #FFDE59 with soft corners. */
   .rc-mark {
     display: inline-block;
     margin-left: -0.08em;
@@ -381,124 +503,346 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   }
   .rc-h2 {
     font-weight: 400;
-    font-size: clamp(2.25rem, 9vw, 2.75rem);
-    line-height: 1.05;
-    letter-spacing: -0.01em;
+    font-size: clamp(2.375rem, 10vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
   }
   .rc-h3 {
     font-size: 1.0625rem;
     font-weight: 600;
     line-height: 1.3;
   }
-  .rc-lede {
-    text-wrap: pretty;
-    font-size: 1.125rem;
-    line-height: 1.5;
-    color: var(--rc-gray);
-    max-width: 34rem;
-  }
-  .rc-split {
-    display: grid;
-    gap: 1rem;
-  }
-
-  /* ---------- hero ---------- */
-  .rc-hero {
-    padding-top: 2.5rem;
-  }
-  .rc-hero-text {
-    display: grid;
-    gap: 1.5rem;
-    padding-bottom: 2rem;
-  }
-  .rc-sub {
-    text-wrap: balance;
-    font-size: 1.375rem;
-    line-height: 1.3;
-    font-weight: 500;
-  }
-  .rc-date {
-    margin-top: 0.25rem;
-    font-size: 1.0625rem;
-    color: var(--rc-gray);
-  }
-  .rc-intro {
-    margin-top: 1.25rem;
-    font-size: 1.0625rem;
-    line-height: 1.55;
-    color: var(--rc-gray);
-    max-width: 34rem;
-    text-wrap: pretty;
-  }
-  .rc-hero-media {
-    max-width: 90rem;
-    margin: 0 auto;
-  }
-  .rc-hero-media img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  /* ---------- remarks ---------- */
-  .rc-remarks {
-    padding: 4.5rem 0 5rem;
-  }
-  .rc-quotes {
-    margin-top: 3rem;
-    display: grid;
-    gap: 3.25rem;
-  }
-  .rc-quote {
-    display: grid;
-    gap: 0.9rem;
-  }
-  .rc-who {
-    order: 2;
-  }
-  .rc-name {
-    font-weight: 600;
-    font-size: 1.0625rem;
-  }
-  .rc-role {
-    font-size: 0.9375rem;
-    color: var(--rc-gray);
-  }
-  .rc-lead {
-    font-weight: 400;
-    font-size: clamp(1.875rem, 7.5vw, 2.25rem);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
-    text-indent: -0.4em;
-  }
-  .rc-more {
-    margin-top: 0.75rem;
-    font-size: 1.125rem;
-    line-height: 1.45;
-    color: var(--rc-gray);
-    max-width: 38rem;
-  }
-  .rc-coda {
-    margin-top: 4rem;
-    font-style: italic;
-    font-size: clamp(1.75rem, 7vw, 2.25rem);
-    line-height: 1.15;
-    color: var(--rc-gray);
-  }
-
-  /* ---------- dark sections ---------- */
   .rc-dark {
     background: #000;
     color: #fff;
   }
-  .rc-dark .rc-lede {
-    color: rgb(255 255 255 / 0.75);
+
+  /* ---------- hero ---------- */
+  .rc-hero {
+    padding-top: 1.75rem;
   }
+  .rc-hero-text {
+    display: grid;
+    gap: 0.25rem;
+    padding-bottom: 1.25rem;
+  }
+  .rc-sub {
+    text-wrap: balance;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+  .rc-date {
+    margin-top: 0.2rem;
+    font-size: 1rem;
+    color: var(--rc-gray);
+  }
+  .rc-hero-side {
+    order: 3;
+    padding: 1.25rem 0 0;
+  }
+  /* The hero side text sits under the video on phones (see the grid below). */
+  @media (max-width: 767px) {
+    .rc-hero {
+      display: flex;
+      flex-direction: column;
+    }
+    .rc-hero-text {
+      display: contents;
+    }
+    .rc-display {
+      order: 1;
+      padding: 0 1rem 1.25rem;
+    }
+    .rc-stage {
+      order: 2;
+    }
+    .rc-hero-side {
+      order: 3;
+      padding: 1.1rem 1rem 0;
+    }
+  }
+  .rc-stage {
+    position: relative;
+    overflow: hidden;
+    background: #1a1714;
+    aspect-ratio: 3 / 4;
+  }
+  .rc-stage picture {
+    display: contents;
+  }
+  .rc-stage-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0%;
+  }
+  .rc-stage-video {
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .rc-stage.is-playing .rc-stage-video {
+    opacity: 1;
+  }
+  @media (min-width: 768px) {
+    .rc-stage {
+      aspect-ratio: auto;
+      height: clamp(26rem, calc(100svh - 23.25rem), 56.25vw);
+    }
+    .rc-stage-media {
+      object-position: 50% 6%;
+    }
+  }
+
+  /* The ribbon across the stage: one flat band of ribbon red, cut in the
+     middle as the page arrives; each half swings down from its end of the
+     frame like the real ends did, then goes. */
+  .rc-ribbon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 47%;
+    height: clamp(0.875rem, 1.5vw, 1.375rem);
+    pointer-events: none;
+    --v: clamp(0.875rem, 1.5vw, 1.375rem);
+  }
+  .rc-ribbon-half {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: calc(50% + 1px);
+    background: var(--rc-red);
+    animation: 1.25s cubic-bezier(0.5, 0, 0.8, 0.5) 0.8s both;
+  }
+  .rc-ribbon-l {
+    left: 0;
+    transform-origin: 0 50%;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 100% 100%, 0 100%);
+    animation-name: rc-fall-l;
+  }
+  .rc-ribbon-r {
+    right: 0;
+    transform-origin: 100% 50%;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 50%);
+    animation-name: rc-fall-r;
+  }
+  @keyframes rc-fall-l {
+    0% {
+      clip-path: polygon(0 0, 100% 0, 100% 50%, 100% 100%, 0 100%);
+      transform: none;
+      opacity: 1;
+    }
+    6% {
+      clip-path: polygon(0 0, 100% 0, calc(100% - var(--v)) 50%, 100% 100%, 0 100%);
+      transform: translateX(-0.6%);
+      opacity: 1;
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
+      clip-path: polygon(0 0, 100% 0, calc(100% - var(--v)) 50%, 100% 100%, 0 100%);
+      transform: translate(-1.5%, 12vh) rotate(22deg);
+      opacity: 0;
+    }
+  }
+  @keyframes rc-fall-r {
+    0% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 50%);
+      transform: none;
+      opacity: 1;
+    }
+    6% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--v) 50%);
+      transform: translateX(0.6%);
+      opacity: 1;
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--v) 50%);
+      transform: translate(1.5%, 12vh) rotate(-22deg);
+      opacity: 0;
+    }
+  }
+
+  .rc-pp {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.5);
+    color: #fff;
+  }
+  .rc-pp[hidden] {
+    display: none;
+  }
+  .rc-pp svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .rc-pp .rc-pp-play,
+  .rc-pp.is-paused .rc-pp-pause {
+    display: none;
+  }
+  .rc-pp.is-paused .rc-pp-play {
+    display: block;
+  }
+  .rc-pp:focus-visible {
+    outline: 3px solid var(--rc-hi);
+    outline-offset: 2px;
+  }
+
+  /* ---------- how we got here ---------- */
+  .rc-story {
+    padding: 4rem 0 4.5rem;
+  }
+  .rc-thread-row {
+    position: relative;
+    margin-top: 2.5rem;
+  }
+  /* Phones: the thread runs down the left of the three beats and ends in a
+     cut. */
+  .rc-thread {
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    bottom: 0;
+    width: 0.5rem;
+    background: var(--rc-red);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 0.6rem), 0 100%);
+  }
+  .rc-beats {
+    display: grid;
+    gap: 2.75rem;
+    padding-left: 1.75rem;
+  }
+  .rc-beat-title {
+    font-weight: 700;
+    font-size: 1.625rem;
+    line-height: 1.15;
+  }
+  .rc-beat-body {
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: var(--rc-gray);
+    max-width: 30rem;
+    text-wrap: pretty;
+  }
+  .rc-beat-quote {
+    margin-top: 0.9rem;
+  }
+  .rc-beat-quote p {
+    font-size: 1.375rem;
+    line-height: 1.32;
+    max-width: 30rem;
+    text-wrap: pretty;
+  }
+  .rc-beat-quote figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.9375rem;
+    color: var(--rc-gray);
+  }
+
+  /* ---------- in their words ---------- */
+  .rc-words {
+    padding: 4.5rem 0 0;
+  }
+  .rc-quotes {
+    margin-top: 3rem;
+    display: grid;
+    gap: 4.5rem;
+  }
+  .rc-q {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .rc-q-photo {
+    width: 62%;
+    max-width: 22rem;
+  }
+  .rc-q-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 20%;
+  }
+  .rc-q-lead {
+    font-weight: 400;
+    font-size: clamp(2.125rem, 9vw, 2.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .rc-q-more {
+    margin-top: 1rem;
+    font-size: 1.3125rem;
+    line-height: 1.35;
+    color: rgb(255 255 255 / 0.78);
+    max-width: 36rem;
+    text-wrap: pretty;
+  }
+  .rc-q-lead + .rc-q-more {
+    margin-top: 1.5rem;
+  }
+  .rc-q-who {
+    display: block;
+    margin-top: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .rc-q-name {
+    display: block;
+    font-weight: 600;
+  }
+  .rc-q-role {
+    display: block;
+    color: rgb(255 255 255 / 0.68);
+  }
+  .rc-q--room {
+    display: block;
+  }
+  .rc-q--room .rc-q-lead {
+    font-style: italic;
+    font-size: clamp(3rem, 15vw, 4rem);
+    text-wrap: nowrap;
+  }
+  .rc-count {
+    margin-top: 6rem;
+    padding-bottom: 2.5rem;
+    font-style: italic;
+    font-size: clamp(2.375rem, 11vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .rc-cut img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 42% 50%;
+  }
+  @media (min-width: 640px) {
+    .rc-cut img {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
   .rc-watch {
-    padding: 4.5rem 0 1rem;
+    padding-top: 4.5rem;
   }
   .rc-full {
     margin-top: 2rem;
@@ -520,6 +864,9 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   .rc-full + .rc-reels-block .rc-h3 {
     margin-bottom: 1.25rem;
   }
+  .rc-reels-block:first-of-type {
+    margin-top: 2rem;
+  }
   .rc-reels {
     display: grid;
     grid-auto-flow: column;
@@ -538,35 +885,39 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   .rc-reels > li {
     scroll-snap-align: start;
   }
-  .rc-full + .rc-reels-block,
-  .rc-reels-block:first-child {
-    margin-top: 2rem;
-  }
 
+  /* ---------- the night in photos ---------- */
   .rc-photos {
-    padding: 4.5rem 0 4rem;
+    padding: 5rem 0 4.5rem;
+  }
+  .rc-gallery {
+    max-width: 90rem;
+    margin: 0 auto;
   }
   .rc-chapter {
-    margin-top: 3rem;
+    margin-top: 3.5rem;
   }
-  .rc-chapter .rc-h3 {
+  .rc-ch-title {
+    padding: 0 1rem;
     margin-bottom: 1rem;
-    color: rgb(255 255 255 / 0.85);
+    font-weight: 400;
+    font-size: 1.875rem;
+    line-height: 1.1;
+  }
+  .rc-ch-time {
+    margin-left: 0.65rem;
+    font-family: Rubik, sans-serif;
+    font-size: 1rem;
+    color: rgb(255 255 255 / 0.62);
+    white-space: nowrap;
   }
   .rc-row {
     display: flex;
-    gap: 6px;
-    margin-top: 6px;
+    gap: 4px;
+    margin-top: 4px;
   }
   .rc-row--stack {
     flex-direction: column;
-  }
-  @media (min-width: 640px) {
-    .rc-row--cap {
-      max-width: var(--cap);
-      margin-left: auto;
-      margin-right: auto;
-    }
   }
   .rc-row figure {
     flex: var(--ar) 1 0%;
@@ -577,7 +928,7 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     width: 100%;
     padding: 0;
     border: 0;
-    background: #111;
+    background: #151515;
     cursor: zoom-in;
   }
   .rc-ph img {
@@ -586,8 +937,10 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     height: auto;
     aspect-ratio: var(--ar);
   }
-  /* Phones only: a wide frame whose subject is small (the group photo) is
-     cropped tighter. Desktop always shows the whole frame. */
+  .rc-fixed .rc-ph img {
+    object-fit: cover;
+    object-position: var(--dpos);
+  }
   @media (max-width: 639px) {
     .rc-crop .rc-ph img {
       aspect-ratio: var(--crop);
@@ -600,44 +953,105 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     outline-offset: 2px;
   }
   .rc-row figcaption {
-    margin-top: 0.5rem;
-    padding-right: 0.5rem;
+    margin: 0.6rem 0 0.9rem;
+    padding: 0 1rem;
     font-size: 0.9375rem;
     line-height: 1.4;
     color: rgb(255 255 255 / 0.8);
   }
-  .rc-row--stack figcaption {
-    margin-bottom: 0.75rem;
-  }
   .rc-album {
-    margin-top: 2.5rem;
+    margin-top: 4.5rem;
   }
-  .rc-album a,
-  .rc-link {
-    display: inline-block;
-    padding: 0.75rem 0;
-    font-weight: 600;
-    font-size: 1.0625rem;
+  .rc-album a {
+    display: inline;
+    font-size: clamp(2rem, 9vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     text-decoration: underline;
+    text-decoration-color: var(--rc-red);
+    text-decoration-thickness: 0.09em;
+    text-underline-offset: 0.16em;
+    text-decoration-skip-ink: none;
+    transition: text-decoration-color 150ms ease;
+  }
+  .rc-album a:hover {
     text-decoration-color: var(--rc-hi);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 5px;
+  }
+  .rc-album a:focus-visible {
+    outline: 3px solid var(--rc-hi);
+    outline-offset: 4px;
+  }
+  .rc-album-note {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: rgb(255 255 255 / 0.68);
   }
 
-  .rc-thanks {
-    padding: 3rem 0 5rem;
+  /* ---------- the ribbon line ---------- */
+  .rc-line {
+    padding: 4.5rem 0 1rem;
   }
-  .rc-thanks .rc-split {
-    gap: 2rem;
-  }
-  .rc-thanks .rc-lede {
-    margin-top: 0.5rem;
-  }
-  .rc-partners {
+  .rc-line-head {
     display: grid;
-    gap: 0.9rem;
-    font-size: clamp(1.5rem, 6vw, 1.875rem);
+    gap: 1.5rem;
+  }
+  .rc-line-quote p {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+  .rc-line-quote figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.9375rem;
+    color: var(--rc-gray);
+  }
+  .rc-line-photo {
+    margin: 2.5rem -1rem 0;
+  }
+  .rc-line-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .rc-line-photo figcaption {
+    padding: 1rem 1rem 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--rc-gray);
+  }
+  .rc-line-from {
+    font-size: 0.9375rem;
+    color: var(--rc-gray);
+  }
+  .rc-line-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.75rem;
+    margin-top: 0.6rem;
+  }
+  .rc-line-names li {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+  }
+  .rc-line-name {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.375rem;
     line-height: 1.2;
+    color: #000;
+  }
+  .rc-line-role {
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--rc-gray);
+  }
+  .rc-line-thanks {
+    margin-top: 2rem;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    max-width: 40rem;
+    text-wrap: pretty;
   }
 
   /* ---------- open ---------- */
@@ -682,16 +1096,24 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
     background: var(--rc-hi);
     color: #000;
   }
+  .rc-link {
+    display: inline-block;
+    padding: 0.75rem 0;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    text-decoration: underline;
+    text-decoration-color: var(--rc-hi);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
   .rc-btn:focus-visible,
-  .rc-link:focus-visible,
-  .rc-album a:focus-visible {
+  .rc-link:focus-visible {
     outline: 3px solid #000;
     outline-offset: 3px;
   }
   .rc-signoff {
     margin-top: 2.25rem;
     font-style: italic;
-    font-weight: 700;
     font-size: 1.75rem;
   }
   .rc-open-word {
@@ -705,71 +1127,162 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
   }
 
   /* ---------- tablet and up ---------- */
+  @media (min-width: 640px) {
+    .rc-row {
+      gap: 10px;
+      margin-top: 10px;
+      padding: 0 1.5rem;
+    }
+    .rc-row--stack {
+      flex-direction: row;
+    }
+    .rc-row--cap {
+      max-width: calc(var(--cap) + 3rem);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .rc-row figcaption {
+      padding: 0;
+      margin-bottom: 0;
+    }
+    .rc-ch-title {
+      padding: 0 1.5rem;
+    }
+    .rc-line-photo {
+      margin: 2.5rem 0 0;
+    }
+    .rc-line-photo figcaption {
+      padding: 1rem 0 0;
+    }
+  }
   @media (min-width: 768px) {
+    .rc-hero {
+      padding-top: 2rem;
+    }
+    .rc-hero-text {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: end;
+      padding-bottom: 1.75rem;
+    }
+    .rc-hero-side {
+      padding: 0 0 0.75rem;
+    }
+    .rc-display {
+      font-size: clamp(4.5rem, 8.2vw, 7.5rem);
+      line-height: 0.96;
+    }
+    .rc-pp {
+      right: 1.25rem;
+      bottom: 1.25rem;
+    }
     .rc-reels {
       grid-auto-columns: 40%;
     }
   }
   @media (min-width: 1024px) {
-    .rc-hero {
-      padding-top: 4rem;
-    }
-    .rc-hero-text {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-      column-gap: 3rem;
-      align-items: end;
-      padding-bottom: 3rem;
-    }
-    .rc-display {
-      font-size: 6.5rem;
-    }
-    .rc-hero-side {
-      padding-bottom: 0.9rem;
-    }
     .rc-sub {
       font-size: 1.625rem;
     }
-    .rc-intro {
+    .rc-date {
       font-size: 1.125rem;
     }
-    .rc-split {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-      column-gap: 3rem;
-      align-items: end;
-    }
     .rc-h2 {
-      font-size: 4rem;
+      font-size: 4.25rem;
     }
-    .rc-remarks {
+
+    .rc-story {
       padding: 7rem 0 7.5rem;
     }
+    .rc-thread-row {
+      margin-top: 3.5rem;
+      padding-top: 2.75rem;
+    }
+    /* Desktop: the thread comes in from the left edge of the window, runs
+       over all three beats and ends, cut, at the third. */
+    .rc-thread {
+      left: calc(50% - 50vw);
+      right: 0;
+      top: 0;
+      bottom: auto;
+      width: auto;
+      height: 0.625rem;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 0.75rem) 50%, 100% 100%, 0 100%);
+    }
+    .rc-beats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 3.5rem;
+      padding-left: 0;
+    }
+    .rc-beat-title {
+      font-size: 2.375rem;
+      line-height: 1.08;
+    }
+    .rc-beat-body {
+      margin-top: 1rem;
+      font-size: 1.3125rem;
+    }
+    .rc-beat-quote {
+      margin-top: 1.25rem;
+    }
+    .rc-beat-quote p {
+      font-size: 1.75rem;
+      line-height: 1.25;
+    }
+    .rc-beat-quote figcaption {
+      font-size: 1rem;
+    }
+
+    .rc-words {
+      padding-top: 7.5rem;
+    }
     .rc-quotes {
-      margin-top: 5rem;
-      gap: 4.5rem;
-    }
-    .rc-quote {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
-      column-gap: 3rem;
-      align-items: start;
-    }
-    .rc-who {
-      order: 0;
-      padding-top: 0.85rem;
-    }
-    .rc-lead {
-      font-size: 3rem;
-      line-height: 1.1;
-    }
-    .rc-more {
-      font-size: 1.25rem;
-    }
-    .rc-coda {
       margin-top: 5.5rem;
-      font-size: 3rem;
-      padding-left: calc(25% + 0.75rem);
+      gap: 8rem;
     }
+    .rc-q {
+      grid-template-columns: 22rem minmax(0, 1fr);
+      column-gap: 5rem;
+      align-items: center;
+    }
+    .rc-q-photo {
+      width: 100%;
+    }
+    .rc-q-lead,
+    .rc-q-more,
+    .rc-beat-quote p,
+    .rc-line-quote p {
+      text-indent: -0.4em;
+    }
+    .rc-q-lead {
+      font-size: clamp(3.25rem, 4.6vw, 4.5rem);
+      line-height: 1.04;
+    }
+    .rc-q-more {
+      font-size: 1.625rem;
+    }
+    .rc-q--room .rc-q-lead {
+      text-indent: 0;
+    }
+    .rc-q-who {
+      margin-top: 2rem;
+      font-size: 1.0625rem;
+    }
+    .rc-q--room {
+      padding-left: 27rem;
+    }
+    .rc-q--room .rc-q-lead {
+      font-size: 7rem;
+    }
+    .rc-count {
+      margin-top: 9rem;
+      padding-bottom: 4rem;
+      font-size: 6rem;
+      max-width: 14ch;
+    }
+
     .rc-watch {
-      padding: 7rem 0 1rem;
+      padding-top: 7rem;
     }
     .rc-full {
       margin-top: 3rem;
@@ -782,33 +1295,70 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
       margin: 0;
       padding: 0;
     }
+
     .rc-photos {
-      padding: 7rem 0 5rem;
+      padding: 8rem 0 7rem;
     }
     .rc-chapter {
-      margin-top: 4.5rem;
+      margin-top: 6rem;
     }
     .rc-row {
-      gap: 10px;
-      margin-top: 10px;
+      padding: 0 2rem;
     }
-    .rc-thanks {
-      padding: 4rem 0 7rem;
+    .rc-row--cap {
+      max-width: calc(var(--cap) + 4rem);
     }
-    .rc-thanks .rc-split {
-      align-items: start;
+    .rc-ch-title {
+      padding: 0 2rem;
+      margin-bottom: 1.5rem;
+      font-size: 3rem;
     }
-    .rc-thanks .rc-lede {
-      margin-top: 1rem;
-      font-size: 1.375rem;
+    .rc-ch-time {
+      margin-left: 1rem;
+      font-size: 1.125rem;
     }
-    .rc-partners {
-      font-size: 2.125rem;
-      gap: 1rem;
+    .rc-album {
+      margin-top: 7rem;
     }
+    .rc-album a {
+      font-size: 4rem;
+    }
+
+    .rc-line {
+      padding: 8rem 0 2rem;
+    }
+    .rc-line-head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: end;
+    }
+    .rc-line-quote p {
+      font-size: 1.75rem;
+    }
+    .rc-line-photo {
+      margin-top: 3.5rem;
+    }
+    .rc-line-photo figcaption {
+      padding-top: 1.5rem;
+    }
+    .rc-line-names {
+      gap: 1.25rem 2.5rem;
+    }
+    .rc-line-name {
+      font-size: 1.5rem;
+    }
+    .rc-line-role {
+      font-size: 1rem;
+    }
+    .rc-line-thanks {
+      margin-top: 2.5rem;
+      font-size: 1.25rem;
+    }
+
     .rc-open {
       padding: 7rem 0 7rem;
     }
+
     .rc-open-grid {
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
       column-gap: 3rem;
@@ -822,14 +1372,14 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
       justify-self: start;
     }
   }
-  /* Phones: a row stays side by side only when it is narrow (see the page
-     script); every other row stacks. From 640 every row is justified. */
-  @media (min-width: 640px) {
-    .rc-row--stack {
-      flex-direction: row;
+
+  /* Visitors who ask for less motion get the still and no falling ribbon. */
+  @media (prefers-reduced-motion: reduce) {
+    .rc-ribbon {
+      display: none;
     }
-    .rc-row--stack figcaption {
-      margin-bottom: 0;
+    .rc-stage-video {
+      display: none;
     }
   }
 
@@ -925,6 +1475,69 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
 </style>
 
 <script>
+  // Hero loop. The poster (the loop's first frame) is a responsive <img> and
+  // paints first; the video is attached only after the page has loaded, is
+  // skipped for reduced motion and Save-Data, picks the 3:4 crop on phones and
+  // the 16:9 file elsewhere, and fades in over the identical poster once it
+  // is actually playing.
+  const stage = document.querySelector<HTMLElement>("[data-rc-stage]");
+  const vid = stage?.querySelector<HTMLVideoElement>("[data-rc-video]");
+  const pp = stage?.querySelector<HTMLButtonElement>("[data-rc-pp]");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const phone = window.matchMedia("(max-width: 767px)");
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+  let userPaused = false;
+  const setPaused = (paused: boolean) => {
+    if (!pp) return;
+    pp.classList.toggle("is-paused", paused);
+    pp.setAttribute("aria-label", (paused ? pp.dataset.labelPlay : pp.dataset.labelPause) || "");
+  };
+  const start = () => {
+    if (!stage || !vid || reduce.matches || saveData) return;
+    const want = phone.matches ? stage.dataset.tall : stage.dataset.wide;
+    if (!want || vid.getAttribute("src") === want) return;
+    vid.src = want;
+    vid.play().catch(() => {});
+  };
+  if (stage && vid) {
+    vid.addEventListener("playing", () => {
+      stage.classList.add("is-playing");
+      if (pp) pp.hidden = false;
+      setPaused(false);
+    });
+    vid.addEventListener("pause", () => setPaused(true));
+    pp?.addEventListener("click", () => {
+      if (vid.paused) {
+        userPaused = false;
+        vid.play().catch(() => {});
+      } else {
+        userPaused = true;
+        vid.pause();
+      }
+    });
+    // Pause while the stage is off screen (saves battery on phones).
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (!vid.getAttribute("src")) return;
+          if (e.isIntersecting && !userPaused) vid.play().catch(() => {});
+          else if (!e.isIntersecting) vid.pause();
+        }
+      }).observe(stage);
+    }
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    phone.addEventListener("change", start);
+    reduce.addEventListener("change", () => {
+      if (reduce.matches) {
+        vid.pause();
+        stage.classList.remove("is-playing");
+        if (pp) pp.hidden = true;
+      } else start();
+    });
+  }
+
+  // Lightbox.
   const dialog = document.querySelector<HTMLDialogElement>("[data-rc-lb]");
   const dataEl = document.getElementById("rc-lb-data");
   if (dialog && dataEl) {
@@ -959,7 +1572,6 @@ const pageUrl = `https://latinasweatproject.com/${RIBBON_CUTTING_SLUG}`;
       if (e.key === "ArrowRight") show(i + 1);
       if (e.key === "ArrowLeft") show(i - 1);
     });
-    // Tap on the black around the photo closes.
     dialog.addEventListener("click", (e) => {
       if (e.target === dialog) dialog.close();
     });

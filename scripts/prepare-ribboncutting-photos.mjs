@@ -1,9 +1,10 @@
 // Web derivatives for /ribboncutting.
 //
-// Reads the photo list from src/data/ribbonCutting.js (story photos, video
-// posters and the hero), takes each edited full-resolution JPEG from
-// marketing/ribbon-cutting/photos-edited/<id>.jpg (read only; the hero may
-// point anywhere via ribbonCuttingHero.source), and writes:
+// Reads the photo list from src/data/ribbonCutting.js (story photos, speaker
+// portraits, the ribbon-line photo, the cut still, video posters and the
+// share-card hero), takes each edited full-resolution JPEG from
+// marketing/ribbon-cutting/photos-edited/<id>.jpg (read only; ids listed in
+// ribbonCuttingSources and the hero point anywhere in the repo), and writes:
 //   public/images/ribbon-cutting/<id>-<width>.webp   (PHOTO_WIDTHS; the hero gets HERO_WIDTHS)
 //   src/data/ribbonCuttingPhotoSizes.json           ({ id: [width, height] } after rotation)
 //
@@ -24,7 +25,7 @@ sharp.concurrency(2);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const data = await import(pathToFileURL(path.join(ROOT, "src/data/ribbonCutting.js")).href);
-const { ribbonCuttingHero: HERO, ribbonCuttingPhotoIds, PHOTO_WIDTHS, HERO_WIDTHS, PHOTO_DIR } = data;
+const { ribbonCuttingHero: HERO, ribbonCuttingPhotoIds, ribbonCuttingSources: SOURCES = {}, ribbonCuttingCutStill: CUT, PHOTO_WIDTHS, HERO_WIDTHS, PHOTO_DIR } = data;
 
 const SRC_DIR = path.join(ROOT, "marketing/ribbon-cutting/photos-edited");
 const OUT_DIR = path.join(ROOT, "public", PHOTO_DIR);
@@ -36,7 +37,7 @@ const jobs = [
   { id: HERO.id, src: path.join(ROOT, HERO.source), widths: HERO_WIDTHS, quality: 78 },
   ...ribbonCuttingPhotoIds()
     .filter((id) => id !== HERO.id)
-    .map((id) => ({ id, src: path.join(SRC_DIR, `${id}.jpg`), widths: PHOTO_WIDTHS, quality: 74 })),
+    .map((id) => ({ id, src: SOURCES[id] ? path.join(ROOT, SOURCES[id]) : path.join(SRC_DIR, `${id}.jpg`), widths: id === CUT?.id ? [...PHOTO_WIDTHS, 2400] : PHOTO_WIDTHS, quality: 74 })),
 ];
 
 const sizes = {};
