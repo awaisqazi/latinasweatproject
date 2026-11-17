@@ -9,7 +9,7 @@
 // or { ok: false, reason: "not_found" }. No donor names, ever.
 //
 // Dev only: `?mock=<0|5|40>&total=<dollars>` (plus `now=<iso>`, `mock=fail`,
-// `board=closed`, `signup=closed`, `prize=<text>`, `reason=<code>`) swaps the
+// `board=closed`, `signup=closed`, `prize=<text>`, `reason=<code>`, `tick=1`) swaps the
 // RPC for src/lib/givingTuesday/mock.js. The branch sits behind
 // import.meta.env.DEV, so production builds drop it and never load the mock.
 
@@ -66,6 +66,8 @@ export async function fetchGivingPublic(campaign = GIVING_SLUG) {
  * stop() function.
  */
 export function startPolling({ intervalMs, onData, onError }) {
+  // Dev mock `tick=1`: poll fast so the rising mock total can be watched.
+  if (import.meta.env.DEV && mockParams()?.get("tick")) intervalMs = 3500;
   let timer = null;
   let stopped = false;
   let inFlight = false;

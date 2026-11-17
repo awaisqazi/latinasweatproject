@@ -4,23 +4,25 @@
 // Zeffy; every Zeffy URL arrives from the giving_public RPC, and the Give
 // button falls back to /donate while there is none.
 //
-// Identity ("Giving Tuesday" in design.md): plain white page, one ink
-// (#1e1e1e), Rubik in two weights (400, 700), the LSP highlight yellow
-// #FFDE59 as the ground of exactly one block, the thermometer. Real LSP
-// photographs, never captioned or named, no type on them. No chips, cards,
-// rules, gradients, shadows or confetti.
+// Identity ("Giving Tuesday" in design.md): "one class becomes a movement".
+// White page, one ink (#1e1e1e), Rubik in two weights (400, 700), the LSP
+// highlight yellow #FFDE59 as the studio floor and the belief block, studio
+// mat colours from the site palette. Real LSP photographs, never named, no
+// type on them. No chips, cards, rules, gradients, shadows or confetti.
 //
 // Copy and facts: src/data/givingTuesday.js (appeal by Lizett Galan).
 // Live data + polling: src/lib/givingTuesday/live.js.
 // Body: src/components/givingTuesday/GivingTuesdayApp.svelte.
-// Photos: scripts/prepare-givingtuesday-photos.mjs.
+// Photos: src/data/givingTuesdayPhotos.js (crops: scripts/prepare-givingtuesday-photos.mjs).
 // Share card: scripts/render-givingtuesday-og.mjs.
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import GivingTuesdayApp from "@/components/givingTuesday/GivingTuesdayApp.svelte";
 import { givingCopy as copy } from "@/data/givingTuesday";
+import { heroOne, wallImage } from "@/data/givingTuesdayPhotos";
 
 const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const one = wallImage(heroOne.photo, base, { one: true });
 ---
 
 <Layout
@@ -38,8 +40,8 @@ const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL :
     slot="head"
     rel="preload"
     as="image"
-    imagesrcset={`${base}images/givingtuesday/class-800.webp 800w, ${base}images/givingtuesday/class-1400.webp 1400w, ${base}images/givingtuesday/class-2200.webp 2200w`}
-    imagesizes="100vw"
+    imagesrcset={one.srcset}
+    imagesizes="(min-width: 768px) 33vw, 50vw"
     fetchpriority="high"
   />
   <Header />
@@ -56,6 +58,8 @@ const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL :
     --gt-track: rgba(30, 30, 30, 0.14);
     --gt-mist: #ececea;
     --gt-soft: #55534f;
+    --gt-sand: #f5ede3;
+    --gt-clay: #c7602d;
 
     background: var(--gt-paper);
     color: var(--gt-ink);

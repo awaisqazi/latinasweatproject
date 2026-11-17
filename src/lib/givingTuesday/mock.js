@@ -10,7 +10,10 @@
 //   &board=closed      board_open false
 //   &signup=closed     signup_open false
 //   &prize=Some+prize  prize_label
-//   &giveurl=1         campaign give_url set
+//   &giveurl=1         campaign give_url set (a Zeffy peer-to-peer URL, so
+//                      the amount picker's prefill and "Give $100" show)
+//   &tick=1            the total rises by $137 every poll (polls every 3.5 s
+//                      in this mode, see live.js) to watch mats roll out live
 
 const SLUGS = [
   "alondra-alcazar", "amayrani-nunez", "anabel-hernandez", "andrea-fuentes", "antonia-rosales",
@@ -48,10 +51,13 @@ function rand(seed) {
   };
 }
 
+let ticks = -1;
+
 export function mockGivingPublic(q) {
   if (q.get("mock") === "fail") throw new Error("mock failure");
   const n = Math.max(0, Math.min(40, Number(q.get("mock")) || (q.get("mock") === "0" ? 0 : 5)));
-  const totalCents = Math.round((Number(q.get("total")) || 0) * 100);
+  ticks += 1;
+  const totalCents = Math.round((Number(q.get("total")) || 0) * 100) + (q.get("tick") ? ticks * 13700 : 0);
   const r = rand(7 + n);
   const fundraisers = SLUGS.slice(0, n).map((slug, i) => {
     // Spread the total across fundraisers when there is one; else zeros.
@@ -78,7 +84,7 @@ export function mockGivingPublic(q) {
       threshold_cents: 15000,
       starts_at: "2026-11-19T06:00:00Z",
       ends_at: "2026-12-02T05:59:59Z",
-      give_url: q.get("giveurl") ? "https://www.zeffy.com/en-US/peer-to-peer/mock-campaign" : null,
+      give_url: q.get("giveurl") ? "https://www.zeffy.com/en-US/peer-to-peer/lsp-giving-tuesday" : null,
       prize_label: q.get("prize") || null,
       board_open: q.get("board") !== "closed",
       signup_open: q.get("signup") !== "closed",

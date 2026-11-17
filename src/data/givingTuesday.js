@@ -72,6 +72,97 @@ export const givingCopy = {
     finalPassed: "more than our {goal} goal.", // NEW
   },
 
+  // The studio floor (the thermometer drawn as a room of mats). One mat is
+  // $100 of the goal, so $15,000 is 150 mats.
+  floor: {
+    matCents: 10000,
+    key: "Each mat is $100 toward our goal.", // NEW (owner's brief)
+    first: "Roll out the first mat.", // NEW (owner's brief)
+    // Day line above the number (browser only, Chicago calendar days).
+    daysTo: (n) => (n === 1 ? "Tomorrow is Giving Tuesday." : `${n} days to Giving Tuesday`), // "Tomorrow is Giving Tuesday": Lizett's email 2 subject
+    endsTonight: "Ends tonight at 11:59 pm Central.", // NEW (owner's brief)
+  },
+
+  // The amount picker under the floor.
+  picker: {
+    title: "Pick your mat.", // NEW (owner's brief)
+    legend: "Choose an amount", // NEW
+    amounts: [25, 50, 100, 150, 250],
+    preset: 100,
+    other: "Other", // NEW
+    otherLabel: "Other amount in dollars", // NEW
+    // "{amount} rolls out {mats}." The mats wording comes from matWords().
+    preview: "{amount} rolls out {mats}.", // NEW
+    previewNone: "Choose an amount to see it on the floor.", // NEW
+  },
+
+  // The story as a dated timeline, 2022 to now, ending at the ask. Lizett's
+  // words (emails 1 to 3) cut and ordered, never rewritten; every other line
+  // is marked NEW and states only a date, place or number the site already
+  // publishes (source beside it). Years without a dated photo carry none.
+  story: {
+    title: "How we got here", // NEW
+    startedLead: "What started as a few pop-\u2060up yoga classes in Little Village", // word joiner: never break pop-up
+    startedRest:
+      "has grown into something much bigger: a movement rooted in wellness, community care, and the belief that everyone deserves access to spaces where they can move, heal, and thrive.",
+    grew: "Since 2022, you've helped us grow from one monthly class to daily programming across Southwest Chicago.",
+    // Year of the first chapter: src/pages/about.astro:716 "Founded in 2022,
+    // Latina Sweat began as small pop-up yoga classes in Little Village".
+    // 2023 and 2024: src/pages/impact.astro "Previous Years" (2023 Impact,
+    // lines 358 and 365; 2024 Impact, lines 325, 332 and 336), the site's own
+    // labels in sentence case.
+    years: [
+      { year: "2023", facts: ["1,000+ attendees", "750 yoga mats donated"] }, // NEW (site facts)
+      { year: "2024", facts: ["2,000+ attendees", "$27,000 donated to nonprofits", "200 yoga mats donated"] }, // NEW (site facts)
+    ],
+    // 2025: src/pages/impact.astro:19 (classes), :51 (the studio, "Opened the
+    // first yoga nonprofit studio in Pilsen ... our home until fall 2026"),
+    // :59 (45 instructors). The studio is always "Morgan Street Studio".
+    classesTitle: "Classes a month in 2025", // NEW label for the site fact
+    classes: [
+      { month: "Jan", n: 25 },
+      { month: "May", n: 55 },
+      { month: "Sep", n: 100 },
+      { month: "Dec", n: 240 },
+    ],
+    y2025: [
+      "We opened Morgan Street Studio, the first yoga nonprofit studio in Pilsen.", // NEW (impact.astro:51)
+      "We certified 45 new yoga instructors from the Southwest Side and surrounding communities.", // NEW (impact.astro:59)
+    ],
+    // 2026, month by month. Dates and places: graduation.astro:8,55,230,288;
+    // sweatFest.js:15,21; galaRecap2026.js:21,23; about.astro:676-677 and
+    // popUpWeek1.js:60 (pop-ups from Oct 5); ddlmRecap2026.js:52;
+    // ribbonCutting.js:1-2 and about.astro:677-678 (ribbon cutting Nov 15,
+    // classes from Nov 16).
+    moments: {
+      grad: { when: "August 7", line: "Our 2025 and 2026 teacher training cohorts graduated. Nearly 100 teachers strong." }, // NEW
+      sweatfest: { when: "August 22", line: "Sweat Fest at 18th & Peoria." }, // NEW
+      gala: { when: "September 25", line: "Our Annual Gala at the Museum of Contemporary Art Chicago." }, // NEW
+      fall: {
+        when: "October",
+        line: "We went pop-\u2060up around the neighborhood, and celebrated D\u00eda de los Muertos at La Villita Park.", // NEW
+      },
+      moved: { when: "November 15", line: "We cut the ribbon at Mural Park, and classes began there the next day." }, // NEW
+    },
+    // Captions: event, place and month only.
+    captions: {
+      grad: "Teacher training graduation, August 2026.", // NEW
+      sweatfest: "Sweat Fest, August 2026.", // NEW
+      gala: "The Annual Gala, September 2026.", // NEW
+      ddlm: "D\u00eda de los Muertos at La Villita Park, October 2026.", // NEW
+      ribbon: "The ribbon cutting at Mural Park, November 2026.", // NEW
+      tt2025: "Teacher training, 2025.", // NEW (Drive folder "[VIDEO] 2025 LSP TT")
+    },
+    movedLead: "We've moved from",
+    moved: ["pop-\u2060ups", "to Morgan Street Studio", "and now to our temporary home at Mural Park."],
+    movedRest: "Through every transition, our mission has remained the same.",
+    nextTitle: "What's next", // NEW
+    nextWhen: "Giving Tuesday, December 1", // NEW
+    together:
+      "Together, we've brought wellness into parks, schools, and shelters, supported emerging BIPOC yoga instructors, and created spaces where community comes first.",
+    constant: "Our community is why Latina Sweat Project exists, grows, and keeps showing up.",
+  },
+
   // The appeal: Lizett's email copy (emails 1, 2 and 3), lightly trimmed.
   appeal: [
     "What started as a few pop-up yoga classes in Little Village has grown into something much bigger: a movement rooted in wellness, community care, and the belief that everyone deserves access to spaces where they can move, heal, and thrive.",
@@ -191,6 +282,51 @@ export function progress(raisedCents, goalCents) {
   const g = Number(goalCents) || 0;
   if (g <= 0) return 0;
   return Math.min(1, Math.max(0, (Number(raisedCents) || 0) / g));
+}
+
+// Whole Chicago calendar days from `now` to `day` ("YYYY-MM-DD"); 0 on the day.
+export function daysUntil(now, day = givingFacts.givingDay) {
+  const [y1, m1, d1] = chicagoDate(now).split("-").map(Number);
+  const [y2, m2, d2] = String(day).split("-").map(Number);
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+}
+
+// A number of mats in words: 0.25 -> "a quarter of a mat", 1 -> "one mat",
+// 2.5 -> "two and a half mats", 3.7 -> "3.7 mats".
+const WORDS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+export function matWords(mats) {
+  const m = Math.round(Number(mats) * 100) / 100;
+  if (!(m > 0)) return "";
+  const whole = Math.floor(m);
+  const frac = Math.round((m - whole) * 100) / 100;
+  const fracWord = { 0.25: "a quarter", 0.5: "a half", 0.75: "three quarters" }[frac];
+  if (whole === 0 && fracWord) return `${fracWord === "a half" ? "half" : fracWord} of a mat`.replace("half of a mat", "half a mat");
+  if (whole > 0 && whole <= 10 && frac === 0) return `${WORDS[whole]} ${whole === 1 ? "mat" : "mats"}`;
+  if (whole > 0 && whole <= 10 && fracWord) return `${WORDS[whole]} and ${fracWord} mats`;
+  const n = m.toLocaleString("en-US", { maximumFractionDigits: 1 });
+  return `${n} ${n === "1" ? "mat" : "mats"}`;
+}
+
+// Zeffy peer-to-peer pages open their donation form with the amount filled in
+// when the URL carries ?amount=<dollars>&donate=true (checked by hand on the
+// live LSP Giving Tuesday page, Nov 17 2026). Any other URL (the /donate
+// fallback) is returned unchanged, so a button only names an amount when
+// prefillsAmount() is true.
+export function prefillsAmount(url) {
+  try {
+    const u = new URL(url);
+    return /(^|\.)zeffy\.com$/i.test(u.hostname) && u.pathname.includes("/peer-to-peer/");
+  } catch {
+    return false;
+  }
+}
+export function withAmount(url, dollars) {
+  const d = Math.round(Number(dollars));
+  if (!prefillsAmount(url) || !(d > 0)) return url;
+  const u = new URL(url);
+  u.searchParams.set("amount", String(d));
+  u.searchParams.set("donate", "true");
+  return u.toString();
 }
 
 // Fill "{goal}"-style slots.
