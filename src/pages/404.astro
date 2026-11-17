@@ -89,6 +89,17 @@ import Header from "../components/Header.astro";
         window.location.pathname.replace(/\/+$/, "") !== "/finishline"
     ) {
         window.location.replace("/finishline");
+    } else if (
+        // LSP Giving Tuesday 2026: any-case and hyphenated variants.
+        ["/givingtuesday", "/giving-tuesday", "/lspgivingtuesday"].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/givingtuesday"
+    ) {
+        window.location.replace("/givingtuesday");
+    } else if (
+        ["/givingtuesday/join", "/giving-tuesday/join"].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/givingtuesday/join"
+    ) {
+        window.location.replace("/givingtuesday/join");
     } else if (path === "/water" || path === "/water/") {
         window.location.replace(
             "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",

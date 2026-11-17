@@ -1,0 +1,124 @@
+---
+// /givingtuesday/join: UNLISTED instructor and YTT cohort sign-up for LSP
+// Giving Tuesday 2026. noindex, out of the sitemap (astro.config.mjs), never
+// linked from nav; the link goes out to instructors directly.
+//
+// Same identity as /givingtuesday (design.md "Giving Tuesday"). The prize is
+// never named here unless the RPC sends prize_label.
+// Form: src/components/givingTuesday/GivingSignupApp.svelte, posting to the
+// giving-signup edge function.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GivingSignupApp from "@/components/givingTuesday/GivingSignupApp.svelte";
+import { givingJoinCopy as copy } from "@/data/givingTuesday";
+
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+---
+
+<Layout
+  title={copy.metaTitle}
+  socialTitle={copy.socialTitle}
+  description={copy.metaDescription}
+  robots="noindex, nofollow"
+  socialImage="images/givingtuesday/givingtuesday-og.jpg"
+  socialImageAlt="LSP Giving Tuesday. From one class to a movement. Tuesday, Dec 1."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <Header />
+  <main class="gj-page font-rubik">
+    <section class="gj-hero">
+      <div class="gj-wrap">
+        <h1 class="gj-h1">{copy.headline}</h1>
+        <p class="gj-lead">{copy.lead}</p>
+      </div>
+    </section>
+
+    <figure class="gj-wrap gj-photo">
+      <img
+        src={`${base}images/graduation/hero.jpg`}
+        width="1024"
+        height="683"
+        alt="LSP yoga teacher training graduates holding their certificates."
+        decoding="async"
+      />
+    </figure>
+
+    <div class="gj-wrap gj-grid">
+      <div class="gj-how">
+        {copy.steps.map((s) => <p>{s}</p>)}
+      </div>
+      <GivingSignupApp client:load base={base} />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .gj-page {
+    --gt-paper: #ffffff;
+    --gt-ink: #1e1e1e;
+    --gt-soft: #55534f;
+    --gt-bad: #b3261e;
+
+    background: var(--gt-paper);
+    color: var(--gt-ink);
+    font-family: "Rubik", sans-serif;
+    overflow-x: clip;
+    padding-bottom: 96px;
+  }
+  .gj-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  @media (min-width: 768px) {
+    .gj-wrap { padding: 0 40px; }
+  }
+  .gj-hero { padding: 40px 0 28px; }
+  @media (min-width: 768px) { .gj-hero { padding: 72px 0 40px; } }
+  .gj-h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 9.5vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    max-width: 14ch;
+    text-wrap: balance;
+  }
+  .gj-lead {
+    margin: 20px 0 0;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    line-height: 1.3;
+    max-width: 36ch;
+  }
+  .gj-photo { margin: 0 auto; }
+  .gj-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: 50% 72%;
+    border-radius: 4px;
+  }
+  @media (min-width: 768px) {
+    .gj-photo img { aspect-ratio: 21 / 9; object-position: 50% 78%; }
+  }
+  @media (max-width: 767px) {
+    .gj-photo { padding: 0; }
+    .gj-photo img { border-radius: 0; aspect-ratio: 4 / 3; object-position: 50% 70%; }
+  }
+  .gj-grid { display: grid; gap: 48px; margin-top: 48px; }
+  @media (min-width: 1024px) {
+    .gj-grid { grid-template-columns: 5fr 6fr; gap: 80px; margin-top: 72px; align-items: start; }
+  }
+  .gj-how p {
+    margin: 0 0 1.1em;
+    font-size: 1.1875rem;
+    line-height: 1.5;
+    max-width: 44ch;
+  }
+  .gj-how p:first-child { font-weight: 700; font-size: 1.375rem; line-height: 1.35; }
+</style>

@@ -1,0 +1,65 @@
+---
+// /givingtuesday: LSP Giving Tuesday 2026 (Tuesday, Dec 1; goal $15,000;
+// campaign open Nov 19 through 11:59 pm Central on Dec 1). Gifts are made on
+// Zeffy; every Zeffy URL arrives from the giving_public RPC, and the Give
+// button falls back to /donate while there is none.
+//
+// Identity ("Giving Tuesday" in design.md): plain white page, one ink
+// (#1e1e1e), Rubik in two weights (400, 700), the LSP highlight yellow
+// #FFDE59 as the ground of exactly one block, the thermometer. Real LSP
+// photographs, never captioned or named, no type on them. No chips, cards,
+// rules, gradients, shadows or confetti.
+//
+// Copy and facts: src/data/givingTuesday.js (appeal by Lizett Galan).
+// Live data + polling: src/lib/givingTuesday/live.js.
+// Body: src/components/givingTuesday/GivingTuesdayApp.svelte.
+// Photos: scripts/prepare-givingtuesday-photos.mjs.
+// Share card: scripts/render-givingtuesday-og.mjs.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GivingTuesdayApp from "@/components/givingTuesday/GivingTuesdayApp.svelte";
+import { givingCopy as copy } from "@/data/givingTuesday";
+
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+---
+
+<Layout
+  title={copy.metaTitle}
+  socialTitle={copy.socialTitle}
+  description={copy.metaDescription}
+  socialImage="images/givingtuesday/givingtuesday-og.jpg"
+  socialImageAlt="LSP Giving Tuesday. From one class to a movement. Tuesday, Dec 1."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    imagesrcset={`${base}images/givingtuesday/class-800.webp 800w, ${base}images/givingtuesday/class-1400.webp 1400w, ${base}images/givingtuesday/class-2200.webp 2200w`}
+    imagesizes="100vw"
+    fetchpriority="high"
+  />
+  <Header />
+  <main class="gt-page font-rubik">
+    <GivingTuesdayApp client:load base={base} />
+  </main>
+</Layout>
+
+<style>
+  .gt-page {
+    --gt-paper: #ffffff;
+    --gt-ink: #1e1e1e;
+    --gt-sun: #ffde59;
+    --gt-track: rgba(30, 30, 30, 0.14);
+    --gt-mist: #ececea;
+    --gt-soft: #55534f;
+
+    background: var(--gt-paper);
+    color: var(--gt-ink);
+    font-family: "Rubik", sans-serif;
+    overflow-x: clip;
+  }
+</style>

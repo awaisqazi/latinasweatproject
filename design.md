@@ -1116,6 +1116,30 @@ Search Console readiness:
 
 ---
 
+## Giving Tuesday (`/givingtuesday`, `/givingtuesday/join`, Nov 19 to Dec 1, 2026)
+
+LSP Giving Tuesday 2026: Tuesday, Dec 1, goal $15,000, gifts count from Thu Nov 19 through 11:59 pm Central on Dec 1. Campaign and copy by Lizett Galan (development lead). Gifts are made on Zeffy (peer-to-peer, one page per instructor); donations go to Latina Sweat Cares, a 501(c)(3).
+
+**Identity: "white page, one yellow block".** Plain white ground (#ffffff), one ink (#1e1e1e) for all type, Rubik in two weights only (400 and 700), sentence case throughout. The LSP highlight yellow #FFDE59 is the ground of exactly one block on the page: the thermometer. The matching/share/thanks close is the only dark block (ink ground, white type). Photographs are real LSP photos, never captioned or named, with no type on them: the page opens on a full class resting on their mats (`public/images/story.jpeg`, derivatives `public/images/givingtuesday/class-{800,1400,2200}.webp` via `scripts/prepare-givingtuesday-photos.mjs`), the appeal closes on the ribbon cutting group photo (`ribbon-cutting/DSC09794-*`), and the join page uses the graduation cohort photo (`graduation/hero.jpg`). Hard nos: chips, pills, eyebrow labels, two-color headlines, bordered cards, accent bars, tags, stars, rules, gradients, glows, shadows, emoji, confetti.
+
+**Page order (`/givingtuesday`):** hero (headline "From one class to a movement.", sub "Help us build what's next.", phase line, one Give button) → full-bleed class photo → thermometer (yellow) → appeal (belief line large on the left, Lizett's paragraphs and the five "your generosity will help support" lines on the right; group photo; "Will you make a gift today?" + Give) → instructor board → ink close (employer matching, share, #LSPGivingTuesday, thank-you line, 501(c)(3) + EIN).
+
+**Thermometer:** one big honest number and a plain bar (ink on 14% ink track), animated with a Svelte `Tween` on change, instant under `prefers-reduced-motion`. States: live with gifts ("$6,240" / "raised of our $15,000 goal" / "N gifts so far"), past goal (bar full, "raised, past our $15,000 goal"), live at $0 ("Help us raise $15,000", empty bar, "Be the first gift."), RPC down or loading ("Help us raise $15,000" only, no number invented), after `ends_at` ("Together we raised $X", gift count). No countdown clock anywhere.
+
+**Phases** (`phase()` in `src/data/givingTuesday.js`, Chicago time): `before` (before `starts_at`), `early` (open, not yet Dec 1), `today` (Dec 1 in Chicago, until `ends_at`), `after` (thank-you state; the Give button still works). SSR renders `early`; the browser corrects it.
+
+**Instructor board:** a plain list, not cards: round 56/64 px photo (or initials circle), name in 700, optional "why" line, slim 6 px bar toward $150, "$X of $150" or "$X · Reached $150", and an underlined "Give" (the whole row is the link, at least 72 px tall). Two columns (CSS columns) at 1024 px and up when there are more than 6 rows. Sorted by amount raised, then name. Hidden entirely when `board_open` is false or the list is empty. Avatars: `/images/popup/instructors/<avatar>-160.webp`; a failed or missing avatar falls back to initials. A row with no `give_url` links to the campaign `give_url`, which falls back to `/donate`.
+
+**Data contract:** `supabase.rpc("giving_public", { p_campaign: "giving-tuesday-2026" })`, polled every 25 s only while the tab is visible (`src/lib/givingTuesday/live.js`), 8 s timeout, last good payload kept on screen on errors. Sign-up posts to the `giving-signup` edge function via `supabase.functions.invoke` (non-2xx body read with `error.context.json()`), Turnstile rendered explicitly with the site key from the RPC. Reason codes map to plain messages in `GivingSignupApp.svelte`. Donor names never appear anywhere.
+
+**Join page (`/givingtuesday/join`):** unlisted, `noindex, nofollow`, excluded from the sitemap, not in nav. Big headline, one lead line, the cohort photo, then the four facts of the ask (left) beside the form (right) at 1024 px and up, stacked on phones. The prize is never named unless the RPC sends `prize_label`. When `signup_open` is false the form is replaced by a closed state.
+
+**Dev mock (dev server only, stripped from production by `import.meta.env.DEV`):** `?mock=<0..40>&total=<dollars>`, plus `now=<ISO>` (phase), `mock=fail`, `board=closed`, `signup=closed`, `prize=<text>`, `giveurl=1`, `reason=<code>` (join page error). Mock rows use the existing avatar slugs so photo and name always match; amounts are fake.
+
+**Share card:** `public/images/givingtuesday/givingtuesday-og.jpg` (1200x630) from `scripts/render-givingtuesday-og.mjs`: yellow panel with the whole LSP logo, "LSP Giving Tuesday", the headline and "Tuesday, Dec 1" on the left, the class photo on the right. Both pages use it. Aliases in `404.astro`: `/giving-tuesday`, `/lspgivingtuesday`, any case.
+
+---
+
 ## 🧠 14. Project Memory & Change Record Rules
 
 Treat `design.md` as the durable memory for the website's design system, structure, third-party integrations, and routing conventions.
