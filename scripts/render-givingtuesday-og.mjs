@@ -1,9 +1,10 @@
 // /givingtuesday (and /givingtuesday/join) link share card, 1200x630, in the
 // page's own identity (design.md "Giving Tuesday"): the LSP highlight yellow
 // #FFDE59 as a flat panel, one ink #1e1e1e, Rubik in two weights, and a real
-// LSP class photograph (public/images/story.jpeg, the same one the page opens
-// on). No gradients, glows, shadows, chips or rules. Type sits on the yellow,
-// never on the photo.
+// LSP class photograph: the one the page opens on (heroOne in
+// src/data/givingTuesdayPhotos.js, a full class in the studio, May 2026, from
+// LSP's team Drive picks). No gradients, glows, shadows, chips or rules. Type
+// sits on the yellow, never on the photo.
 //
 // Text, in order, and nothing else: "LSP Giving Tuesday", Lizett's headline
 // "From one class to a movement.", the date "Tuesday, Dec 1". The LSP logo
@@ -78,12 +79,23 @@ const LOGO_H = 92;
 const LOGO_W = Math.round(LOGO_H * (logoMeta.width / logoMeta.height));
 const LOGO_URI = "data:image/png;base64," + logoBuf.toString("base64");
 
-// The photo: 660x630 of the class, crop chosen so the instructor and the
-// front rows stay in frame.
+// The photo: 660x630 cut from the portrait original, full width, so the papel
+// picado, every raised arm and the front row's feet stay in frame.
+// PHOTO_TOP = top of the cut as a share of the original's height.
 const PHOTO_W = 660;
-const photoBuf = await sharp(path.join(ROOT, "public/images/story.jpeg"))
+const PHOTO_SRC = path.join(ROOT, "marketing/giving-tuesday-2026/drive-photos/picks/2026-05_team-bonding-class_01.jpg");
+const PHOTO_TOP = 0.29;
+const photoMeta = await sharp(PHOTO_SRC).metadata();
+const cutH = Math.round((photoMeta.width * 630) / PHOTO_W);
+const photoBuf = await sharp(PHOTO_SRC)
   .rotate()
-  .resize({ width: PHOTO_W * 2, height: 630 * 2, fit: "cover", position: "attention" })
+  .extract({
+    left: 0,
+    top: Math.min(photoMeta.height - cutH, Math.round(photoMeta.height * PHOTO_TOP)),
+    width: photoMeta.width,
+    height: cutH,
+  })
+  .resize({ width: PHOTO_W * 2, height: 630 * 2 })
   .jpeg({ quality: 90 })
   .toBuffer();
 const PHOTO_URI = "data:image/jpeg;base64," + photoBuf.toString("base64");
