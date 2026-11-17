@@ -190,3 +190,57 @@ Deno.test("reconcile: no credentials is 401; authorised without API key is no_ap
   assertEquals(res.status, 200);
   assertEquals(await res.json(), { ok: false, reason: "no_api_key" });
 });
+
+Deno.test("check: no credentials is 401; authorised without API key is no_api_key", async () => {
+  Deno.env.set("GIVING_CRON_SECRET", "cron_unit_test_only");
+  const db = fakeDb(seed());
+  const anon = new Request("https://x.test/?mode=check", { method: "POST" });
+  assertEquals((await route(anon, db as any)).status, 401);
+  const ok = new Request("https://x.test/?mode=check", { method: "POST", headers: { "x-giving-cron-secret": "cron_unit_test_only" } });
+  const res = await route(ok, db as any);
+  assertEquals(res.status, 200);
+  assertEquals(await res.json(), { ok: false, reason: "no_api_key" });
+});
+
+Deno.test("check: answers public campaign fields only, and flags an id Zeffy does not know", async () => {
+  Deno.env.set("GIVING_CRON_SECRET", "cron_unit_test_only");
+  Deno.env.set("ZEFFY_API_KEY", "key_unit_test_only");
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = ((input: string | URL | Request) => {
+    const url = String(input instanceof Request ? input.url : input);
+    if (url.endsWith("/campaigns/main")) {
+      return Promise.resolve(new Response(JSON.stringify({
+        id: "main", title: "Drive", url: "https://z.test/peer-to-peer/drive", category: "peer_to_peer",
+        volume: 0, owner: { email: "private@example.com" },
+      }), { status: 200 }));
+    }
+    if (url.includes("/campaigns?")) {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: [
+          { id: "main", title: "Drive", category: "peer_to_peer", url: "https://z.test/peer-to-peer/drive" },
+          { id: "tix", title: "Tickets", category: "event", url: "https://z.test/ticketing/tix" },
+        ],
+      }), { status: 200 }));
+    }
+    return Promise.resolve(new Response("{}", { status: 404 }));
+  }) as typeof fetch;
+  try {
+    const tables = seed();
+    tables.giving_campaigns[0].zeffy_campaign_ids = ["main", "gone"];
+    const req = new Request("https://x.test/?mode=check", { method: "POST", headers: { "x-giving-cron-secret": "cron_unit_test_only" } });
+    const res = await route(req, fakeDb(tables) as any);
+    assertEquals(res.status, 200);
+    const body = await res.json();
+    assertEquals(body.ok, true);
+    assertEquals(body.linked.map((l: any) => [l.id, l.found]), [["main", true], ["gone", false]]);
+    assertEquals(body.linked[0].campaign, {
+      id: "main", title: "Drive", url: "https://z.test/peer-to-peer/drive", category: "peer_to_peer", volume: 0,
+    });
+    assertEquals(body.peer_to_peer.map((c: any) => c.id), ["main"]);
+    assertEquals(JSON.stringify(body).includes("private@example.com"), false);
+    assertEquals(JSON.stringify(body).includes("key_unit_test_only"), false);
+  } finally {
+    globalThis.fetch = realFetch;
+    Deno.env.delete("ZEFFY_API_KEY");
+  }
+});

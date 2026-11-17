@@ -109,7 +109,16 @@ URL: `https://jcseaxtvsozylsbmykka.supabase.co/functions/v1/zeffy-webhook`
   (plus `partial: true` if it ran out of its 110 s budget), `{ok: false, reason: "no_api_key"}`
   (200) when the key is missing, 401 `unauthorized` otherwise. Only campaigns with
   `zeffy_campaign_ids` that ended less than 30 days ago are synced; with none it answers
-  `{ok: true, ..., note: "no_active_campaigns"}` without calling Zeffy.
+  `{ok: true, ..., note: "no_active_campaigns"}` without calling Zeffy. The listing looks back
+  14 days before the earliest `starts_at`, so a gift made before kickoff is still pulled in.
+- Check: `POST ...?mode=check` (same authorisation). Asks Zeffy for each id in
+  `zeffy_campaign_ids` and answers `{ok, linked: [{slug, id, found, campaign}], peer_to_peer: [...]}`
+  with public campaign fields only (title, url, category, status, target, volume). Use it to
+  confirm the link after the key changes. Confirmed 2026-11-17: `c1480631-…` is
+  "LSP Giving Tuesday", `PeerToPeerCampaign`, active, target 1500000.
+- Page addresses: the API writes `https://www.zeffy.com/peer-to-peer/<slug>`, the browser shows
+  `/en-US/peer-to-peer/<slug>`. `normalizeUrl` drops the locale segment, so either spelling of a
+  participant page pasted into `zeffy_url` matches.
 
 Attribution: a payment belongs to the campaign whose `zeffy_campaign_ids` contains its
 `parent_campaign_id` or `campaign_id`. It is credited to the fundraiser whose `zeffy_campaign_id`

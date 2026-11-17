@@ -131,6 +131,16 @@ Deno.test("normalizeUrl strips case, query, fragment and trailing slashes", () =
   assertEquals(normalizeUrl(""), "");
 });
 
+Deno.test("normalizeUrl treats the API and browser spellings of a Zeffy page as one", () => {
+  const api = normalizeUrl("https://www.zeffy.com/peer-to-peer/lsp-giving-tuesday");
+  assertEquals(normalizeUrl("https://www.zeffy.com/en-US/peer-to-peer/lsp-giving-tuesday?donate=true"), api);
+  assertEquals(normalizeUrl("https://www.zeffy.com/fr-CA/peer-to-peer/lsp-giving-tuesday/"), api);
+  assertEquals(normalizeUrl("https://www.zeffy.com/es/peer-to-peer/lsp-giving-tuesday"), api);
+  // A two-letter slug at the end is a page, not a locale.
+  assertEquals(normalizeUrl("https://www.zeffy.com/peer-to-peer/ab"), "https://www.zeffy.com/peer-to-peer/ab");
+  assertEquals(normalizeUrl("https://www.zeffy.com/ab"), "https://www.zeffy.com/ab");
+});
+
 // ── Money ───────────────────────────────────────────────────────
 
 Deno.test("money: gift excludes a tip that is not a line item", () => {

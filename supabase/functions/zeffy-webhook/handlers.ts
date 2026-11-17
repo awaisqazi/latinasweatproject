@@ -4,6 +4,9 @@
 //   POST /?mode=reconcile    pull payments from the Zeffy API and upsert them;
 //                            authorised by x-giving-cron-secret (pg_cron) or a
 //                            dashboard user with the fundraising module.
+//   POST /?mode=check        ask Zeffy about each linked campaign id (same
+//                            authorisation); answers public campaign fields
+//                            only, so the link can be confirmed without the key.
 //
 // Secrets (names only): ZEFFY_WEBHOOK_SECRET, ZEFFY_API_KEY, GIVING_CRON_SECRET.
 // Never log or echo any of them.
@@ -257,6 +260,8 @@ async function processEvent(db: SupabaseClient, type: string, data: any): Promis
 
 // ── Reconcile ───────────────────────────────────────────────────
 
+const EARLY_GIFT_WINDOW_MS = 14 * 86400_000;
+
 async function isAuthorisedForReconcile(req: Request): Promise<boolean> {
   const cronSecret = Deno.env.get("GIVING_CRON_SECRET");
   const given = req.headers.get("x-giving-cron-secret");
@@ -303,8 +308,10 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
 
     const ctx = await loadCtx(db, zeffy);
     ctx.campaigns = ctx.campaigns.filter((c) => active.some((a) => a.slug === c.slug));
+    // Look back two weeks before the earliest start: the Zeffy page takes gifts
+    // as soon as it is published, and a gift made before kickoff still counts.
     const earliest = Math.min(...active.map((c) => new Date(c.starts_at).getTime()));
-    const since = Math.floor((earliest - 86400_000) / 1000);
+    const since = Math.floor((earliest - EARLY_GIFT_WINDOW_MS) / 1000);
 
     const seen = new Set<string>();
     let cursor: string | null = null;
@@ -369,11 +376,61 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
   }
 }
 
+// ── Check ───────────────────────────────────────────────────────
+
+// Campaign fields safe to echo: what the public Zeffy page already shows.
+const CAMPAIGN_FIELDS = [
+  "id", "object", "title", "name", "url", "category", "type", "status",
+  "target", "goal_amount", "volume", "parent_campaign_id", "created",
+];
+function publicCampaign(body: any): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of CAMPAIGN_FIELDS) {
+    const v = body?.[key];
+    if (v === null || ["string", "number", "boolean"].includes(typeof v)) out[key] = v;
+  }
+  return out;
+}
+
+export async function handleCheck(req: Request, db: SupabaseClient): Promise<Response> {
+  if (!(await isAuthorisedForReconcile(req))) {
+    return jsonResponse({ ok: false, reason: "unauthorized" }, 401);
+  }
+  const apiKey = Deno.env.get("ZEFFY_API_KEY");
+  if (!apiKey) return jsonResponse({ ok: false, reason: "no_api_key" }, 200);
+  const zeffy = new ZeffyClient(apiKey);
+
+  try {
+    const { data: all, error } = await db.from("giving_campaigns").select("slug, zeffy_campaign_ids");
+    if (error) throw new Error(`db_campaigns_${error.code}`);
+    const linked = [];
+    for (const c of all || []) {
+      for (const id of (Array.isArray(c.zeffy_campaign_ids) ? c.zeffy_campaign_ids : []).slice(0, 10)) {
+        const res = await zeffy.get(`/campaigns/${encodeURIComponent(id)}`);
+        linked.push({ slug: c.slug, id, found: res.status !== 404, campaign: res.status === 404 ? null : publicCampaign(res.body) });
+      }
+    }
+    // Peer-to-peer pages Zeffy knows about, so a wrong id can be corrected.
+    const list = await zeffy.get("/campaigns?limit=100");
+    const rows: any[] = Array.isArray(list.body?.data) ? list.body.data : [];
+    const peerToPeer = rows
+      .filter((r) => /peer/i.test(`${r?.category ?? ""} ${r?.type ?? ""} ${r?.url ?? ""}`))
+      .slice(0, 40)
+      .map(publicCampaign);
+    return jsonResponse({ ok: true, linked, peer_to_peer: peerToPeer, listed: rows.length });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 120) : "error";
+    console.error("zeffy check failed", msg);
+    return jsonResponse({ ok: false, reason: "check_failed", detail: msg }, 500);
+  }
+}
+
 export async function route(req: Request, db: SupabaseClient): Promise<Response> {
   if (req.method === "OPTIONS") return jsonResponse({}, 204);
   if (req.method !== "POST") return jsonResponse({ ok: false, reason: "method_not_allowed" }, 405);
   const mode = new URL(req.url).searchParams.get("mode");
   if (mode === "reconcile") return handleReconcile(req, db);
+  if (mode === "check") return handleCheck(req, db);
   return handleWebhook(req, db);
 }
 

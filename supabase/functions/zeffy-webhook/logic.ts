@@ -146,12 +146,17 @@ export type GivingFundraiser = {
   zeffy_url: string | null;
 };
 
+// The same page has several spellings: the API writes
+// https://www.zeffy.com/peer-to-peer/<slug>, the browser shows
+// https://www.zeffy.com/en-US/peer-to-peer/<slug>. The locale segment
+// (en-US, fr-CA, es...) is dropped so both compare equal.
 export function normalizeUrl(url: string | null | undefined): string {
   if (!url) return "";
   let s = String(url).trim().toLowerCase();
   const cut = s.search(/[?#]/);
   if (cut >= 0) s = s.slice(0, cut);
   while (s.endsWith("/")) s = s.slice(0, -1);
+  s = s.replace(/^(https?:\/\/[^/]+)\/[a-z]{2}(?:-[a-z]{2})?(?=\/)/, "$1");
   return s;
 }
 

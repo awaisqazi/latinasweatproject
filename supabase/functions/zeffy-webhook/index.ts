@@ -4,6 +4,8 @@
 //   POST /?mode=reconcile    pull payments from the Zeffy API and upsert them;
 //                            authorised by x-giving-cron-secret (pg_cron) or a
 //                            dashboard user with the fundraising module.
+//   POST /?mode=check        ask Zeffy about each linked campaign id (same
+//                            authorisation); public campaign fields only.
 //
 // Secrets (names only): ZEFFY_WEBHOOK_SECRET, ZEFFY_API_KEY, GIVING_CRON_SECRET.
 // Never log or echo any of them.
