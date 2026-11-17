@@ -20,6 +20,7 @@ export default defineConfig({
           '/silentauction', '/teachertrainingclasses', '/teach/',
           '/potluck', '/eventsrequest', '/adobe', '/galaseating',
           '/movecrew', '/committee', '/friendsgiving', '/givingtuesday/join',
+          '/givingtuesday/kit', '/give/',
         ];
         return !excluded.some((path) => page.includes(path));
       },

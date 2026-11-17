@@ -1,0 +1,50 @@
+---
+// /givingtuesday/kit/?i=<slug>: an instructor's LSP Giving Tuesday share kit
+// (short link, captions, feed and story images drawn in the browser).
+// UNLISTED: noindex, out of the sitemap (astro.config.mjs), never linked from
+// nav; the LSP team sends each instructor their own kit link.
+//
+// Body: src/components/givingTuesday/GivingKitApp.svelte.
+// Images: src/lib/givingTuesday/kitCanvas.js (same identity as the share card,
+// scripts/render-givingtuesday-og.mjs).
+// Identity: design.md "Giving Tuesday".
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GivingKitApp from "@/components/givingTuesday/GivingKitApp.svelte";
+import { givingKitCopy as copy } from "@/data/givingTuesday";
+
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+---
+
+<Layout
+  title={copy.metaTitle}
+  socialTitle={copy.socialTitle}
+  description={copy.metaDescription}
+  robots="noindex, nofollow"
+  socialImage="images/givingtuesday/givingtuesday-og.jpg"
+  socialImageAlt="LSP Giving Tuesday. From one class to a movement. Tuesday, Dec 1."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <Header />
+  <main class="gk-page font-rubik">
+    <GivingKitApp client:load base={base} />
+  </main>
+</Layout>
+
+<style>
+  .gk-page {
+    --gt-paper: #ffffff;
+    --gt-ink: #1e1e1e;
+    --gt-sun: #ffde59;
+    --gt-mist: #ececea;
+    --gt-soft: #55534f;
+
+    background: var(--gt-paper);
+    color: var(--gt-ink);
+    font-family: "Rubik", sans-serif;
+    overflow-x: clip;
+  }
+</style>

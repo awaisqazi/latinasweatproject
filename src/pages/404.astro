@@ -84,7 +84,23 @@ import Header from "../components/Header.astro";
         "/marathon",
     ];
     const bare = path.replace(/\/+$/, "");
-    if (
+    // LSP Giving Tuesday instructor short links: /give/<slug> (any case, with
+    // or without a trailing slash) -> /give/?i=<slug>, keeping any query.
+    const giveMatch = bare.match(/^\/give\/([a-z0-9][a-z0-9-]{0,80})$/);
+    const keepQuery = window.location.search.replace(/^\?/, "");
+    if (giveMatch) {
+        window.location.replace(
+            "/give/?i=" + giveMatch[1] + (keepQuery ? "&" + keepQuery : ""),
+        );
+    } else if (
+        ["/givingtuesday/kit", "/giving-tuesday/kit"].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/givingtuesday/kit"
+    ) {
+        // Share kit: any case, keeping ?i=<slug>.
+        window.location.replace(
+            "/givingtuesday/kit/" + window.location.search,
+        );
+    } else if (
         finishLineAliases.includes(bare) &&
         window.location.pathname.replace(/\/+$/, "") !== "/finishline"
     ) {

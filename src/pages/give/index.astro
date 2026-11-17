@@ -1,0 +1,59 @@
+---
+// /give/?i=<slug>: one instructor's LSP Giving Tuesday page. The short link
+// /give/<slug> (any case, with or without a trailing slash) 404s on GitHub
+// Pages and 404.astro sends it here as /give/?i=<slug>. UNLISTED: noindex,
+// out of the sitemap (astro.config.mjs), never linked from nav.
+//
+// Static: the slug is read in the browser and the person comes from the
+// giving_public RPC (src/lib/givingTuesday/live.js). SSR renders the campaign
+// fallback, so the page is never blank; the inline script below hides that
+// fallback for a moment only when a slug is present (the component removes
+// the class on mount; it also clears itself after 5 s).
+// Body: src/components/givingTuesday/GivingPersonApp.svelte.
+// Identity: design.md "Giving Tuesday". Share card: the campaign card.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GivingPersonApp from "@/components/givingTuesday/GivingPersonApp.svelte";
+import { givingPersonCopy as copy } from "@/data/givingTuesday";
+
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+---
+
+<Layout
+  title={copy.metaTitle}
+  socialTitle={copy.socialTitle}
+  description={copy.metaDescription}
+  robots="noindex, nofollow"
+  socialImage="images/givingtuesday/givingtuesday-og.jpg"
+  socialImageAlt="LSP Giving Tuesday. From one class to a movement. Tuesday, Dec 1."
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <script is:inline slot="head">
+    if (/[?&]i=[^&]/.test(location.search)) {
+      document.documentElement.classList.add("gv-wait");
+      setTimeout(function () { document.documentElement.classList.remove("gv-wait"); }, 5000);
+    }
+  </script>
+  <Header />
+  <main class="gv-page font-rubik">
+    <GivingPersonApp client:load base={base} />
+  </main>
+</Layout>
+
+<style>
+  .gv-page {
+    --gt-paper: #ffffff;
+    --gt-ink: #1e1e1e;
+    --gt-sun: #ffde59;
+    --gt-mist: #ececea;
+    --gt-soft: #55534f;
+
+    background: var(--gt-paper);
+    color: var(--gt-ink);
+    font-family: "Rubik", sans-serif;
+    overflow-x: clip;
+  }
+</style>

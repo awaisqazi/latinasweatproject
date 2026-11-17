@@ -22,7 +22,24 @@ export const givingRoutes = {
   page: "/givingtuesday",
   join: "/givingtuesday/join",
   fallbackGive: "/donate",
+  // Instructor short links: /give/<slug> is redirected by 404.astro to the
+  // static page /give/?i=<slug>. The share kit lives at /givingtuesday/kit/?i=<slug>.
+  give: "/give",
+  kit: "/givingtuesday/kit",
+  shortHost: "latinasweatproject.com",
 };
+
+// The public short link for a fundraiser slug, with and without the scheme.
+export function shortLink(slug, { scheme = true } = {}) {
+  const s = String(slug || "").trim().toLowerCase();
+  const path = `${givingRoutes.shortHost}${givingRoutes.give}/${s}`;
+  return scheme ? `https://${path}` : path;
+}
+// Fundraiser slugs are lowercase a-z, 0-9 and hyphens (instructorSlug()).
+export function cleanSlug(v) {
+  const s = String(v || "").trim().toLowerCase().replace(/\/+$/, "");
+  return /^[a-z0-9][a-z0-9-]{0,80}$/.test(s) ? s : "";
+}
 
 // Static fallbacks, mirrored from the backend contract. The RPC wins.
 export const givingFacts = {
@@ -234,6 +251,75 @@ export const givingJoinCopy = {
   successTitle: "You're in, {first}.",
   successBody: "We'll set up your giving page and send your link and share graphics to {email}.",
   successBack: "See the Giving Tuesday page",
+};
+
+// /give/?i=<slug> (short link /give/<slug>): one instructor's giving page.
+// UNLISTED, noindex. All lines NEW unless noted. {name} is the full name as
+// the board shows it; {first} the first word of it; {goal} their threshold.
+export const givingPersonCopy = {
+  metaTitle: "LSP Giving Tuesday: Give Through an Instructor | The Latina Sweat Project",
+  socialTitle: "LSP Giving Tuesday: give through an LSP instructor",
+  metaDescription: "LSP Giving Tuesday is Tuesday, Dec 1. Give through an LSP instructor and help us build what's next.",
+  kicker: "LSP Giving Tuesday",
+  headline: "Help {name} raise {goal}.",
+  counts: "Your gift counts toward {first}'s total and our {campaignGoal} goal.",
+  raisedOf: "{raised} of {goal}",
+  // Fallback (no slug, unknown slug, board closed, or the RPC is down).
+  fallbackHeadline: "Give to LSP Giving Tuesday.",
+  notFound: "We couldn't find that giving page, and you can still give to the campaign.",
+  seeAll: "See the Giving Tuesday page", // same words as givingJoinCopy.successBack
+};
+
+// /givingtuesday/kit/?i=<slug>: an instructor's share kit (link, captions,
+// images drawn in the browser). UNLISTED, noindex. All lines NEW. Every
+// caption leads with "LSP Giving Tuesday". {link} is the short link,
+// {goal} the instructor's threshold, {campaignGoal} the campaign goal.
+export const givingKitCopy = {
+  metaTitle: "LSP Giving Tuesday: Your Share Kit | The Latina Sweat Project",
+  socialTitle: "LSP Giving Tuesday: your share kit",
+  metaDescription: "Your LSP Giving Tuesday link, captions and images.",
+  headline: "{first}, here is your share kit.",
+  headlineNone: "Your LSP Giving Tuesday share kit.",
+  pickLead: "Choose your name to get your link, captions and images.",
+  pickLabel: "Your name",
+  pickPlaceholder: "Choose your name",
+  notFound: "We couldn't find that name. Please choose it from the list.",
+  empty: "Your kit will be ready once we set up your giving page. We'll send you the link.",
+  down: "We couldn't load the list right now. Please try again in a minute.",
+  loading: "Loading your kit.",
+  retry: "Try again",
+  imageFailed: "We couldn't make this image. Please reload the page.",
+  notYou: "Not you? Choose another name",
+
+  linkTitle: "Your link",
+  linkNote: "Share it anywhere. It opens your giving page.",
+  copyLink: "Copy link",
+  copy: "Copy",
+  copied: "Copied",
+  share: "Share",
+  openPage: "Open your page",
+
+  captionsTitle: "Captions",
+  captions: [
+    "LSP Giving Tuesday is Tuesday, Dec 1. I'm raising {goal} for Latina Sweat Project. Will you give through my page? {link} #LSPGivingTuesday",
+    "LSP Giving Tuesday: help me raise {goal} for Latina Sweat Project and help us build what's next. Every gift counts toward our {campaignGoal} goal. {link} #LSPGivingTuesday",
+    "LSP Giving Tuesday: what started as a few pop-up yoga classes in Little Village has grown into something much bigger. Help me raise {goal} by Tuesday, Dec 1. {link} #LSPGivingTuesday", // first clause: Lizett's appeal
+  ],
+
+  imagesTitle: "Images",
+  imagesNote: "Made for you on this page. Download them, or share them straight to your stories.",
+  feedLabel: "Feed post, 1080 x 1350",
+  storyLabel: "Story, 1080 x 1920",
+  download: "Download",
+  making: "Making your image.",
+  imageAlt: "LSP Giving Tuesday graphic: Help {first} raise {goal}, Tuesday, Dec 1, {link}, above a photo of a full class in a bright studio.",
+
+  // Words on the images, and nothing else (plus the LSP logo and the class photo).
+  image: {
+    kicker: "LSP Giving Tuesday",
+    lines: ["Help {first}", "raise {goal}"],
+    date: "Tuesday, Dec 1",
+  },
 };
 
 // ---------------------------------------------------------------- helpers --
