@@ -8,6 +8,7 @@
     ChevronLeft,
     ChevronRight,
     Download,
+    Gift,
     HandCoins,
     LayoutDashboard,
     Megaphone,
@@ -27,6 +28,7 @@
   import Tabs from "../ui/Tabs.svelte";
   import DonorDrawer from "./DonorDrawer.svelte";
   import FundraisingCalendarTab from "./FundraisingCalendarTab.svelte";
+  import GivingTuesdayTab from "./GivingTuesdayTab.svelte";
   import ImportTab from "./ImportTab.svelte";
   import OutreachTab from "./OutreachTab.svelte";
   import ProspectsBoard from "./ProspectsBoard.svelte";
@@ -39,6 +41,10 @@
     loadDonorSummaries,
     loadProspects,
   } from "../../../lib/dashboard/fundraising";
+  import {
+    loadPendingFundraiserCount,
+    resolveGivingCampaignSlug,
+  } from "../../../lib/dashboard/givingAdmin";
   import {
     loadDonorProfiles,
     loadOutreachCampaigns,
@@ -67,6 +73,7 @@
     { id: "donors", label: "Donors", icon: UsersRound },
     { id: "outreach", label: "Outreach", icon: Megaphone },
     { id: "prospects", label: "Prospects & Grants", icon: Target },
+    { id: "giving", label: "Giving Tuesday", icon: Gift },
     { id: "calendar", label: "Calendar", icon: CalendarDays },
     { id: "templates", label: "Templates", icon: BookOpenText },
     { id: "import", label: "Import", icon: Upload },
@@ -94,12 +101,17 @@
   let galaEmails = null;
   let galaLoading = false;
   let galaLoadFailed = false;
+  let givingPendingCount = 0;
 
   $: if (refreshKey !== lastRefreshKey) {
     lastRefreshKey = refreshKey;
     loadAll();
   }
 
+  // Pending Giving Tuesday sign-ups badge the tab.
+  $: tabsWithCounts = TABS.map((tab) =>
+    tab.id === "giving" ? { ...tab, count: givingPendingCount || undefined } : tab,
+  );
   $: givingDonors = donorSummaries.filter((donor) => Number(donor.total_given) > 0);
   $: totalRaised = campaignSummaries.reduce(
     (sum, campaign) => sum + Number(campaign.total_raised || 0),
@@ -167,6 +179,7 @@
       profilesResult,
       templatesResult,
       outreachResult,
+      givingPendingResult,
     ] = await Promise.all([
       loadDonorSummaries(supabase),
       loadCampaignSummaries(supabase),
@@ -175,6 +188,7 @@
       loadDonorProfiles(supabase),
       loadTemplates(supabase),
       loadOutreachCampaigns(supabase),
+      loadPendingFundraiserCount(supabase, resolveGivingCampaignSlug()),
     ]);
 
     const firstError =
@@ -194,6 +208,8 @@
     if (!profilesResult.error) donorProfiles = profilesResult.data || [];
     if (!templatesResult.error) templates = templatesResult.data || [];
     if (!outreachResult.error) outreachCampaigns = outreachResult.data || [];
+    // A failed count only hides the badge; the tab itself reports its errors.
+    if (!givingPendingResult.error) givingPendingCount = givingPendingResult.count;
 
     isLoading = false;
   }
@@ -410,7 +426,7 @@
       </p>
       <h3 id="fundraising-title" class="mt-1 text-2xl font-bold">Fundraising</h3>
     </div>
-    <Tabs tabs={TABS} bind:active={activeTab} variant="segmented" label="Fundraising sections" hasPanels={false} />
+    <Tabs tabs={tabsWithCounts} bind:active={activeTab} variant="segmented" label="Fundraising sections" hasPanels={false} />
   </div>
 
   {#if errorMessage}
@@ -641,6 +657,14 @@
       {teamMembers}
       onSelect={(prospect) => (selectedProspectId = prospect.id)}
       onProspectUpdated={handleProspectUpdated}
+    />
+  {:else if activeTab === "giving"}
+    <GivingTuesdayTab
+      {supabase}
+      {profile}
+      {teamMembers}
+      {refreshKey}
+      onPendingCount={(count) => (givingPendingCount = count)}
     />
   {:else if activeTab === "calendar"}
     <FundraisingCalendarTab
