@@ -32,6 +32,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "benjamin-drury",
+    "name": "Benjamin Drury",
+    "first": "Benjamin",
+    "why": "I am raising money for Latina Sweat Project because they transformed my life, and I aspire to help them transform the lives of countless others in Chicago.",
+    "avatar": "benjamin-drury",
+    "goal_cents": 15000
+  },
+  {
     "slug": "celina-huerta",
     "name": "Celina Huerta",
     "first": "Celina",
@@ -93,6 +101,14 @@
     "first": "Jessica",
     "why": "LSP has changed the way I view wellness and has given me a safe space to grow within community. I am fundraising to continue our mission of wellness for all ♡",
     "avatar": "jessica-eguia",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "karina-melendez",
+    "name": "Karina Melendez",
+    "first": "Karina",
+    "why": "LSP has given us a sanctuary to call home! I’m fundraising to see wellness become more accessible & to support people to find their way back home amongst others",
+    "avatar": "karina-melendez",
     "goal_cents": 15000
   },
   {
