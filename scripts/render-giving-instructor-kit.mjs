@@ -344,11 +344,11 @@ function fitWithPhoto(tp) {
   const lowTop = Math.round(topBottom() + F.gapBlocks);
   // Try the quote whole first, then cut, biggest photo first.
   const texts = [[WHY, false], ...quoteCuts().map((t) => [t, true])];
-  // A readable quote beats a bigger photo: first look for a fit with the
-  // quote at a comfortable size (a smaller photo leaves a wider column),
-  // then allow it down to the minimum.
-  for (const floor of [F.quote.comfort, F.quote.min])
-  for (const [text, cut] of WHY ? texts : [["", false]]) {
+  // The whole quote beats a cut one at any readable size: each text is tried
+  // at a comfortable size first (a smaller photo leaves a wider column), then
+  // down to the minimum, before the next shorter cut is tried.
+  for (const [text, cut] of WHY ? texts : [["", false]])
+  for (const floor of [F.quote.comfort, F.quote.min]) {
     for (let s = F.photo.max; s >= F.photo.min - 1e-9; s -= 0.01) {
       const pl = placeAt(+s.toFixed(3));
       // The top block must clear the photo.

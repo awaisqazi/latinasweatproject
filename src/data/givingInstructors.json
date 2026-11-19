@@ -88,10 +88,26 @@
     "goal_cents": 15000
   },
   {
+    "slug": "jessica-eguia",
+    "name": "Jessica Eguia",
+    "first": "Jessica",
+    "why": "LSP has changed the way I view wellness and has given me a safe space to grow within community. I am fundraising to continue our mission of wellness for all ♡",
+    "avatar": "jessica-eguia",
+    "goal_cents": 15000
+  },
+  {
     "slug": "katherine-castro",
     "name": "Katherine Castro",
     "first": "Katherine",
     "why": "I’m fundraising to continue making wellness accessible; after all movement is a birthright no matter what your tax bracket looks like.",
+    "avatar": null,
+    "goal_cents": 15000
+  },
+  {
+    "slug": "liz-galan",
+    "name": "Liz Galan",
+    "first": "Liz",
+    "why": "Movement is liberating, and teaching is empowering. LSP has made it possible and made it feel like home.",
     "avatar": null,
     "goal_cents": 15000
   },
@@ -109,6 +125,14 @@
     "first": "Rosa",
     "why": "LSP is so much more than yoga. It’s about creating access, building community, and making wellness something everyone deserves—not just those who can afford it.",
     "avatar": null,
+    "goal_cents": 15000
+  },
+  {
+    "slug": "rut-merida",
+    "name": "Rut Merida",
+    "first": "Rut",
+    "why": "Latina Sweat Project changed my life in ways I never imagined. ❤️‍🩹 I'm fundraising so we can continue changing other people's lives as well ✨",
+    "avatar": "rut-merida",
     "goal_cents": 15000
   },
   {
