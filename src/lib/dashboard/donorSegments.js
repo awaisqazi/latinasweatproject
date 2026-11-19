@@ -2,6 +2,8 @@
 // picker. Most segments filter the already-loaded donor summaries client-side;
 // campaign-based ones (gala) resolve an email set from donations first.
 
+import { readDonations } from "./fundraising.js";
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const DONOR_SEGMENTS = [
@@ -57,13 +59,14 @@ export async function loadGalaDonorEmails(supabase) {
 
   for (let page = 0; page < 20; page += 1) {
     const from = page * PAGE;
-    const { data, error } = await supabase
-      .from("fundraising_donations")
-      .select("email")
-      .or("campaign_title.ilike.%gala%,campaign_title.ilike.%noche%")
-      .not("email", "is", null)
-      .order("id", { ascending: true })
-      .range(from, from + PAGE - 1);
+    const { data, error } = await readDonations(supabase, (query) =>
+      query
+        .select("email")
+        .or("campaign_title.ilike.%gala%,campaign_title.ilike.%noche%")
+        .not("email", "is", null)
+        .order("id", { ascending: true })
+        .range(from, from + PAGE - 1),
+    );
 
     if (error) return { emails, error };
 

@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "tz": "America/Chicago",
+  "today": "2026-11-18",
+  "generated_at": "2026-11-19T00:32:16.501128+00:00",
+  "synced_at": "2026-11-19T00:30:02.075+00:00",
+  "history_from": "2025-07-18T15:32:29+00:00",
+  "legacy_used_before": "2025-07-18",
+  "sync": {
+    "reconcile_last_run_at": "2026-11-19T00:30:02.075+00:00",
+    "campaigns_last_run_at": "2026-11-19T00:26:43.141+00:00",
+    "backfill_done": true, "backfill_completed_at": "2026-11-19T00:28:19.929+00:00",
+    "contacts_done": true, "contacts_completed_at": "2026-11-19T00:29:09.442+00:00",
+    "last_payment_synced_at": "2026-11-19T00:30:01.928+00:00"
+  },
+  "totals": {
+    "today": {"amount_cents": 0, "gift_count": 0},
+    "last_7_days": {"amount_cents": 60000, "gift_count": 1},
+    "month_to_date": {"amount_cents": 130250, "gift_count": 23},
+    "year_to_date": {"amount_cents": 10404427, "gift_count": 1684},
+    "prior_year_same_period": {"amount_cents": 3339047, "gift_count": 1725},
+    "prior_year_total": {"amount_cents": 6303038, "gift_count": 1941},
+    "last_12_months": {"amount_cents": 13368418, "gift_count": 1900}
+  },
+  "monthly": [
+    {"month": "2025-11", "amount_cents": 1661166, "gift_count": 151},
+    {"month": "2025-12", "amount_cents": 1900491, "gift_count": 125},
+    {"month": "2026-11", "amount_cents": 130250, "gift_count": 23}
+  ],
+  "campaigns": [
+    {"id": "c-gala", "title": "Sample Gala", "url": "https://www.zeffy.com/ticketing/sample-gala", "category": "Event", "status": "active", "goal_cents": null, "raised_cents": 4595000, "raised_ytd_cents": 4595000, "gifts_ytd": 83, "last_gift_at": "2026-09-26T03:09:29+00:00"},
+    {"id": "c-support", "title": "Support Sample", "url": "https://www.zeffy.com/donation-form/support", "category": "DonationForm", "status": "active", "goal_cents": 1500000, "raised_cents": 500000, "raised_ytd_cents": 300000, "gifts_ytd": 40, "last_gift_at": "2026-11-17T08:40:53+00:00"},
+    {"id": "c-idle", "title": "Idle Form", "url": "https://www.zeffy.com/donation-form/idle", "category": "DonationForm", "status": "active", "goal_cents": null, "raised_cents": 90000, "raised_ytd_cents": 0, "gifts_ytd": 0, "last_gift_at": "2025-12-01T15:00:00+00:00"},
+    {"id": "c-auction", "title": "Sample Auction", "url": "javascript:alert(1)", "category": "Auction", "status": "active", "goal_cents": null, "raised_cents": 377000, "raised_ytd_cents": 377000, "gifts_ytd": 8, "last_gift_at": "2026-09-26T04:00:00+00:00"}
+  ],
+  "by_category_ytd": [
+    {"category": "event", "amount_cents": 6959677, "gift_count": 1359},
+    {"category": "donation", "amount_cents": 2768350, "gift_count": 254},
+    {"category": "auction", "amount_cents": 377000, "gift_count": 8},
+    {"category": "shop", "amount_cents": 299400, "gift_count": 63}
+  ],
+  "donors": {"donors_ytd": 1123, "new_donors_ytd": 960, "returning_donors_ytd": 163, "repeat_donors_ytd": 229, "lapsed_count": 818},
+  "recent": [
+    {"id": "pay_1", "created_at": "2026-11-17T08:40:53+00:00", "amount_cents": 60000, "name": "Test R.", "email": "donor0@example.test", "campaign_id": "c-support", "campaign_title": "Support Sample", "category": "donation"}
+  ],
+  "lapsed": [
+    {"email": "donor1@example.test", "name": "Test Lapsed", "last_year_cents": 340000, "last_gift_at": "2025-12-30T00:59:26+00:00", "lifetime_cents": 340000}
+  ],
+  "top_donors_ytd": [
+    {"email": "donor2@example.test", "name": "Test Top", "amount_cents": 537500, "gift_count": 2, "last_gift_at": "2026-10-05T14:54:02+00:00", "lifetime_cents": 537500}
+  ]
+}

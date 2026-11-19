@@ -189,6 +189,9 @@
 
 <div class="space-y-4">
   <Panel title="Import a Zeffy export" id="fundraising-import-title">
+    <p class="mb-3 text-sm font-semibold leading-6 text-ink">
+      Zeffy now syncs automatically every few minutes, so uploads are no longer needed.
+    </p>
     <p class="text-sm leading-6 text-ink/60">
       Export the full campaign details from Zeffy (the file with a
       "{SHEET_NAME}" sheet) and upload it here. Anything already in the

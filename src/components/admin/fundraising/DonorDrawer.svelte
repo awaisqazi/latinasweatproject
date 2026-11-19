@@ -2,7 +2,7 @@
   // One donor's full picture: lifetime giving, gift history, the team's
   // contact log, and now the relationship layer — who owns this donor, the
   // outreach CRM fields, and template-powered sends. The summary row stays
-  // read-only (it's aggregated from Zeffy imports); everything editable lives
+  // read-only (it's aggregated from the Zeffy sync); everything editable lives
   // on fundraising_donor_profiles keyed by email.
   import { CalendarClock, HandCoins, Mail, Phone, Send, UserPlus } from "@lucide/svelte";
   import SlideOver from "../marketing/SlideOver.svelte";
@@ -66,6 +66,28 @@
   let draftAreas = "";
   let draftWarmIntro = "";
   let draftBoardConnection = "";
+
+  // A gift counts when it succeeded and charged something. Free
+  // registrations ($0) are listed in the history but never counted.
+  $: countedGifts = gifts.filter(
+    (gift) =>
+      Number(gift.total_amount || 0) - Number(gift.refund_amount || 0) > 0 &&
+      (!gift.payment_status || String(gift.payment_status).toLowerCase() === "succeeded"),
+  );
+  // Opened from an email alone (no summary row): derive the header from the
+  // loaded history instead of showing zeros.
+  $: isStubDonor =
+    Boolean(displayedDonor) &&
+    displayedDonor.total_given === undefined &&
+    displayedDonor.gift_count === undefined;
+  $: headerLifetime = isStubDonor
+    ? countedGifts.reduce(
+        (sum, gift) => sum + Number(gift.total_amount || 0) - Number(gift.refund_amount || 0),
+        0,
+      )
+    : Number(displayedDonor?.total_given || 0);
+  $: headerGiftCount = isStubDonor ? countedGifts.length : Number(displayedDonor?.gift_count || 0);
+  $: headerLastGift = isStubDonor ? countedGifts[0]?.payment_date || "" : displayedDonor?.last_gift_date;
 
   $: if (donor?.email && donor.email !== displayedDonor?.email) {
     openDrawer(donor);
@@ -317,14 +339,14 @@
       <div class="flex flex-wrap gap-2">
         <Badge tone="gold">
           <HandCoins class="h-3.5 w-3.5" aria-hidden="true" />
-          {formatMoney(displayedDonor.total_given || 0)} lifetime
+          {formatMoney(headerLifetime)} lifetime
         </Badge>
         <Badge tone="neutral">
-          {displayedDonor.gift_count || 0} gift{(displayedDonor.gift_count || 0) === 1 ? "" : "s"}
+          {headerGiftCount} gift{headerGiftCount === 1 ? "" : "s"}
         </Badge>
         <Badge tone="neutral">
           <CalendarClock class="h-3.5 w-3.5" aria-hidden="true" />
-          Last gift {formatDate(displayedDonor.last_gift_date)}
+          Last gift {formatDate(headerLastGift)}
         </Badge>
         {#if lastContact}
           <Badge tone="teal">Last contact {formatDateTime(lastContact.occurred_at)}</Badge>
@@ -568,11 +590,14 @@
                     {#if gift.rate_title}
                       · {gift.rate_title}
                     {/if}
-                    {#if gift.payment_status && gift.payment_status !== "Succeeded"}
+                    {#if gift.payment_status && String(gift.payment_status).toLowerCase() !== "succeeded"}
                       · {gift.payment_status}
                     {/if}
                     {#if Number(gift.refund_amount) > 0}
                       · refunded {formatMoney(gift.refund_amount)}
+                    {/if}
+                    {#if giftNet(gift) <= 0}
+                      {" · free, not counted as a gift"}
                     {/if}
                   </span>
                   {#if gift.note}
@@ -583,7 +608,7 @@
                   {/if}
                 </span>
                 <span class="text-sm font-bold {giftNet(gift) > 0 ? 'text-ink' : 'text-ink/45'}">
-                  {giftNet(gift) > 0 ? formatMoney(giftNet(gift)) : "Free"}
+                  {giftNet(gift) > 0 ? formatMoney(giftNet(gift)) : "$0"}
                 </span>
               </article>
             {/each}

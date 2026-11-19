@@ -440,7 +440,7 @@
 
     if (error) return false;
 
-    // A donor profile can exist for someone with no imported gifts yet; fall
+    // A donor profile can exist for someone with no synced gifts yet; fall
     // back to a stub so the drawer still opens with the contact log.
     donorRecord = data || { email: normalized };
     return true;

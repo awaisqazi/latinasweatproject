@@ -89,14 +89,26 @@ function escapeLikePattern(value) {
   return String(value).replace(/([\\%_])/g, "\\$1");
 }
 
+// Every donation read goes through fundraising_donations_all, the Zeffy
+// mirror for the whole history (records start 2025-07-18), with a `source`
+// column and text ids. The legacy fundraising_donations table is only the
+// target of the old import helpers below, which the UI no longer offers.
+export const DONATIONS_READ_VIEW = "fundraising_donations_all";
+
+// build(fromBuilder) returns the query; resolves to { data, error, ... }.
+export function readDonations(supabase, build) {
+  return build(supabase.from(DONATIONS_READ_VIEW));
+}
+
 export async function loadDonationsForEmail(supabase, email) {
-  return supabase
-    .from("fundraising_donations")
+  return readDonations(supabase, (from) =>
+    from
     .select(
       "id,payment_date,payment_time,total_amount,refund_amount,payment_status,payment_method,campaign_title,rate_title,fund,note,in_honor_of",
     )
     .ilike("email", escapeLikePattern(email))
-    .order("payment_date", { ascending: false });
+    .order("payment_date", { ascending: false }),
+  );
 }
 
 // Every succeeded donation on or after sinceDate (yyyy-mm-dd), paged past
@@ -107,14 +119,15 @@ export async function loadDonationsSince(supabase, sinceDate) {
 
   for (let page = 0; page < 20; page += 1) {
     const from = page * PAGE;
-    const { data, error } = await supabase
-      .from("fundraising_donations")
-      .select("id,payment_date,total_amount,refund_amount")
-      .eq("payment_status", "Succeeded")
-      .gte("payment_date", sinceDate)
-      .order("payment_date", { ascending: false })
-      .order("id", { ascending: true })
-      .range(from, from + PAGE - 1);
+    const { data, error } = await readDonations(supabase, (query) =>
+      query
+        .select("id,payment_date,total_amount,refund_amount")
+        .eq("payment_status", "Succeeded")
+        .gte("payment_date", sinceDate)
+        .order("payment_date", { ascending: false })
+        .order("id", { ascending: true })
+        .range(from, from + PAGE - 1),
+    );
 
     if (error) return { data: all, error };
 

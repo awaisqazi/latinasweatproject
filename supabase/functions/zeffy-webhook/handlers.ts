@@ -7,6 +7,12 @@
 //   POST /?mode=check        ask Zeffy about each linked campaign id (same
 //                            authorisation); answers public campaign fields
 //                            only, so the link can be confirmed without the key.
+//   POST /?mode=backfill|contacts|campaigns|shape
+//                            Zeffy mirror jobs (same authorisation), see mirror.ts.
+//
+// Every payment the reconcile lists and every payment.* / contact.* event is
+// also written to the zeffy_* mirror tables. Mirror work runs after the giving
+// step and never changes a giving outcome or status code.
 //
 // Secrets (names only): ZEFFY_WEBHOOK_SECRET, ZEFFY_API_KEY, GIVING_CRON_SECRET.
 // Never log or echo any of them.
@@ -22,8 +28,18 @@ import {
   type ZeffyPayment,
   shouldSkipEvent,
 } from "./logic.ts";
-
-const ZEFFY_BASE = "https://api.zeffy.com/api/v1";
+import { ZeffyClient } from "./zeffy_client.ts";
+import {
+  getState,
+  probeShapes,
+  processContactEvent,
+  runBackfill,
+  saveState,
+  softDeletePayment,
+  syncCampaigns,
+  upsertPayments,
+} from "./mirror.ts";
+import { campaignsNeedRefresh } from "./mirror_logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,60 +53,6 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-}
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-// ── Zeffy API client with rate-limit handling ───────────────────
-
-class ZeffyClient {
-  private last = 0;
-  constructor(private key: string) {}
-
-  // Returns {status, body}. 404 is returned, not thrown.
-  async get(path: string): Promise<{ status: number; body: any }> {
-    for (let attempt = 0; attempt < 4; attempt++) {
-      // 20 req/s ceiling: keep at least 75 ms between calls.
-      const gap = Date.now() - this.last;
-      if (gap < 75) await sleep(75 - gap);
-      this.last = Date.now();
-
-      const res = await fetch(`${ZEFFY_BASE}${path}`, {
-        headers: { Authorization: `Bearer ${this.key}`, Accept: "application/json" },
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (res.status === 429) {
-        const wait = Math.min(Math.max(Number(res.headers.get("retry-after")) || 1, 1), 61);
-        await res.body?.cancel();
-        await sleep(wait * 1000);
-        continue;
-      }
-
-      // Slow down before the per-minute window runs dry.
-      const remaining = Number(res.headers.get("x-ratelimit-remaining"));
-      const reset = Number(res.headers.get("x-ratelimit-reset"));
-      if (Number.isFinite(remaining) && remaining <= 2 && Number.isFinite(reset) && reset > 0) {
-        const waitMs = Math.min(Math.max(reset * 1000 - Date.now(), 0), 61000);
-        if (waitMs > 0) await sleep(waitMs);
-      }
-
-      if (res.status === 404) {
-        await res.body?.cancel();
-        return { status: 404, body: null };
-      }
-      if (!res.ok) {
-        await res.body?.cancel();
-        if (res.status >= 500 && attempt < 3) {
-          await sleep(1000 * (attempt + 1));
-          continue;
-        }
-        throw new Error(`zeffy_http_${res.status}`);
-      }
-      return { status: res.status, body: await res.json() };
-    }
-    throw new Error("zeffy_rate_limited");
-  }
 }
 
 // ── Shared state loaded per request ─────────────────────────────
@@ -215,12 +177,14 @@ export async function handleWebhook(req: Request, db: SupabaseClient): Promise<R
     }
   }
 
-  const setOutcome = (outcome: string, err: string | null = null) =>
-    db.from("giving_webhook_events").update({ outcome, error: err }).eq("id", eventId);
+  const setOutcome = (outcome: string, err: string | null = null, mirror?: string) =>
+    db.from("giving_webhook_events")
+      .update(mirror ? { outcome, error: err, mirror_outcome: mirror } : { outcome, error: err })
+      .eq("id", eventId);
 
   try {
-    const outcome = await processEvent(db, type, event.data);
-    await setOutcome(outcome);
+    const { outcome, mirror } = await processEvent(db, type, event.data);
+    await setOutcome(outcome, null, mirror);
     return jsonResponse({ ok: true, outcome });
   } catch (e) {
     const msg = e instanceof Error ? e.message.slice(0, 200) : "error";
@@ -230,16 +194,39 @@ export async function handleWebhook(req: Request, db: SupabaseClient): Promise<R
   }
 }
 
-async function processEvent(db: SupabaseClient, type: string, data: any): Promise<string> {
-  if (!type.startsWith("payment.")) return "ignored";
-  const paymentId = typeof data?.id === "string" ? data.id : "";
-  if (!paymentId) return "ignored";
+type EventResult = { outcome: string; mirror?: string };
 
+// Mirror work after the giving step: best effort. A failure is logged (no
+// donor data, no secrets) and leaves mirror_outcome null; the 5-minute
+// reconcile re-lists recent payments and repairs the row.
+async function mirrorStep(fn: () => Promise<string>): Promise<string | undefined> {
+  try {
+    return await fn();
+  } catch (e) {
+    console.error("zeffy mirror step failed", e instanceof Error ? e.message.slice(0, 120) : "error");
+    return undefined;
+  }
+}
+
+async function processEvent(db: SupabaseClient, type: string, data: any): Promise<EventResult> {
   const apiKey = Deno.env.get("ZEFFY_API_KEY");
+
+  if (type.startsWith("contact.")) {
+    const outcome = await processContactEvent(db, type, data, apiKey ? new ZeffyClient(apiKey) : null);
+    return { outcome, mirror: `contact_${outcome}` };
+  }
+
+  // Anything that is not a payment or contact event: acknowledged and logged.
+  if (!type.startsWith("payment.")) return { outcome: "ignored" };
+  const paymentId = typeof data?.id === "string" ? data.id : "";
+  if (!paymentId) return { outcome: "ignored" };
+
   const zeffy = apiKey ? new ZeffyClient(apiKey) : null;
+  const mirrorDelete = () => mirrorStep(async () => (await softDeletePayment(db, paymentId)) ? "deleted" : "absent");
 
   if (type === "payment.deleted") {
-    return (await markDeleted(db, paymentId)) ? "deleted" : "ignored";
+    const outcome = (await markDeleted(db, paymentId)) ? "deleted" : "ignored";
+    return { outcome, mirror: await mirrorDelete() };
   }
 
   let payment: ZeffyPayment | null = null;
@@ -247,15 +234,20 @@ async function processEvent(db: SupabaseClient, type: string, data: any): Promis
     payment = data as ZeffyPayment;
   } else {
     // payment.updated carries only {id, object}: refetch the current state.
-    if (!zeffy) return "deferred"; // the reconcile pass picks it up once the key exists
+    if (!zeffy) return { outcome: "deferred" }; // the reconcile pass picks it up once the key exists
     const res = await zeffy.get(`/payments/${encodeURIComponent(paymentId)}`);
-    if (res.status === 404) return (await markDeleted(db, paymentId)) ? "deleted" : "ignored";
+    if (res.status === 404) {
+      const outcome = (await markDeleted(db, paymentId)) ? "deleted" : "ignored";
+      return { outcome, mirror: await mirrorDelete() };
+    }
     payment = res.body as ZeffyPayment;
   }
 
   const ctx = await loadCtx(db, zeffy);
   const out = await storePayment(ctx, payment);
-  return out === "ignored" ? "ignored" : "processed";
+  const p = payment;
+  const mirror = await mirrorStep(async () => (await upsertPayments(db, [p])) ? "upserted" : "skipped");
+  return { outcome: out === "ignored" ? "ignored" : "processed", mirror };
 }
 
 // ── Reconcile ───────────────────────────────────────────────────
@@ -291,6 +283,10 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
   const budgetMs = 110_000;
   const zeffy = new ZeffyClient(apiKey);
   const counts = { fetched: 0, upserted: 0, matched: 0, unmatched: 0, deleted: 0 };
+  // Mirror of every listed payment (all forms) plus the campaign list. Its
+  // failures are reported here and never change the giving counts or status.
+  const mirror: MirrorCounts = { payments: 0, deleted: 0, campaigns: null, errors: [] };
+  const listed: ZeffyPayment[] = [];
 
   try {
     const { data: all, error } = await db
@@ -304,7 +300,25 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
       Array.isArray(c.zeffy_campaign_ids) && c.zeffy_campaign_ids.length &&
       new Date(c.ends_at).getTime() >= cutoff
     );
-    if (!active.length) return jsonResponse({ ok: true, ...counts, note: "no_active_campaigns" });
+    if (!active.length) {
+      // No giving drive to sync: still keep the mirror current over the last week.
+      const since = Math.floor((Date.now() - MIRROR_ONLY_WINDOW_MS) / 1000);
+      let cursor: string | null = null;
+      for (let page = 0; page < 20 && Date.now() - startedAt < budgetMs; page++) {
+        const qs = new URLSearchParams({ limit: "100", "created[gte]": String(since) });
+        if (cursor) qs.set("starting_after", cursor);
+        const res = await zeffy.get(`/payments?${qs}`);
+        const list = res.body || {};
+        const rows: ZeffyPayment[] = Array.isArray(list.data) ? list.data : [];
+        counts.fetched += rows.length;
+        listed.push(...rows);
+        await mirrorPage(db, rows, mirror);
+        cursor = list.next_cursor || (rows.length ? rows[rows.length - 1].id : null);
+        if (!list.has_more || !cursor) break;
+      }
+      await finishMirror(db, zeffy, listed, mirror, startedAt + budgetMs, counts);
+      return jsonResponse({ ok: true, ...counts, note: "no_active_campaigns", mirror });
+    }
 
     const ctx = await loadCtx(db, zeffy);
     ctx.campaigns = ctx.campaigns.filter((c) => active.some((a) => a.slug === c.slug));
@@ -336,6 +350,8 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
           counts[out]++;
         }
       }
+      listed.push(...rows);
+      await mirrorPage(db, rows, mirror);
       cursor = list.next_cursor || (rows.length ? rows[rows.length - 1].id : null);
       if (!list.has_more || !cursor) break;
     }
@@ -358,6 +374,9 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
         const res = await zeffy.get(`/payments/${encodeURIComponent(id)}`);
         if (res.status === 404) {
           if (await markDeleted(db, id)) counts.deleted++;
+          await mirrorTry(mirror, async () => {
+            if (await softDeletePayment(db, id)) mirror.deleted++;
+          });
           continue;
         }
         const out = await storePayment(ctx, res.body as ZeffyPayment);
@@ -365,15 +384,65 @@ export async function handleReconcile(req: Request, db: SupabaseClient): Promise
           counts.upserted++;
           counts[out]++;
         }
+        await mirrorPage(db, [res.body as ZeffyPayment], mirror);
       }
     }
 
-    return jsonResponse({ ok: true, ...counts, ...(partial ? { partial: true } : {}) });
+    await finishMirror(db, zeffy, listed, mirror, startedAt + budgetMs, counts);
+    return jsonResponse({ ok: true, ...counts, ...(partial ? { partial: true } : {}), mirror });
   } catch (e) {
     const msg = e instanceof Error ? e.message.slice(0, 120) : "error";
     console.error("zeffy reconcile failed", msg);
     return jsonResponse({ ok: false, reason: "reconcile_failed", detail: msg, ...counts }, 500);
   }
+}
+
+// ── Mirror helpers for the reconcile ────────────────────────────
+
+const MIRROR_ONLY_WINDOW_MS = 7 * 86400_000;
+
+type MirrorCounts = {
+  payments: number;
+  deleted: number;
+  campaigns: { fetched: number; pages: number; complete: boolean } | null;
+  errors: string[];
+  api_calls?: number;
+};
+
+async function mirrorTry(m: MirrorCounts, fn: () => Promise<void>): Promise<void> {
+  try {
+    await fn();
+  } catch (e) {
+    if (m.errors.length < 5) m.errors.push(e instanceof Error ? e.message.slice(0, 80) : "error");
+  }
+}
+
+async function mirrorPage(db: SupabaseClient, rows: ZeffyPayment[], m: MirrorCounts): Promise<void> {
+  await mirrorTry(m, async () => {
+    m.payments += await upsertPayments(db, rows);
+  });
+}
+
+// Campaign refresh when stale or new money arrived, then the run record.
+async function finishMirror(
+  db: SupabaseClient,
+  zeffy: ZeffyClient,
+  listed: ZeffyPayment[],
+  m: MirrorCounts,
+  deadlineMs: number,
+  counts: Record<string, number>,
+): Promise<void> {
+  await mirrorTry(m, async () => {
+    const state = await getState(db, "campaigns");
+    if (deadlineMs - Date.now() > 10_000 && campaignsNeedRefresh(state?.last_run_at, Date.now(), listed)) {
+      m.campaigns = await syncCampaigns(db, zeffy, deadlineMs - 5_000);
+    }
+  });
+  m.api_calls = zeffy.calls;
+  await mirrorTry(m, async () => {
+    const now = new Date().toISOString();
+    await saveState(db, "reconcile", { last_run_at: now, last_result: { ...counts, mirror: m, at: now } });
+  });
 }
 
 // ── Check ───────────────────────────────────────────────────────
@@ -425,12 +494,48 @@ export async function handleCheck(req: Request, db: SupabaseClient): Promise<Res
   }
 }
 
+// ── Mirror modes ────────────────────────────────────────────────
+//   backfill   next pages of the full payment history (?restart=1 starts over)
+//   contacts   next pages of the contact list (?restart=1 starts over)
+//   campaigns  full campaign list refresh
+//   shape      field names and types per endpoint, never values
+
+export async function handleMirrorMode(req: Request, db: SupabaseClient, mode: string): Promise<Response> {
+  if (!(await isAuthorisedForReconcile(req))) {
+    return jsonResponse({ ok: false, reason: "unauthorized" }, 401);
+  }
+  const apiKey = Deno.env.get("ZEFFY_API_KEY");
+  if (!apiKey) return jsonResponse({ ok: false, reason: "no_api_key" }, 200);
+  const zeffy = new ZeffyClient(apiKey);
+  const params = new URL(req.url).searchParams;
+  const restart = params.get("restart") === "1";
+  const pagesParam = Number(params.get("pages"));
+  const maxPages = Number.isFinite(pagesParam) && pagesParam > 0 ? Math.min(Math.floor(pagesParam), 60) : 40;
+  try {
+    if (mode === "shape") return jsonResponse({ ok: true, shapes: await probeShapes(zeffy), api_calls: zeffy.calls });
+    if (mode === "campaigns") {
+      const r = await syncCampaigns(db, zeffy, Date.now() + 90_000, 30);
+      return jsonResponse({ ok: true, ...r, api_calls: zeffy.calls });
+    }
+    const kind = mode === "backfill" ? "payments" : "contacts";
+    // 60 s of paging keeps each call well inside pg_net's 120 s timeout.
+    return jsonResponse(await runBackfill(db, zeffy, kind, { restart, maxPages, budgetMs: 60_000 }));
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 120) : "error";
+    console.error(`zeffy ${mode} failed`, msg);
+    return jsonResponse({ ok: false, reason: `${mode}_failed`, detail: msg, api_calls: zeffy.calls }, 500);
+  }
+}
+
 export async function route(req: Request, db: SupabaseClient): Promise<Response> {
   if (req.method === "OPTIONS") return jsonResponse({}, 204);
   if (req.method !== "POST") return jsonResponse({ ok: false, reason: "method_not_allowed" }, 405);
   const mode = new URL(req.url).searchParams.get("mode");
   if (mode === "reconcile") return handleReconcile(req, db);
   if (mode === "check") return handleCheck(req, db);
+  if (mode === "backfill" || mode === "contacts" || mode === "campaigns" || mode === "shape") {
+    return handleMirrorMode(req, db, mode);
+  }
   return handleWebhook(req, db);
 }
 

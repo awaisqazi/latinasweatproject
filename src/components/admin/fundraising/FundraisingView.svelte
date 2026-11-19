@@ -14,7 +14,6 @@
     Megaphone,
     Search,
     Target,
-    Upload,
     UserRound,
     UsersRound,
   } from "@lucide/svelte";
@@ -28,8 +27,8 @@
   import Tabs from "../ui/Tabs.svelte";
   import DonorDrawer from "./DonorDrawer.svelte";
   import FundraisingCalendarTab from "./FundraisingCalendarTab.svelte";
+  import FundraisingLiveOverview from "./FundraisingLiveOverview.svelte";
   import GivingTuesdayTab from "./GivingTuesdayTab.svelte";
-  import ImportTab from "./ImportTab.svelte";
   import OutreachTab from "./OutreachTab.svelte";
   import ProspectsBoard from "./ProspectsBoard.svelte";
   import ProspectDrawer from "./ProspectDrawer.svelte";
@@ -76,7 +75,6 @@
     { id: "giving", label: "Giving Tuesday", icon: Gift },
     { id: "calendar", label: "Calendar", icon: CalendarDays },
     { id: "templates", label: "Templates", icon: BookOpenText },
-    { id: "import", label: "Import", icon: Upload },
   ];
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
   const DONOR_PAGE_SIZE = 100;
@@ -268,6 +266,13 @@
     });
   }
 
+  function openDonorByEmail(email) {
+    const key = String(email || "").trim().toLowerCase();
+    if (!key) return;
+    selectedDonor =
+      donorSummaries.find((donor) => String(donor.email || "").toLowerCase() === key) || { email: key };
+  }
+
   function donorLabel(donor) {
     return donor.donor_name || donor.company_name || donor.email;
   }
@@ -413,9 +418,6 @@
     if (!found) donorProfiles = [saved, ...donorProfiles];
   }
 
-  function handleImported() {
-    loadAll();
-  }
 </script>
 
 <section class="space-y-4" aria-labelledby="fundraising-title">
@@ -440,8 +442,26 @@
       {/each}
     </div>
   {:else if activeTab === "overview"}
+    <FundraisingLiveOverview
+      {supabase}
+      {profile}
+      {prospects}
+      {donorProfiles}
+      {outreachCampaigns}
+      {refreshKey}
+      onOpenDonorEmail={openDonorByEmail}
+      onOpenProspect={(prospectId) => (selectedProspectId = prospectId)}
+    />
+
+    <div class="pt-4">
+      <h3 id="fundraising-all-campaigns-title" class="text-lg font-bold text-ink">All campaigns and donors, since July 2025</h3>
+      <p class="mt-1 text-sm text-ink/60">
+        All-time numbers from Zeffy, which syncs automatically. Records start July 18, 2025.
+      </p>
+    </div>
+
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <StatCard label="Raised all-time" value={formatMoney(totalRaised)} icon={HandCoins} tone="gold" />
+      <StatCard label="Raised since July 2025" value={formatMoney(totalRaised)} icon={HandCoins} tone="gold" />
       <StatCard label="Raised last 30 days" value={formatMoney(last30Raised)} icon={Banknote} tone="teal" />
       <StatCard label="Donors" value={givingDonors.length.toLocaleString()} icon={UsersRound} tone="teal" />
       <StatCard label="Average gift" value={formatMoney(averageGift)} icon={Target} tone="gold" />
@@ -473,7 +493,7 @@
             {/each}
           </div>
         {:else}
-          <EmptyState title="No campaign totals yet" message="Import a Zeffy export to see campaign performance." />
+          <EmptyState title="No campaign totals yet" message="Campaign totals appear here as gifts sync from Zeffy." />
         {/if}
       </Panel>
 
@@ -500,7 +520,7 @@
             {/each}
           </div>
         {:else}
-          <EmptyState title="No donors yet" message="Import a Zeffy export to build the donor list." />
+          <EmptyState title="No donors yet" message="Donors appear here as gifts sync from Zeffy." />
         {/if}
       </Panel>
     </div>
@@ -673,9 +693,7 @@
       campaigns={outreachCampaigns}
       {teamMembers}
       onOpenProspect={(prospect) => (selectedProspectId = prospect.id)}
-      onOpenDonorEmail={(email) =>
-        (selectedDonor =
-          donorSummaries.find((donor) => donor.email === email) || { email })}
+      onOpenDonorEmail={openDonorByEmail}
     />
   {:else if activeTab === "templates"}
     <TemplatesTab
@@ -684,8 +702,6 @@
       currentUserRole={profile?.role || "member"}
       onTemplatesChanged={reloadTemplates}
     />
-  {:else if activeTab === "import"}
-    <ImportTab {supabase} profileId={profile?.id} onImported={handleImported} />
   {/if}
 </section>
 
