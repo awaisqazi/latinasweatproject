@@ -143,3 +143,74 @@ export const craftForm = {
 };
 
 export const craftContactEmail = "collab@latinasweatproject.com";
+
+// ------------------------------------------- homepage + /links placements --
+// Added Nov 19 2026. The homepage band (PosadaHomeBand.astro, right after the
+// Giving Tuesday band) and the /links card + story bubble
+// (PosadaLinksCard.astro, second card) switch by themselves, at build time
+// AND in the browser:
+//   until the last craft day ends (Thu 12/17, 8:30 pm)  "volunteer": Posada
+//       Craft Days, the next craft day, Pick your hours -> /posada#signup
+//       (the raffle note shows until craftRaffle.endsAt)
+//   from then to the end of Sat 12/19 (Chicago)         "save-the-date" only
+//   after that                                          nothing
+// HOW TO TURN THEM OFF BY HAND: set showPosadaHomeBand (homepage) and/or
+// showPosadaLinksCard (/links card and its bubble) to false. To end them on
+// another day, change posadaPlacementsUntil.
+export const showPosadaHomeBand = true;
+export const showPosadaLinksCard = true;
+export const posadaPlacementsUntil = "2026-12-20T00:00:00-06:00";
+
+// "volunteer" | "save-the-date" | "off" (the toggles are applied by the components).
+export function posadaPlacementPhase(now = Date.now()) {
+  const t = now instanceof Date ? now.getTime() : Number(now);
+  if (t >= Date.parse(posadaPlacementsUntil)) return "off";
+  const last = craftDays[craftDays.length - 1];
+  return t < Date.parse(last.end) ? "volunteer" : "save-the-date";
+}
+
+// The first craft day whose last shift has not ended yet, or null.
+export function nextCraftDay(now = Date.now()) {
+  const t = now instanceof Date ? now.getTime() : Number(now);
+  return craftDays.find((d) => t < Date.parse(d.end)) ?? null;
+}
+
+// Spanish for the /links toggle (keyed like craftDays). Proper names stay:
+// LSP Posadas, Posada Craft Days, Community Grand Opening, Mural Park.
+export const craftDaysEs = {
+  tue1124: { short: "Mar", long: "martes 24 de noviembre" },
+  wed1125: { short: "Mié", long: "miércoles 25 de noviembre" },
+  thu1203: { short: "Jue", long: "jueves 3 de diciembre" },
+  thu1210: { short: "Jue", long: "jueves 10 de diciembre" },
+  thu1217: { short: "Jue", long: "jueves 17 de diciembre" },
+};
+export const posadaPlacementCopy = {
+  intro:
+    "Getting ready for LSP Posadas, the Community Grand Opening, Saturday, December 19 at Mural Park. Come craft with us. Pick a day, pick an hour.",
+  introEs:
+    "Nos preparamos para LSP Posadas, nuestro Community Grand Opening, el sábado 19 de diciembre en Mural Park. Ven a hacer manualidades con nosotros. Elige un día y una hora.",
+  next: "Next craft day:",
+  nextEs: "Próximo día:",
+  today: "Craft day today:",
+  todayEs: "Hoy hay manualidades:",
+  hoursEs: "de 4:30 a 8:30 pm",
+  shifts: "One-hour shifts at Mural Park, 924 W 19th Place, 4th floor.",
+  shiftsEs: "Turnos de una hora en Mural Park, 924 W 19th Place, 4.º piso.",
+  raffleTitleEs: "Rifa de boletos de los Bulls",
+  raffleLineEs:
+    "Ven a un turno el martes 24 o el miércoles 25 de noviembre. Al final de cada hora rifamos boletos de los Bulls para el sábado 28 de noviembre.",
+  cta: "Pick your hours",
+  ctaEs: "Elige tus horas",
+  calendar: "Add December 19 to your calendar",
+  calendarEs: "Agenda el 19 de diciembre",
+  saveLine: "Community Grand Opening · Saturday, December 19 · Mural Park.",
+  saveLineEs: "Community Grand Opening · sábado 19 de diciembre · Mural Park.",
+  soon: "More details soon.",
+  soonEs: "Pronto más detalles.",
+  dayEs: "Sáb",
+  november: "November",
+  novemberEs: "noviembre",
+  december: "December",
+  decemberEs: "diciembre",
+  bubble: "Posadas",
+};

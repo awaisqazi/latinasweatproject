@@ -1,0 +1,279 @@
+---
+// /links: the LSP Posadas / Posada Craft Days card, SECOND (right after the
+// Giving Tuesday card: Dec 1, then Dec 19). The /posada identity on a phone:
+// warm white paper, charcoal ink, one pen red, sticky-note yellow, Mynerve
+// for the name, Rubik for the rest; the save-the-date pinned beside the
+// title; the calendar row (PosadaCalendarStrip) with the next craft day on
+// yellow, past days crossed off and the 19 circled in red pen.
+// Every visible string has an EN/ES pair; proper names stay as they are
+// (LSP Posadas, Posada Craft Days, Community Grand Opening, Mural Park).
+// Phases, raffle note and auto-off as on the homepage band
+// (src/lib/posadaPlacement.js). Toggle: showPosadaLinksCard in
+// src/data/posadaCraftDays.js. Never name what is being crafted.
+import PosadaCalendarStrip from "@/components/PosadaCalendarStrip.astro";
+import {
+  posadaEvent,
+  craftHours,
+  craftRaffle,
+  craftDaysEs,
+  posadaPlacementCopy as pc,
+  posadaPlacementPhase,
+  posadaPlacementsUntil,
+  showPosadaLinksCard,
+  nextCraftDay,
+} from "@/data/posadaCraftDays";
+
+const nowMs = Date.now();
+const ph = posadaPlacementPhase(nowMs);
+const show = showPosadaLinksCard && ph !== "off";
+const saveDate = ph === "save-the-date";
+const raffleOpen = nowMs < Date.parse(craftRaffle.endsAt);
+const next = nextCraftDay(nowMs);
+const nb = (s) => s.replace(/ /g, " ");
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}posada`;
+const icsHref = `${base}${posadaEvent.calendarFile}`;
+---
+
+{show && (
+  <div
+    id="posada-card"
+    class="pcl relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl"
+    style="animation: links-slide-up 0.5s ease backwards; animation-delay: 69ms;"
+    data-pc-place
+    data-pc-until={posadaPlacementsUntil}
+  >
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mynerve&display=swap" />
+    <div class="pcl-in">
+      <div class="pcl-top">
+        <div class="pcl-title">
+          <div data-pc-state="volunteer" hidden={saveDate}>
+            <h2 class="pcl-hand pcl-h">
+              <span class="pcl-l">Posada</span>
+              <span class="pcl-l">Craft Days</span>
+            </h2>
+          </div>
+          <div data-pc-state="save-the-date" hidden={!saveDate}>
+            <h2 class="pcl-hand pcl-h">
+              <span class="pcl-l">LSP</span>
+              <span class="pcl-l">Posadas</span>
+            </h2>
+          </div>
+        </div>
+        <a href={pageUrl} class="pcl-art" tabindex="-1" aria-hidden="true">
+          <img
+            src={`${base}images/posada/lsp-posadas-save-the-date-640.webp`}
+            alt=""
+            width="1080"
+            height="1334"
+            decoding="async"
+          />
+        </a>
+      </div>
+
+      <div data-pc-state="volunteer" hidden={saveDate}>
+        <p class="pcl-intro">
+          <span class="lang-en">{pc.intro}</span>
+          <span class="lang-es hidden">{pc.introEs}</span>
+        </p>
+      </div>
+      <div data-pc-state="save-the-date" hidden={!saveDate}>
+        <p class="pcl-intro">
+          <span class="lang-en">{`${pc.saveLine} ${pc.soon}`}</span>
+          <span class="lang-es hidden">{`${pc.saveLineEs} ${pc.soonEs}`}</span>
+        </p>
+      </div>
+
+      <div class="pcl-strip">
+        <PosadaCalendarStrip bilingual size="card" />
+      </div>
+
+      <div data-pc-state="volunteer" hidden={saveDate}>
+        <p class="pcl-next">
+          <span class="lang-en" data-pc-next data-lang="en">{next ? `${pc.next} ${next.label}, ${nb(craftHours)}` : ""}</span>
+          <span class="lang-es hidden" data-pc-next data-lang="es">{next ? `${pc.nextEs} ${craftDaysEs[next.key].long}, ${nb(pc.hoursEs)}` : ""}</span>
+        </p>
+        <p class="pcl-muted">
+          <span class="lang-en">{pc.shifts}</span>
+          <span class="lang-es hidden">{pc.shiftsEs}</span>
+        </p>
+        {raffleOpen && (
+          <aside class="pcl-sticky" data-pc-raffle-ends={craftRaffle.endsAt} aria-label={craftRaffle.title}>
+            <p class="pcl-sticky-title">
+              <span class="lang-en">{craftRaffle.title}</span>
+              <span class="lang-es hidden">{pc.raffleTitleEs}</span>
+            </p>
+            <p class="pcl-sticky-line">
+              <span class="lang-en">{craftRaffle.line}</span>
+              <span class="lang-es hidden">{pc.raffleLineEs}</span>
+            </p>
+          </aside>
+        )}
+        <a
+          href={`${pageUrl}#signup`}
+          class="pcl-btn"
+          data-conversion-event="posada_page_click"
+          data-conversion-context="links_posada_card"
+        >
+          <span>
+            <span class="lang-en">{pc.cta}</span>
+            <span class="lang-es hidden">{pc.ctaEs}</span>
+          </span>
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </a>
+        <a
+          href={icsHref}
+          class="pcl-cal"
+          download
+          data-conversion-event="posada_calendar_click"
+          data-conversion-context="links_posada_card"
+        >
+          <span class="lang-en">{pc.calendar}</span>
+          <span class="lang-es hidden">{pc.calendarEs}</span>
+        </a>
+      </div>
+
+      <div data-pc-state="save-the-date" hidden={!saveDate}>
+        <a
+          href={icsHref}
+          class="pcl-btn"
+          download
+          data-conversion-event="posada_calendar_click"
+          data-conversion-context="links_posada_card_save_date"
+        >
+          <span>
+            <span class="lang-en">{pc.calendar}</span>
+            <span class="lang-es hidden">{pc.calendarEs}</span>
+          </span>
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+)}
+
+<script>
+  import { initPosadaPlacements } from "@/lib/posadaPlacement.js";
+  initPosadaPlacements();
+</script>
+
+<style>
+  .pcl {
+    --paper: #fbf8f2;
+    --ink: #2b2d36;
+    --red: #d8382e;
+    --yellow: #f5e58a;
+    --muted: rgb(43 45 54 / 0.74);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Rubik", system-ui, sans-serif;
+  }
+  .pcl [hidden] { display: none !important; }
+  :global(.lang-active-en) .pcl .lang-es,
+  :global(.lang-active-es) .pcl .lang-en { display: none !important; }
+  :global(.lang-active-es) .pcl .lang-es { display: inline; }
+  .pcl-in { padding: 1.25rem 1rem 1.1rem; }
+  .pcl-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .pcl-hand {
+    font-family: "Mynerve", "Rubik", cursive;
+    font-weight: 400;
+  }
+  .pcl-h {
+    font-size: clamp(2.3rem, 11vw, 2.75rem);
+    line-height: 1;
+  }
+  .pcl-l { display: block; }
+  .pcl-art {
+    flex: none;
+    display: block;
+    width: 5.6rem;
+    margin: 0.2rem 0.3rem 0 0;
+    transform: rotate(3deg);
+    background: #fff;
+    box-shadow:
+      0 1px 2px rgb(43 45 54 / 0.16),
+      0 8px 18px -12px rgb(43 45 54 / 0.4);
+  }
+  .pcl-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1080 / 1334;
+  }
+  .pcl-intro {
+    margin-top: 0.9rem;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .pcl-strip { margin-top: 1.25rem; }
+  .pcl-next {
+    margin-top: 0.9rem;
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .pcl-muted {
+    margin-top: 0.2rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  .pcl-sticky {
+    margin: 1.1rem 0.2rem 0.2rem;
+    padding: 0.8rem 0.95rem 0.9rem;
+    background: var(--yellow);
+    transform: rotate(-1.2deg);
+  }
+  .pcl-sticky-title {
+    font-family: "Permanent Marker", "Rubik", cursive;
+    font-size: 1.2rem;
+    line-height: 1.1;
+  }
+  .pcl-sticky-line {
+    margin-top: 0.35rem;
+    font-size: 0.86rem;
+    line-height: 1.4;
+  }
+  .pcl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    margin-top: 1.1rem;
+    border-radius: 6px;
+    padding: 0 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: background-color 150ms;
+  }
+  .pcl-btn:hover { background: #1c1d24; }
+  .pcl-cal {
+    display: inline-block;
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgb(43 45 54 / 0.4);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+  }
+  .pcl-btn:focus-visible,
+  .pcl-cal:focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: 2px;
+  }
+  @media (min-width: 640px) {
+    .pcl-in { padding: 1.5rem 1.25rem 1.25rem; }
+  }
+</style>

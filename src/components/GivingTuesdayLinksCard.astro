@@ -1,0 +1,201 @@
+---
+// /links: the LSP Giving Tuesday card, the FIRST card (Nov 19 to Dec 1 2026;
+// the only upcoming dated items on the page are this and the Posadas card
+// after it, in date order). The campaign's look on a phone: white ground, one
+// ink, Rubik 400/700, the yellow studio floor. Live, same as the homepage
+// band (src/lib/givingTuesday/placement.js): the total from the giving_public
+// RPC, the days left (Chicago), the mats that unroll on entry. Every visible
+// string has an EN/ES pair; "LSP Giving Tuesday" and "Giving Tuesday" are the
+// campaign's name and stay in English. /givingtuesday itself is English only.
+// Turns itself off: thank-you copy after givingFacts.endsAt, gone (card and
+// bubble) after givingPlacementsUntil. Toggle: showGivingLinksCard in
+// src/data/givingTuesday.js.
+import GivingMatFloor from "@/components/GivingMatFloor.astro";
+import {
+  givingFacts,
+  givingCopy,
+  givingRoutes,
+  givingPlacementCopy as pc,
+  givingPlacementPhase,
+  showGivingLinksCard,
+  givingPlacementsUntil,
+  money,
+} from "@/data/givingTuesday";
+
+const ph = givingPlacementPhase();
+const show = showGivingLinksCard && ph !== "off";
+const thanks = ph === "thanks";
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}${givingRoutes.page.replace(/^\//, "")}`;
+const goal = money(givingFacts.goalCents);
+---
+
+{show && (
+  <div
+    id="givingtuesday-card"
+    class="gtl relative mb-8 scroll-mt-24 overflow-hidden rounded-2xl"
+    style="animation: links-slide-up 0.5s ease backwards; animation-delay: 66ms;"
+    data-gt-place
+    data-gt-until={givingPlacementsUntil}
+  >
+    <div class="gtl-in">
+      <p class="gtl-kicker">{pc.kicker}</p>
+      <div data-gt-state="campaign" hidden={thanks}>
+        <h2 class="gtl-h">
+          <span class="lang-en">{givingCopy.headline}</span>
+          <span class="lang-es hidden">{pc.headlineEs}</span>
+        </h2>
+        <p class="gtl-sub">
+          <span class="lang-en">{givingCopy.sub}</span>
+          <span class="lang-es hidden">{pc.subEs}</span>
+        </p>
+      </div>
+      <div data-gt-state="thanks" hidden={!thanks}>
+        <h2 class="gtl-h">
+          <span class="lang-en">{pc.thanksHead}</span>
+          <span class="lang-es hidden">{pc.thanksHeadEs}</span>
+        </h2>
+        <p class="gtl-sub">
+          <span class="lang-en">{pc.thanksNote}</span>
+          <span class="lang-es hidden">{pc.thanksNoteEs}</span>
+        </p>
+      </div>
+
+      <div class="gtl-meter" data-gt-meter hidden={thanks}>
+        <p class="gtl-day">
+          <span class="lang-en" data-gt-day data-lang="en">{pc.dateLine}</span>
+          <span class="lang-es hidden" data-gt-day data-lang="es">{pc.dateLineEs}</span>
+        </p>
+        <p class="gtl-num">
+          <span class="lang-en" data-gt-num data-lang="en">{goal}</span>
+          <span class="lang-es hidden" data-gt-num data-lang="es">{goal}</span>
+        </p>
+        <p class="gtl-line">
+          <span class="lang-en" data-gt-line data-lang="en">{pc.goalIs}</span>
+          <span class="lang-es hidden" data-gt-line data-lang="es">{pc.goalIsEs}</span>
+        </p>
+        <p class="sr-only" aria-live="polite" data-gt-sr></p>
+      </div>
+
+      <div class="gtl-floor" data-gt-floor-wrap hidden={thanks}>
+        <GivingMatFloor />
+        <p class="gtl-key">
+          <span class="lang-en">{givingCopy.floor.key}</span>
+          <span class="lang-es hidden">{pc.keyEs}</span>
+        </p>
+      </div>
+
+      <a
+        href={pageUrl}
+        class="gtl-btn"
+        data-conversion-event="givingtuesday_page_click"
+        data-conversion-context="links_givingtuesday_card"
+      >
+        <span data-gt-state="campaign" hidden={thanks}>
+          <span class="lang-en">{pc.cta}</span>
+          <span class="lang-es hidden">{pc.ctaEs}</span>
+        </span>
+        <span data-gt-state="thanks" hidden={!thanks}>
+          <span class="lang-en">{pc.thanksCta}</span>
+          <span class="lang-es hidden">{pc.thanksCtaEs}</span>
+        </span>
+        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+)}
+
+<script>
+  import { initGivingPlacements } from "@/lib/givingTuesday/placement.js";
+  initGivingPlacements();
+</script>
+
+<style>
+  .gtl {
+    --ink: #1e1e1e;
+    background: #fff;
+    color: var(--ink);
+    font-family: "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .gtl [hidden] { display: none !important; }
+  /* The page's language toggle (.lang-active-en / -es on .links-page). */
+  :global(.lang-active-en) .gtl .lang-es,
+  :global(.lang-active-es) .gtl .lang-en { display: none !important; }
+  :global(.lang-active-es) .gtl .lang-es { display: inline; }
+  .gtl-in { padding: 1.25rem 1rem 1rem; }
+  .gtl-kicker {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .gtl-h {
+    margin-top: 0.5rem;
+    font-size: clamp(2rem, 9.6vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+  .gtl-sub {
+    margin-top: 0.6rem;
+    font-size: 1.02rem;
+    line-height: 1.4;
+    color: #4e4f50;
+  }
+  .gtl-meter { margin-top: 1.4rem; }
+  .gtl-day {
+    min-height: 1.45em;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+  .gtl-num {
+    font-size: 2.9rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+  }
+  .gtl-line {
+    margin-top: 0.35rem;
+    min-height: 2.8em;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #4e4f50;
+    white-space: pre-line;
+  }
+  .gtl-floor { margin-top: 0.9rem; }
+  .gtl-key {
+    margin-top: 0.6rem;
+    font-size: 0.86rem;
+    color: #4e4f50;
+  }
+  .gtl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    margin-top: 1.1rem;
+    border-radius: 8px;
+    padding: 0 1rem;
+    background: var(--ink);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: background-color 0.2s ease;
+  }
+  .gtl-btn:hover { background: #000; }
+  .gtl-btn:focus-visible {
+    outline: 3px solid #ffde59;
+    outline-offset: 2px;
+  }
+  @media (min-width: 640px) {
+    .gtl-in { padding: 1.5rem 1.25rem 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gtl-btn { transition: none; }
+  }
+</style>

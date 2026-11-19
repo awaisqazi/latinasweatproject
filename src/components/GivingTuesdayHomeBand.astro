@@ -1,0 +1,214 @@
+---
+// Homepage band for LSP Giving Tuesday (Nov 19 to Dec 1, 2026), right under
+// "Our new home" and before the LSP Posadas band. DARK in the cadence: the
+// campaign's own ink close (#1e1e1e) with its yellow studio floor, Rubik 400
+// and 700, sentence case, one yellow. Floor LEFT on desktop (Our new home's
+// photo is on the right above it, the Posadas art on the right below it).
+//
+// Live: the total from the giving_public RPC (same transport as
+// /givingtuesday, loaded only when the band is near), the days left in
+// Chicago days, and the mats that unroll to the total when the floor scrolls
+// into view. See src/lib/givingTuesday/placement.js for the states.
+// Turns itself off: thank-you copy after givingFacts.endsAt, gone after
+// givingPlacementsUntil (build time here, and in the browser). Toggle:
+// showGivingHomeBand in src/data/givingTuesday.js.
+import GivingMatFloor from "@/components/GivingMatFloor.astro";
+import {
+  givingFacts,
+  givingCopy,
+  givingRoutes,
+  givingPlacementCopy as pc,
+  givingPlacementPhase,
+  showGivingHomeBand,
+  givingPlacementsUntil,
+  money,
+} from "@/data/givingTuesday";
+
+const ph = givingPlacementPhase();
+const show = showGivingHomeBand && ph !== "off";
+const thanks = ph === "thanks";
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}${givingRoutes.page.replace(/^\//, "")}`;
+const goal = money(givingFacts.goalCents);
+---
+
+{show && (
+  <section
+    id="giving-tuesday"
+    class="gtb"
+    aria-labelledby="gtb-title"
+    data-gt-place
+    data-gt-until={givingPlacementsUntil}
+  >
+    <div class="gtb-wrap">
+      <div class="gtb-head">
+        <p class="gtb-kicker">{pc.kicker}</p>
+        <div data-gt-state="campaign" hidden={thanks}>
+          <h2 id="gtb-title" class="gtb-h">
+            <span class="block">From one class</span>
+            <span class="block">to a movement.</span>
+          </h2>
+          <p class="gtb-sub">{givingCopy.sub}</p>
+        </div>
+        <div data-gt-state="thanks" hidden={!thanks}>
+          <p class="gtb-h" role="heading" aria-level="2">{pc.thanksHead}</p>
+          <p class="gtb-sub">{pc.thanksNote}</p>
+        </div>
+      </div>
+
+      <div class="gtb-meter" data-gt-meter hidden={thanks}>
+        <p class="gtb-day" data-gt-day data-lang="en">{pc.dateLine}</p>
+        <p class="gtb-num" data-gt-num data-lang="en">{goal}</p>
+        <p class="gtb-line" data-gt-line data-lang="en">{pc.goalIs}</p>
+        <p class="sr-only" aria-live="polite" data-gt-sr></p>
+      </div>
+
+      <div class="gtb-floor" data-gt-floor-wrap hidden={thanks}>
+        <GivingMatFloor />
+        <p class="gtb-key">{givingCopy.floor.key}</p>
+      </div>
+
+      <div class="gtb-cta">
+        <a
+          href={pageUrl}
+          class="gtb-btn"
+          data-conversion-event="givingtuesday_page_click"
+          data-conversion-context="home_givingtuesday_band"
+        >
+          <span data-gt-state="campaign" hidden={thanks}>{pc.cta}</span>
+          <span data-gt-state="thanks" hidden={!thanks}>{pc.thanksCta}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  import { initGivingPlacements } from "@/lib/givingTuesday/placement.js";
+  initGivingPlacements();
+</script>
+
+<style>
+  .gtb {
+    --ink: #1e1e1e;
+    --sun: #ffde59;
+    background: var(--ink);
+    color: #fff;
+    font-family: "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .gtb [hidden] { display: none !important; }
+  .gtb-wrap {
+    display: grid;
+    grid-template-areas: "head" "meter" "floor" "cta";
+    margin: 0 auto;
+    max-width: 80rem;
+    padding: 3.5rem 1rem 4rem;
+  }
+  .gtb-head { grid-area: head; }
+  .gtb-meter { grid-area: meter; margin-top: 2.25rem; }
+  .gtb-floor { grid-area: floor; margin-top: 1.5rem; }
+  .gtb-cta { grid-area: cta; margin-top: 2rem; }
+
+  .gtb-kicker {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .gtb-h {
+    margin-top: 0.75rem;
+    font-size: clamp(2.15rem, 10.5vw, 4.25rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .gtb-sub {
+    margin-top: 1rem;
+    max-width: 30rem;
+    font-size: 1.2rem;
+    line-height: 1.45;
+    color: rgb(255 255 255 / 0.82);
+    text-wrap: pretty;
+  }
+
+  /* The meter: three lines, height reserved so the live total never shifts
+     the page. */
+  .gtb-day {
+    min-height: 1.5em;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .gtb-num {
+    margin-top: 0.1rem;
+    font-size: clamp(3.1rem, 13vw, 4.75rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .gtb-line {
+    margin-top: 0.6rem;
+    min-height: 2.9em;
+    white-space: pre-line;
+    max-width: 26rem;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    color: rgb(255 255 255 / 0.82);
+    text-wrap: pretty;
+  }
+
+  .gtb-key {
+    margin-top: 0.85rem;
+    font-size: 0.98rem;
+    color: rgb(255 255 255 / 0.82);
+  }
+
+  .gtb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    min-width: 13rem;
+    border-radius: 8px;
+    padding: 0 1.75rem;
+    background: var(--sun);
+    color: var(--ink);
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  .gtb-btn:hover { background: #fff; transform: translateY(-2px); }
+  .gtb-btn:focus-visible {
+    outline: 3px solid var(--sun);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 640px) {
+    .gtb-wrap { padding: 4.5rem 1.5rem 5rem; }
+    .gtb-floor { max-width: 34rem; }
+  }
+  @media (min-width: 1024px) {
+    .gtb-wrap {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        "floor head"
+        "floor meter"
+        "floor cta";
+      column-gap: 5rem;
+      padding: 6rem 2rem;
+    }
+    .gtb-floor {
+      align-self: center;
+      margin-top: 0;
+      max-width: none;
+    }
+    .gtb-meter { margin-top: 2.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gtb-btn { transition: none; }
+    .gtb-btn:hover { transform: none; }
+  }
+</style>

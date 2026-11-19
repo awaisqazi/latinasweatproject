@@ -4,6 +4,10 @@
 //   1. Opening hero [D green] (OpeningHero, flag showOpeningHero in
 //      src/data/studioOpening.js; the video hero is the fallback)
 //   2. Our new home [L cream] (NewHomeSection, the former A New Chapter)
+//   2a. LSP Giving Tuesday [D ink] (GivingTuesdayHomeBand, Nov 19 to Dec 1
+//      2026, a thank-you to Dec 3, then gone; mat floor LEFT)
+//   2b. LSP Posadas + Posada Craft Days [L paper] (PosadaHomeBand, to Dec 19
+//      2026, then gone; save-the-date RIGHT)
 //   3. Annual Gala 2026 recap [D]
 //   4. Relive the summer [L]
 //   5. ABC7 Windy City Weekend [D]
@@ -95,6 +99,9 @@ import { showMerchDrop, showMondayMiles } from "@/data/transition";
 import { showOpeningHero, homeShareCard } from "@/data/studioOpening";
 import OpeningHero from "@/components/OpeningHero.astro";
 import NewHomeSection from "@/components/NewHomeSection.astro";
+// Giving Tuesday (to Dec 1) and LSP Posadas (Dec 19), Nov 19 2026.
+import GivingTuesdayHomeBand from "@/components/GivingTuesdayHomeBand.astro";
+import PosadaHomeBand from "@/components/PosadaHomeBand.astro";
 // First-visit ribbon cutting moment (flag showRibbonIntro, src/data/studioOpening.js).
 import RibbonIntro from "@/components/RibbonIntro.astro";
 // Link share card for the homepage: the opening announcement, then the
@@ -253,6 +260,18 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
         src/components/NewHomeSection.astro) */}
     <NewHomeSection />
     {/* END: Our New Home Section */}
+
+    {/* START: Giving Tuesday [D] + LSP Posadas [L] (Nov 19 2026), in date
+        order (Dec 1, Dec 19), each in its own campaign's identity. They keep
+        the strict light/dark cadence between Our new home [L] and the gala
+        recap [D], and the media zig-zag (Our new home photo RIGHT -> mat
+        floor LEFT -> save-the-date RIGHT -> gala photo LEFT). Both turn
+        themselves off by date (build time and in the browser); toggles
+        showGivingHomeBand in src/data/givingTuesday.js and showPosadaHomeBand
+        in src/data/posadaCraftDays.js. */}
+    <GivingTuesdayHomeBand />
+    <PosadaHomeBand />
+    {/* END: Giving Tuesday + LSP Posadas */}
 
     {/* START: Annual Gala 2026 recap spotlight (post-gala, Sep 26 2026).
         Same slot, same theme as the pre-gala marquee so the documented

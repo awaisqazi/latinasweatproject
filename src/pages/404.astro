@@ -126,6 +126,23 @@ import Header from "../components/Header.astro";
         window.location.pathname.replace(/\/+$/, "") !== "/givingtuesday/join"
     ) {
         window.location.replace("/givingtuesday/join");
+    } else if (
+        // LSP Posadas + Posada Craft Days (Dec 2026): any case, plus flyer
+        // and spoken variants. /posadas and /craftdays (lowercase) are also
+        // redirects in astro.config.mjs. Exact matches only, never on /posada.
+        [
+            "/posada",
+            "/posadas",
+            "/lspposada",
+            "/lspposadas",
+            "/craftdays",
+            "/craft-days",
+            "/posadacraftdays",
+            "/posada-craft-days",
+        ].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/posada"
+    ) {
+        window.location.replace("/posada" + window.location.hash);
     } else if (path === "/water" || path === "/water/") {
         window.location.replace(
             "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",

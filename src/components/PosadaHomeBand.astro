@@ -1,0 +1,338 @@
+---
+// Homepage band for LSP Posadas (the Community Grand Opening, Sat Dec 19
+// 2026) and the Posada Craft Days that get us ready for it. Right after the
+// Giving Tuesday band (date order: Dec 1, then Dec 19). LIGHT in the cadence:
+// the /posada identity, from the team's save-the-date: warm white paper,
+// charcoal ink, one pen red, sticky-note yellow, Mynerve for a few display
+// words, Rubik for everything read. Copy LEFT, the save-the-date RIGHT on
+// desktop (the floor of the band above is on the left, the gala photo below
+// on the left).
+//
+// Live: the calendar row (PosadaCalendarStrip) crosses off days that are
+// over, puts the yellow note on the next craft day and draws the red circle
+// around the 19 on entry; the line under it names the next craft day. The
+// raffle note shows until craftRaffle.endsAt. Phases (build time here, and in
+// the browser via src/lib/posadaPlacement.js): "volunteer" until the last
+// craft day ends, then "save-the-date", then gone after
+// posadaPlacementsUntil. Toggle: showPosadaHomeBand in
+// src/data/posadaCraftDays.js. Never name what is being crafted.
+import PosadaCalendarStrip from "@/components/PosadaCalendarStrip.astro";
+import {
+  posadaEvent,
+  craftDaysPlace,
+  craftHours,
+  craftRaffle,
+  posadaPlacementCopy as pc,
+  posadaPlacementPhase,
+  posadaPlacementsUntil,
+  showPosadaHomeBand,
+  nextCraftDay,
+} from "@/data/posadaCraftDays";
+import { showGivingHomeBand, givingPlacementPhase } from "@/data/givingTuesday";
+
+const nowMs = Date.now();
+const ph = posadaPlacementPhase(nowMs);
+const show = showPosadaHomeBand && ph !== "off";
+// No Giving Tuesday band above: this band follows the cream "Our new home".
+const seam = !(showGivingHomeBand && givingPlacementPhase(nowMs) !== "off");
+const saveDate = ph === "save-the-date";
+const raffleOpen = nowMs < Date.parse(craftRaffle.endsAt);
+const next = nextCraftDay(nowMs);
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}posada`;
+const icsHref = `${base}${posadaEvent.calendarFile}`;
+const instagramProfile = "https://www.instagram.com/latinasweatproject/";
+---
+
+{show && (
+  <section
+    id="posadas"
+    class="pcb"
+    aria-label={`${posadaEvent.name} and Posada Craft Days`}
+    data-pc-place
+    data-pc-until={posadaPlacementsUntil}
+    data-pc-seam={seam ? "" : undefined}
+  >
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mynerve&display=swap" />
+    <div class="pcb-wrap">
+      <div class="pcb-copy">
+        <div data-pc-state="volunteer" hidden={saveDate}>
+          <h2 class="pcb-hand pcb-h">
+            <span class="block">Posada</span>
+            <span class="block">Craft Days</span>
+          </h2>
+          <p class="pcb-intro">{pc.intro}</p>
+        </div>
+        <div data-pc-state="save-the-date" hidden={!saveDate}>
+          <h2 class="pcb-hand pcb-h">{posadaEvent.name}</h2>
+          <p class="pcb-intro">
+            {pc.saveLine}
+            <span class="block">{pc.soon}</span>
+          </p>
+        </div>
+
+        <div class="pcb-strip">
+          <PosadaCalendarStrip />
+        </div>
+
+        <div data-pc-state="volunteer" hidden={saveDate}>
+          <p class="pcb-next" data-pc-next data-lang="en">
+            {next ? `${pc.next} ${next.label}, ${craftHours.replace(/ /g, "\u00a0")}` : ""}
+          </p>
+          <p class="pcb-muted">
+            One-hour shifts at
+            <a href={craftDaysPlace.mapUrl} target="_blank" rel="noopener" class="pcb-link"
+              >{craftDaysPlace.name}, {craftDaysPlace.street}, {craftDaysPlace.floor}</a
+            >.
+          </p>
+          {raffleOpen && (
+            <aside class="pcb-sticky" data-pc-raffle-ends={craftRaffle.endsAt} aria-label={craftRaffle.title}>
+              <p class="pcb-sticky-title">{craftRaffle.title}</p>
+              <p class="pcb-sticky-line">{craftRaffle.line}</p>
+            </aside>
+          )}
+          <div class="pcb-cta">
+            <a
+              href={`${pageUrl}#signup`}
+              class="pcb-btn"
+              data-conversion-event="posada_page_click"
+              data-conversion-context="home_posada_band"
+            >{pc.cta}</a>
+            <a
+              href={icsHref}
+              class="pcb-link pcb-cal"
+              download
+              data-conversion-event="posada_calendar_click"
+              data-conversion-context="home_posada_band"
+            >{pc.calendar}</a>
+          </div>
+        </div>
+
+        <div data-pc-state="save-the-date" hidden={!saveDate}>
+          <div class="pcb-cta">
+            <a
+              href={icsHref}
+              class="pcb-btn"
+              download
+              data-conversion-event="posada_calendar_click"
+              data-conversion-context="home_posada_band_save_date"
+            >{pc.calendar}</a>
+          </div>
+          <p class="pcb-muted pcb-follow">
+            Follow
+            <a href={instagramProfile} target="_blank" rel="noopener" class="pcb-link">@latinasweatproject on Instagram</a>
+            for the details.
+          </p>
+        </div>
+      </div>
+
+      <a
+        href={pageUrl}
+        class="pcb-art"
+        tabindex="-1"
+        aria-hidden="true"
+        data-conversion-event="posada_page_click"
+        data-conversion-context="home_posada_band_art"
+      >
+        <span class="pcb-pinned">
+          <picture>
+            <source
+              type="image/webp"
+              srcset={`${base}images/posada/lsp-posadas-save-the-date-640.webp 640w, ${base}images/posada/lsp-posadas-save-the-date.webp 1080w`}
+              sizes="(min-width: 1024px) 384px, 64vw"
+            />
+            <img
+              src={`${base}${posadaEvent.art}`}
+              alt={posadaEvent.artAlt}
+              width="1080"
+              height="1334"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+        </span>
+      </a>
+    </div>
+  </section>
+)}
+
+<script>
+  import { initPosadaPlacements } from "@/lib/posadaPlacement.js";
+  initPosadaPlacements();
+</script>
+
+<style>
+  .pcb {
+    --paper: #fbf8f2;
+    --ink: #2b2d36;
+    --red: #d8382e;
+    --yellow: #f5e58a;
+    --muted: rgb(43 45 54 / 0.74);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Rubik", system-ui, sans-serif;
+    overflow-x: clip;
+  }
+  .pcb [hidden] { display: none !important; }
+  /* When the Giving Tuesday band is gone (after Dec 3, or toggled off) this
+     paper band sits right under the cream "Our new home": two warm whites
+     touching. The seam is the save-the-date's own hand-ruled ink line along
+     the top of the band (documented exception, like the DDLM picado seam).
+     data-pc-seam is set at build time and kept current by
+     src/lib/posadaPlacement.js. */
+  .pcb[data-pc-seam] .pcb-wrap { position: relative; }
+  .pcb[data-pc-seam] .pcb-wrap::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0.6rem;
+    right: 0.75rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--ink);
+    transform: rotate(-0.35deg);
+  }
+  .pcb-wrap {
+    display: grid;
+    gap: 3rem;
+    margin: 0 auto;
+    max-width: 80rem;
+    padding: 3.5rem 1rem 4.5rem;
+  }
+  .pcb-hand {
+    font-family: "Mynerve", "Rubik", cursive;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .pcb-h {
+    font-size: clamp(3rem, 14vw, 5.25rem);
+    line-height: 0.98;
+  }
+  .pcb-intro {
+    margin-top: 1rem;
+    max-width: 34rem;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .pcb-strip {
+    margin-top: 2rem;
+    max-width: 34rem;
+  }
+  .pcb-next {
+    margin-top: 1.25rem;
+    min-height: 1.45em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+  .pcb-muted {
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .pcb-follow { margin-top: 1rem; }
+  .pcb-link {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgb(43 45 54 / 0.4);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+  }
+  .pcb-link:hover { text-decoration-color: var(--red); }
+
+  /* The raffle: the yellow sticky note from the post. */
+  .pcb-sticky {
+    width: min(100%, 20rem);
+    margin: 1.75rem 0 0 0.25rem;
+    padding: 1rem 1.2rem 1.15rem;
+    background: var(--yellow);
+    transform: rotate(-1.8deg);
+  }
+  .pcb-sticky-title {
+    font-family: "Permanent Marker", "Rubik", cursive;
+    font-size: 1.45rem;
+    line-height: 1.1;
+  }
+  .pcb-sticky-line {
+    margin-top: 0.45rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .pcb-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .pcb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    border-radius: 6px;
+    padding: 0 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    transition: background-color 150ms;
+  }
+  .pcb-btn:hover { background: #1c1d24; }
+  .pcb-btn:focus-visible,
+  .pcb-link:focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .pcb-cal { font-size: 1rem; }
+
+  /* The save-the-date, laid on the paper at a slight angle (as on /posada). */
+  .pcb-art {
+    display: block;
+    justify-self: center;
+    width: 64%;
+    max-width: 19rem;
+  }
+  .pcb-pinned {
+    display: block;
+    transform: rotate(1.8deg);
+    background: #fff;
+    box-shadow:
+      0 1px 2px rgb(43 45 54 / 0.16),
+      0 12px 26px -16px rgb(43 45 54 / 0.4);
+  }
+  .pcb-pinned img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1080 / 1334;
+    background: #f3f1ec;
+  }
+
+  @media (min-width: 640px) {
+    .pcb-wrap { padding: 4.5rem 1.5rem 5.5rem; }
+    .pcb-art { width: 52%; }
+  }
+  @media (min-width: 640px) {
+    .pcb[data-pc-seam] .pcb-wrap::before { left: 1.1rem; right: 1.25rem; }
+  }
+  @media (min-width: 1024px) {
+    .pcb[data-pc-seam] .pcb-wrap::before { left: 1.6rem; right: 1.75rem; }
+    .pcb-wrap {
+      grid-template-columns: minmax(0, 1fr) 24rem;
+      column-gap: 6rem;
+      align-items: center;
+      padding: 6rem 2rem;
+    }
+    .pcb-art {
+      width: 100%;
+      max-width: none;
+    }
+  }
+</style>

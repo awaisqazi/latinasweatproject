@@ -20,6 +20,20 @@ import DdlmSurveyCta from "@/components/DdlmSurveyCta.astro";
 import { ddlmEvent, fallTicketEventFor } from "@/data/fallEvents";
 import { ddlmRecap } from "@/data/ddlmRecap2026";
 import OpeningLinksCard from "@/components/OpeningLinksCard.astro";
+import GivingTuesdayLinksCard from "@/components/GivingTuesdayLinksCard.astro";
+import PosadaLinksCard from "@/components/PosadaLinksCard.astro";
+import {
+  showGivingLinksCard,
+  givingPlacementPhase,
+  givingPlacementsUntil,
+  givingPlacementCopy,
+} from "@/data/givingTuesday";
+import {
+  showPosadaLinksCard,
+  posadaPlacementPhase,
+  posadaPlacementsUntil,
+  posadaPlacementCopy,
+} from "@/data/posadaCraftDays";
 import {
   showRibbonLinksCard,
   isRibbonCuttingLive,
@@ -111,6 +125,15 @@ const ddlmCardPhoto = `${base}images/ddlm/recap/placements/links-119-900.webp`;
 const ribbonActive = showRibbonLinksCard && isRibbonCuttingLive();
 const ribbonPageUrl = withBase(ribbonCuttingPagePath);
 const ribbonCardPhoto = `${base}images/ribbon-cutting/cut-04-arms-up-900.webp`;
+
+// LSP Giving Tuesday (to Dec 1 2026) and LSP Posadas (Dec 19 2026): the only
+// upcoming dated items, so their cards LEAD the stack in date order and their
+// bubbles lead the highlights bar. Both step back by themselves (build time
+// here, and in the browser through data-gt-until / data-pc-until). Toggles:
+// showGivingLinksCard (src/data/givingTuesday.js), showPosadaLinksCard
+// (src/data/posadaCraftDays.js).
+const givingLinksActive = showGivingLinksCard && givingPlacementPhase() !== "off";
+const posadaLinksActive = showPosadaLinksCard && posadaPlacementPhase() !== "off";
 
 // Define links data with English and Spanish translations
 const links = [
@@ -224,6 +247,33 @@ const links = [
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
+  // Giving Tuesday, then LSP Posadas (date order), while their cards show.
+  ...(givingLinksActive
+    ? [
+        {
+          title: { en: givingPlacementCopy.bubble, es: givingPlacementCopy.bubble },
+          target: "#givingtuesday-card",
+          image: `${base}images/highlights/hl_givingtuesday.png`,
+          scale: "scale-[1.0]",
+          hoverScale: "group-hover:scale-[1.12]",
+          color: "amber",
+          gtUntil: givingPlacementsUntil
+        },
+      ]
+    : []),
+  ...(posadaLinksActive
+    ? [
+        {
+          title: { en: posadaPlacementCopy.bubble, es: posadaPlacementCopy.bubble },
+          target: "#posada-card",
+          image: `${base}images/highlights/hl_posadas.jpg`,
+          scale: "scale-[1.0]",
+          hoverScale: "group-hover:scale-[1.12]",
+          color: "amber",
+          pcUntil: posadaPlacementsUntil
+        },
+      ]
+    : []),
   // The ribbon cutting leads while ribbonActive (Nov 16 2026); it jumps to
   // #ribbon-card and is hidden in the browser after the end date.
   ...(ribbonActive
@@ -537,6 +587,8 @@ const getLinkConversionProvider = (url = "") => {
                 {...(story.popupWindow ?? {})}
                 data-finishline-hide-when-past={story.finishline ? "" : undefined}
                 data-ribbon-ends={story.ribbonEnds}
+                data-gt-until={story.gtUntil}
+                data-pc-until={story.pcUntil}
               >
                 {/* Glow story ring */}
                 <div class="relative w-[66px] h-[66px] flex items-center justify-center flex-shrink-0 rounded-full bg-gradient-to-tr from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_15px_rgba(255,189,89,0.4)] shadow-md">
@@ -562,6 +614,13 @@ const getLinkConversionProvider = (url = "") => {
           }
         </div>
       </div>
+
+      {/* LSP Giving Tuesday (Nov 19 to Dec 1 2026), then LSP Posadas + Posada
+          Craft Days (Dec 19 2026): the upcoming dated campaigns lead the card
+          stack in date order, each in its own identity. Each renders nothing
+          once off (see the components). */}
+      <GivingTuesdayLinksCard />
+      <PosadaLinksCard />
 
       {/* The ribbon cutting (Nov 16 2026): the lead card while ribbonActive, in
           the campaign's own look (marketing/ribbon-cutting/CONTENT-PLAN.md):

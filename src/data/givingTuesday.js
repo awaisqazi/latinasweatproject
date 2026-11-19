@@ -426,3 +426,59 @@ export function withAmount(url, dollars) {
 export function fill(template, values) {
   return String(template).replace(/\{(\w+)\}/g, (_, k) => (values[k] ?? ""));
 }
+
+// ------------------------------------------- homepage + /links placements --
+// Added Nov 19 2026. The homepage band (GivingTuesdayHomeBand.astro, right
+// under "Our new home") and the /links card + story bubble
+// (GivingTuesdayLinksCard.astro, the first card) show the live total from the
+// same giving_public RPC as /givingtuesday, the days left, and a small studio
+// floor of mats. They turn themselves off, at build time AND in the browser:
+//   until givingFacts.endsAt (11:59 pm Central, Tue Dec 1)   the campaign
+//   from then until givingPlacementsUntil (end of Thu Dec 3)  a short thank you
+//   after that                                                nothing
+// HOW TO TURN THEM OFF BY HAND: set showGivingHomeBand (homepage) and/or
+// showGivingLinksCard (/links card and its bubble) to false. To end them on
+// another day, change givingPlacementsUntil.
+export const showGivingHomeBand = true;
+export const showGivingLinksCard = true;
+export const givingPlacementsUntil = "2026-12-04T05:59:59Z";
+
+// "campaign" | "thanks" | "off" (the toggles are applied by the components).
+export function givingPlacementPhase(now = Date.now()) {
+  const t = ms(now);
+  if (t > ms(givingPlacementsUntil)) return "off";
+  if (t > ms(givingFacts.endsAt)) return "thanks";
+  return "campaign";
+}
+
+// Words used only by the placements (English from givingCopy where it
+// exists; the Spanish is for the /links toggle). All NEW unless noted.
+export const givingPlacementCopy = {
+  kicker: "LSP Giving Tuesday",
+  headlineEs: "De una clase a un movimiento.",
+  subEs: "Ayúdanos a construir lo que sigue.",
+  cta: "Pick your mat", // givingCopy.picker.title, without the period
+  ctaEs: "Elige tu tapete",
+  thanksCta: "See the Giving Tuesday page", // givingPersonCopy.seeAll
+  thanksCtaEs: "Ve la página de Giving Tuesday",
+  dateLine: "Tuesday, Dec 1", // the share card's date line
+  dateLineEs: "Martes 1 de diciembre",
+  daysToEs: (n) => (n === 1 ? "Mañana es Giving Tuesday." : `Faltan ${n} días para Giving Tuesday`),
+  endsTonightEs: "Termina hoy a las 11:59 pm, hora de Chicago.",
+  raisedOfEs: "recaudados de nuestra meta de {goal}",
+  passedEs: "recaudados, más que nuestra meta de {goal}",
+  giftsEs: (n) => (n === 1 ? "1 donación hasta ahora" : `${n.toLocaleString("en-US")} donaciones hasta ahora`),
+  goalIs: "is our goal.",
+  goalIsEs: "es nuestra meta.",
+  firstEs: "Extiende el primer tapete.",
+  keyEs: "Cada tapete es $100 para nuestra meta.",
+  thanksHead: "Thank you for showing up.", // givingCopy.phases.after.line
+  thanksHeadEs: "Gracias por estar con nosotros.",
+  thanksNote: "Giving Tuesday is over, and you can still give any time.", // givingCopy.phases.after.note
+  thanksNoteEs: "Giving Tuesday terminó, y puedes donar cuando quieras.",
+  finalLeadEs: "Juntos recaudamos",
+  finalOfEs: "para nuestra meta de {goal}.",
+  finalPassedEs: "más que nuestra meta de {goal}.",
+  giftsFinalEs: (n) => (n === 1 ? "1 donación" : `${n.toLocaleString("en-US")} donaciones`),
+  bubble: "Giving Tuesday",
+};

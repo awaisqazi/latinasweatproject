@@ -1,0 +1,310 @@
+---
+// The Posada Craft Days calendar, one ruled row: the five craft days and
+// Saturday, December 19, in date order, under hand-lettered month names. It
+// borrows the three marks of the team's save-the-date and of /posada: ink
+// rules, the sticky-note yellow (on the NEXT craft day), a pen line through
+// the days that are over, and the red pen circle around the 19 (drawn once,
+// when the row scrolls into view). Shared by the homepage band and the /links
+// card; src/lib/posadaPlacement.js keeps past / next current in the browser.
+// Dates come only from src/data/posadaCraftDays.js.
+//
+// Props: bilingual (the /links .lang-en / .lang-es pairs), now (build time).
+import {
+  craftDays,
+  posadaEvent,
+  craftDaysEs,
+  posadaPlacementCopy as pc,
+  nextCraftDay,
+} from "@/data/posadaCraftDays";
+
+interface Props {
+  bilingual?: boolean;
+  size?: "band" | "card";
+}
+const { bilingual = false, size = "band" } = Astro.props;
+const nowMs = Date.now();
+const next = nextCraftDay(nowMs);
+const nov = craftDays.filter((d) => d.monthShort === "Nov").length;
+const dec = craftDays.length - nov + 1; // + December 19
+const weekdayShort = (d) => d.weekday.slice(0, 3);
+// Two hand-drawn pen loops (the same paths as the /posada close).
+const RING_A = "M110 8 C84 1 30 2 12 14 C-2 24 14 41 62 41 C104 41 128 31 122 18 C117 8 88 4 62 5";
+const RING_B = "M76 3 C110 3 130 15 123 27 C116 39 78 43 50 40 C16 37 1 27 7 16 C13 6 44 2 72 4 C98 6 116 12 120 19";
+const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
+---
+
+<div class:list={["pcs", `pcs--${size}`]} data-pc-strip>
+  <div class="pcs-months" aria-hidden="true">
+    <p class="pcs-month" style={`grid-column: span ${nov}`}>
+      {bilingual ? (
+        <>
+          <span class="lang-en">{pc.november}</span>
+          <span class="lang-es hidden">{pc.novemberEs}</span>
+        </>
+      ) : pc.november}
+    </p>
+    <p class="pcs-month" style={`grid-column: span ${dec}`}>
+      {bilingual ? (
+        <>
+          <span class="lang-en">{pc.december}</span>
+          <span class="lang-es hidden">{pc.decemberEs}</span>
+        </>
+      ) : pc.december}
+    </p>
+  </div>
+  <ol class="pcs-row" style={`--rt:${ROT[0]}deg;--rb:${ROT[3]}deg`}>
+    {craftDays.map((d, i) => {
+      const past = nowMs >= Date.parse(d.end);
+      const isNext = next?.key === d.key;
+      return (
+        <li
+          class="pcs-cell"
+          data-pc-cell
+          data-pc-end={d.end}
+          data-state={past ? "past" : isNext ? "next" : undefined}
+          style={`--rv:${ROT[(i + 2) % ROT.length]}deg;--rs:${i % 2 ? 1.6 : -1.6}deg`}
+        >
+          <span class="pcs-note" aria-hidden="true"></span>
+          {bilingual ? (
+            <span class="sr-only">
+              <span class="lang-en">{d.long}</span>
+              <span class="lang-es hidden">{craftDaysEs[d.key].long}</span>
+            </span>
+          ) : (
+            <span class="sr-only">{d.long}</span>
+          )}
+          <span class="pcs-wd" aria-hidden="true">
+            {bilingual ? (
+              <>
+                <span class="lang-en">{weekdayShort(d)}</span>
+                <span class="lang-es hidden">{craftDaysEs[d.key].short}</span>
+              </>
+            ) : weekdayShort(d)}
+          </span>
+          <span class="pcs-num" aria-hidden="true">{d.dayNum}</span>
+          <svg class="pcs-strike" viewBox="0 0 60 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path d="M6 33 C20 25 38 15 55 6" pathLength="1" />
+          </svg>
+        </li>
+      );
+    })}
+    <li class="pcs-cell pcs-event" style={`--rv:${ROT[6]}deg`}>
+      {bilingual ? (
+        <span class="sr-only">
+          <span class="lang-en">{posadaEvent.name}, {posadaEvent.dateLabel}</span>
+          <span class="lang-es hidden">{posadaEvent.name}, sábado 19 de diciembre</span>
+        </span>
+      ) : (
+        <span class="sr-only">{posadaEvent.name}, {posadaEvent.dateLabel}</span>
+      )}
+      <span class="pcs-wd" aria-hidden="true">
+        {bilingual ? (
+          <>
+            <span class="lang-en">Sat</span>
+            <span class="lang-es hidden">{pc.dayEs}</span>
+          </>
+        ) : "Sat"}
+      </span>
+      <span class="pcs-num pcs-circled" aria-hidden="true">
+        19
+        <svg class="pcs-ring" viewBox="0 0 130 44" preserveAspectRatio="none" focusable="false" data-pc-ring>
+          <path d={RING_A} pathLength="1" />
+        </svg>
+        <svg class="pcs-ring pcs-ring-2" viewBox="0 0 130 44" preserveAspectRatio="none" focusable="false" data-pc-ring>
+          <path d={RING_B} pathLength="1" />
+        </svg>
+      </span>
+      <span class="pcs-posadas" aria-hidden="true">Posadas</span>
+    </li>
+  </ol>
+</div>
+
+<style>
+  .pcs {
+    --ink: #2b2d36;
+    --red: #d8382e;
+    --yellow: #f5e58a;
+    color: var(--ink);
+  }
+  .pcs-months {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.4fr);
+    padding: 0 0.15rem 0.35rem;
+  }
+  .pcs-month {
+    font-family: "Mynerve", "Rubik", cursive;
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+  .pcs-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.4fr);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* Ruled lines: ink strokes a hair off true, ends running past. */
+  .pcs-row::before,
+  .pcs-row::after,
+  .pcs-cell + .pcs-cell::before {
+    content: "";
+    position: absolute;
+    background: var(--ink);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .pcs-row::before {
+    left: -0.4rem;
+    right: -0.6rem;
+    top: 0;
+    height: 3px;
+    transform: rotate(var(--rt));
+  }
+  .pcs-row::after {
+    left: -0.5rem;
+    right: -0.4rem;
+    bottom: 0;
+    height: 3px;
+    transform: rotate(var(--rb));
+  }
+  .pcs-cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.7rem 0.1rem 0.85rem;
+  }
+  .pcs-cell + .pcs-cell::before {
+    left: 0;
+    top: -0.35rem;
+    bottom: -0.35rem;
+    width: 3px;
+    transform: rotate(var(--rv));
+  }
+  .pcs-wd {
+    position: relative;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .pcs-num {
+    position: relative;
+    margin-top: 0.1rem;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variant-numeric: lining-nums;
+  }
+
+  /* NEXT: a square of sticky-note yellow stuck behind the day. */
+  .pcs-note {
+    position: absolute;
+    inset: 0.5rem 0.45rem;
+    background: var(--yellow);
+    transform: rotate(var(--rs));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .pcs-cell[data-state="next"] .pcs-note { opacity: 1; }
+
+  /* PAST: dimmed and crossed off with one pen line. */
+  .pcs-cell[data-state="past"] .pcs-wd,
+  .pcs-cell[data-state="past"] .pcs-num { opacity: 0.38; }
+  .pcs-strike {
+    position: absolute;
+    left: 18%;
+    top: 22%;
+    width: 64%;
+    height: 60%;
+    overflow: visible;
+    pointer-events: none;
+    display: none;
+  }
+  .pcs-cell[data-state="past"] .pcs-strike { display: block; }
+  .pcs-strike path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* The 19: circled in red pen, with "Posadas" written under it. */
+  .pcs-circled { display: inline-block; padding: 0 0.15em; }
+  .pcs-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1.95em;
+    height: 1.42em;
+    overflow: visible;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .pcs-ring-2 { transform: translate(-50%, -50%) rotate(-8deg) scale(0.95); }
+  .pcs-ring path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    vector-effect: non-scaling-stroke;
+  }
+  /* The script arms the ring (hidden), then draws it once on entry. Without
+     JS it simply shows. */
+  :global([data-pc-armed]) .pcs-ring path { stroke-dashoffset: 1; }
+  :global([data-pc-armed]) .pcs-ring.is-drawn path {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.9s cubic-bezier(0.35, 0.1, 0.25, 1);
+  }
+  :global([data-pc-armed]) .pcs-ring-2.is-drawn path { transition-delay: 0.75s; transition-duration: 0.7s; }
+  .pcs-event .pcs-wd { margin-bottom: 0.2rem; }
+  .pcs-event .pcs-num { margin-top: 0.15rem; }
+  /* The Saturday column is wider than the craft days (see the grid above) so
+     the circle and this word sit clear of the ruled lines on a phone. */
+  .pcs-posadas {
+    margin-top: 0.45rem;
+    font-family: "Mynerve", "Rubik", cursive;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--red);
+  }
+
+  /* /links language toggle (.lang-active-en / -es on the page). */
+  :global(.lang-active-en) .pcs .lang-es,
+  :global(.lang-active-es) .pcs .lang-en { display: none; }
+  :global(.lang-active-es) .pcs .lang-es { display: inline; }
+
+  /* /links card: a phone-width row. */
+  .pcs--card .pcs-month { font-size: 1.15rem; }
+  .pcs--card .pcs-num { font-size: 1.6rem; }
+  .pcs--card .pcs-wd { font-size: 0.75rem; }
+  .pcs--card .pcs-posadas { font-size: 0.9rem; }
+  .pcs--card .pcs-cell { padding: 0.6rem 0 0.75rem; }
+
+  .pcs-posadas { white-space: nowrap; }
+  @media (max-width: 359px) {
+    .pcs-num { font-size: 1.6rem; }
+    .pcs-wd { font-size: 0.72rem; }
+    .pcs-month { font-size: 1.1rem; }
+    .pcs--card .pcs-num { font-size: 1.4rem; }
+    .pcs--card .pcs-month { font-size: 0.98rem; }
+    .pcs-posadas,
+    .pcs--card .pcs-posadas { font-size: 0.78rem; }
+  }
+  @media (min-width: 640px) {
+    .pcs--band .pcs-num { font-size: 2.6rem; }
+    .pcs--band .pcs-wd { font-size: 0.95rem; }
+    .pcs--band .pcs-month { font-size: 1.6rem; }
+    .pcs--band .pcs-cell { padding: 0.85rem 0.2rem 1rem; }
+    .pcs--band .pcs-posadas { font-size: 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global([data-pc-armed]) .pcs-ring path { transition: none; stroke-dashoffset: 0; }
+    .pcs-note { transition: none; }
+  }
+</style>

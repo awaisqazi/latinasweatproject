@@ -1,0 +1,141 @@
+---
+// A small studio floor of mats for the LSP Giving Tuesday placements on the
+// homepage and /links (the full floor lives in
+// src/components/givingTuesday/MatFloor.svelte on /givingtuesday). Same
+// drawing as that floor's phone layout: a yellow room seen from above, 10
+// columns of sideways mats with a center aisle, 15 rows, 150 mats = $15,000,
+// one mat = $100 (givingCopy.floor.matCents), same mat colours in the same
+// deterministic order. No Svelte here: the SVG is static and
+// src/lib/givingTuesday/placement.js rolls the funded mats out by setting
+// --from / --to / --d on each mat when the floor scrolls into view.
+//
+// Without JS (or before / without the total) the room shows faint mat
+// outlines and no mats. The outlines darken once the live total is known
+// (data-live on the svg). (/givingtuesday shows a bare room in that state;
+// on these smaller placements a bare yellow block read as a broken image.)
+import { givingFacts, givingCopy } from "@/data/givingTuesday";
+
+const mats = Math.ceil(givingFacts.goalCents / givingCopy.floor.matCents);
+const L = { cols: 10, aisleAt: 5, w: 30, h: 10, gx: 4, gy: 5, aisle: 8, pad: 10 };
+const rows = Math.ceil(mats / L.cols);
+const colX = (c) => L.pad + c * (L.w + L.gx) + (c >= L.aisleAt ? L.aisle : 0);
+const rowY = (r) => L.pad + r * (L.h + L.gy);
+const width = colX(L.cols - 1) + L.w + L.pad;
+const height = L.pad * 2 + rows * L.h + (rows - 1) * L.gy;
+
+// The studio mat colours of MatFloor.svelte, [mat, roll], picked the same way.
+const COLORS = [
+  ["#1e1e1e", "#000000"],
+  ["#0f766e", "#0a524d"],
+  ["#c7602d", "#97461f"],
+  ["#d9467a", "#a8305b"],
+  ["#0369a1", "#024a72"],
+  ["#1e1e1e", "#000000"],
+  ["#6d4aa8", "#4f3480"],
+  ["#0f766e", "#0a524d"],
+];
+function colorOf(i) {
+  let x = (i + 11) * 2654435761;
+  x = (x ^ (x >>> 13)) >>> 0;
+  return COLORS[x % COLORS.length];
+}
+const cells = Array.from({ length: mats }, (_, i) => ({
+  x: colX(i % L.cols),
+  y: rowY(Math.floor(i / L.cols)),
+  c: colorOf(i),
+}));
+---
+
+<svg
+  class="gmf"
+  viewBox={`0 0 ${width} ${height}`}
+  width={width}
+  height={height}
+  style={`--len:${L.w}px`}
+  aria-hidden="true"
+  focusable="false"
+  data-gt-floor
+>
+  <rect class="gmf-room" x="0" y="0" width={width} height={height} rx={L.pad * 0.6} />
+  {cells.map((m) => (
+    <g transform={`translate(${m.x} ${m.y})`} data-gt-mat>
+      <rect class="gmf-out" width={L.w} height={L.h} rx="2" />
+      <rect class="gmf-body" width={L.w} height={L.h} rx="2" fill={m.c[0]} />
+      <rect class="gmf-roll" x="-2.5" y="-1.5" width="5" height={L.h + 3} rx="2.5" fill={m.c[1]} />
+    </g>
+  ))}
+</svg>
+
+<style>
+  .gmf {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .gmf-room { fill: #ffde59; }
+  .gmf-out {
+    fill: none;
+    /* Faint until the live total is known, so the room never reads as an
+       empty yellow block (and never as "$0 raised"). */
+    stroke: rgba(30, 30, 30, 0.16);
+    stroke-width: 1;
+    transition: stroke 0.6s;
+  }
+  .gmf[data-live] .gmf-out { stroke: rgba(30, 30, 30, 0.34); }
+
+  /* Nothing is rolled out until the script says so. */
+  .gmf-body,
+  .gmf-roll {
+    transform-box: fill-box;
+    opacity: 0;
+  }
+  .gmf-body { transform-origin: 0 0; }
+  .gmf-roll { transform-origin: 50% 50%; }
+  .gmf-body.g0,
+  .gmf-body.g1,
+  .gmf-roll.g0,
+  .gmf-roll.g1 { opacity: 1; }
+
+  /* The body grows to the right while the roll travels along it, thins and
+     is used up (MatFloor.svelte's keyframes, sideways layout). */
+  .gmf-body.g0 { animation: gmf-b0 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) var(--d) both; }
+  .gmf-body.g1 { animation: gmf-b1 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) var(--d) both; }
+  .gmf-roll.g0 { animation: gmf-r0 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) var(--d) both; }
+  .gmf-roll.g1 { animation: gmf-r1 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) var(--d) both; }
+  .gmf-roll.done.g0 { animation-name: gmf-r0-done; }
+  .gmf-roll.done.g1 { animation-name: gmf-r1-done; }
+
+  @keyframes gmf-b0 { from { transform: scaleX(var(--from)); } to { transform: scaleX(var(--to)); } }
+  @keyframes gmf-b1 { from { transform: scaleX(var(--from)); } to { transform: scaleX(var(--to)); } }
+  @keyframes gmf-r0 {
+    from { transform: translateX(calc(var(--from) * var(--len))) scale(calc(1.25 - var(--from) * 0.5)); }
+    to { transform: translateX(calc(var(--to) * var(--len))) scale(calc(1.25 - var(--to) * 0.5)); }
+  }
+  @keyframes gmf-r1 {
+    from { transform: translateX(calc(var(--from) * var(--len))) scale(calc(1.25 - var(--from) * 0.5)); }
+    to { transform: translateX(calc(var(--to) * var(--len))) scale(calc(1.25 - var(--to) * 0.5)); }
+  }
+  @keyframes gmf-r0-done {
+    0% { opacity: 1; transform: translateX(calc(var(--from) * var(--len))) scale(calc(1.25 - var(--from) * 0.5)); }
+    86% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(var(--len)) scale(0.55); }
+  }
+  @keyframes gmf-r1-done {
+    0% { opacity: 1; transform: translateX(calc(var(--from) * var(--len))) scale(calc(1.25 - var(--from) * 0.5)); }
+    86% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(var(--len)) scale(0.55); }
+  }
+
+  /* Reduced motion: final state, no travel. A partly funded mat keeps its roll. */
+  @media (prefers-reduced-motion: reduce) {
+    .gmf-body,
+    .gmf-roll { animation: none !important; }
+    .gmf-body.g0,
+    .gmf-body.g1 { transform: scaleX(var(--to)); }
+    .gmf-roll.g0,
+    .gmf-roll.g1 { transform: translateX(calc(var(--to) * var(--len))) scale(calc(1.25 - var(--to) * 0.5)); }
+    .gmf-roll.done { opacity: 0; }
+    .gmf-out { transition: none; }
+  }
+</style>
