@@ -10,7 +10,7 @@
 //   before the day   "LSP Giving Tuesday is in 11 days 23 hrs 59 min"  Give ->
 //                    (minutes drop on phones while a day or more is left)
 //   on Dec 1         "LSP Giving Tuesday is today" (+ the page's "gifts count
-//                    through 11:59 pm Central tonight" note on wide screens)
+//                    through 11:59 pm Central tonight" note from 1280 px)
 //   after endsAt     nothing: not rendered at build time, and removed by the
 //                    script below from a stale build before it paints.
 // The whole band is one link to /givingtuesday with one stable accessible
@@ -25,7 +25,32 @@
 // Dev only: ?now=<ISO> (same param as the homepage and /links placements)
 // pretends it is that moment. The attribute that enables it is only rendered
 // by the dev server, and the script also requires a localhost host.
-import { givingFacts, givingRoutes, showGivingHeaderBand } from "@/data/givingTuesday";
+//
+// The mats (added Nov 19, 2026; upright, owner's direction): a row of 15
+// mats, one per goal / 15 ($1,000 of $15,000), drawn as a small slice of
+// MatFloor's wide floor: upright, about 1 : 2.8, softly rounded, in the
+// floor's own colour order, faint ink outlines for mats not yet reached, each
+// mat unrolling top to bottom with its darker roll at the leading edge (the
+// roll thins as the mat is used up, 1.15 to 0.85, as on the floor). Under
+// 1024 px the row lies under the wording (6.5 x 18 px); from 1024 px it is
+// 8 x 22 px before "Give" in the 40 px band. The figure "$555 / $15K" always
+// sits right after the mats, in a reserved place.
+// Loading: the script reveals the 15 mats as ghost outlines before first
+// paint, and the figure and colour arrive with the number. Without JS, or
+// when the fetch fails or returns nonsense, there is no row at all and the
+// band is the single line (44 px on phones).
+// Amount: one plain POST to the public giving_public RPC (publishable key, no
+// supabase-js), headline field total_cents, goal from campaign.goal_cents.
+// Cached in localStorage for 5 minutes (no fetch while fresh). On a browser's first visit
+// the mats unroll in sequence from the first roll (well under 1.5 s in all);
+// afterwards they only move when the number changed since this browser last
+// saw it. Reduced motion: the final state. Minimum: a current mat with any
+// money on it shows at least 2 px of body under its roll; $0 shows the first
+// mat's waiting roll.
+// Dev only: ?bandtotal=<dollars> fakes the total, ?bandtotal=fail the failed
+// fetch, ?bandtotal=hold the loading state (same localhost + dev-attribute
+// guard as ?now=; cache untouched).
+import { givingFacts, givingRoutes, showGivingHeaderBand, GIVING_SLUG } from "@/data/givingTuesday";
 
 const endsMs = Date.parse(givingFacts.endsAt);
 const dayStartIso = new Date(endsMs + 1000 - 86400000).toISOString();
@@ -33,6 +58,27 @@ const show = showGivingHeaderBand && Date.now() <= endsMs;
 const base = import.meta.env.BASE_URL;
 const href = `${base}${givingRoutes.page.replace(/^\//, "")}`;
 const devNow = import.meta.env.DEV;
+const sbUrl = import.meta.env.PUBLIC_SUPABASE_URL || "";
+const sbKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+// 15 mats, one per goal / 15 ($1,000 of $15,000), owner's call. Colours and
+// order are MatFloor.svelte's own (COLORS and colorOf, copied verbatim), so
+// the band is the first 15 mats of the page's floor.
+const MATS = 15;
+const COLORS = [
+  ["#1e1e1e", "#000000"],
+  ["#0f766e", "#0a524d"],
+  ["#c7602d", "#97461f"],
+  ["#d9467a", "#a8305b"],
+  ["#0369a1", "#024a72"],
+  ["#1e1e1e", "#000000"],
+  ["#6d4aa8", "#4f3480"],
+  ["#0f766e", "#0a524d"],
+];
+function colorOf(i: number) {
+  let x = (i + 11) * 2654435761;
+  x = (x ^ (x >>> 13)) >>> 0;
+  return COLORS[x % COLORS.length];
+}
 ---
 
 {show && (
@@ -42,6 +88,10 @@ const devNow = import.meta.env.DEV;
     data-day-start={dayStartIso}
     data-ends={givingFacts.endsAt}
     data-dev-now={devNow ? "" : undefined}
+    data-sb={sbUrl}
+    data-sb-key={sbKey}
+    data-campaign={GIVING_SLUG}
+    data-goal={givingFacts.goalCents}
   >
     <a
       href={href}
@@ -54,6 +104,14 @@ const devNow = import.meta.env.DEV;
         <span class="gthb-line" aria-hidden="true">
           <span class="gthb-name">LSP Giving Tuesday</span>{" "}<span class="gthb-when" data-gthb-when>is Tuesday, Dec 1</span>
           <span class="gthb-note" data-gthb-note hidden>Gifts count through 11:59 pm Central tonight.</span>
+        </span>
+        <span class="gthb-prog" data-gthb-prog aria-hidden="true">
+          <span class="gthb-mats" data-gthb-mats>
+            {Array.from({ length: MATS }, (_, i) => (
+              <span class="gthb-m" style={`--c:${colorOf(i)[0]};--r:${colorOf(i)[1]}`}><span class="gthb-mb"></span><span class="gthb-mt"><span class="gthb-mr"></span></span></span>
+            ))}
+          </span>
+          <span class="gthb-fig" data-gthb-fig></span>
         </span>
         <span class="gthb-give" aria-hidden="true">
           Give
@@ -86,6 +144,13 @@ const devNow = import.meta.env.DEV;
 
       function unit(n, one, many) { return n + " " + (n === 1 ? one : many); }
       var state = "";
+      var amountLabel = "";
+      function setLabel() {
+        link.setAttribute(
+          "aria-label",
+          (state === "today" ? "LSP Giving Tuesday is today. Give now" : "LSP Giving Tuesday, Tuesday December 1. Give now") + amountLabel
+        );
+      }
       var timer = 0;
 
       function render() {
@@ -99,7 +164,7 @@ const devNow = import.meta.env.DEV;
             state = "today";
             when.textContent = "is today";
             note.hidden = false;
-            link.setAttribute("aria-label", "LSP Giving Tuesday is today. Give now");
+            setLabel();
           }
           return true;
         }
@@ -110,11 +175,11 @@ const devNow = import.meta.env.DEV;
         var h = Math.floor((mins % 1440) / 60);
         var m = mins % 60;
         var parts = [];
-        // With a day or more left the minutes are a detail: phones drop them
-        // (and the smallest phones, under 360 px, drop the hours too).
+        // With a day or more left the minutes are a detail: phones under
+        // 480 px drop them, and phones under 380 px drop the next unit too.
         if (d > 0) parts.push([unit(d, "day", "days"), ""]);
-        if (d > 0 || h > 0) parts.push([unit(h, "hr", "hrs"), d > 0 ? "gthb-opt-xs" : ""]);
-        parts.push([unit(m, "min", "min"), d > 0 ? "gthb-opt" : ""]);
+        if (d > 0 || h > 0) parts.push([unit(h, "hr", "hrs"), d > 0 ? "gthb-opt-sm" : ""]);
+        parts.push([unit(m, "min", "min"), d > 0 ? "gthb-opt" : h > 0 ? "gthb-opt-sm" : ""]);
         when.textContent = "is in ";
         parts.forEach(function (p, i) {
           var s = document.createElement("span");
@@ -137,6 +202,136 @@ const devNow = import.meta.env.DEV;
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden) schedule();
       });
+      if (!band.isConnected) return;
+
+      // ---- the mats ----
+      // The ghost floor appears only once this script runs (before first
+      // paint); without JS, or when the total cannot be had, the band stays
+      // the single line.
+      band.setAttribute("data-js", "");
+      function fail() { band.removeAttribute("data-js"); }
+      var prog = band.querySelector("[data-gthb-prog]");
+      var mats = Array.prototype.slice.call(band.querySelectorAll(".gthb-m"));
+      var figs = Array.prototype.slice.call(band.querySelectorAll("[data-gthb-fig]"));
+      function count() { return mats.length; }
+      var KEY = "lsp-gt-band-total";
+      var FRESH = 5 * 60 * 1000;
+      var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var fallbackGoal = Number(band.getAttribute("data-goal")) || 1500000;
+
+      function dollars(c) { return "$" + Math.floor(c / 100).toLocaleString("en-US"); }
+      // "$505", "$1.2K", "$15K" (rounded down, so it never overstates).
+      function short(c) {
+        var d = Math.floor(c / 100);
+        if (d < 1000) return "$" + d;
+        var k = Math.floor(d / 100) / 10;
+        return "$" + (k % 1 ? k.toFixed(1) : String(k)) + "K";
+      }
+      function sane(total, goal) { return isFinite(total) && total >= 0 && isFinite(goal) && goal > 0; }
+
+      // F = mats funded (float). Mat i shows clamp(F - i, 0, 1); the roll sits
+      // on the current mat (the first one not fully funded).
+      function place(F, run) {
+        var n = count();
+        var changed = 0;
+        mats.forEach(function (m, i) {
+          var f = Math.max(0, Math.min(1, F - i));
+          var was = Number(m.style.getPropertyValue("--f") || 0);
+          var moving = run && Math.abs(f - was) > 1e-6;
+          if (moving) {
+            m.style.setProperty("--dl", Math.round(changed * run.step) + "ms");
+            changed++;
+          } else m.style.setProperty("--dl", "0ms");
+          m.classList.toggle("is-run", !!moving);
+          m.style.setProperty("--f", String(f));
+          m.style.setProperty("--mn", f > 0 && f < 1 ? "2px" : "0px");
+          m.style.setProperty("--rs", String(1.15 - f * 0.3));
+          m.classList.toggle("is-full", f >= 1);
+          m.classList.toggle("is-cur", i === Math.floor(F) && F < n);
+        });
+      }
+
+      function show(total, goal, fromTotal) {
+        figs.forEach(function (el) {
+          el.textContent = "";
+          var b = document.createElement("span");
+          b.className = "gthb-fig-raised";
+          b.textContent = short(total);
+          el.appendChild(b);
+          el.appendChild(document.createTextNode("\u2009/\u2009" + short(goal)));
+        });
+        amountLabel = ", " + dollars(total) + " raised of " + dollars(goal);
+        setLabel();
+        var n = count();
+        var F = (total / goal) * n;
+        var F0 = fromTotal == null ? F : (fromTotal / goal) * n;
+        if (reduced || Math.abs(F0 - F) < 1e-9) {
+          place(F, null);
+        } else {
+          // Lay the row at the old amount (the first roll, on a first visit),
+          // then unroll the changed mats one after another, the whole run in
+          // about 1.5 s however many mats move.
+          place(F0, null);
+          void prog.offsetWidth;
+          var k = Math.max(1, Math.ceil(Math.max(F, F0)) - Math.floor(Math.min(F, F0)));
+          var step = k > 1 ? Math.min(140, 800 / (k - 1)) : 0;
+          prog.classList.add("is-moving");
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { place(F, { step: step }); });
+          });
+        }
+        prog.setAttribute("data-on", "");
+        band.setAttribute("data-fig", "");
+      }
+
+      function read() {
+        try {
+          var c = JSON.parse(localStorage.getItem(KEY) || "null");
+          return c && sane(c.total, c.goal) && isFinite(c.t) ? c : null;
+        } catch (e) { return null; }
+      }
+
+      var dev = band.hasAttribute("data-dev-now") && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+      var fakeTotal = dev ? new URLSearchParams(location.search).get("bandtotal") : null;
+      if (fakeTotal === "fail") { setTimeout(fail, 600); return; }
+      if (fakeTotal === "hold") return; // stays loading: the ghost floor
+      if (fakeTotal != null && isFinite(Number(fakeTotal))) {
+        setTimeout(function () { show(Math.round(Number(fakeTotal) * 100), fallbackGoal, 0); }, 300);
+        return;
+      }
+
+      var cached = read();
+      if (cached && Date.now() - cached.t < FRESH) {
+        show(cached.total, cached.goal, null);
+        return;
+      }
+      var url = band.getAttribute("data-sb");
+      var key = band.getAttribute("data-sb-key");
+      if (!url || !key) return fail();
+      var f = window.__lspNativeFetch || window.fetch;
+      if (!f) return fail();
+      var ctl = window.AbortController ? new AbortController() : null;
+      var stop = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+      f(url.replace(/\/$/, "") + "/rest/v1/rpc/giving_public", {
+        method: "POST",
+        headers: { apikey: key, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_campaign: band.getAttribute("data-campaign") }),
+        signal: ctl ? ctl.signal : undefined,
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          clearTimeout(stop);
+          if (!d || d.ok !== true || !band.isConnected) return fail();
+          var total = Number(d.total_cents);
+          var goal = Number(d.campaign && d.campaign.goal_cents) || fallbackGoal;
+          if (!sane(total, goal)) return fail();
+          // First visit: unroll from the roll. Later: from what this browser
+          // last saw, so it only moves when the number changed.
+          var from = cached ? (cached.total / cached.goal) * goal : 0;
+          show(total, goal, from);
+          try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), total: total, goal: goal })); } catch (e) {}
+        })
+        .catch(function () { clearTimeout(stop); fail(); });
     })();
   </script>
 )}
@@ -201,6 +396,145 @@ const devNow = import.meta.env.DEV;
     content: "·";
     margin-right: 0.5em;
   }
+  /* ---- the mats ---- */
+  .gthb-link {
+    position: relative;
+  }
+  /* No JS, or no total to be had: no row at all (the single line). */
+  .gthb:not([data-js]) .gthb-prog {
+    display: none !important;
+  }
+  /* The figure, "$555 / $15K", right after the mats at every width; its
+     place is reserved and it shows once a real total arrives. */
+  .gthb-fig {
+    flex-shrink: 0;
+    min-width: 6.8em;
+    font-weight: 400;
+    visibility: hidden;
+  }
+  .gthb[data-fig] .gthb-fig {
+    visibility: visible;
+  }
+  .gthb-fig :global(.gthb-fig-raised) {
+    font-weight: 700;
+  }
+  /* Upright mats, a slice of MatFloor's wide floor: 26 x 72 (about 1 : 2.8),
+     softly rounded, faint ink outlines for mats not yet reached, the body
+     unrolling top to bottom with the darker roll at its leading edge. */
+  .gthb-mats {
+    --mh: 18px;
+    --mw: 6.5px;
+    --du: 600ms;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 3px;
+  }
+  .gthb-m {
+    position: relative;
+    flex: 0 0 var(--mw);
+    height: var(--mh);
+    border-radius: 1.5px;
+    box-shadow: inset 0 0 0 1px rgba(30, 30, 30, 0.34);
+  }
+  .gthb-mb {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: max(calc(var(--f, 0) * 100%), var(--mn, 0px));
+    border-radius: inherit;
+    background: var(--c);
+  }
+  /* The roll rides a full-height track moved by transform. */
+  .gthb-mt {
+    position: absolute;
+    inset: 0 -1px;
+    transform: translateY(max(calc(var(--f, 0) * 100%), var(--mn, 0px), 1.5px));
+  }
+  .gthb-mr {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -1.5px;
+    height: 3px;
+    border-radius: 1.5px;
+    background: var(--r);
+    transform: scale(var(--rs, 1.15));
+    opacity: 0;
+  }
+  .gthb-m.is-cur .gthb-mr {
+    opacity: 1;
+  }
+  .is-moving .gthb-m.is-run .gthb-mb {
+    transition: height var(--du) cubic-bezier(0.3, 0.7, 0.3, 1) var(--dl);
+  }
+  .is-moving .gthb-m.is-run .gthb-mt,
+  .is-moving .gthb-m.is-run .gthb-mr {
+    transition: transform var(--du) cubic-bezier(0.3, 0.7, 0.3, 1) var(--dl);
+  }
+  /* A mat unrolling all the way shows its roll until it is used up. */
+  .is-moving .gthb-m.is-run.is-full .gthb-mr {
+    animation: gthb-used var(--du) linear var(--dl) both;
+  }
+  @keyframes gthb-used {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (max-width: 1023px) {
+    /* A deliberate two-line set: the wording, and the row of mats under it
+       (on phones the figure sits right after the mats). */
+    .gthb[data-js] .gthb-inner {
+      min-height: 56px;
+      padding-bottom: 24px;
+    }
+    .gthb-prog {
+      position: absolute;
+      left: 1rem;
+      right: 1rem;
+      bottom: 7px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+  @media (max-width: 639px) {
+    .gthb-fig {
+      font-size: 13px;
+      line-height: 18px;
+    }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .gthb-prog {
+      left: 1.5rem;
+      right: 1.5rem;
+    }
+  }
+  @media (max-width: 359px) {
+    .gthb-prog {
+      left: 0.75rem;
+      right: 0.75rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .gthb-prog {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+    .gthb-mats {
+      --mh: 22px;
+      --mw: 8px;
+      gap: 3px;
+    }
+  }
   .gthb-give {
     flex-shrink: 0;
     display: inline-flex;
@@ -227,27 +561,37 @@ const devNow = import.meta.env.DEV;
       display: none;
     }
   }
+  @media (max-width: 379px) {
+    .gthb-when :global(.gthb-opt-sm) {
+      display: none;
+    }
+  }
   @media (max-width: 359px) {
     .gthb-inner {
       gap: 0.75rem;
-      padding: 0 0.75rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
       font-size: 13px;
     }
     .gthb-arrow {
       display: none;
     }
-    .gthb-when :global(.gthb-opt-xs) {
-      display: none;
-    }
+
   }
-  @media (max-width: 767px) {
+  @media (max-width: 1279px) {
     .gthb-note {
       display: none !important;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .gthb-arrow {
+    .gthb-arrow,
+    .is-moving .gthb-m.is-run .gthb-mb,
+    .is-moving .gthb-m.is-run .gthb-mt,
+    .is-moving .gthb-m.is-run .gthb-mr {
       transition: none;
+    }
+    .is-moving .gthb-m.is-run.is-full .gthb-mr {
+      animation: none;
     }
     .gthb-link:hover .gthb-arrow,
     .gthb-link:focus-visible .gthb-arrow {
