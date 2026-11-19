@@ -175,3 +175,11 @@ Deno.test("paymentRow maps fields for the upsert", () => {
   assertEquals(row.fundraiser_id, "f-ana");
   assertEquals(row.zeffy_parent_campaign_id, MAIN);
 });
+
+Deno.test("attribution: a gift on a known participant page with no parent id is still credited", () => {
+  const a = attribute(pay({ campaign_id: "page-ana", parent_campaign_id: null }), campaigns, fundraisers);
+  assertEquals(a.kind, "fundraiser");
+  if (a.kind === "fundraiser") assertEquals(a.fundraiser.id, fundraisers[0].id);
+  // An unknown page with no parent id stays outside the drive.
+  assertEquals(attribute(pay({ campaign_id: "page-zed", parent_campaign_id: null }), campaigns, fundraisers).kind, "ignored");
+});

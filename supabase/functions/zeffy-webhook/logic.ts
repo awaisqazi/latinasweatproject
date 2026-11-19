@@ -181,9 +181,16 @@ export function attribute(
   campaigns: GivingCampaign[],
   fundraisers: GivingFundraiser[],
 ): Attribution {
-  const campaign = findCampaign(p, campaigns);
-  if (!campaign) return { kind: "ignored" };
   const cid = p.campaign_id || "";
+  // Zeffy's API leaves parent_campaign_id empty on participant pages, so a
+  // gift on one may not point back at the main campaign: fall back to the
+  // page id stored on a fundraiser.
+  let campaign = findCampaign(p, campaigns);
+  if (!campaign && cid) {
+    const owner = fundraisers.find((f) => f.zeffy_campaign_id === cid);
+    if (owner) campaign = campaigns.find((c) => c.slug === owner.campaign_slug) || null;
+  }
+  if (!campaign) return { kind: "ignored" };
   if (!cid || campaign.zeffy_campaign_ids.includes(cid)) return { kind: "main", campaign };
   const fr = fundraisers.find((f) => f.campaign_slug === campaign.slug && f.zeffy_campaign_id === cid);
   if (fr) return { kind: "fundraiser", campaign, fundraiser: fr };
