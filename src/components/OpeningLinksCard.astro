@@ -117,6 +117,12 @@ const dayEs = { Mon: "Lun", Tue: "Mar", Wed: "Mié", Thu: "Jue", Fri: "Vie", Sat
     font-family: "Public Sans", "Rubik", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+  /* The page's language toggle (.lang-active-en / -es on .links-page). The
+     toggle rules in links.astro are scoped to that file and do not reach into
+     this component, so the card carries its own. */
+  :global(.lang-active-en) .olc .lang-es,
+  :global(.lang-active-es) .olc .lang-en { display: none !important; }
+  :global(.lang-active-es) .olc .lang-es { display: inline; }
   .olc-in { padding: 1.25rem 1rem 1rem; }
   .olc-label {
     font-size: 0.66rem;
