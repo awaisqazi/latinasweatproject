@@ -23,6 +23,7 @@
   import FundraisingLiveOverview from "./FundraisingLiveOverview.svelte";
   import GrantsTab from "./GrantsTab.svelte";
   import LiveData from "./live/LiveData.svelte";
+  import FollowUpData from "./subcommittee/FollowUpData.svelte";
   import ProspectDrawer from "./ProspectDrawer.svelte";
   import SubcommitteeHeader from "./SubcommitteeHeader.svelte";
   import WorkshopsTab from "./WorkshopsTab.svelte";
@@ -69,6 +70,7 @@
   // Sub-tab ids carry their top tab's id so no two tab buttons share a DOM id.
   const SUB_TABS = {
     donors: [
+      { id: "donors-thanks", label: "Thank-yous" },
       { id: "donors-list", label: "Donors" },
       { id: "donors-lapsed", label: "Lapsed" },
       { id: "donors-outreach", label: "Outreach" },
@@ -111,6 +113,9 @@
   let selectedProspectId = "";
   let givingPendingCount = 0;
   let liveView = null;
+  let followUps = null;
+  // Grants > Pipeline "Overdue next step" quick filter; Next up turns it on.
+  let grantsOverdueOnly = false;
   // Donor list filters live here so they survive sub-tab switches.
   let donorSearch = "";
   let donorSort = "total";
@@ -165,10 +170,28 @@
     }
   }
 
+  // Sub-tab ids are "<tab>-<subtab>" ("donors-thanks"); the short form the
+  // attention targets use ("thanks") is accepted too.
+  function resolveSubTab(top, sub) {
+    const value = String(sub || "").trim();
+    if (!value || !SUB_TABS[top]) return "";
+    const id = value.startsWith(`${top}-`) ? value : `${top}-${value}`;
+    return SUB_TABS[top].some((tab) => tab.id === id) ? id : "";
+  }
+
   function openTab(top, sub = "") {
     if (!TABS.some((tab) => tab.id === top)) return;
-    if (sub) setSubTab(top, sub);
+    const id = resolveSubTab(top, sub);
+    if (id) setSubTab(top, id);
     activeTab = top;
+  }
+
+  // From a subcommittee's Next up: open the tab and sub-tab, then the grant
+  // or the overdue filter when the line asks for one.
+  function openTarget(top, sub = "", options = {}) {
+    if (options.overdueOnly) grantsOverdueOnly = true;
+    openTab(top, sub);
+    if (options.prospectId) selectedProspectId = options.prospectId;
   }
 
   async function loadAll() {
@@ -280,13 +303,13 @@
   bind:view={liveView}
 />
 
+<FollowUpData {supabase} {refreshKey} bind:followUps />
+
 <section class="space-y-4" aria-labelledby="fundraising-title">
   <div class="flex flex-col gap-3 rounded-card border border-ink/8 bg-white p-4 shadow-card md:flex-row md:items-center md:justify-between md:p-5">
     <div class="shrink-0">
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-strong">
-        Donations, donors, and grant prospects in one hub
-      </p>
-      <h3 id="fundraising-title" class="mt-1 text-2xl font-bold">Fundraising</h3>
+      <h3 id="fundraising-title" class="text-2xl font-bold">Fundraising</h3>
+      <p class="mt-0.5 text-sm text-ink/55">Donations, donors, and grant prospects in one place</p>
     </div>
     <div class="min-w-0">
       <Tabs tabs={tabsWithCounts} bind:active={activeTab} variant="segmented" label="Fundraising sections" hasPanels={false} />
@@ -299,12 +322,18 @@
 
   {#if isSubcommitteeTab}
     <SubcommitteeHeader
+      {supabase}
       committeeId={activeTab}
       view={liveView}
+      {followUps}
+      {teamMembers}
+      {campaignSummaries}
+      {last30Donations}
       subTabs={activeSubTabs}
       active={activeSub}
       onChange={(id) => setSubTab(activeTab, id)}
       onOpenProspect={(prospectId) => (selectedProspectId = prospectId)}
+      onOpenTarget={openTarget}
     />
   {/if}
 
@@ -324,7 +353,7 @@
       view={liveView}
       onOpenDonorEmail={openDonorByEmail}
       onOpenProspect={(prospectId) => (selectedProspectId = prospectId)}
-      onOpenTab={(id) => openTab(id)}
+      onOpenTab={(id, subId) => openTab(id, subId)}
       onOpenWorksheet={(id) => openTab(id, `${id}-worksheet`)}
     />
   {:else if activeTab === "donors"}
@@ -335,6 +364,7 @@
       {teamMembers}
       {refreshKey}
       view={liveView}
+      {followUps}
       {donorSummaries}
       {donorProfiles}
       {templates}
@@ -356,6 +386,7 @@
       {teamMembers}
       onSelectProspect={(prospect) => (selectedProspectId = prospect.id)}
       onProspectUpdated={handleProspectUpdated}
+      bind:overdueOnly={grantsOverdueOnly}
     />
   {:else if activeTab === "events"}
     <EventsTab
@@ -366,7 +397,6 @@
       {refreshKey}
       view={liveView}
       {campaignSummaries}
-      {last30Donations}
       {prospects}
       {donorProfiles}
       {outreachCampaigns}

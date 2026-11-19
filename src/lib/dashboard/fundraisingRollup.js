@@ -226,3 +226,85 @@ export async function loadGoalRollup(supabase, cycle = ROLLUP_CYCLE) {
   if (!rollup.ok) return { data: null, error: null, missing: false, forbidden: true, reason: rollup.reason };
   return { data: rollup, error: null, missing: false, forbidden: false };
 }
+
+// ── Overview goal bar ───────────────────────────────────────────
+
+function wholeDollars(cents) {
+  return Math.round(Number(cents || 0) / 100) * 100;
+}
+
+// The Overview's one goal bar: money already counted for the goal year,
+// the rest of the realistic plans (realistic total minus counted), and the
+// gap (goal minus the larger of the two). goal is goalProgress()
+// output (view.goal); rollup is normalizeGoalRollup() output or null;
+// grants is fundraising_live's normalized grants block or null.
+//
+// Counted: in the goal year, Zeffy payments that year plus grants committed
+// for it (goal.baselineCents). Before the goal year starts, only grants
+// already committed for that year. Everything is whole dollars so the parts
+// shown always add up to the goal shown. Returns null without a goal.
+export function goalBarModel({ goal = null, rollup = null, grants = null } = {}) {
+  if (!goal || !(goal.cents > 0)) return null;
+  const goalCents = wholeDollars(goal.cents);
+  const year = String(goal.year);
+  const upcoming = goal.mode !== "current";
+
+  let countedRaw = null;
+  if (!upcoming) countedRaw = goal.baselineCents;
+  else if (grants) countedRaw = grants.byYear?.[year] ?? 0;
+  else if (rollup && String(rollup.cycle || ROLLUP_CYCLE) === year) countedRaw = rollup.grantsCommittedCents;
+  const countedKnown = countedRaw !== null && countedRaw !== undefined;
+  const countedCents = countedKnown ? wholeDollars(countedRaw) : 0;
+
+  const plansApply = Boolean(rollup) && String(rollup.cycle || ROLLUP_CYCLE) === year;
+  const sizedCount = plansApply ? rollup.sizedCount : 0;
+  // A realistic plan is the full-year total, so money already counted is
+  // progress toward it, not on top of it.
+  const realisticCents = plansApply ? wholeDollars(rollup.totals.realisticCents) : 0;
+  const plansCents = Math.max(realisticCents - countedCents, 0);
+  const coveredCents = Math.max(realisticCents, countedCents);
+  const gapCents = Math.max(goalCents - coveredCents, 0);
+  const spareCents = Math.max(coveredCents - goalCents, 0);
+
+  const pct = (cents) => (goalCents > 0 ? Math.max(0, Math.min(100, (cents / goalCents) * 100)) : 0);
+  const countedPercent = pct(countedCents);
+  const plansPercent = Math.min(pct(plansCents), 100 - countedPercent);
+
+  const money = formatCentsWhole;
+  const leaves = gapCents > 0 ? `That leaves ${money(gapCents)} to find.` : spareCents > 0 ? `That is ${money(spareCents)} more than the goal.` : "That meets the goal.";
+  let sentence;
+  if (plansApply && !sizedCount) {
+    sentence = `No subcommittee has sized its plan yet. That leaves ${money(gapCents)} to find.`;
+  } else if (plansApply && countedCents > realisticCents) {
+    sentence = `Realistic plans add up to ${money(realisticCents)}, and ${money(countedCents)} is already in, more than the plans. ${leaves}`;
+  } else if (plansApply && countedCents > 0) {
+    sentence = `Realistic plans add up to ${money(realisticCents)}, and ${money(countedCents)} of that is already in. ${leaves}`;
+  } else if (plansApply) {
+    sentence = `Realistic plans add up to ${money(realisticCents)}. ${leaves}`;
+  } else {
+    sentence = leaves;
+  }
+
+  const unsized = plansApply ? rollup.rows.filter((row) => !row.sized).map((row) => row.tabLabel) : [];
+  if (plansApply && rollup.people && !rollup.people.sized) unsized.push(rollup.people.tabLabel);
+  const unsizedNote =
+    plansApply && sizedCount && unsized.length ? `Not sized yet: ${joinNames(unsized)}.` : "";
+
+  return {
+    year: goal.year,
+    upcoming,
+    goalCents,
+    countedCents,
+    countedKnown,
+    plansApply,
+    sizedCount,
+    realisticCents,
+    plansCents,
+    gapCents,
+    spareCents,
+    countedPercent,
+    plansPercent,
+    sentence,
+    unsizedNote,
+  };
+}

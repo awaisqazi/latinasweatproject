@@ -1,6 +1,7 @@
 <script>
   // Fundraising > Donor Engagement, below its header: the body of each
-  // sub-tab except Worksheet (FundraisingView mounts that one). Donors keeps
+  // sub-tab except Worksheet (FundraisingView mounts that one). Thank-yous
+  // comes first: the gifts nobody has marked as thanked yet. Donors keeps
   // the full donor list with the top donors and newest payments beside it.
   import EmptyState from "../ui/EmptyState.svelte";
   import Panel from "../ui/Panel.svelte";
@@ -10,14 +11,16 @@
   import LiveTopDonors from "./live/LiveTopDonors.svelte";
   import OutreachTab from "./OutreachTab.svelte";
   import TemplatesTab from "./TemplatesTab.svelte";
+  import ThanksTracker from "./ThanksTracker.svelte";
   import { formatMoney } from "../../../lib/dashboard/fundraising";
 
-  export let sub = "donors-list";
+  export let sub = "donors-thanks";
   export let supabase;
   export let profile = null;
   export let teamMembers = [];
   export let refreshKey = 0;
   export let view = null; // LiveData's view
+  export let followUps = null; // FollowUpData's followUps
   export let donorSummaries = [];
   export let donorProfiles = [];
   export let templates = [];
@@ -50,7 +53,19 @@
   }
 </script>
 
-{#if sub === "donors-list"}
+{#if sub === "donors-thanks"}
+  <ThanksTracker
+    {supabase}
+    {profile}
+    {teamMembers}
+    thanks={followUps?.thanks || null}
+    onChanged={() => {
+      followUps?.actions?.reloadThanks?.();
+      followUps?.actions?.reloadAttention?.();
+    }}
+    {onOpenDonorEmail}
+  />
+{:else if sub === "donors-list"}
   <div class="grid items-start gap-4 xl:grid-cols-[3fr_2fr]">
     <DonorsListPanel
       {supabase}

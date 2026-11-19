@@ -13,6 +13,8 @@
   export let teamMembers = [];
   export let onSelectProspect = () => {};
   export let onProspectUpdated = () => {};
+  // "Overdue next step" quick filter, bound up so Next up can turn it on.
+  export let overdueOnly = false;
 
   $: membersById = Object.fromEntries(teamMembers.map((member) => [member.id, member]));
 
@@ -61,5 +63,6 @@
     {teamMembers}
     onSelect={onSelectProspect}
     {onProspectUpdated}
+    bind:overdueOnly
   />
 {/if}

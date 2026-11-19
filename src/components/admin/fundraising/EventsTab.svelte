@@ -2,12 +2,12 @@
   // Fundraising > Fundraising Events, below its header: Campaigns (this
   // year's live Zeffy campaigns, then every campaign since July 2025 with
   // its CSV export), Giving Tuesday and Calendar. Worksheet is mounted by
-  // FundraisingView.
-  import { Banknote, Download, HandCoins, Target } from "@lucide/svelte";
+  // FundraisingView. The all-time totals (payments since July 2025, last 30
+  // days, average) moved to the header's "More numbers".
+  import { Download } from "@lucide/svelte";
   import Button from "../ui/Button.svelte";
   import EmptyState from "../ui/EmptyState.svelte";
   import Panel from "../ui/Panel.svelte";
-  import StatCard from "../ui/StatCard.svelte";
   import FundraisingCalendarTab from "./FundraisingCalendarTab.svelte";
   import GivingTuesdayTab from "./GivingTuesdayTab.svelte";
   import LiveCampaigns from "./live/LiveCampaigns.svelte";
@@ -21,7 +21,6 @@
   export let refreshKey = 0;
   export let view = null; // LiveData's view
   export let campaignSummaries = [];
-  export let last30Donations = [];
   export let prospects = [];
   export let donorProfiles = [];
   export let outreachCampaigns = [];
@@ -29,19 +28,6 @@
   export let onOpenProspect = () => {};
   export let onOpenDonorEmail = () => {};
 
-  $: totalRaised = campaignSummaries.reduce(
-    (sum, campaign) => sum + Number(campaign.total_raised || 0),
-    0,
-  );
-  $: totalGifts = campaignSummaries.reduce(
-    (sum, campaign) => sum + Number(campaign.gift_count || 0),
-    0,
-  );
-  $: last30Raised = last30Donations.reduce(
-    (sum, gift) => sum + Number(gift.total_amount || 0) - Number(gift.refund_amount || 0),
-    0,
-  );
-  $: averageGift = totalGifts ? totalRaised / totalGifts : 0;
   $: rankedCampaigns = campaignSummaries
     .filter((campaign) => Number(campaign.total_raised) > 0)
     .slice()
@@ -94,11 +80,6 @@
     </p>
   </div>
 
-  <div class="grid gap-3 sm:grid-cols-3">
-    <StatCard label="Raised since July 2025" value={formatMoney(totalRaised)} icon={HandCoins} tone="gold" />
-    <StatCard label="Raised last 30 days" value={formatMoney(last30Raised)} icon={Banknote} tone="teal" />
-    <StatCard label="Average gift" value={formatMoney(averageGift)} icon={Target} tone="gold" />
-  </div>
 
   <Panel title="Campaigns" id="fundraising-campaigns-title">
     {#if rankedCampaigns.length}

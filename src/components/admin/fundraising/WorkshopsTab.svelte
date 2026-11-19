@@ -40,10 +40,10 @@
         <table class="w-full min-w-[18rem] text-sm">
           <caption class="sr-only">Approved peer fundraisers</caption>
           <thead>
-            <tr class="text-left text-xs font-bold uppercase tracking-[0.12em] text-ink/50">
-              <th scope="col" class="pb-1.5 pr-3 font-bold">Fundraiser</th>
-              <th scope="col" class="pb-1.5 pl-2 text-right font-bold">Gifts</th>
-              <th scope="col" class="pb-1.5 pl-2 text-right font-bold">Raised</th>
+            <tr class="text-left text-sm text-ink/55">
+              <th scope="col" class="pb-1.5 pr-3 font-semibold">Fundraiser</th>
+              <th scope="col" class="pb-1.5 pl-2 text-right font-semibold">Gifts</th>
+              <th scope="col" class="pb-1.5 pl-2 text-right font-semibold">Raised</th>
             </tr>
           </thead>
           <tbody>

@@ -1,10 +1,16 @@
 <script>
-  // Grant pipeline: the six phases (Prospecting through Received) as a kanban
-  // with drag-and-drop plus filters, and Declined set apart below. Moves use
+  // Grant pipeline: the six phases (Prospecting through Received) and
+  // Declined set apart. On a tablet or wider it is a kanban with drag and
+  // drop and the filters on show. Below that (phones) it is a list grouped by
+  // phase, each group collapsible with its count and total, and each grant
+  // has a "Move to <next phase>" button and a phase picker; search and
+  // filters sit behind one "Filters" control. "Overdue next step" is a quick
+  // filter on every size. Moves use
   // the shared optimistic-lock pattern (eq updated_at) so two people working
   // the pipeline can't silently clobber each other. Moving to Committed asks
   // for the amount and date first; moving to Received asks for the date.
-  import { CalendarClock, Plus, Search, UserRound } from "@lucide/svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { CalendarClock, ChevronDown, Plus, Search, UserRound } from "@lucide/svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
@@ -19,12 +25,16 @@
     stageMoveNeeds,
     withProspectColumns,
   } from "../../../lib/dashboard/fundraising";
+  import { formatCentsWhole, prospectAsk } from "../../../lib/dashboard/fundraisingLive";
+  import { chicagoToday } from "../../../lib/dashboard/timeclock";
 
   export let supabase;
   export let prospects = [];
   export let teamMembers = [];
   export let onSelect = () => {};
   export let onProspectUpdated = () => {};
+  // Quick filter, bound so Next up can open the pipeline on overdue grants.
+  export let overdueOnly = false;
 
   const FIT_TONES = { high: "green", medium: "amber", low: "neutral" };
   const KIND_LABELS = Object.fromEntries(
@@ -44,6 +54,28 @@
   let dragOverStage = "";
   let movingIds = new Set();
   let pendingMove = null; // { prospect, stage, mode } while the dialog asks
+  const WIDE_QUERY = "(min-width: 768px)";
+  let isWide = typeof window !== "undefined" && window.matchMedia ? window.matchMedia(WIDE_QUERY).matches : true;
+  let showFilters = false;
+  let openGroups = {}; // phase -> true/false once someone taps it
+  let mediaQuery = null;
+  const today = chicagoToday();
+  const CLOSED_STAGES = ["Declined", "Received"];
+
+  onMount(() => {
+    if (!window.matchMedia) return;
+    mediaQuery = window.matchMedia(WIDE_QUERY);
+    isWide = mediaQuery.matches;
+    mediaQuery.addEventListener?.("change", handleMedia);
+  });
+
+  onDestroy(() => {
+    mediaQuery?.removeEventListener?.("change", handleMedia);
+  });
+
+  function handleMedia(event) {
+    isWide = event.matches;
+  }
 
   $: filteredProspects = prospects.filter((prospect) => {
     const query = search.trim().toLowerCase();
@@ -62,6 +94,7 @@
     }
     if (fitFilter !== "all" && (prospect.fit_score || "unrated") !== fitFilter) return false;
     if (kindFilter !== "all" && prospect.kind !== kindFilter) return false;
+    if (overdueOnly && !isOverdue(prospect, today)) return false;
     if (ownerFilter === "unowned" && prospect.owner_id) return false;
     if (
       ownerFilter !== "all" &&
@@ -79,7 +112,14 @@
     return groups;
   }, {});
   $: hasFilters =
-    Boolean(search.trim()) || fitFilter !== "all" || kindFilter !== "all" || ownerFilter !== "all";
+    Boolean(search.trim()) || fitFilter !== "all" || kindFilter !== "all" || ownerFilter !== "all" || overdueOnly;
+  // Filters tucked behind the phone "Filters" control, for its label.
+  $: hiddenFilterCount =
+    (search.trim() ? 1 : 0) + (fitFilter !== "all" ? 1 : 0) + (kindFilter !== "all" ? 1 : 0) + (ownerFilter !== "all" ? 1 : 0);
+  $: overdueCount = prospects.filter((prospect) => isOverdue(prospect, today)).length;
+  $: groupTotals = Object.fromEntries(
+    [...GRANT_PHASES, "Declined"].map((stage) => [stage, phaseTotal(prospectsByStage[stage] || [], stage)]),
+  );
 
   function byPriorityThenFit(a, b) {
     const priority = (a.priority || "P2").localeCompare(b.priority || "P2");
@@ -237,27 +277,92 @@
     );
   }
 
-  function isOverdue(prospect) {
+  // A next step dated before today (Chicago) on a grant still in play.
+  function isOverdue(prospect, todayKey = today) {
     if (!prospect.next_action_date) return false;
-    const today = new Date();
-    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    return prospect.next_action_date < todayKey;
+    if (CLOSED_STAGES.includes(normalizeProspectStage(prospect.stage))) return false;
+    return String(prospect.next_action_date).slice(0, 10) < todayKey;
+  }
+
+  function nextPhase(stage) {
+    const index = GRANT_PHASES.indexOf(normalizeProspectStage(stage));
+    if (index < 0 || index >= GRANT_PHASES.length - 1) return "";
+    return GRANT_PHASES[index + 1];
+  }
+
+  // "4 grants, $120,000 asked" (Committed and Received show what was committed).
+  function phaseTotal(rows, stage) {
+    const counted = stage === "Committed" || stage === "Received";
+    let cents = 0;
+    for (const prospect of rows) {
+      if (counted && Number(prospect.committed_amount) > 0) cents += Math.round(Number(prospect.committed_amount) * 100);
+      else if (!counted) cents += prospectAsk(prospect).cents || 0;
+    }
+    const parts = [`${rows.length} grant${rows.length === 1 ? "" : "s"}`];
+    if (cents) parts.push(`${formatCentsWhole(cents)} ${counted ? "committed" : "asked"}`);
+    return parts.join(", ");
+  }
+
+  function groupOpen(stage, count, groups, filtersOn) {
+    if (stage in groups) return groups[stage];
+    if (stage === "Declined") return false;
+    return filtersOn ? count > 0 : count > 0 && count <= 12;
+  }
+
+  function toggleGroup(stage, isOpen) {
+    openGroups = { ...openGroups, [stage]: !isOpen };
+  }
+
+  function pickPhase(event, prospect) {
+    const stage = event.currentTarget.value;
+    // The picker shows the saved phase until the move (or its dialog) lands.
+    event.currentTarget.value = normalizeProspectStage(prospect.stage);
+    requestMove(prospect, stage);
   }
 </script>
 
 <Panel title="Prospect pipeline" id="fundraising-prospects-panel">
-  <p class="mb-4 text-sm leading-6 text-ink/60">
-    Foundations, grants, and major donors, researched and ranked by fit. Click a
-    card for the full profile and its tailored engagement plan; drag cards between
-    phases as each grant moves forward. Moving a grant to Committed asks for the
-    amount and date.
-  </p>
+  {#if isWide}
+    <p class="mb-4 text-sm leading-6 text-ink/60">
+      Foundations, grants, and major donors, researched and ranked by fit. Click a
+      card for the full profile and its tailored engagement plan; drag cards between
+      phases as each grant moves forward. Moving a grant to Committed asks for the
+      amount and date.
+    </p>
+  {:else}
+    <p class="-mt-2 mb-3 text-sm leading-6 text-ink/60">
+      Tap a grant for its profile. Use Move to send it to the next phase.
+    </p>
+  {/if}
 
   {#if errorMessage}
     <Banner tone="error" message={errorMessage} class="mb-4" />
   {/if}
 
-  <div class="mb-4 grid gap-3 rounded-card border border-ink/8 bg-canvas/70 p-3 sm:grid-cols-2 xl:grid-cols-5">
+  {#if !isWide}
+    <div class="mb-3 flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control border px-4 text-sm font-semibold shadow-card transition {showFilters ? 'border-ink/30 bg-ink/[0.04] text-ink' : 'border-ink/14 bg-white text-ink hover:border-ink/30'}"
+        aria-expanded={showFilters}
+        aria-controls="fundraising-prospect-filters"
+        onclick={() => (showFilters = !showFilters)}
+      >
+        Filters{hiddenFilterCount ? ` (${hiddenFilterCount})` : ""}
+      </button>
+      <button
+        type="button"
+        class="inline-flex min-h-11 flex-1 items-center justify-center rounded-control border px-4 text-sm font-semibold shadow-card transition {overdueOnly ? 'border-red-300 bg-red-50 text-red-800' : 'border-ink/14 bg-white text-ink hover:border-ink/30'}"
+        aria-pressed={overdueOnly}
+        onclick={() => (overdueOnly = !overdueOnly)}
+      >
+        Overdue next step{overdueCount ? ` (${overdueCount})` : ""}
+      </button>
+    </div>
+  {/if}
+
+  {#if isWide || showFilters}
+  <div id="fundraising-prospect-filters" class="mb-4 grid gap-3 rounded-card border border-ink/8 bg-canvas/70 p-3 sm:grid-cols-2 xl:grid-cols-5">
     <label class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50 sm:col-span-2">
       Search
       <span class="relative mt-2 block">
@@ -300,15 +405,48 @@
       </select>
     </label>
   </div>
+  {/if}
 
   <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-ink/50">
-      {filteredProspects.length} of {prospects.length} prospects
-      {#if hasFilters}(filtered){/if}
+    <p class="text-sm text-ink/60">
+      {filteredProspects.length} of {prospects.length} prospects{hasFilters ? ", filtered" : ""}
     </p>
-    <Button variant="primary" size="sm" icon={Plus} onclick={() => (showCreateForm = !showCreateForm)}>
-      New prospect
-    </Button>
+    <div class="flex flex-wrap items-center gap-2">
+      {#if isWide}
+        <button
+          type="button"
+          class="inline-flex min-h-9 items-center justify-center rounded-control border px-3 text-sm font-semibold shadow-card transition {overdueOnly ? 'border-red-300 bg-red-50 text-red-800' : 'border-ink/14 bg-white text-ink hover:border-ink/30'}"
+          aria-pressed={overdueOnly}
+          onclick={() => (overdueOnly = !overdueOnly)}
+        >
+          Overdue next step{overdueCount ? ` (${overdueCount})` : ""}
+        </button>
+      {/if}
+      {#if hasFilters}
+        <button
+          type="button"
+          class="inline-flex min-h-11 items-center rounded-control px-3 text-sm font-semibold text-ink/70 hover:bg-ink/[0.06] hover:text-ink md:min-h-9"
+          onclick={() => {
+            search = "";
+            fitFilter = "all";
+            kindFilter = "all";
+            ownerFilter = "all";
+            overdueOnly = false;
+          }}
+        >
+          Clear filters
+        </button>
+      {/if}
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-control border border-transparent bg-brand px-3 text-sm font-semibold text-ink shadow-card transition-colors hover:bg-brand-strong md:min-h-9"
+        aria-expanded={showCreateForm}
+        onclick={() => (showCreateForm = !showCreateForm)}
+      >
+        <Plus class="h-4 w-4 shrink-0" aria-hidden="true" />
+        New prospect
+      </button>
+    </div>
   </div>
 
   {#if showCreateForm}
@@ -334,7 +472,83 @@
     </form>
   {/if}
 
-  {#if prospects.length}
+  {#if prospects.length && !isWide}
+    <div class="space-y-3">
+      {#each [...GRANT_PHASES, "Declined"] as stage (stage)}
+        {@const rows = prospectsByStage[stage] || []}
+        {@const isOpen = groupOpen(stage, rows.length, openGroups, hasFilters)}
+        <section class="rounded-card border border-ink/8 bg-canvas {stage === 'Declined' ? 'mt-6' : ''}" aria-label={`${stage} grants`}>
+          <button
+            type="button"
+            class="flex min-h-12 w-full items-center gap-3 px-4 py-2.5 text-left"
+            aria-expanded={isOpen}
+            onclick={() => toggleGroup(stage, isOpen)}
+          >
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-bold text-ink">{stage === "Declined" ? "Declined, kept on file" : stage}</span>
+              <span class="mt-0.5 block text-sm text-ink/60">{groupTotals[stage]}</span>
+            </span>
+            <ChevronDown class="h-4 w-4 shrink-0 text-ink/40 transition {isOpen ? 'rotate-180' : ''}" aria-hidden="true" />
+          </button>
+          {#if isOpen}
+            <ul class="space-y-2 px-3 pb-3">
+              {#each rows as prospect (prospect.id)}
+                {@const next = nextPhase(prospect.stage)}
+                <li class="rounded-control border border-ink/8 bg-white shadow-card {movingIds.has(prospect.id) ? 'opacity-60' : ''}">
+                  <button type="button" class="block min-h-11 w-full px-3 pt-2.5 text-left" onclick={() => onSelect(prospect)}>
+                    <span class="flex items-start justify-between gap-2">
+                      <span class="min-w-0 font-bold leading-snug text-ink">{prospect.name}</span>
+                      {#if cardAmount(prospect)}
+                        <span class="shrink-0 text-sm font-semibold tabular-nums text-ink/70">{cardAmount(prospect)}</span>
+                      {/if}
+                    </span>
+                    <span class="mt-1 block text-sm text-ink/60">
+                      {[KIND_LABELS[prospect.kind] || prospect.kind, ownerLabel(prospect) || "No owner", prospect.fit_score ? `${prospect.fit_score} fit` : ""].filter(Boolean).join(", ")}
+                    </span>
+                    {#if prospect.next_action || prospect.next_action_date}
+                      <span class="mt-1 block text-sm text-ink/70">
+                        {#if prospect.next_action_date}<span class={isOverdue(prospect, today) ? "font-semibold text-red-700" : ""}>{isOverdue(prospect, today) ? "Overdue" : "Next"} {formatDate(prospect.next_action_date)}</span>{prospect.next_action ? ": " : ""}{:else}{"Next: "}{/if}{prospect.next_action || ""}
+                      </span>
+                    {/if}
+                  </button>
+                  <div class="flex flex-wrap items-center gap-2 px-3 pb-3 pt-2">
+                    {#if next}
+                      <button
+                        type="button"
+                        class="inline-flex min-h-11 flex-1 items-center justify-center rounded-control border border-ink/14 bg-white px-3 text-sm font-semibold text-ink shadow-card hover:border-ink/30 disabled:opacity-55"
+                        disabled={movingIds.has(prospect.id)}
+                        onclick={() => requestMove(prospect, next)}
+                      >
+                        Move to {next}
+                      </button>
+                    {/if}
+                    <label class="flex min-w-0 flex-1 items-center gap-2 text-sm text-ink/60">
+                      <span class="shrink-0">Phase</span>
+                      <select
+                        class="select min-h-11 min-w-0 flex-1"
+                        aria-label={`Phase for ${prospect.name}`}
+                        value={normalizeProspectStage(prospect.stage)}
+                        disabled={movingIds.has(prospect.id)}
+                        onchange={(event) => pickPhase(event, prospect)}
+                      >
+                        {#each [...GRANT_PHASES, "Declined"] as option (option)}
+                          <option value={option}>{option}</option>
+                        {/each}
+                      </select>
+                    </label>
+                  </div>
+                </li>
+              {:else}
+                <li class="rounded-control border border-dashed border-ink/15 bg-white px-3 py-4 text-center text-sm text-ink/50">
+                  {hasFilters ? "No grants here match the filters" : stage === "Declined" ? "When a funder says no, move the grant here. It stays on file." : "Empty"}
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </section>
+      {/each}
+    </div>
+  {:else if prospects.length}
     <div class="prospect-kanban-scroll -mx-4 overflow-x-auto px-4 pb-3 md:-mx-6 md:px-6">
       <div class="prospect-kanban-track grid gap-3">
         {#each GRANT_PHASES as stage}
