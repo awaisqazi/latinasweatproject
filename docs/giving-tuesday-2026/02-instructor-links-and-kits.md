@@ -7,7 +7,8 @@ Front end only. Both pages read the existing `giving_public` RPC (section 1 of
 
 - Public address: `https://latinasweatproject.com/give/<slug>` (`shortLink()` in
   `src/data/givingTuesday.js`). `<slug>` is the fundraiser slug from the RPC.
-- GitHub Pages is static, so `/give/<slug>` is a 404. `src/pages/404.astro` matches
+- Instructors in `src/data/givingInstructors.json` have a static page (next
+  section). For anyone else, GitHub Pages has no `/give/<slug>`, so it is a 404. `src/pages/404.astro` matches
   `^/give/[a-z0-9-]+/?$` (any case) and replaces it with `/give/?i=<slug>`, keeping
   any query string (for example UTM tags).
 - `src/pages/give/index.astro` + `GivingPersonApp.svelte`: finds the fundraiser whose
@@ -27,6 +28,44 @@ Front end only. Both pages read the existing `giving_public` RPC (section 1 of
   `giving_public` only lists board rows. Their Zeffy page still works.
 - The amount shown is `raised_cents` (everything credited), the same number as the
   board. The $150 ring uses `reached` (eligible gifts only: other people's gifts).
+
+## Per-person pages and share cards: `npm run giving:cards`
+
+Link previews (iMessage, WhatsApp, Instagram DMs, Facebook, Slack, X) read
+`og:image` and `og:title` from static HTML and run no JavaScript, so each approved
+instructor also gets a static page with their own card.
+
+- **After approving someone** (or when a name, why, avatar or goal changes): run
+  `npm run giving:cards`, commit `src/data/givingInstructors.json` and
+  `public/images/givingtuesday/give/`, push. Until then their short link still
+  works through the 404 redirect, with the generic campaign card.
+- `scripts/sync-giving-instructors.mjs` calls `giving_public` with the public URL
+  and publishable key (env, `.env`, else the defaults in `deploy.yml`; never a
+  service key) and writes `src/data/givingInstructors.json`: slug, name, first,
+  why, avatar, goal_cents only. Sorted by slug; unchanged roster, unchanged file.
+- `scripts/render-giving-instructor-og.mjs` writes
+  `public/images/givingtuesday/give/<slug>-og.jpg` (1200x630). Yellow card, whole
+  LSP logo, "LSP Giving Tuesday", "Help {first}" / "raise {goal}", their why in
+  quotes (verbatim; emoji left off the card; a long one cut at a word with "…"
+  inside the quote; no why, no line), "Tuesday, Dec 1". The photo is the large
+  transparent cutout the pop-up avatar is cut from
+  (`marketing/popup-week1/instructors/<avatar>.png`) standing on the yellow at
+  the right, sized so it never comes within 36 px of a line of type and the face
+  stays in frame; a cutout cut off by its own left side, or no large cutout, uses
+  the 320 px avatar in a 300 px white circle; no avatar, type only. Each card
+  stores a hash of its inputs, so reruns only redraw what changed (`--force`
+  redraws all); cards for slugs no longer listed are deleted.
+- `src/pages/give/[slug].astro` builds `/give/<slug>/` for every slug in the JSON:
+  the same live page as `/give/?i=<slug>` (`GivingPersonApp` with a `slug` prop),
+  with title "Help {name} raise {goal} | LSP Giving Tuesday", description "LSP
+  Giving Tuesday: “{why}” Help {first} raise {goal} by Tuesday, Dec 1." (without a
+  why: "LSP Giving Tuesday: help {name} raise {goal} by Tuesday, Dec 1.") and their
+  card. noindex, out of the sitemap. GitHub Pages serves it for `/give/<slug>`
+  and `/give/<slug>/`. The page itself is live data: someone later hidden from
+  the board gets the campaign fallback on it, and the card stays until the next
+  `giving:cards` run deletes it.
+- `404.astro`: a slug in the JSON typed in another case goes to `/give/<slug>/`;
+  any other slug still goes to `/give/?i=<slug>`.
 
 ## Share kit: `/givingtuesday/kit/?i=<slug>`
 

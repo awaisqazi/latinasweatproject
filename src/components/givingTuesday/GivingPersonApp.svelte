@@ -1,8 +1,10 @@
 <script>
-  // /give/?i=<slug> (short link /give/<slug>, redirected by 404.astro): one
-  // instructor's LSP Giving Tuesday page. UNLISTED, noindex.
+  // /give/<slug>/ (static, give/[slug].astro, for slugs in
+  // src/data/givingInstructors.json) or /give/?i=<slug> (give/index.astro; any
+  // other /give/<slug> is redirected there by 404.astro): one instructor's LSP
+  // Giving Tuesday page. UNLISTED, noindex.
   //
-  // Reads the slug from ?i=, loads giving_public (live.js; dev mock via
+  // Takes the slug from the `slug` prop, else from ?i=, loads giving_public (live.js; dev mock via
   // ?mock=), finds the fundraiser and shows their face, name, why, their own
   // mat unrolling toward $150 (the board's treatment), the amount picker and
   // Give. Give goes to the fundraiser's own Zeffy page when set, else the
@@ -29,7 +31,9 @@
   import { startPolling, nowOverride } from "../../lib/givingTuesday/live.js";
   import { heroOne, wallImage } from "../../data/givingTuesdayPhotos.js";
 
-  let { base = "/" } = $props();
+  // `slug` is set by the static per-person page /give/<slug>/ (give/[slug].astro);
+  // without it the slug comes from ?i= (give/index.astro).
+  let { base = "/", slug: pageSlug = "" } = $props();
 
   const one = wallImage(heroOne.photo, base, { one: true });
 
@@ -77,7 +81,7 @@
   const avatar = $derived(person?.avatar && !avatarFailed ? `${base}images/popup/instructors/${person.avatar}.webp` : null);
 
   onMount(() => {
-    slug = cleanSlug(new URLSearchParams(window.location.search).get("i"));
+    slug = cleanSlug(pageSlug) || cleanSlug(new URLSearchParams(window.location.search).get("i"));
     mounted = true;
     document.documentElement.classList.remove("gv-wait");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -268,6 +268,13 @@ export const givingPersonCopy = {
   fallbackHeadline: "Give to LSP Giving Tuesday.",
   notFound: "We couldn't find that giving page, and you can still give to the campaign.",
   seeAll: "See the Giving Tuesday page", // same words as givingJoinCopy.successBack
+  // Static per-person page /give/<slug>/ (give/[slug].astro): its own title,
+  // description and share card (scripts/render-giving-instructor-og.mjs).
+  // {why} is their own words, verbatim. All NEW.
+  personTitle: "Help {name} raise {goal} | LSP Giving Tuesday",
+  personDescription: "LSP Giving Tuesday: \u201C{why}\u201D Help {first} raise {goal} by Tuesday, Dec 1.",
+  personDescriptionNoWhy: "LSP Giving Tuesday: help {name} raise {goal} by Tuesday, Dec 1.",
+  personCardAlt: "LSP Giving Tuesday. Help {first} raise {goal}. Tuesday, Dec 1.",
 };
 
 // /givingtuesday/kit/?i=<slug>: an instructor's share kit (link, captions,

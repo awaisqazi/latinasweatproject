@@ -7,7 +7,8 @@
     "dev:local": "astro dev --host localhost --port 4321",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "giving:cards": "node scripts/sync-giving-instructors.mjs && node scripts/render-giving-instructor-og.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.0",

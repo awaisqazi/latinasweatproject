@@ -72,6 +72,8 @@ import Header from "../components/Header.astro";
 </Layout>
 
 <script>
+    // Instructors with a static page /give/<slug>/ (src/pages/give/[slug].astro).
+    import givingInstructors from "../data/givingInstructors.json";
     // Case-insensitive redirects
     const path = window.location.pathname.toLowerCase();
     // The Collective Finish Line (marathon week, Oct 2026): flyer and
@@ -85,10 +87,18 @@ import Header from "../components/Header.astro";
     ];
     const bare = path.replace(/\/+$/, "");
     // LSP Giving Tuesday instructor short links: /give/<slug> (any case, with
-    // or without a trailing slash) -> /give/?i=<slug>, keeping any query.
+    // or without a trailing slash). A slug with a static page (in
+    // givingInstructors.json; only reaches here in another case) goes to
+    // /give/<slug>/; any other to /give/?i=<slug>. Any query is kept.
     const giveMatch = bare.match(/^\/give\/([a-z0-9][a-z0-9-]{0,80})$/);
     const keepQuery = window.location.search.replace(/^\?/, "");
-    if (giveMatch) {
+    if (
+        giveMatch &&
+        givingInstructors.some((g) => g.slug === giveMatch[1]) &&
+        window.location.pathname !== "/give/" + giveMatch[1] + "/" // no loop if that page is missing
+    ) {
+        window.location.replace("/give/" + giveMatch[1] + "/" + window.location.search);
+    } else if (giveMatch) {
         window.location.replace(
             "/give/?i=" + giveMatch[1] + (keepQuery ? "&" + keepQuery : ""),
         );

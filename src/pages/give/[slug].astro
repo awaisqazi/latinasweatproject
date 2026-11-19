@@ -1,0 +1,71 @@
+---
+// /give/<slug>/: one instructor's LSP Giving Tuesday page, built statically
+// for every instructor in src/data/givingInstructors.json (the roster
+// snapshot from scripts/sync-giving-instructors.mjs), so the short link
+// unfurls with its own title, description and share card
+// (public/images/givingtuesday/give/<slug>-og.jpg, from
+// scripts/render-giving-instructor-og.mjs). Run `npm run giving:cards` after
+// approving someone, then commit the JSON and the card.
+//
+// The body is the same as /give/?i=<slug> (give/index.astro): the live
+// GivingPersonApp, given the slug as a prop. A slug not in the JSON yet still
+// 404s and 404.astro sends it to /give/?i=<slug>. UNLISTED: noindex, out of
+// the sitemap ('/give/' in astro.config.mjs), never linked from nav.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import GivingPersonApp from "@/components/givingTuesday/GivingPersonApp.svelte";
+import { givingPersonCopy as copy, money } from "@/data/givingTuesday";
+import instructors from "@/data/givingInstructors.json";
+
+export function getStaticPaths() {
+  return instructors.map((person) => ({ params: { slug: person.slug }, props: { person } }));
+}
+
+const { person } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+
+const fill = (t: string, v: Record<string, string>) => t.replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m));
+// Their why, verbatim; a very long one is cut at a word boundary.
+const MAX_WHY = 180;
+let why = String(person.why || "").replace(/\s+/g, " ").trim();
+if (why.length > MAX_WHY) why = why.slice(0, MAX_WHY).replace(/\s+\S*$/, "").replace(/[,;:]+$/, "") + "…";
+const vars = { name: person.name, first: person.first, goal: money(person.goal_cents), why };
+const title = fill(copy.personTitle, vars);
+const description = fill(why ? copy.personDescription : copy.personDescriptionNoWhy, vars);
+---
+
+<Layout
+  title={title}
+  description={description}
+  robots="noindex, nofollow"
+  socialImage={`images/givingtuesday/give/${person.slug}-og.jpg`}
+  socialImageAlt={fill(copy.personCardAlt, vars)}
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <script is:inline slot="head">
+    document.documentElement.classList.add("gv-wait");
+    setTimeout(function () { document.documentElement.classList.remove("gv-wait"); }, 5000);
+  </script>
+  <Header />
+  <main class="gv-page font-rubik">
+    <GivingPersonApp client:load base={base} slug={person.slug} />
+  </main>
+</Layout>
+
+<style>
+  .gv-page {
+    --gt-paper: #ffffff;
+    --gt-ink: #1e1e1e;
+    --gt-sun: #ffde59;
+    --gt-mist: #ececea;
+    --gt-soft: #55534f;
+
+    background: var(--gt-paper);
+    color: var(--gt-ink);
+    font-family: "Rubik", sans-serif;
+    overflow-x: clip;
+  }
+</style>
