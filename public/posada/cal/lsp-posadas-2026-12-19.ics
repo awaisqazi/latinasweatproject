@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Latina Sweat Project//LSP Posadas 2026//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:lsp-posadas-2026-12-19@latinasweatproject.com
+DTSTAMP:20261119T120000Z
+DTSTART;VALUE=DATE:20261219
+DTEND;VALUE=DATE:20261220
+SUMMARY:LSP Posadas: Community Grand Opening
+LOCATION:Mural Park\, 924 W 19th Place\, Chicago\, IL 60608
+DESCRIPTION:Save the date. Details soon: latinasweatproject.com/posada
+URL:https://latinasweatproject.com/posada
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

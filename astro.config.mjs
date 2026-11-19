@@ -33,6 +33,9 @@ export default defineConfig({
     '/electionadmin': '/admin',
     // Short link for the Día de los Muertos 2026 teaser page
     '/ddlm': '/diadelosmuertos',
+    // Aliases for the Posada Craft Days volunteer sign-up
+    '/posadas': '/posada',
+    '/craftdays': '/posada',
     // Alias for the Halloween + Día de los Muertos weekend waiver
     '/waivers': '/waiver',
   },

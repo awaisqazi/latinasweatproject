@@ -1,0 +1,1169 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import {
+    posadaEvent,
+    craftDaysPlace,
+    craftSlots,
+    craftHours,
+    craftDays,
+    craftRaffle,
+    craftContactEmail,
+} from "@/data/posadaCraftDays.js";
+
+// Posada Craft Days: the volunteer sign-up for the evenings before LSP
+// Posadas (the Community Grand Opening, Saturday, December 19 at Mural
+// Park). Public and indexable, but not linked from nav, the homepage or
+// /links. Every date, slot, place and form id comes from
+// src/data/posadaCraftDays.js.
+//
+// Mechanics mirror /movecrew: a hidden Google Form POST (no-cors,
+// URLSearchParams, one repeated entry.N per picked hour), a honeypot plus a
+// 3 second minimum, name and email remembered on the device, days that hide
+// themselves once their last shift has ended (Chicago), and an "all done"
+// state. The confirmation email with a calendar invite per day is sent by
+// the Apps Script in marketing/posada-craft-days/.
+//
+// Look: the team's save-the-date graphic is the identity. Warm white paper,
+// charcoal ink, one pen red, one sticky-note yellow. Mynerve (a dry pen
+// hand) for a few display lines only; Rubik for anything read precisely.
+// The shift picker is the calendar from the post: hand-ruled lines, heavy
+// numerals, and a red pen circle around every hour you pick.
+
+const nowMs = Date.now();
+const daysOpen = craftDays.filter((d) => nowMs < Date.parse(d.end));
+const raffleOpen = nowMs < Date.parse(craftRaffle.endsAt);
+
+// Calendar links for the save-the-date (all day, December 19).
+const icsHref = `/${posadaEvent.calendarFile}`;
+const ymd = posadaEvent.dateISO.replace(/-/g, "");
+const nextDay = new Date(`${posadaEvent.dateISO}T12:00:00Z`);
+nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+const ymdNext = nextDay.toISOString().slice(0, 10).replace(/-/g, "");
+const gcalHref =
+    "https://calendar.google.com/calendar/render?" +
+    new URLSearchParams({
+        action: "TEMPLATE",
+        text: `${posadaEvent.name}: ${posadaEvent.kicker}`,
+        dates: `${ymd}/${ymdNext}`,
+        location: posadaEvent.calendarLocation,
+        details: "Save the date. More details soon: https://latinasweatproject.com/posada",
+    }).toString();
+
+const instagramProfile = "https://www.instagram.com/latinasweatproject/";
+
+// Three hand-drawn pen loops, so the circles never look stamped. Each runs
+// a little past a full turn, like a quick circle made with a pen.
+const RINGS = [
+    "M110 8 C84 1 30 2 12 14 C-2 24 14 41 62 41 C104 41 128 31 122 18 C117 8 88 4 62 5",
+    "M18 9 C44 0 108 2 121 15 C131 28 108 42 62 41 C20 40 0 31 6 19 C10 9 36 5 60 4 C80 3 96 6 104 9",
+    "M76 3 C110 3 130 15 123 27 C116 39 78 43 50 40 C16 37 1 27 7 16 C13 6 44 2 72 4 C98 6 116 12 120 19",
+];
+const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
+---
+
+<Layout
+    title="Posada Craft Days | The Latina Sweat Project"
+    description="Posada Craft Days: help The Latina Sweat Project get ready for LSP Posadas, the Community Grand Opening on Saturday, December 19, by picking an hour to craft with us at Mural Park."
+    socialImage="images/posada/posada-og.jpg"
+    socialImageAlt="Posada Craft Days. Volunteer with LSP: Tuesday 11/24, Wednesday 11/25, and Thursdays 12/3, 12/10 and 12/17, 4:30 to 8:30 pm."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
+    twitterCard="summary_large_image"
+>
+    <link
+        slot="head"
+        href="https://fonts.googleapis.com/css2?family=Mynerve&display=swap"
+        rel="stylesheet"
+    />
+    <Header />
+    <main class="pc-page font-sans">
+        {/* ============================== HERO ============================== */}
+        <section class="px-4 pb-14 pt-8 sm:px-6 sm:pt-14 lg:pb-20 lg:pt-16">
+            <div
+                class="mx-auto grid max-w-6xl items-center gap-y-12 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-x-20"
+            >
+                <div class="max-w-xl">
+                    <h1 class="pc-hand pc-h1">
+                        <span class="block">Posada</span>
+                        <span class="block">Craft Days</span>
+                    </h1>
+                    <p class="mt-4 text-lg leading-snug sm:mt-6 sm:text-xl">
+                        Getting ready for {posadaEvent.name}, the {posadaEvent.kicker},
+                        {posadaEvent.dateLabel} at {posadaEvent.venue}. Come craft
+                        with us. Pick a day, pick an hour.
+                    </p>
+                    <p class="pc-muted mt-4 text-base leading-relaxed sm:text-[1.0625rem]">
+                        Five evenings, {craftHours}: Tuesday 11/24, Wednesday
+                        11/25, and Thursdays 12/3, 12/10 and 12/17. One-hour
+                        shifts, so come for one or stay for all four. At
+                        <a
+                            href={craftDaysPlace.mapUrl}
+                            target="_blank"
+                            rel="noopener"
+                            class="pc-link"
+                            >{craftDaysPlace.name}, {craftDaysPlace.street},
+                            {craftDaysPlace.floor}</a
+                        >.
+                    </p>
+                    <a href="#signup" id="pc-cta" class="pc-btn mt-6 inline-block sm:mt-8">
+                        Pick your hours
+                    </a>
+                </div>
+
+                {/* The team's save-the-date, laid on the page whole. */}
+                <figure class="mx-auto w-[82%] max-w-[22rem] sm:w-[60%] lg:w-full lg:max-w-none">
+                    <div class="pc-pinned">
+                        <picture>
+                            <source
+                                type="image/webp"
+                                srcset="/images/posada/lsp-posadas-save-the-date-640.webp 640w, /images/posada/lsp-posadas-save-the-date.webp 1080w"
+                                sizes="(min-width: 1024px) 400px, 82vw"
+                            />
+                            <img
+                                src={`/${posadaEvent.art}`}
+                                alt={posadaEvent.artAlt}
+                                width="1080"
+                                height="1334"
+                                loading="eager"
+                                decoding="async"
+                            />
+                        </picture>
+                    </div>
+                </figure>
+            </div>
+        </section>
+
+        {/* ============================ SIGN-UP ============================ */}
+        <section id="signup" class="scroll-mt-24 px-4 pb-16 sm:px-6 sm:pb-24">
+            <div class="mx-auto max-w-6xl">
+                <div id="pc-card">
+                    <div id="pc-intro" class="pc-intro">
+                        <div class="max-w-xl">
+                            <h2 class="pc-hand pc-h2">Pick your hours</h2>
+                            <p class="mt-3 text-base leading-relaxed sm:text-lg">
+                                Shifts are one hour each, from {craftHours}.
+                                Tap every hour that works for you, on any day.
+                            </p>
+                        </div>
+
+                        {raffleOpen && (
+                            <aside
+                                id="pc-raffle"
+                                class="pc-sticky"
+                                data-ends-at={craftRaffle.endsAt}
+                                aria-label={craftRaffle.title}
+                            >
+                                <p class="pc-sticky-title">{craftRaffle.title}</p>
+                                <p class="mt-2 text-[0.95rem] leading-snug">
+                                    {craftRaffle.line}
+                                </p>
+                            </aside>
+                        )}
+                    </div>
+
+                    <form id="pc-form" class="relative" novalidate>
+                        <!-- Honeypot: humans never see or fill it. A bot that
+                             fills every input gets a quiet "success" and
+                             nothing is sent. -->
+                        <div
+                            class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                            aria-hidden="true"
+                        >
+                            <label for="pc-website">Website</label>
+                            <input id="pc-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        {/* ---------- The calendar: five days, four hours each ---------- */}
+                        <fieldset id="pc-picker" class="mt-8 sm:mt-10">
+                            <legend class="sr-only">
+                                Pick your hours. Every shift is {craftHours}, in one-hour blocks.
+                            </legend>
+                            <div class="pc-grid" style={`--rt:${ROT[0]}deg;--rb:${ROT[3]}deg`}>
+                                {craftDays.map((day, di) => (
+                                    <div
+                                        class:list={["pc-day", { hidden: !daysOpen.includes(day) }]}
+                                        role="group"
+                                        aria-label={`${day.long}${day.raffle && raffleOpen ? ", raffle day" : ""}`}
+                                        data-day-key={day.key}
+                                        data-day-date={day.date}
+                                        data-day-end={day.end}
+                                        style={`--r1:${ROT[(di + 1) % ROT.length]}deg;--r2:${ROT[(di + 4) % ROT.length]}deg;--r3:${ROT[(di + 2) % ROT.length] * 0.5}deg`}
+                                    >
+                                        <div class="pc-day-head" aria-hidden="true">
+                                            <p class="pc-wd">{day.weekday}</p>
+                                            <p class="pc-date">
+                                                <span class="pc-mon">{day.monthShort}</span>
+                                                <span class="pc-num">{day.dayNum}</span>
+                                            </p>
+                                            {day.raffle && raffleOpen && (
+                                                <span class="pc-mini" data-raffle-mark>raffle</span>
+                                            )}
+                                        </div>
+                                        <div class="pc-hours">
+                                            {craftSlots.map((slot, si) => (
+                                                <label class="pc-hour">
+                                                    <input
+                                                        type="checkbox"
+                                                        name={day.key}
+                                                        value={slot.value}
+                                                        class="sr-only"
+                                                        data-slot
+                                                        data-start={slot.startMin}
+                                                        data-end={slot.endMin}
+                                                    />
+                                                    <span class="sr-only">{day.long}, </span>
+                                                    <span class="pc-hour-t">
+                                                        {slot.short}
+                                                        <svg
+                                                            class={`pc-ring pc-ring-h pc-v${(di + si * 2) % RINGS.length}`}
+                                                            viewBox="0 0 130 44"
+                                                            preserveAspectRatio="none"
+                                                            aria-hidden="true"
+                                                            focusable="false"
+                                                        >
+                                                            <path
+                                                                d={RINGS[(di + si * 2) % RINGS.length]}
+                                                                pathLength="1"
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                    <span class="sr-only"> pm</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </fieldset>
+
+                        <p id="pc-over" class="hidden mt-10 max-w-xl text-lg leading-relaxed">
+                            Posada Craft Days are done. Thank you to everyone
+                            who crafted with us. See you at {posadaEvent.name},
+                            {posadaEvent.dateLabel}.
+                        </p>
+
+                        {/* ---------- About you ---------- */}
+                        <div id="pc-fields" class="mt-12 grid gap-x-14 gap-y-7 lg:mt-14 lg:grid-cols-2">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="pc-name" class="pc-label">Full name</label>
+                                    <input id="pc-name" name="fullName" type="text" required autocomplete="name" class="pc-input" />
+                                </div>
+                                <div>
+                                    <label for="pc-email" class="pc-label">Email</label>
+                                    <p class="pc-muted mt-0.5 text-sm">Your confirmation and calendar invites go here.</p>
+                                    <input id="pc-email" name="email" type="email" required autocomplete="email" inputmode="email" class="pc-input" />
+                                </div>
+                                <div>
+                                    <label for="pc-phone" class="pc-label">
+                                        Phone <span class="pc-muted font-normal">(optional)</span>
+                                    </label>
+                                    <input id="pc-phone" name="phone" type="tel" autocomplete="tel" class="pc-input" />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-6">
+                                <div>
+                                    <label for="pc-notes" class="pc-label">
+                                        Anything we should know? <span class="pc-muted font-normal">(optional)</span>
+                                    </label>
+                                    <textarea id="pc-notes" name="notes" rows="3" class="pc-input"></textarea>
+                                </div>
+
+                                <div class="pc-summary" aria-live="polite">
+                                    <p class="pc-label">Your hours</p>
+                                    <ul id="pc-summary" class="mt-1 text-base leading-relaxed">
+                                        <li class="pc-muted">No hours picked yet.</li>
+                                    </ul>
+                                </div>
+
+                                <p id="pc-error" role="alert" class="pc-error hidden"></p>
+
+                                <div>
+                                    <button id="pc-submit" type="submit" class="pc-btn w-full sm:w-auto sm:min-w-[14rem]">
+                                        Sign me up
+                                    </button>
+                                    <p class="pc-muted mt-3 text-sm leading-snug">
+                                        A confirmation with a calendar invite for each day is emailed to you right away.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {/* ---------- Success: replaces the form ---------- */}
+                <div id="pc-success" class="hidden max-w-2xl pt-4" tabindex="-1">
+                    <h2 class="pc-hand pc-h2">
+                        You're in, <span id="pc-first">friend</span>.
+                    </h2>
+                    <p class="mt-4 text-lg leading-relaxed">
+                        We just emailed your confirmation and a calendar invite
+                        for each day to <strong id="pc-success-email" class="[overflow-wrap:anywhere]">you</strong>.
+                        If it is not there in a few minutes, check your spam folder.
+                    </p>
+                    <ul id="pc-success-hours" class="mt-5 text-base leading-relaxed"></ul>
+                    <p class="mt-8 text-base leading-relaxed">
+                        Save the date too: {posadaEvent.name}, the {posadaEvent.kicker},
+                        {posadaEvent.dateLabel}.
+                        <span class="block mt-1">
+                            <a href={icsHref} class="pc-link" download>Add December 19 to your calendar</a>
+                            <span class="pc-muted"> · </span>
+                            <a href={gcalHref} target="_blank" rel="noopener" class="pc-link">Google Calendar</a>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        {/* ============================ SAVE THE DATE ============================ */}
+        <section class="pc-close px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-20">
+            <div class="mx-auto grid max-w-6xl items-center gap-y-10 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-14">
+                <div class="pc-circled" aria-hidden="true">
+                    <span class="pc-num">19</span>
+                    <svg class="pc-ring is-on" viewBox="0 0 130 44" preserveAspectRatio="none" focusable="false">
+                        <path d={RINGS[0]} pathLength="1" />
+                    </svg>
+                    <svg class="pc-ring is-on pc-ring-2" viewBox="0 0 130 44" preserveAspectRatio="none" focusable="false">
+                        <path d={RINGS[2]} pathLength="1" />
+                    </svg>
+                </div>
+                <div class="max-w-xl">
+                    <h2 class="pc-hand pc-h2">{posadaEvent.name}</h2>
+                    <p class="mt-3 text-lg leading-relaxed">
+                        {posadaEvent.kicker} · {posadaEvent.dateLabel} · {posadaEvent.venue}.
+                        <span class="block">More details soon.</span>
+                    </p>
+                    <p class="mt-4 text-base leading-relaxed">
+                        <a href={icsHref} class="pc-link" download>Add December 19 to your calendar</a>
+                        <span class="pc-muted"> · </span>
+                        <a href={gcalHref} target="_blank" rel="noopener" class="pc-link">Google Calendar</a>
+                    </p>
+                    <p class="mt-2 text-base leading-relaxed">
+                        Follow
+                        <a href={instagramProfile} target="_blank" rel="noopener" class="pc-link">@latinasweatproject on Instagram</a>
+                        for the details.
+                    </p>
+                    <p class="pc-muted mt-6 text-sm">
+                        Questions go to
+                        <a href={`mailto:${craftContactEmail}`} class="pc-link [overflow-wrap:anywhere]">{craftContactEmail}</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    .pc-page {
+        --pc-paper: #fbf8f2;
+        --pc-ink: #2b2d36;
+        --pc-red: #d8382e;
+        --pc-yellow: #f5e58a;
+        --pc-muted: rgb(43 45 54 / 0.74);
+        background-color: var(--pc-paper);
+        color: var(--pc-ink);
+        overflow-x: clip;
+    }
+    .pc-muted {
+        color: var(--pc-muted);
+    }
+    .pc-page h1,
+    .pc-page h2 {
+        text-wrap: balance;
+    }
+    .pc-page p,
+    .pc-page li {
+        text-wrap: pretty;
+    }
+
+    /* Display hand: a few lines only. */
+    .pc-hand {
+        font-family: "Mynerve", "Rubik", cursive;
+        font-weight: 400;
+        letter-spacing: 0;
+    }
+    .pc-h1 {
+        font-size: clamp(3.4rem, 15vw, 6.25rem);
+        line-height: 0.98;
+    }
+    .pc-h2 {
+        font-size: clamp(2.2rem, 8vw, 3.1rem);
+        line-height: 1.05;
+    }
+
+    .pc-link {
+        color: var(--pc-ink);
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: rgb(43 45 54 / 0.4);
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 4px;
+        transition: text-decoration-color 120ms;
+    }
+    .pc-link:hover {
+        text-decoration-color: var(--pc-red);
+    }
+    .pc-link:focus-visible,
+    .pc-btn:focus-visible {
+        outline: 3px solid var(--pc-red);
+        outline-offset: 3px;
+        border-radius: 2px;
+    }
+
+    .pc-btn {
+        background-color: var(--pc-ink);
+        color: var(--pc-paper);
+        border-radius: 6px;
+        padding: 0.9rem 2rem;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        transition: background-color 150ms, transform 150ms;
+    }
+    .pc-btn:hover:not(:disabled) {
+        background-color: #1c1d24;
+    }
+    .pc-btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+    .pc-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    /* The save-the-date, laid on the paper at a slight angle. */
+    .pc-pinned {
+        transform: rotate(1.8deg);
+        background-color: #fff;
+        box-shadow:
+            0 1px 2px rgb(43 45 54 / 0.16),
+            0 12px 26px -16px rgb(43 45 54 / 0.4);
+    }
+    .pc-pinned img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1080 / 1334;
+        background-color: #f3f1ec;
+    }
+
+    /* Sign-up intro: heading on the left, the sticky note beside it. */
+    .pc-intro {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+    }
+    @media (min-width: 768px) {
+        .pc-intro {
+            flex-direction: row;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 3rem;
+        }
+    }
+
+    /* The yellow sticky note from the post. */
+    .pc-sticky {
+        position: relative;
+        z-index: 2;
+        align-self: flex-start;
+        width: min(100%, 19rem);
+        margin-left: 0.25rem;
+        margin-bottom: -1.5rem;
+        padding: 1.1rem 1.25rem 1.25rem;
+        background-color: var(--pc-yellow);
+        color: var(--pc-ink);
+        transform: rotate(-2.5deg);
+    }
+    @media (min-width: 768px) {
+        .pc-sticky {
+            align-self: flex-end;
+            flex: none;
+            margin: 0 0.5rem -2.25rem 0;
+            transform: rotate(3deg);
+        }
+    }
+    .pc-sticky-title {
+        font-family: "Permanent Marker", "Rubik", cursive;
+        font-size: 1.55rem;
+        line-height: 1.1;
+    }
+
+    /* ---------- The calendar grid ---------- */
+    .pc-grid {
+        position: relative;
+    }
+    /* Ruled lines: ink strokes set a hair off true, ends running past. */
+    .pc-day::before,
+    .pc-day::after,
+    .pc-day-head::after,
+    .pc-grid::after {
+        content: "";
+        position: absolute;
+        background-color: var(--pc-ink);
+        border-radius: 2px;
+        pointer-events: none;
+    }
+    .pc-grid::after {
+        left: -0.5rem;
+        right: -0.75rem;
+        bottom: 0;
+        height: 3px;
+        transform: rotate(var(--rb));
+    }
+
+    .pc-day {
+        position: relative;
+    }
+    /* Days that are over (the scoped display rules below would beat the
+       plain utility class). */
+    .pc-day.hidden {
+        display: none !important;
+    }
+    .pc-day-head {
+        position: relative;
+    }
+    .pc-wd {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    .pc-date {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        margin-top: 0.15rem;
+    }
+    .pc-mon {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--pc-muted);
+    }
+    .pc-num {
+        font-size: 2.6rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        font-variant-numeric: lining-nums;
+    }
+
+    /* Tiny sticky on the two raffle days, tying them to the big note. */
+    .pc-mini {
+        position: absolute;
+        display: block;
+        padding: 0.3rem 0.45rem 0.35rem;
+        background-color: var(--pc-yellow);
+        font-family: "Permanent Marker", "Rubik", cursive;
+        font-size: 0.95rem;
+        line-height: 1;
+        transform: rotate(6deg);
+    }
+
+    /* Hours. */
+    .pc-hour {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3rem;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pc-hour-t {
+        position: relative;
+        display: inline-block;
+        font-size: 1rem;
+        font-weight: 400;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: rgb(43 45 54 / 0.82);
+        transition: color 120ms;
+    }
+    .pc-hour:hover .pc-hour-t {
+        color: var(--pc-ink);
+    }
+    .pc-hour:has(input:checked) .pc-hour-t {
+        font-weight: 700;
+        color: var(--pc-ink);
+    }
+    .pc-hour:has(input:focus-visible) {
+        outline: 2px dashed var(--pc-ink);
+        outline-offset: -2px;
+        border-radius: 6px;
+    }
+
+    /* The red pen circle: each loop sits at its own slight tilt. */
+    .pc-v0 {
+        transform: rotate(-2.5deg);
+    }
+    .pc-v1 {
+        transform: rotate(1.8deg);
+    }
+    .pc-v2 {
+        transform: rotate(-0.8deg);
+    }
+    .pc-ring {
+        position: absolute;
+        overflow: visible;
+        pointer-events: none;
+    }
+    /* Around an hour: sized from the text, so the loop always clears it. */
+    .pc-ring-h {
+        inset: -0.62em -0.8em -0.58em -0.78em;
+        width: calc(100% + 1.58em);
+        height: calc(100% + 1.2em);
+    }
+    .pc-ring path {
+        fill: none;
+        stroke: var(--pc-red);
+        stroke-width: 2.1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        opacity: 0;
+        transition: stroke-dashoffset 420ms cubic-bezier(0.3, 0.6, 0.4, 1);
+    }
+    .pc-hour:has(input:checked) .pc-ring path,
+    .pc-ring.is-on path {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .pc-ring path {
+            transition: none;
+        }
+    }
+
+    /* Phone: one ruled row per day, the date on the left, hours two by two. */
+    .pc-day {
+        display: grid;
+        grid-template-columns: 6.6rem minmax(0, 1fr);
+    }
+    .pc-day::before {
+        left: -0.5rem;
+        right: -0.75rem;
+        top: 0;
+        height: 3px;
+        transform: rotate(var(--r1));
+    }
+    .pc-day-head {
+        padding: 0.9rem 0.6rem 0.9rem 0;
+    }
+    .pc-day-head .pc-num {
+        font-size: 2.35rem;
+    }
+    .pc-day-head::after {
+        top: -0.3rem;
+        bottom: -0.3rem;
+        right: 0;
+        width: 3px;
+        transform: rotate(var(--r2));
+    }
+    .pc-hours {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0.45rem 0 0.45rem 0.4rem;
+    }
+    .pc-hour {
+        min-height: 3.1rem;
+    }
+    .pc-mini {
+        left: 0;
+        bottom: 0.55rem;
+        transform: rotate(-4deg);
+    }
+    .pc-day-head:has(.pc-mini) {
+        padding-bottom: 2.6rem;
+    }
+    @media (max-width: 359px) {
+        .pc-day {
+            grid-template-columns: 5.9rem minmax(0, 1fr);
+        }
+        .pc-hour-t {
+            font-size: 0.95rem;
+        }
+    }
+
+    /* Tablet: rows, all four hours on one line. */
+    @media (min-width: 640px) {
+        .pc-day {
+            grid-template-columns: 8rem minmax(0, 1fr);
+        }
+        .pc-hour-t {
+            font-size: 1.0625rem;
+        }
+        .pc-hours {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            align-items: center;
+            padding-left: 0.75rem;
+        }
+    }
+
+    /* Desktop: the calendar week, one column per day. */
+    @media (min-width: 1024px) {
+        .pc-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(0, 1fr);
+        }
+        .pc-grid::before {
+            content: "";
+            position: absolute;
+            left: -0.75rem;
+            right: -1rem;
+            top: 0;
+            height: 3px;
+            background-color: var(--pc-ink);
+            border-radius: 2px;
+            transform: rotate(var(--rt));
+        }
+        .pc-day {
+            display: block;
+        }
+        .pc-day::before {
+            display: none;
+        }
+        /* Vertical rule between columns (not before the first). */
+        .pc-day:not(.hidden) ~ .pc-day:not(.hidden)::after {
+            left: 0;
+            top: -1.25rem;
+            bottom: -1rem;
+            width: 3px;
+            transform: rotate(var(--r2));
+        }
+        .pc-day-head {
+            padding: 1.1rem 1.25rem 1rem;
+        }
+        .pc-day-head::after {
+            top: auto;
+            bottom: 0;
+            left: -0.25rem;
+            right: -0.25rem;
+            width: auto;
+            height: 3px;
+            transform: rotate(var(--r3));
+        }
+        .pc-day-head .pc-num {
+            font-size: 3.4rem;
+        }
+        .pc-hours {
+            display: flex;
+            flex-direction: column;
+            padding: 0.8rem 0.75rem 1.1rem;
+        }
+        .pc-hour {
+            min-height: 3.25rem;
+        }
+        .pc-day-head:has(.pc-mini) {
+            padding-bottom: 1rem;
+        }
+        .pc-mini {
+            left: auto;
+            bottom: auto;
+            right: 1rem;
+            top: 1.05rem;
+            transform: rotate(6deg);
+        }
+    }
+
+    /* Fields. */
+    .pc-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+    .pc-input {
+        display: block;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.7rem 0.9rem;
+        background-color: #fff;
+        border: 1.5px solid rgb(43 45 54 / 0.35);
+        border-radius: 6px;
+        color: var(--pc-ink);
+        font-size: 1rem;
+    }
+    .pc-input:focus {
+        outline: none;
+        border-color: var(--pc-ink);
+        box-shadow: 0 0 0 3px rgb(216 56 46 / 0.22);
+    }
+    .pc-input[aria-invalid="true"] {
+        border-color: var(--pc-red);
+    }
+    .pc-error {
+        color: #b3261e;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    #pc-success:focus {
+        outline: none;
+    }
+
+    /* Closing: the circled 19 from the post. */
+    .pc-close {
+        position: relative;
+    }
+    .pc-circled {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 11rem;
+        height: 9.5rem;
+        margin-left: 0.5rem;
+    }
+    .pc-circled .pc-num {
+        font-size: 5.5rem;
+    }
+    .pc-circled .pc-ring {
+        left: 50%;
+        top: 50%;
+        width: 10.5rem;
+        height: 9rem;
+        transform: translate(-50%, -50%);
+    }
+    .pc-circled .pc-ring path {
+        stroke-width: 1.15;
+    }
+    .pc-circled .pc-ring-2 {
+        transform: translate(-50%, -50%) rotate(-8deg) scale(0.96);
+    }
+</style>
+
+<style is:global>
+    /* Lines the script writes into the summaries. */
+    .pc-page #pc-summary li strong,
+    .pc-page #pc-success-hours li strong {
+        font-weight: 700;
+    }
+</style>
+
+<script>
+    import {
+        craftDays,
+        craftRaffle,
+        craftForm,
+        craftContactEmail,
+    } from "@/data/posadaCraftDays.js";
+
+    // Google Form wiring comes from src/data/posadaCraftDays.js (craftForm).
+    // Checkbox questions (one per day) take one repeated entry.N param per
+    // picked hour.
+    const NAME_STORAGE_KEY = "lsp_posada_name";
+    const EMAIL_STORAGE_KEY = "lsp_posada_email";
+    const HONEYPOT_FIELD = "website";
+    const MIN_SUBMIT_MS = 3000;
+    const loadedAt = Date.now();
+
+    // Dev only: ?now=ISO pretends it is that moment; ?qa=... drives states
+    // for screenshots. Stripped from the production build.
+    const qs = new URLSearchParams(window.location.search);
+    let nowMs = Date.now();
+    if (import.meta.env.DEV && qs.get("now")) {
+        const t = Date.parse(qs.get("now") || "");
+        if (Number.isFinite(t)) nowMs = t;
+    }
+
+    const $ = <T extends HTMLElement>(id: string) =>
+        document.getElementById(id) as T;
+    const form = $<HTMLFormElement>("pc-form");
+    const card = $("pc-card");
+    const success = $("pc-success");
+    const errorEl = $("pc-error");
+    const summaryEl = $("pc-summary");
+    const submitBtn = $<HTMLButtonElement>("pc-submit");
+    const nameInput = $<HTMLInputElement>("pc-name");
+    const emailInput = $<HTMLInputElement>("pc-email");
+    const slotInputs = Array.from(
+        form.querySelectorAll<HTMLInputElement>("input[data-slot]"),
+    );
+    const dayLabel = Object.fromEntries(craftDays.map((d) => [d.key, d.label]));
+
+    try {
+        nameInput.value = window.localStorage.getItem(NAME_STORAGE_KEY) || "";
+        emailInput.value = window.localStorage.getItem(EMAIL_STORAGE_KEY) || "";
+    } catch {
+        // localStorage unavailable (private mode): nothing to prefill.
+    }
+
+    // The raffle note and the day marks go once the raffle is over.
+    if (nowMs >= Date.parse(craftRaffle.endsAt)) {
+        document.getElementById("pc-raffle")?.remove();
+        document
+            .querySelectorAll("[data-raffle-mark]")
+            .forEach((el) => el.remove());
+    }
+
+    // A day hides once its last shift has ended (falling back to the
+    // Chicago date). When every day is over, sign-ups stop.
+    const todayChicago = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Chicago",
+    }).format(new Date(nowMs));
+    let daysLeft = 0;
+    form.querySelectorAll<HTMLElement>("[data-day-key]").forEach((group) => {
+        const endMs = Date.parse(group.dataset.dayEnd || "");
+        const ended = Number.isFinite(endMs) && nowMs >= endMs;
+        if (ended || (group.dataset.dayDate || "") < todayChicago) {
+            group.classList.add("hidden");
+            group
+                .querySelectorAll<HTMLInputElement>("input")
+                .forEach((i) => (i.checked = false));
+        } else {
+            group.classList.remove("hidden");
+            daysLeft += 1;
+        }
+    });
+    if (daysLeft === 0) {
+        $("pc-intro").classList.add("hidden");
+        $("pc-picker").classList.add("hidden");
+        $("pc-fields").classList.add("hidden");
+        $("pc-over").classList.remove("hidden");
+        document.getElementById("pc-cta")?.classList.add("hidden");
+        submitBtn.disabled = true;
+    }
+
+    // "4:30 to 6:30 pm": contiguous hours on a day merge into one range.
+    const fmt = (m: number) =>
+        `${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, "0")}`;
+    function pickedRanges() {
+        const byDay = new Map<string, [number, number][]>();
+        slotInputs
+            .filter((i) => i.checked)
+            .forEach((i) => {
+                const list = byDay.get(i.name) || [];
+                list.push([Number(i.dataset.start), Number(i.dataset.end)]);
+                byDay.set(i.name, list);
+            });
+        const lines: { day: string; text: string }[] = [];
+        craftDays.forEach((d) => {
+            const list = (byDay.get(d.key) || []).sort((a, b) => a[0] - b[0]);
+            const merged: [number, number][] = [];
+            list.forEach(([s, e]) => {
+                const last = merged[merged.length - 1];
+                if (last && last[1] === s) last[1] = e;
+                else merged.push([s, e]);
+            });
+            if (merged.length)
+                lines.push({
+                    day: dayLabel[d.key],
+                    text:
+                        merged.map(([s, e]) => `${fmt(s)} to ${fmt(e)}`).join(", ") +
+                        " pm",
+                });
+        });
+        return lines;
+    }
+    function renderLines(target: HTMLElement, empty: string) {
+        const lines = pickedRanges();
+        target.replaceChildren();
+        if (!lines.length) {
+            const li = document.createElement("li");
+            li.className = "pc-muted";
+            li.textContent = empty;
+            target.append(li);
+            return;
+        }
+        lines.forEach(({ day, text }) => {
+            const li = document.createElement("li");
+            const b = document.createElement("strong");
+            b.textContent = `${day}: `;
+            li.append(b, text);
+            target.append(li);
+        });
+    }
+    const updateSummary = () => renderLines(summaryEl, "No hours picked yet.");
+    slotInputs.forEach((i) => i.addEventListener("change", () => {
+        updateSummary();
+        if (!errorEl.classList.contains("hidden") && slotInputs.some((s) => s.checked))
+            errorEl.classList.add("hidden");
+    }));
+    updateSummary();
+
+    function showError(message: string, field?: HTMLElement) {
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+        [nameInput, emailInput].forEach((i) => i.removeAttribute("aria-invalid"));
+        if (field instanceof HTMLInputElement) {
+            field.setAttribute("aria-invalid", "true");
+            field.focus({ preventScroll: true });
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (field) {
+            field.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+
+    function showSuccess(fullName: string, email: string) {
+        $("pc-first").textContent = fullName.split(/\s+/)[0] || "friend";
+        // Let a long address wrap after the @ rather than mid-word.
+        const emailEl = $("pc-success-email");
+        const at = email.indexOf("@");
+        if (at > 0)
+            emailEl.replaceChildren(
+                email.slice(0, at + 1),
+                document.createElement("wbr"),
+                email.slice(at + 1),
+            );
+        else emailEl.textContent = email || "you";
+        renderLines($("pc-success-hours"), "");
+        card.classList.add("hidden");
+        // The hero button jumps to the picker, which is gone now.
+        document.getElementById("pc-cta")?.classList.add("hidden");
+        success.classList.remove("hidden");
+        success.scrollIntoView({ behavior: "smooth", block: "start" });
+        success.focus({ preventScroll: true });
+    }
+
+    async function submit() {
+        errorEl.classList.add("hidden");
+        const data = new FormData(form);
+
+        if (
+            String(data.get(HONEYPOT_FIELD) || "").trim() ||
+            Date.now() - loadedAt < MIN_SUBMIT_MS
+        ) {
+            // Looks automated: pretend it worked, send nothing.
+            showSuccess("", "");
+            return;
+        }
+
+        const fullName = String(data.get("fullName") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const phone = String(data.get("phone") || "").trim();
+        const notes = String(data.get("notes") || "").trim();
+        const days = craftDays.map((d) => ({
+            key: d.key,
+            slots: data.getAll(d.key).map(String),
+        }));
+
+        if (!fullName) return showError("Please add your name.", nameInput);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+            return showError("Please add a valid email address.", emailInput);
+        if (days.every((d) => d.slots.length === 0))
+            return showError(
+                "Please pick at least one hour on the calendar.",
+                $("pc-picker"),
+            );
+
+        const ids = craftForm.entryIds as Record<string, string>;
+        const needed = ["fullName", "email", "phone", "notes", ...days.map((d) => d.key)];
+        if (!craftForm.actionUrl || needed.some((k) => !ids[k])) {
+            console.warn(
+                "Posada Craft Days: craftForm.actionUrl or an entry id is empty in src/data/posadaCraftDays.js. Nothing was sent.",
+            );
+            return showError(
+                `We couldn't send your sign-up. Please try again in a bit, or email ${craftContactEmail}.`,
+            );
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const params = new URLSearchParams();
+        params.set(ids.fullName, fullName);
+        params.set(ids.email, email);
+        if (phone) params.set(ids.phone, phone);
+        days.forEach((d) => d.slots.forEach((s) => params.append(ids[d.key], s)));
+        if (notes) params.set(ids.notes, notes);
+
+        try {
+            // no-cors: Google sends no CORS headers on formResponse, so the
+            // response is opaque. A resolved fetch means it reached Google.
+            await fetch(craftForm.actionUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: params.toString(),
+            });
+            try {
+                window.localStorage.setItem(NAME_STORAGE_KEY, fullName);
+                window.localStorage.setItem(EMAIL_STORAGE_KEY, email);
+            } catch {
+                // ignore
+            }
+            showSuccess(fullName, email);
+        } catch (e) {
+            console.error("Posada Craft Days submit failed:", e);
+            showError(
+                `We couldn't send your sign-up. Check your connection and try again, or email ${craftContactEmail}.`,
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Sign me up";
+        }
+    }
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submit();
+    });
+
+    // ---------- Dev-only QA states (removed from the production build) ----------
+    if (import.meta.env.DEV && qs.get("qa")) {
+        const qa = qs.get("qa");
+        const pick = (pairs: [string, number][]) =>
+            pairs.forEach(([key, i]) => {
+                const el = slotInputs.filter((s) => s.name === key)[i];
+                if (el && !el.closest(".hidden")) el.checked = true;
+            });
+        document.documentElement.style.scrollBehavior = "auto";
+        Element.prototype.scrollIntoView = () => {};
+        requestAnimationFrame(() => {
+            const vw = document.documentElement.clientWidth;
+            const wide = [...document.querySelectorAll<HTMLElement>(".pc-page *")]
+                .filter((el) => el.getBoundingClientRect().right > vw + 0.5 && !el.closest(".pc-day::before"))
+                .map((el) => `${el.tagName}.${el.className}`.slice(0, 60));
+            document.body.dataset.qaWide = JSON.stringify(wide.slice(0, 12));
+        });
+        if (qa === "picked" || qa === "success" || qa === "post" || qa === "errors-email") {
+            pick([["tue1124", 0], ["tue1124", 1], ["wed1125", 3], ["thu1203", 1], ["thu1210", 0], ["thu1210", 2], ["thu1210", 3]]);
+            updateSummary();
+        }
+        if (qa === "errors") showError("Please add your name.", nameInput);
+        if (qa === "errors-email") {
+            nameInput.value = "Ana Torres";
+            emailInput.value = "ana@";
+            showError("Please add a valid email address.", emailInput);
+        }
+        if (qa === "errors-hours") {
+            nameInput.value = "Ana Torres";
+            emailInput.value = "ana@example.com";
+            showError("Please pick at least one hour on the calendar.", $("pc-picker"));
+        }
+        if (qa === "success") showSuccess("Ana Torres", "ana.torres@example.com");
+        if (qa === "post") {
+            // Stub fetch and the form config, submit after the 3 s guard,
+            // and write what would be POSTed into the DOM for inspection.
+            (craftForm as any).actionUrl = "https://docs.google.com/forms/d/e/QA/formResponse";
+            Object.keys(craftForm.entryIds).forEach((k, n) => ((craftForm.entryIds as any)[k] = `entry.${1000 + n}`));
+            const realFetch = window.fetch.bind(window);
+            window.fetch = (async (url: string, init: RequestInit) => {
+                if (!String(url).includes("/QA/formResponse")) return realFetch(url, init);
+                document.body.dataset.qaPost = JSON.stringify({
+                    url,
+                    mode: init.mode,
+                    body: String(init.body),
+                    pairs: [...new URLSearchParams(String(init.body))],
+                });
+                return new Response(null);
+            }) as any;
+            nameInput.value = "Ana Torres";
+            emailInput.value = "ana@example.com";
+            (document.getElementById("pc-phone") as HTMLInputElement).value = "312 555 0100";
+            (document.getElementById("pc-notes") as HTMLTextAreaElement).value = "Bringing my sister.";
+            setTimeout(() => form.requestSubmit(), MIN_SUBMIT_MS + 200);
+        }
+        if (qa === "nocfg") {
+            pick([["tue1124", 0]]);
+            nameInput.value = "Ana Torres";
+            emailInput.value = "ana@example.com";
+            setTimeout(() => form.requestSubmit(), MIN_SUBMIT_MS + 200);
+        }
+    }
+</script>

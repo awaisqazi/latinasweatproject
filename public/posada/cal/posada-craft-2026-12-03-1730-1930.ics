@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Latina Sweat Project//Posada Craft Days//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:posada-craft-2026-12-03-1730-1930@latinasweatproject.com
+DTSTAMP:20261119T220000Z
+DTSTART:20261203T233000Z
+DTEND:20261204T013000Z
+SUMMARY:LSP Posada Craft Days shift
+LOCATION:Mural Park\, 924 W 19th Place\, 4th floor\, Chicago\, IL 60608
+DESCRIPTION:Posada Craft Days at Mural Park: crafting for LSP Posadas\, the
+  Community Grand Opening on Saturday\, December 19. The LSP team is on sit
+ e.
+URL:https://latinasweatproject.com/posada
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
