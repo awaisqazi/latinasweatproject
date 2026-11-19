@@ -38,6 +38,7 @@
     LIVE_POLL_MS,
     LIVE_REALTIME_DEBOUNCE_MS,
     campaignsForView,
+    countLabel,
     countOutreachByStatus,
     eventsScorecard,
     fillMonths,
@@ -291,19 +292,19 @@
     return total ? formatCentsWhole(total.amountCents) : "n/a";
   }
 
-  function giftsHint(total) {
+  function paymentsHint(total) {
     if (!total || total.giftCount === null) return "";
-    return `${total.giftCount.toLocaleString()} gift${total.giftCount === 1 ? "" : "s"}`;
+    return countLabel(total.giftCount, "payment");
   }
 
   function ytdHint(ytd, prior, change, partial) {
-    if (!prior) return giftsHint(ytd);
+    if (!prior) return paymentsHint(ytd);
     const delta = change === null ? "" : ` (${change > 0 ? "+" : ""}${change}%)`;
     return `Last year by now ${formatCentsWhole(prior.amountCents)}${partial ? ", partial" : delta}`;
   }
 
   function monthHint(month, week) {
-    const parts = [giftsHint(month)];
+    const parts = [paymentsHint(month)];
     if (week) parts.push(`${formatCentsWhole(week.amountCents)} last 7 days`);
     return parts.filter(Boolean).join(" · ");
   }
@@ -358,7 +359,7 @@
     </div>
   {:else if connected}
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <StatCard label="Today" value={moneyOrNa(totals.today)} icon={Banknote} tone="gold" hint={giftsHint(totals.today)} />
+      <StatCard label="Today" value={moneyOrNa(totals.today)} icon={Banknote} tone="gold" hint={paymentsHint(totals.today)} />
       <StatCard
         label="This month"
         value={moneyOrNa(totals.monthToDate)}

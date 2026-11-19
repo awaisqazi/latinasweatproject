@@ -358,8 +358,8 @@ export function syncHealthWarning(live, now = Date.now()) {
   if (isStale(live.syncedAt, now)) {
     const ago = syncedAgoLabel(live.syncedAt, now);
     return ago
-      ? `The Zeffy sync last ran ${ago}. It normally runs every 5 minutes, so the newest gifts may be missing.`
-      : "The Zeffy sync has not reported a run, so the newest gifts may be missing.";
+      ? `The Zeffy sync last ran ${ago}. It normally runs every 5 minutes, so the newest payments may be missing.`
+      : "The Zeffy sync has not reported a run, so the newest payments may be missing.";
   }
   if (live.sync?.backfillDone === false) {
     return "Zeffy history is still loading, so older totals may be low for now.";
@@ -390,6 +390,26 @@ export function liveSyncMessage(result) {
   }
   const detail = raw?.reason || (result?.ok === false ? "no answer" : "");
   return { tone: "error", message: `Sync failed${detail ? ` (${detail})` : ""}. The automatic sync still runs every 5 minutes.` };
+}
+
+// "1 payment", "12 gifts". Zeffy payments include tickets, shop and auction
+// purchases, so "gift" is kept for donation forms, peer-to-peer and donors.
+export function countLabel(count, noun = "payment") {
+  const n = Number(count || 0);
+  return `${n.toLocaleString()} ${noun}${n === 1 ? "" : "s"}`;
+}
+
+// Donation forms and peer-to-peer pages take gifts; every other Zeffy form
+// (Event, Shop, Auction, Raffle, custom payments) takes payments.
+export function campaignTakesGifts(campaign) {
+  return /donation|peer/i.test(String(campaign?.category || ""));
+}
+
+// Two-digit year mark ("'25") for the first bar and each January.
+export function monthYearMark(key, isFirst) {
+  const match = /^(\d{4})-(\d{2})$/.exec(String(key || ""));
+  if (!match) return "";
+  return isFirst || match[2] === "01" ? `'${match[1].slice(2)}` : "";
 }
 
 // ── Months ──────────────────────────────────────────────────────

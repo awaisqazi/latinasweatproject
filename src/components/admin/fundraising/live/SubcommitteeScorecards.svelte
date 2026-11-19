@@ -55,7 +55,7 @@
               <dd class="mt-1 text-xl font-bold tabular-nums text-ink">{formatCentsWhole(events.revenueCents)}</dd>
             </div>
             <div>
-              <dt class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">Event campaigns with gifts</dt>
+              <dt class="text-xs font-bold uppercase tracking-[0.12em] text-ink/50">Event campaigns with payments</dt>
               <dd class="mt-1 text-xl font-bold tabular-nums text-ink">{events.campaignCount.toLocaleString()}</dd>
             </div>
             <div class="col-span-2">
@@ -64,7 +64,7 @@
                 {#if events.top}
                   <span class="font-semibold text-ink">{events.top.title}</span>{" · "}{formatCentsWhole(events.top.raisedYtdCents)}
                 {:else}
-                  No event gifts this year yet
+                  No event payments this year yet
                 {/if}
               </dd>
             </div>
@@ -95,11 +95,12 @@
                 {#if grants.nextDeadline}
                   <button
                     type="button"
-                    class="font-semibold text-ink underline decoration-ink/20 underline-offset-2 hover:decoration-ink/60"
+                    class="block max-w-full text-left font-semibold text-ink underline decoration-ink/20 underline-offset-2 hover:decoration-ink/60"
                     onclick={() => onOpenProspect(grants.nextDeadline.prospectId)}
                   >
                     {grants.nextDeadline.prospectName}
-                  </button>{" · "}{formatDateOnlyLabel(grants.nextDeadline.date)}
+                  </button>
+                  <span class="mt-0.5 block text-ink/65">{formatDateOnlyLabel(grants.nextDeadline.date)}</span>
                 {:else}
                   No dated deadline in the prospect research
                 {/if}
@@ -183,6 +184,9 @@
                 >
                   <span class="min-w-0 flex-1">
                     <span class="block truncate font-bold leading-snug text-ink">{donorLabel(row)}</span>
+                    {#if row.name && row.email}
+                      <span class="mt-0.5 block truncate text-xs text-ink/55">{row.email}</span>
+                    {/if}
                     <span class="mt-0.5 block truncate text-xs text-ink/50">
                       Last gift {row.lastGiftAt ? formatChicagoDateLabel(row.lastGiftAt) : "unknown"}
                     </span>

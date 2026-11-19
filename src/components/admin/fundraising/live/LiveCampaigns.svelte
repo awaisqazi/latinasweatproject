@@ -7,6 +7,8 @@
   import { formatChicagoDateLabel } from "../../../../lib/dashboard/timeclock";
   import {
     campaignGoalPercent,
+    campaignTakesGifts,
+    countLabel,
     formatCentsWhole,
   } from "../../../../lib/dashboard/fundraisingLive";
 
@@ -45,13 +47,14 @@
     const parts = [];
     const category = categoryLabel(campaign.category);
     if (category) parts.push(category);
-    parts.push(`${campaign.giftsYtd.toLocaleString()} gift${campaign.giftsYtd === 1 ? "" : "s"} this year`);
-    parts.push(campaign.lastGiftAt ? `last gift ${formatChicagoDateLabel(campaign.lastGiftAt)}` : "no gifts yet");
+    const noun = campaignTakesGifts(campaign) ? "gift" : "payment";
+    parts.push(`${countLabel(campaign.giftsYtd, noun)} this year`);
+    parts.push(campaign.lastGiftAt ? `last ${noun} ${formatChicagoDateLabel(campaign.lastGiftAt)}` : `no ${noun}s yet`);
     return parts.join(" · ");
   }
 </script>
 
-<Panel title="Campaigns with gifts this year" id="fundraising-live-campaigns-title">
+<Panel title="Campaigns with payments this year" id="fundraising-live-campaigns-title">
   {#if campaigns.length}
     <div class="space-y-2">
       {#each shown as campaign, index (`${campaign.id}|${index}`)}
@@ -99,6 +102,6 @@
       </div>
     {/if}
   {:else}
-    <EmptyState title="No campaign gifts this year yet" message="Campaigns appear here after their first gift of the year." />
+    <EmptyState title="No campaign payments this year yet" message="Campaigns appear here after their first payment of the year." />
   {/if}
 </Panel>

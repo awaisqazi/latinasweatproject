@@ -9,7 +9,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
+  campaignTakesGifts,
   campaignsForView,
+  countLabel,
   eventsScorecard,
   fillMonths,
   formatCentsWhole,
@@ -20,6 +22,7 @@ import {
   liveSyncMessage,
   loadLive,
   mergeGoal,
+  monthYearMark,
   normalizeLive,
   parseAskCents,
   parseDeadlineDates,
@@ -258,6 +261,22 @@ test("upskillingScorecard counts Giving Tuesday fundraisers", () => {
     ],
   );
   assert.deepEqual(card, { signedUp: 3, approved: 2, withGift: 1, raisedCents: 5000 });
+});
+
+test("payments vs gifts wording and year marks", () => {
+  assert.equal(countLabel(1), "1 payment");
+  assert.equal(countLabel(1684), "1,684 payments");
+  assert.equal(countLabel(1, "gift"), "1 gift");
+  assert.equal(countLabel(0, "gift"), "0 gifts");
+  assert.equal(campaignTakesGifts({ category: "DonationForm" }), true);
+  assert.equal(campaignTakesGifts({ category: "PeerToPeerCampaign" }), true);
+  for (const category of ["Event", "Shop", "Auction", "Raffle", ""]) {
+    assert.equal(campaignTakesGifts({ category }), false, category);
+  }
+  const marks = fillMonths([], TODAY).map((row, index) => monthYearMark(row.month, index === 0));
+  assert.equal(marks[0], "'25", "first bar");
+  assert.equal(marks[2], "'26", "January");
+  assert.equal(marks.filter(Boolean).length, 2);
 });
 
 test("money and freshness labels", () => {

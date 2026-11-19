@@ -1,5 +1,5 @@
 <script>
-  // The newest Zeffy gifts and this year's top donors. Staff-only data:
+  // The newest Zeffy payments and this year's top donors. Staff-only data:
   // names and emails here never go on a public page.
   import EmptyState from "../../ui/EmptyState.svelte";
   import Panel from "../../ui/Panel.svelte";
@@ -18,7 +18,7 @@
 </script>
 
 <div class="grid gap-4 {hasTopDonors ? 'xl:grid-cols-[3fr_2fr]' : ''}">
-  <Panel title="Recent gifts" id="fundraising-live-recent-title">
+  <Panel title="Recent payments" id="fundraising-live-recent-title">
     {#if recent.length}
       <div class="space-y-2">
         {#each recent as gift, index (`${gift.id}|${index}`)}
@@ -40,7 +40,7 @@
       </div>
       <p class="mt-3 text-xs text-ink/50">Times are Chicago time. Amounts are net of refunds.</p>
     {:else}
-      <EmptyState title="No gifts yet" message="New Zeffy gifts show up here within a few minutes." />
+      <EmptyState title="No payments yet" message="New Zeffy payments show up here within a few minutes." />
     {/if}
   </Panel>
 
@@ -60,6 +60,9 @@
               </span>
               <span class="min-w-0 flex-1">
                 <span class="block truncate font-bold leading-snug text-ink">{donorLabel(donor)}</span>
+                {#if donor.name && donor.email}
+                  <span class="mt-0.5 block truncate text-xs text-ink/55">{donor.email}</span>
+                {/if}
                 <span class="mt-0.5 block truncate text-xs text-ink/50">
                   {[
                     donor.giftCount === null ? "" : `${donor.giftCount} gift${donor.giftCount === 1 ? "" : "s"}`,
