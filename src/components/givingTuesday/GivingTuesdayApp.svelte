@@ -301,6 +301,62 @@
   </div>
 </section>
 
+<!-- ======================== INSTRUCTOR BOARD =========================== -->
+{#if showBoard}
+  <section class="gt-board" aria-labelledby="gt-board-h" bind:this={boardEl} class:gt-seen={boardSeen || reduced}>
+    <div class="gt-wrap">
+      <h2 id="gt-board-h" class="gt-h2">{copy.board.title}</h2>
+      <p class="gt-board-intro">{copy.board.intro}</p>
+      <p class="gt-board-sum">{copy.board.summary(data.fundraiser_count ?? fundraisers.length, data.reached_count ?? 0)}</p>
+      <ol class="gt-list" class:gt-list-two={fundraisers.length > 6}>
+        {#each fundraisers as f, i (f.slug)}
+          {@const src = avatarSrc(f)}
+          {@const goal = f.goal_cents || thresholdCents}
+          {@const done = f.reached || f.raised_cents >= goal}
+          {@const p = progress(f.raised_cents, goal)}
+          {@const href = personGive(f)}
+          {@const c = ["#0f766e", "#c7602d", "#d9467a", "#0369a1", "#6d4aa8", "#1e1e1e"][i % 6]}
+          <li style={`--p:${p};--i:${Math.min(i, 16)};--mat:${c}`} class:gt-done={done}>
+            <a class="gt-row" {href} target={ext(href) ? "_blank" : undefined} rel={ext(href) ? "noopener" : undefined}>
+              <span class="gt-avatar" aria-hidden="true">
+                {#if src && !failedAvatars[f.slug]}
+                  <img
+                    {src}
+                    alt=""
+                    width="80"
+                    height="80"
+                    loading="lazy"
+                    decoding="async"
+                    onerror={() => (failedAvatars = { ...failedAvatars, [f.slug]: true })}
+                  />
+                {:else}
+                  <span class="gt-initials">{instructorInitials(f.name)}</span>
+                {/if}
+              </span>
+              <span class="gt-row-main">
+                <span class="gt-row-name">{f.name}</span>
+                {#if f.why}<span class="gt-row-why">{f.why}</span>{/if}
+                <span class="gt-rowmat" aria-hidden="true">
+                  <span class="gt-rowmat-body"></span>
+                  <span class="gt-rowmat-track"><span class="gt-rowmat-roll"></span></span>
+                </span>
+                <span class="gt-row-amt">
+                  {#if done}
+                    {money(f.raised_cents)} · <strong>{copy.board.reached}</strong>
+                  {:else}
+                    {money(f.raised_cents)} of {money(goal)}
+                  {/if}
+                </span>
+              </span>
+              <span class="gt-row-give">{copy.board.give}<span class="gt-sr"> through {firstName(f.name)}</span></span>
+            </a>
+          </li>
+        {/each}
+      </ol>
+    </div>
+  </section>
+{/if}
+
 <!-- ============================ THE FLOOR ============================== -->
 <section class="gt-floor" aria-labelledby="gt-floor-h">
   <div class="gt-wrap">
@@ -534,62 +590,6 @@
     </div>
   </div>
 </section>
-
-<!-- ======================== INSTRUCTOR BOARD =========================== -->
-{#if showBoard}
-  <section class="gt-board" aria-labelledby="gt-board-h" bind:this={boardEl} class:gt-seen={boardSeen || reduced}>
-    <div class="gt-wrap">
-      <h2 id="gt-board-h" class="gt-h2">{copy.board.title}</h2>
-      <p class="gt-board-intro">{copy.board.intro}</p>
-      <p class="gt-board-sum">{copy.board.summary(data.fundraiser_count ?? fundraisers.length, data.reached_count ?? 0)}</p>
-      <ol class="gt-list" class:gt-list-two={fundraisers.length > 6}>
-        {#each fundraisers as f, i (f.slug)}
-          {@const src = avatarSrc(f)}
-          {@const goal = f.goal_cents || thresholdCents}
-          {@const done = f.reached || f.raised_cents >= goal}
-          {@const p = progress(f.raised_cents, goal)}
-          {@const href = personGive(f)}
-          {@const c = ["#0f766e", "#c7602d", "#d9467a", "#0369a1", "#6d4aa8", "#1e1e1e"][i % 6]}
-          <li style={`--p:${p};--i:${Math.min(i, 16)};--mat:${c}`} class:gt-done={done}>
-            <a class="gt-row" {href} target={ext(href) ? "_blank" : undefined} rel={ext(href) ? "noopener" : undefined}>
-              <span class="gt-avatar" aria-hidden="true">
-                {#if src && !failedAvatars[f.slug]}
-                  <img
-                    {src}
-                    alt=""
-                    width="80"
-                    height="80"
-                    loading="lazy"
-                    decoding="async"
-                    onerror={() => (failedAvatars = { ...failedAvatars, [f.slug]: true })}
-                  />
-                {:else}
-                  <span class="gt-initials">{instructorInitials(f.name)}</span>
-                {/if}
-              </span>
-              <span class="gt-row-main">
-                <span class="gt-row-name">{f.name}</span>
-                {#if f.why}<span class="gt-row-why">{f.why}</span>{/if}
-                <span class="gt-rowmat" aria-hidden="true">
-                  <span class="gt-rowmat-body"></span>
-                  <span class="gt-rowmat-track"><span class="gt-rowmat-roll"></span></span>
-                </span>
-                <span class="gt-row-amt">
-                  {#if done}
-                    {money(f.raised_cents)} · <strong>{copy.board.reached}</strong>
-                  {:else}
-                    {money(f.raised_cents)} of {money(goal)}
-                  {/if}
-                </span>
-              </span>
-              <span class="gt-row-give">{copy.board.give}<span class="gt-sr"> through {firstName(f.name)}</span></span>
-            </a>
-          </li>
-        {/each}
-      </ol>
-    </div>
-  </section>
-{/if}
 
 <!-- ===================== MATCHING, SHARING, THANKS ===================== -->
 <section class="gt-more" aria-labelledby="gt-match-h">
