@@ -106,7 +106,7 @@ function colorOf(i: number) {
           <span class="gthb-note" data-gthb-note hidden>Gifts count through 11:59 pm Central tonight.</span>
         </span>
         <span class="gthb-prog" data-gthb-prog aria-hidden="true">
-          <span class="gthb-mats" data-gthb-mats>
+          <span class="gthb-mats" data-gthb-mats style={`--n:${MATS}`}>
             {Array.from({ length: MATS }, (_, i) => (
               <span class="gthb-m" style={`--c:${colorOf(i)[0]};--r:${colorOf(i)[1]}`}><span class="gthb-mb"></span><span class="gthb-mt"><span class="gthb-mr"></span></span></span>
             ))}
@@ -425,13 +425,19 @@ function colorOf(i: number) {
     --mh: 18px;
     --mw: 6.5px;
     --du: 600ms;
+    --mg: 3px;
     display: flex;
-    flex: 0 0 auto;
-    gap: 3px;
+    flex: none;
+    gap: var(--mg);
+    /* Explicit widths, not flex-basis: Safari sizes a flex row from its
+       children's content (empty spans = 0), so without these the row was
+       only as wide as its gaps and the figure landed on top of the mats. */
+    width: calc(var(--n) * var(--mw) + (var(--n) - 1) * var(--mg));
   }
   .gthb-m {
     position: relative;
-    flex: 0 0 var(--mw);
+    flex: none;
+    width: var(--mw);
     height: var(--mh);
     border-radius: 1.5px;
     box-shadow: inset 0 0 0 1px rgba(30, 30, 30, 0.34);
@@ -532,7 +538,6 @@ function colorOf(i: number) {
     .gthb-mats {
       --mh: 22px;
       --mw: 8px;
-      gap: 3px;
     }
   }
   .gthb-give {
