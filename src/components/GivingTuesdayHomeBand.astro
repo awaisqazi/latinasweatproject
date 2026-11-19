@@ -12,6 +12,12 @@
 // Turns itself off: thank-you copy after givingFacts.endsAt, gone after
 // givingPlacementsUntil (build time here, and in the browser). Toggle:
 // showGivingHomeBand in src/data/givingTuesday.js.
+//
+// The top five race (Nov 19 2026): [data-gt-leaders] is hidden until the
+// RPC answers with three or more people who have raised money; placement.js
+// then mounts GivingLeaderboard.svelte (the /givingtuesday race, tone "ink",
+// compact) in it. Under 1024 px it sits between the floor and the button;
+// from 1024 px it runs the full width of the band under both columns.
 import GivingMatFloor from "@/components/GivingMatFloor.astro";
 import {
   givingFacts,
@@ -68,6 +74,11 @@ const goal = money(givingFacts.goalCents);
         <p class="gtb-key">{givingCopy.floor.key}</p>
       </div>
 
+      <div class="gtb-leaders" data-gt-leaders="ink" hidden>
+        <div data-gt-leaders-mount></div>
+        <a class="gtb-all" href={`${pageUrl}/#gt-board-h`}>{givingCopy.board.seeAll}</a>
+      </div>
+
       <div class="gtb-cta">
         <a
           href={pageUrl}
@@ -100,7 +111,7 @@ const goal = money(givingFacts.goalCents);
   .gtb [hidden] { display: none !important; }
   .gtb-wrap {
     display: grid;
-    grid-template-areas: "head" "meter" "floor" "cta";
+    grid-template-areas: "head" "meter" "floor" "leaders" "cta";
     margin: 0 auto;
     max-width: 80rem;
     padding: 3.5rem 1rem 4rem;
@@ -109,6 +120,21 @@ const goal = money(givingFacts.goalCents);
   .gtb-meter { grid-area: meter; margin-top: 2.25rem; }
   .gtb-floor { grid-area: floor; margin-top: 1.5rem; }
   .gtb-cta { grid-area: cta; margin-top: 2rem; }
+  .gtb-leaders { grid-area: leaders; margin-top: 2.5rem; }
+  .gtb-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  .gtb-all:hover { color: var(--sun); }
+  .gtb-all:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 2px; }
 
   .gtb-kicker {
     font-size: 1.05rem;
@@ -206,6 +232,24 @@ const goal = money(givingFacts.goalCents);
       max-width: none;
     }
     .gtb-meter { margin-top: 2.5rem; }
+    /* With the race: the two columns stay as they are and the race runs the
+       full width of the band underneath them, so neither column is left
+       with a hole beside it. */
+    .gtb[data-gt-leaders-on] .gtb-wrap {
+      grid-template-rows: auto auto 1fr auto;
+      grid-template-areas:
+        "floor head"
+        "floor meter"
+        "floor cta"
+        "leaders leaders";
+    }
+    .gtb[data-gt-leaders-on] .gtb-leaders { margin-top: 4.5rem; }
+    .gtb-leaders :global(.lb-list) { max-width: none; }
+    /* At this length the compact mats read as lines: give them the weight
+       of mats again. */
+    .gtb-leaders :global(.lb.lb-compact) { --rankw: 56px; --gap: 16px; }
+    .gtb-leaders :global(.lb.lb-compact .lb-item) { --face: 52px; --mh: 16px; --rs: 2.5rem; }
+    .gtb-leaders :global(.lb.lb-compact .lb-first) { --face: 72px; --mh: 22px; --rs: 4rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     .gtb-btn { transition: none; }

@@ -14,6 +14,15 @@
 //                      the amount picker's prefill and "Give $100" show)
 //   &tick=1            the total rises by $137 every poll (polls every 3.5 s
 //                      in this mode, see live.js) to watch mats roll out live
+//   Leaderboard (the board's top five race; needs total > 0):
+//   &raised=3          only the first N rows have raised money (3 shows a
+//                      race of three, 2 shows no race)
+//   &tie=1             ranks 2 to 4 share one amount, so the order falls back
+//                      to first name
+//   &long=1            the two longest instructor names lead the race
+//                      (Lucia Del Rincon Martinez, Ruthie Maldonado-Delwiche)
+//   &shuffle=1         amounts reshuffle every poll (with tick=1 for 3.5 s
+//                      polls) to watch the race reorder
 
 const SLUGS = [
   "alondra-alcazar", "amayrani-nunez", "anabel-hernandez", "andrea-fuentes", "antonia-rosales",
@@ -58,13 +67,15 @@ export function mockGivingPublic(q) {
   const n = Math.max(0, Math.min(40, Number(q.get("mock")) || (q.get("mock") === "0" ? 0 : 5)));
   ticks += 1;
   const totalCents = Math.round((Number(q.get("total")) || 0) * 100) + (q.get("tick") ? ticks * 13700 : 0);
-  const r = rand(7 + n);
-  const fundraisers = SLUGS.slice(0, n).map((slug, i) => {
+  const r = rand(7 + n + (q.get("shuffle") ? ticks : 0));
+  const LONG = { "lucia-del-rincon-martinez": "Lucia Del Rincon Martinez", "ruthie-maldonado-delwiche": "Ruthie Maldonado-Delwiche" };
+  const slugs = q.get("long") ? [...Object.keys(LONG), ...SLUGS.filter((s) => !LONG[s])] : SLUGS;
+  const fundraisers = slugs.slice(0, n).map((slug, i) => {
     // Spread the total across fundraisers when there is one; else zeros.
     const raised = totalCents > 0 ? Math.round((r() < 0.25 ? 150 + r() * 260 : r() * 149) ) * 100 : 0;
     return {
       slug,
-      name: titleCase(slug),
+      name: LONG[slug] && q.get("long") ? LONG[slug] : titleCase(slug),
       cohort: COHORTS[i % 3],
       avatar: i % 7 === 3 ? null : slug,
       why: WHYS[i % WHYS.length],
@@ -75,6 +86,27 @@ export function mockGivingPublic(q) {
       give_url: i % 4 === 1 ? null : `https://www.zeffy.com/en-US/peer-to-peer/mock-${slug}`,
     };
   });
+  // Leaderboard shapes (dev only).
+  const set = (f, cents) => {
+    f.raised_cents = cents;
+    f.gift_count = cents ? 1 + Math.floor(cents / 4000) : 0;
+    f.reached = cents >= 15000;
+  };
+  if (totalCents > 0) {
+    if (q.has("raised")) {
+      const k = Math.max(0, Number(q.get("raised")) || 0);
+      fundraisers.forEach((f, i) => set(f, i < k ? (f.raised_cents || 2500 + i * 1300) : 0));
+    }
+    if (q.get("long") && fundraisers.length >= 2) {
+      set(fundraisers[0], 41000);
+      set(fundraisers[1], 38500);
+    }
+    if (q.get("tie")) {
+      const order = [...fundraisers].sort((a, b) => b.raised_cents - a.raised_cents);
+      const amt = order[1]?.raised_cents || 9000;
+      order.slice(1, 4).forEach((f) => set(f, amt));
+    }
+  }
   return {
     ok: true,
     campaign: {

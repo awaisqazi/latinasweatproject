@@ -11,7 +11,13 @@
 //      dynamic import, so supabase-js never ships with the first paint) and
 //      polls the giving_public RPC while the tab is visible;
 //   4. rolls the funded mats out once the floor is 35% in view, once; later
-//      rises roll out only the new mats.
+//      rises roll out only the new mats;
+//   5. where the placement has a [data-gt-leaders] box (homepage band, /links
+//      card), shows the /givingtuesday top five race from the same payload
+//      (rules: src/lib/givingTuesday/leaderboard.js). The box stays hidden
+//      (no gap) while loading, on RPC failure, after Giving Tuesday, with the
+//      board closed, or with fewer than three people who have raised money.
+//      Svelte and the component load (dynamic import) only when it shows.
 // States: loading and RPC down keep the server-rendered "$15,000 / is our
 // goal." with the room's faint outlines (no number that could read as
 // "$0 raised"); $0 shows the goal, the mat outlines and "Roll out the
@@ -31,6 +37,7 @@ import {
   money,
   fill,
 } from "../../data/givingTuesday.js";
+import { topRaisers, campaignGiveUrl } from "./leaderboard.js";
 
 function clock() {
   if (import.meta.env.DEV) {
@@ -97,7 +104,43 @@ export function initGivingPlacements() {
     })),
     seen: false,
     total: null,
+    leadBox: root.querySelector("[data-gt-leaders]"),
+    lead: null, // Promise of the mounted leaderboard
   }));
+
+  // The top five race: mounted on first use, then updated in place.
+  function leaders(s, data) {
+    const box = s.leadBox;
+    if (!box) return;
+    const top = !thanks && data?.campaign?.board_open === true ? topRaisers(data.fundraisers) : [];
+    if (!top.length) {
+      box.hidden = true;
+      s.root.removeAttribute("data-gt-leaders-on");
+      return;
+    }
+    const base = import.meta.env.BASE_URL || "/";
+    const fallback = campaignGiveUrl(data.campaign, base);
+    const hrefFor = (f) => f.give_url || fallback;
+    const bilingual = box.hasAttribute("data-gt-bilingual");
+    s.lead ??= import("./placementLeaders.svelte.js").then((m) =>
+      m.mountLeaders(box.querySelector("[data-gt-leaders-mount]"), {
+        base,
+        reduced,
+        tone: box.getAttribute("data-gt-leaders") || "ink",
+        headingId: `${s.root.id || "gt"}-lead-h`,
+        es: bilingual ? { leadTitle: pc.leadTitleEs, leadLabel: pc.leadLabelEs } : null,
+      }),
+    );
+    s.lead
+      .then((lb) => {
+        lb.update(top, hrefFor, Number(data.campaign?.threshold_cents) || 0);
+        box.hidden = false;
+        s.root.setAttribute("data-gt-leaders-on", "");
+      })
+      .catch(() => {
+        box.hidden = true; // the placement reads well without it
+      });
+  }
 
   function roll(s) {
     if (!s.seen || s.total == null) return;
@@ -168,6 +211,7 @@ export function initGivingPlacements() {
     s.floor?.setAttribute("data-live", "");
     s.total = total;
     roll(s);
+    leaders(s, data);
   }
 
   // Seen: the floor is 35% in view (or no IntersectionObserver).

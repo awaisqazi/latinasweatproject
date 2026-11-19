@@ -10,13 +10,12 @@
   // amount picker -> "How we got here", a dated timeline 2022 to now whose
   // line draws down to "What's next" (the ask) -> instructor board -> the ink
   // close. Photos: src/data/givingTuesdayPhotos.js.
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { Tween } from "svelte/motion";
   import { cubicOut } from "svelte/easing";
   import {
     givingCopy as copy,
     givingFacts as facts,
-    givingRoutes as routes,
     phase as phaseAt,
     money,
     progress,
@@ -30,6 +29,8 @@
   import { startPolling, nowOverride } from "../../lib/givingTuesday/live.js";
   import { heroOne, wallPhotos, storyPhotos, wallImage, storyImage } from "../../data/givingTuesdayPhotos.js";
   import MatFloor from "./MatFloor.svelte";
+  import GivingLeaderboard from "./GivingLeaderboard.svelte";
+  import { rankFundraisers, topRaisers, campaignGiveUrl, BOARD_MATS } from "../../lib/givingTuesday/leaderboard.js";
 
   let { base = "/" } = $props();
 
@@ -82,7 +83,7 @@
   const campaign = $derived(data?.campaign ?? null);
   const goalCents = $derived(campaign?.goal_cents ?? facts.goalCents);
   const thresholdCents = $derived(campaign?.threshold_cents ?? facts.thresholdCents);
-  const giveUrl = $derived(campaign?.give_url || `${base}${routes.fallbackGive.replace(/^\//, "")}`);
+  const giveUrl = $derived(campaignGiveUrl(campaign, base));
   const ph = $derived(
     phaseAt(now, campaign?.starts_at ?? facts.startsAt, campaign?.ends_at ?? facts.endsAt, facts.givingDay),
   );
@@ -92,11 +93,12 @@
   const over = $derived(totalCents >= goalCents);
   const goalLabel = $derived(money(goalCents));
   const live = $derived(status === "live");
-  const fundraisers = $derived(
-    [...(data?.fundraisers ?? [])].sort(
-      (a, b) => (b.raised_cents || 0) - (a.raised_cents || 0) || String(a.name).localeCompare(String(b.name)),
-    ),
-  );
+  // Board order (shared with the homepage band, src/lib/givingTuesday/
+  // leaderboard.js): amount raised, most first; then first name; then full
+  // name (localeCompare, sensitivity "base"). The top five race shows only
+  // when at least three people have raised money.
+  const fundraisers = $derived(rankFundraisers(data?.fundraisers));
+  const leaders = $derived(topRaisers(fundraisers));
   const showBoard = $derived(live && campaign?.board_open === true && fundraisers.length > 0);
   const external = $derived(/^https?:/i.test(giveUrl));
 
@@ -150,6 +152,14 @@
   }
   $effect(() => watch(floorEl, () => (floorSeen = true), 0.35));
   $effect(() => watch(boardEl, () => (boardSeen = true), 0.15));
+  // The board renders only once data arrives, after the browser has given up
+  // on a #gt-board-h hash (the homepage band links there): scroll to it once.
+  let boardHashDone = false;
+  $effect(() => {
+    if (!showBoard || boardHashDone || window.location.hash !== "#gt-board-h") return;
+    boardHashDone = true;
+    tick().then(() => document.getElementById("gt-board-h")?.scrollIntoView({ block: "start" }));
+  });
   $effect(() => watch(classesEl, () => (storySeen = true), 0.5));
 
   // Timeline: one line runs from 2022 down to "What's next" and draws as the
@@ -308,6 +318,12 @@
       <h2 id="gt-board-h" class="gt-h2">{copy.board.title}</h2>
       <p class="gt-board-intro">{copy.board.intro}</p>
       <p class="gt-board-sum">{copy.board.summary(data.fundraiser_count ?? fundraisers.length, data.reached_count ?? 0)}</p>
+      {#if leaders.length}
+        <div class="gt-lead">
+          <GivingLeaderboard {leaders} hrefFor={personGive} {base} {thresholdCents} seen={boardSeen} {reduced} />
+        </div>
+        <h3 class="gt-all-h">{copy.board.allTitle}</h3>
+      {/if}
       <ol class="gt-list" class:gt-list-two={fundraisers.length > 6}>
         {#each fundraisers as f, i (f.slug)}
           {@const src = avatarSrc(f)}
@@ -315,7 +331,7 @@
           {@const done = f.reached || f.raised_cents >= goal}
           {@const p = progress(f.raised_cents, goal)}
           {@const href = personGive(f)}
-          {@const c = ["#0f766e", "#c7602d", "#d9467a", "#0369a1", "#6d4aa8", "#1e1e1e"][i % 6]}
+          {@const c = BOARD_MATS[i % BOARD_MATS.length]}
           <li style={`--p:${p};--i:${Math.min(i, 16)};--mat:${c}`} class:gt-done={done}>
             <a class="gt-row" {href} target={ext(href) ? "_blank" : undefined} rel={ext(href) ? "noopener" : undefined}>
               <span class="gt-avatar" aria-hidden="true">
@@ -1117,9 +1133,25 @@
     line-height: 1.05;
     letter-spacing: -0.025em;
   }
+  /* The homepage band and /links card link here (#gt-board-h): clear the
+     fixed header and the countdown band. */
+  #gt-board-h { scroll-margin-top: 120px; }
   .gt-board-intro { margin: 16px 0 0; max-width: 56ch; font-size: 1.125rem; line-height: 1.55; }
   .gt-board-sum { margin: 10px 0 0; font-size: 1.0625rem; color: var(--gt-soft); }
   .gt-list { list-style: none; margin: 36px 0 0; padding: 0; max-width: 760px; }
+  /* The top five race (GivingLeaderboard.svelte), then a plain heading over
+     the full list so the two read as two things. */
+  .gt-lead { margin-top: 44px; }
+  @media (min-width: 768px) { .gt-lead { margin-top: 64px; } }
+  .gt-all-h {
+    margin: 64px 0 0;
+    font-weight: 700;
+    font-size: clamp(1.375rem, 5vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+  @media (min-width: 768px) { .gt-all-h { margin-top: 88px; } }
+  .gt-all-h + .gt-list { margin-top: 12px; }
   @media (min-width: 1024px) {
     .gt-list-two { columns: 2; column-gap: 72px; max-width: none; }
     .gt-list-two li { break-inside: avoid; }

@@ -10,6 +10,11 @@
 // Turns itself off: thank-you copy after givingFacts.endsAt, gone (card and
 // bubble) after givingPlacementsUntil. Toggle: showGivingLinksCard in
 // src/data/givingTuesday.js.
+//
+// The top five race (Nov 19 2026): [data-gt-leaders] between the floor and
+// the button, hidden until the RPC answers with three or more people who
+// have raised money; placement.js then mounts GivingLeaderboard.svelte
+// (tone "light", compact, EN/ES pairs) in it.
 import GivingMatFloor from "@/components/GivingMatFloor.astro";
 import {
   givingFacts,
@@ -83,6 +88,14 @@ const goal = money(givingFacts.goalCents);
           <span class="lang-en">{givingCopy.floor.key}</span>
           <span class="lang-es hidden">{pc.keyEs}</span>
         </p>
+      </div>
+
+      <div class="gtl-leaders" data-gt-leaders="light" data-gt-bilingual hidden>
+        <div data-gt-leaders-mount></div>
+        <a class="gtl-all" href={`${pageUrl}/#gt-board-h`}>
+          <span class="lang-en">{givingCopy.board.seeAll}</span>
+          <span class="lang-es hidden">{pc.seeAllEs}</span>
+        </a>
       </div>
 
       <a
@@ -173,6 +186,20 @@ const goal = money(givingFacts.goalCents);
     font-size: 0.86rem;
     color: #4e4f50;
   }
+  .gtl-leaders { margin-top: 1.5rem; }
+  .gtl-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  .gtl-all:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
   .gtl-btn {
     display: flex;
     align-items: center;

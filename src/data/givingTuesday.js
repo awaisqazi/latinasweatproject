@@ -211,6 +211,13 @@ export const givingCopy = {
     reached: "Reached $150", // NEW
     toGo: "{left} to go", // NEW
     give: "Give", // NEW
+    // The top-five race above the full list (and on the homepage band). The
+    // heading stays true when only three or four people have raised money.
+    leadTitle: (n) => (n >= 5 ? "The top five so far" : `The top ${["", "one", "two", "three", "four"][n] || n} so far`), // NEW
+    // Accessible name of each leaderboard link.
+    leadLabel: (rank, name, amount, first) => `${rank}. ${name}, ${amount} raised. Give through ${first}.`, // NEW
+    allTitle: "All instructors", // NEW
+    seeAll: "See all instructors", // NEW (homepage band link to the full board)
   },
 
   // Employer matching: Lizett's email copy.
@@ -498,4 +505,10 @@ export const givingPlacementCopy = {
   finalPassedEs: "más que nuestra meta de {goal}.",
   giftsFinalEs: (n) => (n === 1 ? "1 donación" : `${n.toLocaleString("en-US")} donaciones`),
   bubble: "Giving Tuesday",
+  // The top five race (GivingLeaderboard.svelte) in the band and the card.
+  // English lines live in givingCopy.board; these are /links' Spanish pairs.
+  // "Van a la cabeza" stays true with three, four or five people.
+  leadTitleEs: () => "Van a la cabeza", // NEW
+  leadLabelEs: (rank, name, amount, first) => `${rank}. ${name}, ${amount} recaudados. Dona a través de ${first}.`, // NEW
+  seeAllEs: "Ver a todos los instructores", // NEW
 };
