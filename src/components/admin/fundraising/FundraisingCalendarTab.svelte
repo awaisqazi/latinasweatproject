@@ -36,7 +36,7 @@
   $: undatedDeadlines = prospects.filter(
     (prospect) =>
       prospect.deadlines?.trim() &&
-      !["Committed", "Declined"].includes(prospect.stage),
+      !["Committed", "Received", "Declined", "Stewardship"].includes(prospect.stage),
   );
 
   function ownerSuffix(ownerId, members) {

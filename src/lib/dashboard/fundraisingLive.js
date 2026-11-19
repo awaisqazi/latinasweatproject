@@ -12,7 +12,7 @@
 // components only ever see the normalized, camelCase shape.
 
 import { getSetting, setSetting } from "./appSettings.js";
-import { PROSPECT_STAGES } from "./fundraising.js";
+import { PROSPECT_STAGES, grantCountedYear, normalizeProspectStage } from "./fundraising.js";
 import {
   STUDIO_TIME_ZONE,
   chicagoToday,
@@ -275,6 +275,79 @@ export function normalizeLive(raw) {
     hasLapsed: has(source, lapsedKeys),
     topDonorsYtd: list(source, topKeys).map(normalizeTopDonor).filter((row) => row.email || row.name),
     hasTopDonors: has(source, topKeys),
+    grants: normalizeGrants(source.grants),
+  };
+}
+
+// fundraising_live's top-level `grants` block: committed and received
+// grants (stage Committed or Received with a committed amount, counted in
+// the calendar year of committed_on). null when the RPC does not send it,
+// so every total falls back to Zeffy alone.
+export function normalizeGrants(value) {
+  let source = value;
+  if (typeof source === "string") {
+    try {
+      source = JSON.parse(source);
+    } catch {
+      source = null;
+    }
+  }
+  if (!isObject(source)) return null;
+  const byYear = {};
+  if (isObject(source.by_year)) {
+    for (const [key, raw] of Object.entries(source.by_year)) {
+      const cents = centsOrNull(raw);
+      if (/^\d{4}$/.test(key) && cents !== null) byYear[key] = cents;
+    }
+  }
+  const byPhase = (Array.isArray(source.by_phase) ? source.by_phase : [])
+    .filter(isObject)
+    .map((row) => ({
+      phase: normalizeProspectStage(text(pick(row, ["phase", "stage"]))),
+      count: intOrNull(row.count) ?? 0,
+      askCents: centsOrNull(pick(row, ["ask_cents"])) ?? 0,
+      committedCents: centsOrNull(pick(row, ["committed_cents"])) ?? 0,
+    }))
+    .filter((row) => text(row.phase));
+  // Legacy names collapse onto one phase; add them up in phase order.
+  const merged = [];
+  for (const stage of PROSPECT_STAGES) {
+    const rows = byPhase.filter((row) => row.phase === stage);
+    if (!rows.length) continue;
+    merged.push({
+      phase: stage,
+      count: rows.reduce((sum, row) => sum + row.count, 0),
+      askCents: rows.reduce((sum, row) => sum + row.askCents, 0),
+      committedCents: rows.reduce((sum, row) => sum + row.committedCents, 0),
+    });
+  }
+  return {
+    committedYtdCents: centsOrNull(source.committed_ytd_cents),
+    committedYtdCount: intOrNull(source.committed_ytd_count),
+    receivedYtdCents: centsOrNull(source.received_ytd_cents),
+    committedLast12MonthsCents: centsOrNull(source.committed_last_12_months_cents),
+    byYear,
+    byPhase: merged,
+  };
+}
+
+// Headline totals with committed grants added in: "Year to date" and "Last
+// 12 months" are Zeffy plus grants when the grants block is there. Each is
+// { amountCents, zeffyCents, grantsCents } or null when Zeffy's own total is
+// missing.
+export function combinedTotals(totals, grants) {
+  const combine = (zeffy, grantsCents) => {
+    if (!zeffy) return null;
+    const add = grants && grantsCents !== null && grantsCents !== undefined ? grantsCents : null;
+    return {
+      amountCents: zeffy.amountCents + (add || 0),
+      zeffyCents: zeffy.amountCents,
+      grantsCents: add,
+    };
+  };
+  return {
+    yearToDate: combine(totals?.yearToDate, grants?.committedYtdCents),
+    last12Months: combine(totals?.last12Months, grants?.committedLast12MonthsCents),
   };
 }
 
@@ -494,18 +567,45 @@ export function pickGoal(goals, currentYear) {
 }
 
 // Numbers for the goal panel. Current year: year-to-date against the goal.
-// Upcoming year: the last 12 months as the baseline.
-export function goalProgress(goal, totals) {
+// Upcoming year: the last 12 months as the baseline. With the live grants
+// block, committed grants count too: the goal year's (by_year) for the
+// current year, the last 12 months' for the upcoming-year pace, and the
+// grants already committed for the upcoming goal year are reported apart.
+export function goalProgress(goal, totals, grants = null) {
   if (!goal) return null;
-  const baseline =
+  const zeffy =
     goal.mode === "current" ? totals?.yearToDate?.amountCents : totals?.last12Months?.amountCents;
-  if (baseline === null || baseline === undefined) {
-    return { ...goal, baselineCents: null, percent: null, remainingCents: null, multiple: null };
+  let grantsCents = null;
+  if (grants) {
+    grantsCents =
+      goal.mode === "current"
+        ? grants.byYear?.[String(goal.year)] ?? grants.committedYtdCents ?? null
+        : grants.committedLast12MonthsCents ?? null;
   }
+  const goalYearGrantsCents =
+    grants && goal.mode !== "current" ? grants.byYear?.[String(goal.year)] ?? null : null;
+  if (zeffy === null || zeffy === undefined) {
+    return {
+      ...goal,
+      baselineCents: null,
+      zeffyCents: null,
+      grantsCents,
+      goalYearGrantsCents,
+      includesGrants: Boolean(grants),
+      percent: null,
+      remainingCents: null,
+      multiple: null,
+    };
+  }
+  const baseline = zeffy + (grantsCents || 0);
   const percent = goal.cents > 0 ? Math.floor((baseline / goal.cents) * 1000) / 10 : null;
   return {
     ...goal,
     baselineCents: baseline,
+    zeffyCents: zeffy,
+    grantsCents,
+    goalYearGrantsCents,
+    includesGrants: Boolean(grants),
     percent,
     remainingCents: Math.max(goal.cents - baseline, 0),
     multiple: baseline > 0 ? Math.round((goal.cents / baseline) * 10) / 10 : null,
@@ -641,20 +741,48 @@ export function parseDeadlineDates(value) {
   return [...found].sort();
 }
 
-// Stages still being worked toward a decision.
-export const PIPELINE_STAGES = ["Research", "Outreach", "In Conversation", "Application"];
+// Phases still being worked toward a decision.
+export const PIPELINE_STAGES = ["Prospecting", "Viable", "Drafted", "Submitted"];
 
-// Grant Research and Identification: the prospects pipeline.
-export function grantsScorecard(prospects, today = chicagoToday()) {
-  const rows = prospects || [];
+function dollarsToCents(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : null;
+}
+
+// A prospect's ask: the ask_amount field when it is set, otherwise the first
+// dollar figure in the free-text suggested_ask note (estimated: true).
+export function prospectAsk(prospect) {
+  const exact = dollarsToCents(prospect?.ask_amount);
+  if (exact) return { cents: exact, estimated: false };
+  const guess = parseAskCents(prospect?.suggested_ask);
+  return guess ? { cents: guess, estimated: true } : { cents: null, estimated: false };
+}
+
+// Grant Research and Identification: the prospects pipeline, plus what is
+// committed and received this calendar year. The live grants block (from
+// fundraising_live) is used for the year's totals and the phase table when
+// it is there; otherwise both are worked out from the prospect rows.
+export function grantsScorecard(prospects, today = chicagoToday(), liveGrants = null) {
+  const rows = (prospects || []).map((prospect) => ({
+    ...prospect,
+    phase: normalizeProspectStage(prospect.stage),
+    ask: prospectAsk(prospect),
+  }));
+  const year = Number(String(today).slice(0, 4));
   const byStage = PROSPECT_STAGES.map((stage) => {
-    const inStage = rows.filter((prospect) => prospect.stage === stage);
-    const asks = inStage.map((prospect) => parseAskCents(prospect.suggested_ask)).filter((cents) => cents);
+    const inStage = rows.filter((prospect) => prospect.phase === stage);
+    const asks = inStage.filter((prospect) => prospect.ask.cents);
     return {
       stage,
       count: inStage.length,
-      askCents: asks.reduce((sum, cents) => sum + cents, 0),
+      askCents: asks.reduce((sum, prospect) => sum + prospect.ask.cents, 0),
       withAsk: asks.length,
+      estimated: asks.filter((prospect) => prospect.ask.estimated).length,
+      committedCents: inStage.reduce(
+        (sum, prospect) => sum + (grantCountedYear(prospect) ? dollarsToCents(prospect.committed_amount) || 0 : 0),
+        0,
+      ),
     };
   });
   const pipeline = byStage.filter((row) => PIPELINE_STAGES.includes(row.stage));
@@ -662,7 +790,7 @@ export function grantsScorecard(prospects, today = chicagoToday()) {
 
   let nextDeadline = null;
   for (const prospect of rows) {
-    if (prospect.stage === "Declined") continue;
+    if (["Declined", "Committed", "Received"].includes(prospect.phase)) continue;
     for (const date of parseDeadlineDates(prospect.deadlines)) {
       if (date < today) continue;
       if (!nextDeadline || date < nextDeadline.date) {
@@ -671,13 +799,44 @@ export function grantsScorecard(prospects, today = chicagoToday()) {
     }
   }
 
+  // This year's committed and received grants, from the prospect rows.
+  const countedThisYear = rows.filter((prospect) => grantCountedYear(prospect) === year);
+  const local = {
+    committedYtdCents: countedThisYear.reduce((sum, p) => sum + (dollarsToCents(p.committed_amount) || 0), 0),
+    committedYtdCount: countedThisYear.length,
+    // The counted grants of this year that are already Received (contract
+    // 01, section 3a), so it is always part of committedYtdCents.
+    receivedYtdCents: countedThisYear
+      .filter((p) => p.phase === "Received")
+      .reduce((sum, p) => sum + (dollarsToCents(p.committed_amount) || 0), 0),
+  };
+  const fromLive = Boolean(liveGrants);
+
   return {
     pipelineCount: pipeline.reduce((sum, row) => sum + row.count, 0),
     pipelineAskCents: pipeline.reduce((sum, row) => sum + row.askCents, 0),
     pipelineWithAsk: pipeline.reduce((sum, row) => sum + row.withAsk, 0),
+    pipelineEstimated: pipeline.reduce((sum, row) => sum + row.estimated, 0),
     committedCount: committed.count,
     committedAskCents: committed.askCents,
+    committedYtdCents: fromLive ? liveGrants.committedYtdCents ?? local.committedYtdCents : local.committedYtdCents,
+    committedYtdCount: fromLive ? liveGrants.committedYtdCount ?? local.committedYtdCount : local.committedYtdCount,
+    receivedYtdCents: fromLive ? liveGrants.receivedYtdCents ?? local.receivedYtdCents : local.receivedYtdCents,
     byStage: byStage.filter((row) => row.count > 0),
+    // The phase table: the live block's when it sent one, else the rows'.
+    byPhase:
+      fromLive && liveGrants.byPhase.length
+        ? liveGrants.byPhase.filter((row) => row.count > 0)
+        : byStage
+            .filter((row) => row.count > 0)
+            .map((row) => ({
+              phase: row.stage,
+              count: row.count,
+              askCents: row.askCents,
+              committedCents: row.committedCents,
+              estimated: row.estimated,
+            })),
+    byPhaseFromLive: fromLive && liveGrants.byPhase.length > 0,
     nextDeadline,
   };
 }

@@ -16,6 +16,7 @@
   export let goalsValue = null; // the stored jsonb, as loaded
   export let canEdit = false;
   export let currentYear = new Date().getFullYear();
+  export let includesGrants = false; // the live grants block is there
   export let onSaved = () => {};
 
   let editing = false;
@@ -83,7 +84,7 @@
               disabled={saving}
             />
           </Field>
-          <Field label="Goal in dollars" id="fundraising-goal-amount" hint="Zeffy payments only, in whole dollars.">
+          <Field label="Goal in dollars" id="fundraising-goal-amount" hint={includesGrants ? "Zeffy payments plus committed grants, in whole dollars." : "Zeffy payments only, in whole dollars."}>
             <input
               id="fundraising-goal-amount"
               type="text"
@@ -137,10 +138,24 @@
           {/if}
         {/if}
       </p>
+      {#if goal.baselineCents !== null && goal.grantsCents}
+        <p class="mt-1 text-xs text-ink/60">
+          Zeffy {formatCentsWhole(goal.zeffyCents)} · Grants committed {formatCentsWhole(goal.grantsCents)}
+        </p>
+      {/if}
+      {#if goal.goalYearGrantsCents}
+        <p class="mt-1 text-sm text-ink/75">
+          Grants already committed for {goal.year}: {formatCentsWhole(goal.goalYearGrantsCents)}.
+        </p>
+      {/if}
     {/if}
 
     <p class="mt-4 border-t border-ink/8 pt-3 text-xs leading-5 text-ink/55">
-      Counts Zeffy payments only. Grants, checks and sponsor invoices are not in Zeffy, so they are not in this number.
+      {#if includesGrants}
+        Counts Zeffy payments and grants marked committed or received. Checks and sponsor invoices outside Zeffy are still not included.
+      {:else}
+        Counts Zeffy payments only. Grants, checks and sponsor invoices are not in Zeffy, so they are not in this number.
+      {/if}
     </p>
   </Panel>
 {:else if canEdit}

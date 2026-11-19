@@ -12,6 +12,9 @@ Applied migrations (production, ledgered 2026-11-18):
   `fundraising_donor_summary` and `fundraising_campaign_summary` now read it (section 7).
 - `supabase/migrations/20261118120300_fundraising_donations_all_mirror_only.sql`: the view is now built
   from the mirror alone, and `fundraising_live` no longer reads the import (section 7, "Current").
+- `supabase/migrations/20261118140000_grant_phases.sql`: grant phases on `fundraising_prospects`, view
+  `fundraising_grants_committed`, and a new top-level `grants` block in `fundraising_live` (section 3a;
+  details in `03-grant-phases.md`).
 
 **The `giving-zeffy-reconcile` cron job must stay scheduled after Giving Tuesday.** It is the mirror's
 sync, and the donor CRM now reads the mirror. Ignore the "remove mid-January" step in the Giving
@@ -175,6 +178,48 @@ campaign's own label (`Event`, `DonationForm`, `Shop`, `Auction`, `PeerToPeerCam
 
 Live updates: subscribe to `postgres_changes` on `public.zeffy_payments` (RLS-filtered), then call the
 RPC again (debounced) rather than patching numbers client side.
+
+### 3a. `grants` block (migration 20261118140000)
+
+Every key above is unchanged. Grant money is **not** in `totals`, `monthly` or any other Zeffy
+figure: show Zeffy and grants as two parts of one total and add them client side.
+
+```json
+"grants": {
+  "committed_ytd_cents": 1000000,
+  "committed_ytd_count": 1,
+  "received_ytd_cents": 1000000,
+  "committed_last_12_months_cents": 1000000,
+  "by_year": { "2025": 250050, "2026": 1000000, "2027": 100000 },
+  "by_phase": [
+    { "phase": "Prospecting", "count": 80, "ask_cents": 0, "committed_cents": 0 },
+    { "phase": "Viable",      "count": 4,  "ask_cents": 0, "committed_cents": 0 },
+    { "phase": "Drafted",     "count": 0,  "ask_cents": 0, "committed_cents": 0 },
+    { "phase": "Submitted",   "count": 1,  "ask_cents": 500000, "committed_cents": 0 },
+    { "phase": "Committed",   "count": 2,  "ask_cents": 0, "committed_cents": 100000 },
+    { "phase": "Received",    "count": 2,  "ask_cents": 1500000, "committed_cents": 1250050 },
+    { "phase": "Declined",    "count": 0,  "ask_cents": 0, "committed_cents": 0 }
+  ]
+}
+```
+
+(Sample from the test run; today all money values are 0 and `by_year` is `{}`.)
+
+Counting rule (one definition, view `public.fundraising_grants_committed`): a grant counts when
+`stage in ('Committed','Received')` and `committed_amount` is not null, in the calendar year of
+`committed_on`.
+
+- `committed_ytd_*`: counted grants whose `committed_on` falls in this calendar year (p_tz), the whole
+  year, so it equals `by_year[this year]`.
+- `received_ytd_cents`: the subset of those whose stage is `Received`.
+- `committed_last_12_months_cents`: counted grants with `committed_on` after today minus one year and
+  up to today.
+- `by_year`: every year with a counted grant; `{}` when none.
+- `by_phase`: all seven phases in order, even when empty. `count` = all prospects in that phase (any
+  kind); `ask_cents` = sum of `ask_amount`; `committed_cents` = counted grants only, so it is 0 outside
+  Committed and Received.
+
+Live updates for grants: `fundraising_prospects` is already in the realtime publication.
 
 ## 4. Runbook
 

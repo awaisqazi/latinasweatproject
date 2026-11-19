@@ -17,13 +17,21 @@
   import Button from "../ui/Button.svelte";
   import ConfirmDialog from "../ui/ConfirmDialog.svelte";
   import Field from "../ui/Field.svelte";
+  import GrantStageDialog from "./GrantStageDialog.svelte";
   import {
     INTERACTION_KINDS,
-    PROSPECT_COLUMNS,
     PROSPECT_KINDS,
     PROSPECT_STAGES,
     addInteraction,
+    formatMoney,
+    grantCountedYear,
     loadInteractions,
+    moneyInputValue,
+    normalizeProspectStage,
+    parseMoneyInput,
+    prospectGrantColumnsMissing,
+    stageMoveNeeds,
+    withProspectColumns,
   } from "../../../lib/dashboard/fundraising";
 
   export let supabase;
@@ -37,12 +45,12 @@
 
   const FIT_TONES = { high: "green", medium: "amber", low: "neutral" };
   const STAGE_TONES = {
-    Research: "neutral",
-    Outreach: "blue",
-    "In Conversation": "blue",
-    Application: "amber",
+    Prospecting: "neutral",
+    Viable: "blue",
+    Drafted: "amber",
+    Submitted: "amber",
     Committed: "green",
-    Stewardship: "green",
+    Received: "green",
     Declined: "red",
   };
   const CONFLICT_MESSAGE =
@@ -63,6 +71,9 @@
   let newInteractionKind = "note";
   let newInteractionBody = "";
   let loggingInteraction = false;
+  let askDraft = "";
+  let committedDraft = "";
+  let pendingStage = null; // { stage, mode } while the dialog asks
 
   // Deleting is gated by app_private.is_admin() in RLS, which currently
   // resolves to superuser only; keep the button in sync so it never no-ops.
@@ -76,16 +87,29 @@
     ? displayedProspect.engagement_plan
     : [];
   $: planDoneCount = plan.filter((step) => step.done).length;
+  $: stage = normalizeProspectStage(displayedProspect?.stage);
+  // The grant amount fields show once the database has them.
+  $: hasGrantFields = Boolean(displayedProspect) && "ask_amount" in displayedProspect;
+  $: countedYear = displayedProspect ? grantCountedYear(displayedProspect) : null;
 
   function openDrawer(next) {
     displayedProspect = next;
     notesDraft = next.research_notes || "";
     nextActionDraft = next.next_action || "";
+    setMoneyDrafts(next);
     errorMessage = "";
     successMessage = "";
     newInteractionBody = "";
     drawerOpen = true;
     loadLog(next.id);
+    // Opened from somewhere that read the original columns (a Workspace
+    // card): fetch the grant fields too.
+    if (!("ask_amount" in next) && !prospectGrantColumnsMissing()) reloadDisplayedProspect();
+  }
+
+  function setMoneyDrafts(row) {
+    askDraft = moneyInputValue(row?.ask_amount);
+    committedDraft = moneyInputValue(row?.committed_amount);
   }
 
   function requestClose() {
@@ -125,15 +149,17 @@
     errorMessage = "";
     successMessage = "";
 
-    let query = supabase
-      .from("fundraising_prospects")
-      .update(updates)
-      .eq("id", displayedProspect.id);
-    if (displayedProspect.updated_at) {
-      query = query.eq("updated_at", displayedProspect.updated_at);
-    }
-
-    const { data, error } = await query.select(PROSPECT_COLUMNS).maybeSingle();
+    const target = displayedProspect;
+    const { data, error } = await withProspectColumns((columns) => {
+      let query = supabase
+        .from("fundraising_prospects")
+        .update(updates)
+        .eq("id", target.id);
+      if (target.updated_at) {
+        query = query.eq("updated_at", target.updated_at);
+      }
+      return query.select(columns).maybeSingle();
+    });
 
     if (error) {
       errorMessage = error.message;
@@ -142,6 +168,7 @@
       await reloadDisplayedProspect();
     } else {
       displayedProspect = data;
+      setMoneyDrafts(data);
       onProspectUpdated(data);
       successMessage = successText;
     }
@@ -152,16 +179,20 @@
   async function reloadDisplayedProspect() {
     if (!displayedProspect?.id) return;
 
-    const { data } = await supabase
-      .from("fundraising_prospects")
-      .select(PROSPECT_COLUMNS)
-      .eq("id", displayedProspect.id)
-      .maybeSingle();
+    const id = displayedProspect.id;
+    const { data } = await withProspectColumns((columns) =>
+      supabase
+        .from("fundraising_prospects")
+        .select(columns)
+        .eq("id", id)
+        .maybeSingle(),
+    );
 
-    if (data) {
+    if (data && displayedProspect?.id === id) {
       displayedProspect = data;
       notesDraft = data.research_notes || "";
       nextActionDraft = data.next_action || "";
+      setMoneyDrafts(data);
       onProspectUpdated(data);
     }
   }
@@ -188,6 +219,36 @@
     const next = nextActionDraft.trim() || null;
     if ((displayedProspect?.next_action || null) === next) return;
     saveUpdates({ next_action: next }, "Next action saved.");
+  }
+
+  // Committed and Received ask for the amount or date first.
+  function changeStage(next, select = null) {
+    if (!next || next === stage) return;
+    const mode = stageMoveNeeds(displayedProspect?.stage, next);
+    if (mode) {
+      // Keep the select on the current phase until the dialog is confirmed.
+      if (select) select.value = stage;
+      pendingStage = { stage: next, mode };
+      return;
+    }
+    saveUpdates({ stage: next }, `Moved to ${next}.`);
+  }
+
+  async function confirmStage(updates) {
+    await saveUpdates(updates, `Moved to ${updates.stage}.`);
+    pendingStage = null;
+  }
+
+  function saveMoney(field, draft, label) {
+    const value = parseMoneyInput(draft);
+    if (value === undefined) {
+      errorMessage = `Enter the ${label} in dollars, for example $12,500.`;
+      return;
+    }
+    const current = displayedProspect?.[field];
+    const same = (current === null || current === undefined || current === "") ? value === null : Number(current) === value;
+    if (same) return;
+    saveUpdates({ [field]: value }, `${label.charAt(0).toUpperCase()}${label.slice(1)} saved.`);
   }
 
   async function logInteraction(event) {
@@ -281,7 +342,7 @@
       { label: "Geography", value: item.geography },
       { label: "Typical grant range", value: item.typical_grant_range },
       { label: "Annual giving", value: item.annual_giving },
-      { label: "Suggested ask", value: item.suggested_ask },
+      { label: "Suggested ask (note)", value: item.suggested_ask },
       { label: "Deadlines", value: item.deadlines },
       { label: "Key people", value: item.key_people },
       { label: "Contact", value: item.contact_info },
@@ -301,8 +362,8 @@
   {#if displayedProspect}
     <div class="px-5 py-5">
       <div class="flex flex-wrap gap-2">
-        <Badge tone={STAGE_TONES[displayedProspect.stage] || "neutral"}>
-          {displayedProspect.stage}
+        <Badge tone={STAGE_TONES[stage] || "neutral"}>
+          {stage}
         </Badge>
         {#if displayedProspect.fit_score}
           <Badge tone={FIT_TONES[displayedProspect.fit_score] || "neutral"}>
@@ -445,19 +506,27 @@
         </div>
 
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Stage" id={`prospect-stage-${displayedProspect.id}`}>
+          <Field label="Phase" id={`prospect-stage-${displayedProspect.id}`}>
             <select
               id={`prospect-stage-${displayedProspect.id}`}
               class="select"
-              value={displayedProspect.stage}
+              value={stage}
               disabled={isSaving}
-              onchange={(event) =>
-                saveUpdates({ stage: event.currentTarget.value }, `Moved to ${event.currentTarget.value}.`)}
+              onchange={(event) => changeStage(event.currentTarget.value, event.currentTarget)}
             >
-              {#each PROSPECT_STAGES as stage}
-                <option value={stage}>{stage}</option>
+              {#each PROSPECT_STAGES as option}
+                <option value={option}>{option}</option>
               {/each}
             </select>
+            {#if stage === "Submitted"}
+              <Button size="sm" variant="ghost" class="mt-2" disabled={isSaving} onclick={() => changeStage("Committed")}>
+                Mark committed
+              </Button>
+            {:else if stage === "Committed"}
+              <Button size="sm" variant="ghost" class="mt-2" disabled={isSaving} onclick={() => changeStage("Received")}>
+                Mark received
+              </Button>
+            {/if}
           </Field>
 
           <Field label="Owner" id={`prospect-owner-${displayedProspect.id}`}>
@@ -536,6 +605,72 @@
             />
           </Field>
         </div>
+
+        {#if hasGrantFields}
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Ask amount"
+              id={`prospect-ask-${displayedProspect.id}`}
+              hint={displayedProspect.suggested_ask ? `Research note: ${displayedProspect.suggested_ask}` : "In dollars, for example $12,500."}
+            >
+              <input
+                id={`prospect-ask-${displayedProspect.id}`}
+                type="text"
+                inputmode="decimal"
+                class="input"
+                placeholder="$12,500"
+                bind:value={askDraft}
+                disabled={isSaving}
+                onblur={() => saveMoney("ask_amount", askDraft, "ask amount")}
+              />
+            </Field>
+            <Field
+              label="Committed amount"
+              id={`prospect-committed-${displayedProspect.id}`}
+              hint={countedYear
+                ? `Counts in the ${countedYear} totals.`
+                : "Counts in the totals once the grant is Committed or Received."}
+            >
+              <input
+                id={`prospect-committed-${displayedProspect.id}`}
+                type="text"
+                inputmode="decimal"
+                class="input"
+                placeholder="$12,500"
+                bind:value={committedDraft}
+                disabled={isSaving}
+                onblur={() => saveMoney("committed_amount", committedDraft, "committed amount")}
+              />
+            </Field>
+            <Field label="Committed on" id={`prospect-committed-on-${displayedProspect.id}`}>
+              <input
+                id={`prospect-committed-on-${displayedProspect.id}`}
+                type="date"
+                class="input"
+                value={displayedProspect.committed_on || ""}
+                disabled={isSaving}
+                onchange={(event) =>
+                  saveUpdates({ committed_on: event.currentTarget.value || null }, "Committed date updated.")}
+              />
+            </Field>
+            <Field label="Received on" id={`prospect-received-on-${displayedProspect.id}`}>
+              <input
+                id={`prospect-received-on-${displayedProspect.id}`}
+                type="date"
+                class="input"
+                value={displayedProspect.received_on || ""}
+                disabled={isSaving}
+                onchange={(event) =>
+                  saveUpdates({ received_on: event.currentTarget.value || null }, "Received date updated.")}
+              />
+            </Field>
+          </div>
+          {#if Number(displayedProspect.committed_amount) > 0 && Number(displayedProspect.ask_amount) > 0 && Number(displayedProspect.committed_amount) !== Number(displayedProspect.ask_amount)}
+            <p class="mt-2 text-xs text-ink/55">
+              Committed {formatMoney(displayedProspect.committed_amount)} against an ask of {formatMoney(displayedProspect.ask_amount)}.
+            </p>
+          {/if}
+        {/if}
 
         <Field label="Team notes" id={`prospect-notes-${displayedProspect.id}`} class="mt-4">
           <textarea
@@ -620,6 +755,15 @@
     </div>
   {/if}
 </SlideOver>
+
+<GrantStageDialog
+  open={Boolean(pendingStage)}
+  mode={pendingStage?.mode || "commit"}
+  prospect={displayedProspect}
+  busy={isSaving}
+  onConfirm={confirmStage}
+  onCancel={() => (pendingStage = null)}
+/>
 
 <ConfirmDialog
   open={confirmingDelete}

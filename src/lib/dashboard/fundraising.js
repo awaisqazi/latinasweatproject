@@ -7,15 +7,71 @@
 // rate_title, ticket_number, item_amount 2dp, fund]; identical tuples get
 // '#2', '#3'... suffixes in sheet order. All fields trimmed; missing = ''.
 
+// Grant phases, in order, then Declined as the closed-out state. Contract:
+// docs/fundraising-live (grant phases). A grant counts toward the
+// fundraising totals once it is Committed or Received with a committed
+// amount, in the calendar year of committed_on.
 export const PROSPECT_STAGES = [
-  "Research",
-  "Outreach",
-  "In Conversation",
-  "Application",
+  "Prospecting",
+  "Viable",
+  "Drafted",
+  "Submitted",
   "Committed",
-  "Stewardship",
+  "Received",
   "Declined",
 ];
+export const GRANT_PHASES = PROSPECT_STAGES.filter((stage) => stage !== "Declined");
+export const COUNTED_STAGES = ["Committed", "Received"];
+
+// Rows written before the relabel (the database renames them, but a row
+// read before that lands must not vanish from the board).
+const LEGACY_STAGES = {
+  Research: "Prospecting",
+  Outreach: "Viable",
+  "In Conversation": "Viable",
+  Application: "Drafted",
+  Stewardship: "Received",
+};
+
+export function normalizeProspectStage(stage) {
+  const value = String(stage || "").trim();
+  if (PROSPECT_STAGES.includes(value)) return value;
+  return LEGACY_STAGES[value] || "Prospecting";
+}
+
+// What a move to `stage` must ask for before saving: "commit" (amount and
+// date), "receive" (date only) or "" (save straight away).
+export function stageMoveNeeds(fromStage, toStage) {
+  if (normalizeProspectStage(fromStage) === toStage) return "";
+  if (toStage === "Committed") return "commit";
+  if (toStage === "Received") return "receive";
+  return "";
+}
+
+// "$12,500", "12500", "12,500.50" -> 12500.5 (dollars). "" -> null (clear).
+// Anything else -> undefined, so the caller can say the amount is not valid.
+export function parseMoneyInput(text) {
+  const cleaned = String(text ?? "").replace(/[$,\s]/g, "");
+  if (!cleaned) return null;
+  if (!/^\d{1,9}(\.\d{1,2})?$/.test(cleaned)) return undefined;
+  return Number(cleaned);
+}
+
+export function moneyInputValue(dollars) {
+  if (dollars === null || dollars === undefined || dollars === "") return "";
+  const n = Number(dollars);
+  return Number.isFinite(n) ? String(n) : "";
+}
+
+// Whether a prospect's committed amount counts in the totals, and for which
+// calendar year (null when it does not count).
+export function grantCountedYear(prospect) {
+  if (!COUNTED_STAGES.includes(normalizeProspectStage(prospect?.stage))) return null;
+  const amount = Number(prospect?.committed_amount);
+  if (!(amount > 0)) return null;
+  const match = /^(\d{4})-/.exec(String(prospect?.committed_on || ""));
+  return match ? Number(match[1]) : null;
+}
 
 export const PROSPECT_KINDS = [
   { value: "foundation", label: "Foundation" },
@@ -35,8 +91,42 @@ export const INTERACTION_KINDS = [
   { value: "thanks", label: "Thank-you sent" },
 ];
 
+// PROSPECT_COLUMNS is the original column list, kept as it was so other
+// modules (Workspace) work before and after the grant columns land. The
+// prospect board and drawer read PROSPECT_FULL_COLUMNS through
+// withProspectColumns(), which falls back to the original list when the
+// grant columns are not there yet.
 export const PROSPECT_COLUMNS =
   "id,name,kind,stage,fit_score,priority,website,focus_areas,geography,typical_grant_range,annual_giving,application_process,deadlines,contact_info,key_people,recent_relevant_giving,fit_rationale,suggested_ask,research_notes,engagement_plan,owner_id,next_action,next_action_date,last_contact_at,source,created_at,updated_at";
+
+export const PROSPECT_GRANT_COLUMNS = "ask_amount,committed_amount,committed_on,received_on";
+export const PROSPECT_FULL_COLUMNS = `${PROSPECT_COLUMNS},${PROSPECT_GRANT_COLUMNS}`;
+
+let grantColumnsMissing = false;
+
+export function isMissingColumnError(error) {
+  if (!error) return false;
+  if (error.code === "42703" || error.code === "PGRST204") return true;
+  return /column .* does not exist|could not find the .* column/i.test(String(error.message || ""));
+}
+
+// True once the database answered without the grant columns (this page load).
+export function prospectGrantColumnsMissing() {
+  return grantColumnsMissing;
+}
+
+// run(columns) builds and awaits one query. Retried once with the original
+// columns when the grant columns are missing; the failed attempt changed
+// nothing, since PostgREST rejects the whole statement.
+export async function withProspectColumns(run) {
+  if (grantColumnsMissing) return run(PROSPECT_COLUMNS);
+  const result = await run(PROSPECT_FULL_COLUMNS);
+  if (result?.error && isMissingColumnError(result.error)) {
+    grantColumnsMissing = true;
+    return run(PROSPECT_COLUMNS);
+  }
+  return result;
+}
 
 const INTERACTION_COLUMNS =
   "id,prospect_id,donor_email,kind,body,occurred_at,created_by,author_name,created_at";
@@ -139,11 +229,13 @@ export async function loadDonationsSince(supabase, sinceDate) {
 }
 
 export async function loadProspects(supabase) {
-  return supabase
-    .from("fundraising_prospects")
-    .select(PROSPECT_COLUMNS)
-    .order("priority", { ascending: true })
-    .order("name", { ascending: true });
+  return withProspectColumns((columns) =>
+    supabase
+      .from("fundraising_prospects")
+      .select(columns)
+      .order("priority", { ascending: true })
+      .order("name", { ascending: true }),
+  );
 }
 
 export async function loadInteractions(supabase, { prospectId, donorEmail } = {}) {

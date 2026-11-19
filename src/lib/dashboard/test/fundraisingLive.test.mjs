@@ -11,6 +11,8 @@ import { readFileSync } from "node:fs";
 import {
   campaignTakesGifts,
   campaignsForView,
+  combinedTotals,
+  normalizeGrants,
   countLabel,
   eventsScorecard,
   fillMonths,
@@ -244,6 +246,78 @@ test("grantsScorecard totals the pipeline and finds the next deadline", () => {
   assert.equal(card.pipelineWithAsk, 2);
   assert.equal(card.committedCount, 1);
   assert.deepEqual(card.nextDeadline, { date: "2026-12-01", prospectId: "b", prospectName: "Test Fund B" });
+});
+
+test("grantsScorecard reads the new phases, real asks first, legacy names mapped", () => {
+  const card = grantsScorecard(
+    [
+      { id: "a", name: "Test Fund A", stage: "Prospecting", ask_amount: 20000, suggested_ask: "$10,000", deadlines: "Jan 10, 2027" },
+      { id: "b", name: "Test Fund B", stage: "Drafted", ask_amount: null, suggested_ask: "$25K", deadlines: "Dec 1, 2026" },
+      { id: "c", name: "Test Fund C", stage: "Committed", ask_amount: 5000, committed_amount: 4000, committed_on: "2026-06-01", deadlines: "Nov 25, 2026" },
+      { id: "d", name: "Test Fund D", stage: "Received", committed_amount: "1500.50", committed_on: "2026-02-01", received_on: "2026-03-01" },
+      { id: "e", name: "Test Fund E", stage: "Received", committed_amount: 9000, committed_on: "2025-12-01", received_on: "2026-01-05" },
+      { id: "f", name: "Test Fund F", stage: "Committed", committed_amount: null, committed_on: "2026-05-01" },
+      { id: "g", name: "Test Fund G", stage: "In Conversation", suggested_ask: "$3,000" },
+      { id: "h", name: "Test Fund H", stage: "Declined", ask_amount: 50000 },
+    ],
+    TODAY,
+  );
+  assert.equal(card.pipelineCount, 3, "Prospecting, Drafted, and the legacy In Conversation as Viable");
+  assert.equal(card.pipelineAskCents, 2000000 + 2500000 + 300000);
+  assert.equal(card.pipelineEstimated, 2, "two asks come from the suggested_ask note");
+  assert.equal(card.committedYtdCents, 550050, "Committed or Received with an amount, in committed_on's year");
+  assert.equal(card.committedYtdCount, 2);
+  assert.equal(card.receivedYtdCents, 150050, "the counted grants of this year already Received");
+  assert.deepEqual(card.nextDeadline, { date: "2026-12-01", prospectId: "b", prospectName: "Test Fund B" }, "committed grants have no deadline to chase");
+  assert.deepEqual(card.byPhase.map((row) => row.phase), ["Prospecting", "Viable", "Drafted", "Committed", "Received", "Declined"]);
+  assert.equal(card.byPhaseFromLive, false);
+});
+
+test("grantsScorecard prefers the live grants block when it is there", () => {
+  const liveGrants = normalizeGrants({
+    committed_ytd_cents: 2500000,
+    committed_ytd_count: 1,
+    received_ytd_cents: "1000000",
+    committed_last_12_months_cents: 3000000,
+    by_year: { 2026: 2500000, 2027: 4000000, bad: 5 },
+    by_phase: [
+      { phase: "Prospecting", count: 4, ask_cents: 100, committed_cents: 0 },
+      { phase: "Research", count: 1, ask_cents: 50, committed_cents: 0 },
+      { phase: "Committed", count: 1, ask_cents: 2500000, committed_cents: 2500000 },
+      "junk",
+    ],
+  });
+  assert.deepEqual(liveGrants.byYear, { 2026: 2500000, 2027: 4000000 });
+  assert.deepEqual(liveGrants.byPhase[0], { phase: "Prospecting", count: 5, askCents: 150, committedCents: 0 }, "legacy names merge");
+  const card = grantsScorecard([], TODAY, liveGrants);
+  assert.equal(card.committedYtdCents, 2500000);
+  assert.equal(card.receivedYtdCents, 1000000);
+  assert.equal(card.byPhaseFromLive, true);
+  assert.equal(normalizeGrants(undefined), null);
+  assert.equal(normalizeGrants("nope"), null);
+  assert.equal(normalizeLive(fixture).grants === null || typeof normalizeLive(fixture).grants === "object", true);
+  assert.equal(normalizeLive({}).grants, null, "no grants block, no grants");
+});
+
+test("combinedTotals and goalProgress add committed grants, or stay Zeffy only", () => {
+  const totals = { yearToDate: { amountCents: 10000000, giftCount: 5 }, last12Months: { amountCents: 12000000, giftCount: 9 } };
+  const grants = normalizeGrants({ committed_ytd_cents: 2500000, committed_last_12_months_cents: 3000000, by_year: { 2026: 2500000, 2027: 4000000 } });
+  const combined = combinedTotals(totals, grants);
+  assert.deepEqual(combined.yearToDate, { amountCents: 12500000, zeffyCents: 10000000, grantsCents: 2500000 });
+  assert.deepEqual(combined.last12Months, { amountCents: 15000000, zeffyCents: 12000000, grantsCents: 3000000 });
+  assert.deepEqual(combinedTotals(totals, null).yearToDate, { amountCents: 10000000, zeffyCents: 10000000, grantsCents: null });
+  assert.equal(combinedTotals({}, grants).yearToDate, null);
+
+  const current = goalProgress({ year: 2026, cents: 100000000, mode: "current" }, totals, grants);
+  assert.equal(current.baselineCents, 12500000);
+  assert.equal(current.grantsCents, 2500000);
+  assert.equal(current.includesGrants, true);
+  const upcoming = goalProgress({ year: 2027, cents: 100000000, mode: "upcoming" }, totals, grants);
+  assert.equal(upcoming.baselineCents, 15000000, "pace is the last 12 months, grants included");
+  assert.equal(upcoming.goalYearGrantsCents, 4000000, "grants already committed for the goal year");
+  const zeffyOnly = goalProgress({ year: 2026, cents: 100000000, mode: "current" }, totals);
+  assert.equal(zeffyOnly.baselineCents, 10000000);
+  assert.equal(zeffyOnly.includesGrants, false);
 });
 
 test("upskillingScorecard counts Giving Tuesday fundraisers", () => {

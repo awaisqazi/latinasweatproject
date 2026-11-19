@@ -1,17 +1,23 @@
 <script>
-  // Prospect pipeline: 7-stage kanban with drag-and-drop plus filters. Stage
-  // moves use the shared optimistic-lock pattern (eq updated_at) so two people
-  // working the pipeline can't silently clobber each other.
+  // Grant pipeline: the six phases (Prospecting through Received) as a kanban
+  // with drag-and-drop plus filters, and Declined set apart below. Moves use
+  // the shared optimistic-lock pattern (eq updated_at) so two people working
+  // the pipeline can't silently clobber each other. Moving to Committed asks
+  // for the amount and date first; moving to Received asks for the date.
   import { CalendarClock, Plus, Search, UserRound } from "@lucide/svelte";
   import Badge from "../ui/Badge.svelte";
   import Banner from "../ui/Banner.svelte";
   import Button from "../ui/Button.svelte";
   import EmptyState from "../ui/EmptyState.svelte";
   import Panel from "../ui/Panel.svelte";
+  import GrantStageDialog from "./GrantStageDialog.svelte";
   import {
-    PROSPECT_COLUMNS,
+    GRANT_PHASES,
     PROSPECT_KINDS,
-    PROSPECT_STAGES,
+    formatMoney,
+    normalizeProspectStage,
+    stageMoveNeeds,
+    withProspectColumns,
   } from "../../../lib/dashboard/fundraising";
 
   export let supabase;
@@ -37,6 +43,7 @@
   let draggedProspectId = "";
   let dragOverStage = "";
   let movingIds = new Set();
+  let pendingMove = null; // { prospect, stage, mode } while the dialog asks
 
   $: filteredProspects = prospects.filter((prospect) => {
     const query = search.trim().toLowerCase();
@@ -65,9 +72,9 @@
     }
     return true;
   });
-  $: prospectsByStage = PROSPECT_STAGES.reduce((groups, stage) => {
+  $: prospectsByStage = [...GRANT_PHASES, "Declined"].reduce((groups, stage) => {
     groups[stage] = filteredProspects
-      .filter((prospect) => prospect.stage === stage)
+      .filter((prospect) => normalizeProspectStage(prospect.stage) === stage)
       .sort(byPriorityThenFit);
     return groups;
   }, {});
@@ -90,11 +97,13 @@
     isCreating = true;
     errorMessage = "";
 
-    const { data, error } = await supabase
-      .from("fundraising_prospects")
-      .insert({ name, kind: newKind, source: "manual" })
-      .select(PROSPECT_COLUMNS)
-      .single();
+    const { data, error } = await withProspectColumns((columns) =>
+      supabase
+        .from("fundraising_prospects")
+        .insert({ name, kind: newKind, source: "manual" })
+        .select(columns)
+        .single(),
+    );
 
     if (error) {
       errorMessage = error.message;
@@ -108,21 +117,39 @@
     isCreating = false;
   }
 
-  async function moveProspectToStage(prospect, stage) {
-    if (!prospect?.id || prospect.stage === stage || movingIds.has(prospect.id)) return;
+  // Committed and Received ask first; every other move saves at once.
+  function requestMove(prospect, stage) {
+    if (!prospect?.id || normalizeProspectStage(prospect.stage) === stage || movingIds.has(prospect.id)) return;
+    const mode = stageMoveNeeds(prospect.stage, stage);
+    if (mode) {
+      pendingMove = { prospect, stage, mode };
+      return;
+    }
+    moveProspectToStage(prospect, { stage });
+  }
+
+  function confirmPendingMove(updates) {
+    const move = pendingMove;
+    pendingMove = null;
+    if (move) moveProspectToStage(move.prospect, updates);
+  }
+
+  async function moveProspectToStage(prospect, updates) {
+    if (!prospect?.id || movingIds.has(prospect.id)) return;
 
     movingIds = new Set(movingIds).add(prospect.id);
     errorMessage = "";
     const previous = prospect;
-    onProspectUpdated({ ...prospect, stage });
+    onProspectUpdated({ ...prospect, ...updates });
 
-    let query = supabase
-      .from("fundraising_prospects")
-      .update({ stage })
-      .eq("id", prospect.id);
-    if (prospect.updated_at) query = query.eq("updated_at", prospect.updated_at);
-
-    const { data, error } = await query.select(PROSPECT_COLUMNS).maybeSingle();
+    const { data, error } = await withProspectColumns((columns) => {
+      let query = supabase
+        .from("fundraising_prospects")
+        .update(updates)
+        .eq("id", prospect.id);
+      if (prospect.updated_at) query = query.eq("updated_at", prospect.updated_at);
+      return query.select(columns).maybeSingle();
+    });
 
     if (error) {
       errorMessage = error.message;
@@ -130,11 +157,13 @@
     } else if (!data) {
       onProspectUpdated(previous);
       errorMessage = `Someone else just updated "${prospect.name}", so the pipeline was refreshed with their change. Try again in a moment.`;
-      const { data: fresh } = await supabase
-        .from("fundraising_prospects")
-        .select(PROSPECT_COLUMNS)
-        .eq("id", prospect.id)
-        .maybeSingle();
+      const { data: fresh } = await withProspectColumns((columns) =>
+        supabase
+          .from("fundraising_prospects")
+          .select(columns)
+          .eq("id", prospect.id)
+          .maybeSingle(),
+      );
       if (fresh) onProspectUpdated(fresh);
     } else {
       onProspectUpdated(data);
@@ -187,7 +216,13 @@
     dragOverStage = "";
 
     if (!prospect) return;
-    moveProspectToStage(prospect, stage);
+    requestMove(prospect, stage);
+  }
+
+  function cardAmount(prospect) {
+    if (Number(prospect.committed_amount) > 0) return `Committed ${formatMoney(prospect.committed_amount)}`;
+    if (Number(prospect.ask_amount) > 0) return `Ask ${formatMoney(prospect.ask_amount)}`;
+    return "";
   }
 
   function ownerLabel(prospect) {
@@ -214,7 +249,8 @@
   <p class="mb-4 text-sm leading-6 text-ink/60">
     Foundations, grants, and major donors, researched and ranked by fit. Click a
     card for the full profile and its tailored engagement plan; drag cards between
-    stages as relationships progress.
+    phases as each grant moves forward. Moving a grant to Committed asks for the
+    amount and date.
   </p>
 
   {#if errorMessage}
@@ -301,7 +337,7 @@
   {#if prospects.length}
     <div class="prospect-kanban-scroll -mx-4 overflow-x-auto px-4 pb-3 md:-mx-6 md:px-6">
       <div class="prospect-kanban-track grid gap-3">
-        {#each PROSPECT_STAGES as stage}
+        {#each GRANT_PHASES as stage}
           <div
             class="snap-start flex h-[calc(100dvh-13rem)] min-h-[24rem] max-h-[44rem] flex-col rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStage === stage ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
             role="region"
@@ -361,6 +397,9 @@
                           {ownerLabel(prospect)}
                         </span>
                       {/if}
+                      {#if cardAmount(prospect)}
+                        <span class="tabular-nums text-ink/70">{cardAmount(prospect)}</span>
+                      {/if}
                       {#if prospect.next_action_date}
                         <span class="inline-flex items-center gap-1 {isOverdue(prospect) ? 'font-bold text-red-600' : ''}">
                           <CalendarClock class="h-3 w-3" aria-hidden="true" />
@@ -385,6 +424,38 @@
         {/each}
       </div>
     </div>
+
+    <div
+      class="mt-3 rounded-card border border-ink/8 bg-canvas p-3 transition {dragOverStage === 'Declined' ? 'border-accent bg-accent-soft ring-2 ring-accent/20' : ''}"
+      role="region"
+      aria-label="Declined prospects"
+      ondragover={(event) => handleStageDragOver(event, "Declined")}
+      ondragleave={(event) => handleStageDragLeave(event, "Declined")}
+      ondrop={(event) => handleStageDrop(event, "Declined")}
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h4 class="text-sm font-bold text-ink">Declined</h4>
+        <Badge tone="neutral" size="xs" class="bg-white">{prospectsByStage.Declined?.length || 0}</Badge>
+      </div>
+      {#if prospectsByStage.Declined?.length}
+        <div class="mt-2 flex flex-wrap gap-2">
+          {#each prospectsByStage.Declined as prospect (prospect.id)}
+            <button
+              type="button"
+              class="rounded-control border border-ink/8 bg-white px-3 py-1.5 text-left text-xs font-semibold text-ink/70 transition hover:border-accent/40 {draggedProspectId === prospect.id ? 'opacity-50' : ''}"
+              draggable="true"
+              ondragstart={(event) => handleDragStart(event, prospect)}
+              ondragend={handleDragEnd}
+              onclick={() => onSelect(prospect)}
+            >
+              {prospect.name}
+            </button>
+          {/each}
+        </div>
+      {:else}
+        <p class="mt-1 text-xs text-ink/50">Drop a card here when a funder says no. It stays on file.</p>
+      {/if}
+    </div>
   {:else}
     <EmptyState
       title="No prospects yet"
@@ -392,6 +463,14 @@
     />
   {/if}
 </Panel>
+
+<GrantStageDialog
+  open={Boolean(pendingMove)}
+  mode={pendingMove?.mode || "commit"}
+  prospect={pendingMove?.prospect || null}
+  onConfirm={confirmPendingMove}
+  onCancel={() => (pendingMove = null)}
+/>
 
 <style>
   .prospect-kanban-scroll {
