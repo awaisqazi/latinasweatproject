@@ -158,5 +158,13 @@
     "why": "So that LSP can continue to be accessible to our BIPOC communities 🫶🏼",
     "avatar": "xochyl-perez",
     "goal_cents": 15000
+  },
+  {
+    "slug": "yari-jurado",
+    "name": "Yari Jurado",
+    "first": "Yari",
+    "why": null,
+    "avatar": "yaritza-jurado",
+    "goal_cents": 15000
   }
 ]
