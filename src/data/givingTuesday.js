@@ -406,15 +406,17 @@ export function matWords(mats) {
   return `${n} ${n === "1" ? "mat" : "mats"}`;
 }
 
-// Zeffy peer-to-peer pages open their donation form with the amount filled in
-// when the URL carries ?amount=<dollars>&donate=true (checked by hand on the
-// live LSP Giving Tuesday page, Nov 17 2026). Any other URL (the /donate
-// fallback) is returned unchanged, so a button only names an amount when
-// prefillsAmount() is true.
+// Zeffy opens its donation form with the amount filled in when the URL carries
+// ?amount=<dollars>&donate=true. That holds for the campaign's peer-to-peer
+// page (checked by hand, Nov 17 2026) and for each instructor's own
+// /fundraising/<slug> page (checked Nov 19 2026: the form shows "$ 150" and
+// the receipt line names $150). Any other URL (the /donate fallback) is
+// returned unchanged, so a button only names an amount when prefillsAmount()
+// is true.
 export function prefillsAmount(url) {
   try {
     const u = new URL(url);
-    return /(^|\.)zeffy\.com$/i.test(u.hostname) && u.pathname.includes("/peer-to-peer/");
+    return /(^|\.)zeffy\.com$/i.test(u.hostname) && /\/(peer-to-peer|fundraising)\//.test(u.pathname);
   } catch {
     return false;
   }
