@@ -51,8 +51,9 @@ instructor also gets a static page with their own card.
   transparent cutout the pop-up avatar is cut from
   (`marketing/popup-week1/instructors/<avatar>.png`) standing on the yellow at
   the right, sized so it never comes within 36 px of a line of type and the face
-  stays in frame; a cutout cut off by its own left side, or no large cutout, uses
-  the 320 px avatar in a 300 px white circle; no avatar, type only. Each card
+  stays in frame; a cutout cut off by its own left side, an avatar on
+  `ALWAYS_CIRCLE`, or no large cutout, uses the 320 px avatar in a 300 px white
+  circle; no avatar, type only. Each card
   stores a hash of its inputs, so reruns only redraw what changed (`--force`
   redraws all); cards for slugs no longer listed are deleted.
 - `src/pages/give/[slug].astro` builds `/give/<slug>/` for every slug in the JSON:
@@ -103,10 +104,25 @@ instructor also gets a static page with their own card.
   right; the quote and name sit in a column to its left, as wide as the
   cutout's row outline allows with 40 px clear. The script prefers a readable
   quote (33 px feed, 40 px story) over a bigger photo, then allows smaller. The
-  name never wraps. No cutout: type only, quote big and full width.
-- Story: type between 272 px and 1620 px; the photo runs under the bottom bar.
+  name never wraps. The whole why is tried at every readable size before a cut
+  one.
+- Round photo: a cutout cut off by its own left side, or an avatar on
+  `ALWAYS_CIRCLE`, becomes a face-centred circle on white at the right of the
+  lower part, where the full photo would stand (360 to 500 px feed, 380 to
+  520 px story, never larger than its source). It is cut straight from the
+  large cutout (the pop-up avatar's square crop, face box from
+  `marketing/giving-tuesday-2026/email-1/facebox.py`), because the 320 px
+  avatar would be soft. The quote and name sit in the column to its left,
+  40 px clear, centred on the circle. The circle shrinks before the quote is
+  cut. No cutout at all: type only, quote big and full width.
+- `ALWAYS_CIRCLE` (in both renderers, link card included): `lizett-galan`,
+  whose cutout ends in straight vertical cut edges on the torso. Add an avatar
+  there when its cutout looks wrong standing on the yellow.
+- Story: type between 272 px and 1620 px; the full photo runs under the bottom
+  bar, the circle stays above it so the face is never under the reply bar.
 - Fails loudly if any line is near an edge, outside the safe area, or within
-  40 px of the photo, or if the face box runs off the frame.
+  40 px of the photo or circle, if the face box runs off the frame, or if the
+  circle leaves the margins or safe area.
 
 ## Canvas fallback (`kitCanvas.js`)
 

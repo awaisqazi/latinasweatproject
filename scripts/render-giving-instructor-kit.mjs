@@ -22,12 +22,22 @@
 // so the face box keeps FACE_EDGE from the right edge. The quote and name sit
 // in a column to its left, as wide as the cutout's row-by-row outline allows
 // with GAP to spare; the photo shrinks (down to a floor) until the column
-// takes a readable quote. No large cutout, or one cut off by its own left
-// side: type only, bigger. (The round 320 px avatar is too small for a full
-// size post.)
+// takes a readable quote.
+//
+// Round photo: a large cutout cut off by its own left side, or an avatar on
+// ALWAYS_CIRCLE, is shown as a face-centred circle on white instead, cut
+// straight from the large cutout (the same square crop as the pop-up avatar:
+// face box from YuNet via facebox.py, 12% margin, nudged down a little) so it
+// stays sharp; the 320 px avatar would be soft at this size. The circle sits
+// at the right of the lower part, where the full photo would stand, as large
+// as the room allows (never larger than its source crop), with the quote and
+// name in a column to its left, 40 px clear, the two centred on each other.
+// It shrinks (down to circle.min) before the quote is cut. No large cutout:
+// type only, bigger.
 //
 // Story: logo and type stay below the top 272 px and above the bottom 300 px
-// (Instagram's bars); the photo runs under the bottom bar.
+// (Instagram's bars); the full photo runs under the bottom bar, the circle
+// does not (a face under the reply bar would be covered).
 //
 // Rendering: Playwright's separate chrome-headless-shell (never the Chrome
 // app). Pass 1 (--dump-dom) fits the type and places the photo in the page;
@@ -57,6 +67,12 @@ const ROOT = path.resolve(path.dirname(SELF), "..");
 const DATA = process.env.CARDS_DATA || path.join(ROOT, "src/data/givingInstructors.json");
 const OUT_DIR = process.env.CARDS_OUT_DIR || path.join(ROOT, "public/images/givingtuesday/give");
 const CUTOUTS = path.join(ROOT, "marketing/popup-week1/instructors");
+const FACEBOX = path.join(ROOT, "marketing/giving-tuesday-2026/email-1/facebox.py");
+// Avatars that always use the round photo, even with a usable cutout (same
+// list in render-giving-instructor-og.mjs).
+const ALWAYS_CIRCLE = new Set([
+  "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
+]);
 const TMP = process.env.TMP_DIR || path.join(os.tmpdir(), "lsp-giving-instructor-kit");
 const PROFILE = path.join(TMP, "prof");
 const FORCE = process.argv.includes("--force");
@@ -79,15 +95,15 @@ const FORMATS = {
     w: 1080, h: 1350, padX: 80, logoTop: 72, logoH: 112, gapLogo: 52, safeBottom: 1350 - 72,
     kicker: 40, head: { max: 148, min: 96 }, date: 40, link: { max: 36, min: 20 },
     gapKicker: 14, gapHead: 26, gapDate: 10, gapBlocks: 64,
-    quote: { max: 36, comfort: 33, min: 27, solo: 48, soloMin: 32 }, name: 46, gapName: 24,
-    photo: { max: 1.05, min: 0.74 }, faceEdge: 72, minCol: 330,
+    quote: { max: 36, comfort: 33, min: 27, solo: 48, soloMin: 32 }, name: 46, nameMin: 36, gapName: 24,
+    photo: { max: 1.05, min: 0.74 }, faceEdge: 72, minCol: 330, maxSink: 240, faceLimit: 1350 - 72, circle: { max: 500, min: 360, underMin: 320 },
   },
   story: {
     w: 1080, h: 1920, padX: 88, logoTop: 272, logoH: 136, gapLogo: 64, safeBottom: 1920 - 300,
     kicker: 52, head: { max: 190, min: 110 }, date: 52, link: { max: 44, min: 24 },
     gapKicker: 18, gapHead: 32, gapDate: 12, gapBlocks: 80,
-    quote: { max: 44, comfort: 40, min: 33, solo: 58, soloMin: 38 }, name: 56, gapName: 28,
-    photo: { max: 1.3, min: 0.95 }, faceEdge: 80, minCol: 380,
+    quote: { max: 44, comfort: 40, min: 33, solo: 58, soloMin: 38 }, name: 56, nameMin: 44, gapName: 28,
+    photo: { max: 1.3, min: 0.95 }, faceEdge: 80, minCol: 380, maxSink: 240, faceLimit: 1920 - 220, circle: { max: 520, min: 380, underMin: 340 },
   },
 };
 
@@ -135,7 +151,45 @@ async function photoSource(avatar) {
   const big = path.join(CUTOUTS, `${avatar}.png`);
   if (!existsSync(big)) return null;
   const prof = await rowProfile(big);
-  return prof.touchLeft ? null : { file: big, prof };
+  // A usable cutout also carries the circle crop, for when no photo size fits.
+  const crop = await circleCrop(big);
+  if (!prof.touchLeft && !ALWAYS_CIRCLE.has(avatar)) return { kind: "cutout", file: big, prof, crop };
+  return { kind: "circle", file: big, crop };
+}
+// Face-centred square of the cutout, on white, as PNG: the geometry of
+// square_crop() in scripts/render-popup-instructor-avatars.py.
+async function circleCrop(file) {
+  const out = JSON.parse(execFileSync("python3", [FACEBOX, file], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 60000 }));
+  const face = out[file];
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let side, cx, cy;
+  if (face) {
+    const [fx, fy, fw, fh] = face;
+    const m = 0.12 * Math.max(fw, fh), bw = fw + 2 * m, bh = fh + 2 * m;
+    side = Math.max(Math.hypot(bw, bh), 2 * Math.hypot(bw / 2, bh / 2 + 0.06 * fh));
+    cx = fx + fw / 2;
+    cy = fy + fh / 2 + 0.06 * fh;
+  } else {
+    let x0 = Infinity, x1 = -1, y0 = Infinity;
+    for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) {
+      if (data[(y * info.width + x) * 4 + 3] > 40) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); }
+    }
+    side = Math.min(x1 - x0, info.height - y0) * 0.9;
+    cx = (x0 + x1) / 2;
+    cy = y0 + side / 2;
+  }
+  const s = Math.round(side), pad = s;
+  // Pad first (sharp runs extract before extend within one pipeline).
+  const padded = await sharp(file)
+    .extend({ top: pad, bottom: pad, left: pad, right: pad, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const buf = await sharp(padded)
+    .extract({ left: Math.round(cx - side / 2) + pad, top: Math.round(cy - side / 2) + pad, width: s, height: s })
+    .flatten({ background: "#ffffff" })
+    .png()
+    .toBuffer();
+  return { side: s, face: !!face, buf };
 }
 const sha = (...parts) => {
   const h = createHash("sha256");
@@ -161,8 +215,8 @@ for (const p of people) {
     keep.add(path.basename(out));
     if (ONLY.length && !ONLY.includes(p.slug)) continue;
     const hash = sha(
-      JSON.stringify({ format, slug: p.slug, name: p.name, why: p.why, goal: p.goal_cents, avatar: p.avatar, photo: !!photo }),
-      photo ? readFileSync(photo.file) : "",
+      JSON.stringify({ format, slug: p.slug, name: p.name, why: p.why, goal: p.goal_cents, avatar: p.avatar, photo: photo?.kind ?? null }),
+      photo ? (photo.kind === "circle" ? photo.crop.buf : readFileSync(photo.file)) : "",
       logoRaw,
       selfSrc,
     );
@@ -227,10 +281,12 @@ function dumpReport(F, htmlPath) {
 // ---------- the page ----------
 // fit null: the page fits the type and places the photo itself (pass 1).
 // Otherwise those values are fixed (pass 2 and the screenshot).
-function pageHtml({ F, p, why, photo, photoUri, fit }) {
+function pageHtml({ F, p, why, photo, photoUri, circleUri, fit }) {
   const logoW = Math.round(F.logoH * (logoMeta.width / logoMeta.height));
   const goal = money(p.goal_cents);
-  const prof = photo ? { left: photo.prof.left, w: photo.prof.w, h: photo.prof.h, y0: photo.prof.y0 } : null;
+  const cutout = photo?.kind === "cutout" ? photo : null;
+  const prof = cutout ? { left: cutout.prof.left, w: cutout.prof.w, h: cutout.prof.h, y0: cutout.prof.y0 } : null;
+  const circ = photo?.crop ? { max: Math.min(F.circle.max, photo.crop.side), min: F.circle.min } : null;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 ${FONT_CSS}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -248,6 +304,8 @@ body{position:relative;font-family:"Rubik";color:${INK};-webkit-font-smoothing:a
 .name{white-space:nowrap;font-weight:700;font-size:${F.name}px;line-height:1.15}
 .quote + .name{margin-top:${F.gapName}px}
 .photo{position:absolute;display:block}
+.circle{position:absolute;border-radius:50%;background:#ffffff;overflow:hidden}
+.circle img{display:block;width:100%;height:100%}
 </style></head><body>
 <img class="logo" src="${LOGO_URI}" width="${logoW}" height="${F.logoH}" alt="">
 <div class="top">
@@ -260,17 +318,19 @@ body{position:relative;font-family:"Rubik";color:${INK};-webkit-font-smoothing:a
   ${why ? `<p class="quote"></p>` : ""}
   <p class="name">${esc(p.name)}</p>
 </div>
-${photo ? `<img class="photo" src="${photoUri}" alt="">` : ""}
+${cutout ? `<img class="photo" src="${photoUri}" alt="">` : ""}
+${circ ? `<div class="circle"><img src="${circleUri}" alt=""></div>` : ""}
 <script>
 const F = ${JSON.stringify(F)};
 const WHY = ${JSON.stringify(why || "")};
 const PROF = ${JSON.stringify(prof)};
+const CIRC = ${JSON.stringify(circ)};
 const FACE = ${JSON.stringify(FACE)}, GAP = ${GAP};
 const FIT = ${JSON.stringify(fit)};
 const LOGO_BOTTOM = F.logoTop + F.logoH;
 const topEl = document.querySelector(".top"), title = document.querySelector(".title"), link = document.querySelector(".link");
 const low = document.querySelector(".low"), q = document.querySelector(".quote"), nameEl = document.querySelector(".name");
-const img = document.querySelector(".photo");
+const img = document.querySelector(".photo"), circEl = document.querySelector(".circle");
 const inkRects = (el) => { const rg = document.createRange(); rg.selectNodeContents(el); return [...rg.getClientRects()].map((r) => [r.left, r.top, r.right, r.bottom]); };
 const inkW = (el) => Math.max(0, ...inkRects(el).map((r) => r[2] - r[0]));
 const colW = F.w - 2 * F.padX;
@@ -311,10 +371,11 @@ function minOutline(pl, a, b) {
   for (let y = Math.floor(a); y <= Math.ceil(b); y++) m = Math.min(m, outlineX(pl, y));
   return m;
 }
-function placeAt(s) {
+// sink: how far the photo's bottom runs past the frame's bottom edge.
+function placeAt(s, sink = 0) {
   const w = PROF.w * s, h = PROF.h * s;
   const off = F.w - F.faceEdge - (FACE.cx + FACE.half) * w;
-  return { s, off: Math.round(off), top: Math.round(F.h - h), w: Math.round(w), h: Math.round(h) };
+  return { s, off: Math.round(off), top: Math.round(F.h - h + sink), w: Math.round(w), h: Math.round(h) };
 }
 // Worst clearance between the photo and any line of type.
 function clearance(pl, lines) {
@@ -340,28 +401,37 @@ const quoteCuts = () => {
   return out;
 };
 
-function fitWithPhoto(tp) {
+// sinks: [0] first; only when no size fits standing on the bottom edge (a tall
+// cutout whose head meets a long link line) is it lowered, by up to
+// F.maxSink, the face box staying above F.faceLimit.
+// coarse: bigger search steps (the lowered pass, which only runs when the
+// standing pass found nothing; keeps the search inside the render timeout).
+let nameBlocked = false; // set when the name alone was what did not fit
+function fitWithPhoto(tp, sinks, texts, coarse = false, floors = [F.quote.comfort, F.quote.min]) {
   const lowTop = Math.round(topBottom() + F.gapBlocks);
-  // Try the quote whole first, then cut, biggest photo first.
-  const texts = [[WHY, false], ...quoteCuts().map((t) => [t, true])];
+  const nameW = inkW(nameEl);
+  const sStep = coarse ? 0.03 : 0.01, wStep = coarse ? 12 : 6, qStep = coarse ? 2 : 1;
   // The whole quote beats a cut one at any readable size: each text is tried
   // at a comfortable size first (a smaller photo leaves a wider column), then
   // down to the minimum, before the next shorter cut is tried.
-  for (const [text, cut] of WHY ? texts : [["", false]])
-  for (const floor of [F.quote.comfort, F.quote.min]) {
-    for (let s = F.photo.max; s >= F.photo.min - 1e-9; s -= 0.01) {
-      const pl = placeAt(+s.toFixed(3));
+  for (const [text, cut] of texts)
+  for (const floor of floors) {
+    for (let s = F.photo.max; s >= F.photo.min - 1e-9; s -= sStep) {
+      for (const sink of sinks) {
+      const pl = placeAt(+s.toFixed(3), sink);
+      if (sink && pl.top + FACE.bottom * pl.h > F.faceLimit) break;
       // The top block must clear the photo.
       setPhoto(pl);
       const topLines = [...topEl.querySelectorAll(".kicker, .title span, .date, .link")].flatMap(inkRects);
       if (clearance(pl, topLines) < GAP) continue;
       if (pl.top + FACE.top * pl.h < EDGE_) continue;
-      const sizes = WHY ? range(F.quote.max, floor) : [0];
+      const sizes = WHY ? range(F.quote.max, floor).filter((x, i, a) => i % qStep === 0 || i === a.length - 1) : [0];
       for (const qs of sizes) {
         // Widest column whose block clears the outline over the rows it covers.
         const start = Math.min(colW, Math.floor(minOutline(pl, lowTop - GAP, lowTop + GAP) - GAP - F.padX));
+        if (nameW > start) { nameBlocked = true; break; } // no quote size helps
         let width = 0;
-        for (let w = start; w >= F.minCol; w -= 6) {
+        for (let w = start; w >= F.minCol; w -= wStep) {
           setLow(lowTop, w);
           if (q) setQuote(text, qs, cut);
           const bottom = lowBottom();
@@ -369,9 +439,10 @@ function fitWithPhoto(tp) {
           if (minOutline(pl, lowTop - GAP, bottom + GAP) - GAP - F.padX >= w) { width = w; break; }
         }
         if (!width) continue;
-        if (nameEl && inkW(nameEl) > width) continue;
+        if (nameEl && inkW(nameEl) > width) { nameBlocked = true; continue; }
         if (clearance(pl, allLines()) < GAP) continue;
         return { ...tp, lowTop, width, qSize: qs, quote: text, cut, place: pl };
+      }
       }
     }
   }
@@ -379,6 +450,113 @@ function fitWithPhoto(tp) {
 }
 const EDGE_ = ${EDGE};
 function range(a, b) { const out = []; for (let x = a; x >= b; x--) out.push(x); return out; }
+
+// Round photo: the circle at the right of the lower part, the quote and name
+// in the column to its left, the two centred on each other. Same order of
+// preference as fitWithPhoto: the whole why at every readable size (a smaller
+// circle leaves a wider column) before any cut.
+function setCircle(c) {
+  if (!circEl || !c) return;
+  Object.assign(circEl.style, { left: c.left + "px", top: c.top + "px", width: c.d + "px", height: c.d + "px" });
+}
+// Worst gap between the circle's box and any line of type beside or near it.
+function circleClear(c, lines) {
+  let worst = Infinity;
+  for (const [l, t, r, b] of lines) {
+    if (b + GAP <= c.top || t - GAP >= c.top + c.d) continue;
+    worst = Math.min(worst, c.left - r);
+  }
+  return worst;
+}
+// under: the name too long for the column goes on its own line under the
+// circle and quote, left-aligned, full width (only with a why).
+function setNameUnder(off) {
+  if (off == null) { nameEl.style.position = ""; nameEl.style.top = ""; nameEl.style.marginTop = ""; return; }
+  Object.assign(nameEl.style, { position: "absolute", left: "0px", top: off + "px", marginTop: "0px" });
+}
+function fitCircle(tp, texts, under = false) {
+  const lowTop = Math.round(topBottom() + F.gapBlocks);
+  const room = F.safeBottom - lowTop;
+  const min = under ? F.circle.underMin : CIRC.min;
+  setNameUnder(under ? 0 : null);
+  const nameH = under ? Math.ceil(nameEl.getBoundingClientRect().height) : 0;
+  // The ink box of a line can poke a pixel or two above its line box.
+  const nameGap = Math.max(GAP, F.gapName) + 6;
+  if (under && inkW(nameEl) > colW) { setNameUnder(null); return null; }
+  for (const [text, cut] of texts)
+  for (const floor of [F.quote.comfort, F.quote.min])
+  for (let d = Math.min(CIRC.max, room); d >= min; d -= 4) {
+    const left = F.w - F.padX - d;
+    const width = left - GAP - F.padX;
+    if (width < F.minCol) continue;
+    for (const qs of WHY ? range(F.quote.max, floor) : [0]) {
+      setLow(0, width);
+      if (q) setQuote(text, qs, cut);
+      if (!under && inkW(nameEl) > width) { nameBlocked = true; break; }
+      // Height of what sits beside the circle (the quote alone when under).
+      const hb = Math.ceil(under ? q.getBoundingClientRect().height : low.getBoundingClientRect().height);
+      const gh = Math.max(hb, d);
+      const total = gh + (under ? nameGap + nameH : 0);
+      if (total > room) continue;
+      // A little air under the top block, the rest below.
+      const g0 = Math.round(lowTop + Math.min((room - total) / 2, F.gapBlocks * 0.75));
+      const c = { d, left, top: Math.round(g0 + (gh - d) / 2) };
+      const bTop = Math.round(g0 + (gh - hb) / 2);
+      const under0 = under ? Math.round(g0 + gh + nameGap - bTop) : null;
+      setLow(bTop, width);
+      setNameUnder(under0);
+      setCircle(c);
+      if (Math.max(lowBottom(), nameEl.getBoundingClientRect().bottom) > F.safeBottom) continue;
+      if (circleClear(c, allLines()) < GAP) continue;
+      return { ...tp, lowTop: bTop, width, qSize: qs, quote: text, cut, place: null, circle: c, nameUnder: under0 };
+    }
+  }
+  setNameUnder(null);
+  return null;
+}
+
+// Order of preference: the whole why before any cut one; for each text the
+// name at full size, then smaller (a long name that cannot fit beside the
+// photo at full size); for each, the full photo standing on the bottom edge,
+// then lowered, then the circle.
+function setName(size) { nameEl.style.fontSize = size + "px"; }
+function fitPhotoOrCircle(tp) {
+  if (!PROF && !CIRC) return null;
+  const sinks = [];
+  for (let k = 40; k <= F.maxSink; k += 40) sinks.push(k);
+  const texts = WHY ? [[WHY, false], ...quoteCuts().map((t) => [t, true])] : [["", false]];
+  for (const t of texts) {
+    setName(F.name);
+    nameBlocked = false;
+    let fit = (PROF ? fitWithPhoto(tp, [0], [t]) || fitWithPhoto(tp, sinks, [t], true) : null) || (CIRC ? fitCircle(tp, [t]) : null);
+    if (fit) return { ...fit, nSize: F.name };
+    if (!nameBlocked) continue;
+    // A long name: a smaller name beside the full photo with the quote at a
+    // comfortable size; else the circle (name beside it, smaller, or on its
+    // own line under it); last, the full photo with the quote down to the minimum.
+    const smaller = [];
+    for (let ns = F.name - 4; ns >= F.nameMin; ns -= 4) smaller.push(ns);
+    for (const ns of smaller) {
+      setName(ns);
+      if (PROF && (fit = fitWithPhoto(tp, [0, ...sinks], [t], true, [F.quote.comfort]))) return { ...fit, nSize: ns };
+    }
+    if (CIRC) {
+      for (const ns of smaller) {
+        setName(ns);
+        if ((fit = fitCircle(tp, [t]))) return { ...fit, nSize: ns };
+      }
+      setName(F.name);
+      if (WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
+    }
+    for (const ns of smaller) {
+      setName(ns);
+      if (PROF && (fit = fitWithPhoto(tp, [0, ...sinks], [t], true, [F.quote.min]))) return { ...fit, nSize: ns };
+    }
+    setName(F.name);
+  }
+  setName(F.name);
+  return null;
+}
 
 function fitSolo(tp) {
   // Type only: the quote full width and big; the whole stack sits between the
@@ -405,14 +583,18 @@ document.fonts.ready.then(() => {
   let fit = FIT;
   if (!fit) {
     const tp = fitTop();
-    fit = (PROF ? fitWithPhoto(tp) : null) || fitSolo(tp) || { failed: true, ...tp };
+    fit = fitPhotoOrCircle(tp) || fitSolo(tp) || { failed: true, ...tp };
   }
   setTop(fit.tSize, fit.lSize);
+  setName(fit.nSize || F.name);
+  setNameUnder(fit.nameUnder ?? null);
   if (!fit.failed) {
     setLow(fit.lowTop, fit.width);
     if (q) setQuote(fit.quote, fit.qSize, fit.cut);
     setPhoto(fit.place);
     if (img && !fit.place) img.style.display = "none";
+    setCircle(fit.circle);
+    if (circEl && !fit.circle) circEl.style.display = "none";
   }
   const box = (el) => { const r = el.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round); };
   document.body.dataset.report = JSON.stringify({
@@ -423,6 +605,8 @@ document.fonts.ready.then(() => {
     lines: allLines().map((r) => r.map(Math.round)),
     quoteText: q ? q.textContent : "",
     clear: fit.place ? clearance(fit.place, allLines()) : null,
+    circle: circEl && fit.circle ? box(circEl) : null,
+    circleClear: fit.circle ? circleClear(fit.circle, allLines()) : null,
   });
 });
 </script>
@@ -433,17 +617,18 @@ for (const { p, format, out, photo, hash } of jobs) {
   const F = FORMATS[format];
   const why = cardWhy(p.why);
   const htmlPath = path.join(TMP, `${p.slug}-${format}.html`);
-  const photoUri = photo ? "data:image/png;base64," + readFileSync(photo.file).toString("base64") : "";
+  const photoUri = photo?.kind === "cutout" ? "data:image/png;base64," + readFileSync(photo.file).toString("base64") : "";
+  const circleUri = photo ? "data:image/png;base64," + photo.crop.buf.toString("base64") : "";
 
   // Pass 1: fit and place.
-  writeFileSync(htmlPath, pageHtml({ F, p, why, photo, photoUri, fit: null }));
+  writeFileSync(htmlPath, pageHtml({ F, p, why, photo, photoUri, circleUri, fit: null }));
   const r1 = dumpReport(F, htmlPath);
   if (!r1.bold || !r1.regular) throw new Error(`${p.slug} ${format}: Rubik did not load`);
   if (r1.fit.failed) throw new Error(`${p.slug} ${format}: the type does not fit`);
-  if (photo && !r1.fit.place) console.warn(`  ${p.slug} ${format}: WARNING photo did not fit, type only`);
+  if (photo && !r1.fit.place && !r1.fit.circle) console.warn(`  ${p.slug} ${format}: WARNING photo did not fit, type only`);
 
   // Pass 2: fixed values, re-measured.
-  writeFileSync(htmlPath, pageHtml({ F, p, why, photo, photoUri, fit: r1.fit }));
+  writeFileSync(htmlPath, pageHtml({ F, p, why, photo, photoUri, circleUri, fit: r1.fit }));
   const r2 = dumpReport(F, htmlPath);
   if (JSON.stringify(r2.lines) !== JSON.stringify(r1.lines)) throw new Error(`${p.slug} ${format}: type moved between passes`);
   for (const [i, [l, t, r, b]] of [...r2.lines, r2.logo].entries()) {
@@ -456,6 +641,14 @@ for (const { p, format, out, photo, hash } of jobs) {
     const pl = r1.fit.place;
     const faceL = pl.off + (FACE.cx - FACE.half) * pl.w, faceR = pl.off + (FACE.cx + FACE.half) * pl.w;
     if (faceL < EDGE || faceR > F.w - EDGE) throw new Error(`${p.slug} ${format}: face box runs off the frame`);
+  }
+  if (r1.fit.circle) {
+    const [l, t, r, b] = r2.circle || [];
+    if (!r2.circle) throw new Error(`${p.slug} ${format}: circle missing`);
+    if (l < EDGE || r > F.w - F.padX + 1) throw new Error(`${p.slug} ${format}: circle outside the margins: ${r2.circle}`);
+    if (t < F.logoTop - 1 || b > F.safeBottom + 1) throw new Error(`${p.slug} ${format}: circle outside the safe area: ${r2.circle}`);
+    if (r2.circleClear < GAP - 1) throw new Error(`${p.slug} ${format}: circle comes within ${r2.circleClear}px of the type`);
+    if (r2.circle[2] - r2.circle[0] > photo.crop.side + 1) throw new Error(`${p.slug} ${format}: circle larger than its source`);
   }
 
   // Pass 3: screenshot at 2x, downsample, stamp the hash.
@@ -473,7 +666,10 @@ for (const { p, format, out, photo, hash } of jobs) {
   const f = r1.fit;
   console.log(
     `  ${p.slug} ${format}: wrote ${path.relative(ROOT, out)} ${kb} KB | headline ${f.tSize}px link ${f.lSize}px` +
+      (f.nSize && f.nSize !== F.name ? ` | name ${f.nSize}px` : "") +
       (why ? ` | quote ${f.qSize}px ${f.cut ? "CUT" : "full"} in ${f.width}px` : " | no why") +
-      (f.place ? ` | photo scale ${f.place.s} clear ${Math.round(r2.clear)}px` : " | type only"),
+      (f.place ? ` | photo scale ${f.place.s} clear ${Math.round(r2.clear)}px`
+        : f.circle ? ` | circle ${f.circle.d}px (source ${photo.crop.side}px${photo.crop.face ? "" : ", no face found"}) clear ${Math.round(r2.circleClear)}px`
+        : " | type only"),
   );
 }

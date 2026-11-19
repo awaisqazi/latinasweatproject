@@ -25,8 +25,9 @@
 // row-by-row outline is checked against every measured line of type, so no
 // hair or shoulder ever sits under the words; the photo shrinks until it
 // clears them. Only the avatar mapped to the slug is used, never a guess. No
-// large cutout: the 320 px avatar in a 300 px circle on white. No avatar: type
-// only.
+// large cutout, one cut off by its own left side, or an avatar on
+// ALWAYS_CIRCLE: the 320 px avatar in a 300 px circle on white. No avatar:
+// type only.
 //
 // Rendering: Playwright's separate chrome-headless-shell binary (never the
 // Chrome app). Pass 1 (--dump-dom) fits and measures the type with no photo;
@@ -107,10 +108,15 @@ function findHeadlessShell() {
   }
   throw new Error("Playwright chrome-headless-shell not found; run `npx playwright install chromium-headless-shell`");
 }
+// Avatars that always use the round photo, even with a usable cutout (same
+// list in render-giving-instructor-kit.mjs).
+const ALWAYS_CIRCLE = new Set([
+  "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
+]);
 async function photoSource(avatar) {
   if (!avatar) return null;
   const big = path.join(CUTOUTS, `${avatar}.png`);
-  if (existsSync(big)) {
+  if (existsSync(big) && !ALWAYS_CIRCLE.has(avatar)) {
     const prof = await rowProfile(big);
     // A cutout cut off by its own left side would show that straight edge in
     // the middle of the card: use the round avatar instead.
