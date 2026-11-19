@@ -1,10 +1,106 @@
 [
   {
+    "slug": "amanda-lopez-martinez",
+    "name": "Amanda Lopez-Martinez",
+    "first": "Amanda",
+    "why": "LSP is a space where I created community, learned about myself, and fulfilled a lifelong goal. I believe in the mission that movement is for everyone!",
+    "avatar": null,
+    "goal_cents": 15000
+  },
+  {
+    "slug": "anabel-hernandez",
+    "name": "Anabel Hernandez",
+    "first": "Anabel",
+    "why": "To keep collective healing accessible ✨",
+    "avatar": "anabel-hernandez",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "antonia-rosales",
+    "name": "Antonia Rosales",
+    "first": "Antonia",
+    "why": "To help normalize yoga in underrepresented communities, cultivate wellness leaders, & use movement as a tool for resistance, resilience, and healing.",
+    "avatar": "antonia-rosales",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "celina-huerta",
+    "name": "Celina Huerta",
+    "first": "Celina",
+    "why": "LSP has given me an opportunity to become a yoga teacher instructor and I’m forever grateful. Want to give back in return.",
+    "avatar": "celina-huerta",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "diane-ortega",
+    "name": "Diane Ortega",
+    "first": "Diane",
+    "why": "I’m fundraising to continue LSP’s mission…an accessible wellness space to call home led by a strong, inspiring, and passionate community.",
+    "avatar": null,
+    "goal_cents": 15000
+  },
+  {
+    "slug": "fabiola-saldana",
+    "name": "Fabiola Saldaña",
+    "first": "Fabiola",
+    "why": "Let’s make wellness and movement accessible to all!",
+    "avatar": "fabiola-saldana",
+    "goal_cents": 15000
+  },
+  {
     "slug": "ghazala-irshad",
     "name": "Ghazala Irshad",
     "first": "Ghazala",
     "why": null,
     "avatar": "ghazala-irshad",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "gigi-torres",
+    "name": "Gigi Torres",
+    "first": "Gigi",
+    "why": "LSP has given me so much, and I’m fundraising so others can experience the same sense of belonging, growth, and accessible wellness that changed my life.",
+    "avatar": "gigi-torres",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "gisella-mitchell",
+    "name": "Gisella Mitchell",
+    "first": "Gisella",
+    "why": "To give back to the community who welcomed me with open arms.",
+    "avatar": "gisella-mitchell",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "jade-nguyen",
+    "name": "Jade Nguyen",
+    "first": "Jade",
+    "why": null,
+    "avatar": "jade-nguyen",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "katherine-castro",
+    "name": "Katherine Castro",
+    "first": "Katherine",
+    "why": "I’m fundraising to continue making wellness accessible; after all movement is a birthright no matter what your tax bracket looks like.",
+    "avatar": null,
+    "goal_cents": 15000
+  },
+  {
+    "slug": "marlene-garcia",
+    "name": "Marlene Garcia",
+    "first": "Marlene",
+    "why": null,
+    "avatar": "marlene-garcia",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "ruthie-maldonado-delwiche",
+    "name": "Ruthie Maldonado-Delwiche",
+    "first": "Ruthie",
+    "why": "LSP is the family I didn't know I needed. Aside from gaining a new family, LSP has provided a space that is always welcoming. #YoSoyLSP",
+    "avatar": null,
     "goal_cents": 15000
   },
   {
