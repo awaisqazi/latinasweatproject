@@ -2,11 +2,14 @@
   // /givingtuesday/kit/?i=<slug>: an instructor's LSP Giving Tuesday share
   // kit, made for a phone. UNLISTED, noindex.
   //
-  // Their short link (/give/<slug>) with Copy, three captions with Copy (and
-  // Share where the browser has a share sheet), and two images drawn here on
-  // a canvas (src/lib/givingTuesday/kitCanvas.js): 1080x1350 feed and
-  // 1080x1920 story, as JPEGs to download or share. Nothing per person is
-  // stored in the repo; the roster comes from giving_public at runtime.
+  // Their short link (/give/<slug>) with Copy, three first-person captions
+  // with Copy (and Share where the browser has a share sheet), and two images,
+  // 1080x1350 feed and 1080x1920 story, as JPEGs to download or share.
+  // Images: for instructors in src/data/givingInstructors.json, the files
+  // scripts/render-giving-instructor-kit.mjs pre-renders with their photo,
+  // name and why (public/images/givingtuesday/give/<slug>-post.jpg, -story.jpg;
+  // `npm run giving:cards`). Anyone approved since that last run, or a file
+  // that fails to load: drawn here on a canvas (kitCanvas.js), words only.
   // No slug, or one not on the board: a name picker built from the approved
   // fundraisers the RPC returns.
   // Copy: givingKitCopy in src/data/givingTuesday.js. Identity: design.md
@@ -23,6 +26,7 @@
     cleanSlug,
   } from "../../data/givingTuesday.js";
   import { fetchGivingPublic } from "../../lib/givingTuesday/live.js";
+  import instructors from "../../data/givingInstructors.json";
   import { ensureFonts, loadAssets, drawKit, canvasBlob } from "../../lib/givingTuesday/kitCanvas.js";
 
   let { base = "/" } = $props();
@@ -37,6 +41,9 @@
   // { feed: { url, file } | null, story: ... }
   let images = $state({ feed: null, story: null });
   let imageError = $state(false);
+  // Which kind of image is showing: "file" (pre-rendered) or "canvas".
+  let imageKind = $state("");
+  const listed = new Map(instructors.map((p) => [p.slug, p]));
 
   const campaign = $derived(data?.campaign ?? null);
   const fundraisers = $derived(
@@ -109,15 +116,39 @@
     revoke();
     images = { feed: null, story: null };
     imageError = false;
+    imageKind = "";
     if (!f) return;
     const words = {
       kicker: kc.image.kicker,
-      lines: kc.image.lines.map((l) => fill(l, { first, goal })),
-      altLines: altLines(first, goal),
+      lines: kc.image.lines.map((l) => fill(l, { goal })),
+      sign: String(f.name || "").trim(),
       date: kc.image.date,
       link: linkText,
     };
     (async () => {
+      // Pre-rendered files first.
+      if (listed.has(f.slug)) {
+        try {
+          const out = {};
+          for (const [format, file] of [["feed", "post"], ["story", "story"]]) {
+            const res = await fetch(`${base}images/givingtuesday/give/${encodeURIComponent(f.slug)}-${file}.jpg`);
+            if (!res.ok || !String(res.headers.get("content-type") || "").startsWith("image/")) throw new Error("no file");
+            const blob = await res.blob();
+            const name = `lsp-giving-tuesday-${f.slug}-${format}.jpg`;
+            out[format] = { url: URL.createObjectURL(blob), file: new File([blob], name, { type: "image/jpeg" }), name };
+          }
+          if (drawn !== key) {
+            URL.revokeObjectURL(out.feed.url);
+            URL.revokeObjectURL(out.story.url);
+            return;
+          }
+          imageKind = "file";
+          images = out;
+          return;
+        } catch {
+          /* fall back to the canvas */
+        }
+      }
       try {
         await ensureFonts();
         const assets = await loadAssets(base);
@@ -134,20 +165,13 @@
           URL.revokeObjectURL(out.story.url);
           return;
         }
+        imageKind = "canvas";
         images = out;
       } catch {
         if (drawn === key) imageError = true;
       }
     })();
   });
-
-  // The headline split over three lines for a long first name: the words of
-  // kc.image.lines, with the name on a line of its own.
-  function altLines(name, g) {
-    const [l1, l2] = kc.image.lines.map((l) => fill(l, { first: name, goal: g }));
-    const lead = l1.replace(name, "").trim();
-    return lead ? [lead, name, l2] : undefined;
-  }
 
   async function copyText(text, key) {
     try {
@@ -240,7 +264,7 @@
           <figure class="gk-img">
             <div class="gk-frame" style={`aspect-ratio:${w} / ${h}`}>
               {#if img}
-                <img src={img.url} width={w} height={h} alt={fill(kc.imageAlt, { first, goal, link: linkText })} />
+                <img src={img.url} width={w} height={h} alt={fill(imageKind === "file" && listed.get(person.slug)?.avatar ? kc.imageAltPhoto : kc.imageAlt, { name: person.name, goal, link: linkText })} />
               {:else}
                 <span class="gk-making" role="status">{imageError ? kc.imageFailed : kc.making}</span>
               {/if}

@@ -307,24 +307,30 @@ export const givingKitCopy = {
   openPage: "Open your page",
 
   captionsTitle: "Captions",
+  // First person, in the instructor's voice, ready to paste.
   captions: [
-    "LSP Giving Tuesday is Tuesday, Dec 1. I'm raising {goal} for Latina Sweat Project. Will you give through my page? {link} #LSPGivingTuesday",
-    "LSP Giving Tuesday: help me raise {goal} for Latina Sweat Project and help us build what's next. Every gift counts toward our {campaignGoal} goal. {link} #LSPGivingTuesday",
-    "LSP Giving Tuesday: what started as a few pop-up yoga classes in Little Village has grown into something much bigger. Help me raise {goal} by Tuesday, Dec 1. {link} #LSPGivingTuesday", // first clause: Lizett's appeal
+    "LSP Giving Tuesday is Tuesday, Dec 1, and I'm fundraising for Latina Sweat Project. My goal is {goal}. Will you give through my page? {link} #LSPGivingTuesday",
+    "LSP Giving Tuesday: every gift to my page helps Latina Sweat Project build what's next and counts toward our {campaignGoal} goal. Help me raise {goal}. {link} #LSPGivingTuesday",
+    "LSP Giving Tuesday: what started as a few pop-up yoga classes in Little Village has grown into something much bigger. Help me reach {goal} by Tuesday, Dec 1. {link} #LSPGivingTuesday", // first clause: Lizett's appeal
   ],
 
   imagesTitle: "Images",
-  imagesNote: "Made for you on this page. Download them, or share them straight to your stories.",
+  imagesNote: "Made for you, with your name and your words. Download them, or share them straight to your stories.",
   feedLabel: "Feed post, 1080 x 1350",
   storyLabel: "Story, 1080 x 1920",
   download: "Download",
   making: "Making your image.",
-  imageAlt: "LSP Giving Tuesday graphic: Help {first} raise {goal}, Tuesday, Dec 1, {link}, above a photo of a full class in a bright studio.",
+  // Pre-rendered per instructor by scripts/render-giving-instructor-kit.mjs
+  // (public/images/givingtuesday/give/<slug>-post.jpg and -story.jpg). Their
+  // words live in that script; the canvas fallback below says the same.
+  imageAlt: "LSP Giving Tuesday graphic: Help me raise {goal}. Tuesday, Dec 1. {link}. Signed {name}.",
+  imageAltPhoto: "LSP Giving Tuesday graphic with a photo of {name}: Help me raise {goal}. Tuesday, Dec 1. {link}.",
 
-  // Words on the images, and nothing else (plus the LSP logo and the class photo).
+  // Canvas fallback (kitCanvas.js), for anyone approved since the last
+  // `npm run giving:cards`: words only, plus the logo and the class photo.
   image: {
     kicker: "LSP Giving Tuesday",
-    lines: ["Help {first}", "raise {goal}"],
+    lines: ["Help me", "raise {goal}"],
     date: "Tuesday, Dec 1",
   },
 };

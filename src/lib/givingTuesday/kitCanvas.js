@@ -1,6 +1,9 @@
-// LSP Giving Tuesday share-kit images, drawn IN THE BROWSER on a canvas for
-// whichever instructor opens /givingtuesday/kit (the roster changes at
-// runtime, so there are no per-person files and no build step).
+// LSP Giving Tuesday share-kit images, drawn IN THE BROWSER on a canvas.
+// FALLBACK ONLY: instructors in src/data/givingInstructors.json get
+// pre-rendered images with their photo and their why
+// (scripts/render-giving-instructor-kit.mjs). This covers anyone approved
+// since the last `npm run giving:cards`, in the same first-person words
+// ("Help me" / "raise $150", signed with their name).
 //
 // Identity: the share card (scripts/render-givingtuesday-og.mjs, design.md
 // "Giving Tuesday"): a flat panel of LSP highlight yellow #FFDE59, one ink
@@ -114,7 +117,8 @@ function inkWidth(ctx, text) {
  * Draw one image.
  *   canvas  a <canvas> (resized here)
  *   format  "feed" | "story"
- *   words   { kicker, lines: [..], altLines?: [..], date, link } (link without https://)
+ *   words   { kicker, lines: [..], altLines?: [..], sign?, date, link } (link without https://;
+ *           sign: the instructor's name, drawn bold under the headline)
  *   assets  from loadAssets()
  * Returns { boxes: { name: [l, t, r, b] }, headSize, linkSize, w, h }.
  */
@@ -169,9 +173,18 @@ export function drawKit(canvas, format, words, assets) {
   // Headline: biggest size where every line fits the width AND the whole
   // block fits between the logo and the bottom margin.
   const room = F.panel - F.bottom - (logoBottom + F.minGapBelowLogo);
+  // Signature: the date size, smaller only if a long name needs it.
+  let signSize = F.date;
+  if (words.sign) {
+    for (; signSize > 16; signSize -= 1) {
+      setFont(ctx, 700, signSize);
+      if (inkWidth(ctx, words.sign) <= maxW) break;
+    }
+  }
+  const signRoom = words.sign ? cap(700, signSize) + desc(700, signSize) + F.gapDate * 1.6 : 0;
   const blockHeight = (lines, hs) =>
     cap(700, F.kicker) + F.gapKicker + cap(700, hs) + (lines.length - 1) * hs * F.lead + desc(700, hs) * 0.4 +
-    F.gapHead + cap(400, F.date) + F.gapDate + cap(400, linkSize) + desc(400, linkSize);
+    F.gapHead + signRoom + cap(400, F.date) + F.gapDate + cap(400, linkSize) + desc(400, linkSize);
   const bestSize = (lines) => {
     let s = F.head.max;
     for (; s > F.head.min; s -= 2) {
@@ -211,7 +224,13 @@ export function drawKit(canvas, format, words, assets) {
   put("link", words.link, 400, linkSize, y);
   y -= cap(400, linkSize) + F.gapDate;
   put("date", words.date, 400, F.date, y);
-  y -= cap(400, F.date) + F.gapHead + desc(700, headSize) * 0.4;
+  if (words.sign) {
+    y -= cap(400, F.date) + F.gapDate * 1.6 + desc(700, signSize);
+    put("sign", words.sign, 700, signSize, y);
+    y -= cap(700, signSize) + F.gapHead + desc(700, headSize) * 0.4;
+  } else {
+    y -= cap(400, F.date) + F.gapHead + desc(700, headSize) * 0.4;
+  }
   for (let i = lines.length - 1; i >= 0; i--) {
     put(`line${i + 1}`, lines[i], 700, headSize, y, HEAD_TRACK);
     if (i > 0) y -= headSize * F.lead;

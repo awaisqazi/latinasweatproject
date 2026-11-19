@@ -36,8 +36,8 @@ Link previews (iMessage, WhatsApp, Instagram DMs, Facebook, Slack, X) read
 instructor also gets a static page with their own card.
 
 - **After approving someone** (or when a name, why, avatar or goal changes): run
-  `npm run giving:cards`, commit `src/data/givingInstructors.json` and
-  `public/images/givingtuesday/give/`, push. Until then their short link still
+  `npm run giving:cards` (sync, link cards, then share-kit images), commit
+  `src/data/givingInstructors.json` and `public/images/givingtuesday/give/`, push. Until then their short link still
   works through the 404 redirect, with the generic campaign card.
 - `scripts/sync-giving-instructors.mjs` calls `giving_public` with the public URL
   and publishable key (env, `.env`, else the defaults in `deploy.yml`; never a
@@ -72,10 +72,14 @@ instructor also gets a static page with their own card.
 - `src/pages/givingtuesday/kit.astro` + `GivingKitApp.svelte`. Send each instructor
   `https://latinasweatproject.com/givingtuesday/kit/?i=<slug>`.
 - Shows the short link (Copy, Share where the browser has a share sheet, "Open your
-  page"), three captions (`givingKitCopy.captions`, each leads with "LSP Giving
-  Tuesday", Copy + Share), and two images drawn in the browser by
-  `src/lib/givingTuesday/kitCanvas.js`: 1080x1350 feed and 1080x1920 story, JPEG,
-  Download (and Share with the file where `navigator.canShare({ files })` is true).
+  page"), three captions (`givingKitCopy.captions`, first person in the
+  instructor's voice, each leads with "LSP Giving Tuesday", Copy + Share), and two
+  images, 1080x1350 feed and 1080x1920 story, JPEG, Download (and Share with the
+  file where `navigator.canShare({ files })` is true).
+- Images: a slug in `givingInstructors.json` gets its pre-rendered files
+  `public/images/givingtuesday/give/<slug>-post.jpg` and `<slug>-story.jpg`
+  (fetched, so Download and Share hand over the same file). Anyone else, or a
+  file that fails to load: drawn in the browser by `kitCanvas.js` (words only).
 - No `?i=`, or a slug not on the board: a name picker built from `fundraisers`
   (sorted by name). Choosing a name rewrites the URL to `?i=<slug>`.
 - Mentions the thank-you drawing only when the campaign's `prize_label` is set.
@@ -83,18 +87,42 @@ instructor also gets a static page with their own card.
 - Nothing per person is stored in the repo; a new approved fundraiser has a working
   link and kit as soon as the RPC lists them.
 
-## Images (`kitCanvas.js`)
+## Pre-rendered kit images: `scripts/render-giving-instructor-kit.mjs`
+
+- Run by `npm run giving:cards` after the link cards; alone:
+  `node scripts/render-giving-instructor-kit.mjs [--force] [--only=slug,slug]`.
+  Same pipeline and hash-skip as the link cards (EXIF `lsp-kit:` hash; images
+  for slugs no longer listed are deleted, except with `--only`).
+  `CARDS_OUT_DIR=<dir>` writes proofs somewhere else.
+- First person: "LSP Giving Tuesday", "Help me" / "raise {goal}", "Tuesday,
+  Dec 1", the short link, then their why in quotes (verbatim, emoji left off,
+  cut at a word with "…" only if nothing else fits) and their full name in bold
+  as the signature. No why: the name alone.
+- Photo: the same large cutout as the link card
+  (`marketing/popup-week1/instructors/<avatar>.png`), bottom-anchored, pushed
+  right; the quote and name sit in a column to its left, as wide as the
+  cutout's row outline allows with 40 px clear. The script prefers a readable
+  quote (33 px feed, 40 px story) over a bigger photo, then allows smaller. The
+  name never wraps. No cutout: type only, quote big and full width.
+- Story: type between 272 px and 1620 px; the photo runs under the bottom bar.
+- Fails loudly if any line is near an edge, outside the safe area, or within
+  40 px of the photo, or if the face box runs off the frame.
+
+## Canvas fallback (`kitCanvas.js`)
+
+- Only for someone approved since the last `giving:cards` run. Same first
+  person words: "Help me" / "raise $150", their name in bold under the
+  headline, date and link, over the class photo.
 
 - The share card's identity: flat #FFDE59 panel on top, ink #1e1e1e, Rubik 400/700
   (`document.fonts.load` before drawing), `public/logo.png` whole (its empty
   transparent margin trimmed), `public/images/givingtuesday/wall/one-960.webp` under
   the panel. Type on the yellow only, never on the photo.
-- Words: "LSP Giving Tuesday", "Help {first}" / "raise $150", "Tuesday, Dec 1", the
-  short link without `https://`.
+- Words: "LSP Giving Tuesday", "Help me" / "raise $150", their name, "Tuesday,
+  Dec 1", the short link without `https://`.
 - Fit: the headline starts at 112 px (feed) / 150 px (story) and shrinks until each
   line fits the width and the block fits between the logo and the panel's bottom
-  margin; a long first name may go on its own line ("Help" / name / "raise $150")
-  when that is clearly bigger. The link shrinks to fit the width. `drawKit()`
+  margin. The name and the link shrink to fit the width. `drawKit()`
   returns the ink boxes and `fitsFrame()` checks them.
 - Story: logo and type stay below the top 272 px and inside the yellow (ends at
   1110 px), clear of Instagram's top bar; the photo runs under the bottom UI.
