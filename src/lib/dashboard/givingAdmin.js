@@ -90,9 +90,11 @@ export function netCents(payment) {
   return Math.max(Number(payment?.amount_cents || 0) - Number(payment?.refunded_cents || 0), 0);
 }
 
-// A gift counts when status = 'succeeded' (contract section 1).
+// A gift counts when it has cleared or is still clearing (contract section 1).
+// Zeffy shows a bank transfer on the thermometer while it is 'pending', so the
+// site counts it too; a transfer that fails drops out on the next sync.
 export function paymentCounts(payment) {
-  return payment?.status === "succeeded";
+  return payment?.status === "succeeded" || payment?.status === "pending";
 }
 
 // Zeffy status values ("succeeded", "failed", "deleted"...) in sentence case.

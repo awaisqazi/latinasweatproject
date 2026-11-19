@@ -277,7 +277,7 @@
         <Badge tone={displayed.source === "offline" ? "blue" : "neutral"}>
           {displayed.source === "offline" ? "Offline" : "Zeffy"}
         </Badge>
-        <Badge tone={displayed.status === "succeeded" ? "green" : "red"}>{paymentStatusLabel(displayed.status)}</Badge>
+        <Badge tone={displayed.status === "succeeded" ? "green" : displayed.status === "pending" ? "amber" : "red"}>{paymentStatusLabel(displayed.status)}</Badge>
         {#if isRefunded(displayed)}
           <Badge tone="amber">Refunded {formatCents(displayed.refunded_cents)} of {formatCents(displayed.amount_cents)}</Badge>
         {/if}

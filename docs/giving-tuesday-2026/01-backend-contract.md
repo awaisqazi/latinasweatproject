@@ -51,7 +51,10 @@ Unknown slug or `is_public = false`: `{"ok": false, "reason": "not_found"}` (HTT
 
 Counting rules:
 
-- A gift counts when `status = 'succeeded'`. Its value is `greatest(amount_cents - refunded_cents, 0)`.
+- A gift counts when `status` is `'succeeded'` or `'pending'`. Pending is a bank transfer (ACH) that has
+  not cleared yet: Zeffy shows it on the thermometer right away, so the site does too. If the transfer
+  fails, the next sync changes its status and it drops out of every total, including `reached`.
+  Its value is `greatest(amount_cents - refunded_cents, 0)`.
   `gift_count` counts gifts with a value above zero (a fully refunded gift drops out).
 - `amount_cents` is the gift without the optional Zeffy tip: the sync takes the sum of the payment's
   `donation`, `additional_donation` and `ticket` line items, capped at `amount` (the spec does not say

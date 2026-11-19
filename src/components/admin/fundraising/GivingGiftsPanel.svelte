@@ -15,6 +15,7 @@
     isRefunded,
     lockGiftQuery,
     netCents,
+    paymentCounts,
     paymentStatusLabel,
   } from "../../../lib/dashboard/givingAdmin";
 
@@ -48,7 +49,7 @@
   };
   $: visibleRows = filterRows(payments, filter, search);
   $: visibleNet = visibleRows
-    .filter((row) => row.status === "succeeded")
+    .filter((row) => paymentCounts(row))
     .reduce((sum, row) => sum + netCents(row), 0);
   $: selectedPayment = payments.find((row) => row.id === selectedId) || null;
 
@@ -155,7 +156,7 @@
               {row.source === "offline" ? "Offline" : "Zeffy"}
             </Badge>
             {#if row.status !== "succeeded"}
-              <Badge tone="red" size="xs">{paymentStatusLabel(row.status)}</Badge>
+              <Badge tone={row.status === "pending" ? "amber" : "red"} size="xs">{paymentStatusLabel(row.status)}</Badge>
             {/if}
             {#if isRefunded(row)}
               <Badge tone="amber" size="xs">Refunded {formatCents(row.refunded_cents)}</Badge>
