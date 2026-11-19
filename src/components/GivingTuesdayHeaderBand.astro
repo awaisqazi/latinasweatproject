@@ -1,0 +1,257 @@
+---
+// Site-wide LSP Giving Tuesday countdown band (Nov 19 to Dec 1, 2026).
+// Rendered by Header.astro as the first thing inside the fixed
+// #header-wrapper; Header's own script lets it scroll away with the page (the
+// nav then settles at the top), so it behaves like a band in normal flow
+// without position: sticky.
+//
+// One line of type, one ink on the campaign's flat yellow, Rubik 400/700:
+//   server / no JS   "LSP Giving Tuesday is Tuesday, Dec 1"            Give ->
+//   before the day   "LSP Giving Tuesday is in 11 days 23 hrs 59 min"  Give ->
+//                    (minutes drop on phones while a day or more is left)
+//   on Dec 1         "LSP Giving Tuesday is today" (+ the page's "gifts count
+//                    through 11:59 pm Central tonight" note on wide screens)
+//   after endsAt     nothing: not rendered at build time, and removed by the
+//                    script below from a stale build before it paints.
+// The whole band is one link to /givingtuesday with one stable accessible
+// name; the ticking words are aria-hidden. It updates once a minute, on the
+// minute (no seconds: calm, not a clock). Dates come from givingFacts
+// (givingDay, endsAt); the day starts 24 h before endsAt + 1 s.
+//
+// Toggle: showGivingHeaderBand in src/data/givingTuesday.js. Header.astro
+// skips it while the studio outage banner is on and on tool and campaign
+// pages (see GIVING_BAND_SKIP there).
+//
+// Dev only: ?now=<ISO> (same param as the homepage and /links placements)
+// pretends it is that moment. The attribute that enables it is only rendered
+// by the dev server, and the script also requires a localhost host.
+import { givingFacts, givingRoutes, showGivingHeaderBand } from "@/data/givingTuesday";
+
+const endsMs = Date.parse(givingFacts.endsAt);
+const dayStartIso = new Date(endsMs + 1000 - 86400000).toISOString();
+const show = showGivingHeaderBand && Date.now() <= endsMs;
+const base = import.meta.env.BASE_URL;
+const href = `${base}${givingRoutes.page.replace(/^\//, "")}`;
+const devNow = import.meta.env.DEV;
+---
+
+{show && (
+  <div
+    id="gt-header-band"
+    class="gthb"
+    data-day-start={dayStartIso}
+    data-ends={givingFacts.endsAt}
+    data-dev-now={devNow ? "" : undefined}
+  >
+    <a
+      href={href}
+      class="gthb-link"
+      aria-label="LSP Giving Tuesday, Tuesday December 1. Give now"
+      data-conversion-event="givingtuesday_page_click"
+      data-conversion-context="header_band"
+    >
+      <span class="gthb-inner">
+        <span class="gthb-line" aria-hidden="true">
+          <span class="gthb-name">LSP Giving Tuesday</span>{" "}<span class="gthb-when" data-gthb-when>is Tuesday, Dec 1</span>
+          <span class="gthb-note" data-gthb-note hidden>Gifts count through 11:59 pm Central tonight.</span>
+        </span>
+        <span class="gthb-give" aria-hidden="true">
+          Give
+          <svg class="gthb-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 8h10.5M9 4l4 4-4 4" />
+          </svg>
+        </span>
+      </span>
+    </a>
+  </div>
+)}
+
+{show && (
+  <script is:inline>
+    (function () {
+      var band = document.getElementById("gt-header-band");
+      if (!band) return;
+      var dayStart = Date.parse(band.getAttribute("data-day-start"));
+      var ends = Date.parse(band.getAttribute("data-ends"));
+      var link = band.querySelector(".gthb-link");
+      var when = band.querySelector("[data-gthb-when]");
+      var note = band.querySelector("[data-gthb-note]");
+
+      var offset = 0;
+      if (band.hasAttribute("data-dev-now") && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+        var fake = Date.parse(new URLSearchParams(location.search).get("now") || "");
+        if (isFinite(fake)) offset = fake - Date.now();
+      }
+      function now() { return Date.now() + offset; }
+
+      function unit(n, one, many) { return n + " " + (n === 1 ? one : many); }
+      var state = "";
+      var timer = 0;
+
+      function render() {
+        var t = now();
+        if (!(t <= ends)) {
+          band.remove();
+          return false;
+        }
+        if (t >= dayStart) {
+          if (state !== "today") {
+            state = "today";
+            when.textContent = "is today";
+            note.hidden = false;
+            link.setAttribute("aria-label", "LSP Giving Tuesday is today. Give now");
+          }
+          return true;
+        }
+        state = "count";
+        // Whole minutes left, rounded up, so it never reads "0 min" early.
+        var mins = Math.ceil((dayStart - t) / 60000);
+        var d = Math.floor(mins / 1440);
+        var h = Math.floor((mins % 1440) / 60);
+        var m = mins % 60;
+        var parts = [];
+        // With a day or more left the minutes are a detail: phones drop them
+        // (and the smallest phones, under 360 px, drop the hours too).
+        if (d > 0) parts.push([unit(d, "day", "days"), ""]);
+        if (d > 0 || h > 0) parts.push([unit(h, "hr", "hrs"), d > 0 ? "gthb-opt-xs" : ""]);
+        parts.push([unit(m, "min", "min"), d > 0 ? "gthb-opt" : ""]);
+        when.textContent = "is in ";
+        parts.forEach(function (p, i) {
+          var s = document.createElement("span");
+          s.textContent = (i ? " " : "") + p[0];
+          if (p[1]) s.className = p[1];
+          when.appendChild(s);
+        });
+        return true;
+      }
+
+      function schedule() {
+        clearTimeout(timer);
+        if (!render()) return;
+        // Next tick just after the next whole minute of the countdown.
+        var wait = ((dayStart - now()) % 60000 + 60000) % 60000 || 60000;
+        timer = setTimeout(schedule, Math.min(wait + 50, 60050));
+      }
+
+      schedule();
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) schedule();
+      });
+    })();
+  </script>
+)}
+
+<style>
+  .gthb {
+    background: #ffde59;
+    color: #1e1e1e;
+    font-family: "Rubik", system-ui, sans-serif;
+  }
+  .gthb-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    outline: none;
+  }
+  .gthb-link:focus-visible {
+    box-shadow: inset 0 0 0 2px #1e1e1e;
+  }
+  .gthb-inner {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 80rem; /* max-w-7xl, the header's own grid */
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: 14px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  @media (min-width: 640px) {
+    .gthb-inner {
+      padding: 0 1.5rem;
+      font-size: 15px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .gthb-inner {
+      min-height: 40px;
+      padding: 0 2rem;
+    }
+  }
+  .gthb-line {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gthb-name {
+    font-weight: 700;
+  }
+  .gthb-when {
+    font-weight: 400;
+  }
+  .gthb-note {
+    font-weight: 400;
+    margin-left: 0.5em;
+  }
+  .gthb-note::before {
+    content: "·";
+    margin-right: 0.5em;
+  }
+  .gthb-give {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-weight: 700;
+  }
+  .gthb-arrow {
+    width: 1em;
+    height: 1em;
+    transition: transform 240ms ease;
+  }
+  .gthb-link:hover .gthb-arrow,
+  .gthb-link:focus-visible .gthb-arrow {
+    transform: translateX(3px);
+  }
+  .gthb-link:hover .gthb-give {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  @media (max-width: 479px) {
+    .gthb-when :global(.gthb-opt) {
+      display: none;
+    }
+  }
+  @media (max-width: 359px) {
+    .gthb-inner {
+      gap: 0.75rem;
+      padding: 0 0.75rem;
+      font-size: 13px;
+    }
+    .gthb-arrow {
+      display: none;
+    }
+    .gthb-when :global(.gthb-opt-xs) {
+      display: none;
+    }
+  }
+  @media (max-width: 767px) {
+    .gthb-note {
+      display: none !important;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gthb-arrow {
+      transition: none;
+    }
+    .gthb-link:hover .gthb-arrow,
+    .gthb-link:focus-visible .gthb-arrow {
+      transform: none;
+    }
+  }
+</style>

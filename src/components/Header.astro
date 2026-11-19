@@ -2,6 +2,7 @@
 // src/components/Header.astro
 import { statusBanner } from "@/data/studioStatus.js";
 import { isPopUpSeriesActive } from "@/data/popUpWeeks";
+import GivingTuesdayHeaderBand from "@/components/GivingTuesdayHeaderBand.astro";
 
 const base = import.meta.env.BASE_URL;
 
@@ -13,6 +14,26 @@ const isHome = pathname === base || pathname === `${base}/`;
 // is not past at build time.
 const showPopUpNav = isPopUpSeriesActive();
 
+// LSP Giving Tuesday countdown band (GivingTuesdayHeaderBand.astro). Never
+// while the studio outage banner is on (that one takes the top), and not on
+// the campaign's own pages or on tool / kiosk surfaces. Prefix match.
+const GIVING_BAND_SKIP = [
+  "/givingtuesday", // the page it points at, plus /join and /kit
+  "/give", // instructor fundraiser pages (/give/, /give/<slug>/)
+  "/checkin",
+  "/photobooth",
+  "/waiver",
+  "/inventory",
+  "/shifts",
+  "/subs",
+];
+const pathNoBase = "/" + pathname.slice(base.length).replace(/^\/+/, "");
+const showGivingBand =
+  !statusBanner.active &&
+  !GIVING_BAND_SKIP.some(
+    (p) => pathNoBase === p || pathNoBase.startsWith(p + "/"),
+  );
+
 const bannerHref = statusBanner.href.startsWith("/")
   ? base.replace(/\/$/, "") + statusBanner.href
   : statusBanner.href;
@@ -23,6 +44,8 @@ const bannerHref = statusBanner.href.startsWith("/")
     flow and move as one unit. A script at the end of this component keeps
     #header-spacer's height synced to the wrapper's total height. */}
 <div id="header-wrapper" class="fixed top-0 left-0 right-0 z-50">
+
+    {showGivingBand && <GivingTuesdayHeaderBand />}
 
     {
       statusBanner.active && (
@@ -357,6 +380,21 @@ const bannerHref = statusBanner.href.startsWith("/")
           syncSpacer();
         });
       }
+    }
+
+    // The Giving Tuesday band scrolls away with the page: the wrapper rises by
+    // up to the band's height, so the nav settles at the top once the band is
+    // out of view (the spacer keeps the full height, so content starts below
+    // both). Direct scroll tracking, not an animation.
+    var gtBand = document.getElementById("gt-header-band");
+    if (gtBand) {
+      var lift = function () {
+        var h = gtBand.isConnected ? gtBand.offsetHeight : 0;
+        var y = Math.min(Math.max(window.scrollY || 0, 0), h);
+        wrapper.style.transform = y ? "translateY(" + -y + "px)" : "";
+      };
+      window.addEventListener("scroll", lift, { passive: true });
+      lift();
     }
 
     syncSpacer();

@@ -449,6 +449,15 @@ export const showGivingHomeBand = true;
 export const showGivingLinksCard = true;
 export const givingPlacementsUntil = "2026-12-04T05:59:59Z";
 
+// Site-wide countdown band at the very top of every page that renders the
+// shared Header (src/components/GivingTuesdayHeaderBand.astro). It counts to
+// the start of givingFacts.givingDay in Chicago, reads "LSP Giving Tuesday is
+// today" on the day, and is gone once givingFacts.endsAt passes (build time
+// and in the browser). It never shows while the studio outage banner
+// (src/data/studioStatus.js) is on. HOW TO TURN IT OFF BY HAND: set this to
+// false.
+export const showGivingHeaderBand = true;
+
 // "campaign" | "thanks" | "off" (the toggles are applied by the components).
 export function givingPlacementPhase(now = Date.now()) {
   const t = ms(now);
