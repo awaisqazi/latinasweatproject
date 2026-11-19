@@ -33,9 +33,9 @@ export const posadaEvent = {
   calendarLocation: "Mural Park, 924 W 19th Place, Chicago, IL 60608",
 };
 
-// ASSUMED, NOT YET CONFIRMED BY FEZ: craft days happen at the studio. The
-// brief gave no location; the save-the-date is tagged Mural Park. Change it
-// here and in marketing/posada-craft-days/PosadaConfirm.template.gs.
+// Confirmed by Fez on Nov 19 2026: craft days happen at the studio. To change
+// the place, edit it here and in
+// marketing/posada-craft-days/PosadaConfirm.template.gs.
 export const craftDaysPlace = {
   name: "Mural Park",
   street: "924 W 19th Place",
