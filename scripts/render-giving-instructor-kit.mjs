@@ -72,6 +72,7 @@ const FACEBOX = path.join(ROOT, "marketing/giving-tuesday-2026/email-1/facebox.p
 // list in render-giving-instructor-og.mjs).
 const ALWAYS_CIRCLE = new Set([
   "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
+  "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
 ]);
 const TMP = process.env.TMP_DIR || path.join(os.tmpdir(), "lsp-giving-instructor-kit");
 const PROFILE = path.join(TMP, "prof");

@@ -112,6 +112,7 @@ function findHeadlessShell() {
 // list in render-giving-instructor-kit.mjs).
 const ALWAYS_CIRCLE = new Set([
   "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
+  "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
 ]);
 async function photoSource(avatar) {
   if (!avatar) return null;

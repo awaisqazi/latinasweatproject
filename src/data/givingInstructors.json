@@ -1,5 +1,13 @@
 [
   {
+    "slug": "alondra-alcazar",
+    "name": "Alondra Alcazar",
+    "first": "Alondra",
+    "why": null,
+    "avatar": "alondra-alcazar",
+    "goal_cents": 15000
+  },
+  {
     "slug": "amanda-lopez-martinez",
     "name": "Amanda Lopez-Martinez",
     "first": "Amanda",
@@ -45,6 +53,14 @@
     "first": "Celina",
     "why": "LSP has given me an opportunity to become a yoga teacher instructor and I’m forever grateful. Want to give back in return.",
     "avatar": "celina-huerta",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "courtney-luedke",
+    "name": "Courtney Luedke",
+    "first": "Courtney",
+    "why": "LSP is a community & wellness home that feels like family. I want to share LSP with others and continue to promote generational wellness in our communities.",
+    "avatar": "courtney-luedke",
     "goal_cents": 15000
   },
   {
@@ -136,6 +152,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "lizzel-barragan",
+    "name": "Lizzel Barragan",
+    "first": "Lizzel",
+    "why": "To provide safe spaces for healing through movement.",
+    "avatar": "lizzel-barragan",
+    "goal_cents": 15000
+  },
+  {
     "slug": "marlene-garcia",
     "name": "Marlene Garcia",
     "first": "Marlene",
@@ -173,6 +197,14 @@
     "first": "Sarah",
     "why": "I’m fundraising for Latina Sweat Project because wellness and healing in community saves and changes lives. 🤍 My life is forever changed by LSP.",
     "avatar": "sarah-esparza",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "savannah-alvarez",
+    "name": "Savannah Alvarez",
+    "first": "Savannah",
+    "why": "The LSP 2026 YTT cohort showed me that yoga is more than movement-it’s about the community you uplift. I am fundraising to keep this movement alive!",
+    "avatar": "savannah-alvarez",
     "goal_cents": 15000
   },
   {
