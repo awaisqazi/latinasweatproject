@@ -138,6 +138,10 @@
       onSeen();
       return () => {};
     }
+    // A section taller than the viewport can never show the full ratio, so cap
+    // it to what 80% of the viewport can hold or the observer never fires.
+    const h = el.getBoundingClientRect().height;
+    const reachable = h > 0 ? (window.innerHeight * 0.8) / h : 1;
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
@@ -145,7 +149,7 @@
           io.disconnect();
         }
       },
-      { threshold },
+      { threshold: Math.min(threshold, reachable) },
     );
     io.observe(el);
     return () => io.disconnect();

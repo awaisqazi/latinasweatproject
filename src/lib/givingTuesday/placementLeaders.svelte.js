@@ -29,6 +29,10 @@ export function mountLeaders(target, { base = "/", reduced = false, tone = "ink"
   if (!props.seen) {
     if (!("IntersectionObserver" in window)) props.seen = true;
     else {
+      // Cap the ratio to what 80% of the viewport can hold, or a list taller
+      // than the screen never fires.
+      const h = target.getBoundingClientRect().height;
+      const reachable = h > 0 ? (window.innerHeight * 0.8) / h : 1;
       const io = new IntersectionObserver(
         (entries) => {
           if (entries.some((e) => e.isIntersecting)) {
@@ -36,7 +40,7 @@ export function mountLeaders(target, { base = "/", reduced = false, tone = "ink"
             io.disconnect();
           }
         },
-        { threshold: 0.25 },
+        { threshold: Math.min(0.25, reachable) },
       );
       io.observe(target);
     }
