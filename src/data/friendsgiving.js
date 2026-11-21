@@ -18,7 +18,7 @@ export const friendsgivingEvent = {
   // Shown above the menu on the dark ground.
   kicker: "LSP Team Bonding",
   dateLabel: "Sunday, November 22",
-  timeLabel: "11:30 am to 5:30 pm",
+  timeLabel: "1:30 pm to 5:30 pm",
   instruction:
     "Bring a dish, side or dessert to share, and add it to the menu so nobody doubles up.",
   partifulUrl: "https://partiful.com/e/DFSgX9nrLBkAXk1iv9SC",
