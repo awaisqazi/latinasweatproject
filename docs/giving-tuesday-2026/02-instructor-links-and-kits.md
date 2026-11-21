@@ -115,8 +115,20 @@ instructor also gets a static page with their own card.
   avatar would be soft. The quote and name sit in the column to its left,
   40 px clear, centred on the circle. The circle shrinks before the quote is
   cut. No cutout at all: type only, quote big and full width.
+- No why and a name too long to sit beside the circle at full size: the
+  circle moves to the left margin and the name goes on its own line under it,
+  full size, left-aligned with the type above (lucia-del-rincon-martinez).
+- `marketing/giving-tuesday-2026/kit-photos/<avatar>.png` (kit only): a
+  larger cutout of the same photo, used for the circle instead of the pop-up
+  cutout when that one is too small to stay sharp. lucia-del-rincon-martinez's
+  pop-up cutout is 300x300; hers is the 800x800 original
+  (`public/images/gala/2026/honorees/lucia-del-rincon.jpg`, registered to the
+  300 px cutout: exactly 8/3 scale, so the same image), cut out with
+  `scripts/tools/cutout` plus the 300 px cutout's matte to close hair gaps
+  (`merge-matte.py` beside it).
 - `ALWAYS_CIRCLE` (in both renderers, link card included): `lizett-galan`,
-  whose cutout ends in straight vertical cut edges on the torso. Add an avatar
+  `alondra-alcazar` (cutouts end in straight cut edges) and
+  `lucia-del-rincon-martinez` (cutout too small). Add an avatar
   there when its cutout looks wrong standing on the yellow.
 - Story: type between 272 px and 1620 px; the full photo runs under the bottom
   bar, the circle stays above it so the face is never under the reply bar.

@@ -73,6 +73,7 @@ const FACEBOX = path.join(ROOT, "marketing/giving-tuesday-2026/email-1/facebox.p
 const ALWAYS_CIRCLE = new Set([
   "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
   "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
+  "lucia-del-rincon-martinez", // no why and a long link line: the full cutout only fits as a tiny figure
 ]);
 const TMP = process.env.TMP_DIR || path.join(os.tmpdir(), "lsp-giving-instructor-kit");
 const PROFILE = path.join(TMP, "prof");
@@ -147,8 +148,15 @@ async function rowProfile(file) {
   }
   return { left, w: info.width, h: info.height, y0, touchLeft };
 }
+// A larger cutout of the SAME photo as the pop-up cutout, for an avatar whose
+// pop-up cutout is too small for a sharp circle (lucia-del-rincon-martinez:
+// 300x300; KIT_PHOTOS/<avatar>.png is the 800x800 original it was downscaled
+// from, registered to it, with its matte). Always the round photo.
+const KIT_PHOTOS = path.join(ROOT, "marketing/giving-tuesday-2026/kit-photos");
 async function photoSource(avatar) {
   if (!avatar) return null;
+  const hires = path.join(KIT_PHOTOS, `${avatar}.png`);
+  if (existsSync(hires)) return { kind: "circle", file: hires, crop: await circleCrop(hires) };
   const big = path.join(CUTOUTS, `${avatar}.png`);
   if (!existsSync(big)) return null;
   const prof = await rowProfile(big);
@@ -470,7 +478,8 @@ function circleClear(c, lines) {
   return worst;
 }
 // under: the name too long for the column goes on its own line under the
-// circle and quote, left-aligned, full width (only with a why).
+// circle and quote, left-aligned, full width (no why: under the circle alone,
+// the circle at the left margin).
 function setNameUnder(off) {
   if (off == null) { nameEl.style.position = ""; nameEl.style.top = ""; nameEl.style.marginTop = ""; return; }
   Object.assign(nameEl.style, { position: "absolute", left: "0px", top: off + "px", marginTop: "0px" });
@@ -481,21 +490,24 @@ function fitCircle(tp, texts, under = false) {
   const min = under ? F.circle.underMin : CIRC.min;
   setNameUnder(under ? 0 : null);
   const nameH = under ? Math.ceil(nameEl.getBoundingClientRect().height) : 0;
+  // No why: nothing sits beside the circle, so the circle moves to the left
+  // margin and the name goes under it, left-aligned with everything above.
+  const solo = under && !q;
   // The ink box of a line can poke a pixel or two above its line box.
   const nameGap = Math.max(GAP, F.gapName) + 6;
   if (under && inkW(nameEl) > colW) { setNameUnder(null); return null; }
   for (const [text, cut] of texts)
   for (const floor of [F.quote.comfort, F.quote.min])
   for (let d = Math.min(CIRC.max, room); d >= min; d -= 4) {
-    const left = F.w - F.padX - d;
-    const width = left - GAP - F.padX;
+    const left = solo ? F.padX : F.w - F.padX - d;
+    const width = solo ? colW : left - GAP - F.padX;
     if (width < F.minCol) continue;
     for (const qs of WHY ? range(F.quote.max, floor) : [0]) {
       setLow(0, width);
       if (q) setQuote(text, qs, cut);
       if (!under && inkW(nameEl) > width) { nameBlocked = true; break; }
       // Height of what sits beside the circle (the quote alone when under).
-      const hb = Math.ceil(under ? q.getBoundingClientRect().height : low.getBoundingClientRect().height);
+      const hb = solo ? 0 : Math.ceil(under ? q.getBoundingClientRect().height : low.getBoundingClientRect().height);
       const gh = Math.max(hb, d);
       const total = gh + (under ? nameGap + nameH : 0);
       if (total > room) continue;
@@ -542,6 +554,10 @@ function fitPhotoOrCircle(tp) {
       if (PROF && (fit = fitWithPhoto(tp, [0, ...sinks], [t], true, [F.quote.comfort]))) return { ...fit, nSize: ns };
     }
     if (CIRC) {
+      // No why and a long name: the circle with the name at full size on its
+      // own line under it, before a smaller name beside it.
+      setName(F.name);
+      if (!WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
       for (const ns of smaller) {
         setName(ns);
         if ((fit = fitCircle(tp, [t]))) return { ...fit, nSize: ns };
@@ -607,7 +623,8 @@ document.fonts.ready.then(() => {
     quoteText: q ? q.textContent : "",
     clear: fit.place ? clearance(fit.place, allLines()) : null,
     circle: circEl && fit.circle ? box(circEl) : null,
-    circleClear: fit.circle ? circleClear(fit.circle, allLines()) : null,
+    // Infinity (no line beside the circle) would serialise to null.
+    circleClear: fit.circle ? Math.min(circleClear(fit.circle, allLines()), 9999) : null,
   });
 });
 </script>
@@ -670,7 +687,7 @@ for (const { p, format, out, photo, hash } of jobs) {
       (f.nSize && f.nSize !== F.name ? ` | name ${f.nSize}px` : "") +
       (why ? ` | quote ${f.qSize}px ${f.cut ? "CUT" : "full"} in ${f.width}px` : " | no why") +
       (f.place ? ` | photo scale ${f.place.s} clear ${Math.round(r2.clear)}px`
-        : f.circle ? ` | circle ${f.circle.d}px (source ${photo.crop.side}px${photo.crop.face ? "" : ", no face found"}) clear ${Math.round(r2.circleClear)}px`
+        : f.circle ? ` | circle ${f.circle.d}px (source ${photo.crop.side}px${photo.crop.face ? "" : ", no face found"}) clear ${r2.circleClear >= 9999 ? "(no type beside it)" : Math.round(r2.circleClear) + "px"}`
         : " | type only"),
   );
 }

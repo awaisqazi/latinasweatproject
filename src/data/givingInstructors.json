@@ -80,6 +80,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "dinorah-zubieta",
+    "name": "Dinorah Zubieta",
+    "first": "Dinorah",
+    "why": "LSP made my dream of becoming a yoga instructor a reality. I want to help continue the mission and provide more scholarships for more BIPOC instructors.",
+    "avatar": "dinorah-zubieta",
+    "goal_cents": 15000
+  },
+  {
     "slug": "fabiola-saldana",
     "name": "Fabiola Saldaña",
     "first": "Fabiola",
@@ -173,6 +181,14 @@
     "first": "Lizzel",
     "why": "To provide safe spaces for healing through movement.",
     "avatar": "lizzel-barragan",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "lucia-del-rincon-martinez",
+    "name": "Lucia del Rincon Martinez",
+    "first": "Lucia",
+    "why": null,
+    "avatar": "lucia-del-rincon-martinez",
     "goal_cents": 15000
   },
   {

@@ -113,6 +113,7 @@ function findHeadlessShell() {
 const ALWAYS_CIRCLE = new Set([
   "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
   "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
+  "lucia-del-rincon-martinez", // no why and a long link line: the full cutout only fits as a tiny figure
 ]);
 async function photoSource(avatar) {
   if (!avatar) return null;
