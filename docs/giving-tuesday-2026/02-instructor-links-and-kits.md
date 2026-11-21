@@ -51,8 +51,10 @@ instructor also gets a static page with their own card.
   transparent cutout the pop-up avatar is cut from
   (`marketing/popup-week1/instructors/<avatar>.png`) standing on the yellow at
   the right, sized so it never comes within 36 px of a line of type and the face
-  stays in frame; a cutout cut off by its own left side, an avatar on
-  `ALWAYS_CIRCLE`, or no large cutout, uses the 320 px avatar in a 300 px white
+  stays in frame (see "Standing photo for everyone" below; a prepared photo
+  may also run past the bottom edge so its face matches everyone else's).
+  Only a cutout cut off by its own left side that is not on `STANDING`, or an
+  avatar on `ALWAYS_CIRCLE` (empty), uses the 320 px avatar in a 300 px white
   circle; no avatar, type only. Each card
   stores a hash of its inputs, so reruns only redraw what changed (`--force`
   redraws all); cards for slugs no longer listed are deleted.
@@ -99,15 +101,22 @@ instructor also gets a static page with their own card.
   Dec 1", the short link, then their why in quotes (verbatim, emoji left off,
   cut at a word with "…" only if nothing else fits) and their full name in bold
   as the signature. No why: the name alone.
-- Photo: the same large cutout as the link card
+- Photo: the same standing photo as the link card
   (`marketing/popup-week1/instructors/<avatar>.png`), bottom-anchored, pushed
   right; the quote and name sit in a column to its left, as wide as the
   cutout's row outline allows with 40 px clear. The script prefers a readable
   quote (33 px feed, 40 px story) over a bigger photo, then allows smaller. The
   name never wraps. The whole why is tried at every readable size before a cut
   one.
-- Round photo: a cutout cut off by its own left side, or an avatar on
-  `ALWAYS_CIRCLE`, becomes a face-centred circle on white at the right of the
+- Fit order: for each text (whole why first), the standing photo (full-size
+  name, then smaller; standing, then lowered; last, in the story only, a
+  smaller photo down to `photo.floor` 0.8 provided the measured face stays
+  above `faceLimit`), then the circle, then the next shorter cut. So a why
+  that fits whole beside the circle is never cut to fit beside the standing
+  photo; the circle is only used when the standing photo cannot hold it.
+- Round photo (fallback only): when no standing layout fits (above), a
+  cutout cut off by its own left side not on `STANDING`, or an avatar on
+  `ALWAYS_CIRCLE`, it becomes a face-centred circle on white at the right of the
   lower part, where the full photo would stand (360 to 500 px feed, 380 to
   520 px story, never larger than its source). It is cut straight from the
   large cutout (the pop-up avatar's square crop, face box from
@@ -118,18 +127,45 @@ instructor also gets a static page with their own card.
 - No why and a name too long to sit beside the circle at full size: the
   circle moves to the left margin and the name goes on its own line under it,
   full size, left-aligned with the type above (lucia-del-rincon-martinez).
-- `marketing/giving-tuesday-2026/kit-photos/<avatar>.png` (kit only): a
-  larger cutout of the same photo, used for the circle instead of the pop-up
-  cutout when that one is too small to stay sharp. lucia-del-rincon-martinez's
-  pop-up cutout is 300x300; hers is the 800x800 original
-  (`public/images/gala/2026/honorees/lucia-del-rincon.jpg`, registered to the
-  300 px cutout: exactly 8/3 scale, so the same image), cut out with
-  `scripts/tools/cutout` plus the 300 px cutout's matte to close hair gaps
-  (`merge-matte.py` beside it).
-- `ALWAYS_CIRCLE` (in both renderers, link card included): `lizett-galan`,
-  `alondra-alcazar` (cutouts end in straight cut edges) and
-  `lucia-del-rincon-martinez` (cutout too small). Add an avatar
-  there when its cutout looks wrong standing on the yellow.
+- Standing photo for everyone (owner's decision, Nov 2026): every
+  instructor with a photo stands in the post, story and link card. Cutouts
+  that could not stand as they were are prepared by
+  `scripts/giving-standing-photos.mjs` (`STANDING`, shared by both
+  renderers):
+  - Straight cut edges (the edge of the original photo) on the sides are cut
+    off straight at the bottom, at the first row where a side turns straight
+    or meets the cutout's left side, so the cut sits on the frame's bottom
+    edge: alondra-alcazar (row 560), lizett-galan (478), and the portrait
+    750x1125 cutouts courtney-luedke (941), dinorah-zubieta (1004),
+    karina-melendez (847), yaritza-jurado (839). A cut on the RIGHT side may
+    stay; both renderers keep it running off the frame (checked loudly).
+    Nothing is added, extended or mirrored.
+  - lucia-del-rincon-martinez: her pop-up cutout is 300x300, so she stands
+    from `marketing/giving-tuesday-2026/kit-photos/lucia-del-rincon-martinez.png`,
+    the 800x800 original of the same photo
+    (`public/images/gala/2026/honorees/lucia-del-rincon.jpg`, registered to
+    the 300 px cutout at exactly 8/3 scale), cut out with
+    `scripts/tools/cutout` plus the small cutout's matte (`merge-matte.py`).
+  - These photos get a measured face box (YuNet, `facebox.py`) instead of
+    the house box, and their scale is set so the face comes out the size of
+    a house cutout's face (`scale` = 240 / face width). Their face, with a
+    margin of 14% of its height under the chin, must stay above `faceLimit`
+    (story: 1700 px, clear of the reply bar), also when standing on the
+    bottom edge.
+  - Loud checks: no prepared photo touches its own left side; the crop never
+    cuts the face; every standing photo reaches the bottom edge; a cut right
+    side runs off the frame; the face box stays in frame.
+- Still round, story only (the post and link card stand). Each needs a
+  photo of the same shoot showing more of the body (to mid-torso, arms inside
+  the frame, like the house 1125x750 cutouts), so the face can sit higher:
+  - karina-melendez, liz-galan, yari-jurado: after the bottom cut the chin
+    sits so close to the cut that standing on the bottom edge puts the face
+    in the reply-bar zone at any size that leaves room for the type.
+  - amanda-lopez-martinez, ghazala-irshad: their whole why only fits beside
+    a photo small enough to stand with the face in the reply-bar zone; the
+    circle keeps the why whole (cutting it is not allowed).
+- `ALWAYS_CIRCLE` (both renderers) is empty; add an avatar there only if
+  its standing photo looks wrong and it cannot be prepared honestly.
 - Story: type between 272 px and 1620 px; the full photo runs under the bottom
   bar, the circle stays above it so the face is never under the reply bar.
 - Fails loudly if any line is near an edge, outside the safe area, or within

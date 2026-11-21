@@ -49,6 +49,7 @@ import path from "node:path";
 import os from "node:os";
 import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { standingPhoto } from "./giving-standing-photos.mjs";
 
 const require = createRequire(import.meta.url);
 const sharp = require("sharp");
@@ -109,23 +110,28 @@ function findHeadlessShell() {
   throw new Error("Playwright chrome-headless-shell not found; run `npx playwright install chromium-headless-shell`");
 }
 // Avatars that always use the round photo, even with a usable cutout (same
-// list in render-giving-instructor-kit.mjs).
-const ALWAYS_CIRCLE = new Set([
-  "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
-  "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
-  "lucia-del-rincon-martinez", // no why and a long link line: the full cutout only fits as a tiny figure
-]);
+// list in render-giving-instructor-kit.mjs). Empty: everyone with a photo
+// stands (cutouts with straight cut edges are cut at the bottom by
+// giving-standing-photos.mjs instead).
+const ALWAYS_CIRCLE = new Set([]);
 async function photoSource(avatar) {
   if (!avatar) return null;
+  // On STANDING (giving-standing-photos.mjs): the prepared cutout and its
+  // measured face box.
+  const st = await standingPhoto(ROOT, avatar, CUTOUTS);
+  if (st) {
+    const prof = await rowProfile(st.buf);
+    return { kind: "cutout", buf: st.buf, prof, face: st.face };
+  }
   const big = path.join(CUTOUTS, `${avatar}.png`);
   if (existsSync(big) && !ALWAYS_CIRCLE.has(avatar)) {
     const prof = await rowProfile(big);
     // A cutout cut off by its own left side would show that straight edge in
     // the middle of the card: use the round avatar instead.
-    if (!prof.touchLeft) return { kind: "cutout", file: big, prof };
+    if (!prof.touchLeft) return { kind: "cutout", buf: readFileSync(big), prof, face: FACE };
   }
   const small = path.join(AVATARS, `${avatar}.webp`);
-  if (existsSync(small)) return { kind: "circle", file: small };
+  if (existsSync(small)) return { kind: "circle", buf: readFileSync(small), file: small };
   return null;
 }
 const sha = (...parts) => {
@@ -143,6 +149,7 @@ async function cardHash(file) {
 // ---------- which cards need work ----------
 const logoRaw = readFileSync(path.join(ROOT, "public/logo.png"));
 const selfSrc = readFileSync(SELF);
+const standingSrc = readFileSync(path.join(path.dirname(SELF), "giving-standing-photos.mjs"));
 const jobs = [];
 const keep = new Set();
 for (const p of people) {
@@ -151,9 +158,10 @@ for (const p of people) {
   const photo = await photoSource(p.avatar);
   const hash = sha(
     JSON.stringify({ name: p.name, first: p.first, why: p.why, goal: p.goal_cents, avatar: p.avatar, kind: photo?.kind ?? null }),
-    photo ? readFileSync(photo.file) : "",
+    photo ? photo.buf : "",
     logoRaw,
     selfSrc,
+    standingSrc,
   );
   if (!FORCE && (await cardHash(out)) === hash) {
     console.log(`  ${p.slug}: unchanged`);
@@ -341,11 +349,22 @@ async function rowProfile(file) {
 
 // Biggest cutout scale whose outline clears every line box (plus the logo)
 // by GAP while the face box and head stay in frame. Bottom-anchored.
-function placeCutout(prof, boxes, colRight) {
-  for (let s = 0.9; s >= 0.5; s -= 0.005) {
-    const imgTop = H - prof.h * s;
+// face: the house FACE box, or a measured one (giving-standing-photos.mjs),
+// whose scale keeps the face the size a house cutout's face is drawn.
+function placeCutout(prof, boxes, colRight, face) {
+  const FACE = face, SC = face.scale || 1;
+  // A measured face may also run the photo past the bottom edge (sink), so a
+  // tall photo (lucia-del-rincon-martinez: 800x800, waist up) shows the face
+  // as large as everyone else's instead of a small whole figure. House
+  // cutouts stand on the bottom edge, as before.
+  const sinks = [0];
+  if (FACE.custom) for (let k = 10; k <= 240; k += 10) sinks.push(k);
+  for (let s = 0.9 * SC; s >= 0.5 * SC; s -= 0.005)
+  for (const sink of sinks) {
+    const imgTop = H - prof.h * s + sink;
     const headTop = imgTop + prof.y0 * s;
     const faceTop = imgTop + FACE.top * prof.h * s;
+    if (FACE.custom && imgTop + FACE.bottom * prof.h * s > H - EDGE) break;
     if (headTop < 36 || faceTop < EDGE) continue;
     const maxOff = W - FACE_EDGE - (FACE.cx + FACE.half) * prof.w * s;
     let minOff = -Infinity;
@@ -394,9 +413,9 @@ for (const { p, out, photo, hash } of jobs) {
   let photoTag = "", place = null, prof = null;
   if (photo?.kind === "cutout") {
     prof = photo.prof;
-    place = placeCutout(prof, boxes, colRight);
+    place = placeCutout(prof, boxes, colRight, photo.face);
     if (!place) throw new Error(`${p.slug}: no photo size clears the type and keeps the face in frame`);
-    const uri = "data:image/png;base64," + readFileSync(photo.file).toString("base64");
+    const uri = "data:image/png;base64," + photo.buf.toString("base64");
     photoTag = `<img class="photo" src="${uri}" alt="" style="left:${place.off}px;top:${place.top}px;width:${place.w}px;height:${place.h}px">`;
   } else if (photo?.kind === "circle") {
     const meta = await sharp(photo.file).metadata();
@@ -421,8 +440,13 @@ for (const { p, out, photo, hash } of jobs) {
   if (place) {
     const c = clearance(prof, place, [...r2.lines, r2.logo]);
     if (c < GAP - 1) throw new Error(`${p.slug}: photo comes within ${c}px of the type`);
-    const faceR = place.off + (FACE.cx + FACE.half) * place.w;
+    const fc = photo.face;
+    const faceL = place.off + (fc.cx - fc.half) * place.w, faceR = place.off + (fc.cx + fc.half) * place.w;
     if (faceR > W - FACE_EDGE + 1) throw new Error(`${p.slug}: face box runs off the right edge`);
+    if (faceL < EDGE || place.top + fc.top * place.h < EDGE || place.top + fc.bottom * place.h > H - EDGE) throw new Error(`${p.slug}: face box runs off the card`);
+    // Stands on the bottom edge; a cut right side runs off the card.
+    if (place.top + place.h < H) throw new Error(`${p.slug}: photo floats above the bottom edge`);
+    if (prof.touchRight && place.off + place.w < W) throw new Error(`${p.slug}: the photo's cut right side shows on the card`);
   } else if (r2.photo) {
     if (r2.photo[0] < colRight + GAP - 1) throw new Error(`${p.slug}: circle touches the type`);
   }

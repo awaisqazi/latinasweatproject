@@ -24,8 +24,13 @@
 // with GAP to spare; the photo shrinks (down to a floor) until the column
 // takes a readable quote.
 //
-// Round photo: a large cutout cut off by its own left side, or an avatar on
-// ALWAYS_CIRCLE, is shown as a face-centred circle on white instead, cut
+// Everyone with a photo stands: cutouts with straight cut edges, or too
+// small, are prepared by giving-standing-photos.mjs (STANDING), with a
+// measured face box that must stay above faceLimit.
+//
+// Round photo (fallback only, when no standing layout keeps the face off the
+// story's reply bar or the why whole; or a cutout cut off by its own left
+// side not on STANDING) is shown as a face-centred circle on white, cut
 // straight from the large cutout (the same square crop as the pop-up avatar:
 // face box from YuNet via facebox.py, 12% margin, nudged down a little) so it
 // stays sharp; the 320 px avatar would be soft at this size. The circle sits
@@ -58,6 +63,7 @@ import path from "node:path";
 import os from "node:os";
 import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { standingPhoto } from "./giving-standing-photos.mjs";
 
 const require = createRequire(import.meta.url);
 const sharp = require("sharp");
@@ -69,12 +75,10 @@ const OUT_DIR = process.env.CARDS_OUT_DIR || path.join(ROOT, "public/images/givi
 const CUTOUTS = path.join(ROOT, "marketing/popup-week1/instructors");
 const FACEBOX = path.join(ROOT, "marketing/giving-tuesday-2026/email-1/facebox.py");
 // Avatars that always use the round photo, even with a usable cutout (same
-// list in render-giving-instructor-og.mjs).
-const ALWAYS_CIRCLE = new Set([
-  "lizett-galan", // the cutout's torso ends in straight vertical cut edges, which look wrong standing on the yellow
-  "alondra-alcazar", // same: both arms and the hair on one side end in straight cut edges
-  "lucia-del-rincon-martinez", // no why and a long link line: the full cutout only fits as a tiny figure
-]);
+// list in render-giving-instructor-og.mjs). Empty: everyone with a photo
+// stands (cutouts with straight cut edges are cut at the bottom by
+// giving-standing-photos.mjs instead).
+const ALWAYS_CIRCLE = new Set([]);
 const TMP = process.env.TMP_DIR || path.join(os.tmpdir(), "lsp-giving-instructor-kit");
 const PROFILE = path.join(TMP, "prof");
 const FORCE = process.argv.includes("--force");
@@ -98,14 +102,14 @@ const FORMATS = {
     kicker: 40, head: { max: 148, min: 96 }, date: 40, link: { max: 36, min: 20 },
     gapKicker: 14, gapHead: 26, gapDate: 10, gapBlocks: 64,
     quote: { max: 36, comfort: 33, min: 27, solo: 48, soloMin: 32 }, name: 46, nameMin: 36, gapName: 24,
-    photo: { max: 1.05, min: 0.74 }, faceEdge: 72, minCol: 330, maxSink: 240, faceLimit: 1350 - 72, circle: { max: 500, min: 360, underMin: 320 },
+    photo: { max: 1.05, min: 0.74, floor: 0.74 }, faceEdge: 72, minCol: 330, maxSink: 240, faceLimit: 1350 - 72, circle: { max: 500, min: 360, underMin: 320 },
   },
   story: {
     w: 1080, h: 1920, padX: 88, logoTop: 272, logoH: 136, gapLogo: 64, safeBottom: 1920 - 300,
     kicker: 52, head: { max: 190, min: 110 }, date: 52, link: { max: 44, min: 24 },
     gapKicker: 18, gapHead: 32, gapDate: 12, gapBlocks: 80,
     quote: { max: 44, comfort: 40, min: 33, solo: 58, soloMin: 38 }, name: 56, nameMin: 44, gapName: 28,
-    photo: { max: 1.3, min: 0.95 }, faceEdge: 80, minCol: 380, maxSink: 240, faceLimit: 1920 - 220, circle: { max: 520, min: 380, underMin: 340 },
+    photo: { max: 1.3, min: 0.95, floor: 0.8 }, faceEdge: 80, minCol: 380, maxSink: 240, faceLimit: 1920 - 220, circle: { max: 520, min: 380, underMin: 340 },
   },
 };
 
@@ -139,31 +143,39 @@ function findHeadlessShell() {
 async function rowProfile(file) {
   const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const left = new Array(info.height).fill(null);
-  let y0 = info.height, touchLeft = false;
+  let y0 = info.height, touchLeft = false, touchRight = false;
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
       if (data[(y * info.width + x) * 4 + 3] > 24) { left[y] = x; if (y < y0) y0 = y; break; }
     }
     if (data[y * info.width * 4 + 3] > 24) touchLeft = true;
+    if (data[(y * info.width + info.width - 1) * 4 + 3] > 24) touchRight = true;
   }
-  return { left, w: info.width, h: info.height, y0, touchLeft };
+  return { left, w: info.width, h: info.height, y0, touchLeft, touchRight };
 }
-// A larger cutout of the SAME photo as the pop-up cutout, for an avatar whose
-// pop-up cutout is too small for a sharp circle (lucia-del-rincon-martinez:
-// 300x300; KIT_PHOTOS/<avatar>.png is the 800x800 original it was downscaled
-// from, registered to it, with its matte). Always the round photo.
-const KIT_PHOTOS = path.join(ROOT, "marketing/giving-tuesday-2026/kit-photos");
+// An avatar on STANDING (giving-standing-photos.mjs) stands from its prepared
+// cutout (cut straight at the bottom, or a larger cutout of the same photo),
+// with its measured face box; everyone else from the pop-up cutout as is,
+// with the house FACE box.
 async function photoSource(avatar) {
   if (!avatar) return null;
-  const hires = path.join(KIT_PHOTOS, `${avatar}.png`);
-  if (existsSync(hires)) return { kind: "circle", file: hires, crop: await circleCrop(hires) };
+  const st = await standingPhoto(ROOT, avatar, CUTOUTS);
+  if (st) return { kind: "cutout", buf: st.buf, prof: st.prof, face: st.face, crop: await circleCrop(st.src) };
   const big = path.join(CUTOUTS, `${avatar}.png`);
   if (!existsSync(big)) return null;
   const prof = await rowProfile(big);
   // A usable cutout also carries the circle crop, for when no photo size fits.
   const crop = await circleCrop(big);
-  if (!prof.touchLeft && !ALWAYS_CIRCLE.has(avatar)) return { kind: "cutout", file: big, prof, crop };
+  if (!prof.touchLeft && !ALWAYS_CIRCLE.has(avatar)) return { kind: "cutout", buf: readFileSync(big), prof, face: FACE, crop, chin: await chinOf(big, prof.h) };
   return { kind: "circle", file: big, crop };
+}
+// Bottom of the measured face (YuNet box + 14% of its height, the margin
+// giving-standing-photos.mjs uses) as a fraction of the cutout's height; only
+// the smaller-photo fallback of fitStanding checks it against faceLimit.
+async function chinOf(file, h) {
+  const out = JSON.parse(execFileSync("python3", [FACEBOX, file], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 60000 }));
+  const f = out[file];
+  return f ? (f[1] + 1.14 * f[3]) / h : FACE.bottom;
 }
 // Face-centred square of the cutout, on white, as PNG: the geometry of
 // square_crop() in scripts/render-popup-instructor-avatars.py.
@@ -215,6 +227,7 @@ async function imageHash(file) {
 // ---------- which images need work ----------
 const logoRaw = readFileSync(path.join(ROOT, "public/logo.png"));
 const selfSrc = readFileSync(SELF);
+const standingSrc = readFileSync(path.join(path.dirname(SELF), "giving-standing-photos.mjs"));
 const jobs = [];
 const keep = new Set();
 for (const p of people) {
@@ -225,9 +238,10 @@ for (const p of people) {
     if (ONLY.length && !ONLY.includes(p.slug)) continue;
     const hash = sha(
       JSON.stringify({ format, slug: p.slug, name: p.name, why: p.why, goal: p.goal_cents, avatar: p.avatar, photo: photo?.kind ?? null }),
-      photo ? (photo.kind === "circle" ? photo.crop.buf : readFileSync(photo.file)) : "",
+      photo ? (photo.kind === "circle" ? photo.crop.buf : photo.buf) : "",
       logoRaw,
       selfSrc,
+      standingSrc,
     );
     if (!FORCE && (await imageHash(out)) === hash) {
       console.log(`  ${p.slug} ${format}: unchanged`);
@@ -334,7 +348,8 @@ const F = ${JSON.stringify(F)};
 const WHY = ${JSON.stringify(why || "")};
 const PROF = ${JSON.stringify(prof)};
 const CIRC = ${JSON.stringify(circ)};
-const FACE = ${JSON.stringify(FACE)}, GAP = ${GAP};
+const FACE = ${JSON.stringify(cutout ? cutout.face : FACE)}, GAP = ${GAP};
+const CHIN = ${JSON.stringify(cutout ? (cutout.chin ?? cutout.face.bottom) : null)};
 const FIT = ${JSON.stringify(fit)};
 const LOGO_BOTTOM = F.logoTop + F.logoH;
 const topEl = document.querySelector(".top"), title = document.querySelector(".title"), link = document.querySelector(".link");
@@ -416,6 +431,11 @@ const quoteCuts = () => {
 // coarse: bigger search steps (the lowered pass, which only runs when the
 // standing pass found nothing; keeps the search inside the render timeout).
 let nameBlocked = false; // set when the name alone was what did not fit
+// A measured face (giving-standing-photos.mjs) scales the photo range so the
+// face comes out the size a house cutout's face does (FACE.scale; 1 otherwise).
+const SC = FACE.scale || 1;
+let minScale = F.photo.min; // fitStanding lowers it to F.photo.floor as a last resort
+let checkChin = false; // ...and then keeps the measured face above faceLimit
 function fitWithPhoto(tp, sinks, texts, coarse = false, floors = [F.quote.comfort, F.quote.min]) {
   const lowTop = Math.round(topBottom() + F.gapBlocks);
   const nameW = inkW(nameEl);
@@ -425,10 +445,18 @@ function fitWithPhoto(tp, sinks, texts, coarse = false, floors = [F.quote.comfor
   // down to the minimum, before the next shorter cut is tried.
   for (const [text, cut] of texts)
   for (const floor of floors) {
-    for (let s = F.photo.max; s >= F.photo.min - 1e-9; s -= sStep) {
+    const scales = [];
+    for (let s = F.photo.max * SC; s >= minScale * SC - 1e-9; s -= sStep) scales.push(s);
+    // The smallest size always gets its turn (coarse steps can skip it).
+    if (scales.at(-1) > minScale * SC + 1e-9) scales.push(minScale * SC);
+    for (const s of scales) {
       for (const sink of sinks) {
       const pl = placeAt(+s.toFixed(3), sink);
       if (sink && pl.top + FACE.bottom * pl.h > F.faceLimit) break;
+      // A measured face box (giving-standing-photos.mjs) also keeps the face
+      // above faceLimit standing on the bottom edge (story: off the reply bar).
+      if (FACE.custom && pl.top + FACE.bottom * pl.h > F.faceLimit) continue;
+      if (checkChin && pl.top + CHIN * pl.h > F.faceLimit) continue;
       // The top block must clear the photo.
       setPhoto(pl);
       const topLines = [...topEl.querySelectorAll(".kicker, .title span, .date, .link")].flatMap(inkRects);
@@ -528,48 +556,76 @@ function fitCircle(tp, texts, under = false) {
   return null;
 }
 
-// Order of preference: the whole why before any cut one; for each text the
-// name at full size, then smaller (a long name that cannot fit beside the
-// photo at full size); for each, the full photo standing on the bottom edge,
-// then lowered, then the circle.
+// Order of preference: the standing photo for everyone who has one (the
+// owner's rule); the circle only when a text does not fit beside it (see
+// fitPhotoOrCircle). For the standing photo and a given text: the name at
+// full size, then smaller (a long name that cannot fit beside the photo at
+// full size); for each, the full photo standing on the bottom edge, then
+// lowered; last (story), a smaller photo.
 function setName(size) { nameEl.style.fontSize = size + "px"; }
+function fitStanding(tp, texts, sinks) {
+  // A measured face keeps the face above faceLimit, which leaves a narrow
+  // band of sizes: search it in fine steps (house cutouts: coarse, as before).
+  const coarse = !FACE.custom;
+  const smaller = [];
+  for (let ns = F.name - 4; ns >= F.nameMin; ns -= 4) smaller.push(ns);
+  for (const t of texts) {
+    setName(F.name);
+    nameBlocked = false;
+    minScale = F.photo.min;
+    let fit = fitWithPhoto(tp, [0], [t]) || fitWithPhoto(tp, sinks, [t], true);
+    if (fit) return { ...fit, nSize: F.name };
+    if (nameBlocked) {
+      for (const floor of [F.quote.comfort, F.quote.min])
+      for (const ns of smaller) {
+        setName(ns);
+        if ((fit = fitWithPhoto(tp, [0, ...sinks], [t], coarse, [floor]))) return { ...fit, nSize: ns };
+      }
+    }
+    // Last, before this text is cut: a smaller photo (down to F.photo.floor)
+    // leaves a wider column (a long why beside a long name in the story),
+    // as long as the measured face (CHIN) stays above faceLimit: a smaller
+    // photo stands lower, its face nearer the reply bar.
+    if (F.photo.floor < F.photo.min) {
+      minScale = F.photo.floor; checkChin = true;
+      for (const ns of [F.name, ...smaller]) {
+        setName(ns);
+        if ((fit = fitWithPhoto(tp, [0, ...sinks], [t], coarse))) { minScale = F.photo.min; checkChin = false; return { ...fit, nSize: ns }; }
+      }
+      minScale = F.photo.min; checkChin = false;
+    }
+  }
+  setName(F.name);
+  return null;
+}
 function fitPhotoOrCircle(tp) {
   if (!PROF && !CIRC) return null;
   const sinks = [];
   for (let k = 40; k <= F.maxSink; k += 40) sinks.push(k);
   const texts = WHY ? [[WHY, false], ...quoteCuts().map((t) => [t, true])] : [["", false]];
+  const smaller = [];
+  for (let ns = F.name - 4; ns >= F.nameMin; ns -= 4) smaller.push(ns);
+  // Each text, whole why first: the standing photo, then (no cutout, or none
+  // fits) the circle, so a why that fits whole beside the circle is never
+  // cut to fit beside the standing photo.
   for (const t of texts) {
+    let fit = PROF ? fitStanding(tp, [t], sinks) : null;
+    if (fit) return fit;
+    if (!CIRC) continue;
     setName(F.name);
     nameBlocked = false;
-    let fit = (PROF ? fitWithPhoto(tp, [0], [t]) || fitWithPhoto(tp, sinks, [t], true) : null) || (CIRC ? fitCircle(tp, [t]) : null);
-    if (fit) return { ...fit, nSize: F.name };
+    if ((fit = fitCircle(tp, [t]))) return { ...fit, nSize: F.name };
     if (!nameBlocked) continue;
-    // A long name: a smaller name beside the full photo with the quote at a
-    // comfortable size; else the circle (name beside it, smaller, or on its
-    // own line under it); last, the full photo with the quote down to the minimum.
-    const smaller = [];
-    for (let ns = F.name - 4; ns >= F.nameMin; ns -= 4) smaller.push(ns);
+    // A long name: no why, the circle with the name at full size on its own
+    // line under it; else a smaller name beside it; else, with a why, the
+    // name at full size under the circle and quote.
+    if (!WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
     for (const ns of smaller) {
       setName(ns);
-      if (PROF && (fit = fitWithPhoto(tp, [0, ...sinks], [t], true, [F.quote.comfort]))) return { ...fit, nSize: ns };
-    }
-    if (CIRC) {
-      // No why and a long name: the circle with the name at full size on its
-      // own line under it, before a smaller name beside it.
-      setName(F.name);
-      if (!WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
-      for (const ns of smaller) {
-        setName(ns);
-        if ((fit = fitCircle(tp, [t]))) return { ...fit, nSize: ns };
-      }
-      setName(F.name);
-      if (WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
-    }
-    for (const ns of smaller) {
-      setName(ns);
-      if (PROF && (fit = fitWithPhoto(tp, [0, ...sinks], [t], true, [F.quote.min]))) return { ...fit, nSize: ns };
+      if ((fit = fitCircle(tp, [t]))) return { ...fit, nSize: ns };
     }
     setName(F.name);
+    if (WHY && (fit = fitCircle(tp, [t], true))) return { ...fit, nSize: F.name };
   }
   setName(F.name);
   return null;
@@ -621,7 +677,8 @@ document.fonts.ready.then(() => {
     logo: box(document.querySelector(".logo")),
     lines: allLines().map((r) => r.map(Math.round)),
     quoteText: q ? q.textContent : "",
-    clear: fit.place ? clearance(fit.place, allLines()) : null,
+    // Infinity (no line beside the photo) would serialise to null.
+    clear: fit.place ? Math.min(clearance(fit.place, allLines()), 9999) : null,
     circle: circEl && fit.circle ? box(circEl) : null,
     // Infinity (no line beside the circle) would serialise to null.
     circleClear: fit.circle ? Math.min(circleClear(fit.circle, allLines()), 9999) : null,
@@ -635,7 +692,7 @@ for (const { p, format, out, photo, hash } of jobs) {
   const F = FORMATS[format];
   const why = cardWhy(p.why);
   const htmlPath = path.join(TMP, `${p.slug}-${format}.html`);
-  const photoUri = photo?.kind === "cutout" ? "data:image/png;base64," + readFileSync(photo.file).toString("base64") : "";
+  const photoUri = photo?.kind === "cutout" ? "data:image/png;base64," + photo.buf.toString("base64") : "";
   const circleUri = photo ? "data:image/png;base64," + photo.crop.buf.toString("base64") : "";
 
   // Pass 1: fit and place.
@@ -656,9 +713,15 @@ for (const { p, format, out, photo, hash } of jobs) {
   }
   if (r1.fit.place) {
     if (r2.clear < GAP - 1) throw new Error(`${p.slug} ${format}: photo comes within ${r2.clear}px of the type`);
-    const pl = r1.fit.place;
-    const faceL = pl.off + (FACE.cx - FACE.half) * pl.w, faceR = pl.off + (FACE.cx + FACE.half) * pl.w;
+    const pl = r1.fit.place, fc = photo.face;
+    const faceL = pl.off + (fc.cx - fc.half) * pl.w, faceR = pl.off + (fc.cx + fc.half) * pl.w;
     if (faceL < EDGE || faceR > F.w - EDGE) throw new Error(`${p.slug} ${format}: face box runs off the frame`);
+    if (pl.top + fc.top * pl.h < EDGE) throw new Error(`${p.slug} ${format}: face box runs off the top`);
+    if (fc.custom && pl.top + fc.bottom * pl.h > F.faceLimit + 1) throw new Error(`${p.slug} ${format}: face runs below ${F.faceLimit}px`);
+    // The photo stands on the bottom edge (or runs past it): its own bottom
+    // edge never shows. A cut on its right side runs off the frame.
+    if (pl.top + pl.h < F.h) throw new Error(`${p.slug} ${format}: photo floats above the bottom edge`);
+    if (photo.prof.touchRight && pl.off + pl.w < F.w) throw new Error(`${p.slug} ${format}: the photo's cut right side shows on the yellow`);
   }
   if (r1.fit.circle) {
     const [l, t, r, b] = r2.circle || [];
