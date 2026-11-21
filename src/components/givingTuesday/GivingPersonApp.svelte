@@ -75,7 +75,10 @@
   const pickedLabel = $derived(prefill && pickDollars > 0 ? `${copy.giveLabel} ${money(pickDollars * 100)}` : copy.giveLabel);
 
   const personGoal = $derived(person ? person.goal_cents || thresholdCents : thresholdCents);
+  // Ring: hit the $150 drawing mark. Bar and line: hit their own goal
+  // (the same thing unless they raised their goal above $150).
   const done = $derived(!!person && (person.reached || person.raised_cents >= personGoal));
+  const met = $derived(!!person && (person.raised_cents >= personGoal || (person.reached && personGoal <= thresholdCents)));
   const p = $derived(person ? progress(person.raised_cents, personGoal) : 0);
   const first = $derived(String(person?.name || "").trim().split(/\s+/)[0] || "");
   const avatar = $derived(person?.avatar && !avatarFailed ? `${base}images/popup/instructors/${person.avatar}.webp` : null);
@@ -153,14 +156,14 @@
       <h1 class="gv-h1">{fill(pc.headline, { name: person.name, goal: money(personGoal) })}</h1>
       {#if person.why}<p class="gv-why">“{person.why}”</p>{/if}
 
-      <div class="gv-progress" class:gv-seen={seen} class:gv-done={done} style={`--p:${p}`}>
+      <div class="gv-progress" class:gv-seen={seen} class:gv-done={met} style={`--p:${p}`}>
         <span class="gv-mat" aria-hidden="true">
           <span class="gv-mat-body"></span>
           <span class="gv-mat-track"><span class="gv-mat-roll"></span></span>
         </span>
         <p class="gv-amt-line">
-          {#if done}
-            {money(person.raised_cents)} · <strong>{copy.board.reached}</strong>
+          {#if met}
+            {money(person.raised_cents)} · <strong>{fill(copy.board.reached, { goal: money(personGoal) })}</strong>
           {:else}
             {fill(pc.raisedOf, { raised: money(person.raised_cents), goal: money(personGoal) })}
           {/if}

@@ -208,7 +208,7 @@ export const givingCopy = {
     summary: (count, reached) =>
       `${count} ${count === 1 ? "instructor is" : "instructors are"} raising` +
       (reached > 0 ? ` · ${reached} reached $150` : ""), // NEW
-    reached: "Reached $150", // NEW
+    reached: "Reached {goal}", // NEW: {goal} is their own goal ($150 unless raised)
     toGo: "{left} to go", // NEW
     give: "Give", // NEW
     // The top-five race above the full list (and on the homepage band). The

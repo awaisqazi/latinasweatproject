@@ -333,10 +333,11 @@
           {@const src = avatarSrc(f)}
           {@const goal = f.goal_cents || thresholdCents}
           {@const done = f.reached || f.raised_cents >= goal}
+          {@const met = f.raised_cents >= goal || (f.reached && goal <= thresholdCents)}
           {@const p = progress(f.raised_cents, goal)}
           {@const href = personGive(f)}
           {@const c = BOARD_MATS[i % BOARD_MATS.length]}
-          <li style={`--p:${p};--i:${Math.min(i, 16)};--mat:${c}`} class:gt-done={done}>
+          <li style={`--p:${p};--i:${Math.min(i, 16)};--mat:${c}`} class:gt-done={done} class:gt-met={met}>
             <a class="gt-row" {href} target={ext(href) ? "_blank" : undefined} rel={ext(href) ? "noopener" : undefined}>
               <span class="gt-avatar" aria-hidden="true">
                 {#if src && !failedAvatars[f.slug]}
@@ -361,8 +362,8 @@
                   <span class="gt-rowmat-track"><span class="gt-rowmat-roll"></span></span>
                 </span>
                 <span class="gt-row-amt">
-                  {#if done}
-                    {money(f.raised_cents)} · <strong>{copy.board.reached}</strong>
+                  {#if met}
+                    {money(f.raised_cents)} · <strong>{fill(copy.board.reached, { goal: money(goal) })}</strong>
                   {:else}
                     {money(f.raised_cents)} of {money(goal)}
                   {/if}
@@ -1244,7 +1245,7 @@
     transform: translateX(calc(var(--p) * 100%));
     transition: transform 1s cubic-bezier(0.3, 0.7, 0.3, 1) calc(var(--i) * 90ms);
   }
-  .gt-seen li:not(.gt-done) .gt-rowmat-roll { opacity: 1; transition: opacity 0.2s calc(var(--i) * 90ms); }
+  .gt-seen li:not(.gt-met) .gt-rowmat-roll { opacity: 1; transition: opacity 0.2s calc(var(--i) * 90ms); }
   .gt-row-amt { margin-top: 6px; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
   .gt-row-amt strong { font-weight: 700; }
   .gt-row-give {
