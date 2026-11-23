@@ -40,6 +40,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "auriana-moctezuma",
+    "name": "Auriana Moctezuma",
+    "first": "Auriana",
+    "why": "Thank you LSP for being a safe space and a space that I trust",
+    "avatar": "auriana-moctezuma",
+    "goal_cents": 15000
+  },
+  {
     "slug": "benjamin-drury",
     "name": "Benjamin Drury",
     "first": "Benjamin",
@@ -205,6 +213,14 @@
     "first": "Marlene",
     "why": null,
     "avatar": "marlene-garcia",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "nhi-le",
+    "name": "Nhi Le",
+    "first": "Nhi",
+    "why": "LSP helped me achieved my dream of becoming a yoga instructor. I want to continue with LSP’s mission to make yoga and wellness accessible to all.",
+    "avatar": "nhi-le",
     "goal_cents": 15000
   },
   {

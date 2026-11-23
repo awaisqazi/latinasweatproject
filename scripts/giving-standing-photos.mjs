@@ -45,6 +45,8 @@ export const STANDING = {
   // Portrait cutout that never touches its left side (the shoulder runs off
   // the right side, which runs off the frame): no cut, measured face box only.
   "korey-martinez": {},
+  // Portrait cutout that touches neither side: no cut, measured face box only.
+  "nhi-le": {},
   // Pop-up cutout too small (300x300): the 800x800 original of the same photo.
   "lucia-del-rincon-martinez": { file: "marketing/giving-tuesday-2026/kit-photos/lucia-del-rincon-martinez.png" },
 };
