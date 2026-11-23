@@ -342,6 +342,166 @@ export const givingKitCopy = {
   },
 };
 
+// /givingtuesday/kit "7 days. 7 memories. 1 community." (Nov 24 to Nov 30,
+// 2026): the team's social countdown to Giving Tuesday, one memory prompt a
+// day, at the top of every instructor's kit (GivingMemoryWeek.svelte, images
+// drawn by src/lib/givingTuesday/memoryCanvas.js). Days, titles, prompts and
+// invite lines: the team's announcement (Lizett's doc has a second version of
+// days 2 and 1; this is the announced one). Tips, placeholders, captions and
+// UI lines: the owner's brief, Nov 23 2026. To change a day's wording or date,
+// edit its row in `days` (one place). The section shows from `showFrom` to
+// `showUntil` (Chicago calendar days, inclusive) and is gone on Dec 1.
+// In captions {memory} is the instructor's words plus a space (or nothing),
+// {goal} their goal and {link} their short link.
+export const givingMemoryWeek = {
+  showFrom: "2026-11-23",
+  showUntil: "2026-11-30",
+  title: "7 days. 7 memories. 1 community.",
+  hashtag: "#LSPGivingTuesday",
+  handle: "@latinasweatproject",
+  lead: "One post a day until Giving Tuesday. Today's is ready: add a photo, write a line, share.",
+  leadBefore: "Starts tomorrow, Tuesday, Nov 24. Here is a first look at each day.",
+  weekLabel: "Pick a day",
+  todayMark: "Today",
+  dayLine: "Day {n} · {date}", // {date}: "Tuesday, Nov 24"
+
+  photoTitle: "1. Add your photo",
+  photoAdd: "Choose a photo",
+  photoChange: "Change photo",
+  photoRemove: "Remove photo",
+  photoNote: "Optional. Your photo stays on your phone, nothing is uploaded.",
+  photoHint: "Drag the photo to move it. Use the slider to zoom.",
+  photoAdded: "Photo added. Move and zoom it on the preview below.",
+  photoZoom: "Zoom",
+  photoOpening: "Opening your photo.",
+  photoFailed: "We couldn't open that photo. Try another, or a screenshot of it.",
+
+  wordsLabel: "2. Write your memory",
+  wordsNote: "Optional, one or two sentences.",
+  // Day 1 prefills their sign-up why whole; when it is longer than wordsMax
+  // that field's limit is the length of their why.
+  wordsMax: 160,
+  wordsCount: "{n} of {max}",
+
+  shareTitle: "3. Share it",
+  storyLabel: "Story",
+  postLabel: "Post",
+  formatLegend: "Image size",
+  previewAlt: "Your Day {n} image: {prompt}",
+
+  captionLabel: "4. Post your caption",
+  copyLinkNote: "For the story Link sticker:",
+
+  howTitle: "How to post it",
+  how: [
+    "Tap Share and choose Instagram, or tap Download and add it from your camera roll.",
+    "On a story, add the Link sticker and paste your link. On a post, links in captions can't be tapped, so put your link in your bio.",
+    "Tag @latinasweatproject and add #LSPGivingTuesday so we can reshare you.",
+    "Tag the people in your memory. Every tag is another person who sees your page.",
+  ],
+
+  // On the image.
+  kicker: "LSP Giving Tuesday · Day {n}",
+  help: "Help me raise {goal}",
+
+  days: [
+    {
+      date: "2026-11-24",
+      n: 7,
+      title: "First class",
+      prompt: "Do you remember your first LSP class?",
+      invite: "Share your first-class memory. Tag @latinasweatproject #LSPGivingTuesday",
+      tip: "Tell the story of the first LSP class you took or taught. An old photo is perfect, even a blurry one.",
+      placeholder: "My first LSP class was...",
+      caption:
+        "LSP Giving Tuesday, Day 7: my first LSP class. {memory}Do you remember yours? Share it and tag @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-25",
+      n: 6,
+      title: "Most challenging workout",
+      prompt: "Which class had you questioning your life choices?",
+      invite: "Tag the instructor. #LSPGivingTuesday @latinasweatproject",
+      tip: "Share the class that humbled you and tag who taught it. Then ask your students if it was one of yours.",
+      placeholder: "The class that had me questioning my life choices was...",
+      caption:
+        "LSP Giving Tuesday, Day 6: the most challenging workout. {memory}Which LSP class had you questioning your life choices? Tag the instructor and @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-26",
+      n: 5,
+      title: "Favorite community event",
+      prompt: "From rooftop yoga to park takeovers, which event was your favorite?",
+      invite: "Share your favorite event memory. Tag @latinasweatproject #LSPGivingTuesday",
+      tip: "Scroll back through your camera roll: a park class, a festival, a gala night, the ribbon cutting. Pick the one that still makes you smile.",
+      placeholder: "My favorite LSP event was...",
+      caption:
+        "LSP Giving Tuesday, Day 5: my favorite community event. {memory}From rooftop yoga to park takeovers, which LSP event was your favorite? Share it and tag @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-27",
+      n: 4,
+      title: "Favorite LSP merch or selfie at LSP",
+      prompt: "Show us your LSP merch or your selfie at LSP.",
+      invite: "Tag @latinasweatproject in your photo. #LSPGivingTuesday",
+      tip: "Today is all photo. Wear your favorite LSP piece or take a mirror selfie at the studio.",
+      placeholder: "This is my favorite LSP...",
+      caption:
+        "LSP Giving Tuesday, Day 4: my favorite LSP merch and my selfie at LSP. {memory}Show us yours and tag @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-28",
+      n: 3,
+      title: "Never missed class",
+      prompt: "Which LSP class do you never miss?",
+      invite: "Tag your instructor. #LSPGivingTuesday @latinasweatproject",
+      tip: "Name the class you never miss and tag who teaches it. Then ask your own students which class they never miss.",
+      placeholder: "The class I never miss is...",
+      caption:
+        "LSP Giving Tuesday, Day 3: the class I never miss. {memory}Which LSP class do you never miss? Tag your instructor and @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-29",
+      n: 2,
+      title: "Besties and familia",
+      prompt: "Who did you bring into the LSP community?",
+      invite: "Tag your familia and chosen family. #LSPGivingTuesday @latinasweatproject",
+      tip: "Post a photo with the people you brought to LSP, or the ones who brought you. Tag them so they can share it too.",
+      placeholder: "I brought...",
+      caption:
+        "LSP Giving Tuesday, Day 2: my favorite LSP moment with my besties and familia. {memory}Who did you bring into the LSP community? Tag your familia and chosen family, and @latinasweatproject. I'm raising {goal} for Latina Sweat Project by Tuesday, Dec 1: {link} #LSPGivingTuesday",
+    },
+    {
+      date: "2026-11-30",
+      n: 1,
+      title: "Why LSP?",
+      prompt: "Why LSP?",
+      invite: "Tomorrow is Giving Tuesday. #LSPGivingTuesday @latinasweatproject",
+      tip: "We filled in the why you wrote when you signed up. Keep it or make it new.",
+      tipNoWhy: "Say in a sentence why LSP matters to you.",
+      placeholder: "LSP matters to me because...",
+      // Day 1 starts from the instructor's own sign-up why, when they have one.
+      prefillWhy: true,
+      caption:
+        "LSP Giving Tuesday is tomorrow. Why LSP? {memory}Help me raise {goal} for Latina Sweat Project: {link} #LSPGivingTuesday @latinasweatproject",
+    },
+  ],
+};
+
+// "2026-11-24" -> "Tuesday, Nov 24" (and the short parts for the week row).
+// Calendar dates only, so no time zone can shift them.
+export function memoryDayParts(day) {
+  const [y, m, d] = String(day).split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d, 12));
+  const f = (o) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...o }).format(t);
+  return { long: `${f({ weekday: "long" })}, ${f({ month: "short" })} ${d}`, weekday: f({ weekday: "short" }), dayNum: String(d) };
+}
+
+// Is the memory week section showing on this Chicago calendar day?
+export function memoryWeekShowing(today, mw = givingMemoryWeek) {
+  return today >= mw.showFrom && today <= mw.showUntil;
+}
+
 // ---------------------------------------------------------------- helpers --
 
 const ms = (t) => (t instanceof Date ? t.getTime() : typeof t === "number" ? t : new Date(t).getTime());

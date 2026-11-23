@@ -28,6 +28,7 @@
   import { fetchGivingPublic } from "../../lib/givingTuesday/live.js";
   import instructors from "../../data/givingInstructors.json";
   import { ensureFonts, loadAssets, drawKit, canvasBlob } from "../../lib/givingTuesday/kitCanvas.js";
+  import GivingMemoryWeek from "./GivingMemoryWeek.svelte";
 
   let { base = "/" } = $props();
 
@@ -215,6 +216,9 @@
 <div class="gk-wrap">
   {#if person}
     <h1 class="gk-h1">{fill(kc.headline, { first })}</h1>
+
+    <!-- Nov 23 to 30, 2026 only: "7 days. 7 memories. 1 community." -->
+    <GivingMemoryWeek {person} {goal} {link} {linkText} why={person.why ?? listed.get(person.slug)?.why ?? ""} {base} {canShare} />
 
     <!-- ------------------------------ link ------------------------------ -->
     <section class="gk-sec" aria-labelledby="gk-link-h">
