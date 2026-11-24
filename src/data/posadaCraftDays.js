@@ -10,26 +10,40 @@
 //      location tag Mural Park.
 //   2. Fez's brief for the volunteer form (Nov 19 2026): the five craft days,
 //      the four one-hour shifts, and the Bulls ticket raffle on the first two.
-// Nothing else is known yet (no event time, no program, no tickets). Do not
-// add details that are not in one of those two sources.
+//   3. Fez's event copy (Nov 23 2026): the event is "Una Posada, Un Hogar",
+//      the LSP Grand Opening & Community Fundraiser, Saturday December 19,
+//      6 to 9 pm, Mural Park; music, food, Loteria, festive activities,
+//      raffles; raising $10,000 toward a permanent home for LSP in 2027; free
+//      tickets on Zeffy with a $10 suggested donation.
+// Do not add details that are not in one of those sources.
 //
 // All dates are 2026 and Central Standard Time (UTC-6).
 
 export const posadaEvent = {
-  name: "LSP Posadas",
-  kicker: "Community Grand Opening",
+  // Named by Fez on Nov 23 2026 (the save-the-date called it "LSP Posadas,
+  // Community Grand Opening").
+  name: "Una Posada, Un Hogar",
+  kicker: "LSP Grand Opening & Community Fundraiser",
   dateISO: "2026-12-19",
   dateLabel: "Saturday, December 19",
+  timeLabel: "6 to 9 pm",
+  start: "2026-12-19T18:00:00-06:00",
+  end: "2026-12-19T21:00:00-06:00",
   venue: "Mural Park",
+  // Free tickets, pay what you can, $10 suggested (Zeffy, Latina Sweat Cares,
+  // created Nov 23 2026).
+  ticketUrl: "https://www.zeffy.com/en-US/ticketing/una-posada-un-hogar",
+  goal: 10000,
   instagramUrl: "https://www.instagram.com/p/Df5crFGIVeH/",
   // The team's save-the-date graphic, used whole.
   art: "images/posada/lsp-posadas-save-the-date.jpg",
   artAlt:
     "Save the date. Community Grand Opening, LSP Posadas, Saturday, December 19.",
-  // All-day save-the-date calendar file for December 19 (public/posada/cal/).
+  // Calendar file for December 19, 6 to 9 pm (public/posada/cal/). The name
+  // is kept: confirmation emails already sent link to it.
   calendarFile: "posada/cal/lsp-posadas-2026-12-19.ics",
-  // Address used in the save-the-date calendar entries (no floor: the floor
-  // is for the craft days, the event itself is not detailed yet).
+  // Address used in the calendar entries (no floor: the floor is confirmed
+  // for the craft days only).
   calendarLocation: "Mural Park, 924 W 19th Place, Chicago, IL 60608",
 };
 
@@ -152,7 +166,10 @@ export const craftContactEmail = "collab@latinasweatproject.com";
 //   until the last craft day ends (Thu 12/17, 8:30 pm)  "volunteer": Posada
 //       Craft Days, the next craft day, Pick your hours -> /posada#signup
 //       (the raffle note shows until craftRaffle.endsAt)
-//   from then to the end of Sat 12/19 (Chicago)         "save-the-date" only
+//   from then to the end of Sat 12/19 (Chicago)         "save-the-date": the
+//       event and its ticket button only
+// Both phases lead with the event (Una Posada, Un Hogar) and its free-ticket
+// button (posadaEvent.ticketUrl); the craft days sit under it while open.
 //   after that                                          nothing
 // HOW TO TURN THEM OFF BY HAND: set showPosadaHomeBand (homepage) and/or
 // showPosadaLinksCard (/links card and its bubble) to false. To end them on
@@ -185,10 +202,18 @@ export const craftDaysEs = {
   thu1217: { short: "Jue", long: "jueves 17 de diciembre" },
 };
 export const posadaPlacementCopy = {
-  intro:
-    "Getting ready for LSP Posadas, the Community Grand Opening, Saturday, December 19 at Mural Park. Come craft with us. Pick a day, pick an hour.",
-  introEs:
-    "Nos preparamos para LSP Posadas, nuestro Community Grand Opening, el sábado 19 de diciembre en Mural Park. Ven a hacer manualidades con nosotros. Elige un día y una hora.",
+  event:
+    "LSP Grand Opening & Community Fundraiser. Saturday, December 19, 6 to 9 pm at Mural Park: music, food, Lotería, raffles and celebration.",
+  eventEs:
+    "LSP Grand Opening & Community Fundraiser. Sábado 19 de diciembre, de 6 a 9 pm, en Mural Park: música, comida, Lotería, rifas y celebración.",
+  goal: "We're raising $10,000 toward a permanent home for Latina Sweat Project in 2027. Free tickets, $10 suggested donation.",
+  goalEs:
+    "Estamos recaudando $10,000 para un hogar permanente para Latina Sweat Project en 2027. Boletos gratis, donación sugerida de $10.",
+  ticket: "Get your free ticket",
+  ticketEs: "Reserva tu boleto gratis",
+  craftTitle: "Posada Craft Days",
+  intro: "Help us get ready. Come craft with us: pick a day, pick an hour.",
+  introEs: "Ayúdanos a prepararnos. Ven a hacer manualidades con nosotros: elige un día y una hora.",
   next: "Next craft day:",
   nextEs: "Próximo día:",
   today: "Craft day today:",
@@ -203,10 +228,6 @@ export const posadaPlacementCopy = {
   ctaEs: "Elige tus horas",
   calendar: "Add December 19 to your calendar",
   calendarEs: "Agenda el 19 de diciembre",
-  saveLine: "Community Grand Opening · Saturday, December 19 · Mural Park.",
-  saveLineEs: "Community Grand Opening · sábado 19 de diciembre · Mural Park.",
-  soon: "More details soon.",
-  soonEs: "Pronto más detalles.",
   dayEs: "Sáb",
   november: "November",
   novemberEs: "noviembre",

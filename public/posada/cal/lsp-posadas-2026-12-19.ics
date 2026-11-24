@@ -5,13 +5,15 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:lsp-posadas-2026-12-19@latinasweatproject.com
-DTSTAMP:20261119T120000Z
-DTSTART;VALUE=DATE:20261219
-DTEND;VALUE=DATE:20261220
-SUMMARY:LSP Posadas: Community Grand Opening
+DTSTAMP:20261123T120000Z
+SEQUENCE:1
+DTSTART:20261220T000000Z
+DTEND:20261220T030000Z
+SUMMARY:Una Posada\, Un Hogar: LSP Grand Opening & Community Fundraiser
 LOCATION:Mural Park\, 924 W 19th Place\, Chicago\, IL 60608
-DESCRIPTION:Save the date. Details soon: latinasweatproject.com/posada
-URL:https://latinasweatproject.com/posada
-TRANSP:TRANSPARENT
+DESCRIPTION:Music\, food\, Lotería\, raffles and celebration. Free tickets
+ \, $10 suggested donation: https://www.zeffy.com/en-US/ticketing/una-posad
+ a-un-hogar
+URL:https://www.zeffy.com/en-US/ticketing/una-posada-un-hogar
 END:VEVENT
 END:VCALENDAR

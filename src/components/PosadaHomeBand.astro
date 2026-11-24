@@ -1,6 +1,8 @@
 ---
-// Homepage band for LSP Posadas (the Community Grand Opening, Sat Dec 19
-// 2026) and the Posada Craft Days that get us ready for it. Right after the
+// Homepage band for Una Posada, Un Hogar (the LSP Grand Opening & Community
+// Fundraiser, Sat Dec 19 2026, 6 to 9 pm; free tickets on Zeffy) and the
+// Posada Craft Days that get us ready for it. It leads with the event and
+// its ticket button; the craft days sit under the calendar row while open. Right after the
 // Giving Tuesday band (date order: Dec 1, then Dec 19). LIGHT in the cadence:
 // the /posada identity, from the team's save-the-date: warm white paper,
 // charcoal ink, one pen red, sticky-note yellow, Mynerve for a few display
@@ -41,7 +43,6 @@ const next = nextCraftDay(nowMs);
 const base = import.meta.env.BASE_URL;
 const pageUrl = `${base}posada`;
 const icsHref = `${base}${posadaEvent.calendarFile}`;
-const instagramProfile = "https://www.instagram.com/latinasweatproject/";
 ---
 
 {show && (
@@ -56,26 +57,37 @@ const instagramProfile = "https://www.instagram.com/latinasweatproject/";
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mynerve&display=swap" />
     <div class="pcb-wrap">
       <div class="pcb-copy">
-        <div data-pc-state="volunteer" hidden={saveDate}>
-          <h2 class="pcb-hand pcb-h">
-            <span class="block">Posada</span>
-            <span class="block">Craft Days</span>
-          </h2>
-          <p class="pcb-intro">{pc.intro}</p>
-        </div>
-        <div data-pc-state="save-the-date" hidden={!saveDate}>
-          <h2 class="pcb-hand pcb-h">{posadaEvent.name}</h2>
-          <p class="pcb-intro">
-            {pc.saveLine}
-            <span class="block">{pc.soon}</span>
-          </p>
+        <h2 class="pcb-hand pcb-h">
+          <span class="block">Una Posada,</span>
+          <span class="block">Un Hogar</span>
+        </h2>
+        <p class="pcb-intro">{pc.event}</p>
+        <p class="pcb-muted pcb-goal">{pc.goal}</p>
+        <div class="pcb-cta">
+          <a
+            href={posadaEvent.ticketUrl}
+            target="_blank"
+            rel="noopener"
+            class="pcb-btn"
+            data-conversion-event="posada_ticket_click"
+            data-conversion-context="home_posada_band"
+          >{pc.ticket}</a>
+          <a
+            href={icsHref}
+            class="pcb-link pcb-cal"
+            download
+            data-conversion-event="posada_calendar_click"
+            data-conversion-context="home_posada_band"
+          >{pc.calendar}</a>
         </div>
 
         <div class="pcb-strip">
           <PosadaCalendarStrip />
         </div>
 
-        <div data-pc-state="volunteer" hidden={saveDate}>
+        <div class="pcb-craft" data-pc-state="volunteer" hidden={saveDate}>
+          <h3 class="pcb-hand pcb-h3">{pc.craftTitle}</h3>
+          <p class="pcb-craft-intro">{pc.intro}</p>
           <p class="pcb-next" data-pc-next data-lang="en">
             {next ? `${pc.next} ${next.label}, ${craftHours.replace(/ /g, "\u00a0")}` : ""}
           </p>
@@ -94,35 +106,11 @@ const instagramProfile = "https://www.instagram.com/latinasweatproject/";
           <div class="pcb-cta">
             <a
               href={`${pageUrl}#signup`}
-              class="pcb-btn"
+              class="pcb-btn pcb-btn-line"
               data-conversion-event="posada_page_click"
               data-conversion-context="home_posada_band"
             >{pc.cta}</a>
-            <a
-              href={icsHref}
-              class="pcb-link pcb-cal"
-              download
-              data-conversion-event="posada_calendar_click"
-              data-conversion-context="home_posada_band"
-            >{pc.calendar}</a>
           </div>
-        </div>
-
-        <div data-pc-state="save-the-date" hidden={!saveDate}>
-          <div class="pcb-cta">
-            <a
-              href={icsHref}
-              class="pcb-btn"
-              download
-              data-conversion-event="posada_calendar_click"
-              data-conversion-context="home_posada_band_save_date"
-            >{pc.calendar}</a>
-          </div>
-          <p class="pcb-muted pcb-follow">
-            Follow
-            <a href={instagramProfile} target="_blank" rel="noopener" class="pcb-link">@latinasweatproject on Instagram</a>
-            for the details.
-          </p>
         </div>
       </div>
 
@@ -215,12 +203,25 @@ const instagramProfile = "https://www.instagram.com/latinasweatproject/";
     line-height: 1.45;
     text-wrap: pretty;
   }
+  .pcb-goal { margin-top: 0.75rem; max-width: 34rem; }
   .pcb-strip {
-    margin-top: 2rem;
+    margin-top: 2.5rem;
     max-width: 34rem;
   }
+  .pcb-craft { margin-top: 2rem; }
+  .pcb-h3 {
+    font-size: clamp(2.1rem, 9vw, 2.75rem);
+    line-height: 1;
+  }
+  .pcb-craft-intro {
+    margin-top: 0.6rem;
+    max-width: 34rem;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
   .pcb-next {
-    margin-top: 1.25rem;
+    margin-top: 1rem;
     min-height: 1.45em;
     font-size: 1.1rem;
     font-weight: 700;
@@ -284,6 +285,12 @@ const instagramProfile = "https://www.instagram.com/latinasweatproject/";
     transition: background-color 150ms;
   }
   .pcb-btn:hover { background: #1c1d24; }
+  .pcb-btn-line {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+  .pcb-btn-line:hover { background: var(--ink); color: var(--paper); }
   .pcb-btn:focus-visible,
   .pcb-link:focus-visible {
     outline: 3px solid var(--red);

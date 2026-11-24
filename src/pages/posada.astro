@@ -11,10 +11,11 @@ import {
     craftContactEmail,
 } from "@/data/posadaCraftDays.js";
 
-// Posada Craft Days: the volunteer sign-up for the evenings before LSP
-// Posadas (the Community Grand Opening, Saturday, December 19 at Mural
-// Park). Public and indexable, but not linked from nav, the homepage or
-// /links. Every date, slot, place and form id comes from
+// Posada Craft Days: the volunteer sign-up for the evenings before Una
+// Posada, Un Hogar (the LSP Grand Opening & Community Fundraiser, Saturday,
+// December 19, 6 to 9 pm at Mural Park). The closing #tickets section holds
+// the event and its free-ticket button (Zeffy). Public and indexable; linked
+// from the homepage band and /links, not from nav. Every date, slot, place and form id comes from
 // src/data/posadaCraftDays.js.
 //
 // Mechanics mirror /movecrew: a hidden Google Form POST (no-cors,
@@ -34,23 +35,19 @@ const nowMs = Date.now();
 const daysOpen = craftDays.filter((d) => nowMs < Date.parse(d.end));
 const raffleOpen = nowMs < Date.parse(craftRaffle.endsAt);
 
-// Calendar links for the save-the-date (all day, December 19).
+// Calendar links for December 19, 6 to 9 pm.
 const icsHref = `/${posadaEvent.calendarFile}`;
-const ymd = posadaEvent.dateISO.replace(/-/g, "");
-const nextDay = new Date(`${posadaEvent.dateISO}T12:00:00Z`);
-nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-const ymdNext = nextDay.toISOString().slice(0, 10).replace(/-/g, "");
+const utc = (iso) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 const gcalHref =
     "https://calendar.google.com/calendar/render?" +
     new URLSearchParams({
         action: "TEMPLATE",
         text: `${posadaEvent.name}: ${posadaEvent.kicker}`,
-        dates: `${ymd}/${ymdNext}`,
+        dates: `${utc(posadaEvent.start)}/${utc(posadaEvent.end)}`,
         location: posadaEvent.calendarLocation,
-        details: "Save the date. More details soon: https://latinasweatproject.com/posada",
+        details: `Music, food, Lotería, raffles and celebration. Free tickets, $10 suggested donation: ${posadaEvent.ticketUrl}`,
     }).toString();
 
-const instagramProfile = "https://www.instagram.com/latinasweatproject/";
 
 // Three hand-drawn pen loops, so the circles never look stamped. Each runs
 // a little past a full turn, like a quick circle made with a pen.
@@ -64,7 +61,7 @@ const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
 
 <Layout
     title="Posada Craft Days | The Latina Sweat Project"
-    description="Posada Craft Days: help The Latina Sweat Project get ready for LSP Posadas, the Community Grand Opening on Saturday, December 19, by picking an hour to craft with us at Mural Park."
+    description="Posada Craft Days: help The Latina Sweat Project get ready for Una Posada, Un Hogar, the LSP Grand Opening & Community Fundraiser on Saturday, December 19, by picking an hour to craft with us at Mural Park."
     socialImage="images/posada/posada-og.jpg"
     socialImageAlt="Posada Craft Days. Volunteer with LSP: Tuesday 11/24, Wednesday 11/25, and Thursdays 12/3, 12/10 and 12/17, 4:30 to 8:30 pm."
     socialImageWidth={1200}
@@ -107,9 +104,12 @@ const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
                             {craftDaysPlace.floor}</a
                         >.
                     </p>
-                    <a href="#signup" id="pc-cta" class="pc-btn mt-6 inline-block sm:mt-8">
-                        Pick your hours
-                    </a>
+                    <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4 sm:mt-8">
+                        <a href="#signup" id="pc-cta" class="pc-btn inline-block">
+                            Pick your hours
+                        </a>
+                        <a href="#tickets" class="pc-link text-base">Tickets for December 19</a>
+                    </div>
                 </div>
 
                 {/* The team's save-the-date, laid on the page whole. */}
@@ -306,9 +306,11 @@ const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
                     </p>
                     <ul id="pc-success-hours" class="mt-5 text-base leading-relaxed"></ul>
                     <p class="mt-8 text-base leading-relaxed">
-                        Save the date too: {posadaEvent.name}, the {posadaEvent.kicker},
-                        {posadaEvent.dateLabel}.
+                        Come to {posadaEvent.name} too: {posadaEvent.dateLabel},
+                        {posadaEvent.timeLabel}.
                         <span class="block mt-1">
+                            <a href={posadaEvent.ticketUrl} target="_blank" rel="noopener" class="pc-link">Get your free ticket</a>
+                            <span class="pc-muted"> · </span>
                             <a href={icsHref} class="pc-link" download>Add December 19 to your calendar</a>
                             <span class="pc-muted"> · </span>
                             <a href={gcalHref} target="_blank" rel="noopener" class="pc-link">Google Calendar</a>
@@ -318,8 +320,8 @@ const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
             </div>
         </section>
 
-        {/* ============================ SAVE THE DATE ============================ */}
-        <section class="pc-close px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-20">
+        {/* ======================= THE EVENT: TICKETS ======================= */}
+        <section id="tickets" class="pc-close scroll-mt-24 px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-20">
             <div class="mx-auto grid max-w-6xl items-center gap-y-10 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-14">
                 <div class="pc-circled" aria-hidden="true">
                     <span class="pc-num">19</span>
@@ -333,18 +335,25 @@ const ROT = [-0.6, 0.5, -0.3, 0.7, -0.5, 0.4, -0.8];
                 <div class="max-w-xl">
                     <h2 class="pc-hand pc-h2">{posadaEvent.name}</h2>
                     <p class="mt-3 text-lg leading-relaxed">
-                        {posadaEvent.kicker} · {posadaEvent.dateLabel} · {posadaEvent.venue}.
-                        <span class="block">More details soon.</span>
+                        {posadaEvent.kicker}. {posadaEvent.dateLabel}, {posadaEvent.timeLabel}
+                        at {posadaEvent.venue}: music, food, Lotería, raffles and celebration.
                     </p>
-                    <p class="mt-4 text-base leading-relaxed">
+                    <p class="pc-muted mt-3 text-base leading-relaxed">
+                        We're raising $10,000 toward a permanent home for Latina Sweat
+                        Project in 2027. Free tickets, $10 suggested donation.
+                    </p>
+                    <a
+                        href={posadaEvent.ticketUrl}
+                        target="_blank"
+                        rel="noopener"
+                        class="pc-btn mt-6 inline-block"
+                        data-conversion-event="posada_ticket_click"
+                        data-conversion-context="posada_page"
+                    >Get your free ticket</a>
+                    <p class="mt-5 text-base leading-relaxed">
                         <a href={icsHref} class="pc-link" download>Add December 19 to your calendar</a>
                         <span class="pc-muted"> · </span>
                         <a href={gcalHref} target="_blank" rel="noopener" class="pc-link">Google Calendar</a>
-                    </p>
-                    <p class="mt-2 text-base leading-relaxed">
-                        Follow
-                        <a href={instagramProfile} target="_blank" rel="noopener" class="pc-link">@latinasweatproject on Instagram</a>
-                        for the details.
                     </p>
                     <p class="pc-muted mt-6 text-sm">
                         Questions go to

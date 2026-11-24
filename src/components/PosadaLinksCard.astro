@@ -1,5 +1,6 @@
 ---
-// /links: the LSP Posadas / Posada Craft Days card, SECOND (right after the
+// /links: the Una Posada, Un Hogar (Dec 19 event, free tickets on Zeffy) +
+// Posada Craft Days card, leading with the event and its ticket button, SECOND (right after the
 // Giving Tuesday card: Dec 1, then Dec 19). The /posada identity on a phone:
 // warm white paper, charcoal ink, one pen red, sticky-note yellow, Mynerve
 // for the name, Rubik for the rest; the save-the-date pinned beside the
@@ -47,18 +48,10 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
     <div class="pcl-in">
       <div class="pcl-top">
         <div class="pcl-title">
-          <div data-pc-state="volunteer" hidden={saveDate}>
-            <h2 class="pcl-hand pcl-h">
-              <span class="pcl-l">Posada</span>
-              <span class="pcl-l">Craft Days</span>
-            </h2>
-          </div>
-          <div data-pc-state="save-the-date" hidden={!saveDate}>
-            <h2 class="pcl-hand pcl-h">
-              <span class="pcl-l">LSP</span>
-              <span class="pcl-l">Posadas</span>
-            </h2>
-          </div>
+          <h2 class="pcl-hand pcl-h">
+            <span class="pcl-l">Una Posada,</span>
+            <span class="pcl-l">Un Hogar</span>
+          </h2>
         </div>
         <a href={pageUrl} class="pcl-art" tabindex="-1" aria-hidden="true">
           <img
@@ -71,24 +64,51 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
         </a>
       </div>
 
-      <div data-pc-state="volunteer" hidden={saveDate}>
-        <p class="pcl-intro">
-          <span class="lang-en">{pc.intro}</span>
-          <span class="lang-es hidden">{pc.introEs}</span>
-        </p>
-      </div>
-      <div data-pc-state="save-the-date" hidden={!saveDate}>
-        <p class="pcl-intro">
-          <span class="lang-en">{`${pc.saveLine} ${pc.soon}`}</span>
-          <span class="lang-es hidden">{`${pc.saveLineEs} ${pc.soonEs}`}</span>
-        </p>
-      </div>
+      <p class="pcl-intro">
+        <span class="lang-en">{pc.event}</span>
+        <span class="lang-es hidden">{pc.eventEs}</span>
+      </p>
+      <p class="pcl-muted pcl-goal">
+        <span class="lang-en">{pc.goal}</span>
+        <span class="lang-es hidden">{pc.goalEs}</span>
+      </p>
+      <a
+        href={posadaEvent.ticketUrl}
+        target="_blank"
+        rel="noopener"
+        class="pcl-btn"
+        data-conversion-event="posada_ticket_click"
+        data-conversion-context="links_posada_card"
+      >
+        <span>
+          <span class="lang-en">{pc.ticket}</span>
+          <span class="lang-es hidden">{pc.ticketEs}</span>
+        </span>
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+      </a>
+      <a
+        href={icsHref}
+        class="pcl-cal"
+        download
+        data-conversion-event="posada_calendar_click"
+        data-conversion-context="links_posada_card"
+      >
+        <span class="lang-en">{pc.calendar}</span>
+        <span class="lang-es hidden">{pc.calendarEs}</span>
+      </a>
 
       <div class="pcl-strip">
         <PosadaCalendarStrip bilingual size="card" />
       </div>
 
-      <div data-pc-state="volunteer" hidden={saveDate}>
+      <div class="pcl-craft" data-pc-state="volunteer" hidden={saveDate}>
+        <h3 class="pcl-hand pcl-h3">{pc.craftTitle}</h3>
+        <p class="pcl-craft-intro">
+          <span class="lang-en">{pc.intro}</span>
+          <span class="lang-es hidden">{pc.introEs}</span>
+        </p>
         <p class="pcl-next">
           <span class="lang-en" data-pc-next data-lang="en">{next ? `${pc.next} ${next.label}, ${nb(craftHours)}` : ""}</span>
           <span class="lang-es hidden" data-pc-next data-lang="es">{next ? `${pc.nextEs} ${craftDaysEs[next.key].long}, ${nb(pc.hoursEs)}` : ""}</span>
@@ -111,7 +131,7 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
         )}
         <a
           href={`${pageUrl}#signup`}
-          class="pcl-btn"
+          class="pcl-btn pcl-btn-line"
           data-conversion-event="posada_page_click"
           data-conversion-context="links_posada_card"
         >
@@ -121,34 +141,6 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
           </span>
           <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-          </svg>
-        </a>
-        <a
-          href={icsHref}
-          class="pcl-cal"
-          download
-          data-conversion-event="posada_calendar_click"
-          data-conversion-context="links_posada_card"
-        >
-          <span class="lang-en">{pc.calendar}</span>
-          <span class="lang-es hidden">{pc.calendarEs}</span>
-        </a>
-      </div>
-
-      <div data-pc-state="save-the-date" hidden={!saveDate}>
-        <a
-          href={icsHref}
-          class="pcl-btn"
-          download
-          data-conversion-event="posada_calendar_click"
-          data-conversion-context="links_posada_card_save_date"
-        >
-          <span>
-            <span class="lang-en">{pc.calendar}</span>
-            <span class="lang-es hidden">{pc.calendarEs}</span>
-          </span>
-          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"></path>
           </svg>
         </a>
       </div>
@@ -214,7 +206,18 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
     font-size: 1rem;
     line-height: 1.45;
   }
-  .pcl-strip { margin-top: 1.25rem; }
+  .pcl-goal { margin-top: 0.5rem; }
+  .pcl-strip { margin-top: 1.4rem; }
+  .pcl-craft { margin-top: 1.1rem; }
+  .pcl-h3 {
+    font-size: 1.85rem;
+    line-height: 1;
+  }
+  .pcl-craft-intro {
+    margin-top: 0.45rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
   .pcl-next {
     margin-top: 0.9rem;
     font-size: 0.98rem;
@@ -258,6 +261,12 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
     transition: background-color 150ms;
   }
   .pcl-btn:hover { background: #1c1d24; }
+  .pcl-btn-line {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+  .pcl-btn-line:hover { background: var(--ink); color: var(--paper); }
   .pcl-cal {
     display: inline-block;
     margin-top: 0.85rem;
