@@ -70,13 +70,38 @@ jobs:
         continue-on-error: true
         uses: actions/deploy-pages@v4
 
+      # 2026-11-23: deploy-pages sometimes fails half a second after a good
+      # upload with "Fetching artifact metadata failed" / "No artifacts named
+      # github-pages were found" (GitHub's artifact API lagging the upload).
+      # No deployment exists yet in that case, so a second attempt after a
+      # pause is safe. Up to two retries, 45 s apart.
+      - name: Pause before deploy retry
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 45
+
+      - name: Deploy to GitHub Pages (retry 1)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Pause before second deploy retry
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: sleep 45
+
+      - name: Deploy to GitHub Pages (retry 2)
+        id: deployment_retry2
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
       # deploy-pages hard-caps its wait at 10 minutes, then cancels its own
       # deployment — but during Pages queue backlogs (2026-07-02: 20-75 min)
       # the deployment usually still lands afterwards, and once the cancel is
       # issued the status API stops reporting it. The live site is the only
       # trustworthy oracle: watch version.txt until this commit is serving.
       - name: Wait out slow Pages queue
-        if: steps.deployment.outcome == 'failure'
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure' && steps.deployment_retry2.outcome == 'failure'
         run: |
           echo "deploy-pages gave up; watching the live site for this commit (up to 25 minutes)"
           for i in $(seq 1 100); do
