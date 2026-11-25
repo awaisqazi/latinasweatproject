@@ -10,7 +10,8 @@
 //      location tag Mural Park.
 //   2. Fez's brief for the volunteer form (Nov 19 2026): the five craft days,
 //      the four one-hour shifts, and the Bulls ticket raffle on the first two.
-//   3. Fez's event copy (Nov 23 2026): the event is "Una Posada, Un Hogar",
+//   3. Fez's event copy (Nov 23 2026; on Nov 25 Fez set the name back to
+//      "LSP Posadas"): the event is "LSP Posadas",
 //      the LSP Grand Opening & Community Fundraiser, Saturday December 19,
 //      6 to 9 pm, Mural Park; music, food, Loteria, festive activities,
 //      raffles; raising $10,000 toward a permanent home for LSP in 2027; free
@@ -20,9 +21,9 @@
 // All dates are 2026 and Central Standard Time (UTC-6).
 
 export const posadaEvent = {
-  // Named by Fez on Nov 23 2026 (the save-the-date called it "LSP Posadas,
-  // Community Grand Opening").
-  name: "Una Posada, Un Hogar",
+  // Fez, Nov 25 2026: "rename to LSP Posadas across all of the surfaces"
+  // (Nov 23 to 25 it was "Una Posada, Un Hogar").
+  name: "LSP Posadas",
   kicker: "LSP Grand Opening & Community Fundraiser",
   dateISO: "2026-12-19",
   dateLabel: "Saturday, December 19",
@@ -168,7 +169,7 @@ export const craftContactEmail = "collab@latinasweatproject.com";
 //       (the raffle note shows until craftRaffle.endsAt)
 //   from then to the end of Sat 12/19 (Chicago)         "save-the-date": the
 //       event and its ticket button only
-// Both phases lead with the event (Una Posada, Un Hogar) and its free-ticket
+// Both phases lead with the event (LSP Posadas) and its free-ticket
 // button (posadaEvent.ticketUrl); the craft days sit under it while open.
 //   after that                                          nothing
 // HOW TO TURN THEM OFF BY HAND: set showPosadaHomeBand (homepage) and/or

@@ -1,4 +1,4 @@
-// Una Posada, Un Hogar: Zeffy event banner (1200x1200 square).
+// LSP Posadas (named "Una Posada, Un Hogar" Nov 23 to 25 2026): Zeffy event banner (1200x1200 square).
 //
 // Identity = the team's own LSP Posadas save-the-date (public/images/posada/lsp-posadas-save-the-date.jpg):
 // warm white paper, charcoal ink, one pen red (the circle round the 19), Mynerve for the hand
@@ -84,9 +84,9 @@ body{position:relative;background:${PAPER};color:${INK};font-family:"Rubik"}
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 64px);mask-image:linear-gradient(to bottom,transparent 0,#000 64px)}
 .col{position:absolute;left:0;right:0;top:0;height:${1200 - STRIP_H + 20}px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .mark{display:block;width:${MARK_W}px;height:${MARK_H}px}
-.title{margin-top:26px;font-family:"Mynerve";font-weight:400;font-size:142px;line-height:1;white-space:nowrap}
+.title{margin-top:30px;font-family:"Mynerve";font-weight:400;font-size:168px;line-height:1;white-space:nowrap}
 .title span{display:block}
-.sub{margin-top:46px;font-weight:700;font-size:40px;line-height:1.15;white-space:nowrap}
+.sub{margin-top:40px;font-weight:700;font-size:40px;line-height:1.15;white-space:nowrap}
 .date{margin-top:40px;font-weight:800;font-size:58px;line-height:1.1;white-space:nowrap;letter-spacing:-.005em}
 .num{position:relative;display:inline-block;margin-left:.22em}
 .ring{position:absolute;overflow:visible;pointer-events:none;left:-22px;top:-20px;width:calc(100% + 44px);height:calc(100% + 40px);transform:rotate(-4deg)}
@@ -97,7 +97,7 @@ body{position:relative;background:${PAPER};color:${INK};font-family:"Rubik"}
 <img class="strip" src="${STRIP_URI}" alt="">
 <div class="col">
   <img class="mark" src="${MARK_URI}" width="${MARK_W}" height="${MARK_H}" alt="">
-  <h1 class="title"><span>Una Posada,</span><span>Un Hogar</span></h1>
+  <h1 class="title"><span>LSP Posadas</span></h1>
   <p class="sub">LSP Grand Opening &amp; Community Fundraiser</p>
   <p class="date">Saturday, December <span class="num">19<svg class="ring" viewBox="0 0 100 60" preserveAspectRatio="none"><path d="M78 6 C58 -1 18 2 7 20 C-3 38 18 57 52 56 C86 55 101 40 95 22 C90 9 68 3 46 5"/><path d="M84 10 C64 2 22 5 10 23 C2 40 24 54 55 53 C84 52 98 37 92 21"/></svg></span></p>
   <p class="time">6 to 9 pm · Mural Park</p>
