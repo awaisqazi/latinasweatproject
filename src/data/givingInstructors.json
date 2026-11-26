@@ -152,6 +152,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "jocelyn-vega",
+    "name": "Jocelyn Vega",
+    "first": "Jocelyn",
+    "why": "LSP is the reason why I’m a yoga instructor. Before, I didn’t think yoga was for me, and now I’m teaching to make sure everyone and everybody belongs - J Vega",
+    "avatar": "jocelyn-vega",
+    "goal_cents": 15000
+  },
+  {
     "slug": "karina-melendez",
     "name": "Karina Melendez",
     "first": "Karina",
@@ -192,6 +200,14 @@
     "goal_cents": 15000
   },
   {
+    "slug": "lizette-vega",
+    "name": "Lizette Vega",
+    "first": "Lizette",
+    "why": "I walked into LSP for yoga and walked away with more than I ever imagined: a community that feels like home and the confidence to become a yoga teacher.",
+    "avatar": "lizette-vega",
+    "goal_cents": 15000
+  },
+  {
     "slug": "lizzel-barragan",
     "name": "Lizzel Barragan",
     "first": "Lizzel",
@@ -213,6 +229,14 @@
     "first": "Marlene",
     "why": null,
     "avatar": "marlene-garcia",
+    "goal_cents": 15000
+  },
+  {
+    "slug": "nayeli-a-jimenez",
+    "name": "Nayeli A Jimenez",
+    "first": "Nayeli",
+    "why": "I am fundraising to support the opportunities that LSP has provided for our communities. Through movement, we have united to create a safe space for belonging.",
+    "avatar": "nayeli-a-jimenez",
     "goal_cents": 15000
   },
   {
