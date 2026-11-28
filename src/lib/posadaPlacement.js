@@ -33,18 +33,23 @@ function clock() {
 const chicagoDate = (t) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(t));
 
-// Homepage: a ruled seam when the band follows another light section. The
-// dark bands that can sit above it (Giving Tuesday, the Holiday Gift Drive)
-// need none. Read against the live DOM, so it is right whichever placement
-// script removes its band first; src/lib/giftDrivePlacement.js calls it again
-// after it removes the gift band.
+// Homepage seams between two light bands. The Posadas band (data-pc-seam, a
+// ruled ink line) and the Holiday Gift Drive band (data-gd-seam, the flyer's
+// row of dots) each draw a seam when the section right above them is light.
+// Only the Giving Tuesday band (data-gt-place) is dark; the gift band is
+// light (cream), so the Posadas band draws its seam under it. Read against
+// the live DOM, so it is right whichever placement script removes its band
+// first; src/lib/giftDrivePlacement.js calls it again on every load.
 export function syncPosadaSeam() {
-  document.querySelectorAll(".pcb[data-pc-place]").forEach((root) => {
-    let prev = root.previousElementSibling;
-    while (prev && /^(SCRIPT|STYLE|LINK)$/.test(prev.tagName)) prev = prev.previousElementSibling;
-    const darkAbove = !!prev && (prev.hasAttribute("data-gt-place") || prev.hasAttribute("data-gd-place"));
-    root.toggleAttribute("data-pc-seam", !!prev && !darkAbove);
-  });
+  const sync = (selector, attr) =>
+    document.querySelectorAll(selector).forEach((root) => {
+      let prev = root.previousElementSibling;
+      while (prev && /^(SCRIPT|STYLE|LINK)$/.test(prev.tagName)) prev = prev.previousElementSibling;
+      const darkAbove = !!prev && prev.hasAttribute("data-gt-place");
+      root.toggleAttribute(attr, !!prev && !darkAbove);
+    });
+  sync(".pcb[data-pc-place]", "data-pc-seam");
+  sync(".gdb[data-gd-place]", "data-gd-seam");
 }
 
 export function initPosadaPlacements() {

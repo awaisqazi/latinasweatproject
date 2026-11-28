@@ -11,8 +11,9 @@
 //     Sunday, December 13"), dropped on Dec 12 and 13;
 //   - flips [data-gd-state="open" | "closed"] blocks once the drive is over
 //     (the page's closed state);
-//   - re-checks the LSP Posadas band's seam, because removing the gift band
-//     puts the Posadas band right under a light section again.
+//   - re-checks the homepage seams (the gift band's dotted top and the LSP
+//     Posadas band's ruled top, syncPosadaSeam), on every load: the bands
+//     above them may have been removed by their own placement scripts.
 // Dev only (stripped from production by import.meta.env.DEV): ?now=<ISO>
 // pretends it is that moment.
 import { giftDriveCountdown, giftDrivePhase } from "../data/giftDrive.js";
@@ -33,14 +34,10 @@ export function giftDriveNow() {
 
 export function initGiftDrivePlacements() {
   const now = clock();
-  let removed = false;
   document.querySelectorAll("[data-gd-until]").forEach((el) => {
-    if (now >= Date.parse(el.getAttribute("data-gd-until"))) {
-      el.remove();
-      removed = true;
-    }
+    if (now >= Date.parse(el.getAttribute("data-gd-until"))) el.remove();
   });
-  if (removed) syncPosadaSeam();
+  syncPosadaSeam();
 
   const open = giftDrivePhase(now) === "open";
   document.querySelectorAll("[data-gd-state]").forEach((el) => {

@@ -1,22 +1,23 @@
-// /giftdrive link share card (og:image), in the page's own identity: the tree at the studio
-// and the flyer's paper. Flyer cream ground, evergreen ink, and nothing else.
+// /giftdrive link share card (og:image), in the look of the team's flyer: its cream paper
+// #fef9e6 and ink #040501, its own title lockup, the hand-lettered "On now until Dec 13"
+// over the flyer's row of round dots, and its gifts drawing. Nothing new is drawn.
 //
-// Layout: the left 300px column is a plain rectangular crop of the tree photo
-// (public/images/giftdrive/tree.jpg, 960x1280), full card height and flush to the edges.
-// The centre column (inside x 300-900, so a centre-square crop still reads) holds
-// "Holiday / Gift Drive" in Fraunces 560, "Take a tag. Fill a wish list." in Rubik 700, and
-// the due date and place in Rubik 500. The right column holds the LSP X mark
-// (scripts/mark_x_only.png), whole and unaltered (black on transparent, so it needs this
-// light ground). No rules, no decoration.
+// Layout: the left column (x 56-604) holds the lockup (public/images/giftdrive/lockup.svg,
+// the vector trace of the flyer's lettering, made by scripts/render-giftdrive-art.py),
+// "On now until Dec 13" in Shantell Sans 500 with the dots under it, "Take a tag. Fill a
+// wish list." in DM Sans 700 and the due date and place in DM Sans 500. The middle holds
+// the flyer's gifts drawing (gifts-2x.webp, 290px wide, centred between the text and the
+// mark). The right column holds the LSP X mark (scripts/mark_x_only.png), whole and unaltered, where it has always
+// been (black on transparent, so it needs this light ground).
 //
 // The due date comes from src/data/giftDrive.js and the place name from craftDaysPlace in
 // src/data/posadaCraftDays.js, so after a change just re-run this script.
 //
 // Rendering: an HTML template rendered by Playwright's separate chrome-headless-shell binary
 // (never the Chrome app), at device scale 2, then downsampled to 1200x630 JPEG with sharp.
-// Fraunces and Rubik (latin subset) are fetched from Google Fonts at run time and inlined as
-// data URIs; a first headless pass checks that both faces loaded and that every line sits
-// inside its column with margin, and the script fails loudly if not.
+// DM Sans and Shantell Sans (latin subset) are fetched from Google Fonts at run time and
+// inlined as data URIs; a first headless pass checks that the faces loaded and that every
+// line and image sits inside the frame with margin, and the script fails loudly if not.
 //
 // Output: public/images/giftdrive/giftdrive-og.jpg (1200x630)
 //
@@ -73,8 +74,8 @@ async function inlineFonts(query) {
   return out.join("\n");
 }
 const FONT_CSS = [
-  await inlineFonts("family=Fraunces:opsz,wght@9..144,560"),
-  await inlineFonts("family=Rubik:wght@500;700"),
+  await inlineFonts("family=DM+Sans:opsz,wght@9..40,500;9..40,700"),
+  await inlineFonts("family=Shantell+Sans:wght@500"),
 ].join("\n");
 
 // ---------- LSP X mark, embedded whole: no recolour, filter or blend ----------
@@ -84,39 +85,40 @@ const markMeta = await sharp(MARK_SRC).metadata();
 const MARK_H = 150;
 const MARK_W = +(MARK_H * (markMeta.width / markMeta.height)).toFixed(2);
 
-// ---------- the tree: a plain rectangular crop, never upscaled ----------
-// The 300x630 slot at device scale 2 needs 600x1260 source pixels: x 160-760 keeps the
-// tree centred, y 10-1270 is nearly the full height. Encoded at its own pixels (no resize).
-const PHOTO = path.join(ROOT, "public", giftDrive.photo.jpg);
-const CROP = { left: 158, top: 10, width: 600, height: 1260 };
-const TREE_URI =
-  "data:image/jpeg;base64," +
-  (await sharp(PHOTO).extract(CROP).jpeg({ quality: 92 }).toBuffer()).toString("base64");
+// ---------- the flyer's own art ----------
+const ART = path.join(ROOT, "public/images/giftdrive");
+const LOCKUP_URI = "data:image/svg+xml;base64," + readFileSync(path.join(ART, "lockup.svg")).toString("base64");
+const GIFTS_URI = "data:image/webp;base64," + readFileSync(path.join(ART, "gifts-2x.webp")).toString("base64");
 
 // ---------- copy, from the data files ----------
-const CREAM = "#fef8e6", EVER = "#123d2f";
+const PAPER = "#fef9e6", INK = "#040501";
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const dueLine = `Gifts due ${giftDrive.dueLabel}`;
 const placeLine = `LSP at ${craftDaysPlace.name}`;
+const LOCK_W = 548, LOCK_H = +(LOCK_W * 326 / 616).toFixed(2);
+const GIFTS_W = 290, GIFTS_H = +(GIFTS_W * 290 / 498).toFixed(2);
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 ${FONT_CSS}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1200px;height:630px;overflow:hidden}
-body{position:relative;background:${CREAM};color:${EVER};font-family:"Rubik"}
-.tree{position:absolute;left:0;top:0;width:300px;height:630px;display:block}
-.col{position:absolute;left:300px;top:0;width:600px;height:630px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+body{position:relative;background:${PAPER};color:${INK};font-family:"DM Sans"}
+.col{position:absolute;left:56px;top:0;width:${LOCK_W}px;height:630px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.lockup{display:block;width:${LOCK_W}px;height:${LOCK_H}px}
+.onnow{margin-top:14px;font-family:"Shantell Sans";font-weight:500;font-size:40px;line-height:1.15;white-space:nowrap}
+.dots{width:330px;height:7px;margin-top:10px;background:radial-gradient(circle, ${INK} 2.7px, transparent 3.2px) 0 50% / 10.5px 7px space no-repeat}
+.tag{margin-top:28px;font-weight:700;font-size:34px;line-height:1.15;white-space:nowrap}
+.due{margin-top:14px;font-weight:500;font-size:25px;line-height:1.25;white-space:nowrap}
+.place{margin-top:2px;font-weight:500;font-size:25px;line-height:1.25;white-space:nowrap;color:rgba(4,5,1,.74)}
+.gifts{position:absolute;display:block;left:${(604 + 1050 - MARK_W / 2) / 2 - GIFTS_W / 2}px;top:${315 - GIFTS_H / 2}px;width:${GIFTS_W}px;height:${GIFTS_H}px}
 .mark{position:absolute;display:block;left:${1050 - MARK_W / 2}px;top:${315 - MARK_H / 2}px;width:${MARK_W}px;height:${MARK_H}px}
-.title{font-family:"Fraunces";font-weight:560;font-variation-settings:"opsz" 144;font-size:102px;line-height:.98;letter-spacing:-.01em;white-space:nowrap}
-.title span{display:block}
-.tag{margin-top:34px;font-weight:700;font-size:36px;line-height:1.15;white-space:nowrap}
-.due{margin-top:22px;font-weight:500;font-size:27px;line-height:1.25;white-space:nowrap}
-.place{margin-top:4px;font-weight:500;font-size:27px;line-height:1.25;white-space:nowrap;color:rgba(18,61,47,.78)}
 </style></head><body>
-<img class="tree" src="${TREE_URI}" width="300" height="630" alt="">
+<img class="gifts" src="${GIFTS_URI}" width="${GIFTS_W}" height="${GIFTS_H}" alt="">
 <img class="mark" src="${MARK_URI}" width="${MARK_W}" height="${MARK_H}" alt="">
 <div class="col">
-  <h1 class="title"><span>Holiday</span><span>Gift Drive</span></h1>
+  <img class="lockup" src="${LOCKUP_URI}" width="${LOCK_W}" height="${LOCK_H}" alt="">
+  <p class="onnow">On now until Dec 13</p>
+  <div class="dots"></div>
   <p class="tag">Take a tag. Fill a wish list.</p>
   <p class="due">${esc(dueLine)}</p>
   <p class="place">${esc(placeLine)}</p>
@@ -126,9 +128,10 @@ document.fonts.ready.then(() => {
   const ink = (s) => { const rg = document.createRange(); rg.selectNodeContents(document.querySelector(s)); const r = rg.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)]; };
   const box = (s) => { const r = document.querySelector(s).getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)]; };
   document.body.dataset.report = JSON.stringify({
-    fraunces: document.fonts.check('560 102px "Fraunces"', "Holiday"),
+    hand: document.fonts.check('500 40px "Shantell Sans"', "On now"),
     loaded: [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family + " " + f.weight),
-    title: ink(".title"), tag: ink(".tag"), due: ink(".due"), place: ink(".place"), mark: box(".mark"), tree: box(".tree"),
+    lockup: box(".lockup"), onnow: ink(".onnow"), tag: ink(".tag"), due: ink(".due"), place: ink(".place"),
+    gifts: box(".gifts"), mark: box(".mark"),
     markNatural: [document.querySelector(".mark").naturalWidth, document.querySelector(".mark").naturalHeight],
   });
 });
@@ -149,24 +152,19 @@ const raw = dom.match(/data-report="([^"]*)"/)?.[1];
 if (!raw) throw new Error("render check did not run (no report in DOM)");
 const report = JSON.parse(raw.replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
 console.log("render check", JSON.stringify(report));
-if (!report.fraunces || !report.loaded.some((f) => f.startsWith("Fraunces"))) throw new Error("Fraunces did not load");
-if (!report.loaded.some((f) => f.startsWith("Rubik 700"))) throw new Error("Rubik 700 did not load");
-if (!report.loaded.some((f) => f.startsWith("Rubik 500"))) throw new Error("Rubik 500 did not load");
-const SQ = { l: 300, t: 15, r: 900, b: 615 };
-for (const key of ["title", "tag", "due", "place"]) {
-  const [l, t, r, b] = report[key];
-  if (l < SQ.l + 24 || r > SQ.r - 24 || t < SQ.t + 14 || b > SQ.b - 14)
-    throw new Error(`${key} is not inside the centre column with margin: ${report[key]}`);
-}
+if (!report.hand || !report.loaded.some((f) => f.startsWith("Shantell Sans"))) throw new Error("Shantell Sans did not load");
+if (!report.loaded.some((f) => f.startsWith("DM Sans 700"))) throw new Error("DM Sans 700 did not load");
+if (!report.loaded.some((f) => f.startsWith("DM Sans 500"))) throw new Error("DM Sans 500 did not load");
+const inside = (key, [l, t, r, b], L, T, R, B) => {
+  if (l < L || t < T || r > R || b > B) throw new Error(`${key} is outside its area with margin: ${[l, t, r, b]}`);
+};
+for (const key of ["lockup", "onnow", "tag", "due", "place"]) inside(key, report[key], 40, 32, 620, 598);
+inside("gifts", report.gifts, 620, 32, 1050 - MARK_W / 2 - 20, 598);
 {
   const [l, t, r, b] = report.mark;
   if (l < 900 + 24 || r > 1200 - 24 || t < 8 || b > 622) throw new Error(`mark is not inside the right column: ${report.mark}`);
   const [nw, nh] = report.markNatural;
   if (Math.abs((r - l) / (b - t) - nw / nh) > 0.03) throw new Error("mark aspect ratio changed");
-}
-{
-  const [l, t, r, b] = report.tree;
-  if (l !== 0 || t !== 0 || r !== 300 || b !== 630) throw new Error(`tree is not flush to the left column: ${report.tree}`);
 }
 
 // Pass 2: screenshot at 2x, downsample to 1200x630 sRGB JPEG.

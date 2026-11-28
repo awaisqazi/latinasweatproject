@@ -2,23 +2,29 @@
 //   hl_posadas.jpg       a plain crop of the circled 19 from the team's save-the-date
 //   hl_givingtuesday.png the Giving Tuesday studio floor: yellow room, sideways mats in
 //                        the MatFloor colours, a few rows rolled out (no new illustration)
-//   hl_giftdrive.jpg     a plain crop of the Holiday Gift Drive tree photo: gold ornaments
-//                        and a wish list tag (public/images/giftdrive/tree.jpg, 960x1280)
-// Usage: node scripts/render-campaign-bubbles.mjs
+//   hl_giftdrive.jpg     a plain crop of the team's flyer: the wrapped gift box and its tag
+//                        from the gifts drawing at the foot of page 1, on the flyer's own
+//                        cream (public/images/giftdrive/flyer-1.jpg, 989x1280)
+// Usage: node scripts/render-campaign-bubbles.mjs [posadas|giftdrive|givingtuesday]
+// (a name re-renders that bubble only, so the others are not re-encoded)
 import sharp from "sharp";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(repo, "public/images/highlights");
+const only = process.argv[2];
+const want = (name) => !only || only === name;
 // Posadas: a plain crop of the circled 19 from the team's save-the-date.
-await sharp(`${repo}/public/images/posada/lsp-posadas-save-the-date.jpg`)
+if (want("posadas")) await sharp(`${repo}/public/images/posada/lsp-posadas-save-the-date.jpg`)
   .extract({ left: 276, top: 520, width: 404, height: 404 })
   .resize(420, 420)
   .jpeg({ quality: 86, mozjpeg: true })
   .toFile(`${out}/hl_posadas.jpg`);
-// Holiday Gift Drive: a plain 420x420 crop of the tree photo (no resize, no filter).
-await sharp(`${repo}/public/images/giftdrive/tree.jpg`)
-  .extract({ left: 250, top: 290, width: 420, height: 420 })
+// Holiday Gift Drive: a plain crop of the flyer's gift box and tag (no filter, no
+// redraw), scaled to 420 with Lanczos; the bubble shows it at 66px.
+if (want("giftdrive")) await sharp(`${repo}/public/images/giftdrive/flyer-1.jpg`)
+  .extract({ left: 344, top: 966, width: 240, height: 240 })
+  .resize(420, 420, { kernel: "lanczos3" })
   .jpeg({ quality: 86, mozjpeg: true })
   .toFile(`${out}/hl_giftdrive.jpg`);
 // Giving Tuesday: the campaign's yellow studio floor, mats drawn exactly as
@@ -41,5 +47,5 @@ for (let i=0;i<cols*rows;i++){
   if (f>0 && f<1) mats += `<rect x="${x+w*f-7}" y="${y-4}" width="14" height="${h+8}" rx="7" fill="${R[k]}"/>`;
 }
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420"><rect width="420" height="420" fill="#ffde59"/>${mats}</svg>`;
-await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(`${out}/hl_givingtuesday.png`);
+if (want("givingtuesday")) await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(`${out}/hl_givingtuesday.png`);
 console.log("ok");

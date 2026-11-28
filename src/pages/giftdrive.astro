@@ -17,16 +17,23 @@ import { craftDaysPlace } from "@/data/posadaCraftDays.js";
 // band and /links, not from nav or footer. Every fact comes from the team's
 // flyer via src/data/giftDrive.js; the address from craftDaysPlace.
 //
-// Look: the real tree at the studio and the flyer's paper. Evergreen
-// #123d2f, flyer cream #fef8e6, one ornament gold #e3c77e (on evergreen
-// only). Fraunces 560 for display, Rubik for everything read. Sections
-// alternate cream / evergreen. The photo is a plain rectangle; the two flyer
-// pages are shown whole.
+// Look: the team's flyer. Its cream paper and near-black ink everywhere, its
+// own title lockup as the H1 (public/images/giftdrive/lockup.svg, a trace of
+// the flyer's lettering) and its gifts illustration once near the close
+// (gifts.webp, the flyer's pixels). Colours sampled from the flyer: paper
+// #fef9e6, ink #040501, pink #fb0b57, green #04b17a, sparkle yellow #fde511
+// (blue #1f7bdd and red #fa5758 live only inside the illustration). DM Sans
+// (the flyer's body face) for everything read, bold where the flyer bolds;
+// Shantell Sans 500 for the hand-lettered lines and headings. One colour
+// band: the checklist on the flyer's green with ink text. One button style
+// (green, ink outline, hard ink offset like the lettering). The only divider
+// is the flyer's row of round dots. The tree photo is the real tree.
+// Art recipe: scripts/render-giftdrive-art.py.
 //
 // Closed state (from giftDrive.endsAt, at build time and in the browser via
-// src/lib/giftDrivePlacement.js): a thank-you line in the hero, How it works,
-// the checklist and Team up hidden; Who the gifts are for and the questions
-// email stay. Dev only: ?now=<ISO>.
+// src/lib/giftDrivePlacement.js): a thank-you line and the gifts illustration
+// in the hero, How it works, the checklist and Team up hidden; Who the gifts
+// are for and the questions email stay. Dev only: ?now=<ISO>.
 
 const nowMs = Date.now();
 const closed = giftDrivePhase(nowMs) === "off";
@@ -36,29 +43,44 @@ const mail = `mailto:${giftDrive.contactEmail}`;
 // The address may only break before the @ on narrow phones.
 const [mailUser, mailDomain] = giftDrive.contactEmail.split("@");
 const p = giftDrive.photo;
+// Bold where the flyer bolds: the $75 maximum and the due date.
+const budget = `$${giftDrive.maxBudget}`;
+const EMPH = new RegExp(`(\\$${giftDrive.maxBudget}|${giftDrive.dueLabel})`);
+const emph = (t: string) => t.split(EMPH);
 ---
 
 <Layout
     title="Holiday Gift Drive | Latina Sweat Project"
     description="The Latina Sweat Project's Holiday Gift Drive, on now until Sunday, December 13: take an ornament tag off the tree at LSP, buy a few items from one person's holiday wish list (up to $75), and bring them back. Gifts go to individuals at Bethany House and Viator House of Hospitality."
     socialImage="images/giftdrive/giftdrive-og.jpg"
-    socialImageAlt="Holiday Gift Drive. Take a tag. Fill a wish list. Gifts due Sunday, December 13, LSP at Mural Park."
+    socialImageAlt="The Latina Sweat Project's Holiday Gift Drive, on now until Dec 13. Take a tag. Fill a wish list. Gifts due Sunday, December 13, LSP at Mural Park."
     socialImageWidth={1200}
     socialImageHeight={630}
     socialImageType="image/jpeg"
     twitterCard="summary_large_image"
 >
+    <link
+        slot="head"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Shantell+Sans:wght@500&display=swap"
+        rel="stylesheet"
+    />
     <Header />
-    <main class="gd-page font-sans" data-gd-page>
+    <main class="gd-page" data-gd-page>
         {/* ============================== HERO ============================== */}
-        <section class="gd-cream gd-hero">
+        <section class="gd-hero">
             <div class="gd-hero-grid">
                 <div class="gd-hero-head">
-                    <p class="gd-pre">The Latina Sweat Project's</p>
-                    <h1 class="gd-h1">
-                        <span>Holiday</span>
-                        <span>Gift Drive</span>
+                    <h1 class="gd-lockup">
+                        <img
+                            src="/images/giftdrive/lockup.svg"
+                            alt="The Latina Sweat Project's Holiday Gift Drive"
+                            width="616"
+                            height="326"
+                            loading="eager"
+                            decoding="async"
+                        />
                     </h1>
+                    <p class="gd-hand gd-onnow" data-gd-state="open" hidden={closed}>On now until Dec 13</p>
                 </div>
 
                 <figure class="gd-hero-photo">
@@ -85,11 +107,11 @@ const p = giftDrive.photo;
                         <p class="gd-lead">
                             Take an ornament tag off our tree, buy a few things from one
                             person's holiday wish list, and bring them back by
-                            {giftDrive.dueLabel.replace(/ (\d+)$/, " $1")}.
+                            <strong>{giftDrive.dueLabel.replace(/ (\d+)$/, " $1")}</strong>.
                         </p>
                         <p class="gd-count" data-gd-countdown data-lang="en">{countdown?.en}</p>
                         <div class="gd-cta">
-                            <a href="#how" class="gd-btn gd-btn-ink">How it works</a>
+                            <a href="#how" class="gd-btn">How it works</a>
                             <a
                                 href={icsHref}
                                 class="gd-link"
@@ -110,13 +132,23 @@ const p = giftDrive.photo;
                             The drive closed on {giftDrive.dueLabel}. Thank you to everyone
                             who took a tag.
                         </p>
+                        <img
+                            class="gd-gifts gd-gifts-hero"
+                            src="/images/giftdrive/gifts.webp"
+                            srcset="/images/giftdrive/gifts.webp 1x, /images/giftdrive/gifts-2x.webp 2x"
+                            alt="The flyer's drawing of gifts: a teddy bear, a ball, a wrapped box with a tag, books and cups of pencils and brushes."
+                            width="498"
+                            height="290"
+                            loading="lazy"
+                            decoding="async"
+                        />
                     </div>
                 </div>
             </div>
         </section>
 
         {/* ========================== HOW IT WORKS ========================== */}
-        <section id="how" class="gd-ever gd-sec" data-gd-state="open" hidden={closed} aria-labelledby="gd-how-h">
+        <section id="how" class="gd-sec gd-how" data-gd-state="open" hidden={closed} aria-labelledby="gd-how-h">
             <div class="gd-wrap">
                 <h2 id="gd-how-h" class="gd-h2">How it works</h2>
                 <ol class="gd-steps">
@@ -124,15 +156,18 @@ const p = giftDrive.photo;
                         <li class="gd-step">
                             <span class="gd-num" aria-hidden="true">{i + 1}</span>
                             <h3 class="gd-step-title">{s.title}</h3>
-                            <p class="gd-step-body">{s.body}</p>
+                            <p class="gd-step-body">
+                                {emph(s.body).map((part, k) => (k % 2 ? <strong>{part}</strong> : part))}
+                            </p>
                         </li>
                     ))}
                 </ol>
+                <div class="gd-dots gd-dots-sec" aria-hidden="true"></div>
             </div>
         </section>
 
         {/* ===================== WHO THE GIFTS ARE FOR ===================== */}
-        <section class="gd-cream gd-sec gd-who" aria-labelledby="gd-who-h">
+        <section class="gd-sec gd-who" aria-labelledby="gd-who-h">
             <div class="gd-wrap gd-who-grid">
                 <div class="gd-who-head">
                 <h2 id="gd-who-h" class="gd-h2">Who the gifts are for</h2>
@@ -152,7 +187,7 @@ const p = giftDrive.photo;
                 </div>
                 <p class="gd-body gd-measure gd-notes">
                     They share a space, so we want the gifts to be as equal as possible.
-                    That is why every tag has a ${giftDrive.maxBudget} limit. Not everyone
+                    That is why every tag has a <strong>{budget} limit</strong>. Not everyone
                     celebrates Christmas, so please keep wrapping and gifts to a general
                     holiday theme.
                 </p>
@@ -167,7 +202,7 @@ const p = giftDrive.photo;
         </section>
 
         {/* =========================== CHECKLIST =========================== */}
-        <section class="gd-ever gd-sec" data-gd-state="open" hidden={closed} aria-labelledby="gd-check-h">
+        <section class="gd-green gd-sec" data-gd-state="open" hidden={closed} aria-labelledby="gd-check-h">
             <div class="gd-wrap gd-check-grid">
                 <div class="gd-check-copy">
                     <h2 id="gd-check-h" class="gd-h2">Before you bring it back</h2>
@@ -179,7 +214,7 @@ const p = giftDrive.photo;
                         your tag so someone else can complete it.
                     </p>
                     <p class="gd-body gd-check-mail">
-                        <a href={mail} class="gd-link gd-link-cream gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
+                        <a href={mail} class="gd-link gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
                             >{mailUser}<wbr />@{mailDomain}</a
                         >
                     </p>
@@ -206,8 +241,18 @@ const p = giftDrive.photo;
         </section>
 
         {/* ============================ TEAM UP ============================ */}
-        <section class="gd-cream gd-sec gd-close" data-gd-state="open" hidden={closed} aria-labelledby="gd-team-h">
+        <section class="gd-sec gd-close" data-gd-state="open" hidden={closed} aria-labelledby="gd-team-h">
             <div class="gd-wrap gd-close-grid">
+                <img
+                    class="gd-gifts gd-gifts-close"
+                    src="/images/giftdrive/gifts.webp"
+                    srcset="/images/giftdrive/gifts.webp 1x, /images/giftdrive/gifts-2x.webp 2x"
+                    alt="The flyer's drawing of gifts: a teddy bear, a ball, a wrapped box with a tag, books and cups of pencils and brushes."
+                    width="498"
+                    height="290"
+                    loading="lazy"
+                    decoding="async"
+                />
                 <div class="gd-team-head">
                     <h2 id="gd-team-h" class="gd-h2">Team up</h2>
                     <p class="gd-lead gd-measure">
@@ -215,11 +260,24 @@ const p = giftDrive.photo;
                     </p>
                     <button
                         type="button"
-                        class="gd-btn gd-btn-ink gd-share"
+                        class="gd-btn gd-share"
                         id="gd-share"
                         data-conversion-event="giftdrive_share_click"
                         data-conversion-context="giftdrive_page"
                     >Share this page</button>
+                </div>
+
+                <div class="gd-ask">
+                    <h2 class="gd-h2">Questions?</h2>
+                    <p class="gd-lead gd-measure">
+                        Email
+                        <a href={mail} class="gd-link gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
+                            >{mailUser}<wbr />@{mailDomain}</a
+                        >
+                    </p>
+                    <p class="gd-body gd-schedule">
+                        <a href="/schedule" class="gd-link">Class schedule</a>
+                    </p>
                 </div>
 
                 <div class="gd-flyers">
@@ -237,19 +295,6 @@ const p = giftDrive.photo;
                     ))}
                 </div>
                 <p class="gd-flyer-note gd-muted">Tap or click a page to open it full size.</p>
-
-                <div class="gd-ask">
-                    <h2 class="gd-h2">Questions?</h2>
-                    <p class="gd-lead gd-measure">
-                        Email
-                        <a href={mail} class="gd-link gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
-                            >{mailUser}<wbr />@{mailDomain}</a
-                        >
-                    </p>
-                    <p class="gd-body gd-schedule">
-                        <a href="/schedule" class="gd-link">Class schedule</a>
-                    </p>
-                </div>
             </div>
         </section>
     </main>
@@ -257,26 +302,24 @@ const p = giftDrive.photo;
 
 <style>
     .gd-page {
-        --gd-ever: #123d2f;
-        --gd-cream: #fef8e6;
-        --gd-gold: #e3c77e;
-        --gd-ink-muted: rgb(18 61 47 / 0.74);
-        --gd-cream-muted: rgb(254 248 230 / 0.74);
-        background: var(--gd-cream);
-        color: var(--gd-ever);
-        font-family: "Rubik", system-ui, sans-serif;
+        /* Sampled from the team's flyer (scripts/render-giftdrive-art.py). */
+        --gd-paper: #fef9e6;
+        --gd-ink: #040501;
+        --gd-pink: #fb0b57;
+        --gd-green: #04b17a;
+        --gd-yellow: #fde511;
+        --gd-ink-muted: rgb(4 5 1 / 0.74);
+        background: var(--gd-paper);
+        color: var(--gd-ink);
+        font-family: "DM Sans", "Rubik", system-ui, sans-serif;
         overflow-x: clip;
     }
     .gd-page [hidden] {
         display: none !important;
     }
-    .gd-cream {
-        background: var(--gd-cream);
-        color: var(--gd-ever);
-    }
-    .gd-ever {
-        background: var(--gd-ever);
-        color: var(--gd-cream);
+    .gd-green {
+        background: var(--gd-green);
+        color: var(--gd-ink);
     }
     .gd-page h1,
     .gd-page h2,
@@ -286,6 +329,9 @@ const p = giftDrive.photo;
     .gd-page p,
     .gd-page li {
         text-wrap: pretty;
+    }
+    .gd-page strong {
+        font-weight: 700;
     }
     .gd-muted {
         color: var(--gd-ink-muted);
@@ -303,87 +349,91 @@ const p = giftDrive.photo;
         max-width: 34rem;
     }
 
-    /* Display type: Fraunces 560, sentence case, tight. */
-    .gd-h1,
-    .gd-h2 {
-        font-family: "Fraunces", Georgia, serif;
-        font-weight: 560;
-        font-variation-settings: "opsz" 144;
-        letter-spacing: -0.01em;
-    }
-    .gd-h1 {
-        margin-top: 0.4rem;
-        font-size: clamp(3.4rem, 15vw, 6rem);
-        line-height: 0.98;
-    }
-    .gd-h1 span {
-        display: block;
+    /* The flyer's hand lettering: Shantell Sans 500, ink, sentence case. */
+    .gd-hand,
+    .gd-h2,
+    .gd-num {
+        font-family: "Shantell Sans", "DM Sans", system-ui, sans-serif;
+        font-weight: 500;
     }
     .gd-h2 {
-        font-size: clamp(2.4rem, 9vw, 3.6rem);
-        line-height: 1;
-    }
-    .gd-pre {
-        font-size: 1.125rem;
-        line-height: 1.3;
+        font-size: clamp(2.1rem, 8vw, 3.1rem);
+        line-height: 1.08;
+        letter-spacing: -0.005em;
     }
     .gd-lead {
         margin-top: 1rem;
         font-size: 1.2rem;
-        line-height: 1.45;
+        line-height: 1.5;
     }
     .gd-body {
         font-size: 1.0625rem;
-        line-height: 1.55;
+        line-height: 1.6;
+    }
+
+    /* The flyer's row of round dots: the only divider. */
+    .gd-dots {
+        height: 6px;
+        background: radial-gradient(circle, var(--gd-ink) 2.3px, transparent 2.8px) 0 50% / 9px 6px space no-repeat;
     }
 
     .gd-link {
         color: inherit;
-        font-weight: 600;
+        font-weight: 500;
         text-decoration: underline;
-        text-decoration-color: rgb(18 61 47 / 0.4);
+        text-decoration-color: currentColor;
         text-decoration-thickness: 1.5px;
         text-underline-offset: 4px;
-        transition: text-decoration-color 120ms;
     }
     .gd-link:hover {
-        text-decoration-color: currentColor;
-    }
-    .gd-link-cream {
-        text-decoration-color: rgb(254 248 230 / 0.45);
+        text-decoration-thickness: 2.5px;
     }
     .gd-mail {
         overflow-wrap: break-word;
     }
+    /* The one primary button: the flyer's green, an ink outline and a hard ink
+       offset like the lettering; pressing it moves it into the offset. */
     .gd-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-height: 3.25rem;
-        border-radius: 6px;
-        padding: 0 2rem;
+        border: 2.5px solid var(--gd-ink);
+        border-radius: 12px;
+        padding: 0 1.75rem;
+        background: var(--gd-green);
+        color: var(--gd-ink);
+        box-shadow: 3px 3px 0 var(--gd-ink);
         font-size: 1.0625rem;
         font-weight: 700;
         cursor: pointer;
-        transition: background-color 150ms;
+        transition: transform 90ms, box-shadow 90ms;
     }
-    .gd-btn-ink {
-        background: var(--gd-ever);
-        color: var(--gd-cream);
+    .gd-btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 var(--gd-ink);
     }
-    .gd-btn-ink:hover {
-        background: #0b2a20;
+    .gd-btn:active {
+        transform: translate(3px, 3px);
+        box-shadow: 0 0 0 var(--gd-ink);
     }
     .gd-link:focus-visible,
-    .gd-btn:focus-visible,
     .gd-flyer:focus-visible,
     .gd-reset:focus-visible {
-        outline: 3px solid currentColor;
+        outline: 3px solid var(--gd-ink);
         outline-offset: 3px;
         border-radius: 2px;
     }
     .gd-btn:focus-visible {
-        outline-color: var(--gd-ever);
+        outline: 3px solid var(--gd-ink);
+        outline-offset: 5px;
+    }
+
+    .gd-gifts {
+        display: block;
+        width: 100%;
+        max-width: 330px;
+        height: auto;
     }
 
     /* ------------------------------ hero ------------------------------ */
@@ -399,10 +449,31 @@ const p = giftDrive.photo;
     }
     .gd-hero-head {
         grid-area: head;
+        width: 100%;
+        max-width: 38rem;
+        text-align: center;
+    }
+    .gd-lockup img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+    .gd-onnow {
+        display: inline-block;
+        margin-top: 0.9rem;
+        font-size: clamp(1.6rem, 7vw, 2.25rem);
+        line-height: 1.2;
+    }
+    .gd-onnow::after {
+        content: "";
+        display: block;
+        height: 6px;
+        margin: 0.55rem 6% 0;
+        background: radial-gradient(circle, var(--gd-ink) 2.3px, transparent 2.8px) 0 50% / 9px 6px space no-repeat;
     }
     .gd-hero-photo {
         grid-area: photo;
-        margin-top: 1.75rem;
+        margin-top: 2rem;
     }
     .gd-hero-photo img {
         display: block;
@@ -413,7 +484,7 @@ const p = giftDrive.photo;
         object-fit: cover;
         object-position: 50% 55%;
         border-radius: 3px;
-        background: #e9e3d2;
+        background: #ece5cf;
     }
     .gd-hero-body {
         grid-area: body;
@@ -429,41 +500,43 @@ const p = giftDrive.photo;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 1rem 1.75rem;
+        gap: 1.25rem 1.75rem;
         margin-top: 1.75rem;
     }
     .gd-place {
         margin-top: 1.75rem;
         max-width: 34rem;
         font-size: 1rem;
-        line-height: 1.55;
+        line-height: 1.6;
         color: var(--gd-ink-muted);
     }
     .gd-place .gd-link {
-        color: var(--gd-ever);
+        color: var(--gd-ink);
+    }
+    .gd-gifts-hero {
+        margin-top: 2rem;
     }
 
     /* -------------------------- how it works -------------------------- */
-    .gd-ever .gd-link {
-        text-decoration-color: rgb(254 248 230 / 0.45);
+    .gd-page .gd-how {
+        padding-top: 1rem;
+        padding-bottom: 0;
     }
     .gd-steps {
         display: grid;
         gap: 2.75rem;
-        margin-top: 2.5rem;
+        margin-top: 2.25rem;
         list-style: none;
         padding: 0;
     }
     .gd-num {
         display: block;
-        color: var(--gd-gold);
-        font-size: 4.5rem;
-        font-weight: 800;
-        line-height: 0.9;
-        font-variant-numeric: lining-nums;
+        color: var(--gd-pink);
+        font-size: 4.75rem;
+        line-height: 0.95;
     }
     .gd-step-title {
-        margin-top: 1rem;
+        margin-top: 0.75rem;
         font-size: 1.4rem;
         font-weight: 700;
         line-height: 1.2;
@@ -472,11 +545,17 @@ const p = giftDrive.photo;
         margin-top: 0.6rem;
         max-width: 34rem;
         font-size: 1.0625rem;
-        line-height: 1.55;
-        color: var(--gd-cream-muted);
+        line-height: 1.6;
+    }
+    .gd-dots-sec {
+        width: min(18rem, 70%);
+        margin: 3.5rem auto 0;
     }
 
     /* -------------------------- who + notes --------------------------- */
+    .gd-who {
+        padding-top: 3.5rem;
+    }
     .gd-houses {
         display: grid;
         gap: 1.5rem;
@@ -485,10 +564,7 @@ const p = giftDrive.photo;
     .gd-house {
         max-width: 34rem;
         font-size: 1.125rem;
-        line-height: 1.55;
-    }
-    .gd-house strong {
-        font-weight: 700;
+        line-height: 1.6;
     }
     .gd-notes {
         margin-top: 2.25rem;
@@ -507,25 +583,42 @@ const p = giftDrive.photo;
     }
     .gd-check-note {
         margin-top: 1.25rem;
-        color: var(--gd-cream-muted);
     }
     .gd-check-mail {
         margin-top: 0.5rem;
     }
-    .gd-check-mail .gd-link {
-        color: var(--gd-cream);
-    }
-    /* One flat cream gift tag: the two top corners clipped, a punched hole
-       near the top centre that shows the evergreen through. */
+    /* One cream gift tag drawn in the flyer's outline style: an ink outline of
+       2.5px, the two top corners clipped, a punched hole near the top centre
+       that shows the green through. The tag itself is the ink shape; ::before
+       is the cream face 2.5px inside it (its chamfer is the outline's offset:
+       cut - 2.5px x (2 - sqrt 2)), with a hole 2.5px wider, so the hole gets an
+       ink ring too. */
     .gd-tag {
         --cut: 2.75rem;
+        --line: 2.5px;
+        --hole: 0.7rem;
+        --hy: 1.75rem;
+        position: relative;
+        isolation: isolate;
         width: 100%;
         max-width: 30rem;
-        background: var(--gd-cream);
-        color: var(--gd-ever);
+        background: var(--gd-ink);
+        color: var(--gd-ink);
         clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%, 0 var(--cut));
-        -webkit-mask: radial-gradient(circle at 50% 1.75rem, transparent 0.7rem, #000 calc(0.7rem + 0.5px));
-        mask: radial-gradient(circle at 50% 1.75rem, transparent 0.7rem, #000 calc(0.7rem + 0.5px));
+        -webkit-mask: radial-gradient(circle at 50% var(--hy), transparent var(--hole), #000 calc(var(--hole) + 0.5px));
+        mask: radial-gradient(circle at 50% var(--hy), transparent var(--hole), #000 calc(var(--hole) + 0.5px));
+    }
+    .gd-tag::before {
+        --c2: calc(var(--cut) - var(--line) * 0.586);
+        --h2: calc(var(--hole) + var(--line));
+        content: "";
+        position: absolute;
+        inset: var(--line);
+        z-index: -1;
+        background: var(--gd-paper);
+        clip-path: polygon(var(--c2) 0, calc(100% - var(--c2)) 0, 100% var(--c2), 100% 100%, 0 100%, 0 var(--c2));
+        -webkit-mask: radial-gradient(circle at 50% calc(var(--hy) - var(--line)), transparent var(--h2), #000 calc(var(--h2) + 0.5px));
+        mask: radial-gradient(circle at 50% calc(var(--hy) - var(--line)), transparent var(--h2), #000 calc(var(--h2) + 0.5px));
     }
     .gd-tag-in {
         margin: 0;
@@ -548,7 +641,7 @@ const p = giftDrive.photo;
         min-height: 44px;
         padding: 0.55rem 0;
         font-size: 1.0625rem;
-        line-height: 1.4;
+        line-height: 1.45;
         cursor: pointer;
     }
     .gd-box {
@@ -558,19 +651,19 @@ const p = giftDrive.photo;
         width: 1.6rem;
         height: 1.6rem;
         margin: -0.05rem 0 0;
-        border: 2px solid var(--gd-ever);
-        border-radius: 3px;
+        border: 2.5px solid var(--gd-ink);
+        border-radius: 5px;
         background: transparent;
         cursor: pointer;
         transition: background-color 120ms;
     }
     .gd-box:checked {
-        background: var(--gd-ever)
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fef8e6' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+        background: var(--gd-ink)
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fef9e6' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
             center / 80% no-repeat;
     }
     .gd-box:focus-visible {
-        outline: 3px solid var(--gd-ever);
+        outline: 3px solid var(--gd-ink);
         outline-offset: 3px;
     }
     .gd-row:has(.gd-box:checked) span {
@@ -592,39 +685,41 @@ const p = giftDrive.photo;
         padding: 0;
         background: none;
         border: 0;
-        color: var(--gd-ever);
+        color: var(--gd-ink);
         font: inherit;
         font-size: 1rem;
-        font-weight: 600;
+        font-weight: 500;
         text-decoration: underline;
-        text-decoration-color: rgb(18 61 47 / 0.4);
         text-decoration-thickness: 1.5px;
         text-underline-offset: 4px;
         cursor: pointer;
     }
 
     /* ----------------------------- team up ---------------------------- */
+    .gd-gifts-close {
+        margin: 0 auto 3.5rem;
+    }
     .gd-share {
         margin-top: 1.75rem;
     }
     .gd-flyers {
         display: grid;
         gap: 1.25rem;
-        margin-top: 3rem;
+        margin-top: 3.5rem;
     }
     .gd-flyer {
         display: block;
     }
     .gd-flyer img {
         display: block;
-        /* The flyer's paper is the page's cream: a faint ink edge so each
-           page reads as a sheet (no shadow, no card). */
-        outline: 1px solid rgb(18 61 47 / 0.18);
+        /* The flyer's paper is the page's paper: a hairline edge so each page
+           reads as a sheet (no shadow, no card). */
+        outline: 1px solid rgb(4 5 1 / 0.2);
         outline-offset: -1px;
         width: 100%;
         height: auto;
         aspect-ratio: 989 / 1280;
-        background: #f3ecd6;
+        background: var(--gd-paper);
     }
     .gd-flyer-note {
         margin-top: 0.75rem;
@@ -639,7 +734,7 @@ const p = giftDrive.photo;
     .gd-close {
         padding-bottom: 5rem;
     }
-    /* Closed: the hero and "Who the gifts are for" share the cream, so they
+    /* Closed: the hero and "Who the gifts are for" share the paper, so they
        read as one section. */
     .gd-page:has(#how[hidden]) .gd-who {
         padding-top: 0;
@@ -655,6 +750,7 @@ const p = giftDrive.photo;
         }
         .gd-hero-photo {
             width: 75%;
+            justify-self: center;
         }
         .gd-flyers {
             grid-template-columns: 1fr 1fr;
@@ -685,7 +781,7 @@ const p = giftDrive.photo;
     }
     @media (min-width: 1024px) {
         .gd-hero {
-            padding: 4.5rem 0 6rem;
+            padding: 4rem 0 5.5rem;
         }
         .gd-hero-grid {
             grid-template-columns: minmax(0, 1fr) 28rem;
@@ -707,13 +803,19 @@ const p = giftDrive.photo;
             max-height: none;
         }
         .gd-hero-body {
-            margin-top: 0.5rem;
+            margin-top: 1.25rem;
         }
         .gd-wrap {
             padding: 0 2rem;
         }
         .gd-sec {
             padding: 6rem 0 6.5rem;
+        }
+        .gd-page .gd-how {
+            padding-top: 2rem;
+        }
+        .gd-who {
+            padding-top: 4rem;
         }
         .gd-flyers {
             column-gap: 2rem;
@@ -740,28 +842,32 @@ const p = giftDrive.photo;
         .gd-who-body .gd-measure {
             max-width: none;
         }
-        /* Closing: Team up and Questions side by side, the flyer at reading
-           size across the full measure under them. */
+        /* Closing: Team up, the flyer's gifts and Questions across, the two
+           flyer pages at reading size under them. */
         .gd-close-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            column-gap: 2rem;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            column-gap: 3rem;
             grid-template-areas:
-                "team ask"
-                "flyers flyers"
-                "note note";
-            align-items: start;
+                "team art ask"
+                "flyers flyers flyers"
+                "note note note";
+            align-items: center;
         }
         .gd-team-head { grid-area: team; }
         .gd-ask { grid-area: ask; margin-top: 0; }
-        .gd-flyers { grid-area: flyers; margin-top: 4rem; }
+        .gd-gifts-close { grid-area: art; margin: 0; width: 330px; }
+        .gd-flyers { grid-area: flyers; margin-top: 5rem; }
         .gd-flyer-note { grid-area: note; }
     }
     @media (prefers-reduced-motion: reduce) {
         .gd-box,
-        .gd-btn,
-        .gd-link {
+        .gd-btn {
             transition: none;
+        }
+        .gd-btn:hover,
+        .gd-btn:active {
+            transform: none;
         }
     }
 </style>

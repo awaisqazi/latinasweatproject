@@ -6,12 +6,13 @@
 //   2. Our new home [L cream] (NewHomeSection, the former A New Chapter)
 //   2a. LSP Giving Tuesday [D ink] (GivingTuesdayHomeBand, Nov 19 to Dec 1
 //      2026, a thank-you to Dec 3, then gone; mat floor LEFT)
-//   2b. Holiday Gift Drive [D evergreen] (GiftDriveHomeBand, Nov 27 to Dec 13
-//      2026, then gone; tree photo LEFT). Dark against the Giving Tuesday
-//      band above until Dec 3 (documented exception in design.md)
+//   2b. Holiday Gift Drive [L flyer cream] (GiftDriveHomeBand, Nov 27 to
+//      Dec 13 2026, then gone; tree photo LEFT). Its dotted top seam shows
+//      only when the section above is light (Our new home, once the Giving
+//      Tuesday band has stepped back)
 //   2c. LSP Posadas + Posada Craft Days [L paper] (PosadaHomeBand, to Dec 19
-//      2026, then gone; save-the-date RIGHT; its ruled seam shows only when
-//      neither dark band is above it)
+//      2026, then gone; save-the-date RIGHT; its ruled seam shows whenever
+//      the section above is light, i.e. unless Giving Tuesday is right above)
 //   3. Annual Gala 2026 recap [D]
 //   4. Relive the summer [L]
 //   5. ABC7 Windy City Weekend [D]
@@ -276,7 +277,7 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
         showGivingHomeBand in src/data/givingTuesday.js and showPosadaHomeBand
         in src/data/posadaCraftDays.js. */}
     <GivingTuesdayHomeBand />
-    {/* Holiday Gift Drive [D evergreen] (Nov 27 2026, to Sun Dec 13), in date
+    {/* Holiday Gift Drive [L flyer cream] (Nov 27 2026, to Sun Dec 13), in date
         order between the two; tree photo LEFT. Gone after Dec 13 (toggle
         showGiftDriveHomeBand in src/data/giftDrive.js). */}
     <GiftDriveHomeBand />

@@ -2,10 +2,12 @@
 // /links: the Holiday Gift Drive card (LSP's Community Impact Team, on until
 // Sunday, December 13, 2026), between the Giving Tuesday card and the LSP
 // Posadas card (date order: Dec 1, Dec 13, Dec 19). The /giftdrive identity
-// on a phone: evergreen #123d2f, flyer cream text, ornament gold #e3c77e for
-// the countdown only, Fraunces 560 for the title, Rubik for the rest; a
-// small plain crop of the tree photo beside the title (not rotated, no
-// shadow). Every visible string has an EN/ES pair; proper names stay
+// on a phone, from the team's flyer: its cream paper #fef9e6 and ink
+// #040501, its own title lockup as the heading
+// (public/images/giftdrive/lockup.svg; the lettering is the flyer's, in
+// English in both languages, so the alt names it), Rubik for the rest, and
+// the one /giftdrive button (flyer green #04b17a, ink outline, hard ink
+// offset). Every visible string has an EN/ES pair; proper names stay
 // (Holiday Gift Drive, Bethany House, Viator House of Hospitality).
 // Live countdown and auto-off: src/lib/giftDrivePlacement.js. Toggle:
 // showGiftDriveLinksCard in src/data/giftDrive.js.
@@ -35,21 +37,15 @@ const line = (count, tail) => (c ? (c.short ? count : `${count} · ${tail}`) : 
     data-gd-until={giftDrive.endsAt}
   >
     <div class="gdl-in">
-      <div class="gdl-top">
-        <h2 class="gdl-h">
-          <span class="gdl-l">Holiday</span>
-          <span class="gdl-l">Gift Drive</span>
-        </h2>
-        <a href={pageUrl} class="gdl-art" tabindex="-1" aria-hidden="true">
-          <img
-            src={`${base}${giftDrive.photo.webp320}`}
-            alt=""
-            width="320"
-            height="427"
-            decoding="async"
-          />
-        </a>
-      </div>
+      <h2 class="gdl-h">
+        <img
+          src={`${base}images/giftdrive/lockup.svg`}
+          alt="The Latina Sweat Project's Holiday Gift Drive"
+          width="616"
+          height="326"
+          decoding="async"
+        />
+      </h2>
 
       <p class="gdl-lead">
         <span class="lang-en">{pc.lead}</span>
@@ -98,57 +94,33 @@ const line = (count, tail) => (c ? (c.short ? count : `${count} · ${tail}`) : 
 
 <style>
   .gdl {
-    --ever: #123d2f;
-    --cream: #fef8e6;
-    --gold: #e3c77e;
-    --muted: rgb(254 248 230 / 0.74);
-    background: var(--ever);
-    color: var(--cream);
+    --paper: #fef9e6;
+    --ink: #040501;
+    --green: #04b17a;
+    --muted: rgb(4 5 1 / 0.74);
+    background: var(--paper);
+    color: var(--ink);
     font-family: "Rubik", system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
   }
   .gdl [hidden] { display: none !important; }
   :global(.lang-active-en) .gdl .lang-es,
   :global(.lang-active-es) .gdl .lang-en { display: none !important; }
   :global(.lang-active-es) .gdl .lang-es { display: inline; }
-  .gdl-in { padding: 1.25rem 1rem 1.1rem; }
-  .gdl-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-  .gdl-h {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 560;
-    font-variation-settings: "opsz" 144;
-    font-size: clamp(2.2rem, 10.5vw, 2.6rem);
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
-  .gdl-l { display: block; }
-  .gdl-art {
-    flex: none;
-    display: block;
-    width: 4.75rem;
-    margin-top: 0.15rem;
-  }
-  .gdl-art img {
+  .gdl-in { padding: 1.25rem 1rem 1.15rem; }
+  .gdl-h img {
     display: block;
     width: 100%;
+    max-width: 22rem;
     height: auto;
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
-    border-radius: 3px;
+    margin: 0 auto;
   }
   .gdl-lead {
-    margin-top: 0.9rem;
+    margin-top: 1rem;
     font-size: 1rem;
     line-height: 1.45;
   }
   .gdl-count {
     margin-top: 0.7rem;
-    color: var(--gold);
     font-size: 0.98rem;
     font-weight: 700;
     line-height: 1.4;
@@ -164,32 +136,40 @@ const line = (count, tail) => (c ? (c.short ? count : `${count} · ${tail}`) : 
     align-items: center;
     justify-content: space-between;
     min-height: 48px;
-    margin-top: 1.1rem;
-    border-radius: 6px;
+    margin: 1.1rem 3px 0 0;
+    border: 2.5px solid var(--ink);
+    border-radius: 12px;
     padding: 0 1rem;
-    background: var(--cream);
-    color: var(--ever);
+    background: var(--green);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
     font-size: 0.95rem;
     font-weight: 700;
-    transition: background-color 150ms;
+    transition: transform 90ms, box-shadow 90ms;
   }
-  .gdl-btn:hover { background: #fff; }
+  .gdl-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--ink);
+  }
   .gdl-cal {
     display: inline-block;
-    margin-top: 0.85rem;
+    margin-top: 0.95rem;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: underline;
-    text-decoration-color: rgb(254 248 230 / 0.45);
     text-decoration-thickness: 1.5px;
     text-underline-offset: 4px;
   }
   .gdl-btn:focus-visible,
   .gdl-cal:focus-visible {
-    outline: 3px solid var(--gold);
-    outline-offset: 2px;
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
   }
   @media (min-width: 640px) {
     .gdl-in { padding: 1.5rem 1.25rem 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gdl-btn { transition: none; }
+    .gdl-btn:active { transform: none; }
   }
 </style>
