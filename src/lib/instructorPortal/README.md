@@ -28,7 +28,11 @@ schedules. None of that may ever be committed or end up in the JS bundle.
 | Schema, RPCs | `supabase/migrations/20261125120000_instructor_portal.sql` |
 | Content working copy (gitignored) | `private/instructor-portal/content.json` |
 | Push, pull, passcode | `scripts/instructor-portal.mjs` |
+| Push guard (does a push undo staff edits?) | `scripts/instructor-portal-guard.mjs` |
 | Share card | `scripts/render-instructors-og.mjs` to `public/images/instructors/` |
+| Staff editor (dashboard module) | `src/components/admin/instructorPortal/*.svelte` |
+| Editor logic, dashboard RPC client | `src/lib/instructorPortal/editor.js`, `adminRemote.js` |
+| Editor RPCs, history table | `supabase/migrations/20261127120000_instructor_portal_admin.sql` |
 
 ## Server contract
 
@@ -42,6 +46,9 @@ Tables (RLS on, zero grants, zero policies; reachable only through the RPCs):
 - `instructor_portal_content(slug pk, content jsonb, updated_at)`
 - `instructor_portal_sessions(token_hash pk, slug, created_at, expires_at)`
 - `instructor_portal_attempts(id, slug, attempted_at)`
+- `instructor_portal_content_history(id, slug, content, content_updated_at,
+  replaced_at, replaced_by, source)` every document that was replaced, filed by
+  a trigger on `instructor_portal_content`; newest 50 per slug
 
 RPCs callable by `anon` and `authenticated` (all `security definer`, all return
 `jsonb`, none raise on a bad passcode so the attempt row is kept):
@@ -77,7 +84,43 @@ run from the SQL editor or `scripts/instructor-portal.mjs`):
 ```
 instructor_portal_set_passcode(p_slug text, p_new_pass text)   also signs everyone out
 instructor_portal_set_content(p_slug text, p_content jsonb)
+instructor_portal_restore_version(p_slug text, p_history_id bigint)   put a history version back
 ```
+
+Dashboard RPCs (callable by `authenticated` only, and only for a signed-in
+dashboard user who holds the `instructor_portal` module; superusers pass
+implicitly; `security definer`, return `jsonb`, never read the access table):
+
+```
+instructor_portal_admin_get(p_slug text)
+  ok   -> { ok: true, slug, content, updated_at, updated_by }
+  fail -> { ok: false, reason: "forbidden" | "invalid-slug" | "no-portal" }
+
+instructor_portal_admin_save(p_slug text, p_content jsonb, p_expected_updated_at timestamptz)
+  ok   -> { ok: true, slug, updated_at, unchanged, bytes? }
+  fail -> { ok: false, reason: "forbidden" | "conflict" | "locked-sections" | "no-portal"
+                             | "missing-version" | "invalid-slug" | "not-an-object"
+                             | "bad-schema" | "too-large",
+            updated_at? }          (the live version, on "conflict")
+```
+
+Rules:
+
+- Holding the module means reading the whole portal without the passcode and
+  editing it. Grant it in User Access to the people who run the portal, nobody
+  else.
+- A save may change only the top-level keys `updated`, `week`, `dates` and
+  `faq`. Any other difference from the stored document is refused
+  (`locked-sections`). The list lives in `v_editable` (SQL) and `EDITABLE_KEYS`
+  (`editor.js`); change both together, in a new migration.
+- `p_expected_updated_at` is the `updated_at` the editor loaded. If the row has
+  moved, someone else saved first: `conflict`, nothing written. The client must
+  send the string back untouched (it carries microseconds; a JavaScript `Date`
+  rounds them off).
+- A save cannot create a portal. The slug's row must already exist.
+- The same shape checks as `instructor_portal_set_content` (slug, object,
+  `schema` 1, size cap). The full document check is `validateContent`, run by
+  the editor before it saves and by the script before it pushes.
 
 ## Client API (`src/lib/instructorPortal/remote.js`)
 
@@ -186,14 +229,102 @@ Behaviour the page derives from the data (do not hard-code dates in components):
 
 ## Editing content
 
+There are two ways in. The database copy is always the copy of record.
+
+### In the dashboard: the parts that change every week
+
+`/admin#instructor-portal`, for dashboard users who hold the Instructor Portal
+module (User Access; see the rules above for what the grant means).
+
+What can be edited there:
+
+- `week`: add this week's entry (date range, headline, notes as a plain list,
+  shoutouts), edit or remove an entry.
+- `dates`: add, edit, remove.
+- `faq`: the answer text, and turning `pending` off when a policy is written.
+  Questions, groups and ids are read only.
+- `updated` is stamped with today's date (America/Chicago) on every save.
+
+Everything else, the handbook included, is read only there, and the database
+enforces it (`locked-sections`).
+
+How it behaves:
+
+- The draft lives in the browser's memory only. It is never written to
+  `localStorage`, `sessionStorage`, a URL or the console.
+- Save first runs `prepareForSave` (drops blank rows and blank optional fields,
+  sorts weeks and dates) and then `validateContent`. Errors are listed in plain
+  words (`plainProblems`) and block the save. Warnings are shown and do not.
+- Preview renders the prepared document with the real portal views
+  (`WeekView`, `HandbookView`) before anything is saved. Links are switched off
+  inside it.
+- Two people editing: on `conflict` the editor loads the newer document. If the
+  two people changed different sections, the person's changes are put on top of
+  it (`rebaseDraft`) and they save again. If both changed the same section,
+  their version stays on screen and they choose when to load the other one.
+- Instructors see a saved change the next time they open or reload the portal.
+- A bad edit can be put back: the document it replaced is in
+  `instructor_portal_content_history`. The owner runs
+  `instructor_portal_restore_version` (runbook at the end of
+  `20261127120000_instructor_portal_admin.sql`).
+
+Testing the editor: under `astro dev`, open
+`/admin?slug=instructors-dev#instructor-portal`. It is the same DEV-only `?slug=`
+switch the portal page uses, and the editor shows a banner while it is on. Never
+test against `instructors`.
+
+To open another section for editing: add its key to `v_editable` in a new
+migration and to `EDITABLE_KEYS` in `editor.js`, then build its form.
+
+### From the working copy: everything else
+
 ```
+node scripts/instructor-portal.mjs pull                     fetch what is live into the working copy folder
 edit private/instructor-portal/content.json
 preview: astro dev, then /instructors/?local=1
 node scripts/instructor-portal.mjs check                    validate against schema 1
 node scripts/instructor-portal.mjs push --slug instructors-dev
 node scripts/instructor-portal.mjs push                     the real portal
-node scripts/instructor-portal.mjs pull                     fetch what is live into the working copy folder
 ```
 
-The database copy is the copy of record. The working copy can always be rebuilt
-with `pull`.
+**Pull before you edit.** Staff now change the live document every week, so
+`content.json` goes stale, and `push` replaces the whole document. `pull` writes
+`pulled-<slug>.json` next to `content.json`, never overwrites it, and says which
+sections differ, so bring `week`, `dates` and `faq` across from the pulled file
+(or start from it) before you edit and push.
+
+**`push` stops rather than undo staff edits.** Before it writes, it reads what
+is live and compares each top-level section three ways: what this computer last
+pushed, what is live now, and what `content.json` holds. A section that changed
+live and that `content.json` would replace with something else stops the push,
+with the section names and the steps to take. Nothing is written. A section
+staff changed that the working copy already carries is fine, and so is one only
+the working copy changed. The `updated` date stamp alone never stops a push.
+
+- The record of the last push is `private/instructor-portal/.push-base.json`:
+  the live version and one hash per section, per slug. No content. Gitignored
+  with the rest of the folder, and safe to delete.
+- With no record (a new computer, a deleted file), the push goes ahead while
+  nobody has ever saved the slug from the dashboard. Once staff have, it stops
+  and asks for one `pull`, a look, and `push --overwrite`.
+- `push --overwrite` replaces the live sections on purpose. After the staff
+  editor's migration the replaced document is in the history table either way:
+  put it back with `instructor_portal_restore_version`.
+- When live already equals `content.json`, nothing is written, so an open
+  editor in the dashboard does not get a needless "someone else saved".
+- The write itself is conditional on the version that was just read, with the
+  row locked, so a dashboard save cannot slip in between the check and the
+  write. If one tries, the push answers "changed while this push was running":
+  run it again.
+
+## Tests
+
+```
+node src/lib/instructorPortal/test/run.mjs                  rich text, dates, search, validateContent
+node src/lib/instructorPortal/test/editor.test.mjs          the editor's document logic
+node src/lib/instructorPortal/test/adminRemote.test.mjs     the dashboard RPC client, against a fake
+node src/lib/instructorPortal/test/pushGuard.test.mjs       the push script's stale-copy guard
+```
+
+Fixtures are invented. No real name, address, number or portal sentence belongs
+in a test.

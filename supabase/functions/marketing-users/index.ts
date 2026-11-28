@@ -21,6 +21,7 @@ const MODULE_KEYS = [
   "fundraising",
   "inventory",
   "time_clock",
+  "instructor_portal",
 ] as const;
 
 type Profile = {

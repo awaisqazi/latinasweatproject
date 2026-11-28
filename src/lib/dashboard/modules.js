@@ -57,6 +57,11 @@ export const MODULES = [
     label: "Time Clock",
     description: "Studio check-ins, timesheets, and kiosk messages.",
   },
+  {
+    key: "instructor_portal",
+    label: "Instructor Portal",
+    description: "Edit the weekly note, dates, and FAQ answers on the instructor portal. Lets the person read the whole portal.",
+  },
 ];
 
 export const MODULE_KEYS = MODULES.map((module) => module.key);

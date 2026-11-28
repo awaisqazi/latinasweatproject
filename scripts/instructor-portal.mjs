@@ -11,6 +11,10 @@
 // from argv, and is never printed or written to disk. The keychain token is never
 // printed. Content is never printed either, only its size and timestamp.
 //
+// push will not replace live changes it has not seen. Staff edit the live
+// document from the dashboard, so push first reads what is live and stops when
+// the working copy would undo their work. The rules: instructor-portal-guard.mjs.
+//
 // Usage: node scripts/instructor-portal.mjs --help
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -18,10 +22,26 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateContent } from "../src/lib/instructorPortal/schema.js";
+import {
+  VERSION_RE,
+  HISTORY_EXISTS_QUERY,
+  changedSinceBase,
+  dashboardSavesQuery,
+  differingSections,
+  guardedPushQuery,
+  judgePush,
+  liveQuery,
+  makeBase,
+  readBase,
+  refusalText,
+  withBase,
+} from "./instructor-portal-guard.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PRIVATE_DIR = path.join(ROOT, "private/instructor-portal");
 const CONTENT_FILE = path.join(PRIVATE_DIR, "content.json");
+// Which live version this computer last pushed, per slug. Hashes, no content.
+const BASE_FILE = path.join(PRIVATE_DIR, ".push-base.json");
 const PROJECT_REF = "jcseaxtvsozylsbmykka";
 const API = `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`;
 const DEFAULT_SLUG = "instructors";
@@ -30,13 +50,16 @@ const B64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
 const HELP = `Instructor portal content and passcode
 
-  node scripts/instructor-portal.mjs <command> [--slug <slug>]
+  node scripts/instructor-portal.mjs <command> [--slug <slug>] [--overwrite]
 
 Commands
   check            validate private/instructor-portal/content.json (schema 1)
-  push             check, then store it as the live content for the slug
+  push             check, then store it as the live content for the slug.
+                   Stops when the live portal has changes content.json would
+                   undo (staff edit it from the dashboard): pull first.
   pull             fetch the live content into private/instructor-portal/pulled-<slug>.json
-                   (content.json is never overwritten)
+                   (content.json is never overwritten) and say which
+                   sections differ
   set-passcode     set or rotate the passcode; signs everyone out of that slug.
                    Reads PORTAL_PASSCODE, or prompts with echo off when unset.
   status           access row, content row and updated_at, live sessions,
@@ -45,6 +68,7 @@ Commands
 
 Options
   --slug <slug>    instructors (default) or instructors-dev for browser testing
+  --overwrite      push only: replace the live sections anyway
   --help, -h       this text
 
 push, pull, set-passcode, status and clear-lockout use the Supabase CLI login
@@ -60,10 +84,11 @@ function fail(message, code = 1) {
 }
 
 function parseArgs(argv) {
-  const args = { command: null, slug: DEFAULT_SLUG, help: false };
+  const args = { command: null, slug: DEFAULT_SLUG, help: false, overwrite: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--help" || a === "-h") args.help = true;
+    else if (a === "--overwrite") args.overwrite = true;
     else if (a === "--slug") {
       const v = argv[++i];
       if (v === undefined) fail("--slug needs a value");
@@ -96,6 +121,29 @@ function loadContentFile() {
     fail(`${path.relative(ROOT, CONTENT_FILE)} is not valid JSON (${e.message})`);
   }
   return doc;
+}
+
+// The working copy when it is there and parses, else null. For comparisons only.
+function readContentFileQuietly() {
+  try {
+    const doc = JSON.parse(readFileSync(CONTENT_FILE, "utf8"));
+    return doc && typeof doc === "object" && !Array.isArray(doc) ? doc : null;
+  } catch {
+    return null;
+  }
+}
+
+function readBaseState() {
+  try {
+    return JSON.parse(readFileSync(BASE_FILE, "utf8"));
+  } catch {
+    return null; // missing or unreadable: the same as never having pushed
+  }
+}
+
+function writeBase(slug, base) {
+  mkdirSync(PRIVATE_DIR, { recursive: true });
+  writeFileSync(BASE_FILE, `${JSON.stringify(withBase(readBaseState(), slug, base), null, 2)}\n`);
 }
 
 function runCheck() {
@@ -251,30 +299,99 @@ async function newPasscode() {
  * commands
  * ------------------------------------------------------------------ */
 
-async function runPush(slug) {
+// What is live for the slug: { content, version, updatedAt }, or null when the
+// slug has no content row yet.
+async function fetchLive(slug) {
+  const rows = await sql(liveQuery(slug));
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  let content = rows[0].content;
+  if (typeof content === "string") content = JSON.parse(content);
+  const version = rows[0].version;
+  if (typeof version !== "string" || !VERSION_RE.test(version)) {
+    fail("the live content row came back without a usable version. Nothing was changed.");
+  }
+  return { content, version, updatedAt: rows[0].updated_at };
+}
+
+// How many times staff have saved the slug from the dashboard. Zero when the
+// history table is not there yet (the staff editor's migration is not applied).
+async function countDashboardSaves(slug) {
+  const has = await sql(HISTORY_EXISTS_QUERY);
+  if (!has?.[0]?.present) return 0;
+  const rows = await sql(dashboardSavesQuery(slug));
+  return Number(rows?.[0]?.n) || 0;
+}
+
+function pulledFile(slug) {
+  return path.join(PRIVATE_DIR, `pulled-${slug}.json`);
+}
+
+async function runPush(slug, { overwrite = false } = {}) {
   const doc = runCheck();
+  const live = await fetchLive(slug);
+  const base = readBase(readBaseState(), slug);
+  const dashboardSaves = live && !base ? await countDashboardSaves(slug) : 0;
+  const verdict = judgePush({
+    local: doc,
+    live: live ? live.content : null,
+    liveVersion: live ? live.version : null,
+    base,
+    dashboardSaves,
+  });
+
+  if (verdict.action === "same") {
+    writeBase(slug, makeBase(live.content, live.version));
+    console.log(`in step  slug=${slug}  the live portal already matches content.json, nothing to push`);
+    return;
+  }
+  if (verdict.action === "refuse") {
+    if (!overwrite) {
+      fail(
+        refusalText({
+          why: verdict.why,
+          sections: verdict.sections,
+          slug,
+          liveVersion: live.version,
+          pulledFile: path.relative(ROOT, pulledFile(slug)),
+        }),
+      );
+    }
+    console.log(`overwrite  replacing live sections: ${verdict.sections.join(", ")}`);
+  }
+
   const json = JSON.stringify(doc);
-  const query =
-    `select public.instructor_portal_set_content('${slug}', ` +
-    `convert_from(decode('${b64(json)}', 'base64'), 'utf8')::jsonb) as r;`;
-  const r = firstResult(await sql(query), "r");
+  const rows = await sql(guardedPushQuery(slug, b64(json), live ? live.version : null));
+  const r = firstResult(rows, "r");
+  if (r && r.ok === false && r.reason === "moved") {
+    fail("the live portal changed while this push was running. Nothing was changed. Run push again.");
+  }
   if (!r || r.ok !== true) fail(`push refused: ${r?.reason || "no result"}`);
+  const version = rows?.[0]?.version;
+  if (typeof version === "string" && VERSION_RE.test(version)) writeBase(slug, makeBase(doc, version));
   console.log(`pushed  slug=${slug}  updated_at=${r.updated_at}  bytes=${r.bytes}`);
 }
 
 async function runPull(slug) {
-  const rows = await sql(
-    `select content, updated_at from public.instructor_portal_content where slug = '${slug}';`,
-  );
-  if (!Array.isArray(rows) || rows.length === 0) fail(`no content stored for slug ${slug}`);
-  let content = rows[0].content;
-  if (typeof content === "string") content = JSON.parse(content);
+  const live = await fetchLive(slug);
+  if (!live) fail(`no content stored for slug ${slug}`);
   mkdirSync(PRIVATE_DIR, { recursive: true });
-  const out = path.join(PRIVATE_DIR, `pulled-${slug}.json`);
-  const body = `${JSON.stringify(content, null, 2)}\n`;
+  const out = pulledFile(slug);
+  const body = `${JSON.stringify(live.content, null, 2)}\n`;
   writeFileSync(out, body);
-  console.log(`pulled  slug=${slug}  updated_at=${rows[0].updated_at}  bytes=${Buffer.byteLength(body)}`);
+  console.log(`pulled  slug=${slug}  updated_at=${live.updatedAt}  bytes=${Buffer.byteLength(body)}`);
   console.log(`wrote   ${path.relative(ROOT, out)} (content.json left as it was)`);
+
+  // Section names only, so the owner knows what to bring across.
+  const local = readContentFileQuietly();
+  if (local) {
+    const differs = differingSections(local, live.content);
+    console.log(differs.length ? `differs from content.json in: ${differs.join(", ")}` : "same as content.json");
+  }
+  const base = readBase(readBaseState(), slug);
+  if (base && base.version !== live.version) {
+    const changed = changedSinceBase(base, live.content);
+    if (changed.length) console.log(`changed live since this computer last pushed: ${changed.join(", ")}`);
+  }
 }
 
 async function runSetPasscode(slug) {
@@ -330,13 +447,14 @@ if (args.help || !args.command) {
   process.exit(args.help ? 0 : 1);
 }
 const slug = checkSlug(args.slug);
+if (args.overwrite && args.command !== "push") fail("--overwrite only goes with push. See --help.");
 
 switch (args.command) {
   case "check":
     runCheck();
     break;
   case "push":
-    await runPush(slug);
+    await runPush(slug, { overwrite: args.overwrite });
     break;
   case "pull":
     await runPull(slug);

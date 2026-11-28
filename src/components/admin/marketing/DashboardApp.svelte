@@ -3,6 +3,7 @@
   import {
     AlertCircle,
     ArrowLeftRight,
+    BookOpen,
     CalendarDays,
     ChevronLeft,
     ChevronRight,
@@ -68,6 +69,7 @@
   import SpacesView from "../spaces/SpacesView.svelte";
   import InventoryView from "../inventory/InventoryView.svelte";
   import TimeClockView from "../timeclock/TimeClockView.svelte";
+  import InstructorPortalAdminView from "../instructorPortal/InstructorPortalAdminView.svelte";
 
   const LOGIN_PATH = "/admin/marketing/login";
   const DASHBOARD_PATH = "/admin/marketing";
@@ -108,6 +110,7 @@
     { id: "spaces", label: "Studio Spaces", icon: DoorOpen, section: "Operations", modules: ["spaces"] },
     { id: "inventory", label: "Inventory", icon: Package, section: "Operations", modules: ["inventory"] },
     { id: "time-clock", label: "Time Clock", icon: Clock, section: "Operations", modules: ["time_clock"] },
+    { id: "instructor-portal", label: "Instructor Portal", icon: BookOpen, section: "Operations", modules: ["instructor_portal"] },
     { id: "user-access", label: "User Access", icon: Users, section: "Admin", superuserOnly: true },
   ];
 
@@ -149,6 +152,7 @@
   let spacesRefreshKey = 0;
   let inventoryRefreshKey = 0;
   let timeClockRefreshKey = 0;
+  let instructorPortalRefreshKey = 0;
   let selectedKanbanProject = null;
   let createDrawerOpen = false;
   let publishScheduleProject = null;
@@ -673,6 +677,7 @@
       spaces: () => (spacesRefreshKey += 1),
       inventory: () => (inventoryRefreshKey += 1),
       "time-clock": () => (timeClockRefreshKey += 1),
+      "instructor-portal": () => (instructorPortalRefreshKey += 1),
       "user-access": () => (userAccessRefreshKey += 1),
       admin: () => {
         adminRefreshKey += 1;
@@ -1833,6 +1838,12 @@
               {supabase}
               {profile}
               refreshKey={timeClockRefreshKey}
+            />
+          {:else if activeView === "instructor-portal"}
+            <InstructorPortalAdminView
+              {supabase}
+              {profile}
+              refreshKey={instructorPortalRefreshKey}
             />
           {:else if activeView === "publishing"}
             <PublishingCalendarView
