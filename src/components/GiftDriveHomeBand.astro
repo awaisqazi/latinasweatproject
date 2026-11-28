@@ -1,0 +1,233 @@
+---
+// Homepage band for the Holiday Gift Drive (LSP's Community Impact Team, on
+// until Sunday, December 13, 2026). Between the Giving Tuesday band and the
+// LSP Posadas band (date order: Dec 1, Dec 13, Dec 19). DARK in the cadence:
+// the /giftdrive identity, evergreen #123d2f with flyer cream text, ornament
+// gold #e3c77e for the countdown line only, Fraunces 560 for the title,
+// Rubik for the rest. The tree photo LEFT on desktop (plain rectangle, 3:4);
+// on phones the title, then the photo (4:5), then the copy, with the DOM
+// order heading, copy, photo for assistive tech (grid-template-areas).
+//
+// Live (src/lib/giftDrivePlacement.js): the countdown in Chicago days, and
+// the band removes itself after giftDrive.endsAt (data-gd-until). While this
+// band sits above the Posadas band, that band draws no seam (dark above
+// light); see syncPosadaSeam in src/lib/posadaPlacement.js. Toggle:
+// showGiftDriveHomeBand in src/data/giftDrive.js.
+import {
+  giftDrive,
+  giftDrivePlacementCopy as pc,
+  giftDrivePhase,
+  giftDriveCountdown,
+  showGiftDriveHomeBand,
+} from "@/data/giftDrive";
+
+const nowMs = Date.now();
+const show = showGiftDriveHomeBand && giftDrivePhase(nowMs) !== "off";
+const c = giftDriveCountdown(nowMs);
+const base = import.meta.env.BASE_URL;
+const pageUrl = `${base}${giftDrive.pagePath}`;
+const icsHref = `${base}${giftDrive.calendarFile}`;
+const p = giftDrive.photo;
+const countText = c ? (c.short ? c.en : `${c.en} · ${pc.due}`) : "";
+---
+
+{show && (
+  <section
+    id="gift-drive"
+    class="gdb"
+    aria-labelledby="gdb-title"
+    data-gd-place
+    data-gd-until={giftDrive.endsAt}
+  >
+    <div class="gdb-wrap">
+      <h2 id="gdb-title" class="gdb-h">{pc.title}</h2>
+      <div class="gdb-copy">
+        <p class="gdb-lead">{pc.lead}</p>
+        <p class="gdb-count" data-gd-countdown data-lang="en" data-gd-tail={pc.due}>{countText}</p>
+        <p class="gdb-muted">{pc.who}</p>
+        <div class="gdb-cta">
+          <a
+            href={pageUrl}
+            class="gdb-btn"
+            data-conversion-event="giftdrive_page_click"
+            data-conversion-context="home_giftdrive_band"
+          >{pc.cta}</a>
+          <a
+            href={icsHref}
+            class="gdb-link"
+            download
+            data-conversion-event="giftdrive_calendar_click"
+            data-conversion-context="home_giftdrive_band"
+          >{pc.calendar}</a>
+        </div>
+      </div>
+      <a
+        href={pageUrl}
+        class="gdb-art"
+        tabindex="-1"
+        aria-hidden="true"
+        data-conversion-event="giftdrive_page_click"
+        data-conversion-context="home_giftdrive_band_art"
+      >
+        <picture>
+          <source
+            type="image/webp"
+            srcset={`${base}${p.webp640} 640w, ${base}${p.webp960} 960w`}
+            sizes="(min-width: 1024px) 368px, calc(100vw - 2rem)"
+          />
+          <img
+            src={`${base}${p.jpg}`}
+            alt=""
+            width={p.width}
+            height={p.height}
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+      </a>
+    </div>
+  </section>
+)}
+
+<script>
+  import { initGiftDrivePlacements } from "@/lib/giftDrivePlacement.js";
+  initGiftDrivePlacements();
+</script>
+
+<style>
+  .gdb {
+    --ever: #123d2f;
+    --cream: #fef8e6;
+    --gold: #e3c77e;
+    --muted: rgb(254 248 230 / 0.74);
+    background: var(--ever);
+    color: var(--cream);
+    font-family: "Rubik", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  .gdb [hidden] { display: none !important; }
+  .gdb-wrap {
+    display: grid;
+    grid-template-areas: "head" "art" "copy";
+    margin: 0 auto;
+    max-width: 80rem;
+    padding: 3.5rem 1rem 4.5rem;
+  }
+  .gdb-h {
+    grid-area: head;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560;
+    font-variation-settings: "opsz" 144;
+    font-size: clamp(2.75rem, 12vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .gdb-copy { grid-area: copy; }
+  .gdb-lead {
+    margin-top: 1.5rem;
+    max-width: 34rem;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .gdb-count {
+    margin-top: 1rem;
+    max-width: 34rem;
+    color: var(--gold);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .gdb-muted {
+    margin-top: 0.6rem;
+    max-width: 34rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .gdb-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .gdb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    border-radius: 6px;
+    padding: 0 2rem;
+    background: var(--cream);
+    color: var(--ever);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    transition: background-color 150ms;
+  }
+  .gdb-btn:hover { background: #fff; }
+  .gdb-link {
+    color: var(--cream);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgb(254 248 230 / 0.45);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+  }
+  .gdb-link:hover { text-decoration-color: var(--cream); }
+  .gdb-btn:focus-visible,
+  .gdb-link:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .gdb-art {
+    grid-area: art;
+    display: block;
+    margin-top: 1.75rem;
+  }
+  .gdb-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    max-height: 70vh;
+    object-fit: cover;
+    object-position: 50% 55%;
+    border-radius: 3px;
+    background: #1b4a3a;
+  }
+
+  @media (min-width: 640px) {
+    .gdb-wrap { padding: 4.5rem 1.5rem 5.5rem; }
+    .gdb-art { width: 75%; }
+  }
+  @media (min-width: 1024px) {
+    .gdb-wrap {
+      /* The pair is centred in the band so the margins match left and right. */
+      grid-template-columns: 23rem minmax(0, 34rem);
+      justify-content: center;
+      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-areas:
+        "art ."
+        "art head"
+        "art copy"
+        "art .";
+      column-gap: 6rem;
+      padding: 6rem 2rem;
+    }
+    .gdb-art {
+      width: 100%;
+      margin-top: 0;
+    }
+    .gdb-art img {
+      aspect-ratio: 3 / 4;
+      max-height: none;
+    }
+  }
+</style>

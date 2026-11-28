@@ -37,6 +37,9 @@ export default defineConfig({
     // Aliases for the Posada Craft Days volunteer sign-up
     '/posadas': '/posada',
     '/craftdays': '/posada',
+    // Holiday Gift Drive (to Dec 13 2026); other cases in 404.astro.
+    '/gift-drive': '/giftdrive',
+    '/holidaygiftdrive': '/giftdrive',
     // Alias for the Halloween + Día de los Muertos weekend waiver
     '/waivers': '/waiver',
     // Aliases for the passcode-gated instructor portal

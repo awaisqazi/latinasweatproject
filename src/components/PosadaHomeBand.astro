@@ -31,12 +31,16 @@ import {
   nextCraftDay,
 } from "@/data/posadaCraftDays";
 import { showGivingHomeBand, givingPlacementPhase } from "@/data/givingTuesday";
+import { showGiftDriveHomeBand, giftDrivePhase } from "@/data/giftDrive";
 
 const nowMs = Date.now();
 const ph = posadaPlacementPhase(nowMs);
 const show = showPosadaHomeBand && ph !== "off";
-// No Giving Tuesday band above: this band follows the cream "Our new home".
-const seam = !(showGivingHomeBand && givingPlacementPhase(nowMs) !== "off");
+// No dark band above (Giving Tuesday, or the Holiday Gift Drive right above
+// it until Dec 13): this band follows the cream "Our new home".
+const seam =
+  !(showGivingHomeBand && givingPlacementPhase(nowMs) !== "off") &&
+  !(showGiftDriveHomeBand && giftDrivePhase(nowMs) !== "off");
 const saveDate = ph === "save-the-date";
 const raffleOpen = nowMs < Date.parse(craftRaffle.endsAt);
 const next = nextCraftDay(nowMs);
@@ -161,7 +165,8 @@ const icsHref = `${base}${posadaEvent.calendarFile}`;
     overflow-x: clip;
   }
   .pcb [hidden] { display: none !important; }
-  /* When the Giving Tuesday band is gone (after Dec 3, or toggled off) this
+  /* When the Giving Tuesday and Holiday Gift Drive bands are gone (after
+     Dec 3 and Dec 13, or toggled off) this
      paper band sits right under the cream "Our new home": two warm whites
      touching. The seam is the save-the-date's own hand-ruled ink line along
      the top of the band (documented exception, like the DDLM picado seam).

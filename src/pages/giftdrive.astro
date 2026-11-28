@@ -1,0 +1,853 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import {
+    giftDrive,
+    giftDriveSteps,
+    giftDriveChecklist,
+    giftDriveChecklistKey,
+    giftDriveHouses,
+    giftDrivePhase,
+    giftDriveCountdown,
+} from "@/data/giftDrive.js";
+import { craftDaysPlace } from "@/data/posadaCraftDays.js";
+
+// The Holiday Gift Drive, run by LSP's Community Impact Team, on until
+// Sunday, December 13, 2026. Public and indexable; linked from the homepage
+// band and /links, not from nav or footer. Every fact comes from the team's
+// flyer via src/data/giftDrive.js; the address from craftDaysPlace.
+//
+// Look: the real tree at the studio and the flyer's paper. Evergreen
+// #123d2f, flyer cream #fef8e6, one ornament gold #e3c77e (on evergreen
+// only). Fraunces 560 for display, Rubik for everything read. Sections
+// alternate cream / evergreen. The photo is a plain rectangle; the two flyer
+// pages are shown whole.
+//
+// Closed state (from giftDrive.endsAt, at build time and in the browser via
+// src/lib/giftDrivePlacement.js): a thank-you line in the hero, How it works,
+// the checklist and Team up hidden; Who the gifts are for and the questions
+// email stay. Dev only: ?now=<ISO>.
+
+const nowMs = Date.now();
+const closed = giftDrivePhase(nowMs) === "off";
+const countdown = giftDriveCountdown(nowMs);
+const icsHref = `/${giftDrive.calendarFile}`;
+const mail = `mailto:${giftDrive.contactEmail}`;
+// The address may only break before the @ on narrow phones.
+const [mailUser, mailDomain] = giftDrive.contactEmail.split("@");
+const p = giftDrive.photo;
+---
+
+<Layout
+    title="Holiday Gift Drive | Latina Sweat Project"
+    description="The Latina Sweat Project's Holiday Gift Drive, on now until Sunday, December 13: take an ornament tag off the tree at LSP, buy a few items from one person's holiday wish list (up to $75), and bring them back. Gifts go to individuals at Bethany House and Viator House of Hospitality."
+    socialImage="images/giftdrive/giftdrive-og.jpg"
+    socialImageAlt="Holiday Gift Drive. Take a tag. Fill a wish list. Gifts due Sunday, December 13, LSP at Mural Park."
+    socialImageWidth={1200}
+    socialImageHeight={630}
+    socialImageType="image/jpeg"
+    twitterCard="summary_large_image"
+>
+    <Header />
+    <main class="gd-page font-sans" data-gd-page>
+        {/* ============================== HERO ============================== */}
+        <section class="gd-cream gd-hero">
+            <div class="gd-hero-grid">
+                <div class="gd-hero-head">
+                    <p class="gd-pre">The Latina Sweat Project's</p>
+                    <h1 class="gd-h1">
+                        <span>Holiday</span>
+                        <span>Gift Drive</span>
+                    </h1>
+                </div>
+
+                <figure class="gd-hero-photo">
+                    <picture>
+                        <source
+                            type="image/webp"
+                            srcset={`/${p.webp640} 640w, /${p.webp960} 960w`}
+                            sizes="(min-width: 1024px) 448px, calc(100vw - 2rem)"
+                        />
+                        <img
+                            src={`/${p.jpg}`}
+                            alt={p.alt}
+                            width={p.width}
+                            height={p.height}
+                            loading="eager"
+                            decoding="async"
+                            fetchpriority="high"
+                        />
+                    </picture>
+                </figure>
+
+                <div class="gd-hero-body">
+                    <div data-gd-state="open" hidden={closed}>
+                        <p class="gd-lead">
+                            Take an ornament tag off our tree, buy a few things from one
+                            person's holiday wish list, and bring them back by
+                            {giftDrive.dueLabel.replace(/ (\d+)$/, " $1")}.
+                        </p>
+                        <p class="gd-count" data-gd-countdown data-lang="en">{countdown?.en}</p>
+                        <div class="gd-cta">
+                            <a href="#how" class="gd-btn gd-btn-ink">How it works</a>
+                            <a
+                                href={icsHref}
+                                class="gd-link"
+                                download
+                                data-conversion-event="giftdrive_calendar_click"
+                                data-conversion-context="giftdrive_page"
+                            >Add December 13 to your calendar</a>
+                        </div>
+                        <p class="gd-place">
+                            The tree is up at LSP,
+                            <a href={craftDaysPlace.mapUrl} target="_blank" rel="noopener" class="gd-link"
+                                >{craftDaysPlace.name}, {craftDaysPlace.street}, {craftDaysPlace.floor}</a
+                            >.
+                        </p>
+                    </div>
+                    <div data-gd-state="closed" hidden={!closed}>
+                        <p class="gd-lead">
+                            The drive closed on {giftDrive.dueLabel}. Thank you to everyone
+                            who took a tag.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* ========================== HOW IT WORKS ========================== */}
+        <section id="how" class="gd-ever gd-sec" data-gd-state="open" hidden={closed} aria-labelledby="gd-how-h">
+            <div class="gd-wrap">
+                <h2 id="gd-how-h" class="gd-h2">How it works</h2>
+                <ol class="gd-steps">
+                    {giftDriveSteps.map((s, i) => (
+                        <li class="gd-step">
+                            <span class="gd-num" aria-hidden="true">{i + 1}</span>
+                            <h3 class="gd-step-title">{s.title}</h3>
+                            <p class="gd-step-body">{s.body}</p>
+                        </li>
+                    ))}
+                </ol>
+            </div>
+        </section>
+
+        {/* ===================== WHO THE GIFTS ARE FOR ===================== */}
+        <section class="gd-cream gd-sec gd-who" aria-labelledby="gd-who-h">
+            <div class="gd-wrap gd-who-grid">
+                <div class="gd-who-head">
+                <h2 id="gd-who-h" class="gd-h2">Who the gifts are for</h2>
+                <p class="gd-lead gd-measure">
+                    Every tag is a wish list from someone at Bethany House or
+                    Viator House.
+                </p>
+                <p class="gd-body gd-measure gd-muted gd-team">
+                    The drive is run by LSP's {giftDrive.team}.
+                </p>
+                </div>
+                <div class="gd-who-body">
+                <div class="gd-houses">
+                    {giftDriveHouses.map((h) => (
+                        <p class="gd-house"><strong>{h.name}</strong> {h.line}</p>
+                    ))}
+                </div>
+                <p class="gd-body gd-measure gd-notes">
+                    They share a space, so we want the gifts to be as equal as possible.
+                    That is why every tag has a ${giftDrive.maxBudget} limit. Not everyone
+                    celebrates Christmas, so please keep wrapping and gifts to a general
+                    holiday theme.
+                </p>
+                <p class="gd-body gd-measure gd-team" data-gd-state="closed" hidden={!closed}>
+                    Questions? Email
+                    <a href={mail} class="gd-link gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
+                        >{mailUser}<wbr />@{mailDomain}</a
+                    >
+                </p>
+                </div>
+            </div>
+        </section>
+
+        {/* =========================== CHECKLIST =========================== */}
+        <section class="gd-ever gd-sec" data-gd-state="open" hidden={closed} aria-labelledby="gd-check-h">
+            <div class="gd-wrap gd-check-grid">
+                <div class="gd-check-copy">
+                    <h2 id="gd-check-h" class="gd-h2">Before you bring it back</h2>
+                    <p class="gd-body gd-measure gd-check-intro">
+                        Tick these off as you go. They stay ticked on this device.
+                    </p>
+                    <p class="gd-body gd-measure gd-check-note">
+                        Can't finish your gift? Let us know as soon as you can and return
+                        your tag so someone else can complete it.
+                    </p>
+                    <p class="gd-body gd-check-mail">
+                        <a href={mail} class="gd-link gd-link-cream gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
+                            >{mailUser}<wbr />@{mailDomain}</a
+                        >
+                    </p>
+                </div>
+
+                <div class="gd-tag" id="gd-tag">
+                    <fieldset class="gd-tag-in">
+                        <legend class="sr-only">Before you bring it back</legend>
+                        <ul class="gd-list">
+                            {giftDriveChecklist.map((item) => (
+                                <li>
+                                    <label class="gd-row">
+                                        <input type="checkbox" class="gd-box" data-key={item.key} />
+                                        <span>{item.label}</span>
+                                    </label>
+                                </li>
+                            ))}
+                        </ul>
+                        <p class="gd-done" id="gd-done" aria-live="polite"></p>
+                        <button type="button" class="gd-reset" id="gd-reset" hidden>Start over</button>
+                    </fieldset>
+                </div>
+            </div>
+        </section>
+
+        {/* ============================ TEAM UP ============================ */}
+        <section class="gd-cream gd-sec gd-close" data-gd-state="open" hidden={closed} aria-labelledby="gd-team-h">
+            <div class="gd-wrap gd-close-grid">
+                <div class="gd-team-head">
+                    <h2 id="gd-team-h" class="gd-h2">Team up</h2>
+                    <p class="gd-lead gd-measure">
+                        Feel free to team up with someone to complete a gift. Send them this page.
+                    </p>
+                    <button
+                        type="button"
+                        class="gd-btn gd-btn-ink gd-share"
+                        id="gd-share"
+                        data-conversion-event="giftdrive_share_click"
+                        data-conversion-context="giftdrive_page"
+                    >Share this page</button>
+                </div>
+
+                <div class="gd-flyers">
+                    {giftDrive.flyers.map((f) => (
+                        <a href={`/${f.webp}`} target="_blank" rel="noopener" class="gd-flyer">
+                            <picture>
+                                <source
+                                    type="image/webp"
+                                    srcset={`/${f.webp640} 640w, /${f.webp} 989w`}
+                                    sizes="(min-width: 1152px) 528px, (min-width: 640px) 46vw, calc(100vw - 2rem)"
+                                />
+                                <img src={`/${f.jpg}`} alt={f.alt} width="989" height="1280" loading="lazy" decoding="async" />
+                            </picture>
+                        </a>
+                    ))}
+                </div>
+                <p class="gd-flyer-note gd-muted">Tap or click a page to open it full size.</p>
+
+                <div class="gd-ask">
+                    <h2 class="gd-h2">Questions?</h2>
+                    <p class="gd-lead gd-measure">
+                        Email
+                        <a href={mail} class="gd-link gd-mail" data-conversion-event="giftdrive_email_click" data-conversion-context="giftdrive_page"
+                            >{mailUser}<wbr />@{mailDomain}</a
+                        >
+                    </p>
+                    <p class="gd-body gd-schedule">
+                        <a href="/schedule" class="gd-link">Class schedule</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    .gd-page {
+        --gd-ever: #123d2f;
+        --gd-cream: #fef8e6;
+        --gd-gold: #e3c77e;
+        --gd-ink-muted: rgb(18 61 47 / 0.74);
+        --gd-cream-muted: rgb(254 248 230 / 0.74);
+        background: var(--gd-cream);
+        color: var(--gd-ever);
+        font-family: "Rubik", system-ui, sans-serif;
+        overflow-x: clip;
+    }
+    .gd-page [hidden] {
+        display: none !important;
+    }
+    .gd-cream {
+        background: var(--gd-cream);
+        color: var(--gd-ever);
+    }
+    .gd-ever {
+        background: var(--gd-ever);
+        color: var(--gd-cream);
+    }
+    .gd-page h1,
+    .gd-page h2,
+    .gd-page h3 {
+        text-wrap: balance;
+    }
+    .gd-page p,
+    .gd-page li {
+        text-wrap: pretty;
+    }
+    .gd-muted {
+        color: var(--gd-ink-muted);
+    }
+
+    .gd-wrap {
+        margin: 0 auto;
+        max-width: 72rem;
+        padding: 0 1rem;
+    }
+    .gd-sec {
+        padding: 4rem 0 4.5rem;
+    }
+    .gd-measure {
+        max-width: 34rem;
+    }
+
+    /* Display type: Fraunces 560, sentence case, tight. */
+    .gd-h1,
+    .gd-h2 {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 560;
+        font-variation-settings: "opsz" 144;
+        letter-spacing: -0.01em;
+    }
+    .gd-h1 {
+        margin-top: 0.4rem;
+        font-size: clamp(3.4rem, 15vw, 6rem);
+        line-height: 0.98;
+    }
+    .gd-h1 span {
+        display: block;
+    }
+    .gd-h2 {
+        font-size: clamp(2.4rem, 9vw, 3.6rem);
+        line-height: 1;
+    }
+    .gd-pre {
+        font-size: 1.125rem;
+        line-height: 1.3;
+    }
+    .gd-lead {
+        margin-top: 1rem;
+        font-size: 1.2rem;
+        line-height: 1.45;
+    }
+    .gd-body {
+        font-size: 1.0625rem;
+        line-height: 1.55;
+    }
+
+    .gd-link {
+        color: inherit;
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: rgb(18 61 47 / 0.4);
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 4px;
+        transition: text-decoration-color 120ms;
+    }
+    .gd-link:hover {
+        text-decoration-color: currentColor;
+    }
+    .gd-link-cream {
+        text-decoration-color: rgb(254 248 230 / 0.45);
+    }
+    .gd-mail {
+        overflow-wrap: break-word;
+    }
+    .gd-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3.25rem;
+        border-radius: 6px;
+        padding: 0 2rem;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 150ms;
+    }
+    .gd-btn-ink {
+        background: var(--gd-ever);
+        color: var(--gd-cream);
+    }
+    .gd-btn-ink:hover {
+        background: #0b2a20;
+    }
+    .gd-link:focus-visible,
+    .gd-btn:focus-visible,
+    .gd-flyer:focus-visible,
+    .gd-reset:focus-visible {
+        outline: 3px solid currentColor;
+        outline-offset: 3px;
+        border-radius: 2px;
+    }
+    .gd-btn:focus-visible {
+        outline-color: var(--gd-ever);
+    }
+
+    /* ------------------------------ hero ------------------------------ */
+    .gd-hero {
+        padding: 2rem 0 4rem;
+    }
+    .gd-hero-grid {
+        display: grid;
+        grid-template-areas: "head" "photo" "body";
+        margin: 0 auto;
+        max-width: 72rem;
+        padding: 0 1rem;
+    }
+    .gd-hero-head {
+        grid-area: head;
+    }
+    .gd-hero-photo {
+        grid-area: photo;
+        margin-top: 1.75rem;
+    }
+    .gd-hero-photo img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 5;
+        max-height: 72vh;
+        object-fit: cover;
+        object-position: 50% 55%;
+        border-radius: 3px;
+        background: #e9e3d2;
+    }
+    .gd-hero-body {
+        grid-area: body;
+        margin-top: 0.75rem;
+    }
+    .gd-count {
+        margin-top: 1rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+    .gd-cta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem 1.75rem;
+        margin-top: 1.75rem;
+    }
+    .gd-place {
+        margin-top: 1.75rem;
+        max-width: 34rem;
+        font-size: 1rem;
+        line-height: 1.55;
+        color: var(--gd-ink-muted);
+    }
+    .gd-place .gd-link {
+        color: var(--gd-ever);
+    }
+
+    /* -------------------------- how it works -------------------------- */
+    .gd-ever .gd-link {
+        text-decoration-color: rgb(254 248 230 / 0.45);
+    }
+    .gd-steps {
+        display: grid;
+        gap: 2.75rem;
+        margin-top: 2.5rem;
+        list-style: none;
+        padding: 0;
+    }
+    .gd-num {
+        display: block;
+        color: var(--gd-gold);
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 0.9;
+        font-variant-numeric: lining-nums;
+    }
+    .gd-step-title {
+        margin-top: 1rem;
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .gd-step-body {
+        margin-top: 0.6rem;
+        max-width: 34rem;
+        font-size: 1.0625rem;
+        line-height: 1.55;
+        color: var(--gd-cream-muted);
+    }
+
+    /* -------------------------- who + notes --------------------------- */
+    .gd-houses {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 2.25rem;
+    }
+    .gd-house {
+        max-width: 34rem;
+        font-size: 1.125rem;
+        line-height: 1.55;
+    }
+    .gd-house strong {
+        font-weight: 700;
+    }
+    .gd-notes {
+        margin-top: 2.25rem;
+    }
+    .gd-team {
+        margin-top: 1rem;
+    }
+
+    /* ---------------------------- checklist --------------------------- */
+    .gd-check-grid {
+        display: grid;
+        gap: 2.5rem;
+    }
+    .gd-check-intro {
+        margin-top: 1.25rem;
+    }
+    .gd-check-note {
+        margin-top: 1.25rem;
+        color: var(--gd-cream-muted);
+    }
+    .gd-check-mail {
+        margin-top: 0.5rem;
+    }
+    .gd-check-mail .gd-link {
+        color: var(--gd-cream);
+    }
+    /* One flat cream gift tag: the two top corners clipped, a punched hole
+       near the top centre that shows the evergreen through. */
+    .gd-tag {
+        --cut: 2.75rem;
+        width: 100%;
+        max-width: 30rem;
+        background: var(--gd-cream);
+        color: var(--gd-ever);
+        clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%, 0 var(--cut));
+        -webkit-mask: radial-gradient(circle at 50% 1.75rem, transparent 0.7rem, #000 calc(0.7rem + 0.5px));
+        mask: radial-gradient(circle at 50% 1.75rem, transparent 0.7rem, #000 calc(0.7rem + 0.5px));
+    }
+    .gd-tag-in {
+        margin: 0;
+        border: 0;
+        min-width: 0;
+        padding: 3.75rem 1.25rem 1.5rem;
+    }
+    .gd-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .gd-list li + li {
+        margin-top: 0.25rem;
+    }
+    .gd-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+        min-height: 44px;
+        padding: 0.55rem 0;
+        font-size: 1.0625rem;
+        line-height: 1.4;
+        cursor: pointer;
+    }
+    .gd-box {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: none;
+        width: 1.6rem;
+        height: 1.6rem;
+        margin: -0.05rem 0 0;
+        border: 2px solid var(--gd-ever);
+        border-radius: 3px;
+        background: transparent;
+        cursor: pointer;
+        transition: background-color 120ms;
+    }
+    .gd-box:checked {
+        background: var(--gd-ever)
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fef8e6' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+            center / 80% no-repeat;
+    }
+    .gd-box:focus-visible {
+        outline: 3px solid var(--gd-ever);
+        outline-offset: 3px;
+    }
+    .gd-row:has(.gd-box:checked) span {
+        color: var(--gd-ink-muted);
+    }
+    .gd-done {
+        min-height: 0;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+    .gd-done:not(:empty) {
+        margin-top: 1rem;
+    }
+    .gd-reset {
+        display: inline-block;
+        margin-top: 0.75rem;
+        min-height: 44px;
+        padding: 0;
+        background: none;
+        border: 0;
+        color: var(--gd-ever);
+        font: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: rgb(18 61 47 / 0.4);
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 4px;
+        cursor: pointer;
+    }
+
+    /* ----------------------------- team up ---------------------------- */
+    .gd-share {
+        margin-top: 1.75rem;
+    }
+    .gd-flyers {
+        display: grid;
+        gap: 1.25rem;
+        margin-top: 3rem;
+    }
+    .gd-flyer {
+        display: block;
+    }
+    .gd-flyer img {
+        display: block;
+        /* The flyer's paper is the page's cream: a faint ink edge so each
+           page reads as a sheet (no shadow, no card). */
+        outline: 1px solid rgb(18 61 47 / 0.18);
+        outline-offset: -1px;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 989 / 1280;
+        background: #f3ecd6;
+    }
+    .gd-flyer-note {
+        margin-top: 0.75rem;
+        font-size: 0.95rem;
+    }
+    .gd-ask {
+        margin-top: 3.5rem;
+    }
+    .gd-schedule {
+        margin-top: 1rem;
+    }
+    .gd-close {
+        padding-bottom: 5rem;
+    }
+    /* Closed: the hero and "Who the gifts are for" share the cream, so they
+       read as one section. */
+    .gd-page:has(#how[hidden]) .gd-who {
+        padding-top: 0;
+    }
+
+    @media (min-width: 640px) {
+        .gd-wrap,
+        .gd-hero-grid {
+            padding: 0 1.5rem;
+        }
+        .gd-sec {
+            padding: 5rem 0 5.5rem;
+        }
+        .gd-hero-photo {
+            width: 75%;
+        }
+        .gd-flyers {
+            grid-template-columns: 1fr 1fr;
+        }
+        .gd-tag-in {
+            padding: 4rem 2rem 2rem;
+        }
+    }
+    @media (min-width: 768px) {
+        .gd-houses {
+            grid-template-columns: 1fr 1fr;
+            column-gap: 3rem;
+        }
+    }
+    @media (min-width: 900px) {
+        .gd-steps {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            column-gap: 3rem;
+        }
+        .gd-check-grid {
+            grid-template-columns: minmax(0, 1fr) 28rem;
+            column-gap: 4rem;
+            align-items: center;
+        }
+        .gd-tag {
+            justify-self: end;
+        }
+    }
+    @media (min-width: 1024px) {
+        .gd-hero {
+            padding: 4.5rem 0 6rem;
+        }
+        .gd-hero-grid {
+            grid-template-columns: minmax(0, 1fr) 28rem;
+            grid-template-rows: 1fr auto auto 1fr;
+            grid-template-areas:
+                ". photo"
+                "head photo"
+                "body photo"
+                ". photo";
+            column-gap: 5rem;
+            padding: 0 2rem;
+        }
+        .gd-hero-photo {
+            width: 100%;
+            margin-top: 0;
+        }
+        .gd-hero-photo img {
+            aspect-ratio: 3 / 4;
+            max-height: none;
+        }
+        .gd-hero-body {
+            margin-top: 0.5rem;
+        }
+        .gd-wrap {
+            padding: 0 2rem;
+        }
+        .gd-sec {
+            padding: 6rem 0 6.5rem;
+        }
+        .gd-flyers {
+            column-gap: 2rem;
+        }
+        /* Who: the heading holds the left column, the two houses and the
+           notes read down the right, so neither side sits empty. */
+        .gd-who-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+            column-gap: 5rem;
+            align-items: start;
+        }
+        .gd-who-body {
+            padding-top: 0.75rem;
+        }
+        .gd-who-body .gd-houses {
+            grid-template-columns: 1fr;
+            margin-top: 0;
+        }
+        .gd-who-body .gd-house {
+            font-size: 1.25rem;
+            max-width: none;
+        }
+        .gd-who-body .gd-measure {
+            max-width: none;
+        }
+        /* Closing: Team up and Questions side by side, the flyer at reading
+           size across the full measure under them. */
+        .gd-close-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            column-gap: 2rem;
+            grid-template-areas:
+                "team ask"
+                "flyers flyers"
+                "note note";
+            align-items: start;
+        }
+        .gd-team-head { grid-area: team; }
+        .gd-ask { grid-area: ask; margin-top: 0; }
+        .gd-flyers { grid-area: flyers; margin-top: 4rem; }
+        .gd-flyer-note { grid-area: note; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .gd-box,
+        .gd-btn,
+        .gd-link {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    import { initGiftDrivePlacements } from "@/lib/giftDrivePlacement.js";
+    import { giftDriveChecklistKey } from "@/data/giftDrive.js";
+
+    initGiftDrivePlacements();
+
+    // ---------------------------------------------------- the checklist --
+    const boxes = Array.from(document.querySelectorAll<HTMLInputElement>(".gd-box"));
+    const done = document.getElementById("gd-done");
+    const reset = document.getElementById("gd-reset") as HTMLButtonElement | null;
+    const DONE_LINE = "You're all set. Thank you for filling a wish list.";
+
+    function load(): Record<string, boolean> {
+        try {
+            return JSON.parse(window.localStorage.getItem(giftDriveChecklistKey) || "{}") || {};
+        } catch {
+            return {};
+        }
+    }
+    function save() {
+        const state: Record<string, boolean> = {};
+        boxes.forEach((b) => {
+            if (b.checked) state[b.dataset.key || ""] = true;
+        });
+        try {
+            if (Object.keys(state).length) window.localStorage.setItem(giftDriveChecklistKey, JSON.stringify(state));
+            else window.localStorage.removeItem(giftDriveChecklistKey);
+        } catch {
+            /* private mode: the ticks just won't be remembered */
+        }
+    }
+    function render() {
+        const n = boxes.filter((b) => b.checked).length;
+        if (done) done.textContent = n === boxes.length && n > 0 ? DONE_LINE : "";
+        if (reset) reset.hidden = n === 0;
+    }
+    const saved = load();
+    boxes.forEach((b) => {
+        b.checked = !!saved[b.dataset.key || ""];
+        b.addEventListener("change", () => {
+            save();
+            render();
+        });
+    });
+    render();
+    reset?.addEventListener("click", () => {
+        boxes.forEach((b) => (b.checked = false));
+        save();
+        render();
+        boxes[0]?.focus();
+    });
+
+    // ------------------------------------------------------- share page --
+    const share = document.getElementById("gd-share") as HTMLButtonElement | null;
+    const shareUrl = `${window.location.origin}/giftdrive`;
+    share?.addEventListener("click", async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: "Holiday Gift Drive | Latina Sweat Project", url: shareUrl });
+                return;
+            } catch (err) {
+                if ((err as Error)?.name === "AbortError") return;
+            }
+        }
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+        } catch {
+            const ta = document.createElement("textarea");
+            ta.value = shareUrl;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand("copy");
+            } catch {
+                /* nothing more to try */
+            }
+            ta.remove();
+        }
+        share.textContent = "Link copied";
+        window.setTimeout(() => (share.textContent = "Share this page"), 2000);
+    });
+</script>

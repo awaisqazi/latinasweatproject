@@ -22,6 +22,13 @@ import { ddlmRecap } from "@/data/ddlmRecap2026";
 import OpeningLinksCard from "@/components/OpeningLinksCard.astro";
 import GivingTuesdayLinksCard from "@/components/GivingTuesdayLinksCard.astro";
 import PosadaLinksCard from "@/components/PosadaLinksCard.astro";
+import GiftDriveLinksCard from "@/components/GiftDriveLinksCard.astro";
+import {
+  giftDrive,
+  showGiftDriveLinksCard,
+  giftDrivePhase,
+  giftDrivePlacementCopy,
+} from "@/data/giftDrive";
 import {
   showGivingLinksCard,
   givingPlacementPhase,
@@ -134,6 +141,10 @@ const ribbonCardPhoto = `${base}images/ribbon-cutting/cut-04-arms-up-900.webp`;
 // (src/data/posadaCraftDays.js).
 const givingLinksActive = showGivingLinksCard && givingPlacementPhase() !== "off";
 const posadaLinksActive = showPosadaLinksCard && posadaPlacementPhase() !== "off";
+// Holiday Gift Drive (Nov 27 2026, to Sun Dec 13): its card and bubble sit
+// between Giving Tuesday and LSP Posadas (date order) and step back the same
+// way (data-gd-until). Toggle: showGiftDriveLinksCard (src/data/giftDrive.js).
+const giftDriveLinksActive = showGiftDriveLinksCard && giftDrivePhase() !== "off";
 
 // Define links data with English and Spanish translations
 const links = [
@@ -247,7 +258,8 @@ const links = [
 // order: Reader feature, Graduation 2026 (Aug 7), Sweat Fest (Aug 22).
 // Matches the feature-card order below.
 const highlights = [
-  // Giving Tuesday, then LSP Posadas (date order), while their cards show.
+  // Giving Tuesday, the Holiday Gift Drive, then LSP Posadas (date order),
+  // while their cards show.
   ...(givingLinksActive
     ? [
         {
@@ -258,6 +270,19 @@ const highlights = [
           hoverScale: "group-hover:scale-[1.12]",
           color: "amber",
           gtUntil: givingPlacementsUntil
+        },
+      ]
+    : []),
+  ...(giftDriveLinksActive
+    ? [
+        {
+          title: { en: giftDrivePlacementCopy.bubble, es: giftDrivePlacementCopy.bubbleEs },
+          target: "#giftdrive-card",
+          image: `${base}images/highlights/hl_giftdrive.jpg`,
+          scale: "scale-[1.0]",
+          hoverScale: "group-hover:scale-[1.12]",
+          color: "amber",
+          gdUntil: giftDrive.endsAt
         },
       ]
     : []),
@@ -589,6 +614,7 @@ const getLinkConversionProvider = (url = "") => {
                 data-ribbon-ends={story.ribbonEnds}
                 data-gt-until={story.gtUntil}
                 data-pc-until={story.pcUntil}
+                data-gd-until={story.gdUntil}
               >
                 {/* Glow story ring */}
                 <div class="relative w-[66px] h-[66px] flex items-center justify-center flex-shrink-0 rounded-full bg-gradient-to-tr from-[#b5a18d] via-[#ffbd59] to-[#b5a18d] transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_15px_rgba(255,189,89,0.4)] shadow-md">
@@ -620,6 +646,9 @@ const getLinkConversionProvider = (url = "") => {
           stack in date order, each in its own identity. Each renders nothing
           once off (see the components). */}
       <GivingTuesdayLinksCard />
+      {/* Holiday Gift Drive (to Sun Dec 13 2026), in date order between the
+          two; evergreen, bilingual, steps back by itself. */}
+      <GiftDriveLinksCard />
       <PosadaLinksCard />
 
       {/* The ribbon cutting (Nov 16 2026): the lead card while ribbonActive, in

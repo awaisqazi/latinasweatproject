@@ -2,6 +2,8 @@
 //   hl_posadas.jpg       a plain crop of the circled 19 from the team's save-the-date
 //   hl_givingtuesday.png the Giving Tuesday studio floor: yellow room, sideways mats in
 //                        the MatFloor colours, a few rows rolled out (no new illustration)
+//   hl_giftdrive.jpg     a plain crop of the Holiday Gift Drive tree photo: gold ornaments
+//                        and a wish list tag (public/images/giftdrive/tree.jpg, 960x1280)
 // Usage: node scripts/render-campaign-bubbles.mjs
 import sharp from "sharp";
 import path from "node:path";
@@ -14,6 +16,11 @@ await sharp(`${repo}/public/images/posada/lsp-posadas-save-the-date.jpg`)
   .resize(420, 420)
   .jpeg({ quality: 86, mozjpeg: true })
   .toFile(`${out}/hl_posadas.jpg`);
+// Holiday Gift Drive: a plain 420x420 crop of the tree photo (no resize, no filter).
+await sharp(`${repo}/public/images/giftdrive/tree.jpg`)
+  .extract({ left: 250, top: 290, width: 420, height: 420 })
+  .jpeg({ quality: 86, mozjpeg: true })
+  .toFile(`${out}/hl_giftdrive.jpg`);
 // Giving Tuesday: the campaign's yellow studio floor, mats drawn exactly as
 // on the floor (sideways mats, the same colours), a few rows rolled out.
 const C = ["#1e1e1e","#0f766e","#c7602d","#d9467a","#0369a1","#1e1e1e","#6d4aa8","#0f766e"];

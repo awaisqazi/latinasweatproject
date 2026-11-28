@@ -144,6 +144,22 @@ import Header from "../components/Header.astro";
     ) {
         window.location.replace("/posada" + window.location.hash);
     } else if (
+        // Holiday Gift Drive (to Dec 13 2026): any case, plus flyer and
+        // spoken variants. /gift-drive and /holidaygiftdrive (lowercase) are
+        // also redirects in astro.config.mjs. Exact matches only, never on
+        // /giftdrive itself.
+        [
+            "/giftdrive",
+            "/gift-drive",
+            "/holidaygiftdrive",
+            "/holiday-gift-drive",
+            "/lspgiftdrive",
+            "/gifts",
+        ].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/giftdrive"
+    ) {
+        window.location.replace("/giftdrive" + window.location.hash);
+    } else if (
         // Instructor portal: any case, plus spoken variants. /instructor and
         // /instructorportal (lowercase) are also redirects in astro.config.mjs.
         // Exact matches only, never on /instructors itself. The hash is kept so

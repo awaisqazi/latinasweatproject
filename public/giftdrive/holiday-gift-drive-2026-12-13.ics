@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Latina Sweat Project//Holiday Gift Drive//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:holiday-gift-drive-2026-12-13@latinasweatproject.com
+DTSTAMP:20261127T180000Z
+DTSTART;VALUE=DATE:20261213
+DTEND;VALUE=DATE:20261214
+SUMMARY:Holiday Gift Drive: gifts due at LSP
+LOCATION:Mural Park\, 924 W 19th Place\, 4th floor\, Chicago\, IL 60608
+DESCRIPTION:Bring your Holiday Gift Drive gifts back to LSP by Sunday\, Dec
+ ember 13. https://latinasweatproject.com/giftdrive
+URL:https://latinasweatproject.com/giftdrive
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

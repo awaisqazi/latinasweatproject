@@ -33,6 +33,20 @@ function clock() {
 const chicagoDate = (t) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(t));
 
+// Homepage: a ruled seam when the band follows another light section. The
+// dark bands that can sit above it (Giving Tuesday, the Holiday Gift Drive)
+// need none. Read against the live DOM, so it is right whichever placement
+// script removes its band first; src/lib/giftDrivePlacement.js calls it again
+// after it removes the gift band.
+export function syncPosadaSeam() {
+  document.querySelectorAll(".pcb[data-pc-place]").forEach((root) => {
+    let prev = root.previousElementSibling;
+    while (prev && /^(SCRIPT|STYLE|LINK)$/.test(prev.tagName)) prev = prev.previousElementSibling;
+    const darkAbove = !!prev && (prev.hasAttribute("data-gt-place") || prev.hasAttribute("data-gd-place"));
+    root.toggleAttribute("data-pc-seam", !!prev && !darkAbove);
+  });
+}
+
 export function initPosadaPlacements() {
   const now = clock();
   document.querySelectorAll("[data-pc-until]").forEach((el) => {
@@ -41,6 +55,7 @@ export function initPosadaPlacements() {
   document.querySelectorAll("[data-pc-raffle-ends]").forEach((el) => {
     if (now >= Date.parse(el.getAttribute("data-pc-raffle-ends"))) el.remove();
   });
+  syncPosadaSeam();
   const roots = [...document.querySelectorAll("[data-pc-place]")];
   if (!roots.length) return;
 
@@ -50,13 +65,6 @@ export function initPosadaPlacements() {
 
   roots.forEach((root) => {
     root.dataset.pcPhase = ph;
-    // Homepage: a ruled seam when the band follows another light section
-    // (the Giving Tuesday band above has stepped back).
-    if (root.classList.contains("pcb")) {
-      let prev = root.previousElementSibling;
-      while (prev && /^(SCRIPT|STYLE|LINK)$/.test(prev.tagName)) prev = prev.previousElementSibling;
-      root.toggleAttribute("data-pc-seam", !!prev && !prev.hasAttribute("data-gt-place"));
-    }
     root.querySelectorAll("[data-pc-state]").forEach((el) => {
       el.hidden = el.getAttribute("data-pc-state") !== ph;
     });

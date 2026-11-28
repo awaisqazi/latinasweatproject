@@ -6,8 +6,12 @@
 //   2. Our new home [L cream] (NewHomeSection, the former A New Chapter)
 //   2a. LSP Giving Tuesday [D ink] (GivingTuesdayHomeBand, Nov 19 to Dec 1
 //      2026, a thank-you to Dec 3, then gone; mat floor LEFT)
-//   2b. LSP Posadas + Posada Craft Days [L paper] (PosadaHomeBand, to Dec 19
-//      2026, then gone; save-the-date RIGHT)
+//   2b. Holiday Gift Drive [D evergreen] (GiftDriveHomeBand, Nov 27 to Dec 13
+//      2026, then gone; tree photo LEFT). Dark against the Giving Tuesday
+//      band above until Dec 3 (documented exception in design.md)
+//   2c. LSP Posadas + Posada Craft Days [L paper] (PosadaHomeBand, to Dec 19
+//      2026, then gone; save-the-date RIGHT; its ruled seam shows only when
+//      neither dark band is above it)
 //   3. Annual Gala 2026 recap [D]
 //   4. Relive the summer [L]
 //   5. ABC7 Windy City Weekend [D]
@@ -102,6 +106,8 @@ import NewHomeSection from "@/components/NewHomeSection.astro";
 // Giving Tuesday (to Dec 1) and LSP Posadas (Dec 19), Nov 19 2026.
 import GivingTuesdayHomeBand from "@/components/GivingTuesdayHomeBand.astro";
 import PosadaHomeBand from "@/components/PosadaHomeBand.astro";
+// Holiday Gift Drive (to Dec 13), Nov 27 2026.
+import GiftDriveHomeBand from "@/components/GiftDriveHomeBand.astro";
 // First-visit ribbon cutting moment (flag showRibbonIntro, src/data/studioOpening.js).
 import RibbonIntro from "@/components/RibbonIntro.astro";
 // Link share card for the homepage: the opening announcement, then the
@@ -270,8 +276,12 @@ const ddlmRecapPhoto = `${base}images/ddlm/recap/placements/home-108-1200.webp`;
         showGivingHomeBand in src/data/givingTuesday.js and showPosadaHomeBand
         in src/data/posadaCraftDays.js. */}
     <GivingTuesdayHomeBand />
+    {/* Holiday Gift Drive [D evergreen] (Nov 27 2026, to Sun Dec 13), in date
+        order between the two; tree photo LEFT. Gone after Dec 13 (toggle
+        showGiftDriveHomeBand in src/data/giftDrive.js). */}
+    <GiftDriveHomeBand />
     <PosadaHomeBand />
-    {/* END: Giving Tuesday + LSP Posadas */}
+    {/* END: Giving Tuesday + Holiday Gift Drive + LSP Posadas */}
 
     {/* START: Annual Gala 2026 recap spotlight (post-gala, Sep 26 2026).
         Same slot, same theme as the pre-gala marquee so the documented
