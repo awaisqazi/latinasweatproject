@@ -77,3 +77,7 @@ docs/gala-2026/
 
 # downloaded OFL fonts for local sharp/librsvg renders (fetched by scripts/render-committee-og.mjs)
 scripts/fonts/
+
+# Instructor portal content working copy (internal policy + staff contacts, never commit;
+# the copy of record lives in Supabase, see src/lib/instructorPortal/README.md)
+private/

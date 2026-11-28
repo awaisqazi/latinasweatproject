@@ -1,0 +1,82 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import InstructorPortalApp from "@/components/instructorPortal/InstructorPortalApp.svelte";
+
+// Instructor portal: a passcode-gated page for LSP instructors and studio
+// coordinators. Not in the nav, noindex, excluded from the sitemap in
+// astro.config.mjs and disallowed in public/robots.txt.
+//
+// PRIVACY: this repo is public and this page ships EMPTY. Every word of portal
+// content is one JSON document in Supabase, returned only after the passcode is
+// checked inside Postgres. Nothing below may hold portal content: only the
+// shell and a loading line. Contract: src/lib/instructorPortal/README.md.
+//
+// No site Header or Footer: the portal is a phone tool with its own pinned
+// navigation.
+---
+
+<Layout
+  title="Instructor portal | The Latina Sweat Project"
+  socialTitle="Instructor portal"
+  description="For LSP instructors and studio coordinators."
+  robots="noindex, nofollow"
+  hideFooter
+  viewport="width=device-width, initial-scale=1, viewport-fit=cover"
+  socialImage="images/instructors/instructors-og.jpg"
+  socialImageAlt="Instructor portal, Latina Sweat Project"
+  socialImageWidth={1200}
+  socialImageHeight={630}
+  socialImageType="image/jpeg"
+  twitterCard="summary_large_image"
+>
+  <Fragment slot="head">
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="referrer" content="same-origin" />
+    <!-- iPhone and iPad only: stop Safari magnifying the page when a field is
+         focused (same trick as /galaseating). iOS still honours a person's own
+         pinch zoom; Android and desktop are left alone. Runs before paint. -->
+    <script is:inline>
+      (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        if (!ios) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
+      })();
+    </script>
+    <style is:inline>
+      /* Global CSS puts overflow-x: hidden on html and body, which turns body
+         into a scroll container and kills position: sticky. clip keeps the
+         sideways guard without that side effect, on this page only. */
+      html,
+      body {
+        overflow-x: clip;
+      }
+      body {
+        background: #ffffff;
+        -webkit-text-size-adjust: 100%;
+      }
+      .ip-boot {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Rubik, system-ui, sans-serif;
+        font-size: 17px;
+        color: #5d5d5a;
+        margin: 0;
+        padding: 24px;
+      }
+    </style>
+  </Fragment>
+
+  <main id="ip-root">
+    <InstructorPortalApp client:only="svelte">
+      <p class="ip-boot" slot="fallback">Opening the instructor portal…</p>
+    </InstructorPortalApp>
+    <noscript>
+      <p class="ip-boot">The instructor portal needs JavaScript. Turn it on and reload this page.</p>
+    </noscript>
+  </main>
+</Layout>

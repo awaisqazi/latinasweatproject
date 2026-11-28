@@ -143,6 +143,21 @@ import Header from "../components/Header.astro";
         window.location.pathname.replace(/\/+$/, "") !== "/posada"
     ) {
         window.location.replace("/posada" + window.location.hash);
+    } else if (
+        // Instructor portal: any case, plus spoken variants. /instructor and
+        // /instructorportal (lowercase) are also redirects in astro.config.mjs.
+        // Exact matches only, never on /instructors itself. The hash is kept so
+        // a texted link to one answer (#faq-...) still lands on it.
+        [
+            "/instructors",
+            "/instructor",
+            "/instructorportal",
+            "/instructor-portal",
+            "/instructorsportal",
+        ].includes(bare) &&
+        window.location.pathname.replace(/\/+$/, "") !== "/instructors"
+    ) {
+        window.location.replace("/instructors/" + window.location.hash);
     } else if (path === "/water" || path === "/water/") {
         window.location.replace(
             "https://www.zeffy.com/en-US/ticketing/lsp-cooler-water-bottles",

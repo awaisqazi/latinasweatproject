@@ -15,6 +15,7 @@ Disallow: /gala/admin
 Disallow: /admin/
 Disallow: /forms
 Disallow: /galaseating
+Disallow: /instructors
 
 # Allow everything else
 Allow: /

@@ -20,7 +20,8 @@ export default defineConfig({
           '/silentauction', '/teachertrainingclasses', '/teach/',
           '/potluck', '/eventsrequest', '/adobe', '/galaseating',
           '/movecrew', '/committee', '/friendsgiving', '/givingtuesday/join',
-          '/givingtuesday/kit', '/give/',
+          '/givingtuesday/kit', '/give/', '/instructors', '/instructor/',
+          '/instructorportal',
         ];
         return !excluded.some((path) => page.includes(path));
       },
@@ -38,6 +39,9 @@ export default defineConfig({
     '/craftdays': '/posada',
     // Alias for the Halloween + Día de los Muertos weekend waiver
     '/waivers': '/waiver',
+    // Aliases for the passcode-gated instructor portal
+    '/instructor': '/instructors',
+    '/instructorportal': '/instructors',
   },
 
   // Your existing Vite config for Tailwind v4
